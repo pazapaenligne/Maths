@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Je retiens !</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--purple:#9b59b6;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--green);top:-80px;right:-80px;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--blue);bottom:120px;right:-40px;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;}
+
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-bottom:.6rem;}
+    h1{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;line-height:1.2;}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+    .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem;position:relative;z-index:1;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink),var(--blue),var(--green));}
+    .intro{font-size:.95rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6;}
+
+    .choices{display:flex;flex-direction:column;gap:.8rem;margin-bottom:1.2rem;}
+    .choice{display:flex;align-items:flex-start;gap:.9rem;padding:1rem 1.1rem;border:2px solid var(--border);border-radius:12px;cursor:pointer;font-size:.9rem;line-height:1.6;background:var(--bg);transition:border-color .15s,background .15s,transform .1s;}
+    .choice:hover:not(.locked){border-color:var(--green);background:#f0faeb;transform:scale(1.005);}
+    .choice.selected{border-color:var(--green);background:#f0faeb;}
+    .choice.correct-c{border-color:var(--green);background:#f0faeb;cursor:default;}
+    .choice.wrong-c{border-color:var(--pink);background:#fff0ef;cursor:default;opacity:.7;}
+    .choice.locked{cursor:default;}
+    .choice-icon{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;margin-top:.1rem;}
+    .choice.selected .choice-icon{background:var(--green);border-color:var(--green);color:#fff;}
+    .choice.correct-c .choice-icon{background:var(--green);border-color:var(--green);color:#fff;}
+    .choice.wrong-c .choice-icon{background:var(--pink);border-color:var(--pink);color:#fff;}
+
+    .hint-toggle{display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--muted);cursor:pointer;margin-bottom:.8rem;}
+    .hint-toggle:hover{color:var(--orange);}
+    .hint-box{background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.7rem 1rem;font-size:.84rem;color:#7a6010;display:none;margin-bottom:.8rem;line-height:1.6;}
+    .hint-box.show{display:block;}
+
+    .feedback{margin-top:1rem;padding:.85rem 1.1rem;border-radius:10px;font-size:.9rem;display:none;line-height:1.6;}
+    .feedback.show{display:block;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-detail{margin-top:.4rem;font-size:.85rem;color:var(--text);line-height:1.6;}
+
+    .btn-row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.2rem;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;border-radius:99px;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .12s;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--green);color:#fff;box-shadow:0 3px 10px rgba(141,198,63,.3);}
+    .btn-hint{background:var(--yellow);color:#5a3e00;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--green);color:var(--text);}
+
+    /* Success */
+    .success{display:none;text-align:center;margin-top:1.5rem;}
+    .success.show{display:block;}
+    .success-icon{font-size:3rem;margin-bottom:.5rem;}
+    .success-title{font-size:1.3rem;font-weight:800;color:var(--green);}
+    .memo-box{background:#f0faeb;border:2px solid var(--green);border-radius:var(--radius);padding:1.2rem 1.5rem;margin:1rem 0;text-align:left;font-size:.9rem;line-height:1.8;}
+    .memo-box .memo-title{font-weight:800;color:var(--green);margin-bottom:.6rem;font-size:1rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card{animation:fadeUp .4s ease both;}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Maths · 3ème
+  </div>
+  <div class="week-label">Semaine 1 – Jour 2</div>
+  <h1>📚 Je <span style="color:var(--green)">retiens</span> !</h1>
+  <p class="subtitle">Méthode · équation produit nul · niveau collège</p>
+</header>
+
+<div class="card" id="main-card">
+  <div class="card-stripe"></div>
+  <p class="intro">Identifie la <strong>bonne méthode</strong> pour résoudre une équation produit nul.</p>
+
+  <div class="choices" id="choices-container">
+    <div class="choice" id="c0" onclick="select(0)">
+      <div class="choice-icon" id="ic0"></div>
+      <span>Pour résoudre une équation produit nul de la forme <strong>(ax + b)(cx + d) = 0</strong>, on utilise la propriété du produit nul : si un produit est nul, alors au moins l'un des facteurs est nul. On résout donc séparément <strong>ax + b = 0</strong> et <strong>cx + d = 0</strong>.</span>
+    </div>
+    <div class="choice" id="c1" onclick="select(1)">
+      <div class="choice-icon" id="ic1"></div>
+      <span>Pour résoudre une équation produit nul, il suffit de diviser les deux côtés par l'un des facteurs.</span>
+    </div>
+    <div class="choice" id="c2" onclick="select(2)">
+      <div class="choice-icon" id="ic2"></div>
+      <span>Pour résoudre une équation produit nul, on peut additionner les deux facteurs et résoudre l'équation obtenue.</span>
+    </div>
+  </div>
+
+  <div class="hint-toggle" onclick="toggleHint()">💡 Indice</div>
+  <div class="hint-box" id="hint-box">Si un produit est nul, alors <strong>au moins un des facteurs doit être nul</strong>. On ne peut pas diviser par un facteur qui pourrait être égal à zéro !</div>
+
+  <div class="feedback" id="feedback">
+    <div id="fb-msg"></div>
+    <div class="feedback-detail" id="fb-detail"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-check" onclick="validate()" disabled>Valider ✓</button>
+    <button class="btn btn-ghost" id="btn-restart" onclick="restart()" style="display:none;">🔄 Recommencer</button>
+  </div>
+
+  <div class="success" id="success">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Bravo ! Tu as bien retenu !</div>
+    <div class="memo-box">
+      <div class="memo-title">📌 À retenir :</div>
+      <strong>Propriété du produit nul :</strong><br>
+      Si A × B = 0, alors A = 0 <strong>ou</strong> B = 0.<br><br>
+      Pour résoudre <strong>(ax + b)(cx + d) = 0</strong> :<br>
+      ➡ ax + b = 0 → x = −b/a<br>
+      ➡ cx + d = 0 → x = −d/c<br><br>
+      L'équation a donc <strong>deux solutions</strong> (ou une si elles sont égales).
+    </div>
+  </div>
+</div>
+
+<script>
+const CORRECT = 0;
+let selected = null;
+let hintOpen = false;
+let validated = false;
+
+function select(i) {
+  if (validated) return;
+  selected = i;
+  [0,1,2].forEach(j => {
+    document.getElementById('c'+j).classList.toggle('selected', j===i);
+    document.getElementById('ic'+j).textContent = j===i ? '✓' : '';
+  });
+  document.getElementById('btn-check').disabled = false;
+}
+
+function validate() {
+  if (selected === null) return;
+  validated = true;
+  const ok = selected === CORRECT;
+
+  [0,1,2].forEach(j => {
+    const c = document.getElementById('c'+j);
+    const ic = document.getElementById('ic'+j);
+    c.onclick = null;
+    c.classList.remove('selected');
+    c.classList.add('locked');
+    if (j === CORRECT) { c.classList.add('correct-c'); ic.textContent = '✓'; }
+    else if (j === selected && !ok) { c.classList.add('wrong-c'); ic.textContent = '✗'; }
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show ' + (ok ? 'ok' : 'ko');
+  document.getElementById('fb-msg').textContent = ok ? '✅ Parfait ! C'est bien la bonne méthode !' : '❌ Ce n'est pas la bonne méthode.';
+  document.getElementById('fb-detail').innerHTML = ok
+    ? 'La propriété du produit nul est fondamentale : si A × B = 0, alors A = 0 <strong>ou</strong> B = 0. On résout donc chaque facteur séparément.'
+    : 'Attention : diviser par un facteur est <strong>interdit</strong> si ce facteur peut être nul ! La bonne méthode est de résoudre chaque facteur séparément.';
+
+  document.getElementById('btn-check').disabled = true;
+  document.getElementById('btn-restart').style.display = 'inline-flex';
+  if (ok) document.getElementById('success').classList.add('show');
+}
+
+function toggleHint() {
+  hintOpen = !hintOpen;
+  document.getElementById('hint-box').classList.toggle('show', hintOpen);
+}
+
+function restart() {
+  validated = false;
+  selected = null;
+  hintOpen = false;
+  [0,1,2].forEach(j => {
+    const c = document.getElementById('c'+j);
+    c.className = 'choice';
+    c.onclick = () => select(j);
+    document.getElementById('ic'+j).textContent = '';
+  });
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('hint-box').classList.remove('show');
+  document.getElementById('success').classList.remove('show');
+  document.getElementById('btn-check').disabled = true;
+  document.getElementById('btn-restart').style.display = 'none';
+}
+</script>
+</body>
+</html>
