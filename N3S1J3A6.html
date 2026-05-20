@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa – Mission Terminal Quantique</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js"></script>
+  <style>
+    :root {
+      --bg: #fffdf7; --surface: #ffffff; --border: #e8e4d9;
+      --yellow: #f5c518; --green: #8dc63f; --blue: #3ab5d8;
+      --pink: #f28b82; --orange: #f5a623; --text: #1a1d23; --muted: #8a8f9a; --radius: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      padding: 2rem 1rem 4rem; position: relative; overflow-x: hidden;
+    }
+    body::before { content: ''; position: fixed; border-radius: 50%; z-index: 0; opacity: .1; width: 340px; height: 340px; background: var(--blue); top: -80px; right: -80px; }
+    body::after  { content: ''; position: fixed; border-radius: 50%; z-index: 0; opacity: .1; width: 260px; height: 260px; background: var(--yellow); bottom: -60px; left: -60px; }
+
+    header { text-align: center; margin-bottom: 2.5rem; position: relative; z-index: 1; }
+    .logo-badge { display: inline-flex; align-items: center; gap: .5rem; background: var(--yellow); color: #000; font-size: .75rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: .3rem .9rem; border-radius: 99px; margin-bottom: .5rem; }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .week-label { font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--muted); margin-bottom: .6rem; }
+    h1 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800; }
+    h1 .hl-blue { color: var(--blue); }
+    .subtitle { color: var(--muted); font-size: .85rem; margin-top: .3rem; font-family: 'JetBrains Mono', monospace; }
+
+    /* Mission intro card */
+    .mission-card {
+      width: 100%; max-width: 700px; background: #0d1117; color: #e8eaf0;
+      border-radius: var(--radius); padding: 1.8rem 2rem; margin-bottom: 2.5rem;
+      position: relative; z-index: 1; border: 2px solid #30363d;
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    }
+    .mission-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: var(--radius) var(--radius) 0 0; background: linear-gradient(90deg, var(--blue), var(--green)); }
+    .terminal-header { display: flex; align-items: center; gap: .5rem; margin-bottom: 1rem; }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .terminal-title { font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: #8b949e; flex: 1; text-align: center; }
+    .terminal-text { font-family: 'JetBrains Mono', monospace; font-size: .88rem; color: #7ee787; line-height: 1.7; }
+    .terminal-text .blink { animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .mission-title { font-size: 1.2rem; font-weight: 800; color: var(--yellow); margin-bottom: .6rem; }
+    .mission-desc { font-size: .9rem; color: #c9d1d9; line-height: 1.6; }
+
+    /* Timeline */
+    .timeline { width: 100%; max-width: 700px; position: relative; z-index: 1; }
+    .timeline-line { position: absolute; left: 28px; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--blue), var(--green), var(--yellow)); border-radius: 99px; z-index: 0; }
+
+    .step {
+      display: flex; gap: 1.2rem; margin-bottom: 1.5rem;
+      opacity: 0; transform: translateX(-20px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .step.visible { opacity: 1; transform: translateX(0); }
+
+    .step-icon {
+      width: 58px; height: 58px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; border: 3px solid var(--surface); z-index: 1;
+      box-shadow: 0 2px 12px rgba(0,0,0,.12);
+    }
+
+    .step-body {
+      flex: 1; background: var(--surface); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem 1.4rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+    .step-tag { display: inline-block; font-size: .65rem; font-weight: 700; padding: .15rem .5rem; border-radius: 4px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem; }
+    .step-headline { font-size: 1.05rem; font-weight: 800; margin-bottom: .6rem; }
+    .step-text { font-size: .9rem; color: var(--muted); line-height: 1.7; }
+    .step-text strong { color: var(--text); }
+    .step-text .eq-box {
+      display: inline-block; background: #f0f6ff; border: 1.5px solid #d4edff;
+      border-radius: 8px; padding: .3rem .8rem; margin: .3rem 0;
+      font-family: 'JetBrains Mono', monospace; color: var(--blue);
+    }
+
+    /* Quiz at end */
+    .quiz-card {
+      width: 100%; max-width: 700px; background: var(--surface); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 1.8rem; position: relative; z-index: 1;
+      box-shadow: 0 4px 24px rgba(0,0,0,.06); margin-top: 1rem;
+    }
+    .quiz-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: var(--radius) var(--radius) 0 0; background: linear-gradient(90deg, var(--yellow), var(--orange)); }
+    .quiz-title { font-size: 1rem; font-weight: 800; margin-bottom: 1rem; }
+    .quiz-question { font-size: .95rem; margin-bottom: 1rem; line-height: 1.5; }
+    .quiz-choices { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1rem; }
+    .quiz-choice {
+      display: flex; align-items: center; gap: .8rem; padding: .7rem 1rem;
+      border: 2px solid var(--border); border-radius: 10px; cursor: pointer;
+      font-size: .9rem; transition: border-color .15s, background .15s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .quiz-choice:hover { border-color: var(--yellow); background: #fffbeb; }
+    .quiz-choice.selected { border-color: var(--yellow); background: #fffbeb; }
+    .quiz-choice.correct-c { border-color: var(--green); background: #f0faeb; color: #2f6e10; }
+    .quiz-choice.wrong-c   { border-color: var(--pink);  background: #fff0ef; color: #a93226; }
+    .quiz-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; }
+    .quiz-choice.selected .quiz-radio { background: var(--yellow); border-color: var(--yellow); }
+    .quiz-choice.correct-c .quiz-radio { background: var(--green); border-color: var(--green); }
+    .quiz-choice.wrong-c .quiz-radio   { background: var(--pink); border-color: var(--pink); }
+
+    .btn { display: inline-flex; align-items: center; gap: .4rem; padding: .6rem 1.4rem; border-radius: 99px; font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700; cursor: pointer; border: none; transition: transform .12s; }
+    .btn:active { transform: scale(.96); }
+    .btn:disabled { opacity: .38; cursor: default; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-green   { background: var(--green); color: #fff; }
+
+    .quiz-feedback { margin-top: 1rem; padding: .8rem 1rem; border-radius: 10px; font-size: .9rem; display: none; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.ok { background: #f0faeb; border: 1.5px solid var(--green); color: #2f6e10; }
+    .quiz-feedback.ko { background: #fff0ef; border: 1.5px solid var(--pink); color: #a93226; }
+
+    /* Success screen */
+    .success { display: none; text-align: center; margin-top: 1.5rem; }
+    .success.show { display: block; }
+    .success-icon { font-size: 3rem; margin-bottom: .5rem; }
+    .success-title { font-size: 1.4rem; font-weight: 800; color: var(--green); }
+    .code-box { display: inline-block; background: #0d1117; color: var(--yellow); font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 700; padding: .6rem 1.5rem; border-radius: 10px; margin: 1rem 0; letter-spacing: .15em; border: 2px solid var(--yellow); }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .mission-card, .quiz-card { animation: fadeUp .4s ease both; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Maths · 3ème
+  </div>
+  <div class="week-label">Semaine 1 – Jour 3</div>
+  <h1>🔐 🎯 <span class="hl-blue">Mission Finale</span></h1>
+  <p class="subtitle">Équations sans solution · niveau collège</p>
+</header>
+
+<!-- Mission intro -->
+<div class="mission-card">
+  <div class="terminal-header">
+    <div class="terminal-dot" style="background:#ff5f57"></div>
+    <div class="terminal-dot" style="background:#febc2e"></div>
+    <div class="terminal-dot" style="background:#28c840"></div>
+    <div class="terminal-title">mission-finale.exe</div>
+  </div>
+  <div class="terminal-text">
+    &gt; MISSION FINALE – ACCÈS AUTORISÉ...<br>
+    &gt; AUTHENTIFICATION REQUISE...<br>
+    &gt; RÉSOUDRE L'ÉQUATION POUR VALIDER LA MISSION<span class="blink">_</span>
+  </div>
+  <div style="margin-top:1rem;">
+    <div class="mission-title">🎯 Votre mission</div>
+    <div class="mission-desc">
+      Félicitations, équipe de 3ème ! Vous avez accédé au Mission Finale.<br>
+      Analysez l'équation du terminal pour déterminer si une solution existe :<br><br>
+      <span style="font-family:'JetBrains Mono',monospace; color:var(--yellow); font-size:1.1rem;">\( x + 7 = x - 2 \)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="timeline" id="timeline">
+  <div class="timeline-line"></div>
+
+  <div class="step" id="step-0">
+    <div class="step-icon" style="background:#dbeafe;">🔍</div>
+    <div class="step-body">
+      <div class="step-tag" style="background:#dbeafe; color:#1e40af;">Mathématiques</div>
+      <div class="step-headline">Étape 1 – Analyser l'équation</div>
+      <div class="step-text">
+        On observe l'équation : <span class="eq-box">\( x + 7 = x - 2 \)</span><br><br>
+        <strong>Méthode :</strong> On soustrait \( x \) des deux membres pour isoler les constantes :<br>
+        <span class="eq-box">\( x + 7 - x = x - 2 - x \)</span><br>
+        Ce qui donne : <span class="eq-box">\( 7 = -2 \)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" id="step-1">
+    <div class="step-icon" style="background:#fef9c3;">💡</div>
+    <div class="step-body">
+      <div class="step-tag" style="background:#fef9c3; color:#854d0e;">Observation</div>
+      <div class="step-headline">Étape 2 – Interpréter le résultat</div>
+      <div class="step-text">
+        On obtient <span class="eq-box">\( 7 = -2 \)</span><br><br>
+        Cette égalité est <strong>impossible</strong> : 7 ne sera jamais égal à −2,<br>
+        quelle que soit la valeur de \( x \).<br><br>
+        ➡ L'équation <strong>n'a pas de solution</strong>.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" id="step-2">
+    <div class="step-icon" style="background:#dcfce7;">🏁</div>
+    <div class="step-body">
+      <div class="step-tag" style="background:#dcfce7; color:#166534;">Résolution</div>
+      <div class="step-headline">Conclusion</div>
+      <div class="step-text">
+        L'équation <span class="eq-box">\( x + 7 = x - 2 \)</span> <strong>n'a pas de solution</strong>.<br><br>
+        Cela signifie qu'il n'existe <strong>aucune valeur de \( x \)</strong> qui vérifie cette équation.<br><br>
+        🔒 Le mission n'est pas encore accomplie… Répondez aux questions pour l'ouvrir !
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz -->
+<div class="quiz-card" id="quiz-section" style="display:none;">
+  <div class="quiz-title">🎮 Réussis ta Mission Finale – Réponds aux questions</div>
+
+  <div id="q1-block">
+    <div class="quiz-question"><strong>Question 1/2 :</strong> Que donne-t-on quand on soustrait \( x \) des deux membres de \( x + 7 = x - 2 \) ?</div>
+    <div class="quiz-choices" id="q1-choices">
+      <div class="quiz-choice" onclick="selectChoice(1,0)"><div class="quiz-radio"></div> \( 7 = -2 \)</div>
+      <div class="quiz-choice" onclick="selectChoice(1,1)"><div class="quiz-radio"></div> \( 7 = 2 \)</div>
+      <div class="quiz-choice" onclick="selectChoice(1,2)"><div class="quiz-radio"></div> \( 0 = -9 \)</div>
+      <div class="quiz-choice" onclick="selectChoice(1,3)"><div class="quiz-radio"></div> \( 2x = -9 \)</div>
+    </div>
+    <button class="btn btn-primary" id="btn-q1" onclick="checkQ1()" disabled>Valider</button>
+    <div class="quiz-feedback" id="fb-q1"></div>
+  </div>
+
+  <div id="q2-block" style="display:none;margin-top:1.5rem;">
+    <div class="quiz-question"><strong>Question 2/2 :</strong> L'équation \( x + 7 = x - 2 \) a-t-elle une solution ?</div>
+    <div class="quiz-choices" id="q2-choices">
+      <div class="quiz-choice" onclick="selectChoice(2,0)"><div class="quiz-radio"></div> Oui, \( x = 5 \)</div>
+      <div class="quiz-choice" onclick="selectChoice(2,1)"><div class="quiz-radio"></div> Oui, \( x = -9 \)</div>
+      <div class="quiz-choice" onclick="selectChoice(2,2)"><div class="quiz-radio"></div> Non, elle n'a pas de solution</div>
+      <div class="quiz-choice" onclick="selectChoice(2,3)"><div class="quiz-radio"></div> Oui, toutes les valeurs de x conviennent</div>
+    </div>
+    <button class="btn btn-primary" id="btn-q2" onclick="checkQ2()" disabled>Valider</button>
+    <div class="quiz-feedback" id="fb-q2"></div>
+  </div>
+
+  <div class="success" id="success-screen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Mission Finale accomplie !</div>
+    <p style="color:var(--muted);margin:.5rem 0 .5rem;">Félicitations ! Tu as compris que certaines équations n'ont pas de solution.</p>
+    <div class="code-box">CODE : 3EME-OK</div>
+    <p style="font-size:.85rem;color:var(--muted);">Mission accomplie ! Tu maîtrises les équations sans solution. 🚀</p>
+  </div>
+</div>
+
+<script>
+let q1Selected = null, q2Selected = null;
+const CORRECT = { 1: 0, 2: 2 };
+
+function selectChoice(q, idx) {
+  const choices = document.querySelectorAll(`#q${q}-choices .quiz-choice`);
+  choices.forEach((c,i) => {
+    c.classList.toggle("selected", i === idx);
+    c.querySelector(".quiz-radio").style.background = i === idx ? "var(--yellow)" : "";
+    c.querySelector(".quiz-radio").style.borderColor = i === idx ? "var(--yellow)" : "";
+  });
+  if (q === 1) { q1Selected = idx; document.getElementById("btn-q1").disabled = false; }
+  else         { q2Selected = idx; document.getElementById("btn-q2").disabled = false; }
+}
+
+function checkQ1() {
+  const choices = document.querySelectorAll("#q1-choices .quiz-choice");
+  choices.forEach((c,i) => {
+    c.onclick = null;
+    if (i === CORRECT[1]) c.classList.add("correct-c");
+    else if (i === q1Selected) c.classList.add("wrong-c");
+  });
+  document.getElementById("btn-q1").disabled = true;
+  const fb = document.getElementById("fb-q1");
+  const ok = q1Selected === CORRECT[1];
+  fb.className = "quiz-feedback show " + (ok ? "ok" : "ko");
+  fb.innerHTML = ok
+    ? "✅ Exact ! En soustrayant x des deux membres, on obtient 7 = −2."
+    : "❌ Non. En soustrayant x : (x+7)−x = (x−2)−x → 7 = −2.";
+  if (window.MathJax) MathJax.typesetPromise([fb]);
+  setTimeout(() => {
+    document.getElementById("q2-block").style.display = "block";
+    if (window.MathJax) MathJax.typesetPromise([document.getElementById("q2-block")]);
+  }, 800);
+}
+
+function checkQ2() {
+  const choices = document.querySelectorAll("#q2-choices .quiz-choice");
+  choices.forEach((c,i) => {
+    c.onclick = null;
+    if (i === CORRECT[2]) c.classList.add("correct-c");
+    else if (i === q2Selected) c.classList.add("wrong-c");
+  });
+  document.getElementById("btn-q2").disabled = true;
+  const fb = document.getElementById("fb-q2");
+  const ok = q2Selected === CORRECT[2];
+  fb.className = "quiz-feedback show " + (ok ? "ok" : "ko");
+  fb.innerHTML = ok
+    ? "✅ Parfait ! 7 = −2 est impossible, donc l'équation n'a aucune solution."
+    : "❌ Non. Puisque 7 = −2 est toujours faux, aucune valeur de x ne convient.";
+  if (window.MathJax) MathJax.typesetPromise([fb]);
+  setTimeout(() => {
+    document.getElementById("success-screen").classList.add("show");
+  }, 800);
+}
+
+// Animate timeline steps then show quiz
+window.addEventListener("DOMContentLoaded", () => {
+  if (window.MathJax) MathJax.typesetPromise();
+  let delay = 300;
+  ["step-0","step-1","step-2"].forEach(id => {
+    setTimeout(() => {
+      document.getElementById(id).classList.add("visible");
+    }, delay);
+    delay += 600;
+  });
+  setTimeout(() => {
+    document.getElementById("quiz-section").style.display = "block";
+    if (window.MathJax) MathJax.typesetPromise([document.getElementById("quiz-section")]);
+    document.getElementById("quiz-section").scrollIntoView({behavior:"smooth", block:"start"});
+  }, delay + 200);
+});
+</script>
+</body>
+</html>
