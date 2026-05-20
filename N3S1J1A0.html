@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Classer les expressions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js"></script>
+  <style>
+    :root {
+      --bg: #fffdf7; --surface: #ffffff; --border: #e8e4d9;
+      --yellow: #f5c518; --green: #8dc63f; --blue: #3ab5d8;
+      --pink: #f28b82; --orange: #f5a623; --text: #1a1d23; --muted: #8a8f9a; --radius: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      padding: 2rem 1rem 4rem; position: relative; overflow-x: hidden;
+    }
+    body::before { content: ''; position: fixed; border-radius: 50%; z-index: 0; opacity: .13; width: 340px; height: 340px; background: var(--yellow); top: -80px; right: -80px; }
+    body::after  { content: ''; position: fixed; border-radius: 50%; z-index: 0; opacity: .13; width: 260px; height: 260px; background: var(--blue); bottom: -60px; left: -60px; }
+    .bubble1 { position: fixed; border-radius: 50%; z-index: 0; opacity: .10; width: 180px; height: 180px; background: var(--green); bottom: 120px; right: -40px; }
+    .bubble2 { position: fixed; border-radius: 50%; z-index: 0; opacity: .10; width: 120px; height: 120px; background: var(--pink); top: 200px; left: -30px; }
+
+    header { text-align: center; margin-bottom: 2rem; position: relative; z-index: 1; }
+    .logo-badge { display: inline-flex; align-items: center; gap: .5rem; background: var(--yellow); color: #000; font-size: .75rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: .3rem .9rem; border-radius: 99px; margin-bottom: .5rem; }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .week-label { font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--muted); margin-bottom: .6rem; letter-spacing: .06em; }
+    h1 { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800; line-height: 1.2; }
+    h1 .hl-green { color: var(--green); } h1 .hl-blue { color: var(--blue); }
+    .subtitle { color: var(--muted); font-size: .88rem; margin-top: .4rem; font-family: 'JetBrains Mono', monospace; }
+
+    .card { width: 100%; max-width: 760px; background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 2rem; position: relative; z-index: 1; box-shadow: 0 4px 24px rgba(0,0,0,.06); }
+    .card-stripe { position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: var(--radius) var(--radius) 0 0; background: linear-gradient(90deg, var(--yellow), var(--orange), var(--pink), var(--blue), var(--green)); }
+    .consigne { font-size: .95rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+    /* Drop zones */
+    .zones-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+    .drop-zone {
+      min-height: 130px; border-radius: 12px; border: 2.5px dashed var(--border);
+      padding: .8rem; display: flex; flex-direction: column; gap: .5rem;
+      transition: border-color .2s, background .2s;
+    }
+    .drop-zone.drag-over { border-color: var(--yellow); background: #fffbeb; }
+    .drop-zone.correct-zone { border-color: var(--green); background: #f0faeb; }
+    .drop-zone.wrong-zone  { border-color: var(--pink);  background: #fff0ef; }
+    .zone-label { font-weight: 800; font-size: .9rem; margin-bottom: .4rem; text-align: center; padding-bottom: .4rem; border-bottom: 2px solid var(--border); }
+    .zone-eq  .zone-label { color: var(--blue); border-color: #d4edff; }
+    .zone-ineq .zone-label { color: var(--orange); border-color: #fff3cd; }
+    .zone-expr .zone-label { color: var(--green); border-color: #e8f5e9; }
+
+    /* Draggable items */
+    .items-row { display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center; margin-bottom: 1.5rem; min-height: 60px; padding: .8rem; background: var(--bg); border-radius: 12px; border: 2px dashed var(--border); }
+    .drag-item {
+      background: var(--surface); border: 2px solid var(--border); border-radius: 10px;
+      padding: .5rem 1rem; cursor: grab; user-select: none;
+      font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600;
+      transition: transform .15s, box-shadow .15s, border-color .15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .drag-item:hover { border-color: var(--yellow); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .drag-item.dragging { opacity: .5; cursor: grabbing; }
+    .drag-item.correct-item { border-color: var(--green); background: #f0faeb; cursor: default; }
+    .drag-item.wrong-item   { border-color: var(--pink);  background: #fff0ef; cursor: default; }
+
+    /* Buttons */
+    .btn-row { display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: .4rem; padding: .6rem 1.4rem; border-radius: 99px; font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700; cursor: pointer; border: none; transition: transform .12s, box-shadow .12s; }
+    .btn:active { transform: scale(.96); }
+    .btn:disabled { opacity: .38; cursor: default; }
+    .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 3px 10px rgba(58,181,216,.3); }
+    .btn-yellow  { background: var(--yellow); color: #5a3e00; }
+    .btn-ghost   { background: transparent; color: var(--muted); border: 2px solid var(--border); }
+
+    /* Feedback */
+    .feedback-box { margin-top: 1.2rem; padding: .8rem 1rem; border-radius: 10px; font-size: .9rem; display: none; text-align: center; font-weight: 700; }
+    .feedback-box.show { display: block; }
+    .feedback-box.ok { background: #f0faeb; border: 1.5px solid var(--green); color: #3a7d0a; }
+    .feedback-box.ko { background: #fff0ef; border: 1.5px solid var(--pink); color: #c0392b; }
+    .score-display { font-size: 1.1rem; margin-top: .3rem; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .card { animation: fadeUp .4s ease both; }
+    .drag-item { animation: fadeUp .3s ease both; }
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Maths · 3ème
+  </div>
+  <div class="week-label">Semaine 1 – Jour 1</div>
+  <h1>Classer : <span class="hl-blue">Équation</span>, <span class="hl-green">Expression</span><br>ou <span style="color:var(--orange)">Inéquation</span> ?</h1>
+  <p class="subtitle">Glisse chaque expression dans la bonne catégorie</p>
+</header>
+
+<div class="card">
+  <div class="card-stripe"></div>
+  <p class="consigne">Glisse chaque expression mathématique dans la catégorie correspondante.</p>
+
+  <!-- Drop zones -->
+  <div class="zones-row">
+    <div class="drop-zone zone-eq" id="zone-equation" ondragover="onDragOver(event)" ondrop="onDrop(event,'equation')" ondragleave="onDragLeave(event)">
+      <div class="zone-label">⚖️ Équation</div>
+    </div>
+    <div class="drop-zone zone-ineq" id="zone-inequation" ondragover="onDragOver(event)" ondrop="onDrop(event,'inequation')" ondragleave="onDragLeave(event)">
+      <div class="zone-label">📐 Inéquation</div>
+    </div>
+    <div class="drop-zone zone-expr" id="zone-expression" ondragover="onDragOver(event)" ondrop="onDrop(event,'expression')" ondragleave="onDragLeave(event)">
+      <div class="zone-label">🔢 Expression</div>
+    </div>
+  </div>
+
+  <!-- Items to drag -->
+  <div class="items-row" id="items-bank" ondragover="onDragOver(event)" ondrop="onDrop(event,'bank')" ondragleave="onDragLeave(event)">
+    <div class="drag-item" id="item-0" draggable="true" ondragstart="onDragStart(event,'item-0')" data-zone="bank">\( x^2 + 1 \)</div>
+    <div class="drag-item" id="item-1" draggable="true" ondragstart="onDragStart(event,'item-1')" data-zone="bank">\( 5x + 3 \)</div>
+    <div class="drag-item" id="item-2" draggable="true" ondragstart="onDragStart(event,'item-2')" data-zone="bank">\( x - 7 = 0 \)</div>
+    <div class="drag-item" id="item-3" draggable="true" ondragstart="onDragStart(event,'item-3')" data-zone="bank">\( 2x > 4 \)</div>
+    <div class="drag-item" id="item-4" draggable="true" ondragstart="onDragStart(event,'item-4')" data-zone="bank">\( 3x + 2 = 5 \)</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-check" onclick="checkAnswers()">Vérifier ✓</button>
+    <button class="btn btn-yellow" onclick="showSolution()">Solution</button>
+    <button class="btn btn-ghost" onclick="resetAll()">🔄 Recommencer</button>
+  </div>
+
+  <div class="feedback-box" id="feedback-box">
+    <div id="feedback-msg"></div>
+    <div class="score-display" id="score-display"></div>
+  </div>
+</div>
+
+<script>
+const CORRECT = {
+  'item-0': 'expression',
+  'item-1': 'expression',
+  'item-2': 'equation',
+  'item-3': 'inequation',
+  'item-4': 'equation',
+};
+
+let draggedId = null;
+
+function onDragStart(e, id) {
+  draggedId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => document.getElementById(id).classList.add('dragging'), 0);
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e, zoneName) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!draggedId) return;
+
+  const item = document.getElementById(draggedId);
+  item.classList.remove('dragging');
+
+  // Remove from current zone
+  const currentZone = item.dataset.zone;
+
+  // Move to new zone
+  if (zoneName === 'bank') {
+    document.getElementById('items-bank').appendChild(item);
+  } else {
+    document.getElementById('zone-' + zoneName).appendChild(item);
+  }
+  item.dataset.zone = zoneName;
+
+  // Re-render math
+  if (window.MathJax) MathJax.typesetPromise([item]);
+
+  draggedId = null;
+  // Reset feedback
+  document.getElementById('feedback-box').className = 'feedback-box';
+  resetColors();
+}
+
+function resetColors() {
+  document.querySelectorAll('.drag-item').forEach(i => i.classList.remove('correct-item','wrong-item'));
+  document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('correct-zone','wrong-zone'));
+}
+
+function checkAnswers() {
+  resetColors();
+  let correct = 0, total = Object.keys(CORRECT).length;
+
+  for (const [id, correctZone] of Object.entries(CORRECT)) {
+    const item = document.getElementById(id);
+    const userZone = item.dataset.zone;
+    if (userZone === correctZone) {
+      item.classList.add('correct-item');
+      correct++;
+    } else if (userZone !== 'bank') {
+      item.classList.add('wrong-item');
+    }
+  }
+
+  const fb = document.getElementById('feedback-box');
+  const pct = Math.round((correct / total) * 100);
+  fb.className = 'feedback-box show ' + (correct === total ? 'ok' : 'ko');
+  document.getElementById('feedback-msg').textContent = correct === total
+    ? '🎉 Parfait ! Toutes les expressions sont bien classées !'
+    : `${correct} expression(s) correctement placée(s) sur ${total}.`;
+  document.getElementById('score-display').textContent =
+    pct >= 75 ? '⭐⭐⭐ Excellent !' : pct >= 50 ? '⭐⭐ Bien joué !' : '⭐ Continue à t'entraîner !';
+}
+
+function showSolution() {
+  resetAll();
+  setTimeout(() => {
+    for (const [id, correctZone] of Object.entries(CORRECT)) {
+      const item = document.getElementById(id);
+      const zoneEl = document.getElementById('zone-' + correctZone);
+      zoneEl.appendChild(item);
+      item.dataset.zone = correctZone;
+      item.classList.add('correct-item');
+      item.draggable = false;
+    }
+    if (window.MathJax) MathJax.typesetPromise();
+    const fb = document.getElementById('feedback-box');
+    fb.className = 'feedback-box show ok';
+    document.getElementById('feedback-msg').textContent = '✅ Voici la solution correcte !';
+    document.getElementById('score-display').textContent = 'Équation : x−7=0 et 3x+2=5 · Inéquation : 2x>4 · Expression : x²+1 et 5x+3';
+  }, 100);
+}
+
+function resetAll() {
+  resetColors();
+  const bank = document.getElementById('items-bank');
+  for (const id of Object.keys(CORRECT)) {
+    const item = document.getElementById(id);
+    item.dataset.zone = 'bank';
+    item.draggable = true;
+    item.classList.remove('correct-item','wrong-item');
+    bank.appendChild(item);
+  }
+  if (window.MathJax) MathJax.typesetPromise();
+  document.getElementById('feedback-box').className = 'feedback-box';
+}
+
+// Touch support
+let touchItem = null;
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.drag-item').forEach(item => {
+    item.addEventListener('touchstart', e => {
+      touchItem = item;
+      item.classList.add('dragging');
+    }, {passive: true});
+    item.addEventListener('touchend', e => {
+      if (!touchItem) return;
+      const touch = e.changedTouches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const zone = el && el.closest('.drop-zone');
+      if (zone) {
+        const zoneId = zone.id.replace('zone-','');
+        zone.appendChild(touchItem);
+        touchItem.dataset.zone = zoneId;
+        if (window.MathJax) MathJax.typesetPromise([touchItem]);
+      }
+      touchItem.classList.remove('dragging');
+      touchItem = null;
+      document.getElementById('feedback-box').className = 'feedback-box';
+      resetColors();
+    }, {passive: true});
+  });
+});
+</script>
+</body>
+</html>
