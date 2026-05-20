@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Je relève le défi !</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js"></script>
+  <style>
+    :root{--bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--purple:#9b59b6;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--purple);top:-80px;right:-80px;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--blue);bottom:120px;right:-40px;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;}
+
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-bottom:.6rem;}
+    h1{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;line-height:1.2;}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+    .score-row{display:flex;gap:.6rem;margin-bottom:1.8rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong .dot{background:var(--pink);}
+    .chip.remaining .dot{background:var(--muted);}
+
+    .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem;position:relative;z-index:1;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink),var(--purple),var(--blue));}
+    .q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;}
+    .dnb-badge{display:inline-block;background:#f3e8ff;color:#7e22ce;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;}
+    .q-text{font-size:1rem;font-weight:700;line-height:1.6;margin-bottom:.4rem;}
+    .consigne{font-size:.83rem;color:var(--muted);margin-bottom:1.2rem;font-style:italic;}
+
+    .choices{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem;}
+    .choice{display:flex;align-items:center;gap:.8rem;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.95rem;background:var(--bg);transition:border-color .15s,background .15s;}
+    .choice:hover:not(.locked){border-color:var(--purple);background:#f5f0ff;}
+    .choice.checked{border-color:var(--purple);background:#f5f0ff;}
+    .choice.correct-c{border-color:var(--green);background:#f0faeb;cursor:default;}
+    .choice.wrong-c{border-color:var(--pink);background:#fff0ef;cursor:default;}
+    .choice.missed-c{border-color:var(--orange);background:#fff8eb;cursor:default;}
+    .choice.locked{cursor:default;}
+    .cb{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;}
+    .choice.checked .cb{background:var(--purple);border-color:var(--purple);color:#fff;}
+    .choice.correct-c .cb{background:var(--green);border-color:var(--green);color:#fff;}
+    .choice.wrong-c .cb{background:var(--pink);border-color:var(--pink);color:#fff;}
+    .choice.missed-c .cb{background:var(--orange);border-color:var(--orange);color:#fff;}
+
+    .hint-box{margin-top:.8rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.65rem .9rem;font-size:.83rem;color:#7a6010;display:none;line-height:1.6;}
+    .hint-box.show{display:block;}
+    .hint-box strong{color:var(--orange);}
+
+    .feedback{margin-top:1rem;padding:.75rem 1rem;border-radius:10px;font-size:.9rem;display:none;line-height:1.5;}
+    .feedback.show{display:block;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#3a7d0a;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.3rem;}
+
+    .btn-row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;border-radius:99px;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--purple);color:#fff;box-shadow:0 3px 10px rgba(155,89,182,.3);}
+    .btn-hint{background:var(--yellow);color:#5a3e00;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.2rem;}
+
+    .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--purple);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.82rem;}
+    .recap-item .eq{color:var(--purple);flex:1;}
+    .recap-item.ok-item{border-color:#b5e08a;}
+    .recap-item.ko-item{border-color:#f9c0bb;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card,.results{animation:fadeUp .4s ease both;}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa · Maths · 3ème
+  </div>
+  <div class="week-label">Semaine 1 – Jour 2</div>
+  <h1>🏆 Je relève le <span style="color:var(--purple)">défi !</span></h1>
+  <p class="subtitle">5 questions · plusieurs réponses possibles · niveau collège</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Question 1 / 5</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">5</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="q-num" id="q-num">Question 1</div>
+  <div class="dnb-badge">Challenge – Produit nul</div>
+  <div class="q-text" id="q-text"></div>
+  <div class="consigne">Coche toutes les valeurs correctes (plusieurs réponses possibles).</div>
+  <div class="choices" id="choices"></div>
+  <div class="hint-box" id="hint-box"></div>
+  <div class="feedback" id="feedback">
+    <div id="fb-msg"></div>
+    <div class="feedback-detail" id="fb-detail"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-check" onclick="checkAnswer()">Valider ✓</button>
+    <button class="btn btn-hint" onclick="toggleHint()">? Indice</button>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()">← Précédent</button>
+    <button class="btn btn-ghost" id="btn-next" onclick="nextQ()" disabled>Suivant →</button>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/5</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">🔄 Recommencer</button>
+  </div>
+</div>
+
+<script>
+// correct: array of correct indices
+const QUESTIONS = [
+  {
+    text: "Résoudre (2x − 5)(x + 3) = 0. Quelles valeurs de x satisfont l'équation ?",
+    choices: ["x = <span style='display:inline-block;text-align:center;vertical-align:middle;font-family:serif'><span style='display:block;border-bottom:1.5px solid currentColor;padding:0 3px;font-size:.85em'>5</span><span style='display:block;padding:0 3px;font-size:.85em'>2</span></span>", "x = −3", "x = 0", "x = 7"],
+    correct: [0, 1],
+    hint: "2x−5=0 → x = 5/2 &nbsp;&nbsp; ou &nbsp;&nbsp; x+3=0 → x = −3."
+  },
+  {
+    text: "Résoudre (x − 4)(3x + 6) = 0. Quelles sont les solutions ?",
+    choices: ["x = 4", "x = −2", "x = 6", "x = −4"],
+    correct: [0, 1],
+    hint: "x−4=0 → x = 4 &nbsp;&nbsp; ou &nbsp;&nbsp; 3x+6=0 → x = −2."
+  },
+  {
+    text: "Résoudre (5x + 10)(x − 3) = 0. Quelles sont les solutions ?",
+    choices: ["x = −2", "x = 3", "x = 2", "x = −3"],
+    correct: [0, 1],
+    hint: "5x+10=0 → x = −2 &nbsp;&nbsp; ou &nbsp;&nbsp; x−3=0 → x = 3."
+  },
+  {
+    text: "Résoudre (x + 7)(2x − 8) = 0. Quelles sont les solutions ?",
+    choices: ["x = −7", "x = 4", "x = 7", "x = −4"],
+    correct: [0, 1],
+    hint: "x+7=0 → x = −7 &nbsp;&nbsp; ou &nbsp;&nbsp; 2x−8=0 → x = 4."
+  },
+  {
+    text: "Résoudre (4x − 12)(x + 5) = 0. Quelles sont les solutions ?",
+    choices: ["x = 3", "x = −5", "x = 12", "x = 5"],
+    correct: [0, 1],
+    hint: "4x−12=0 → x = 3 &nbsp;&nbsp; ou &nbsp;&nbsp; x+5=0 → x = −5."
+  },
+];
+
+const TOTAL = QUESTIONS.length;
+let current = 0;
+let userAnswers = new Array(TOTAL).fill(null); // null or Set of checked indices
+let hintOpen = false;
+const $ = id => document.getElementById(id);
+
+function render() {
+  const q = QUESTIONS[current];
+  hintOpen = false;
+  $("q-num").textContent = `Question ${current+1} / ${TOTAL}`;
+  $("q-text").innerHTML = q.text;
+  $("hint-box").className = "hint-box";
+  $("feedback").className = "feedback";
+  $("btn-next").disabled = true;
+  $("btn-check").disabled = false;
+  $("btn-prev").disabled = current === 0;
+
+  const container = $("choices");
+  container.innerHTML = "";
+  const answered = userAnswers[current] !== null;
+  const userSet = answered ? userAnswers[current] : new Set();
+
+  q.choices.forEach((text, i) => {
+    const div = document.createElement("div");
+    div.className = "choice" + (answered ? " locked" : "");
+    if (!answered) div.onclick = () => toggleChoice(i);
+
+    if (answered) {
+      const correctSet = new Set(q.correct);
+      if (correctSet.has(i) && userSet.has(i)) div.classList.add("correct-c");
+      else if (!correctSet.has(i) && userSet.has(i)) div.classList.add("wrong-c");
+      else if (correctSet.has(i) && !userSet.has(i)) div.classList.add("missed-c");
+    } else if (window._tempChecked && window._tempChecked.has(i)) {
+      div.classList.add("checked");
+    }
+
+    const icon = answered
+      ? (new Set(q.correct).has(i) && userSet.has(i) ? "✓"
+        : !new Set(q.correct).has(i) && userSet.has(i) ? "✗"
+        : new Set(q.correct).has(i) && !userSet.has(i) ? "→" : "")
+      : (window._tempChecked && window._tempChecked.has(i) ? "✓" : "");
+
+    div.innerHTML = `<div class="cb">${icon}</div><span>${text}</span>`;
+    container.appendChild(div);
+  });
+
+  if (answered) {
+    const allCorrect = q.correct.every(i => userSet.has(i)) && userSet.size === q.correct.length;
+    const fb = $("feedback");
+    fb.className = "feedback show " + (allCorrect ? "ok" : "ko");
+    $("fb-msg").textContent = allCorrect ? "✅ Parfait ! Toutes les bonnes réponses !" : "❌ Pas tout à fait.";
+    $("fb-detail").textContent = allCorrect
+      ? `Les deux solutions sont correctes.`
+      : `Les bonnes réponses sont surlignées en vert. Les manquantes en orange.`;
+    $("btn-next").disabled = false;
+    $("btn-check").disabled = true;
+  }
+
+  updateProgress();
+  if (window.MathJax) MathJax.typesetPromise([$('hint-box')]);
+}
+
+function toggleChoice(i) {
+  if (!window._tempChecked) window._tempChecked = new Set();
+  if (window._tempChecked.has(i)) window._tempChecked.delete(i);
+  else window._tempChecked.add(i);
+
+  document.querySelectorAll(".choice").forEach((c, idx) => {
+    const checked = window._tempChecked.has(idx);
+    c.classList.toggle("checked", checked);
+    c.querySelector(".cb").textContent = checked ? "✓" : "";
+  });
+  $("btn-check").disabled = window._tempChecked.size === 0;
+}
+
+function checkAnswer() {
+  if (!window._tempChecked || window._tempChecked.size === 0) return;
+  userAnswers[current] = new Set(window._tempChecked);
+  window._tempChecked = new Set();
+  render();
+}
+
+function toggleHint() {
+  hintOpen = !hintOpen;
+  const h = $("hint-box");
+  if (hintOpen) { h.innerHTML = `<strong>? Indice :</strong> ${QUESTIONS[current].hint}`; h.classList.add("show"); if (window.MathJax) MathJax.typesetPromise([h]); }
+  else h.classList.remove("show");
+}
+
+function nextQ() {
+  window._tempChecked = new Set();
+  if (current < TOTAL-1) { current++; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else showResults();
+}
+function prevQ() { window._tempChecked = new Set(); if (current > 0) { current--; render(); } }
+
+function updateProgress() {
+  const answered = userAnswers.filter(a => a !== null).length;
+  const pct = Math.round((answered/TOTAL)*100);
+  $("progress-bar").style.width = pct+"%";
+  $("prog-label").textContent = `Question ${current+1} / ${TOTAL}`;
+  $("prog-pct").textContent = pct+" %";
+  const ok = userAnswers.filter((a,i) => {
+    if (!a) return false;
+    const q = QUESTIONS[i];
+    return q.correct.every(c => a.has(c)) && a.size === q.correct.length;
+  }).length;
+  const ko = answered - ok;
+  $("count-ok").textContent = ok;
+  $("count-ko").textContent = ko;
+  $("count-rem").textContent = TOTAL - answered;
+}
+
+function showResults() {
+  $("ex-card").style.display = "none";
+  $("results-screen").classList.add("show");
+  const ok = userAnswers.filter((a,i) => {
+    if (!a) return false;
+    const q = QUESTIONS[i];
+    return q.correct.every(c => a.has(c)) && a.size === q.correct.length;
+  }).length;
+  $("score-num").textContent = ok;
+  const stars = ok >= 5 ? 5 : ok >= 4 ? 4 : ok >= 3 ? 3 : ok >= 2 ? 2 : 1;
+  $("stars-row").textContent = "⭐".repeat(stars)+"☆".repeat(5-stars);
+  const msgs = ["Continue à t'entraîner !","Bon début !","Pas mal !","Bien joué !","Très bien !","Parfait ! Défi relevé ! 🏆"];
+  $("results-msg").textContent = msgs[ok];
+  const list = $("recap-list");
+  list.innerHTML = "";
+  QUESTIONS.forEach((q,i) => {
+    const a = userAnswers[i];
+    const correct = a && q.correct.every(c => a.has(c)) && a.size === q.correct.length;
+    const div = document.createElement("div");
+    div.className = "recap-item "+(correct?"ok-item":"ko-item");
+    div.innerHTML = `<span>${correct?"✅":"❌"}</span><span class="eq">Q${i+1} – Produit nul</span><span>${correct?"Correct !":"Solutions : "+q.correct.map(c=>q.choices[c].replace(/\\[()]/g,"")).join(" et ")}</span>`;
+    list.appendChild(div);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart() {
+  current = 0;
+  userAnswers = new Array(TOTAL).fill(null);
+  window._tempChecked = new Set();
+  $("ex-card").style.display = "block";
+  $("results-screen").classList.remove("show");
+  render();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  window._tempChecked = new Set();
+  render();
+});
+</script>
+</body>
+</html>
