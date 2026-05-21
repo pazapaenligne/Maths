@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pazapa — N6S1J1A3 — Calcul posé</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fffdf7;
+  --surface: #ffffff;
+  --border: #e8e4d9;
+  --yellow: #f5c518;
+  --green: #8dc63f;
+  --green-light: #edf7d6;
+  --green-dark: #4a7a00;
+  --blue: #3ab5d8;
+  --blue-light: #e0f6fc;
+  --blue-dark: #1a6a82;
+  --pink: #f28b82;
+  --orange: #f5a623;
+  --purple: #9b59b6;
+  --text: #1a1d23;
+  --muted: #8a8f9a;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed; top: -80px; right: -80px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,197,24,0.12) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; bottom: -60px; left: -60px;
+  width: 250px; height: 250px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(58,181,216,0.09) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+.bubble1 {
+  position: fixed; top: 38%; right: 4%;
+  width: 130px; height: 130px; border-radius: 50%;
+  background: rgba(141,198,63,0.07);
+  pointer-events: none; z-index: 0;
+}
+.bubble2 {
+  position: fixed; top: 18%; left: 3%;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(242,139,130,0.08);
+  pointer-events: none; z-index: 0;
+}
+
+.wrapper {
+  position: relative; z-index: 1;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 56px;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 18px;
+}
+.header-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.header-meta {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.3px;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 5px;
+}
+.header-title {
+  font-size: 21px; font-weight: 800; color: var(--text); line-height: 1.2; margin-bottom: 4px;
+}
+.header-sub {
+  font-size: 13px; color: var(--muted); font-weight: 400;
+}
+
+/* PROGRESS STRIP */
+.progress-strip {
+  display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.prog-dot {
+  flex: 1; min-width: 80px;
+  height: 6px; border-radius: 99px;
+  background: var(--border);
+  transition: background 0.4s;
+  cursor: pointer;
+}
+.prog-dot.active { background: var(--blue); }
+.prog-dot.done { background: var(--green); }
+
+/* ACTIVITY CARD */
+.activity-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.activity-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 24px;
+  border-bottom: 1.5px solid var(--border);
+}
+.activity-num {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; flex-shrink: 0;
+  color: #fff;
+}
+.num-1 { background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%); }
+.num-2 { background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%); }
+.num-3 { background: linear-gradient(135deg, var(--orange) 0%, #c07000 100%); }
+.num-4 { background: linear-gradient(135deg, var(--purple) 0%, #7d3cac 100%); }
+.num-5 { background: linear-gradient(135deg, var(--pink) 0%, #c0392b 100%); }
+
+.activity-title {
+  font-size: 15px; font-weight: 700; color: var(--text); flex: 1;
+}
+.activity-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 20px;
+  flex-shrink: 0;
+}
+.tag-1 { background: var(--blue-light); color: var(--blue-dark); }
+.tag-2 { background: var(--green-light); color: var(--green-dark); }
+.tag-3 { background: #fff8e1; color: #7a4a00; }
+.tag-4 { background: #f5effe; color: #5b2d8a; }
+.tag-5 { background: #fdecea; color: #a83228; }
+
+.consigne-band {
+  padding: 13px 24px;
+  font-size: 14px; line-height: 1.65; color: var(--text);
+  background: #fafaf5;
+  border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.consigne-pin {
+  font-size: 16px; flex-shrink: 0; margin-top: 1px;
+}
+
+.iframe-wrap {
+  width: 100%;
+  background: #f7f5f0;
+  position: relative;
+}
+.iframe-wrap iframe {
+  display: block;
+  width: 100%;
+  border: none;
+}
+
+/* NAVIGATION */
+.nav-bar {
+  display: flex; gap: 12px; justify-content: center;
+  margin-top: 8px; flex-wrap: wrap;
+}
+.btn-nav {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--text);
+  display: flex; align-items: center; gap: 7px;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+.btn-nav:hover {
+  background: var(--bg);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.09);
+  transform: translateY(-1px);
+}
+.btn-nav:active { transform: scale(0.97); }
+.btn-nav.primary {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+  color: #fff; border-color: transparent;
+}
+.btn-nav svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* FOOTER NOTE */
+.footer-note {
+  text-align: center;
+  font-size: 12px; color: var(--muted);
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 600px) {
+  .header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .activity-header { padding: 14px 16px; flex-wrap: wrap; }
+  .consigne-band { padding: 12px 16px; }
+  .btn-nav { font-size: 13px; padding: 9px 14px; }
+  .header-title { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+<div class="bubble1" aria-hidden="true"></div>
+<div class="bubble2" aria-hidden="true"></div>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon" aria-hidden="true">🧮</div>
+    <div>
+      <div class="header-meta">6ème &nbsp;·&nbsp; Semaine 1 &nbsp;·&nbsp; Jour 1 &nbsp;·&nbsp; Activité 3</div>
+      <div class="header-title">Calcul posé — Entraînement</div>
+      <div class="header-sub">5 activités · Additions, soustractions, grands nombres, tables de multiplication</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS STRIP -->
+  <div class="progress-strip" id="progress-strip" role="progressbar" aria-label="Progression des activités">
+    <div class="prog-dot active" id="dot-1" onclick="scrollTo(1)" title="Activité 1"></div>
+    <div class="prog-dot" id="dot-2" onclick="scrollTo(2)" title="Activité 2"></div>
+    <div class="prog-dot" id="dot-3" onclick="scrollTo(3)" title="Activité 3"></div>
+    <div class="prog-dot" id="dot-4" onclick="scrollTo(4)" title="Activité 4"></div>
+    <div class="prog-dot" id="dot-5" onclick="scrollTo(5)" title="Activité 5"></div>
+  </div>
+
+  <!-- ACTIVITÉ 1 -->
+  <div class="activity-card" id="act-1">
+    <div class="activity-header">
+      <div class="activity-num num-1">1</div>
+      <div class="activity-title">Additions et soustractions posées</div>
+      <span class="activity-tag tag-1">+&nbsp; −</span>
+    </div>
+    <div class="consigne-band">
+      <span class="consigne-pin" aria-hidden="true">📍</span>
+      <span>Effectue les additions et soustractions proposées, puis vérifie tes résultats directement dans l'activité.</span>
+    </div>
+    <div class="iframe-wrap">
+      <iframe
+        title="Addition et soustraction posées — école collège"
+        src="https://www.geogebra.org/material/iframe/id/dqvme4xz/width/926/height/402/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/false/rc/false/ld/false/sdz/false/ctl/false"
+        height="420"
+        scrolling="no"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- ACTIVITÉ 2 -->
+  <div class="activity-card" id="act-2">
+    <div class="activity-header">
+      <div class="activity-num num-2">2</div>
+      <div class="activity-title">Lire et écrire les grands nombres</div>
+      <span class="activity-tag tag-2">Grands nombres</span>
+    </div>
+    <div class="consigne-band">
+      <span class="consigne-pin" aria-hidden="true">📍</span>
+      <span>Lis attentivement chaque grand nombre affiché et écris-le correctement en chiffres ou en lettres, selon la consigne.</span>
+    </div>
+    <div class="iframe-wrap">
+      <iframe
+        title="Lire et écrire les grands nombres"
+        src="https://www.geogebra.org/material/iframe/id/SEnRh2M4/width/1366/height/631/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/false/rc/false/ld/false/sdz/false/ctl/false"
+        height="650"
+        scrolling="no"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- ACTIVITÉ 3 -->
+  <div class="activity-card" id="act-3">
+    <div class="activity-header">
+      <div class="activity-num num-3">3</div>
+      <div class="activity-title">Tables de multiplication 4, 5, 6, 7, 8 et 9</div>
+      <span class="activity-tag tag-3">×&nbsp; Tables</span>
+    </div>
+    <div class="consigne-band">
+      <span class="consigne-pin" aria-hidden="true">📍</span>
+      <span>Entraîne-toi à réviser les tables de multiplication 4, 5, 6, 7, 8 et 9 en répondant aux calculs proposés.</span>
+    </div>
+    <div class="iframe-wrap">
+      <iframe
+        title="Tables 4, 6, 8 et Tables 5, 7, 9 — Collège"
+        src="https://www.geogebra.org/material/iframe/id/qbd682zr/width/800/height/600/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/false/rc/false/ld/false/sdz/false/ctl/false"
+        height="620"
+        scrolling="no"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- ACTIVITÉ 4 -->
+  <div class="activity-card" id="act-4">
+    <div class="activity-header">
+      <div class="activity-num num-4">4</div>
+      <div class="activity-title">Choisir une table et la compléter en vitesse</div>
+      <span class="activity-tag tag-4">× Rapidité</span>
+    </div>
+    <div class="consigne-band">
+      <span class="consigne-pin" aria-hidden="true">📍</span>
+      <span>Choisis une table de multiplication et complète les résultats le plus vite possible.</span>
+    </div>
+    <div class="iframe-wrap">
+      <iframe
+        title="Table de Multiplication — rapidité"
+        src="https://www.geogebra.org/material/iframe/id/PgDG85bA/width/1341/height/522/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/true/rc/false/ld/false/sdz/true/ctl/false"
+        height="540"
+        scrolling="no"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- ACTIVITÉ 5 -->
+  <div class="activity-card" id="act-5">
+    <div class="activity-header">
+      <div class="activity-num num-5">5</div>
+      <div class="activity-title">Multiplications posées — gabarits</div>
+      <span class="activity-tag tag-5">× Posé</span>
+    </div>
+    <div class="consigne-band">
+      <span class="consigne-pin" aria-hidden="true">📍</span>
+      <span>Pose et effectue les multiplications en utilisant les gabarits pour t'aider.</span>
+    </div>
+    <div class="iframe-wrap">
+      <iframe
+        title="Gabarits pour multiplications posées"
+        src="https://www.geogebra.org/material/iframe/id/Apf9sNKb/width/1068/height/862/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/false/rc/false/ld/false/sdz/false/ctl/false"
+        height="880"
+        scrolling="no"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-bar">
+    <button class="btn-nav" onclick="scrollToTop()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
+      Haut de page
+    </button>
+    <button class="btn-nav primary" onclick="scrollToAct(1)">
+      Activité 1
+    </button>
+    <button class="btn-nav primary" onclick="scrollToAct(2)">
+      Activité 2
+    </button>
+    <button class="btn-nav primary" onclick="scrollToAct(3)">
+      Activité 3
+    </button>
+    <button class="btn-nav primary" onclick="scrollToAct(4)">
+      Activité 4
+    </button>
+    <button class="btn-nav primary" onclick="scrollToAct(5)">
+      Activité 5
+    </button>
+  </div>
+
+  <div class="footer-note">
+    6ème &nbsp;·&nbsp; Semaine 1, Jour 1 &nbsp;·&nbsp; Activité 3 &nbsp;·&nbsp; Pazapa En Ligne
+  </div>
+
+</div>
+
+<script>
+var dots = [null,
+  document.getElementById("dot-1"),
+  document.getElementById("dot-2"),
+  document.getElementById("dot-3"),
+  document.getElementById("dot-4"),
+  document.getElementById("dot-5")
+];
+
+function scrollToAct(n) {
+  var el = document.getElementById("act-" + n);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function scrollTo(n) { scrollToAct(n); }
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function getCurrentAct() {
+  var best = 1;
+  for (var i = 1; i <= 5; i++) {
+    var el = document.getElementById("act-" + i);
+    if (!el) continue;
+    var rect = el.getBoundingClientRect();
+    if (rect.top <= 120) best = i;
+  }
+  return best;
+}
+
+function updateDots() {
+  var cur = getCurrentAct();
+  for (var i = 1; i <= 5; i++) {
+    dots[i].className = "prog-dot";
+    if (i < cur) dots[i].classList.add("done");
+    else if (i === cur) dots[i].classList.add("active");
+  }
+}
+
+window.addEventListener("scroll", updateDots, { passive: true });
+updateDots();
+</script>
+</body>
+</html>
