@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pazapa — Devinette — Soustraction posée</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fffdf7;
+  --surface: #ffffff;
+  --border: #e8e4d9;
+  --yellow: #f5c518;
+  --green: #8dc63f;
+  --green-light: #edf7d6;
+  --green-dark: #4a7a00;
+  --blue: #3ab5d8;
+  --blue-light: #e0f6fc;
+  --blue-dark: #1a6a82;
+  --pink: #f28b82;
+  --pink-light: #fdecea;
+  --pink-dark: #a83228;
+  --orange: #f5a623;
+  --purple: #9b59b6;
+  --text: #1a1d23;
+  --muted: #8a8f9a;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed; top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,197,24,0.13) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; bottom: -60px; left: -60px;
+  width: 250px; height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(58,181,216,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.bubble1 {
+  position: fixed; top: 40%; right: 5%;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(141,198,63,0.08);
+  pointer-events: none; z-index: 0;
+}
+.bubble2 {
+  position: fixed; top: 20%; left: 3%;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(242,139,130,0.09);
+  pointer-events: none; z-index: 0;
+}
+
+.wrapper {
+  position: relative; z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--purple) 0%, #7d3cac 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.header-meta {
+  font-size: 11px; font-weight: 600; letter-spacing: 1.2px;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
+}
+.header-title {
+  font-size: 19px; font-weight: 800; color: var(--text); line-height: 1.2;
+  margin-bottom: 3px;
+}
+.header-sub {
+  font-size: 13px; color: var(--muted); font-weight: 400;
+}
+
+/* PROGRESS */
+.progress-bar-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.progress-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.progress-label { font-size: 13px; font-weight: 600; color: var(--text); }
+.progress-pct { font-size: 13px; font-weight: 700; color: var(--blue); }
+.progress-track {
+  height: 8px; border-radius: 99px;
+  background: var(--border); overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--purple) 0%, var(--blue) 100%);
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 28px 24px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+/* RIDDLE BOX */
+.riddle-box {
+  background: linear-gradient(135deg, #f5f0ff 0%, #ede8fa 100%);
+  border: 1.5px solid #c9b8ef;
+  border-radius: var(--radius-sm);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  position: relative;
+}
+.riddle-deco {
+  position: absolute;
+  top: 14px; right: 18px;
+  font-size: 28px;
+  opacity: 0.35;
+  pointer-events: none;
+  user-select: none;
+}
+.riddle-text {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #2d1f5e;
+  font-style: italic;
+}
+.riddle-text strong {
+  font-style: normal;
+  font-weight: 800;
+  color: #1a0d4a;
+}
+.riddle-question {
+  margin-top: 14px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--purple);
+  font-style: normal;
+}
+
+/* INPUT ZONE */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.input-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.reponse-input {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--blue-dark);
+  background: var(--blue-light);
+  border: 2px solid var(--blue);
+  border-radius: 10px;
+  padding: 10px 16px;
+  flex: 1;
+  min-width: 200px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.reponse-input:focus {
+  border-color: var(--blue-dark);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(58,181,216,0.18);
+}
+.reponse-input:disabled { cursor: default; }
+.reponse-input.correct {
+  background: var(--green-light);
+  border-color: var(--green);
+  color: var(--green-dark);
+}
+.reponse-input.wrong {
+  background: var(--pink-light);
+  border-color: var(--pink);
+  color: var(--pink-dark);
+}
+
+/* HINT */
+.hint-zone {
+  margin-top: 16px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+}
+.hint-btn {
+  width: 100%;
+  background: #fdf9f0;
+  border: none;
+  padding: 11px 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--orange);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  transition: background 0.2s;
+}
+.hint-btn:hover { background: #fdf0d0; }
+.hint-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.hint-content {
+  display: none;
+  padding: 12px 16px;
+  background: #fffae8;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #6b4a00;
+  border-top: 1px solid #f5dea0;
+}
+.hint-content.visible { display: block; }
+
+/* FEEDBACK */
+.feedback-zone {
+  margin-top: 18px;
+  display: none;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.feedback-zone.visible { display: block; }
+.feedback-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 700;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.feedback-header svg { width: 20px; height: 20px; flex-shrink: 0; }
+.feedback-ok .feedback-header {
+  background: var(--green-light);
+  color: var(--green-dark);
+  border: 1.5px solid var(--green); border-bottom: none;
+}
+.feedback-ko .feedback-header {
+  background: var(--pink-light);
+  color: var(--pink-dark);
+  border: 1.5px solid var(--pink); border-bottom: none;
+}
+.feedback-detail {
+  padding: 14px 16px;
+  font-size: 14px; line-height: 1.75;
+  background: var(--surface);
+  border-left: 1.5px solid;
+  border-right: 1.5px solid;
+  border-bottom: 1.5px solid;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+.feedback-ok .feedback-detail { border-color: var(--green); color: var(--green-dark); }
+.feedback-ko .feedback-detail { border-color: var(--pink); color: #6b1d1a; }
+
+/* ACTIONS */
+.actions {
+  display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+}
+.btn {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700;
+  border: none; border-radius: 12px;
+  padding: 13px 22px;
+  cursor: pointer;
+  transition: transform 0.12s, opacity 0.2s, box-shadow 0.2s;
+  display: flex; align-items: center; gap: 8px;
+  flex: 1; justify-content: center; min-width: 140px;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.13); }
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--purple) 0%, #7d3cac 100%);
+  color: #fff;
+}
+.btn-secondary {
+  background: var(--border); color: var(--text);
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* RESULT */
+.result-screen { display: none; }
+.result-screen.visible { display: block; }
+
+.result-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 32px 24px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  margin-bottom: 16px;
+}
+.result-stars { font-size: 40px; margin-bottom: 16px; }
+.result-msg {
+  font-size: 18px; font-weight: 700;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+.result-msg.perfect { background: var(--green-light); color: var(--green-dark); }
+.result-msg.try-again { background: var(--pink-light); color: var(--pink-dark); }
+
+.result-answer-box {
+  background: #f5f0ff;
+  border: 1.5px solid #c9b8ef;
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.result-answer-label {
+  font-size: 12px; font-weight: 700; color: var(--purple);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+}
+.result-answer-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px; font-weight: 700;
+  color: #2d1f5e;
+}
+.result-explication {
+  font-size: 14px; line-height: 1.75;
+  color: var(--text); text-align: left;
+  padding: 14px 16px;
+  background: #fafaf7;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.btn-restart {
+  width: 100%;
+  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 100%);
+  color: #fff;
+  font-size: 16px;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 8px;
+}
+.btn-restart:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,166,35,0.4); }
+.btn-restart:active { transform: scale(0.97); }
+
+@media (max-width: 480px) {
+  .wrapper { padding: 16px 12px 32px; }
+  .header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .card { padding: 20px 16px; }
+  .riddle-text { font-size: 15px; }
+  .actions { flex-direction: column; }
+  .btn { min-width: unset; width: 100%; }
+  .input-row { flex-direction: column; align-items: flex-start; }
+  .reponse-input { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="bubble1" aria-hidden="true"></div>
+<div class="bubble2" aria-hidden="true"></div>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon" aria-hidden="true">🔍</div>
+    <div class="header-text">
+      <div class="header-meta">6ème &nbsp;·&nbsp; Semaine 1 &nbsp;·&nbsp; Jour 2</div>
+      <div class="header-title">Devinette mathématique</div>
+      <div class="header-sub">Trouve l'opération décrite</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar-wrap">
+    <div class="progress-top">
+      <span class="progress-label" id="progress-label">Question 1 / 1</span>
+      <span class="progress-pct" id="progress-pct">0 %</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- EXERCISE CARD -->
+  <div class="card" id="exercise-card">
+
+    <div class="riddle-box">
+      <span class="riddle-deco" aria-hidden="true">🔎</span>
+      <div class="riddle-text" id="riddle-text">
+        Je prends deux nombres, je les superpose, j'aligne bien mes unités,<br>
+        et parfois je dois emprunter pour continuer.<br>
+        <strong>Sans moi, pas de différence possible.</strong>
+      </div>
+      <div class="riddle-question">Qui suis-je ?</div>
+    </div>
+
+    <div class="input-row">
+      <span class="input-label">Réponse :</span>
+      <input
+        type="text"
+        class="reponse-input"
+        id="reponse-input"
+        placeholder="Écris ta réponse…"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        aria-label="Réponse à la devinette"
+      >
+    </div>
+
+    <div class="hint-zone">
+      <button class="hint-btn" id="hint-btn" onclick="toggleHint()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Indice
+      </button>
+      <div class="hint-content" id="hint-content">
+        <strong>Indice 1 :</strong> Le mot clé est <em>différence</em> — c'est le nom du résultat de cette opération.<br><br>
+        <strong>Indice 2 :</strong> Si j'ai 53 et je retire 27, j'obtiens 26. Quelle opération ai-je effectuée ?
+      </div>
+    </div>
+
+    <div class="feedback-zone" id="feedback-zone">
+      <div class="feedback-header" id="feedback-header">
+        <span id="feedback-icon-svg"></span>
+        <span id="feedback-title"></span>
+      </div>
+      <div class="feedback-detail" id="feedback-detail"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-valider" onclick="valider()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        Vérifier
+      </button>
+      <button class="btn btn-secondary" id="btn-restart-inline" onclick="restart()" style="display:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+        Recommencer
+      </button>
+    </div>
+
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="result-screen" id="result-screen">
+    <div class="result-card">
+      <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+      <div class="result-msg" id="result-msg"></div>
+
+      <div class="result-answer-box">
+        <div class="result-answer-label">La bonne réponse</div>
+        <div class="result-answer-value">La soustraction posée</div>
+      </div>
+
+      <div class="result-explication">
+        <strong>Pourquoi ?</strong><br>
+        Dans la <strong>soustraction posée</strong>, on superpose deux nombres en alignant les unités sous les unités, les dizaines sous les dizaines, etc.<br><br>
+        Quand le chiffre du dessus est plus petit que celui du dessous, on <strong>emprunte</strong> une unité au rang supérieur (technique de la retenue).<br><br>
+        Le résultat d'une soustraction s'appelle la <strong>différence</strong> : c'est l'indice clé de la devinette !<br><br>
+        Exemple : <span style="font-family:'JetBrains Mono',monospace; font-weight:600;">53 − 27 = 26</span> &nbsp;→&nbsp; on emprunte à la dizaine car 3 &lt; 7.
+      </div>
+    </div>
+
+    <button class="btn-restart" onclick="restart()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+      Recommencer
+    </button>
+  </div>
+
+</div>
+<script>
+var ANSWERS_OK = [
+  "soustraction",
+  "la soustraction",
+  "soustraction posee",
+  "la soustraction posee",
+  "soustraction pos\u00e9e",
+  "la soustraction pos\u00e9e",
+  "soustraire",
+  "retrait",
+  "diff\u00e9rence"
+];
+
+var answered = false;
+
+function normalise(s) {
+  return s.trim().toLowerCase()
+    .replace(/[\u00e0\u00e2\u00e4]/g, "a")
+    .replace(/[\u00e9\u00e8\u00ea\u00eb]/g, "e")
+    .replace(/[\u00ee\u00ef]/g, "i")
+    .replace(/[\u00f4\u00f6]/g, "o")
+    .replace(/[\u00f9\u00fb\u00fc]/g, "u")
+    .replace(/\u00e7/g, "c");
+}
+
+function toggleHint() {
+  var hc = document.getElementById("hint-content");
+  hc.classList.toggle("visible");
+}
+
+document.getElementById("reponse-input").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") { e.preventDefault(); valider(); }
+});
+
+document.getElementById("reponse-input").addEventListener("input", function() {
+  var val = this.value.trim();
+  var pct = val.length > 0 ? 50 : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-pct").textContent = pct + "\u00a0%";
+});
+
+var ICON_OK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>';
+var ICON_KO = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+
+function valider() {
+  if (answered) return;
+  var inp = document.getElementById("reponse-input");
+  var val = inp.value.trim();
+  if (val.length === 0) return;
+
+  answered = true;
+  inp.disabled = true;
+
+  var normVal = normalise(val);
+  var correct = ANSWERS_OK.some(function(a) { return normalise(a) === normVal; });
+
+  document.getElementById("progress-fill").style.width = "100%";
+  document.getElementById("progress-pct").textContent = "100\u00a0%";
+  document.getElementById("progress-label").textContent = correct ? "Bonne r\u00e9ponse !" : "R\u00e9ponse donn\u00e9e";
+
+  var zone = document.getElementById("feedback-zone");
+  var iconEl = document.getElementById("feedback-icon-svg");
+  var titleEl = document.getElementById("feedback-title");
+  var detailEl = document.getElementById("feedback-detail");
+
+  zone.classList.remove("feedback-ok", "feedback-ko");
+  zone.classList.add("visible");
+
+  if (correct) {
+    inp.classList.add("correct");
+    zone.classList.add("feedback-ok");
+    iconEl.innerHTML = ICON_OK;
+    titleEl.textContent = "Bravo ! C\u2019est la bonne r\u00e9ponse.";
+    detailEl.innerHTML = "Tu as trouv\u00e9 : <strong>la soustraction pos\u00e9e</strong>.<br><br>"
+      + "Les trois indices pointaient bien vers elle :<br>"
+      + "\u2022 <em>Superposer et aligner les unit\u00e9s</em> \u2192 technique de la pose<br>"
+      + "\u2022 <em>Emprunter</em> \u2192 la retenue de la soustraction<br>"
+      + "\u2022 <em>Sans moi, pas de diff\u00e9rence</em> \u2192 la <strong>diff\u00e9rence</strong> est le r\u00e9sultat d\u2019une soustraction";
+  } else {
+    inp.classList.add("wrong");
+    zone.classList.add("feedback-ko");
+    iconEl.innerHTML = ICON_KO;
+    titleEl.textContent = "Pas tout \u00e0 fait\u2026 La r\u00e9ponse \u00e9tait :";
+    detailEl.innerHTML = "La r\u00e9ponse \u00e9tait <strong>la soustraction pos\u00e9e</strong>."
+      + " Tu as r\u00e9pondu : \u00ab\u00a0" + val + "\u00a0\u00bb<br><br>"
+      + "Les indices de la devinette :<br>"
+      + "\u2022 <em>Superposer et aligner les unit\u00e9s</em> \u2192 c'est la m\u00e9thode de la <strong>pose</strong><br>"
+      + "\u2022 <em>Emprunter</em> \u2192 quand le chiffre du dessus est trop petit, on emprunte au rang sup\u00e9rieur<br>"
+      + "\u2022 <em>Sans moi, pas de diff\u00e9rence</em> \u2192 le r\u00e9sultat d\u2019une <strong>soustraction</strong> s\u2019appelle la diff\u00e9rence";
+  }
+
+  zone.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  document.getElementById("btn-valider").disabled = true;
+  document.getElementById("btn-restart-inline").style.display = "flex";
+
+  setTimeout(function() {
+    document.getElementById("result-screen").classList.add("visible");
+    document.getElementById("result-stars").textContent = correct ? "\u2b50\u2b50\u2b50" : "\u2b50";
+    var msg = document.getElementById("result-msg");
+    if (correct) {
+      msg.textContent = "Excellent ! Tu as d\u00e9chiffr\u00e9 la devinette.";
+      msg.className = "result-msg perfect";
+    } else {
+      msg.textContent = "Pas grave ! Relis bien les indices et r\u00e9essaie.";
+      msg.className = "result-msg try-again";
+    }
+    document.getElementById("exercise-card").style.display = "none";
+    document.getElementById("result-screen").scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 2200);
+}
+
+function restart() {
+  answered = false;
+
+  var inp = document.getElementById("reponse-input");
+  inp.value = "";
+  inp.disabled = false;
+  inp.className = "reponse-input";
+  inp.focus();
+
+  document.getElementById("progress-fill").style.width = "0%";
+  document.getElementById("progress-pct").textContent = "0\u00a0%";
+  document.getElementById("progress-label").textContent = "Question 1 / 1";
+
+  var zone = document.getElementById("feedback-zone");
+  zone.classList.remove("visible", "feedback-ok", "feedback-ko");
+
+  document.getElementById("hint-content").classList.remove("visible");
+  document.getElementById("btn-valider").disabled = false;
+  document.getElementById("btn-restart-inline").style.display = "none";
+  document.getElementById("result-screen").classList.remove("visible");
+  document.getElementById("exercise-card").style.display = "block";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.getElementById("reponse-input").focus();
+</script>
+</body>
+</html>
