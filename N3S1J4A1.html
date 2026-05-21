@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Automatismes 3ème</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--blue);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-bottom:.6rem;}
+    h1{font-size:clamp(1.4rem,4vw,2rem);font-weight:800;line-height:1.2;}
+    h1 .hl-blue{color:var(--blue);}h1 .hl-green{color:var(--green);}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+    .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}.chip.wrong .dot{background:var(--pink);}.chip.remaining .dot{background:var(--muted);}
+    .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 24px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink),var(--blue),var(--green));}
+    .question-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.7rem;text-transform:uppercase;letter-spacing:.08em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .55rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;}
+    .equation{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--green);margin-bottom:.35rem;}
+    .question-text{font-size:.9rem;color:var(--muted);margin-bottom:1.4rem;line-height:1.5;}
+    .input-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;position:relative;z-index:2;}
+    .input-label{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;}
+    .answer-input{width:120px;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1.05rem;padding:.5rem .85rem;outline:none;transition:border-color .2s;position:relative;z-index:2;}
+    .answer-input:focus{border-color:var(--blue);}
+    .answer-input.correct-input{border-color:var(--green);background:#f0faeb;}
+    .answer-input.wrong-input{border-color:var(--pink);background:#fff0ef;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;border-radius:99px;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .12s;position:relative;z-index:2;}
+    .btn:active{transform:scale(.96);}.btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.3);}
+    .btn-hint{background:var(--yellow);color:#5a3e00;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--blue);color:var(--text);}
+    .hint-box{margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.7rem 1rem;font-size:.84rem;color:#7a6010;display:none;line-height:1.6;}
+    .hint-box.show{display:block;}.hint-box strong{color:var(--orange);}
+    .feedback{margin-top:1.2rem;padding:.75rem 1rem;border-radius:10px;font-size:.9rem;display:none;align-items:flex-start;gap:.6rem;line-height:1.5;}
+    .feedback.show{display:flex;}.feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#3a7d0a;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-icon{font-size:1.2rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.3rem;}
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.4rem;gap:.7rem;position:relative;z-index:2;}
+    .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--blue);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.82rem;}
+    .recap-item .eq{color:var(--blue);flex:1;}.recap-item.ok-item{border-color:#b5e08a;}.recap-item.ko-item{border-color:#f9c0bb;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card,.results{animation:fadeUp .4s ease both;}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Automatismes &ndash; R&eacute;vision 3&egrave;me</div>
+  <h1><span class="hl-blue">Automatismes</span><br>de <span class="hl-green">r&eacute;vision</span></h1>
+  <p class="subtitle">10 exercices &middot; calcul &middot; &eacute;quations &middot; puissances &middot; niveau coll&egrave;ge</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Question 1 / 10</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">10</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="question-num" id="q-num">Exercice 1</div>
+  <div class="theme-badge" id="q-theme"></div>
+  <div class="equation" id="q-eq"></div>
+  <div class="question-text" id="q-text"></div>
+  <div class="input-row">
+    <span class="input-label" id="q-label">= </span>
+    <input type="number" class="answer-input" id="answer-input" placeholder="?" autocomplete="off" step="any"/>
+    <button class="btn btn-primary" id="btn-check" onclick="checkAnswer()">Valider &#10003;</button>
+    <button class="btn btn-hint" onclick="toggleHint()">? Indice</button>
+  </div>
+  <div class="hint-box" id="hint-box"></div>
+  <div class="feedback" id="feedback">
+    <span class="feedback-icon" id="fb-icon"></span>
+    <div><div id="fb-msg"></div><div class="feedback-detail" id="fb-detail"></div></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()">&larr; Pr&eacute;c&eacute;dent</button>
+    <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Suivant &rarr;</button>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/10</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">&#128260; Recommencer</button>
+  </div>
+</div>
+
+<script>
+// ── Générateur aléatoire ──────────────────────────────────────────
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function genExercises() {
+  var exs = [];
+
+  // 1. Calcul : addition/soustraction entiers relatifs
+  var a1 = rnd(-15, 15), b1 = rnd(-15, 15);
+  exs.push({
+    theme: "Calcul",
+    themeColor: "#3ab5d8",
+    eq: a1 + " + (" + b1 + ")",
+    text: "Calcule.",
+    label: "=",
+    ans: a1 + b1,
+    hint: a1 + " + (" + b1 + ") = " + (a1 + b1)
+  });
+
+  // 2. Calcul : multiplication entiers relatifs
+  var a2 = rnd(-9, 9), b2 = rnd(-9, 9);
+  while (a2 === 0) a2 = rnd(-9, 9);
+  while (b2 === 0) b2 = rnd(-9, 9);
+  exs.push({
+    theme: "Calcul",
+    themeColor: "#3ab5d8",
+    eq: "(" + a2 + ") \u00d7 (" + b2 + ")",
+    text: "Calcule.",
+    label: "=",
+    ans: a2 * b2,
+    hint: "(" + a2 + ") \u00d7 (" + b2 + ") = " + (a2 * b2) + ". Rappel : \u2212 \u00d7 \u2212 = + et + \u00d7 \u2212 = \u2212."
+  });
+
+  // 3. Puissance entière
+  var base3 = pick([2,3,4,5,-2,-3]);
+  var exp3 = rnd(2, 4);
+  var res3 = Math.pow(base3, exp3);
+  exs.push({
+    theme: "Puissances",
+    themeColor: "#9b59b6",
+    eq: base3 + (exp3 === 2 ? "\u00b2" : exp3 === 3 ? "\u00b3" : "\u2074"),
+    text: "Calcule cette puissance.",
+    label: "=",
+    ans: res3,
+    hint: base3 + " est multipli\u00e9 " + exp3 + " fois par lui-m\u00eame : " + Array(exp3).fill(base3).join(" \u00d7 ") + " = " + res3
+  });
+
+  // 4. Puissance de 10
+  var exp4 = rnd(2, 6);
+  var res4 = Math.pow(10, exp4);
+  exs.push({
+    theme: "Puissances",
+    themeColor: "#9b59b6",
+    eq: "10" + (exp4 === 2 ? "\u00b2" : exp4 === 3 ? "\u00b3" : "^" + exp4),
+    text: "Calcule.",
+    label: "=",
+    ans: res4,
+    hint: "10^" + exp4 + " = 1 suivi de " + exp4 + " z\u00e9ro(s) = " + res4
+  });
+
+  // 5. Équation 1er degré simple : ax + b = c
+  var a5 = rnd(2, 8), x5 = rnd(-10, 10), b5 = rnd(-15, 15);
+  var c5 = a5 * x5 + b5;
+  exs.push({
+    theme: "\u00c9quations",
+    themeColor: "#f5a623",
+    eq: a5 + "x + (" + b5 + ") = " + c5,
+    text: "Trouve x.",
+    label: "x =",
+    ans: x5,
+    hint: a5 + "x = " + c5 + " \u2212 (" + b5 + ") = " + (c5 - b5) + ", donc x = " + (c5-b5) + " \u00f7 " + a5 + " = " + x5
+  });
+
+  // 6. Équation : 2 membres avec x
+  var a6 = rnd(2, 6), b6 = rnd(1, 5), c6 = rnd(1, 4), d6 = rnd(-10, 10);
+  // (a6)x + b6 = (c6)x + d6  →  x = (d6-b6)/(a6-c6)
+  // ensure a6 > c6 and integer solution
+  while (a6 <= c6) { a6 = rnd(3, 8); c6 = rnd(1, 4); }
+  var x6num = d6 - b6;
+  var x6den = a6 - c6;
+  while (x6num % x6den !== 0 || Math.abs(x6num / x6den) > 12) {
+    b6 = rnd(1, 8); d6 = rnd(-12, 12);
+    x6num = d6 - b6; x6den = a6 - c6;
+  }
+  var x6 = x6num / x6den;
+  exs.push({
+    theme: "\u00c9quations",
+    themeColor: "#f5a623",
+    eq: a6 + "x + " + b6 + " = " + c6 + "x + " + d6,
+    text: "Trouve x.",
+    label: "x =",
+    ans: x6,
+    hint: a6 + "x \u2212 " + c6 + "x = " + d6 + " \u2212 " + b6 + ", soit " + x6den + "x = " + x6num + ", donc x = " + x6
+  });
+
+  // 7. Calcul : carré d'un nombre décimal
+  var base7 = pick([0.1, 0.2, 0.3, 0.5, 1.2, 1.5, 2.5]);
+  var res7 = Math.round(base7 * base7 * 100) / 100;
+  exs.push({
+    theme: "Calcul",
+    themeColor: "#3ab5d8",
+    eq: base7 + "\u00b2",
+    text: "Calcule.",
+    label: "=",
+    ans: res7,
+    hint: base7 + " \u00d7 " + base7 + " = " + res7
+  });
+
+  // 8. Priorités opératoires
+  var a8 = rnd(2, 8), b8 = rnd(2, 6), c8 = rnd(1, 5);
+  var res8 = a8 + b8 * c8;
+  exs.push({
+    theme: "Priorit\u00e9s",
+    themeColor: "#f28b82",
+    eq: a8 + " + " + b8 + " \u00d7 " + c8,
+    text: "Respecte les priorit\u00e9s op\u00e9ratoires.",
+    label: "=",
+    ans: res8,
+    hint: "On effectue d\u2019abord la multiplication : " + b8 + " \u00d7 " + c8 + " = " + (b8*c8) + ", puis " + a8 + " + " + (b8*c8) + " = " + res8
+  });
+
+  // 9. Équation : distributivité a(x + b) = c
+  var a9 = rnd(2, 5), b9 = rnd(-6, 6), c9, x9;
+  x9 = rnd(-8, 8);
+  c9 = a9 * (x9 + b9);
+  exs.push({
+    theme: "\u00c9quations",
+    themeColor: "#f5a623",
+    eq: a9 + "(x + " + b9 + ") = " + c9,
+    text: "D\u00e9veloppe puis r\u00e9sous.",
+    label: "x =",
+    ans: x9,
+    hint: a9 + "x + " + (a9*b9) + " = " + c9 + ", donc " + a9 + "x = " + (c9 - a9*b9) + ", x = " + x9
+  });
+
+  // 10. Calcul : division relative
+  var a10 = rnd(2, 9), b10 = rnd(2, 6);
+  var sign10 = pick([1, -1]);
+  var res10 = sign10 * a10;
+  exs.push({
+    theme: "Calcul",
+    themeColor: "#3ab5d8",
+    eq: (sign10 * a10 * b10) + " \u00f7 " + b10,
+    text: "Calcule.",
+    label: "=",
+    ans: res10,
+    hint: (sign10 * a10 * b10) + " \u00f7 " + b10 + " = " + res10 + ". Le quotient de deux nombres de m\u00eame signe est positif."
+  });
+
+  return exs;
+}
+
+// ── State ─────────────────────────────────────────────────────────
+var EXERCISES = genExercises();
+var current = 0;
+var userAnswers = new Array(EXERCISES.length).fill(null);
+var hintOpen = false;
+var $ = function(id) { return document.getElementById(id); };
+
+function render() {
+  var ex = EXERCISES[current];
+  $("q-num").textContent = "Exercice " + (current + 1);
+
+  var badge = $("q-theme");
+  badge.textContent = ex.theme;
+  badge.style.background = ex.themeColor + "22";
+  badge.style.color = ex.themeColor;
+  badge.style.border = "1.5px solid " + ex.themeColor + "66";
+
+  $("q-eq").textContent = ex.eq;
+  $("q-text").textContent = ex.text;
+  $("q-label").textContent = ex.label;
+  $("hint-box").innerHTML = "";
+  $("hint-box").classList.remove("show");
+  hintOpen = false;
+
+  var inp = $("answer-input");
+  inp.className = "answer-input";
+  inp.value = userAnswers[current] !== null ? userAnswers[current] : "";
+  $("feedback").className = "feedback";
+
+  if (userAnswers[current] !== null) {
+    var correct = parseFloat(userAnswers[current]) === ex.ans;
+    showFeedback(correct);
+    inp.className = "answer-input " + (correct ? "correct-input" : "wrong-input");
+    $("btn-next").disabled = false;
+    $("btn-check").disabled = true;
+    inp.disabled = true;
+  } else {
+    $("btn-next").disabled = true;
+    $("btn-check").disabled = false;
+    inp.disabled = false;
+    inp.focus();
+  }
+
+  var answered = userAnswers.filter(function(a) { return a !== null; }).length;
+  var pct = Math.round((answered / EXERCISES.length) * 100);
+  $("progress-bar").style.width = pct + "%";
+  $("prog-label").textContent = "Question " + (current + 1) + " / " + EXERCISES.length;
+  $("prog-pct").textContent = pct + "\u00a0%";
+
+  var ok = userAnswers.filter(function(a, i) { return a !== null && parseFloat(a) === EXERCISES[i].ans; }).length;
+  var ko = userAnswers.filter(function(a, i) { return a !== null && parseFloat(a) !== EXERCISES[i].ans; }).length;
+  $("count-ok").textContent = ok;
+  $("count-ko").textContent = ko;
+  $("count-rem").textContent = EXERCISES.length - answered;
+  $("btn-prev").disabled = current === 0;
+}
+
+function showFeedback(correct) {
+  var fb = $("feedback");
+  fb.className = "feedback show " + (correct ? "ok" : "ko");
+  $("fb-icon").textContent = correct ? "\u2705" : "\u274C";
+  $("fb-msg").textContent = correct ? "Bonne r\u00e9ponse !" : "Pas tout \u00e0 fait\u2026";
+  var det = $("fb-detail");
+  if (correct) {
+    det.textContent = ex_at(current).eq + " = " + EXERCISES[current].ans;
+  } else {
+    det.textContent = "La bonne r\u00e9ponse \u00e9tait " + EXERCISES[current].ans + ". " + EXERCISES[current].hint;
+  }
+}
+
+function ex_at(i) { return EXERCISES[i]; }
+
+function checkAnswer() {
+  var val = parseFloat($("answer-input").value);
+  if (isNaN(val)) { $("answer-input").focus(); return; }
+  userAnswers[current] = val;
+  render();
+}
+
+function toggleHint() {
+  hintOpen = !hintOpen;
+  var h = $("hint-box");
+  if (hintOpen) {
+    h.innerHTML = "<strong>? Indice :</strong> " + EXERCISES[current].hint;
+    h.classList.add("show");
+  } else {
+    h.classList.remove("show");
+  }
+}
+
+function nextQ() {
+  if (current < EXERCISES.length - 1) { current++; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else showResults();
+}
+
+function prevQ() { if (current > 0) { current--; render(); } }
+
+function showResults() {
+  $("ex-card").style.display = "none";
+  $("results-screen").classList.add("show");
+  var ok = userAnswers.filter(function(a, i) { return a !== null && parseFloat(a) === EXERCISES[i].ans; }).length;
+  $("score-num").textContent = ok;
+  var stars = ok >= 9 ? 5 : ok >= 7 ? 4 : ok >= 5 ? 3 : ok >= 3 ? 2 : 1;
+  $("stars-row").textContent = "\u2B50".repeat(stars) + "\u2606".repeat(5 - stars);
+  var msgs = ["Continue \u00e0 t\u2019entra\u00eener !", "Bon d\u00e9but !", "Pas mal !", "Bien jou\u00e9 !", "Tr\u00e8s bien !", "Parfait ! Bravo ! \uD83C\uDF89"];
+  $("results-msg").textContent = msgs[Math.min(ok, msgs.length - 1)];
+  var list = $("recap-list");
+  list.innerHTML = "";
+  EXERCISES.forEach(function(ex, i) {
+    var ans = userAnswers[i];
+    var correct = ans !== null && parseFloat(ans) === ex.ans;
+    var div = document.createElement("div");
+    div.className = "recap-item " + (correct ? "ok-item" : "ko-item");
+    div.innerHTML = "<span>" + (correct ? "\u2705" : "\u274C") + "</span>"
+      + "<span class=\"eq\">" + ex.theme + " : " + ex.eq + " " + ex.label + " " + ex.ans + "</span>"
+      + ((!correct && ans !== null) ? "<span style='color:var(--pink)'>(tu as mis " + ans + ")</span>" : "");
+    list.appendChild(div);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart() {
+  EXERCISES = genExercises();
+  current = 0;
+  userAnswers = new Array(EXERCISES.length).fill(null);
+  $("ex-card").style.display = "block";
+  $("results-screen").classList.remove("show");
+  render();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  $("answer-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !$("btn-check").disabled) checkAnswer();
+  });
+  render();
+});
+</script>
+</body>
+</html>
