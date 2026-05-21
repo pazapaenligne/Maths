@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Je relève le défi !</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;
+      --pink:#f28b82;--orange:#f5a623;--purple:#9b59b6;
+      --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 1rem 4rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--purple);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:200px;height:200px;background:var(--pink);bottom:100px;right:-50px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:150px;height:150px;background:var(--blue);top:180px;left:-40px;pointer-events:none;}
+
+    /* ── HERO BANNER ── */
+    .hero{width:100%;background:linear-gradient(135deg,#7d3fa0 0%,#9b59b6 60%,#b07cc8 100%);padding:1.8rem 1rem 2rem;text-align:center;position:relative;overflow:hidden;margin-bottom:2rem;}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(255,255,255,.12),transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(245,197,24,.15),transparent 50%);pointer-events:none;}
+    /* Confettis déco */
+    .hero-deco{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+    .hero-deco span{position:absolute;border-radius:50%;opacity:.25;}
+    .logo-badge-hero{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.2);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.8rem;border:1px solid rgba(255,255,255,.3);}
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+    .week-label-hero{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:rgba(255,255,255,.7);margin-bottom:.8rem;letter-spacing:.06em;}
+    /* GRAND TITRE */
+    .hero-title{font-size:clamp(1.6rem,5vw,2.4rem);font-weight:800;color:#fff;line-height:1.05;margin-bottom:.6rem;text-shadow:0 2px 8px rgba(0,0,0,.15);}
+    .hero-title .trophy{display:inline-block;animation:bounce 3s infinite;}
+    .hero-title .defi{color:var(--yellow);}
+    @keyframes bounce{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-8px) rotate(5deg);}}
+    .hero-subtitle{color:rgba(255,255,255,.85);font-size:.85rem;font-family:'JetBrains Mono',monospace;margin-bottom:1.2rem;}
+    /* Badge défi animé */
+    .defi-badge{display:inline-flex;align-items:center;gap:.6rem;background:var(--yellow);color:#3a2800;font-size:.85rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.5rem 1.4rem;border-radius:99px;box-shadow:0 2px 10px rgba(245,197,24,.3);}
+    .defi-badge-dot{width:8px;height:8px;border-radius:50%;background:#e67e22;animation:flash .8s infinite;}
+    @keyframes flash{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.6);}}
+    /* Score hero */
+    .hero-score-row{display:flex;gap:1.5rem;justify-content:center;margin-top:1.4rem;flex-wrap:wrap;}
+    .hero-chip{display:flex;flex-direction:column;align-items:center;gap:.2rem;}
+    .hero-chip-val{font-size:1.3rem;font-weight:800;color:#fff;}
+    .hero-chip-ok{color:var(--yellow);}
+    .hero-chip-label{font-size:.7rem;color:rgba(255,255,255,.65);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;}
+    /* Progress arc dans hero */
+    .hero-progress{margin-top:1.2rem;}
+    .hero-prog-bar-bg{background:rgba(255,255,255,.2);border-radius:99px;height:8px;max-width:320px;margin:0 auto;overflow:hidden;}
+    .hero-prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--yellow),#fff);border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+    .hero-prog-label{color:rgba(255,255,255,.8);font-size:.78rem;font-family:'JetBrains Mono',monospace;margin-top:.4rem;}
+
+    /* ── CARD ── */
+    .card{width:100%;max-width:700px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 24px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--purple),var(--pink),var(--yellow),var(--orange));}
+    /* Numéro + badge */
+    .q-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;}
+    .q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    .q-cat{font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.07em;}
+    .cat-eq{background:#f3e8ff;color:var(--purple);border:1px solid #d8b8f8;}
+    .cat-pn{background:#fff0e8;color:var(--orange);border:1px solid #f5c090;}
+    .cat-pb{background:#e8f4fb;color:var(--blue);border:1px solid #a8d8f0;}
+    .cat-in{background:#fff5e6;color:#c0610a;border:1px solid #f5d0a0;}
+    /* Équation */
+    .eq-box{background:#faf8ff;border:2px solid #e8d8f8;border-radius:12px;padding:.9rem 1.2rem;margin-bottom:1rem;font-family:'JetBrains Mono',monospace;font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:700;color:var(--purple);letter-spacing:.02em;text-align:center;}
+    .q-text{font-size:.88rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5;}
+    /* Méthode */
+    .method-box{background:#faf5ff;border:1px solid #e0c8f8;border-radius:8px;padding:.7rem 1rem;margin-bottom:1.1rem;font-size:.82rem;font-family:'JetBrains Mono',monospace;color:#7030a0;line-height:1.8;}
+    .method-box strong{color:var(--purple);}
+    /* Input standard */
+    .input-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;position:relative;z-index:2;margin-bottom:.8rem;}
+    .input-label{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--text);}
+    .answer-input{width:120px;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1.05rem;padding:.5rem .85rem;outline:none;transition:border-color .2s;position:relative;z-index:2;}
+    .answer-input:focus{border-color:var(--purple);}
+    .answer-input.correct-input{border-color:var(--green);background:#f0faeb;}
+    .answer-input.wrong-input{border-color:var(--pink);background:#fff0ef;}
+    /* Signe inéquation */
+    .sign-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;position:relative;z-index:2;}
+    .sign-btn{padding:.45rem .9rem;border:2px solid var(--border);border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;background:var(--surface);color:var(--text);transition:all .15s;position:relative;z-index:2;}
+    .sign-btn:hover{border-color:var(--purple);background:#f5e8ff;}
+    .sign-btn.selected{border-color:var(--purple);background:#f5e8ff;color:var(--purple);}
+    .sign-btn.correct-sign{border-color:var(--green);background:#f0faeb;color:#2f6e10;cursor:default;}
+    .sign-btn.wrong-sign{border-color:var(--pink);background:#fff0ef;color:#c0392b;cursor:default;}
+    .sign-display{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--muted);min-width:1.3rem;text-align:center;}
+    /* QCM produit nul */
+    .qcm-row{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.8rem;position:relative;z-index:2;}
+    .qcm-choice{display:flex;align-items:center;gap:.7rem;padding:.6rem 1rem;border:2px solid var(--border);border-radius:10px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.9rem;transition:all .15s;background:var(--bg);position:relative;z-index:2;}
+    .qcm-choice:hover:not(.locked){border-color:var(--purple);background:#f8f0ff;}
+    .qcm-choice.selected{border-color:var(--purple);background:#f8f0ff;}
+    .qcm-choice.correct-c{border-color:var(--green);background:#f0faeb;color:#2f6e10;cursor:default;}
+    .qcm-choice.wrong-c{border-color:var(--pink);background:#fff0ef;color:#c0392b;cursor:default;}
+    .qcm-choice.locked{cursor:default;}
+    .qcm-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;}
+    .qcm-choice.selected .qcm-radio{background:var(--purple);border-color:var(--purple);}
+    .qcm-choice.correct-c .qcm-radio{background:var(--green);border-color:var(--green);}
+    .qcm-choice.wrong-c .qcm-radio{background:var(--pink);border-color:var(--pink);}
+    /* Boutons */
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;border-radius:10px;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;position:relative;z-index:2;}
+    .btn:active{transform:scale(.96);}.btn:disabled{opacity:.38;cursor:default;}
+    .btn-defi{background:linear-gradient(135deg,var(--purple),#a86cc1);color:#fff;box-shadow:0 3px 12px rgba(155,89,182,.35);}
+    .btn-defi:hover:not(:disabled){box-shadow:0 5px 18px rgba(155,89,182,.5);transform:translateY(-1px);}
+    .btn-hint{background:var(--yellow);color:#5a3e00;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--purple);color:var(--text);}
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;position:relative;z-index:2;}
+    /* Hint */
+    .hint-box{margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.7rem 1rem;font-size:.82rem;color:#7a6010;display:none;line-height:1.7;font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
+    /* Feedback */
+    .feedback{margin-top:1.2rem;padding:.75rem 1rem;border-radius:10px;font-size:.9rem;display:none;align-items:flex-start;gap:.6rem;line-height:1.5;}
+    .feedback.show{display:flex;}.feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#3a7d0a;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-icon{font-size:1.2rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.3rem;line-height:1.7;}
+    /* Nav */
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.4rem;gap:.7rem;position:relative;z-index:2;}
+    /* Results */
+    .results{width:100%;max-width:700px;text-align:center;display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+    .results-trophy{font-size:4rem;animation:bounce 3s infinite;display:block;margin-bottom:.5rem;}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.6rem 0 .4rem;}
+    .results-score .s-num{color:var(--purple);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.5;}
+    .recap-item .eq{color:var(--purple);flex:1;}
+    .recap-item.ok-item{border-color:#b5e08a;}.recap-item.ko-item{border-color:#f9c0bb;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card,.results{animation:fadeUp .35s ease both;}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+
+<!-- ── HERO ── -->
+<div class="hero" id="hero-section">
+  <div class="hero-deco" id="hero-deco"></div>
+  <div class="logo-badge-hero">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 3&egrave;me
+  </div>
+  <div class="week-label-hero">Semaine 1 &ndash; Jour 4</div>
+  <div class="hero-title">
+    <span class="trophy">&#127942;</span><br>
+    Je <span class="defi">rel&egrave;ve</span><br>le <span class="defi">d&eacute;fi&nbsp;!</span>
+  </div>
+  <p class="hero-subtitle">10 challenges &middot; &eacute;quations &middot; in&eacute;quations &middot; probl&egrave;mes</p>
+  <div class="defi-badge">
+    <span class="defi-badge-dot"></span>
+    D&eacute;fi r&eacute;vision 3&egrave;me
+    <span class="defi-badge-dot"></span>
+  </div>
+  <div class="hero-score-row">
+    <div class="hero-chip"><span class="hero-chip-val hero-chip-ok" id="h-ok">0</span><span class="hero-chip-label">r&eacute;ussies</span></div>
+    <div class="hero-chip"><span class="hero-chip-val" id="h-rem" style="color:#fff;">10</span><span class="hero-chip-label">restantes</span></div>
+    <div class="hero-chip"><span class="hero-chip-val" id="h-ko" style="color:var(--pink);">0</span><span class="hero-chip-label">erreurs</span></div>
+  </div>
+  <div class="hero-progress">
+    <div class="hero-prog-bar-bg"><div class="hero-prog-bar-fill" id="hero-bar" style="width:0%"></div></div>
+    <div class="hero-prog-label" id="hero-prog-label">D&eacute;fi 1 / 10</div>
+  </div>
+</div>
+
+<!-- ── CARD ── -->
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="q-header">
+    <div class="q-num" id="q-num">D&eacute;fi 01</div>
+    <div class="q-cat cat-eq" id="q-cat">&Eacute;quation</div>
+  </div>
+  <div class="eq-box" id="q-eq"></div>
+  <div class="q-text" id="q-text"></div>
+  <div class="method-box" id="method-box"></div>
+
+  <!-- input numérique (eq 1er degré / problème) -->
+  <div id="part-num">
+    <div class="input-row">
+      <span class="input-label" id="num-label">x =</span>
+      <input type="number" class="answer-input" id="answer-input" placeholder="?" autocomplete="off" step="any"/>
+      <button class="btn btn-defi" id="btn-check" onclick="checkAnswer()">&#10003; Valider</button>
+      <button class="btn btn-hint" onclick="toggleHint()">&#128161;</button>
+    </div>
+  </div>
+
+  <!-- QCM (produit nul) -->
+  <div id="part-qcm" style="display:none;">
+    <div class="qcm-row" id="qcm-choices"></div>
+    <div class="btn-row">
+      <button class="btn btn-defi" id="btn-check-qcm" onclick="checkQcm()" disabled>&#10003; Valider</button>
+      <button class="btn btn-hint" onclick="toggleHint()">&#128161;</button>
+    </div>
+  </div>
+
+  <!-- inéquation -->
+  <div id="part-ineq" style="display:none;">
+    <div style="font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">Choisis le signe :</div>
+    <div class="sign-row" id="sign-row">
+      <button class="sign-btn" id="sign-lt" onclick="selectSign('lt')">&lt;</button>
+      <button class="sign-btn" id="sign-le" onclick="selectSign('le')">&le;</button>
+      <button class="sign-btn" id="sign-gt" onclick="selectSign('gt')">&gt;</button>
+      <button class="sign-btn" id="sign-ge" onclick="selectSign('ge')">&ge;</button>
+    </div>
+    <div class="input-row">
+      <span class="input-label" style="color:var(--purple);">x</span>
+      <span class="sign-display" id="sign-display">?</span>
+      <input type="number" class="answer-input" id="ineq-input" placeholder="?" autocomplete="off" step="any"/>
+      <button class="btn btn-defi" id="btn-check-ineq" onclick="checkIneq()">&#10003; Valider</button>
+      <button class="btn btn-hint" onclick="toggleHint()">&#128161;</button>
+    </div>
+  </div>
+
+  <div class="hint-box" id="hint-box"></div>
+  <div class="feedback" id="feedback">
+    <span class="feedback-icon" id="fb-icon"></span>
+    <div><div id="fb-msg"></div><div class="feedback-detail" id="fb-detail"></div></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()">&larr; Pr&eacute;c&eacute;dent</button>
+    <button class="btn btn-defi" id="btn-next" onclick="nextQ()" disabled>Suivant &rarr;</button>
+  </div>
+</div>
+
+<!-- ── RESULTS ── -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <span class="results-trophy">&#127942;</span>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/10</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <button class="btn btn-defi" onclick="restart()" style="margin:0 auto;display:flex;padding:.7rem 2rem;font-size:1rem;">&#127942; Nouveau d&eacute;fi !</button>
+  </div>
+</div>
+
+<script>
+var SIGNS={lt:{html:"&lt;",text:"<",flip:"gt"},le:{html:"&le;",text:"\u2264",flip:"ge"},gt:{html:"&gt;",text:">",flip:"lt"},ge:{html:"&ge;",text:"\u2265",flip:"le"}};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function genExercises(){
+  var exs=[];
+
+  // ── 3 équations 1er degré ────────────────────────────────
+  for(var i=0;i<3;i++){
+    var a=rnd(2,8),x=rnd(-8,8),b=rnd(-12,12);
+    var c=a*x+b;
+    var bStr=b>=0?" + "+b:" \u2212 "+Math.abs(b);
+    exs.push({kind:"num",cat:"cat-eq",catTxt:"\u00c9quation",
+      eq:a+"x"+bStr+" = "+c,eqHtml:a+"x"+bStr+" = "+c,
+      label:"x =",ans:x,
+      method:"<strong>1\ufe0f\u20e3</strong> Isoler x : "+a+"x = "+c+" \u2212 ("+b+") = "+(c-b)+"<br><strong>2\ufe0f\u20e3</strong> Diviser par "+a+" : x = "+(c-b)+" \u00f7 "+a+" = "+x,
+      hint:"x = "+(c-b)+" \u00f7 "+a+" = "+x
+    });
+  }
+
+  // ── 2 produit nul (QCM) ──────────────────────────────────
+  for(var j=0;j<2;j++){
+    var x1=rnd(-6,6),x2;
+    do{x2=rnd(-6,6);}while(x2===x1);
+    // (x - x1)(x - x2) = 0 → displayed with integer coefficients
+    var k1=-x1,k2=-x2; // (x+k1)(x+k2)=0
+    var k1str=k1>=0?" + "+k1:" \u2212 "+Math.abs(k1);
+    var k2str=k2>=0?" + "+k2:" \u2212 "+Math.abs(k2);
+    // Wrong choices
+    var w1=x1+rnd(1,3),w2=x2-rnd(1,2);
+    var choices=[
+      {text:"x = "+x1+" ou x = "+x2, correct:true},
+      {text:"x = "+w1+" ou x = "+w2, correct:false},
+      {text:"x = "+(x1+x2)+" (somme)", correct:false},
+      {text:"Pas de solution", correct:false}
+    ];
+    // shuffle choices
+    for(var s=choices.length-1;s>0;s--){var r=Math.floor(Math.random()*(s+1));var t=choices[s];choices[s]=choices[r];choices[r]=t;}
+    var correctIdx=choices.findIndex(function(c){return c.correct;});
+    exs.push({kind:"qcm",cat:"cat-pn",catTxt:"Produit nul",
+      eq:"(x"+k1str+")(x"+k2str+") = 0",
+      eqHtml:"(x"+k1str+")(x"+k2str+") = 0",
+      choices:choices,correctIdx:correctIdx,
+      method:"<strong>Propri\u00e9t\u00e9 :</strong> Si A\u00d7B = 0 alors A = 0 ou B = 0<br>x"+k1str+" = 0 \u2192 x = "+x1+"<br>x"+k2str+" = 0 \u2192 x = "+x2,
+      hint:"x"+k1str+" = 0 \u2192 x = "+x1+" &nbsp; ou &nbsp; x"+k2str+" = 0 \u2192 x = "+x2,
+      ans:correctIdx
+    });
+  }
+
+  // ── 2 inéquations ────────────────────────────────────────
+  for(var k=0;k<2;k++){
+    var ia=rnd(2,6),ix=rnd(-6,6),ib=rnd(-8,8);
+    var isign=pick(["lt","le","gt","ge"]);
+    var ic;
+    if(isign==="lt")      ic=ia*ix+ib+rnd(1,4);
+    else if(isign==="le") ic=ia*ix+ib;
+    else if(isign==="gt") ic=ia*ix+ib-rnd(1,4);
+    else                  ic=ia*ix+ib;
+    var ibStr=ib>=0?" + "+ib:" \u2212 "+Math.abs(ib);
+    exs.push({kind:"ineq",cat:"cat-in",catTxt:"In\u00e9quation",
+      eq:ia+"x"+ibStr+" "+SIGNS[isign].text+" "+ic,
+      eqHtml:ia+"x"+ibStr+" "+SIGNS[isign].html+" "+ic,
+      signKey:isign,ans:ix,
+      method:"<strong>1\ufe0f\u20e3</strong> Isoler : "+ia+"x "+SIGNS[isign].html+" "+(ic-ib)+"<br><strong>2\ufe0f\u20e3</strong> Diviser par <strong>"+ia+"</strong> (positif \u2192 signe inchang\u00e9) :<br>x "+SIGNS[isign].html+" "+ix,
+      hint:"x "+SIGNS[isign].text+" "+(ic-ib)+" \u00f7 "+ia+" = "+ix
+    });
+  }
+
+  // ── 3 problèmes de mise en équation ─────────────────────
+  var pb=[
+    (function(){
+      var n=rnd(3,9),tot=rnd(n*2+2,n*3+10);
+      var x3=tot-n; // frère = x, Paul = n+x, total = n+2x = tot → x=(tot-n)/2
+      // ensure integer
+      while((tot-n)%2!==0){tot=rnd(n*2+2,n*3+10);}
+      var x3v=(tot-n)/2;
+      return {kind:"num",cat:"cat-pb",catTxt:"Probl\u00e8me",
+        eq:"Paul a "+n+" ans de plus que sa s\u0153ur. Ensemble ils ont "+tot+" ans.",
+        eqHtml:"Paul a "+n+" ans de plus que sa s\u0153ur.<br>Ensemble ils ont "+tot+" ans.",
+        label:"\u00c2ge s\u0153ur =",ans:x3v,
+        method:"<strong>Mise en \u00e9quation :</strong><br>S\u0153ur = x, Paul = x + "+n+"<br>x + (x+"+n+") = "+tot+" \u2192 2x = "+(tot-n)+" \u2192 x = "+x3v,
+        hint:"2x + "+n+" = "+tot+" \u2192 2x = "+(tot-n)+" \u2192 x = "+x3v
+      };
+    })(),
+    (function(){
+      var prix=rnd(2,7),nb=rnd(3,8),red=rnd(1,prix-1);
+      var tot2=prix*nb-red;
+      return {kind:"num",cat:"cat-pb",catTxt:"Probl\u00e8me",
+        eq:"Un stylo co\u00fbte "+prix+"\u20ac. Apr\u00e8s une r\u00e9duction de "+red+"\u20ac sur la commande, le total est "+tot2+"\u20ac.",
+        eqHtml:"Stylo : "+prix+"\u20ac. R\u00e9duction : "+red+"\u20ac.<br>Total : "+tot2+"\u20ac.",
+        label:"Nb stylos =",ans:nb,
+        method:"<strong>\u00c9quation :</strong> "+prix+"x \u2212 "+red+" = "+tot2+"<br>\u2192 "+prix+"x = "+(tot2+red)+" \u2192 x = "+nb,
+        hint:prix+"x = "+(tot2+red)+" \u2192 x = "+nb
+      };
+    })(),
+    (function(){
+      var a3b=rnd(2,5),b3b=rnd(-4,4),c3b=rnd(1,5);
+      var x3b=rnd(-4,4);
+      var res3b=a3b*(x3b+b3b)+c3b;
+      var b3bStr=b3b>=0?"+"+b3b:""+b3b;
+      var c3bStr=c3b>=0?" + "+c3b:" \u2212 "+Math.abs(c3b);
+      return {kind:"num",cat:"cat-pb",catTxt:"Probl\u00e8me",
+        eq:a3b+"(x "+b3bStr+")"+c3bStr+" = "+res3b,
+        eqHtml:a3b+"(x "+b3bStr+")"+c3bStr+" = "+res3b,
+        label:"x =",ans:x3b,
+        method:"<strong>D\u00e9veloppement :</strong><br>"+a3b+"x + "+(a3b*b3b)+c3bStr+" = "+res3b+"<br>"+a3b+"x = "+(res3b-a3b*b3b-c3b)+" \u2192 x = "+x3b,
+        hint:a3b+"x = "+(res3b-a3b*b3b-c3b)+" \u2192 x = "+x3b
+      };
+    })()
+  ];
+  pb.forEach(function(p){exs.push(p);});
+
+  // Shuffle all
+  for(var m=exs.length-1;m>0;m--){
+    var ri=Math.floor(Math.random()*(m+1));
+    var tmp=exs[m];exs[m]=exs[ri];exs[ri]=tmp;
+  }
+  return exs;
+}
+
+// ── State ───────────────────────────────────────────────────
+var EXERCISES=genExercises(),TOTAL=EXERCISES.length;
+var current=0,selectedSign=null,hintOpen=false,qcmSel=null;
+var userAnswers=new Array(TOTAL).fill(null);
+var userSigns=new Array(TOTAL).fill(null);
+var $=function(id){return document.getElementById(id);};
+
+function render(){
+  var ex=EXERCISES[current];
+  // Header
+  $("q-num").textContent="D\u00e9fi "+(current<9?"0":"")+(current+1);
+  $("q-eq").innerHTML=ex.eqHtml;
+  $("q-text").textContent="";
+  $("method-box").innerHTML=ex.method;
+  $("q-cat").className="q-cat "+ex.cat;
+  $("q-cat").textContent=ex.catTxt;
+  $("hint-box").innerHTML="";$("hint-box").classList.remove("show");
+  hintOpen=false;$("feedback").className="feedback";
+  selectedSign=null;qcmSel=null;
+
+  // Show correct part
+  $("part-num").style.display=ex.kind==="num"?"block":"none";
+  $("part-qcm").style.display=ex.kind==="qcm"?"block":"none";
+  $("part-ineq").style.display=ex.kind==="ineq"?"block":"none";
+
+  if(ex.kind==="num"){
+    $("num-label").textContent=ex.label;
+    var inp=$("answer-input");
+    inp.className="answer-input";
+    inp.value=userAnswers[current]!==null?userAnswers[current]:"";
+    inp.disabled=false;$("btn-check").disabled=false;
+  }else if(ex.kind==="qcm"){
+    buildQcm(ex);
+  }else{
+    ["lt","le","gt","ge"].forEach(function(s){
+      var b=$("sign-"+s);b.className="sign-btn";b.disabled=false;
+      b.onclick=(function(sk){return function(){selectSign(sk);};})(s);
+    });
+    $("sign-display").innerHTML="?";$("sign-display").style.color="var(--muted)";
+    var ii=$("ineq-input");ii.className="answer-input";ii.value="";ii.disabled=false;
+    $("btn-check-ineq").disabled=false;
+  }
+
+  if(userAnswers[current]!==null){
+    var correct=checkCorrect(current);
+    showFeedback(correct,current);
+    $("btn-next").disabled=false;
+    if(ex.kind==="num"){
+      $("btn-check").disabled=true;$("answer-input").disabled=true;
+      $("answer-input").className="answer-input "+(correct?"correct-input":"wrong-input");
+    }else if(ex.kind==="ineq"){
+      $("btn-check-ineq").disabled=true;$("ineq-input").disabled=true;
+      $("ineq-input").className="answer-input "+(correct?"correct-input":"wrong-input");
+      var sav=userSigns[current];
+      $("sign-display").innerHTML=sav?SIGNS[sav].html:"?";
+      $("sign-display").style.color=correct?"var(--green)":"var(--pink)";
+      ["lt","le","gt","ge"].forEach(function(s){
+        var b=$("sign-"+s);b.disabled=true;
+        if(s===ex.signKey) b.className="sign-btn correct-sign";
+        else if(s===sav&&sav!==ex.signKey) b.className="sign-btn wrong-sign";
+      });
+    }
+  } else {
+    $("btn-next").disabled=true;
+    if(ex.kind==="num") $("answer-input").focus();
+    else if(ex.kind==="ineq") $("ineq-input").focus();
+  }
+  updateProgress();
+  $("btn-prev").disabled=current===0;
+}
+
+function buildQcm(ex){
+  var container=$("qcm-choices");
+  container.innerHTML="";
+  var answered=userAnswers[current]!==null;
+  ex.choices.forEach(function(ch,idx){
+    var div=document.createElement("div");
+    div.className="qcm-choice"+(answered?" locked":"");
+    if(!answered) div.onclick=(function(i){return function(){selectQcm(i);};})(idx);
+    if(answered){
+      if(idx===ex.correctIdx) div.classList.add("correct-c");
+      else if(idx===userAnswers[current]&&idx!==ex.correctIdx) div.classList.add("wrong-c");
+    }else if(qcmSel===idx) div.classList.add("selected");
+    var radio=document.createElement("div");radio.className="qcm-radio";
+    div.appendChild(radio);
+    var span=document.createElement("span");span.textContent=ch.text;
+    div.appendChild(span);
+    container.appendChild(div);
+  });
+  $("btn-check-qcm").disabled=answered||(qcmSel===null);
+}
+
+function selectQcm(idx){
+  qcmSel=idx;
+  document.querySelectorAll(".qcm-choice").forEach(function(c,i){
+    c.classList.toggle("selected",i===idx);
+  });
+  $("btn-check-qcm").disabled=false;
+}
+
+function checkQcm(){
+  if(qcmSel===null)return;
+  userAnswers[current]=qcmSel;
+  render();
+}
+
+function checkCorrect(idx){
+  var ex=EXERCISES[idx];
+  if(ex.kind==="qcm") return userAnswers[idx]===ex.correctIdx;
+  if(ex.kind==="ineq") return userSigns[idx]===ex.signKey&&parseFloat(userAnswers[idx])===ex.ans;
+  return parseFloat(userAnswers[idx])===ex.ans;
+}
+
+function selectSign(sk){
+  if($("btn-check-ineq").disabled)return;
+  selectedSign=sk;
+  ["lt","le","gt","ge"].forEach(function(s){$("sign-"+s).className="sign-btn"+(s===sk?" selected":"");});
+  $("sign-display").innerHTML=SIGNS[sk].html;
+  $("sign-display").style.color="var(--purple)";
+}
+
+function checkAnswer(){
+  var val=parseFloat($("answer-input").value);
+  if(isNaN(val)){$("answer-input").focus();return;}
+  userAnswers[current]=val;render();
+}
+
+function checkIneq(){
+  if(!selectedSign){
+    $("hint-box").innerHTML="<strong>\u26a0\ufe0f</strong> Choisis d\u2019abord le signe !";
+    $("hint-box").classList.add("show");return;
+  }
+  var val=parseFloat($("ineq-input").value);
+  if(isNaN(val)){$("ineq-input").focus();return;}
+  userAnswers[current]=val;userSigns[current]=selectedSign;render();
+}
+
+function showFeedback(correct,idx){
+  var ex=EXERCISES[idx];
+  var fb=$("feedback");
+  fb.className="feedback show "+(correct?"ok":"ko");
+  $("fb-icon").textContent=correct?"\u2705":"\u274C";
+  var det=$("fb-detail");
+  if(correct){
+    var msgs=["\uD83C\uDF89 Excellent ! D\u00e9fi relev\u00e9 !","\u26a1 Parfait !","\uD83C\uDF1F Tr\u00e8s bien !","\uD83C\uDFC6 Bravo !"];
+    $("fb-msg").textContent=pick(msgs);
+    det.textContent=ex.hint;
+  } else {
+    $("fb-msg").textContent="Pas tout \u00e0 fait\u2026";
+    det.innerHTML=(ex.kind==="ineq"
+      ?((userSigns[idx]!==ex.signKey)?"\u26a0\ufe0f Signe attendu : "+SIGNS[ex.signKey].html+" ":"")
+       +((parseFloat(userAnswers[idx])!==ex.ans)?"\u26a0\ufe0f Valeur : "+ex.ans+" ":"")
+      :"")
+      +"<br>\uD83D\uDCA1 "+ex.hint;
+  }
+}
+
+function toggleHint(){
+  hintOpen=!hintOpen;
+  var h=$("hint-box");
+  if(hintOpen){h.innerHTML="<strong>\uD83D\uDCA1</strong> "+EXERCISES[current].hint;h.classList.add("show");}
+  else h.classList.remove("show");
+}
+
+function updateProgress(){
+  var answered=userAnswers.filter(function(a){return a!==null;}).length;
+  var ok=userAnswers.filter(function(a,i){return a!==null&&checkCorrect(i);}).length;
+  var ko=answered-ok;
+  var pct=Math.round((answered/TOTAL)*100);
+  $("hero-bar").style.width=pct+"%";
+  $("hero-prog-label").textContent="D\u00e9fi "+(current+1)+" / "+TOTAL;
+  $("h-ok").textContent=ok;$("h-ko").textContent=ko;$("h-rem").textContent=TOTAL-answered;
+  $("btn-prev").disabled=current===0;
+}
+
+function nextQ(){
+  if(current<TOTAL-1){current++;render();window.scrollTo({top:0,behavior:"smooth"});}
+  else showResults();
+}
+function prevQ(){if(current>0){current--;render();}}
+
+function showResults(){
+  $("ex-card").style.display="none";
+  $("results-screen").classList.add("show");
+  var ok=userAnswers.filter(function(a,i){return a!==null&&checkCorrect(i);}).length;
+  $("score-num").textContent=ok;
+  var stars=ok>=9?5:ok>=7?4:ok>=5?3:ok>=3?2:1;
+  $("stars-row").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
+  var msgs=["Continue l\u2019entra\u00eenement !","Bon d\u00e9but !","Pas mal !","Bien jou\u00e9 !","Tr\u00e8s bien !","\uD83C\uDF89 D\u00e9fi RELEV\u00c9 ! Bravo !"];
+  $("results-msg").textContent=msgs[Math.min(ok,msgs.length-1)];
+  var list=$("recap-list");list.innerHTML="";
+  EXERCISES.forEach(function(ex,i){
+    var correct=userAnswers[i]!==null&&checkCorrect(i);
+    var div=document.createElement("div");
+    div.className="recap-item "+(correct?"ok-item":"ko-item");
+    var solTxt=ex.kind==="qcm"
+      ?ex.choices[ex.correctIdx].text
+      :ex.kind==="ineq"
+        ?"x "+SIGNS[ex.signKey].html+" "+ex.ans
+        :ex.label+" "+ex.ans;
+    div.innerHTML="<span>"+(correct?"\u2705":"\u274C")+"</span>"
+      +"<span class=\"eq\">["+ex.catTxt+"] "+ex.eqHtml+"</span>"
+      +"<span>"+solTxt+"</span>";
+    list.appendChild(div);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  EXERCISES=genExercises();current=0;
+  userAnswers=new Array(TOTAL).fill(null);
+  userSigns=new Array(TOTAL).fill(null);
+  $("ex-card").style.display="block";
+  $("results-screen").classList.remove("show");
+  render();
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  $("answer-input").addEventListener("keydown",function(e){if(e.key==="Enter"&&!$("btn-check").disabled)checkAnswer();});
+  $("ineq-input").addEventListener("keydown",function(e){if(e.key==="Enter"&&!$("btn-check-ineq").disabled)checkIneq();});
+  render();
+});
+</script>
+</body>
+</html>
