@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pazapa — Texte à trous — Multiplication posée</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fffdf7;
+  --surface: #ffffff;
+  --border: #e8e4d9;
+  --yellow: #f5c518;
+  --green: #8dc63f;
+  --green-light: #edf7d6;
+  --green-dark: #4a7a00;
+  --blue: #3ab5d8;
+  --blue-light: #e0f6fc;
+  --blue-dark: #1a6a82;
+  --pink: #f28b82;
+  --pink-light: #fdecea;
+  --pink-dark: #a83228;
+  --orange: #f5a623;
+  --purple: #9b59b6;
+  --text: #1a1d23;
+  --muted: #8a8f9a;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed; top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,197,24,0.13) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; bottom: -60px; left: -60px;
+  width: 250px; height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(58,181,216,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bubble1 {
+  position: fixed; top: 40%; right: 5%;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(141,198,63,0.08);
+  pointer-events: none; z-index: 0;
+}
+.bubble2 {
+  position: fixed; top: 20%; left: 3%;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(242,139,130,0.09);
+  pointer-events: none; z-index: 0;
+}
+
+.wrapper {
+  position: relative; z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.header-text {}
+.header-meta {
+  font-size: 11px; font-weight: 600; letter-spacing: 1.2px;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
+}
+.header-title {
+  font-size: 19px; font-weight: 800; color: var(--text); line-height: 1.2;
+  margin-bottom: 3px;
+}
+.header-sub {
+  font-size: 13px; color: var(--muted); font-weight: 400;
+}
+
+/* PROGRESS */
+.progress-bar-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.progress-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.progress-label {
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.progress-pct {
+  font-size: 13px; font-weight: 700; color: var(--blue);
+}
+.progress-track {
+  height: 8px; border-radius: 99px;
+  background: var(--border);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--green) 100%);
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 28px 24px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.consigne {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.8px;
+  color: var(--blue); text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.consigne::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 18px;
+  border-radius: 2px;
+  background: var(--blue);
+  flex-shrink: 0;
+}
+
+/* TEXT WITH BLANKS */
+.texte-exercice {
+  font-size: 16px; line-height: 2.2;
+  color: var(--text);
+}
+.texte-exercice p {
+  margin-bottom: 8px;
+}
+
+.blank-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  margin: 0 3px;
+}
+.blank-input {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--blue-dark);
+  background: var(--blue-light);
+  border: 2px solid var(--blue);
+  border-radius: 8px;
+  padding: 4px 10px;
+  min-width: 90px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, transform 0.1s;
+  cursor: text;
+}
+.blank-input:focus {
+  border-color: var(--blue-dark);
+  background: #fff;
+  transform: scale(1.03);
+  box-shadow: 0 0 0 3px rgba(58,181,216,0.18);
+}
+.blank-input:disabled {
+  cursor: default;
+  transform: none;
+}
+.blank-input.correct {
+  background: var(--green-light);
+  border-color: var(--green);
+  color: var(--green-dark);
+}
+.blank-input.wrong {
+  background: var(--pink-light);
+  border-color: var(--pink);
+  color: var(--pink-dark);
+}
+.blank-input.corrected {
+  background: #fff8e1;
+  border-color: var(--orange);
+  color: #7a4a00;
+  text-decoration: line-through;
+}
+
+.blank-feedback-icon {
+  position: absolute;
+  right: -22px;
+  font-size: 15px;
+  display: none;
+}
+
+/* HINT */
+.hint-zone {
+  margin-top: 16px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+}
+.hint-btn {
+  width: 100%;
+  background: #fdf9f0;
+  border: none;
+  padding: 11px 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--orange);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  transition: background 0.2s;
+}
+.hint-btn:hover { background: #fdf0d0; }
+.hint-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.hint-content {
+  display: none;
+  padding: 12px 16px;
+  background: #fffae8;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6b4a00;
+  border-top: 1px solid #f5dea0;
+}
+.hint-content.visible { display: block; }
+
+/* FEEDBACK */
+.feedback-zone {
+  margin-top: 18px;
+  display: none;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.feedback-zone.visible { display: block; }
+.feedback-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 700;
+}
+.feedback-header svg { width: 20px; height: 20px; flex-shrink: 0; }
+.feedback-ok .feedback-header {
+  background: var(--green-light);
+  color: var(--green-dark);
+  border: 1.5px solid var(--green);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.feedback-ko .feedback-header {
+  background: var(--pink-light);
+  color: var(--pink-dark);
+  border: 1.5px solid var(--pink);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.feedback-partial .feedback-header {
+  background: #fff8e1;
+  color: #7a4a00;
+  border: 1.5px solid var(--orange);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.feedback-detail {
+  padding: 12px 16px;
+  font-size: 14px; line-height: 1.7;
+  background: var(--surface);
+  border-left: 1.5px solid;
+  border-right: 1.5px solid;
+  border-bottom: 1.5px solid;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+.feedback-ok .feedback-detail { border-color: var(--green); color: var(--green-dark); }
+.feedback-ko .feedback-detail { border-color: var(--pink); color: #6b1d1a; }
+.feedback-partial .feedback-detail { border-color: var(--orange); color: #6b4a00; }
+.correction-list {
+  margin-top: 10px; padding-left: 0; list-style: none;
+}
+.correction-list li {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.corr-ok { background: var(--green-light); color: var(--green-dark); }
+.corr-ko { background: var(--pink-light); color: var(--pink-dark); }
+
+/* ACTIONS */
+.actions {
+  display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+}
+.btn {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700;
+  border: none; border-radius: 12px;
+  padding: 13px 22px;
+  cursor: pointer;
+  transition: transform 0.12s, opacity 0.2s, box-shadow 0.2s;
+  display: flex; align-items: center; gap: 8px;
+  flex: 1; justify-content: center; min-width: 140px;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.13); }
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--blue) 0%, #1a8fb5 100%);
+  color: #fff;
+}
+.btn-secondary {
+  background: var(--border);
+  color: var(--text);
+}
+.btn:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
+}
+
+/* RESULT SCREEN */
+.result-screen {
+  display: none;
+}
+.result-screen.visible { display: block; }
+
+.result-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 32px 24px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  margin-bottom: 16px;
+}
+.result-stars {
+  font-size: 36px; margin-bottom: 16px; letter-spacing: 4px;
+}
+.result-score {
+  font-size: 52px; font-weight: 800;
+  color: var(--text); line-height: 1;
+  margin-bottom: 4px;
+}
+.result-score span { color: var(--blue); }
+.result-label {
+  font-size: 15px; color: var(--muted); margin-bottom: 24px;
+}
+.result-msg {
+  font-size: 18px; font-weight: 700;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+.result-msg.perfect { background: var(--green-light); color: var(--green-dark); }
+.result-msg.good { background: var(--blue-light); color: var(--blue-dark); }
+.result-msg.try-again { background: var(--pink-light); color: var(--pink-dark); }
+
+.recap-title {
+  font-size: 14px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 12px; text-align: left;
+}
+.recap-list {
+  list-style: none; text-align: left;
+}
+.recap-list li {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  border: 1px solid transparent;
+}
+.recap-list li.ok {
+  background: var(--green-light);
+  border-color: rgba(141,198,63,0.3);
+  color: var(--green-dark);
+}
+.recap-list li.ko {
+  background: var(--pink-light);
+  border-color: rgba(242,139,130,0.3);
+  color: var(--pink-dark);
+}
+.recap-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700;
+  padding: 3px 8px; border-radius: 6px;
+  flex-shrink: 0;
+}
+.recap-list li.ok .recap-badge { background: rgba(141,198,63,0.25); color: var(--green-dark); }
+.recap-list li.ko .recap-badge { background: rgba(242,139,130,0.25); color: var(--pink-dark); }
+.recap-text { flex: 1; }
+
+.btn-restart {
+  width: 100%;
+  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 100%);
+  color: #fff;
+  font-size: 16px;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 8px;
+}
+.btn-restart:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,166,35,0.4); }
+.btn-restart:active { transform: scale(0.97); }
+
+/* WORD BANK */
+.word-bank {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #f7f4ec;
+  border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--border);
+}
+.word-bank-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+.word-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 5px 13px;
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--blue-dark);
+  border: 1.5px solid var(--blue);
+  cursor: default;
+  transition: opacity 0.2s, text-decoration 0.2s, background 0.2s;
+  user-select: none;
+}
+.word-chip.used {
+  opacity: 0.38;
+  text-decoration: line-through;
+  background: var(--border);
+  border-color: var(--border);
+  color: var(--muted);
+}
+.word-chip.validated-ok {
+  background: var(--green-light);
+  border-color: var(--green);
+  color: var(--green-dark);
+  opacity: 1;
+  text-decoration: none;
+}
+.word-chip.validated-ko {
+  background: var(--pink-light);
+  border-color: var(--pink);
+  color: var(--pink-dark);
+  opacity: 1;
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .wrapper { padding: 16px 12px 32px; }
+  .header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .card { padding: 20px 16px; }
+  .result-score { font-size: 42px; }
+  .actions { flex-direction: column; }
+  .btn { min-width: unset; width: 100%; }
+  .texte-exercice { font-size: 15px; line-height: 2.4; }
+}
+</style>
+</head>
+<body>
+<div class="bubble1" aria-hidden="true"></div>
+<div class="bubble2" aria-hidden="true"></div>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon" aria-hidden="true">✏️</div>
+    <div class="header-text">
+      <div class="header-meta">6ème &nbsp;·&nbsp; Semaine 1 &nbsp;·&nbsp; Jour 2</div>
+      <div class="header-title">Texte à trous — Calcul posé</div>
+      <div class="header-sub">Compléter les règles de la multiplication posée</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar-wrap">
+    <div class="progress-top">
+      <span class="progress-label" id="progress-label">Blanc 1 / 5</span>
+      <span class="progress-pct" id="progress-pct">0 %</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- EXERCISE CARD -->
+  <div class="card" id="exercise-card">
+    <div class="consigne">Complète le texte</div>
+    <div class="word-bank" id="word-bank" aria-label="Mots proposés">
+      <span class="word-bank-label">Mots à placer :</span>
+      <span class="word-chip" id="chip-rang">rang</span>
+      <span class="word-chip" id="chip-retenues">retenues</span>
+      <span class="word-chip" id="chip-gauche">gauche</span>
+      <span class="word-chip" id="chip-multiplication">multiplication</span>
+      <span class="word-chip" id="chip-ordre">ordre</span>
+    </div>
+
+    <div class="texte-exercice" id="texte-zone">
+      <!-- injected by JS -->
+    </div>
+
+    <div class="hint-zone">
+      <button class="hint-btn" id="hint-btn" onclick="toggleHint()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Indice
+      </button>
+      <div class="hint-content" id="hint-content">
+        <strong>Pour t'aider :</strong> les 5 mots manquants sont liés aux règles du calcul posé.
+        Pense à : l'alignement des chiffres, les retenues, le sens du décalage, la vérification du résultat.
+        <br><br>
+        <em>Exemple :</em> dans 47 × 23, la 2e ligne se décale d'un rang vers la <strong>gauche</strong> car on multiplie par les dizaines.
+      </div>
+    </div>
+
+    <div class="feedback-zone" id="feedback-zone">
+      <div class="feedback-header" id="feedback-header">
+        <span id="feedback-icon-svg"></span>
+        <span id="feedback-title"></span>
+      </div>
+      <div class="feedback-detail" id="feedback-detail"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-valider" onclick="valider()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        Vérifier
+      </button>
+      <button class="btn btn-secondary" id="btn-restart-inline" onclick="restart()" style="display:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+        Recommencer
+      </button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="result-screen" id="result-screen">
+    <div class="result-card">
+      <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+      <div class="result-score"><span id="score-num">5</span> / <span>5</span></div>
+      <div class="result-label">blancs correctement remplis</div>
+      <div class="result-msg" id="result-msg">Parfait !</div>
+
+      <div class="recap-title">Récapitulatif</div>
+      <ul class="recap-list" id="recap-list"></ul>
+    </div>
+
+    <button class="btn-restart" onclick="restart()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+      Recommencer
+    </button>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+var BLANKS = [
+  {
+    id: 0,
+    answer: "rang",
+    context: "Toujours aligner les chiffres selon leur",
+    suffix: ".",
+    explication: "On aligne toujours les chiffres selon leur <strong>rang</strong> (unit\u00e9s sous unit\u00e9s, dizaines sous dizaines, etc.) pour \u00e9viter les erreurs de position."
+  },
+  {
+    id: 1,
+    answer: "retenues",
+    context: "Poser soigneusement les",
+    suffix: ".",
+    explication: "Les <strong>retenues</strong> sont les chiffres \u00e0 reporter quand la somme ou le produit d\u00e9passe 9. Oublier une retenue est la cause la plus fr\u00e9quente d\u0027erreur dans le calcul pos\u00e9."
+  },
+  {
+    id: 2,
+    answer: "gauche",
+    context: "D\u00e9caler d\u2019un rang vers la",
+    suffix: " \u00e0 chaque nouvelle ligne de multiplication.",
+    explication: "On d\u00e9cale vers la <strong>gauche</strong> car on multiplie par les dizaines (valeur 10 fois plus grande), ce qui revient \u00e0 ajouter un z\u00e9ro en fin de ligne."
+  },
+  {
+    id: 3,
+    answer: "multiplication",
+    context: "\u00e0 chaque nouvelle ligne de",
+    suffix: ".",
+    explication: "Lors de la <strong>multiplication</strong> pos\u00e9e \u00e0 deux chiffres, chaque chiffre du multiplicateur g\u00e9n\u00e8re une ligne. Le d\u00e9calage vers la gauche indique la valeur positionnelle du chiffre multiplicateur."
+  },
+  {
+    id: 4,
+    answer: "ordre",
+    context: "V\u00e9rifier le r\u00e9sultat avec un",
+    suffix: " de grandeur.",
+    explication: "Estimer l\u2019<strong>ordre</strong> de grandeur permet de v\u00e9rifier que le r\u00e9sultat est coh\u00e9rent. Par exemple, 47 \u00d7 23 \u2248 50 \u00d7 20 = 1\u202f000, donc un r\u00e9sultat de 10 ou 10\u202f000 serait suspect."
+  }
+];
+
+var TOTAL = BLANKS.length;
+var answered = false;
+var userAnswers = new Array(TOTAL).fill("");
+var results = new Array(TOTAL).fill(null);
+
+function buildTexte() {
+  var zone = document.getElementById("texte-zone");
+  zone.innerHTML = "";
+
+  var p1 = document.createElement("p");
+  p1.appendChild(document.createTextNode("Toujours aligner les chiffres selon leur "));
+  p1.appendChild(makeBlankWrap(0));
+  p1.appendChild(document.createTextNode("."));
+  zone.appendChild(p1);
+
+  var p2 = document.createElement("p");
+  p2.appendChild(document.createTextNode("Poser soigneusement les "));
+  p2.appendChild(makeBlankWrap(1));
+  p2.appendChild(document.createTextNode("."));
+  zone.appendChild(p2);
+
+  var p3 = document.createElement("p");
+  p3.appendChild(document.createTextNode("Lors de la multiplication, mettre le nombre le plus court sur la deuxi\u00e8me ligne."));
+  zone.appendChild(p3);
+
+  var p4 = document.createElement("p");
+  p4.appendChild(document.createTextNode("D\u00e9caler d\u2019un rang vers la "));
+  p4.appendChild(makeBlankWrap(2));
+  p4.appendChild(document.createTextNode(" \u00e0 chaque nouvelle ligne de "));
+  p4.appendChild(makeBlankWrap(3));
+  p4.appendChild(document.createTextNode("."));
+  zone.appendChild(p4);
+
+  var p5 = document.createElement("p");
+  p5.appendChild(document.createTextNode("V\u00e9rifier le r\u00e9sultat avec un "));
+  p5.appendChild(makeBlankWrap(4));
+  p5.appendChild(document.createTextNode(" de grandeur."));
+  zone.appendChild(p5);
+
+  document.getElementById("blank-0").focus();
+}
+
+function makeBlankWrap(idx) {
+  var wrap = document.createElement("span");
+  wrap.className = "blank-wrap";
+
+  var inp = document.createElement("input");
+  inp.type = "text";
+  inp.className = "blank-input";
+  inp.id = "blank-" + idx;
+  inp.setAttribute("autocomplete", "off");
+  inp.setAttribute("autocorrect", "off");
+  inp.setAttribute("spellcheck", "false");
+  inp.setAttribute("placeholder", "...");
+  inp.setAttribute("aria-label", "Blanc " + (idx + 1) + " sur " + TOTAL);
+
+  var sizeMap = [4, 9, 6, 14, 6];
+  inp.style.minWidth = (sizeMap[idx] * 11 + 40) + "px";
+
+  inp.addEventListener("input", function() {
+    userAnswers[idx] = inp.value.trim();
+    updateProgress();
+    updateChips();
+  });
+  inp.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") { e.preventDefault(); valider(); }
+  });
+
+  wrap.appendChild(inp);
+  return wrap;
+}
+
+function updateProgress() {
+  var filled = userAnswers.filter(function(a) { return a.length > 0; }).length;
+  var pct = Math.round((filled / TOTAL) * 100);
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-pct").textContent = pct + "\u00a0%";
+  document.getElementById("progress-label").textContent = "Blanc " + (filled < TOTAL ? (filled + 1) : TOTAL) + " / " + TOTAL;
+}
+
+var CHIP_IDS = ["chip-rang", "chip-retenues", "chip-gauche", "chip-multiplication", "chip-ordre"];
+
+function updateChips() {
+  var usedWords = userAnswers.map(function(a) { return normalise(a); });
+  BLANKS.forEach(function(b, i) {
+    var chip = document.getElementById("chip-" + b.answer);
+    if (!chip) return;
+    var isTyped = usedWords.indexOf(normalise(b.answer)) !== -1;
+    if (isTyped) {
+      chip.classList.add("used");
+    } else {
+      chip.classList.remove("used");
+      chip.classList.remove("validated-ok");
+      chip.classList.remove("validated-ko");
+    }
+  });
+}
+
+function validateChips() {
+  BLANKS.forEach(function(b, i) {
+    var chip = document.getElementById("chip-" + b.answer);
+    if (!chip) return;
+    chip.classList.remove("used");
+    if (results[i]) {
+      chip.classList.add("validated-ok");
+    } else {
+      chip.classList.add("validated-ko");
+    }
+  });
+}
+
+function toggleHint() {
+  var hc = document.getElementById("hint-content");
+  var hb = document.getElementById("hint-btn");
+  if (hc.classList.contains("visible")) {
+    hc.classList.remove("visible");
+    hb.childNodes[1].textContent = " Indice";
+  } else {
+    hc.classList.add("visible");
+  }
+}
+
+function normalise(s) {
+  return s.trim().toLowerCase()
+    .replace(/[\u00e0\u00e2\u00e4]/g, "a")
+    .replace(/[\u00e9\u00e8\u00ea\u00eb]/g, "e")
+    .replace(/[\u00ee\u00ef]/g, "i")
+    .replace(/[\u00f4\u00f6]/g, "o")
+    .replace(/[\u00f9\u00fb\u00fc]/g, "u")
+    .replace(/\u00e7/g, "c");
+}
+
+function valider() {
+  if (answered) return;
+  answered = true;
+
+  var score = 0;
+  var allEmpty = userAnswers.every(function(a) { return a.length === 0; });
+  if (allEmpty) { answered = false; return; }
+
+  for (var i = 0; i < TOTAL; i++) {
+    var inp = document.getElementById("blank-" + i);
+    var correct = normalise(BLANKS[i].answer) === normalise(userAnswers[i]);
+    results[i] = correct;
+    inp.disabled = true;
+
+    if (correct) {
+      inp.classList.add("correct");
+      score++;
+    } else {
+      inp.classList.add("wrong");
+    }
+  }
+
+  document.getElementById("progress-fill").style.width = "100%";
+  document.getElementById("progress-pct").textContent = "100\u00a0%";
+  document.getElementById("progress-label").textContent = "Termin\u00e9 — " + score + " / " + TOTAL;
+
+  validateChips();
+  showFeedback(score);
+
+  document.getElementById("btn-valider").disabled = true;
+  document.getElementById("btn-restart-inline").style.display = "flex";
+}
+
+var ICON_OK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>';
+var ICON_KO = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+var ICON_PARTIAL = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+function showFeedback(score) {
+  var zone = document.getElementById("feedback-zone");
+  var header = document.getElementById("feedback-header");
+  var iconEl = document.getElementById("feedback-icon-svg");
+  var titleEl = document.getElementById("feedback-title");
+  var detailEl = document.getElementById("feedback-detail");
+
+  zone.classList.remove("feedback-ok", "feedback-ko", "feedback-partial");
+  zone.classList.add("visible");
+
+  var html = "";
+
+  if (score === TOTAL) {
+    zone.classList.add("feedback-ok");
+    iconEl.innerHTML = ICON_OK;
+    titleEl.textContent = "Parfait ! Tous les blancs sont corrects.";
+    html = "<strong>Bravo !</strong> Tu as parfaitement retenu les 5 r\u00e8gles fondamentales du calcul pos\u00e9.<br><br>";
+    html += "Ces r\u00e8gles garantissent des multiplications sans erreur : alignement par <strong>rang</strong>, gestion des <strong>retenues</strong>, d\u00e9calage vers la <strong>gauche</strong>, nouvelle ligne pour chaque chiffre de la <strong>multiplication</strong>, v\u00e9rification par l\u2019<strong>ordre</strong> de grandeur.";
+  } else if (score === 0) {
+    zone.classList.add("feedback-ko");
+    iconEl.innerHTML = ICON_KO;
+    titleEl.textContent = "Aucun blanc correct. Voici les corrections :";
+    html = buildCorrectionHTML();
+  } else {
+    zone.classList.add("feedback-partial");
+    iconEl.innerHTML = ICON_PARTIAL;
+    titleEl.textContent = score + " blanc" + (score > 1 ? "s" : "") + " correct" + (score > 1 ? "s" : "") + " sur " + TOTAL + ".";
+    html = buildCorrectionHTML();
+  }
+
+  detailEl.innerHTML = html;
+  zone.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+  setTimeout(function() {
+    document.getElementById("result-screen").classList.add("visible");
+    buildRecap(score);
+    document.getElementById("exercise-card").style.display = "none";
+    document.getElementById("result-screen").scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 2200);
+}
+
+function buildCorrectionHTML() {
+  var html = "Corrections d\u00e9taill\u00e9es :<ul class='correction-list'>";
+  for (var i = 0; i < TOTAL; i++) {
+    if (results[i]) {
+      html += "<li class='corr-ok'>\u2705 Blanc " + (i + 1) + " : <strong>" + BLANKS[i].answer + "</strong> \u2014 correct !</li>";
+    } else {
+      html += "<li class='corr-ko'>\u274c Blanc " + (i + 1) + " : tu as \u00e9crit \u00ab\u00a0" + (userAnswers[i] || "(vide)") + "\u00a0\u00bb \u2014 r\u00e9ponse : <strong>" + BLANKS[i].answer + "</strong>. " + BLANKS[i].explication + "</li>";
+    }
+  }
+  html += "</ul>";
+  return html;
+}
+
+function buildRecap(score) {
+  var stars = score === TOTAL ? "\u2b50\u2b50\u2b50" : score >= 3 ? "\u2b50\u2b50" : "\u2b50";
+  document.getElementById("result-stars").textContent = stars;
+  document.getElementById("score-num").textContent = score;
+
+  var msg = document.getElementById("result-msg");
+  if (score === TOTAL) {
+    msg.textContent = "Parfait ! Tu ma\u00eetrises les r\u00e8gles du calcul pos\u00e9.";
+    msg.className = "result-msg perfect";
+  } else if (score >= 3) {
+    msg.textContent = "Bien jou\u00e9 ! Revois les blancs manqu\u00e9s.";
+    msg.className = "result-msg good";
+  } else {
+    msg.textContent = "Retente ! Relis les r\u00e8gles avant de recommencer.";
+    msg.className = "result-msg try-again";
+  }
+
+  var list = document.getElementById("recap-list");
+  list.innerHTML = "";
+  for (var i = 0; i < TOTAL; i++) {
+    var li = document.createElement("li");
+    li.className = results[i] ? "ok" : "ko";
+
+    var badge = document.createElement("span");
+    badge.className = "recap-badge";
+    badge.textContent = results[i] ? "\u2705" : "\u274c";
+
+    var txt = document.createElement("span");
+    txt.className = "recap-text";
+
+    var label = document.createElement("strong");
+    label.textContent = "Blanc " + (i + 1) + " : ";
+    txt.appendChild(label);
+    txt.appendChild(document.createTextNode(BLANKS[i].answer));
+
+    if (!results[i] && userAnswers[i]) {
+      var wrong = document.createElement("span");
+      wrong.style.opacity = "0.7";
+      wrong.textContent = " (tu as \u00e9crit : " + userAnswers[i] + ")";
+      txt.appendChild(wrong);
+    }
+
+    li.appendChild(badge);
+    li.appendChild(txt);
+    list.appendChild(li);
+  }
+}
+
+function restart() {
+  answered = false;
+  userAnswers = new Array(TOTAL).fill("");
+  results = new Array(TOTAL).fill(null);
+
+  document.getElementById("feedback-zone").classList.remove("visible");
+  document.getElementById("feedback-zone").className = "feedback-zone";
+  document.getElementById("hint-content").classList.remove("visible");
+  document.getElementById("btn-valider").disabled = false;
+  document.getElementById("btn-restart-inline").style.display = "none";
+  document.getElementById("result-screen").classList.remove("visible");
+  document.getElementById("exercise-card").style.display = "block";
+
+  document.getElementById("progress-fill").style.width = "0%";
+  document.getElementById("progress-pct").textContent = "0\u00a0%";
+  document.getElementById("progress-label").textContent = "Blanc 1 / " + TOTAL;
+
+  CHIP_IDS.forEach(function(id) {
+    var chip = document.getElementById(id);
+    if (chip) { chip.className = "word-chip"; }
+  });
+
+  buildTexte();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+buildTexte();
+</script>
+</body>
+</html>
