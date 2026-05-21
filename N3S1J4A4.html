@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Inéquations Expert</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a;
+      --border:#2e3250; --border2:#3d4470;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623; --red:#e74c3c;
+      --text:#e8eaf0; --muted:#7a8099; --radius:14px;
+      --accent:#ff4757;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+    /* Fond étoilé subtle */
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%, rgba(58,181,216,.06) 0%, transparent 60%),radial-gradient(ellipse at 80% 20%, rgba(155,89,182,.07) 0%, transparent 50%);pointer-events:none;z-index:0;}
+    /* Grid lines décoratives */
+    body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(58,181,216,.03) 1px, transparent 1px),linear-gradient(90deg,rgba(58,181,216,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:300px;height:300px;background:radial-gradient(circle,var(--accent),transparent);bottom:80px;right:-80px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:200px;height:200px;background:radial-gradient(circle,var(--blue),transparent);top:100px;left:-50px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:2.5rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.6rem;}
+    .logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:.5rem;letter-spacing:.08em;}
+    h1{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;line-height:1.15;}
+    h1 .hl-red{color:var(--accent);}
+    h1 .hl-blue{color:var(--blue);}
+    .subtitle{color:var(--muted);font-size:.85rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+    /* Expert badge animé */
+    .expert-stripe{display:inline-flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--accent),#c0392b);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:.35rem 1rem;border-radius:6px;margin-top:.6rem;box-shadow:0 0 20px rgba(231,76,60,.4);}
+    .expert-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.7);}}
+
+    /* Progress */
+    .progress-wrap{width:100%;max-width:720px;margin-bottom:1.4rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--surface2);border-radius:99px;height:6px;overflow:hidden;border:1px solid var(--border);}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--orange));border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px rgba(231,76,60,.5);}
+
+    /* Score chips */
+    .score-row{display:flex;gap:.5rem;margin-bottom:1.8rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:6px;font-size:.78rem;font-family:'JetBrains Mono',monospace;border:1px solid var(--border);background:var(--surface);font-weight:600;color:var(--muted);}
+    .chip .dot{width:7px;height:7px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}.chip.wrong .dot{background:var(--accent);}.chip.remaining .dot{background:var(--muted);}
+
+    /* Card */
+    .card{width:100%;max-width:720px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 8px 40px rgba(0,0,0,.4),0 0 0 1px rgba(58,181,216,.05);animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--accent),var(--orange),var(--yellow));}
+    /* Numéro exercice */
+    .q-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;}
+    .q-num{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    .q-badge{font-size:.62rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;}
+    .badge-t1{background:rgba(231,76,60,.15);color:var(--accent);border:1px solid rgba(231,76,60,.3);}
+    .badge-t2{background:rgba(245,166,35,.15);color:var(--orange);border:1px solid rgba(245,166,35,.3);}
+    .badge-t3{background:rgba(58,181,216,.15);color:var(--blue);border:1px solid rgba(58,181,216,.3);}
+
+    /* Équation style terminal */
+    .eq-terminal{background:#0a0c12;border:1.5px solid var(--border2);border-radius:10px;padding:1rem 1.4rem;margin-bottom:1.2rem;position:relative;overflow:hidden;}
+    .eq-terminal::before{content:'> inéquation';position:absolute;top:6px;right:10px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);opacity:.6;}
+    .ineq-display{font-family:'JetBrains Mono',monospace;font-size:clamp(1.3rem,3.5vw,2rem);font-weight:700;color:#7dd3fc;letter-spacing:.03em;line-height:1.4;}
+    /* Pour encadrement : deux valeurs */
+    .ineq-encad{font-family:'JetBrains Mono',monospace;font-size:clamp(1rem,2.5vw,1.5rem);font-weight:700;color:#7dd3fc;margin-bottom:.3rem;}
+
+    .q-text{font-size:.88rem;color:var(--muted);margin-bottom:.8rem;line-height:1.5;}
+    /* Méthode */
+    .method-box{background:rgba(58,181,216,.06);border:1px solid rgba(58,181,216,.2);border-radius:8px;padding:.7rem 1rem;margin-bottom:1.2rem;font-size:.82rem;font-family:'JetBrains Mono',monospace;color:#93c5fd;line-height:1.8;}
+    .method-box strong{color:var(--blue);}
+
+    /* Signe */
+    .sign-label{font-size:.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;}
+    .sign-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;position:relative;z-index:2;}
+    .sign-btn{padding:.5rem .95rem;border:1.5px solid var(--border);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text);transition:all .15s;position:relative;z-index:2;}
+    .sign-btn:hover{border-color:var(--accent);background:rgba(231,76,60,.12);transform:translateY(-1px);}
+    .sign-btn.selected{border-color:var(--accent);background:rgba(231,76,60,.18);color:var(--accent);}
+    .sign-btn.correct-sign{border-color:var(--green);background:rgba(141,198,63,.12);color:var(--green);cursor:default;}
+    .sign-btn.wrong-sign{border-color:var(--accent);background:rgba(231,76,60,.12);color:var(--accent);cursor:default;}
+
+    /* Input */
+    .input-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;position:relative;z-index:2;margin-bottom:.8rem;}
+    .input-label{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;color:var(--text);}
+    .sign-display{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;color:var(--muted);min-width:1.4rem;text-align:center;}
+    .answer-input{width:110px;background:#0a0c12;border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;padding:.5rem .85rem;outline:none;transition:border-color .2s;position:relative;z-index:2;}
+    .answer-input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(58,181,216,.15);}
+    .answer-input.correct-input{border-color:var(--green);background:rgba(141,198,63,.08);}
+    .answer-input.wrong-input{border-color:var(--accent);background:rgba(231,76,60,.08);}
+
+    /* Encadrement : deux inputs */
+    .encad-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem;position:relative;z-index:2;font-family:'JetBrains Mono',monospace;}
+    .encad-input{width:85px;background:#0a0c12;border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.95rem;padding:.45rem .7rem;outline:none;transition:border-color .2s;position:relative;z-index:2;}
+    .encad-input:focus{border-color:var(--blue);}
+    .encad-input.correct-input{border-color:var(--green);background:rgba(141,198,63,.08);}
+    .encad-input.wrong-input{border-color:var(--accent);background:rgba(231,76,60,.08);}
+    .encad-sign{font-size:.95rem;font-weight:700;color:var(--blue);}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;border-radius:8px;font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;position:relative;z-index:2;}
+    .btn:active{transform:scale(.96);}.btn:disabled{opacity:.35;cursor:default;}
+    .btn-primary{background:var(--accent);color:#fff;box-shadow:0 3px 12px rgba(231,76,60,.35);}
+    .btn-primary:hover:not(:disabled){box-shadow:0 5px 18px rgba(231,76,60,.5);transform:translateY(-1px);}
+    .btn-hint{background:var(--surface2);color:var(--yellow);border:1.5px solid rgba(245,197,24,.3);}
+    .btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--blue);color:var(--text);}
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;position:relative;z-index:2;}
+
+    /* Hint */
+    .hint-box{margin-top:.9rem;background:rgba(245,197,24,.06);border:1px dashed rgba(245,197,24,.4);border-radius:8px;padding:.7rem 1rem;font-size:.82rem;color:var(--yellow);display:none;line-height:1.7;font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
+
+    /* Feedback */
+    .feedback{margin-top:1.2rem;padding:.75rem 1rem;border-radius:8px;font-size:.88rem;display:none;align-items:flex-start;gap:.6rem;line-height:1.5;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:rgba(141,198,63,.1);border:1px solid rgba(141,198,63,.4);color:#a8e06a;}
+    .feedback.ko{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.4);color:#ff7c75;}
+    .feedback-icon{font-size:1.2rem;flex-shrink:0;}
+    .feedback-detail{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.3rem;line-height:1.7;}
+
+    /* Nav */
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.4rem;gap:.7rem;position:relative;z-index:2;}
+
+    /* Results */
+    .results{width:100%;max-width:720px;text-align:center;display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 8px 40px rgba(0,0,0,.4);}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--accent);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.92rem;margin-bottom:2rem;font-family:'JetBrains Mono',monospace;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;gap:.4rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.79rem;line-height:1.5;color:var(--muted);}
+    .recap-item .eq{color:#7dd3fc;flex:1;}
+    .recap-item.ok-item{border-color:rgba(141,198,63,.4);}.recap-item.ko-item{border-color:rgba(231,76,60,.35);}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+    .card,.results{animation:fadeUp .35s ease both;}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 3&egrave;me
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 4</div>
+  <h1>In&eacute;quations du <span class="hl-blue">1er degr&eacute;</span></h1>
+  <div class="expert-stripe">
+    <span class="expert-dot"></span>
+    Niveau Expert &mdash; 10 challenges
+    <span class="expert-dot"></span>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label" style="color:var(--accent);">Challenge 1 / 10</span>
+    <span id="prog-pct" style="color:var(--accent);">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> r&eacute;ussies</div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">10</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="q-header">
+    <div class="q-num" id="q-num">Challenge 01</div>
+    <div class="q-badge badge-t1" id="q-badge">Distribution</div>
+  </div>
+
+  <div class="eq-terminal">
+    <div class="ineq-display" id="q-eq"></div>
+  </div>
+  <div class="q-text" id="q-text"></div>
+  <div class="method-box" id="method-box"></div>
+
+  <!-- Résolution (type 1 & 2) -->
+  <div id="part-resolve">
+    <div class="sign-label">// S&eacute;lectionne le signe :</div>
+    <div class="sign-row" id="sign-row">
+      <button class="sign-btn" id="sign-lt" onclick="selectSign('lt')">&lt;</button>
+      <button class="sign-btn" id="sign-le" onclick="selectSign('le')">&le;</button>
+      <button class="sign-btn" id="sign-gt" onclick="selectSign('gt')">&gt;</button>
+      <button class="sign-btn" id="sign-ge" onclick="selectSign('ge')">&ge;</button>
+    </div>
+    <div class="input-row">
+      <span class="input-label" style="color:#7dd3fc;">x</span>
+      <span class="sign-display" id="sign-display">_</span>
+      <input type="number" class="answer-input" id="answer-input" placeholder="?" autocomplete="off" step="any"/>
+    </div>
+    <div class="btn-row" style="margin-top:.6rem;">
+      <button class="btn btn-primary" id="btn-check" onclick="checkAnswer()">&#10003; Valider</button>
+      <button class="btn btn-hint" onclick="toggleHint()">&#128161;</button>
+    </div>
+  </div>
+
+  <!-- Encadrement (type 3) -->
+  <div id="part-encad" style="display:none;">
+    <div class="sign-label">// Compl&egrave;te l&rsquo;encadrement de x :</div>
+    <div class="encad-row">
+      <input type="number" class="encad-input" id="encad-left" placeholder="?" autocomplete="off" step="any"/>
+      <span class="encad-sign" id="encad-sign1">&lt;</span>
+      <span style="font-family:'JetBrains Mono',monospace;color:#7dd3fc;font-weight:700;">x</span>
+      <span class="encad-sign" id="encad-sign2">&lt;</span>
+      <input type="number" class="encad-input" id="encad-right" placeholder="?" autocomplete="off" step="any"/>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-check-encad" onclick="checkEncad()">&#10003; Valider</button>
+      <button class="btn btn-hint" onclick="toggleHint()">&#128161;</button>
+    </div>
+  </div>
+
+  <div class="hint-box" id="hint-box"></div>
+  <div class="feedback" id="feedback">
+    <span class="feedback-icon" id="fb-icon"></span>
+    <div><div id="fb-msg"></div><div class="feedback-detail" id="fb-detail"></div></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()">&larr; Retour</button>
+    <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Suivant &rarr;</button>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="expert-stripe" style="margin-bottom:1rem;display:inline-flex;">
+      <span class="expert-dot"></span>Bilan Expert<span class="expert-dot"></span>
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/10</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">&#128260; Nouveau challenge</button>
+  </div>
+</div>
+
+<script>
+var SIGNS = {
+  lt:{html:"&lt;",text:"<",flip:"gt"},
+  le:{html:"&le;",text:"\u2264",flip:"ge"},
+  gt:{html:"&gt;",text:">",flip:"lt"},
+  ge:{html:"&ge;",text:"\u2265",flip:"le"}
+};
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function genExercises(){
+  var exs=[];
+
+  // ── TYPE 1 ×4 : a(bx+c) OP d(ex+f) — distribution deux membres ──
+  for(var i=0;i<4;i++){
+    var a=rnd(2,4),b=rnd(2,5),c=rnd(-6,6);
+    var d=rnd(2,4),e=rnd(1,3),f=rnd(-6,6);
+    var sign=pick(["lt","le","gt","ge"]);
+    var x=rnd(-5,5);
+    // a(bx+c) OP d(ex+f) — compute RHS from x
+    // LHS = a*b*x + a*c
+    // RHS must satisfy: a*b*x + a*c OP d*e*x + d*f
+    // (a*b - d*e)*x OP d*f - a*c
+    var coefL=a*b, coefR=d*e, diff=coefL-coefR;
+    // ensure diff != 0
+    while(diff===0){e=rnd(1,3);coefR=d*e;diff=coefL-coefR;}
+    var lhsConst=a*c, rhsConst;
+    // diff*x OP rhsConst - lhsConst
+    var need=diff*x;
+    if(sign==="lt")      rhsConst=lhsConst+need+rnd(1,5);
+    else if(sign==="le") rhsConst=lhsConst+need;
+    else if(sign==="gt") rhsConst=lhsConst+need-rnd(1,5);
+    else                 rhsConst=lhsConst+need;
+    // but diff can be negative → sign may flip
+    var trueSign=sign;
+    if(diff<0) trueSign=SIGNS[sign].flip;
+    var f2=rhsConst/d; // d*f = rhsConst → f = rhsConst/d — not always integer
+    // Let's fix: build integer f so d*f = rhsConst
+    // If not divisible, adjust x
+    while(rhsConst%d!==0||Math.abs(rhsConst/d)>15){
+      x=rnd(-5,5);need=diff*x;
+      if(sign==="lt")      rhsConst=lhsConst+need+rnd(1,5);
+      else if(sign==="le") rhsConst=lhsConst+need;
+      else if(sign==="gt") rhsConst=lhsConst+need-rnd(1,5);
+      else                 rhsConst=lhsConst+need;
+    }
+    f2=rhsConst/d;
+    var cStr=c>=0?"+"+c:""+c, fStr=f2>=0?"+"+f2:""+f2;
+    var bStr=b+"x"+cStr, eStr=e+"x"+fStr;
+    var flipNote=diff<0?"<br>\u26a0\ufe0f Division par <strong>"+diff+"</strong> (n\u00e9gatif) \u2192 signe retorn\u00e9 !":"";
+    exs.push({
+      kind:"resolve",exType:"t1",
+      eq:a+"("+bStr+") "+SIGNS[sign].text+" "+d+"("+eStr+")",
+      eqHtml:a+"("+bStr+") "+SIGNS[sign].html+" "+d+"("+eStr+")",
+      signKey:trueSign,ans:x,
+      badgeClass:"badge-t1",badgeText:"Distribution",
+      qText:"D\u00e9veloppe les deux membres, puis r\u00e9sous.",
+      method:"<strong>M\u00e9thode :</strong><br>"
+        +"1\ufe0f\u20e3 Distribuer : "+coefL+"x "+(lhsConst>=0?"+"+lhsConst:lhsConst)+" "+SIGNS[sign].html+" "+coefR+"x "+(rhsConst>=0?"+"+rhsConst:rhsConst)+"<br>"
+        +"2\ufe0f\u20e3 Regrouper : "+(diff)+"x "+SIGNS[sign].html+" "+(rhsConst-lhsConst)
+        +(diff!==0?"<br>3\ufe0f\u20e3 Diviser par <strong>"+diff+"</strong>"+flipNote:""),
+      hint:diff+"x "+SIGNS[trueSign].text+" "+(rhsConst-lhsConst)+" \u2192 x "+SIGNS[trueSign].text+" "+x
+    });
+  }
+
+  // ── TYPE 2 ×3 : grands coefficients, flip possible ──────────
+  for(var j=0;j<3;j++){
+    var a2=rnd(3,9),b2=rnd(-12,12),x2=rnd(-8,8);
+    var sign2=pick(["lt","le","gt","ge"]);
+    var neg=(Math.random()<0.4); // 40% chance diviseur négatif
+    var coef2=neg?-a2:a2;
+    var c2;
+    if(sign2==="lt")      c2=coef2*x2+b2+rnd(1,5);
+    else if(sign2==="le") c2=coef2*x2+b2;
+    else if(sign2==="gt") c2=coef2*x2+b2-rnd(1,5);
+    else                  c2=coef2*x2+b2;
+    var trueSign2=(neg)?SIGNS[sign2].flip:sign2;
+    var b2str=b2>=0?" + "+b2:" \u2212 "+Math.abs(b2);
+    exs.push({
+      kind:"resolve",exType:"t2",
+      eq:(neg?"\u2212"+a2:a2)+"x"+b2str+" "+SIGNS[sign2].text+" "+c2,
+      eqHtml:(neg?"\u2212"+a2:a2)+"x"+b2str+" "+SIGNS[sign2].html+" "+c2,
+      signKey:trueSign2,ans:x2,
+      badgeClass:"badge-t2",badgeText:"Grands coefs",
+      qText:"Attention au signe du coefficient de x !",
+      method:"<strong>M\u00e9thode :</strong><br>"
+        +"1\ufe0f\u20e3 Isoler x : "+(neg?"\u2212"+a2:a2)+"x "+SIGNS[sign2].html+" "+(c2-b2)+"<br>"
+        +"2\ufe0f\u20e3 Diviser par <strong>"+(neg?"\u2212"+a2:a2)+"</strong>"
+        +(neg?" \u26a0\ufe0f signe retorn\u00e9 ! "+SIGNS[sign2].html+" \u2192 "+SIGNS[trueSign2].html:""),
+      hint:"x "+SIGNS[trueSign2].text+" "+x2+(neg?" (division par n\u00e9gatif \u2192 flip)":"")
+    });
+  }
+
+  // ── TYPE 3 ×3 : encadrement a < bx+c < d ──────────────────
+  for(var k=0;k<3;k++){
+    var b3=rnd(2,5),c3=rnd(-8,8);
+    var xLeft=rnd(-5,4),xRight=xLeft+rnd(1,4); // xLeft < x < xRight
+    var useStrict=(Math.random()<0.5);
+    // a = b3*xLeft+c3 + offset (strict: need a < b3*xLeft+c3)
+    var aVal=b3*xLeft+c3-(useStrict?rnd(1,3):0);
+    var dVal=b3*xRight+c3+(useStrict?rnd(1,3):0);
+    var signLeft=useStrict?"lt":"le";
+    var signRight=useStrict?"lt":"le";
+    exs.push({
+      kind:"encad",exType:"t3",
+      eq:aVal+" "+SIGNS[signLeft].text+" "+b3+"x"+(c3>=0?" + "+c3:" \u2212 "+Math.abs(c3))+" "+SIGNS[signRight].text+" "+dVal,
+      eqHtml:aVal+" "+SIGNS[signLeft].html+" "+b3+"x"+(c3>=0?" + "+c3:" \u2212 "+Math.abs(c3))+" "+SIGNS[signRight].html+" "+dVal,
+      signLeft:signLeft,signRight:signRight,
+      ansLeft:xLeft,ansRight:xRight,
+      badgeClass:"badge-t3",badgeText:"Encadrement",
+      qText:"Trouve l\u2019encadrement de x qui v\u00e9rifie la double in\u00e9quation.",
+      method:"<strong>M\u00e9thode :</strong><br>"
+        +"1\ufe0f\u20e3 Soustraire "+c3+" partout : "+(aVal-c3)+" "+SIGNS[signLeft].html+" "+b3+"x "+SIGNS[signRight].html+" "+(dVal-c3)+"<br>"
+        +"2\ufe0f\u20e3 Diviser par "+b3+" (positif) :<br>"
+        +"&nbsp;&nbsp;"+xLeft+" "+SIGNS[signLeft].html+" x "+SIGNS[signRight].html+" "+xRight,
+      hint:xLeft+" "+SIGNS[signLeft].text+" x "+SIGNS[signRight].text+" "+xRight,
+      encadSign1:SIGNS[signLeft].html,
+      encadSign2:SIGNS[signRight].html
+    });
+  }
+  return exs;
+}
+
+// ── State ──────────────────────────────────────────────────
+var EXERCISES=genExercises(),TOTAL=EXERCISES.length;
+var current=0,selectedSign=null,hintOpen=false;
+var userAnswers=new Array(TOTAL).fill(null);
+var userSigns=new Array(TOTAL).fill(null);
+var userEncadLeft=new Array(TOTAL).fill(null);
+var userEncadRight=new Array(TOTAL).fill(null);
+var $=function(id){return document.getElementById(id);};
+
+function render(){
+  var ex=EXERCISES[current];
+  $("q-num").textContent="Challenge "+(current<9?"0":"")+(current+1);
+  $("q-eq").innerHTML=ex.eqHtml;
+  $("q-text").textContent=ex.qText;
+  $("method-box").innerHTML=ex.method;
+  $("q-badge").className="q-badge "+ex.badgeClass;
+  $("q-badge").textContent=ex.badgeText;
+  $("hint-box").innerHTML="";$("hint-box").classList.remove("show");
+  hintOpen=false;$("feedback").className="feedback";
+  selectedSign=null;
+
+  if(ex.kind==="encad"){
+    $("part-resolve").style.display="none";
+    $("part-encad").style.display="block";
+    $("encad-sign1").innerHTML=ex.encadSign1;
+    $("encad-sign2").innerHTML=ex.encadSign2;
+    var il=$("encad-left"),ir=$("encad-right");
+    il.className="encad-input";ir.className="encad-input";
+    il.disabled=false;ir.disabled=false;
+    il.value=userEncadLeft[current]!==null?userEncadLeft[current]:"";
+    ir.value=userEncadRight[current]!==null?userEncadRight[current]:"";
+    $("btn-check-encad").disabled=false;
+  } else {
+    $("part-resolve").style.display="block";
+    $("part-encad").style.display="none";
+    ["lt","le","gt","ge"].forEach(function(s){
+      var b=$("sign-"+s);b.className="sign-btn";b.disabled=false;
+      b.onclick=(function(sk){return function(){selectSign(sk);};})(s);
+    });
+    $("sign-display").innerHTML="_";$("sign-display").style.color="var(--muted)";
+    var inp=$("answer-input");
+    inp.className="answer-input";
+    inp.value=userAnswers[current]!==null?userAnswers[current]:"";
+    inp.disabled=false;$("btn-check").disabled=false;
+  }
+
+  if(userAnswers[current]!==null||(ex.kind==="encad"&&userEncadLeft[current]!==null)){
+    var correct=checkCorrect(current);
+    showFeedback(correct,current);
+    $("btn-next").disabled=false;
+    if(ex.kind==="encad"){
+      $("btn-check-encad").disabled=true;
+      $("encad-left").disabled=true;$("encad-right").disabled=true;
+      $("encad-left").className="encad-input "+(correct?"correct-input":"wrong-input");
+      $("encad-right").className="encad-input "+(correct?"correct-input":"wrong-input");
+    } else {
+      $("btn-check").disabled=true;$("answer-input").disabled=true;
+      $("answer-input").className="answer-input "+(correct?"correct-input":"wrong-input");
+      var saved=userSigns[current];selectedSign=saved;
+      $("sign-display").innerHTML=saved?SIGNS[saved].html:"_";
+      $("sign-display").style.color=correct?"var(--green)":"var(--accent)";
+      ["lt","le","gt","ge"].forEach(function(s){
+        var b=$("sign-"+s);b.disabled=true;
+        if(s===ex.signKey) b.className="sign-btn correct-sign";
+        else if(s===saved&&saved!==ex.signKey) b.className="sign-btn wrong-sign";
+      });
+    }
+  } else {
+    $("btn-next").disabled=true;
+    if(ex.kind!=="encad") $("answer-input").focus();
+    else $("encad-left").focus();
+  }
+  updateProgress();
+  $("btn-prev").disabled=current===0;
+}
+
+function checkCorrect(idx){
+  var ex=EXERCISES[idx];
+  if(ex.kind==="encad"){
+    return parseFloat(userEncadLeft[idx])===ex.ansLeft&&parseFloat(userEncadRight[idx])===ex.ansRight;
+  }
+  return userSigns[idx]===ex.signKey&&parseFloat(userAnswers[idx])===ex.ans;
+}
+
+function selectSign(sk){
+  if($("btn-check").disabled)return;
+  selectedSign=sk;
+  ["lt","le","gt","ge"].forEach(function(s){$("sign-"+s).className="sign-btn"+(s===sk?" selected":"");});
+  $("sign-display").innerHTML=SIGNS[sk].html;
+  $("sign-display").style.color="var(--accent)";
+}
+
+function checkAnswer(){
+  if(!selectedSign){
+    $("hint-box").innerHTML="<strong>\u26a0\ufe0f</strong> S\u00e9lectionne d\u2019abord le signe !";
+    $("hint-box").classList.add("show");return;
+  }
+  var val=parseFloat($("answer-input").value);
+  if(isNaN(val)){$("answer-input").focus();return;}
+  userAnswers[current]=val;userSigns[current]=selectedSign;
+  render();
+}
+
+function checkEncad(){
+  var l=parseFloat($("encad-left").value),r=parseFloat($("encad-right").value);
+  if(isNaN(l)||isNaN(r)){$("encad-left").focus();return;}
+  userEncadLeft[current]=l;userEncadRight[current]=r;
+  userAnswers[current]=1; // mark answered
+  render();
+}
+
+function showFeedback(correct,idx){
+  var ex=EXERCISES[idx];
+  var fb=$("feedback");
+  fb.className="feedback show "+(correct?"ok":"ko");
+  $("fb-icon").textContent=correct?"\u2705":"\u274C";
+  var det=$("fb-detail");
+  if(ex.kind==="encad"){
+    if(correct){
+      $("fb-msg").textContent="\u26a1 Excellent ! Encadrement correct.";
+      det.innerHTML=ex.ansLeft+" "+ex.encadSign1+" x "+ex.encadSign2+" "+ex.ansRight;
+    } else {
+      $("fb-msg").textContent="Pas tout \u00e0 fait\u2026";
+      det.innerHTML="Solution : "+ex.ansLeft+" "+ex.encadSign1+" x "+ex.encadSign2+" "+ex.ansRight+"<br>"+ex.hint;
+    }
+  } else {
+    if(correct){
+      $("fb-msg").textContent="\u26a1 Parfait !";
+      det.innerHTML="x "+SIGNS[ex.signKey].html+" "+ex.ans;
+    } else {
+      $("fb-msg").textContent="Pas tout \u00e0 fait\u2026";
+      var se=userSigns[idx]!==ex.signKey?"\u26a0\ufe0f Signe attendu : "+SIGNS[ex.signKey].html+". ":"";
+      var ve=parseFloat(userAnswers[idx])!==ex.ans?"\u26a0\ufe0f Valeur attendue : "+ex.ans+". ":"";
+      det.innerHTML=se+ve+"<br>"+ex.hint;
+    }
+  }
+}
+
+function toggleHint(){
+  hintOpen=!hintOpen;
+  var h=$("hint-box");
+  if(hintOpen){h.innerHTML="<strong>&#128161;</strong> "+EXERCISES[current].hint;h.classList.add("show");}
+  else h.classList.remove("show");
+}
+
+function updateProgress(){
+  var answered=userAnswers.filter(function(a){return a!==null;}).length;
+  var pct=Math.round((answered/TOTAL)*100);
+  $("progress-bar").style.width=pct+"%";
+  $("prog-label").textContent="Challenge "+(current+1)+" / "+TOTAL;
+  $("prog-pct").textContent=pct+"\u00a0%";
+  var ok=userAnswers.filter(function(a,i){return a!==null&&checkCorrect(i);}).length;
+  $("count-ok").textContent=ok;
+  $("count-ko").textContent=(answered-ok);
+  $("count-rem").textContent=TOTAL-answered;
+}
+
+function nextQ(){
+  if(current<TOTAL-1){current++;render();window.scrollTo({top:0,behavior:"smooth"});}
+  else showResults();
+}
+function prevQ(){if(current>0){current--;render();}}
+
+function showResults(){
+  $("ex-card").style.display="none";
+  $("results-screen").classList.add("show");
+  var ok=userAnswers.filter(function(a,i){return a!==null&&checkCorrect(i);}).length;
+  $("score-num").textContent=ok;
+  var stars=ok>=9?5:ok>=7?4:ok>=5?3:ok>=3?2:1;
+  $("stars-row").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
+  var msgs=["Continue l\u2019entra\u00eenement !","Bon d\u00e9but en Expert !","Pas mal !","Bien jou\u00e9 !","Tr\u00e8s bien !","EXPERT CONFIRM\u00c9 ! \uD83D\uDD25"];
+  $("results-msg").textContent=msgs[Math.min(ok,msgs.length-1)];
+  var list=$("recap-list");list.innerHTML="";
+  EXERCISES.forEach(function(ex,i){
+    var correct=userAnswers[i]!==null&&checkCorrect(i);
+    var div=document.createElement("div");
+    div.className="recap-item "+(correct?"ok-item":"ko-item");
+    var solTxt=ex.kind==="encad"
+      ?ex.ansLeft+" "+ex.encadSign1+" x "+ex.encadSign2+" "+ex.ansRight
+      :"x "+SIGNS[ex.signKey].html+" "+ex.ans;
+    div.innerHTML="<span>"+(correct?"\u2705":"\u274C")+"</span>"
+      +"<span class=\"eq\">"+ex.eqHtml+"</span>"
+      +"<span>"+solTxt+"</span>";
+    list.appendChild(div);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  EXERCISES=genExercises();current=0;
+  userAnswers=new Array(TOTAL).fill(null);
+  userSigns=new Array(TOTAL).fill(null);
+  userEncadLeft=new Array(TOTAL).fill(null);
+  userEncadRight=new Array(TOTAL).fill(null);
+  $("ex-card").style.display="block";
+  $("results-screen").classList.remove("show");
+  render();
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  $("answer-input").addEventListener("keydown",function(e){
+    if(e.key==="Enter"&&!$("btn-check").disabled)checkAnswer();
+  });
+  render();
+});
+</script>
+</body>
+</html>
