@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – 6e – Placer et lire sur la droite graduée</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#ffffff;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fff;color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;}
+header{text-align:center;margin-bottom:1.5rem;}
+.badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--yellow);color:#000;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.28rem .85rem;border-radius:99px;margin-bottom:.8rem;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+h1{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;line-height:1.2;color:var(--text);}
+h1 .gl{color:var(--green);}h1 .bl{color:var(--blue);}
+.sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-top:.3rem;margin-bottom:1.6rem;}
+.prog-wrap{width:100%;max-width:700px;margin-bottom:1.2rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.35rem;}
+.bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;transition:width .5s;}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+.chip{display:flex;align-items:center;gap:.35rem;padding:.28rem .7rem;border-radius:99px;font-size:.75rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:#fff;font-weight:600;color:var(--text);}
+.chip .cd{width:8px;height:8px;border-radius:50%;}
+.card{width:100%;max-width:700px;background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:1.8rem 1.8rem 1.4rem;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink),var(--blue),var(--green));}
+.qnum{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.08em;}
+.eq{font-size:clamp(1.05rem,2.2vw,1.35rem);font-weight:800;color:var(--green);margin-bottom:.5rem;line-height:1.3;}
+.qtxt{font-size:.88rem;color:var(--muted);margin-bottom:1rem;}
+.qtxt b{color:var(--orange);font-family:'JetBrains Mono',monospace;}
+.place-legend{display:flex;flex-wrap:wrap;gap:.45rem;margin:.2rem 0 1rem;}
+.pl-chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;border:2px solid var(--border);background:#fff;font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:600;cursor:pointer;transition:transform .12s,border-color .15s;}
+.pl-chip:active{transform:scale(.96);}
+.pl-chip .pl-name{font-weight:800;}
+.pl-chip.sel{border-color:var(--blue);background:#eef9fd;box-shadow:0 0 0 3px rgba(58,181,216,.12);}
+.pl-chip.done{opacity:.55;}
+.pl-chip .pl-val{color:var(--muted);}
+.place-tip{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted);margin:-.5rem 0 1rem;}
+.line-block{margin:1rem 0 1.5rem;}
+.line-sublbl{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;color:var(--blue);margin-bottom:.25rem;}
+.line-stage{position:relative;width:100%;}
+.line-stage svg{display:block;width:100%;height:auto;}
+.nl-input{position:absolute;transform:translateX(-50%);width:66px;background:#f7f6f2;border:2px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:600;text-align:center;padding:.2rem .05rem;outline:none;transition:border-color .2s,background .2s;}
+.nl-input:focus{border-color:var(--blue);background:#fff;z-index:5;}
+.nl-input.ok{border-color:var(--green);background:#f0faeb;color:#3a7d0a;}
+.nl-input.ko{border-color:var(--pink);background:#fff0ef;color:#c0392b;}
+.nl-input:disabled{cursor:default;}
+/* rangée de réponses alignées (mode lecture) */
+.read-answers{display:flex;flex-wrap:wrap;gap:.55rem .9rem;justify-content:center;margin:.4rem 0 .2rem;}
+.ra-cell{display:flex;align-items:center;gap:.35rem;}
+.ra-lab{font-family:'Syne',sans-serif;font-weight:800;font-size:.92rem;}
+.ra-input{position:static!important;transform:none!important;width:78px;}
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.48rem 1.1rem;border-radius:99px;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-p{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.25);}
+.btn-h{background:var(--yellow);color:#5a3e00;}
+.btn-g{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.fb{margin-top:.9rem;padding:.65rem .9rem;border-radius:10px;font-size:.86rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;}
+.fb.show{display:flex;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green);color:#3a7d0a;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.fb-det{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);margin-top:.2rem;}
+.hint-box{margin-top:.8rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.65rem .9rem;font-size:.82rem;color:#7a6010;display:none;line-height:1.6;}
+.hint-box.show{display:block;}
+.hint-box strong{color:var(--orange);}
+.nav{display:flex;justify-content:space-between;margin-top:1.2rem;gap:.5rem;}
+.results{width:100%;max-width:700px;text-align:center;display:none;}
+.results.show{display:block;}
+.results-card{background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:2.2rem 1.8rem;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.score{font-size:clamp(2.5rem,8vw,4.5rem);font-weight:800;line-height:1;margin:.6rem 0 .3rem;color:var(--blue);}
+.stars{font-size:1.8rem;margin:.3rem 0 .8rem;}
+.rmsg{color:var(--muted);font-size:.9rem;margin-bottom:1.8rem;}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.8rem;}
+.ritem{display:flex;align-items:center;gap:.6rem;padding:.5rem .9rem;background:#f7f6f2;border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);}
+.ritem.ok-i{border-color:#b5e08a;}
+.ritem.ko-i{border-color:#f9c0bb;}
+.ritem .re{color:var(--blue);flex:1;}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">
+    <span class="dot" style="background:#f5c518"></span>
+    <span class="dot" style="background:#8dc63f"></span>
+    <span class="dot" style="background:#3ab5d8"></span>
+    Pazapa · Maths · 6e
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.73rem;color:#8a8f9a;margin-bottom:.35rem;letter-spacing:.06em;">Semaine 3 – Séance 5</div>
+  <h1>Placer et <span class="bl">lire</span> sur la droite <span class="gl">graduée</span></h1>
+  <p class="sub">4 exercices · niveau 6ème</p>
+</header>
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-lbl">Exercice 1 / 4</span><span id="prog-pct">0 %</span></div>
+  <div class="bar-bg"><div class="bar-fill" id="prog-bar" style="width:0%"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="cd" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correctes</div>
+  <div class="chip"><div class="cd" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreurs</div>
+  <div class="chip"><div class="cd" style="background:#8a8f9a"></div><span id="cnt-rem">4</span> restantes</div>
+</div>
+<div class="card" id="ex-card">
+  <div class="stripe"></div>
+  <div class="qnum" id="q-num">Exercice 1</div>
+  <div class="eq" id="q-eq"></div>
+  <div class="qtxt" id="q-txt"></div>
+  <div id="q-body"></div>
+  <div class="hint-box" id="hint-box"></div>
+  <div class="fb" id="feedback"><span id="fb-icon" style="font-size:1.1rem;flex-shrink:0"></span><div><div id="fb-msg"></div><div class="fb-det" id="fb-det"></div></div></div>
+  <div class="nav">
+    <button class="btn btn-g" id="btn-prev" onclick="prevQ()">← Précédent</button>
+    <div style="display:flex;gap:.5rem;">
+      <button class="btn btn-h" id="btn-hint" onclick="toggleHint()">? Indice</button>
+      <button class="btn btn-p" id="btn-next" onclick="nextQ()" disabled>Suivant →</button>
+    </div>
+  </div>
+</div>
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="badge" style="margin-bottom:.5rem">
+      <span class="dot" style="background:#f5c518"></span>
+      <span class="dot" style="background:#8dc63f"></span>
+      <span class="dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="score"><span id="score-num">0</span>/4</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="rmsg" id="results-msg"></div>
+    <div class="recap" id="recap-list"></div>
+    <button class="btn btn-p" onclick="restart()" style="margin:0 auto;display:flex;">🔄 Recommencer</button>
+  </div>
+</div>
+<script>
+const COL={red:'#e8453c',blue:'#3ab5d8',green:'#8dc63f',orange:'#f5a623',
+  purple:'#9b59b6',cyan:'#7fc7e8',pink:'#e84393',black:'#1a1d23',
+  M:'#e8453c',N:'#3ab5d8',O:'#8dc63f',P:'#f5a623',
+  Q:'#e8453c',R:'#3ab5d8',S:'#8dc63f',T:'#f5a623'};
+const EXS = [
+  {
+    mode:'place',
+    title:'1. Placer précisément les points M, N, O et P',
+    txt:'Sélectionne un point puis clique sur la bonne graduation de la droite.',
+    line:{ start:7.8, end:10.4, step:0.2, majors:[8,9,10] },
+    points:[
+      {name:'M',val:8.8,color:COL.M},{name:'N',val:9.2,color:COL.N},
+      {name:'O',val:8.4,color:COL.O},{name:'P',val:9.6,color:COL.P},
+    ],
+    hint:'<strong>Astuce :</strong> entre deux entiers il y a 5 intervalles, donc chaque graduation vaut 0,2. Compte les graduations depuis l\u2019entier le plus proche.'
+  },
+  {
+    mode:'place',
+    title:'2. Placer précisément les points Q, R, S et T',
+    txt:'Sélectionne un point puis clique sur la bonne graduation. Ici on travaille au millième !',
+    line:{ start:2.18, end:2.235, step:0.001, majors:[2.18,2.19,2.20] },
+    points:[
+      {name:'Q',val:2.185,color:COL.Q},{name:'R',val:2.191,color:COL.R},
+      {name:'S',val:2.189,color:COL.S},{name:'T',val:2.23,color:COL.T},
+    ],
+    hint:'<strong>Astuce :</strong> de 2,18 à 2,19 il y a 10 intervalles, donc chaque graduation vaut 0,001. Pour T = 2,23, pars du repère 2,2 puis avance de 3 petites graduations (2,20 → 2,21 → 2,22 → 2,23).'
+  },
+  {
+    mode:'read',
+    title:'3. Donner les abscisses des points A, B, C, D et E',
+    txt:'Lis l\u2019abscisse de chaque point coloré et écris-la dans la case sous la droite.',
+    line:{ start:28.55, end:29.12, step:0.01, majors:[28.6,28.7,28.8,28.9,29],
+      marks:[{name:'A',val:28.65,color:COL.red},{name:'B',val:28.75,color:COL.blue},
+             {name:'C',val:28.83,color:COL.green},{name:'D',val:28.99,color:COL.orange},
+             {name:'E',val:29.01,color:COL.black}] },
+    hint:'<strong>Astuce :</strong> les grandes graduations sont les dixièmes (28,6 ; 28,7 …). Entre deux, chaque petite graduation vaut 0,01.'
+  },
+  {
+    mode:'read',
+    title:'4. Donner les abscisses des points A, B et C',
+    txt:'Travaille au millième : lis l\u2019abscisse de chaque point coloré.',
+    line:{ start:15.698, end:15.714, step:0.001, majors:[15.7,15.71],
+      marks:[{name:'A',val:15.702,color:COL.pink},{name:'B',val:15.707,color:COL.cyan},
+             {name:'C',val:15.711,color:COL.purple}] },
+    hint:'<strong>Astuce :</strong> de 15,7 à 15,71 il y a 10 intervalles, donc chaque graduation vaut 0,001 (un millième).'
+  },
+];
+const TOTAL=EXS.length;
+let cur=0, answered=[false,false,false,false], hintOpen=false, selPoint=null;
+const $=id=>document.getElementById(id);
+function rnd(v){return Math.round(v*1e6)/1e6;}
+function fr(v){return String(rnd(v)).replace('.',',');}
+function numNorm(s){const n=parseFloat(String(s).trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
+function valOk(t,v){const n=numNorm(v);return n!==null && Math.abs(n-t)<1e-9;}
+const VW=640, padL=42, padR=42, axisY=58, VH=110;
+function makeSVG(cfg){
+  const span=cfg.end-cfg.start;
+  const xv=v=>padL+(v-cfg.start)/span*(VW-padL-padR);
+  const NS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
+  svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+  const axis=document.createElementNS(NS,'line');
+  axis.setAttribute('x1',padL-12);axis.setAttribute('y1',axisY);
+  axis.setAttribute('x2',VW-padR+6);axis.setAttribute('y2',axisY);
+  axis.setAttribute('stroke','#1a1d23');axis.setAttribute('stroke-width','2.4');svg.appendChild(axis);
+  const arr=document.createElementNS(NS,'path');
+  arr.setAttribute('d','M'+(VW-padR+6)+','+(axisY-6)+' L'+(VW-padR+18)+','+axisY+' L'+(VW-padR+6)+','+(axisY+6)+' Z');
+  arr.setAttribute('fill','#1a1d23');svg.appendChild(arr);
+  const nb=Math.round(span/cfg.step);
+  for(let i=0;i<=nb;i++){
+    const v=rnd(cfg.start+i*cfg.step);
+    const isMajor=cfg.majors.some(m=>Math.abs(m-v)<1e-6);
+    const half=(i%5===0)&&!isMajor;
+    const h=isMajor?15:(half?10:7);
+    const tick=document.createElementNS(NS,'line');
+    tick.setAttribute('x1',xv(v));tick.setAttribute('y1',axisY-h);
+    tick.setAttribute('x2',xv(v));tick.setAttribute('y2',axisY+(isMajor?h:0));
+    tick.setAttribute('stroke','#1a1d23');tick.setAttribute('stroke-width',isMajor?'2.4':'1.3');
+    svg.appendChild(tick);
+    if(isMajor){
+      const t=document.createElementNS(NS,'text');
+      t.setAttribute('x',xv(v));t.setAttribute('y',axisY+30);
+      t.setAttribute('text-anchor','middle');t.setAttribute('font-family',"'JetBrains Mono',monospace");
+      t.setAttribute('font-size','13');t.setAttribute('font-weight','600');t.setAttribute('fill','#1a1d23');
+      t.textContent=fr(v);svg.appendChild(t);
+    }
+  }
+  return {svg,xv,NS};
+}
+function drawCross(svg,NS,px,col,name){
+  const s=5;
+  const cr=document.createElementNS(NS,'path');
+  cr.setAttribute('d','M'+(px-s)+','+(axisY-s)+' L'+(px+s)+','+(axisY+s)+' M'+(px-s)+','+(axisY+s)+' L'+(px+s)+','+(axisY-s));
+  cr.setAttribute('stroke',col);cr.setAttribute('stroke-width','2.6');cr.setAttribute('stroke-linecap','round');
+  svg.appendChild(cr);
+  if(name){
+    const lt=document.createElementNS(NS,'text');
+    lt.setAttribute('x',px);lt.setAttribute('y',axisY-22);lt.setAttribute('text-anchor','middle');
+    lt.setAttribute('font-family',"'Syne',sans-serif");lt.setAttribute('font-size','15');
+    lt.setAttribute('font-weight','800');lt.setAttribute('fill',col);lt.textContent=name;
+    svg.appendChild(lt);
+  }
+}
+function renderRead(ex,body){
+  const cfg=ex.line;
+  const {svg,xv}=makeSVG(cfg);
+  cfg.marks.forEach(m=>drawCross(svg,'http://www.w3.org/2000/svg',xv(m.val),m.color||'#1a1d23',m.name));
+  const block=document.createElement('div');block.className='line-block';
+  const stage=document.createElement('div');stage.className='line-stage';
+  stage.appendChild(svg);
+  block.appendChild(stage);body.appendChild(block);
+
+  // rangée de réponses alignées sous la droite : A = [..]  B = [..] ...
+  const ansRow=document.createElement('div');ansRow.className='read-answers';
+  cfg.marks.forEach((m,mi)=>{
+    const cell=document.createElement('div');cell.className='ra-cell';
+    const lab=document.createElement('span');lab.className='ra-lab';lab.style.color=m.color||'#1a1d23';lab.textContent=m.name+' =';
+    const inp=document.createElement('input');inp.type='text';inp.className='nl-input ra-input';
+    inp.placeholder='?';inp.autocomplete='off';inp.id='r_'+mi;inp.dataset.val=m.val;
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){const bc=$('btn-check');if(bc&&!bc.disabled)checkRead();}});
+    cell.appendChild(lab);cell.appendChild(inp);ansRow.appendChild(cell);
+  });
+  body.appendChild(ansRow);
+
+  const br=document.createElement('div');br.style.cssText='display:flex;gap:.5rem;margin-top:.7rem;';
+  const bv=document.createElement('button');bv.className='btn btn-p';bv.id='btn-check';bv.textContent='Valider ✓';bv.onclick=checkRead;
+  br.appendChild(bv);body.appendChild(br);
+
+  if(answered[cur]&&ex._ans){
+    cfg.marks.forEach((m,mi)=>{const inp=$('r_'+mi);if(!inp)return;inp.value=ex._ans[mi];inp.className='nl-input ra-input '+(valOk(m.val,ex._ans[mi])?'ok':'ko');inp.disabled=true;});
+    bv.disabled=true;showFB();
+  }
+  setTimeout(()=>{const f=document.querySelector('#q-body .nl-input:not(:disabled)');if(f)f.focus();},40);
+}
+function checkRead(){
+  const ex=EXS[cur];const cfg=ex.line;
+  ex._ans=cfg.marks.map((m,mi)=>($('r_'+mi)||{value:''}).value);
+  answered[cur]=true;
+  cfg.marks.forEach((m,mi)=>{const inp=$('r_'+mi);if(!inp)return;inp.className='nl-input ra-input '+(valOk(m.val,ex._ans[mi])?'ok':'ko');inp.disabled=true;});
+  const bc=$('btn-check');if(bc)bc.disabled=true;
+  showFB();$('btn-next').disabled=false;updateStats();
+}
+function renderPlace(ex,body){
+  const cfg=ex.line;
+  if(!ex._placed)ex._placed={};
+  const leg=document.createElement('div');leg.className='place-legend';
+  ex.points.forEach(p=>{
+    const c=document.createElement('div');c.className='pl-chip';c.dataset.name=p.name;
+    c.innerHTML='<span class="pl-name" style="color:'+p.color+'">'+p.name+'</span><span class="pl-val">'+fr(p.val)+'</span>';
+    if(ex._placed[p.name]!==undefined)c.classList.add('done');
+    c.onclick=()=>{ if(answered[cur])return; selPoint=p.name; document.querySelectorAll('.pl-chip').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); };
+    leg.appendChild(c);
+  });
+  body.appendChild(leg);
+  const tip=document.createElement('div');tip.className='place-tip';tip.textContent='① clique sur un point ci-dessus  ②  clique sur la graduation choisie';
+  body.appendChild(tip);
+  const {svg,xv,NS}=makeSVG(cfg);
+  const span=cfg.end-cfg.start;const nb=Math.round(span/cfg.step);
+  for(let i=0;i<=nb;i++){
+    const v=rnd(cfg.start+i*cfg.step);const px=xv(v);
+    const hit=document.createElementNS(NS,'rect');
+    hit.setAttribute('x',px-7);hit.setAttribute('y',axisY-22);hit.setAttribute('width','14');hit.setAttribute('height','44');
+    hit.setAttribute('fill','transparent');hit.style.cursor='pointer';
+    hit.addEventListener('click',()=>placeAt(v));
+    svg.appendChild(hit);
+  }
+  Object.keys(ex._placed).forEach(name=>{
+    const p=ex.points.find(q=>q.name===name);
+    drawCross(svg,NS,xv(ex._placed[name]),p.color,p.name);
+  });
+  const block=document.createElement('div');block.className='line-block';
+  const stage=document.createElement('div');stage.className='line-stage';stage.appendChild(svg);
+  block.appendChild(stage);body.appendChild(block);
+  const br=document.createElement('div');br.style.cssText='display:flex;gap:.5rem;margin-top:.7rem;';
+  const bv=document.createElement('button');bv.className='btn btn-p';bv.id='btn-check';bv.textContent='Valider ✓';bv.onclick=checkPlace;
+  br.appendChild(bv);body.appendChild(br);
+  if(answered[cur])bv.disabled=true;
+  if(answered[cur])showFB();
+  updatePlaceUI();
+}
+function placeAt(v){
+  const ex=EXS[cur];if(answered[cur])return;
+  if(!selPoint){return;}
+  ex._placed[selPoint]=v;
+  selPoint=null;
+  renderQ();
+}
+function updatePlaceUI(){
+  const ex=EXS[cur];
+  const bc=$('btn-check');
+  if(bc)bc.disabled=answered[cur]||Object.keys(ex._placed||{}).length<ex.points.length;
+}
+function checkPlace(){
+  const ex=EXS[cur];
+  answered[cur]=true;
+  const bc=$('btn-check');if(bc)bc.disabled=true;
+  showFB();$('btn-next').disabled=false;updateStats();
+}
+function renderQ(){
+  const ex=EXS[cur];
+  $('q-num').textContent='Exercice '+(cur+1);
+  $('q-eq').textContent=ex.title;
+  $('q-txt').textContent=ex.txt;
+  $('hint-box').classList.remove('show');$('hint-box').innerHTML='';hintOpen=false;
+  $('feedback').className='fb';
+  const rb=$('btn-retry');if(rb)rb.style.display='none';
+  $('btn-prev').disabled=cur===0;
+  $('btn-hint').style.display=ex.hint?'':'none';
+  $('btn-next').textContent=cur===TOTAL-1?'Terminer →':'Suivant →';
+  $('btn-next').disabled=!answered[cur];
+  const body=$('q-body');body.innerHTML='';
+  if(ex.mode==='read')renderRead(ex,body);else renderPlace(ex,body);
+  updateStats();
+}
+function exAllOk(ex){
+  if(ex.mode==='read'){
+    if(!ex._ans)return false;
+    return ex.line.marks.every((m,mi)=>valOk(m.val,ex._ans[mi]||''));
+  }else{
+    if(!ex._placed||Object.keys(ex._placed).length<ex.points.length)return false;
+    return ex.points.every(p=>Math.abs(ex._placed[p.name]-p.val)<1e-9);
+  }
+}
+function showFB(){
+  const ex=EXS[cur];
+  let okCount,total,wrong=[];
+  if(ex.mode==='read'){
+    if(!ex._ans)return;
+    total=ex.line.marks.length;
+    okCount=ex.line.marks.filter((m,mi)=>valOk(m.val,ex._ans[mi]||'')).length;
+    wrong=ex.line.marks.filter((m,mi)=>!valOk(m.val,ex._ans[mi]||'')).map(m=>m.name+'='+fr(m.val));
+  }else{
+    total=ex.points.length;
+    okCount=ex.points.filter(p=>ex._placed&&Math.abs(ex._placed[p.name]-p.val)<1e-9).length;
+    wrong=ex.points.filter(p=>!ex._placed||Math.abs(ex._placed[p.name]-p.val)>=1e-9).map(p=>p.name+' → '+fr(p.val));
+  }
+  const allOk=okCount===total;
+  $('feedback').className='fb show '+(allOk?'ok':'ko');
+  $('fb-icon').textContent=allOk?'✅':'❌';
+  $('fb-msg').textContent=allOk?'Parfait !':'Pas tout à fait…';
+  $('fb-det').textContent=allOk
+    ?(ex.mode==='read'?'Toutes les abscisses sont correctes !':'Tous les points sont bien placés !')
+    :('Bonnes réponses : '+okCount+' / '+total+'  ·  '+(ex.mode==='read'?'Attendu : ':'À corriger : ')+wrong.join('  ·  '));
+  let retry=$('btn-retry');
+  if(!allOk){
+    if(!retry){
+      retry=document.createElement('button');retry.id='btn-retry';retry.className='btn btn-h';
+      retry.style.marginTop='.7rem';retry.textContent='↻ Réessayer cet exercice';retry.onclick=retryQ;
+      $('feedback').parentNode.insertBefore(retry,$('feedback').nextSibling);
+    }
+    retry.style.display='inline-flex';
+  } else if(retry){retry.style.display='none';}
+}
+function retryQ(){
+  const ex=EXS[cur];
+  answered[cur]=false;
+  delete ex._ans;delete ex._placed;
+  selPoint=null;
+  const r=$('btn-retry');if(r)r.style.display='none';
+  $('feedback').className='fb';$('btn-next').disabled=true;
+  renderQ();updateStats();
+}
+function toggleHint(){
+  const h=$('hint-box');hintOpen=!hintOpen;
+  if(hintOpen){h.innerHTML=EXS[cur].hint;h.classList.add('show');}else h.classList.remove('show');
+}
+function updateStats(){
+  const done=answered.filter(Boolean).length;
+  $('prog-bar').style.width=Math.round(done/TOTAL*100)+'%';
+  $('prog-lbl').textContent='Exercice '+(cur+1)+' / '+TOTAL;
+  $('prog-pct').textContent=Math.round(done/TOTAL*100)+' %';
+  let ok=0,ko=0;
+  EXS.forEach((ex,i)=>{if(!answered[i])return;if(exAllOk(ex))ok++;else ko++;});
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=ko;
+  $('cnt-rem').textContent=answered.filter(a=>!a).length;
+}
+function nextQ(){if(cur<TOTAL-1){cur++;selPoint=null;renderQ();window.scrollTo({top:0,behavior:'smooth'});}else showResults();}
+function prevQ(){if(cur>0){cur--;selPoint=null;renderQ();window.scrollTo({top:0,behavior:'smooth'});}}
+function showResults(){
+  $('ex-card').style.display='none';$('results-screen').classList.add('show');
+  let ok=0;EXS.forEach((ex,i)=>{if(answered[i]&&exAllOk(ex))ok++;});
+  $('score-num').textContent=ok;
+  const filled=Math.round(ok/TOTAL*5);
+  $('stars-row').textContent='⭐'.repeat(filled)+'☆'.repeat(5-filled);
+  const msgs=['Continue à t\u2019entraîner !','Quelques erreurs, persévère !','Tu progresses bien !','Presque parfait !','Parfait ! 🎉'];
+  $('results-msg').textContent=msgs[ok];
+  const list=$('recap-list');list.innerHTML='';
+  EXS.forEach((ex,i)=>{
+    const allOk=answered[i]&&exAllOk(ex);
+    const d=document.createElement('div');d.className='ritem '+(allOk?'ok-i':'ko-i');
+    d.innerHTML='<span>'+(allOk?'✅':'❌')+'</span><span class="re"></span>';
+    d.querySelector('.re').textContent=ex.title;list.appendChild(d);
+  });
+}
+function restart(){
+  cur=0;answered=[false,false,false,false];selPoint=null;
+  EXS.forEach(ex=>{delete ex._ans;delete ex._placed;});
+  $('ex-card').style.display='block';$('results-screen').classList.remove('show');
+  renderQ();
+}
+renderQ();
+</script>
+</body>
+</html>
