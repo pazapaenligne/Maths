@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – 6e – Décomposer un nombre décimal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#ffffff;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fff;color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;}
+header{text-align:center;margin-bottom:1.5rem;}
+.badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--yellow);color:#000;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.28rem .85rem;border-radius:99px;margin-bottom:.8rem;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+h1{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;line-height:1.2;color:var(--text);}
+h1 .gl{color:var(--green);}h1 .bl{color:var(--blue);}
+.sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-top:.3rem;margin-bottom:1.6rem;}
+.prog-wrap{width:100%;max-width:660px;margin-bottom:1.2rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.35rem;}
+.bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;transition:width .5s;}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+.chip{display:flex;align-items:center;gap:.35rem;padding:.28rem .7rem;border-radius:99px;font-size:.75rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:#fff;font-weight:600;color:var(--text);}
+.chip .cd{width:8px;height:8px;border-radius:50%;}
+.card{width:100%;max-width:660px;background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:1.8rem 1.8rem 1.4rem;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink),var(--blue),var(--green));}
+.qnum{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.08em;}
+.eq{font-size:clamp(1.05rem,2.2vw,1.3rem);font-weight:800;color:var(--text);margin-bottom:1rem;line-height:1.4;}
+.eq .calc{color:var(--blue);font-family:'JetBrains Mono',monospace;}
+.qtxt{font-size:.88rem;color:var(--muted);margin-bottom:1rem;}
+
+/* ── Saisie nombre ── */
+.calc-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace;}
+.calc-expr{font-size:1rem;font-weight:700;color:var(--text);}
+.num-input{width:150px;background:#f7f6f2;border:2px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:600;text-align:center;padding:.4rem .6rem;outline:none;transition:border-color .2s,background .2s;}
+.num-input:focus{border-color:var(--blue);background:#fff;}
+.num-input.ok{border-color:var(--green);background:#f0faeb;color:#3a7d0a;}
+.num-input.ko{border-color:var(--pink);background:#fff0ef;color:#c0392b;}
+.num-input:disabled{cursor:default;}
+
+/* ── Vrai / Faux ── */
+.vf-row{display:flex;gap:.8rem;margin-bottom:.4rem;}
+.vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem 1rem;border-radius:14px;border:2.5px solid var(--border);background:#fff;font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:transform .12s,border-color .15s,background .15s;color:var(--text);}
+.vf-btn:active{transform:scale(.97);}
+.vf-btn .vf-ico{font-size:1.2rem;}
+.vf-btn.v:hover{border-color:var(--green);}
+.vf-btn.f:hover{border-color:var(--pink);}
+.vf-btn.correct{border-color:var(--green)!important;background:#f0faeb!important;color:#3a7d0a!important;}
+.vf-btn.wrong{border-color:var(--pink)!important;background:#fff0ef!important;color:#c0392b!important;}
+.vf-btn.picked{box-shadow:0 0 0 3px rgba(26,29,35,.12);}
+.vf-btn:disabled{cursor:default;}
+
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.48rem 1.1rem;border-radius:99px;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-p{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.25);}
+.btn-h{background:var(--yellow);color:#5a3e00;}
+.btn-g{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.fb{margin-top:.9rem;padding:.65rem .9rem;border-radius:10px;font-size:.86rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;}
+.fb.show{display:flex;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green);color:#3a7d0a;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.fb-det{font-size:.82rem;color:var(--text);margin-top:.25rem;line-height:1.55;}
+.fb-det b{color:var(--orange);}
+.hint-box{margin-top:.8rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.65rem .9rem;font-size:.82rem;color:#7a6010;display:none;line-height:1.6;}
+.hint-box.show{display:block;}
+.hint-box strong{color:var(--orange);}
+.nav{display:flex;justify-content:space-between;margin-top:1.2rem;gap:.5rem;}
+.results{width:100%;max-width:660px;text-align:center;display:none;}
+.results.show{display:block;}
+.results-card{background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:2.2rem 1.8rem;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.score{font-size:clamp(2.5rem,8vw,4.5rem);font-weight:800;line-height:1;margin:.6rem 0 .3rem;color:var(--blue);}
+.stars{font-size:1.8rem;margin:.3rem 0 .8rem;}
+.rmsg{color:var(--muted);font-size:.9rem;margin-bottom:1.8rem;}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.8rem;}
+.ritem{display:flex;align-items:center;gap:.6rem;padding:.5rem .9rem;background:#f7f6f2;border:1.5px solid var(--border);border-radius:10px;font-size:.8rem;color:var(--text);}
+.ritem.ok-i{border-color:#b5e08a;}
+.ritem.ko-i{border-color:#f9c0bb;}
+.ritem .re{flex:1;}
+.ritem .rv{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.74rem;color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">
+    <span class="dot" style="background:#f5c518"></span>
+    <span class="dot" style="background:#8dc63f"></span>
+    <span class="dot" style="background:#3ab5d8"></span>
+    Pazapa · Maths · 6e
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.73rem;color:#8a8f9a;margin-bottom:.35rem;letter-spacing:.06em;">Semaine 3 – Séance 7</div>
+  <h1>Décomposer un <span class="bl">nombre</span> <span class="gl">décimal</span></h1>
+  <p class="sub">2 questions · niveau 6ème</p>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-lbl">Question 1 / 2</span><span id="prog-pct">0 %</span></div>
+  <div class="bar-bg"><div class="bar-fill" id="prog-bar" style="width:0%"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="cd" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correctes</div>
+  <div class="chip"><div class="cd" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreurs</div>
+  <div class="chip"><div class="cd" style="background:#8a8f9a"></div><span id="cnt-rem">2</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="stripe"></div>
+  <div class="qnum" id="q-num">Question 1</div>
+  <div class="eq" id="q-eq"></div>
+  <div class="qtxt" id="q-txt"></div>
+  <div id="q-body"></div>
+  <div class="hint-box" id="hint-box"></div>
+  <div class="fb" id="feedback"><span id="fb-icon" style="font-size:1.1rem;flex-shrink:0"></span><div><div id="fb-msg"></div><div class="fb-det" id="fb-det"></div></div></div>
+  <div class="nav">
+    <button class="btn btn-g" id="btn-prev" onclick="prevQ()">← Précédent</button>
+    <div style="display:flex;gap:.5rem;">
+      <button class="btn btn-h" id="btn-hint" onclick="toggleHint()">? Indice</button>
+      <button class="btn btn-p" id="btn-next" onclick="nextQ()" disabled>Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="badge" style="margin-bottom:.5rem">
+      <span class="dot" style="background:#f5c518"></span>
+      <span class="dot" style="background:#8dc63f"></span>
+      <span class="dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="score"><span id="score-num">0</span>/2</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="rmsg" id="results-msg"></div>
+    <div class="recap" id="recap-list"></div>
+    <button class="btn btn-p" onclick="restart()" style="margin:0 auto;display:flex;">🔄 Recommencer</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  Semaine 3 – Séance 7 : Décomposer un nombre décimal
+//  Q1 (saisie)   : (7×100)+(5×1)+(3×0,01) = 705,03
+//  Q2 (vrai/faux): 45,678 = 4 dizaines, 5 unités, 6 dixièmes,
+//                  7 centièmes, 8 millièmes  →  VRAI
+//                  (40 + 5 + 0,6 + 0,07 + 0,008 = 45,678)
+// ============================================================
+const EXS = [
+  {
+    type:'num',
+    eqHTML:'1. Écris le nombre décimal correspondant à la décomposition.',
+    txt:'',
+    expr:'(7 × 100) + (5 × 1) + (3 × 0,01) =',
+    answer:705.03,
+    explain:'700 + 5 + 0,03 = <b>705,03</b>. Le 7 est aux centaines, le 5 aux unités, le 3 aux centièmes (les dizaines et les dixièmes valent 0).',
+    hint:'<strong>Astuce :</strong> ×100 → centaines, ×1 → unités, ×0,01 → centièmes. Place chaque chiffre à son rang et mets un 0 dans les rangs vides (dizaines, dixièmes).'
+  },
+  {
+    type:'vf',
+    eqHTML:'2. Cette égalité est-elle correcte ?',
+    txt:'',
+    statementHTML:'<span class="calc">45,678</span> = 4 dizaines, 5 unités, 6 dixièmes, 7 centièmes et 8 millièmes.',
+    answer:true,
+    explain:'4 dizaines = 40 ; 5 unités = 5 ; 6 dixièmes = 0,6 ; 7 centièmes = 0,07 ; 8 millièmes = 0,008. Total : 40 + 5 + 0,6 + 0,07 + 0,008 = <b>45,678</b>. L\u2019égalité est juste.',
+    hint:'<strong>Astuce :</strong> additionne chaque rang. Dizaines (×10), unités (×1), dixièmes (×0,1), centièmes (×0,01), millièmes (×0,001). Retombes-tu sur 45,678 ?'
+  },
+];
+
+const TOTAL=EXS.length;
+let cur=0, ans=new Array(TOTAL).fill(null), hintOpen=false;
+const $=id=>document.getElementById(id);
+
+function numNorm(s){const n=parseFloat(String(s).trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
+function numOk(t,v){const n=numNorm(v);return n!==null && Math.abs(n-t)<1e-9;}
+function frNum(v){return String(v).replace('.',',');}
+
+function isAnswered(i){return ans[i]!==null && ans[i]!==undefined && ans[i]!=='';}
+
+function renderQ(){
+  const ex=EXS[cur];
+  $('q-num').textContent='Question '+(cur+1);
+  $('q-eq').innerHTML=ex.eqHTML;
+  $('q-txt').textContent=ex.txt||'';
+  $('q-txt').style.display=ex.txt?'':'none';
+  $('hint-box').classList.remove('show');$('hint-box').innerHTML='';hintOpen=false;
+  $('feedback').className='fb';
+  $('btn-prev').disabled=cur===0;
+  $('btn-hint').style.display=ex.hint?'':'none';
+  $('btn-next').textContent=cur===TOTAL-1?'Terminer →':'Suivant →';
+  $('btn-next').disabled=!isAnswered(cur);
+
+  const body=$('q-body');body.innerHTML='';
+  if(ex.type==='num')renderNum(ex,body);else renderVF(ex,body);
+  updateStats();
+}
+
+/* ── Saisie nombre ── */
+function renderNum(ex,body){
+  const row=document.createElement('div');row.className='calc-row';
+  const sp=document.createElement('span');sp.className='calc-expr';sp.textContent=ex.expr;
+  const inp=document.createElement('input');inp.type='text';inp.className='num-input';inp.id='num';inp.placeholder='?';inp.autocomplete='off';
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){const bc=$('btn-check');if(bc&&!bc.disabled)checkNum();}});
+  row.appendChild(sp);row.appendChild(inp);body.appendChild(row);
+
+  const br=document.createElement('div');br.style.cssText='display:flex;gap:.5rem;margin-top:.8rem;';
+  const bv=document.createElement('button');bv.className='btn btn-p';bv.id='btn-check';bv.textContent='Valider ✓';bv.onclick=checkNum;
+  br.appendChild(bv);body.appendChild(br);
+
+  if(isAnswered(cur)){
+    inp.value=ans[cur];inp.className='num-input '+(numOk(ex.answer,ans[cur])?'ok':'ko');inp.disabled=true;bv.disabled=true;
+    showFB();
+  }
+  setTimeout(()=>{if(!inp.disabled)inp.focus();},40);
+}
+function checkNum(){
+  const ex=EXS[cur];const inp=$('num');
+  ans[cur]=inp.value;
+  inp.className='num-input '+(numOk(ex.answer,inp.value)?'ok':'ko');inp.disabled=true;
+  const bc=$('btn-check');if(bc)bc.disabled=true;
+  showFB();$('btn-next').disabled=false;updateStats();
+}
+
+/* ── Vrai / Faux ── */
+function renderVF(ex,body){
+  const st=document.createElement('div');st.style.cssText='font-family:Syne,sans-serif;font-weight:700;font-size:1rem;margin-bottom:1rem;line-height:1.5;';
+  st.innerHTML=ex.statementHTML;body.appendChild(st);
+
+  const row=document.createElement('div');row.className='vf-row';
+  const bV=document.createElement('button');bV.className='vf-btn v';bV.innerHTML='<span class="vf-ico">✔</span> VRAI';bV.onclick=()=>chooseVF(true);
+  const bF=document.createElement('button');bF.className='vf-btn f';bF.innerHTML='<span class="vf-ico">✘</span> FAUX';bF.onclick=()=>chooseVF(false);
+  row.appendChild(bV);row.appendChild(bF);body.appendChild(row);
+
+  if(isAnswered(cur)){ lockVF(); showFB(); }
+}
+function chooseVF(val){
+  if(isAnswered(cur))return;
+  ans[cur]=val;
+  lockVF();showFB();$('btn-next').disabled=false;updateStats();
+}
+function lockVF(){
+  const ex=EXS[cur];const btns=document.querySelectorAll('.vf-btn');
+  btns.forEach(b=>b.disabled=true);
+  const btnV=btns[0],btnF=btns[1];
+  const userVal=ans[cur];
+  const goodBtn=ex.answer?btnV:btnF;
+  const userBtn=userVal?btnV:btnF;
+  goodBtn.classList.add('correct');
+  if(userVal!==ex.answer)userBtn.classList.add('wrong');
+  userBtn.classList.add('picked');
+}
+
+/* ── correctness commun ── */
+function exOk(ex,i){
+  if(!isAnswered(i))return false;
+  if(ex.type==='num')return numOk(ex.answer,ans[i]);
+  return ans[i]===ex.answer;
+}
+
+function showFB(){
+  const ex=EXS[cur];const ok=exOk(ex,cur);
+  $('feedback').className='fb show '+(ok?'ok':'ko');
+  $('fb-icon').textContent=ok?'✅':'❌';
+  $('fb-msg').textContent=ok?'Bonne réponse !':'Pas tout à fait…';
+  let det;
+  if(ex.type==='num'){
+    det='Réponse : <b>'+frNum(ex.answer)+'</b>. '+ex.explain;
+  }else{
+    det='Réponse : <b>'+(ex.answer?'VRAI':'FAUX')+'</b>. '+ex.explain;
+  }
+  $('fb-det').innerHTML=det;
+}
+
+function toggleHint(){
+  const h=$('hint-box');hintOpen=!hintOpen;
+  if(hintOpen){h.innerHTML=EXS[cur].hint;h.classList.add('show');}else h.classList.remove('show');
+}
+
+function updateStats(){
+  const done=EXS.filter((ex,i)=>isAnswered(i)).length;
+  $('prog-bar').style.width=Math.round(done/TOTAL*100)+'%';
+  $('prog-lbl').textContent='Question '+(cur+1)+' / '+TOTAL;
+  $('prog-pct').textContent=Math.round(done/TOTAL*100)+' %';
+  let ok=0,ko=0;
+  EXS.forEach((ex,i)=>{if(!isAnswered(i))return;if(exOk(ex,i))ok++;else ko++;});
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=ko;
+  $('cnt-rem').textContent=EXS.filter((ex,i)=>!isAnswered(i)).length;
+}
+
+function nextQ(){if(cur<TOTAL-1){cur++;renderQ();window.scrollTo({top:0,behavior:'smooth'});}else showResults();}
+function prevQ(){if(cur>0){cur--;renderQ();window.scrollTo({top:0,behavior:'smooth'});}}
+
+function showResults(){
+  $('ex-card').style.display='none';$('results-screen').classList.add('show');
+  let ok=0;EXS.forEach((ex,i)=>{if(exOk(ex,i))ok++;});
+  $('score-num').textContent=ok;
+  const filled=Math.round(ok/TOTAL*5);
+  $('stars-row').textContent='⭐'.repeat(filled)+'☆'.repeat(5-filled);
+  const msgs=['Continue à t\u2019entraîner !','Bien, encore un effort !','Parfait ! 🎉'];
+  $('results-msg').textContent=msgs[ok];
+  const list=$('recap-list');list.innerHTML='';
+  EXS.forEach((ex,i)=>{
+    const ok2=exOk(ex,i);
+    const d=document.createElement('div');d.className='ritem '+(ok2?'ok-i':'ko-i');
+    const txt=document.createElement('span');txt.className='re';txt.textContent='Question '+(i+1);
+    const rv=document.createElement('span');rv.className='rv';rv.textContent=ex.type==='num'?frNum(ex.answer):(ex.answer?'VRAI':'FAUX');
+    d.innerHTML='<span>'+(ok2?'✅':'❌')+'</span>';
+    d.appendChild(txt);d.appendChild(rv);list.appendChild(d);
+  });
+}
+
+function restart(){
+  cur=0;ans=new Array(TOTAL).fill(null);
+  $('ex-card').style.display='block';$('results-screen').classList.remove('show');
+  renderQ();
+}
+
+// clavier : V/F pour le vrai-faux, Entrée pour avancer
+document.addEventListener('keydown',e=>{
+  if($('results-screen').classList.contains('show'))return;
+  const ex=EXS[cur];
+  if(ex.type==='vf' && !isAnswered(cur)){
+    const k=e.key.toLowerCase();
+    if(k==='v')chooseVF(true);else if(k==='f')chooseVF(false);
+  } else if(e.key==='Enter' && isAnswered(cur) && !$('btn-next').disabled){
+    nextQ();
+  }
+});
+
+renderQ();
+</script>
+</body>
+</html>
