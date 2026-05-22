@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – 6e – Décompositions décimales</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#ffffff;--border:#cfd6dc;--blue-hd:#1f72b8;--blue:#3ab5d8;
+  --green-bd:#8dc63f;--orange-bd:#f5a623;--pink-bd:#f28b82;
+  --text:#1a1d23;--muted:#6b7280;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:#fff;color:var(--text);font-family:'Syne',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.8rem 1rem 3rem;
+}
+.sheet{width:100%;max-width:760px;}
+.body{padding:0;}
+
+/* ── TITRES D'EXERCICE ── */
+.exo-title{
+  color:var(--blue-hd);font-weight:700;font-size:.95rem;
+  text-decoration:underline;text-underline-offset:3px;
+  margin:2rem 0 1rem;line-height:1.4;
+}
+.exo-title:first-child{margin-top:0;}
+.exo-sub{font-size:.84rem;color:var(--muted);margin:-.5rem 0 1rem;line-height:1.5;}
+.exo-sub .ex-eq{font-family:'JetBrains Mono',monospace;color:var(--text);}
+
+/* ── LIGNES D'EXERCICE (décompo / questions) ── */
+.qrow{
+  display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+  padding:.5rem 0;
+}
+.qlabel{
+  font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text);
+  min-width:18px;font-weight:600;
+}
+.qexpr{
+  font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--text);
+  line-height:1.5;
+}
+.qexpr.big{font-weight:600;}
+.arrow{color:var(--muted);font-size:1rem;}
+
+/* ── CHAMP DE SAISIE ── */
+.cell-in{
+  border:1.6px solid var(--blue);border-radius:7px;
+  background:#f0f8fd;color:var(--blue);font-family:'JetBrains Mono',monospace;
+  font-size:.88rem;font-weight:600;text-align:center;padding:.3rem .5rem;outline:none;
+  transition:border-color .2s,background .2s;min-width:120px;
+}
+.cell-in.wide{min-width:100%;text-align:left;}
+.cell-in.med{min-width:240px;}
+.cell-in:focus{border-color:#1a6a82;background:#fff;box-shadow:0 0 0 3px rgba(58,181,216,.15);}
+.cell-in.ok{background:#f0faeb;border-color:var(--green-bd);color:#3a7d0a;}
+.cell-in.ko{background:#fff0ef;border-color:var(--pink-bd);color:#c0392b;}
+.cell-in:disabled{cursor:default;}
+.fracline{font-family:'JetBrains Mono',monospace;font-size:.88rem;color:var(--text);}
+
+/* grille 2 colonnes pour ex3 & écriture lettres */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1.4rem;}
+@media(max-width:560px){.grid2{grid-template-columns:1fr;}}
+
+/* ── BOUTONS / FEEDBACK ── */
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0 0;}
+.btn{
+  display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1.1rem;
+  border-radius:99px;font-family:'Syne',sans-serif;font-size:.84rem;font-weight:700;
+  cursor:pointer;border:none;transition:transform .12s;
+}
+.btn:active{transform:scale(.96);}
+.btn-p{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.25);}
+.btn-g{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.fb{
+  margin:.9rem 0 0;padding:.6rem .9rem;border-radius:10px;
+  font-size:.85rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;
+}
+.fb.show{display:flex;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green-bd);color:#3a7d0a;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink-bd);color:#c0392b;}
+.fb .det{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);margin-top:.2rem;}
+
+.hint{
+  margin:.7rem 0 0;background:#fffbeb;border:1.5px dashed #f5c518;
+  border-radius:10px;padding:.55rem .9rem;font-size:.81rem;color:#7a6010;
+  line-height:1.55;display:none;
+}
+.hint.show{display:block;}
+.hint strong{color:var(--orange-bd);}
+
+.divider{border:none;border-top:2px dashed var(--border);margin:2.4rem 0 0;}
+.note-line{
+  margin-top:1.2rem;font-size:.84rem;color:var(--blue-hd);font-weight:700;
+  text-decoration:underline;text-underline-offset:3px;
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="body">
+
+    <!-- ─────────── EXERCICE 1 ─────────── -->
+    <div class="exo-title">1. Pour chaque décomposition, écrire le nombre décimal en chiffres correspondant.</div>
+    <div id="ex1"></div>
+    <div class="tools">
+      <button class="btn btn-g" onclick="toggleHint('h1')">? Indice</button>
+      <button class="btn btn-p" onclick="checkEx1()">Valider ✓</button>
+    </div>
+    <div class="hint" id="h1">
+      <strong>Astuce :</strong> chaque facteur donne un chiffre à une position. ×10 → dizaines,
+      ×1 → unités, ×0,1 → dixièmes, ×0,01 → centièmes, ×0,001 → millièmes, ×0,0001 → dix-millièmes.
+      Place chaque chiffre à son rang, mets des 0 dans les rangs vides.
+    </div>
+    <div class="fb" id="fb1"><span class="i"></span><div><div class="m"></div><div class="det"></div></div></div>
+
+
+    <!-- ─────────── EXERCICE 2 ─────────── -->
+    <div class="exo-title">2. Décomposer les nombres en suivant l'exemple ci-dessous.</div>
+    <div class="exo-sub">Exemple : <span class="ex-eq">68,72 = (6×10) + (8×1) + (7×0,1) + (2×0,01)</span></div>
+    <div id="ex2"></div>
+    <div class="tools">
+      <button class="btn btn-g" onclick="toggleHint('h2')">? Indice</button>
+      <button class="btn btn-p" onclick="checkEx2()">Valider ✓</button>
+    </div>
+    <div class="hint" id="h2">
+      <strong>Astuce :</strong> écris un produit par chiffre non nul. Ex : 378,5 = (3×100)+(7×10)+(8×1)+(5×0,1).
+      Tu peux écrire les × comme « x » ou « * », et utiliser des espaces librement.
+    </div>
+    <div class="fb" id="fb2"><span class="i"></span><div><div class="m"></div><div class="det"></div></div></div>
+
+
+    <!-- ─────────── EXERCICE 3 ─────────── -->
+    <div class="exo-title">3. Donner l'écriture d'une fraction décimale de :</div>
+    <div id="ex3" class="grid2"></div>
+    <div class="tools">
+      <button class="btn btn-g" onclick="toggleHint('h3')">? Indice</button>
+      <button class="btn btn-p" onclick="checkEx3()">Valider ✓</button>
+    </div>
+    <div class="hint" id="h3">
+      <strong>Astuce :</strong> compte les chiffres après la virgule pour choisir le dénominateur.
+      1 chiffre → /10, 2 chiffres → /100. Ex : 56,9 = 569/10 ; 235,01 = 23501/100.
+      Écris ta réponse sous la forme <em>numérateur/dénominateur</em>.
+    </div>
+    <div class="fb" id="fb3"><span class="i"></span><div><div class="m"></div><div class="det"></div></div></div>
+
+
+    <hr class="divider"/>
+
+    <!-- ─────────── EXERCICE 4 (ex-devoir maison, sans le titre) ─────────── -->
+    <div class="exo-title">4. Écrire en lettres les nombres suivants.</div>
+    <div id="ex4" class="grid2"></div>
+    <div class="tools">
+      <button class="btn btn-g" onclick="toggleHint('h4')">? Indice</button>
+      <button class="btn btn-p" onclick="checkEx4()">Valider ✓</button>
+    </div>
+    <div class="hint" id="h4">
+      <strong>Astuce :</strong> la virgule se lit « virgule ». Ex : 56,9 → cinquante-six virgule neuf.
+      Tu peux aussi dire la partie décimale par rang : 235,01 → deux cent trente-cinq virgule zéro un
+      (ou « un centième »). On accepte plusieurs formulations.
+    </div>
+    <div class="fb" id="fb4"><span class="i"></span><div><div class="m"></div><div class="det"></div></div></div>
+
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+function toggleHint(id){$('#'+id).classList.toggle('show');}
+function setFB(id,ok,msg,det){
+  const f=$('#'+id);f.className='fb show '+(ok?'ok':'ko');
+  f.querySelector('.i').textContent=ok?'✅':'❌';
+  f.querySelector('.m').textContent=msg;
+  f.querySelector('.det').textContent=det||'';
+}
+
+/* normalisation numérique : enlève espaces/insécables, virgule -> point */
+function numNorm(s){
+  return s.trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',', '.');
+}
+function asNumber(s){const n=parseFloat(numNorm(s));return isNaN(n)?null:n;}
+
+/* ─────────── EX1 : décompositions -> nombre ─────────── */
+const EX1=[
+  {expr:'(7×10) + (2×1) + (3×0,1) + (5×0,001) + (6×0,0001)', val:72.3056},
+  {expr:'(4×100) + (8×1) + (5×0,1) + (2×0,001) + (7×0,0001)', val:408.5027},
+  {expr:'(9×1) + (3×0,1) + (4×0,001) + (6×0,0001)', val:9.3046},
+  {expr:'(5×10) + (6×0,01)', val:50.06},
+];
+function buildEx1(){
+  const box=$('#ex1');box.innerHTML='';
+  EX1.forEach((it,i)=>{
+    const row=document.createElement('div');row.className='qrow';
+    row.innerHTML='<span class="qexpr big">'+it.expr+'</span><span class="arrow">→</span>';
+    const inp=document.createElement('input');inp.className='cell-in';inp.id='e1_'+i;inp.placeholder='nombre ?';
+    inp.autocomplete='off';inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkEx1();});
+    row.appendChild(inp);box.appendChild(row);
+  });
+}
+function checkEx1(){
+  let ok=0;const wrong=[];
+  EX1.forEach((it,i)=>{
+    const inp=$('#e1_'+i);const n=asNumber(inp.value);
+    const good=n!==null && Math.abs(n-it.val)<1e-9;
+    inp.classList.toggle('ok',good);inp.classList.toggle('ko',!good);
+    if(good)ok++;else wrong.push(String.fromCharCode(97+i)+') '+String(it.val).replace('.',','));
+  });
+  setFB('fb1',ok===EX1.length, ok===EX1.length?'Parfait !':'Réponses correctes : '+ok+' / '+EX1.length,
+        ok===EX1.length?'':'Correction : '+wrong.join('   '));
+}
+
+/* ─────────── EX2 : nombre -> décomposition (vérif par recalcul) ─────────── */
+const EX2=[
+  {lbl:'a)', val:378.5},
+  {lbl:'b)', val:10.53},
+  {lbl:'c)', val:5200},
+  {lbl:'d)', val:0.109},
+  {lbl:'e)', val:684.652},
+  {lbl:'f)', val:890.07},
+];
+function buildEx2(){
+  const box=$('#ex2');box.innerHTML='';
+  EX2.forEach((it,i)=>{
+    const row=document.createElement('div');row.className='qrow';
+    row.innerHTML='<span class="qlabel">'+it.lbl+'</span><span class="qexpr">'+String(it.val).replace('.',',')+' =</span>';
+    const inp=document.createElement('input');inp.className='cell-in wide';inp.id='e2_'+i;
+    inp.placeholder='(...×...) + (...×...) + ...';inp.autocomplete='off';
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkEx2();});
+    row.appendChild(inp);box.appendChild(row);
+  });
+}
+// évalue une décomposition tapée par l'élève : somme de produits (a×b)+(c×d)...
+function evalDecomp(str){
+  if(!str.trim())return null;
+  let s=str.replace(/\u202f/g,'').replace(/×|x|X|\*/g,'*').replace(/,/g,'.').replace(/\s/g,'');
+  // sécurité : n'autorise que chiffres . * + ( )
+  if(!/^[0-9.*+()]+$/.test(s))return NaN;
+  // chaque facteur doit être un produit ; on évalue de façon contrôlée
+  try{
+    // découpe sur '+' au niveau racine
+    const parts=s.replace(/\(/g,'').replace(/\)/g,'').split('+').filter(Boolean);
+    let total=0;
+    for(const p of parts){
+      const facs=p.split('*').filter(Boolean);
+      let prod=1;for(const f of facs){const v=parseFloat(f);if(isNaN(v))return NaN;prod*=v;}
+      total+=prod;
+    }
+    return total;
+  }catch(e){return NaN;}
+}
+function checkEx2(){
+  let ok=0;const wrong=[];
+  EX2.forEach((it,i)=>{
+    const inp=$('#e2_'+i);const r=evalDecomp(inp.value);
+    const good=r!==null && !isNaN(r) && Math.abs(r-it.val)<1e-9;
+    inp.classList.toggle('ok',good);inp.classList.toggle('ko',!good);
+    if(good)ok++;else wrong.push(it.lbl+' doit valoir '+String(it.val).replace('.',','));
+  });
+  setFB('fb2',ok===EX2.length, ok===EX2.length?'Bravo, décompositions justes !':'Décompositions correctes : '+ok+' / '+EX2.length,
+        ok===EX2.length?'':wrong.join('   '));
+}
+
+/* ─────────── EX3 : fraction décimale ─────────── */
+// num/den : on accepte toute fraction égale (num/den == val) à dénominateur puissance de 10
+const EX3=[
+  {lbl:'a)', val:'56,9',   answers:['569/10']},
+  {lbl:'b)', val:'47,8',   answers:['478/10']},
+  {lbl:'c)', val:'235,01', answers:['23501/100']},
+  {lbl:'d)', val:'8,63',   answers:['863/100']},
+];
+function buildEx3(){
+  const box=$('#ex3');box.innerHTML='';
+  EX3.forEach((it,i)=>{
+    const row=document.createElement('div');row.className='qrow';
+    row.innerHTML='<span class="qlabel">'+it.lbl+'</span><span class="qexpr">'+it.val+' =</span>';
+    const inp=document.createElement('input');inp.className='cell-in';inp.id='e3_'+i;
+    inp.placeholder='.../...';inp.autocomplete='off';
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkEx3();});
+    row.appendChild(inp);box.appendChild(row);
+  });
+}
+function checkEx3(){
+  let ok=0;const wrong=[];
+  EX3.forEach((it,i)=>{
+    const inp=$('#e3_'+i);const raw=inp.value.replace(/\s/g,'').replace(/\u202f/g,'');
+    let good=false;
+    const m=raw.match(/^(\d+)\/(\d+)$/);
+    if(m){
+      const num=parseInt(m[1],10),den=parseInt(m[2],10);
+      const target=parseFloat(it.val.replace(',','.'));
+      // le dénominateur doit être une puissance de 10 (10, 100, 1000…)
+      const isPow10=/^1[0]+$/.test(String(den));
+      good = isPow10 && Math.abs(num/den-target)<1e-9;
+    }
+    inp.classList.toggle('ok',good);inp.classList.toggle('ko',!good);
+    if(good)ok++;else wrong.push(it.lbl+' '+it.answers[0]);
+  });
+  setFB('fb3',ok===EX3.length, ok===EX3.length?'Parfait !':'Fractions correctes : '+ok+' / '+EX3.length,
+        ok===EX3.length?'':'Correction : '+wrong.join('   '));
+}
+
+/* ─────────── EX4 : écriture en lettres ─────────── */
+const EX4=[
+  {lbl:'a)', val:'56,9',   accept:['cinquante-six virgule neuf','cinquante six virgule neuf','cinquante-six virgule neuf dixiemes','cinquante-six et neuf dixiemes']},
+  {lbl:'b)', val:'47,8',   accept:['quarante-sept virgule huit','quarante sept virgule huit','quarante-sept virgule huit dixiemes','quarante-sept et huit dixiemes']},
+  {lbl:'c)', val:'235,01', accept:['deux cent trente-cinq virgule zero un','deux cent trente cinq virgule zero un','deux cent trente-cinq virgule zero un centiemes','deux cent trente-cinq et un centieme']},
+  {lbl:'d)', val:'8,63',   accept:['huit virgule soixante-trois','huit virgule soixante trois','huit virgule soixante-trois centiemes','huit et soixante-trois centiemes']},
+];
+function lettersNorm(s){
+  return s.toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')   // enlève accents
+    .replace(/[.\-']/g,' ')                            // tirets/points -> espace
+    .replace(/\s+/g,' ').trim();
+}
+function buildEx4(){
+  const box=$('#ex4');box.innerHTML='';
+  EX4.forEach((it,i)=>{
+    const row=document.createElement('div');row.className='qrow';
+    row.innerHTML='<span class="qlabel">'+it.lbl+'</span><span class="qexpr">'+it.val+'</span><span class="arrow">→</span>';
+    const inp=document.createElement('input');inp.className='cell-in med';inp.id='e4_'+i;
+    inp.placeholder='en lettres…';inp.autocomplete='off';
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkEx4();});
+    row.appendChild(inp);box.appendChild(row);
+  });
+}
+function checkEx4(){
+  let ok=0;const wrong=[];
+  EX4.forEach((it,i)=>{
+    const inp=$('#e4_'+i);const v=lettersNorm(inp.value);
+    const good=it.accept.some(a=>lettersNorm(a)===v);
+    inp.classList.toggle('ok',good);inp.classList.toggle('ko',!good);
+    if(good)ok++;else wrong.push(it.lbl+' '+it.accept[0]);
+  });
+  setFB('fb4',ok===EX4.length, ok===EX4.length?'Bravo !':'Réponses correctes : '+ok+' / '+EX4.length,
+        ok===EX4.length?'':'Ex. attendu : '+wrong.join('   '));
+}
+
+buildEx1();buildEx2();buildEx3();buildEx4();
+</script>
+</body>
+</html>
