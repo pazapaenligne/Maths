@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Modéliser par une inéquation – Niveau 2 – S1 J5</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --day-color:#f5c518; --day-dark:#8a6000; --day-light:#fffbeb;
+      --day-border:#f5e08a; --day-glow:rgba(245,197,24,.3);
+    }
+    :root {
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;letter-spacing:.02em;word-spacing:.06em;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .section-label{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);padding:.22rem .8rem;border-radius:6px;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;}
+    .niveau-label{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:#fff0ef;color:#c0392b;border:1.5px solid #f9c0bb;padding:.18rem .7rem;border-radius:5px;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;margin-left:.4rem;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;}
+    h1 .hl{color:var(--day-color);}
+    .consigne-box{margin-top:.7rem;background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:0 8px 8px 0;padding:.6rem 1rem;font-size:.88rem;color:var(--day-dark);font-family:'JetBrains Mono',monospace;line-height:1.7;max-width:680px;text-align:left;}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));border-radius:99px;transition:width .5s ease;}
+    .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong .dot{background:var(--pink);}
+    .chip.remaining .dot{background:var(--muted);}
+    .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink),var(--blue));}
+    .q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .problem-box{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:.95rem;color:var(--day-dark);line-height:1.9;}
+    .problem-box .p-intro{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--day-color);margin-bottom:.5rem;}
+    .problem-box strong{font-weight:700;color:var(--text);}
+    .q-question{font-size:.88rem;color:var(--muted);margin-bottom:.9rem;line-height:1.7;}
+    .qcm-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;}
+    .qcm-opt{display:flex;align-items:center;gap:.8rem;padding:.65rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--bg);cursor:pointer;transition:border-color .15s,background .15s;font-family:'JetBrains Mono',monospace;font-size:.93rem;font-weight:600;color:var(--text);}
+    .qcm-opt:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+    .qcm-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:border-color .15s,background .15s;}
+    .qcm-opt.selected{border-color:var(--day-color);background:var(--day-light);}
+    .qcm-opt.selected .qcm-radio{background:var(--day-color);border-color:var(--day-color);}
+    .qcm-opt.correct-opt{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .qcm-opt.correct-opt .qcm-radio{background:var(--green);border-color:var(--green);}
+    .qcm-opt.wrong-opt{border-color:var(--pink);background:#fff0ef;color:#c0392b;}
+    .qcm-opt.wrong-opt .qcm-radio{background:var(--pink);border-color:var(--pink);}
+    .qcm-opt.locked{cursor:default;}
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:2.6rem;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-hint{background:var(--orange);color:#fff;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+    .hint-box{margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.75rem 1rem;font-size:.85rem;color:#7a6010;display:none;line-height:1.8;font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
+    .feedback{margin-top:1.2rem;padding:.8rem 1rem;border-radius:10px;font-size:.9rem;display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-icon{font-size:1.4rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.3rem;line-height:1.8;}
+    .correction-box{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:0 8px 8px 0;padding:.75rem 1rem;margin-top:.9rem;font-size:.84rem;font-family:'JetBrains Mono',monospace;color:var(--day-dark);line-height:1.8;display:none;}
+    .correction-box.show{display:block;}
+    .correction-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--day-color);margin-bottom:.4rem;}
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.4rem;gap:.7rem;}
+    .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.8rem;padding:.65rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.6;}
+    .recap-item .eq{color:var(--day-dark);flex:1;}
+    .recap-item.ok-item{border-color:#b5e08a;}
+    .recap-item.ko-item{border-color:#f9c0bb;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card,.results{animation:fadeUp .4s ease both;}
+    @media(max-width:480px){.card{padding:1.4rem;}.btn{font-size:.85rem;padding:.55rem 1rem;}.qcm-opt{font-size:.83rem;}}
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 3&egrave;me
+    </div><br/>
+    <span class="section-label">&#127947; Je m&rsquo;entra&icirc;ne pour progresser</span>
+    <span class="niveau-label">&#128293; Niveau 2 &ndash; Interm&eacute;diaire</span>
+    <div class="week-label">Semaine 1 &ndash; Jour 5 (Vendredi)</div>
+    <h1>Mod&eacute;liser un probl&egrave;me<br>par une <span class="hl">in&eacute;quation</span></h1>
+    <div class="consigne-box">
+      Lis attentivement chaque situation et choisis l&rsquo;in&eacute;quation qui la mod&eacute;lise correctement.
+    </div>
+    <p class="subtitle">5 probl&egrave;mes &middot; QCM &middot; niveau interm&eacute;diaire</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="prog-label">Probl&egrave;me 1 / 5</span>
+      <span id="prog-pct">0&nbsp;%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="score-row">
+    <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+    <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+    <div class="chip remaining"><div class="dot"></div><span id="count-rem">5</span> restantes</div>
+  </div>
+
+  <div class="card" id="ex-card">
+    <div class="card-stripe"></div>
+    <div class="q-num" id="q-num">Probl&egrave;me 1</div>
+    <div class="theme-badge" id="q-theme">Mod&eacute;lisation</div>
+    <div class="problem-box" id="problem-box">
+      <div class="p-intro">&#128221; &Eacute;nonc&eacute;</div>
+      <div id="problem-text"></div>
+    </div>
+    <div class="q-question" id="q-question"></div>
+    <div class="qcm-list" id="qcm-list"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-check" onclick="checkAnswer()" disabled>&#10003; Valider</button>
+      <button class="btn btn-hint" onclick="toggleHint()">? Indice</button>
+    </div>
+    <div class="hint-box" id="hint-box"></div>
+    <div class="feedback" id="feedback">
+      <span class="feedback-icon" id="fb-icon"></span>
+      <div>
+        <div id="fb-msg"></div>
+        <div class="feedback-detail" id="fb-detail"></div>
+      </div>
+    </div>
+    <div class="correction-box" id="correction-box">
+      <div class="correction-title">&#128161; Correction d&eacute;taill&eacute;e</div>
+      <div id="correction-content"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()">&larr; Pr&eacute;c&eacute;dent</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Suivant &rarr;</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-screen">
+    <div class="results-card">
+      <div class="logo-badge" style="margin-bottom:.5rem">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#3ab5d8"></span>
+        R&eacute;sultats
+      </div>
+      <div class="results-score"><span class="s-num" id="score-num">0</span>/5</div>
+      <div class="stars" id="stars-row"></div>
+      <div class="results-msg" id="results-msg"></div>
+      <div class="recap-list" id="recap-list"></div>
+      <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">&#128260; Recommencer</button>
+    </div>
+  </div>
+
+<script>
+var EXERCISES = [
+  {
+    problem: "Une librairie vend des livres de poche \u00e0 <strong>15\u00a0\u20ac</strong> et des livres reli\u00e9s \u00e0 <strong>25\u00a0\u20ac</strong>. Elle vend <strong>deux fois plus</strong> de livres de poche que de livres reli\u00e9s. Le chiffre d\u2019affaires doit d\u00e9passer <strong>1\u202f500\u00a0\u20ac</strong>.",
+    question: "On note x le nombre de livres reli\u00e9s vendus. Quelle in\u00e9quation mod\u00e9lise la situation ?",
+    choices: [
+      "15x + 25x > 1500",
+      "2x \u00d7 15 + 25x > 1500",
+      "15x + 2 \u00d7 25x > 1500",
+      "30x + 25x \u2265 1500"
+    ],
+    correct: 1,
+    hint: "Livres reli\u00e9s = x, livres de poche = 2x (deux fois plus). Recette = 15 \u00d7 2x + 25 \u00d7 x. \u00ab\u00a0d\u00e9passer\u00a0\u00bb = strictement sup\u00e9rieur.",
+    correction: "Livres reli\u00e9s = x \u2192 livres de poche = 2x.<br>Recette = 15 \u00d7 2x + 25 \u00d7 x = 30x + 25x = 55x.<br>\u00ab\u00a0D\u00e9passer 1\u202f500\u00a0\u20ac\u00a0\u00bb \u2192 strictement sup\u00e9rieur \u2192 &gt;.<br>In\u00e9quation : <strong>2x \u00d7 15 + 25x &gt; 1\u202f500</strong> (soit 55x &gt; 1\u202f500)"
+  },
+  {
+    problem: "Un train parcourt <strong>300\u00a0km</strong> \u00e0 la vitesse de <strong>v\u00a0km/h</strong>. Un autre train parcourt <strong>400\u00a0km</strong> \u00e0 la vitesse de <strong>(v + 20)\u00a0km/h</strong>. Le deuxi\u00e8me train doit arriver en <strong>moins de temps</strong> que le premier.",
+    question: "Quelle in\u00e9quation traduit que le deuxi\u00e8me train est plus rapide (arrive avant) ?",
+    choices: [
+      "400 / (v + 20) &gt; 300 / v",
+      "400 / (v + 20) &lt; 300 / v",
+      "400(v + 20) &lt; 300v",
+      "300 / v &lt; 400 / (v + 20)"
+    ],
+    correct: 1,
+    hint: "Temps = distance \u00f7 vitesse. Moins de temps \u2192 dur\u00e9e du train 2 &lt; dur\u00e9e du train 1. Dur\u00e9e 1 = 300/v, dur\u00e9e 2 = 400/(v+20).",
+    correction: "Dur\u00e9e train 1 = 300/v.<br>Dur\u00e9e train 2 = 400/(v+20).<br>Train 2 arrive avant \u2192 sa dur\u00e9e est plus courte \u2192 &lt;.<br>In\u00e9quation : <strong>400/(v+20) &lt; 300/v</strong>"
+  },
+  {
+    problem: "Une association organise un s\u00e9jour. Le co\u00fbt fixe est de <strong>800\u00a0\u20ac</strong> et chaque participant paie <strong>45\u00a0\u20ac</strong>. L\u2019association ne veut <strong>pas perdre d\u2019argent</strong> (recette \u2265 co\u00fbts).",
+    question: "On note n le nombre de participants. Quelle in\u00e9quation mod\u00e9lise la situation ?",
+    choices: [
+      "45n &lt; 800",
+      "45n &gt; 800",
+      "45n \u2265 800",
+      "45n + 800 \u2265 0"
+    ],
+    correct: 2,
+    hint: "Recette = 45n. Co\u00fbt fixe = 800\u00a0\u20ac. Ne pas perdre \u2192 recette \u2265 co\u00fbt \u2192 45n \u2265 800.",
+    correction: "Recette = 45n.<br>Co\u00fbt = 800\u00a0\u20ac.<br>\u00ab\u00a0Ne pas perdre d\u2019argent\u00a0\u00bb \u2192 recette \u2265 co\u00fbt.<br>In\u00e9quation : <strong>45n \u2265 800</strong>"
+  },
+  {
+    problem: "Un rectangle a un p\u00e9rim\u00e8tre <strong>inf\u00e9rieur \u00e0 60\u00a0cm</strong>. Sa longueur est <strong>(2x + 3)\u00a0cm</strong> et sa largeur est <strong>(x \u2212 1)\u00a0cm</strong>.",
+    question: "Quelle in\u00e9quation mod\u00e9lise la contrainte sur le p\u00e9rim\u00e8tre ?",
+    choices: [
+      "2x + 3 + x \u2212 1 &lt; 60",
+      "2(2x + 3 + x \u2212 1) &lt; 60",
+      "2(2x + 3)(x \u2212 1) &lt; 60",
+      "2(2x + 3) + 2(x \u2212 1) \u2264 60"
+    ],
+    correct: 1,
+    hint: "P\u00e9rim\u00e8tre rectangle = 2 \u00d7 (longueur + largeur). \u00ab\u00a0inf\u00e9rieur \u00e0\u00a0\u00bb \u2192 signe strict &lt;.",
+    correction: "P\u00e9rim\u00e8tre = 2 \u00d7 (longueur + largeur) = 2[(2x+3)+(x\u22121)] = 2(3x+2).<br>\u00ab\u00a0Inf\u00e9rieur \u00e0 60\u00a0\u00bb \u2192 strict &lt;.<br>In\u00e9quation : <strong>2(2x + 3 + x \u2212 1) &lt; 60</strong>"
+  },
+  {
+    problem: "Une voiture consomme <strong>6\u00a0L aux 100\u00a0km</strong>. Le r\u00e9servoir contient <strong>50\u00a0L</strong>. Le conducteur veut parcourir <strong>au moins 700\u00a0km</strong> sans refaire le plein.",
+    question: "On note d la distance parcourue. Quelle in\u00e9quation exprime la contrainte sur le carburant ?",
+    choices: [
+      "6d / 100 &gt; 50",
+      "6d / 100 \u2264 50",
+      "6 \u00d7 100 / d \u2264 50",
+      "d / 6 \u2264 50"
+    ],
+    correct: 1,
+    hint: "Consommation pour d\u00a0km = 6 \u00d7 d/100. Cette quantit\u00e9 ne doit pas d\u00e9passer les 50\u00a0L disponibles.",
+    correction: "Consommation = 6 \u00d7 d / 100 (litres pour d km).<br>Il ne faut pas d\u00e9passer 50\u00a0L \u2192 \u2264 50.<br>In\u00e9quation : <strong>6d/100 \u2264 50</strong><br>V\u00e9rif : 6 \u00d7 700/100 = 42 \u2264 50 \u2713 (700\u00a0km est faisable)"
+  }
+];
+
+var TOTAL = EXERCISES.length;
+var current = 0;
+var userAnswers = new Array(TOTAL).fill(null);
+var selectedChoice = null;
+var hintOpen = false;
+var $ = function(id){ return document.getElementById(id); };
+
+function render() {
+  var ex = EXERCISES[current];
+  selectedChoice = null;
+  $("q-num").textContent = "Probl\u00e8me " + (current + 1);
+  $("problem-text").innerHTML = ex.problem;
+  $("q-question").innerHTML = ex.question;
+  $("hint-box").innerHTML = "";
+  $("hint-box").classList.remove("show");
+  $("correction-box").classList.remove("show");
+  hintOpen = false;
+  $("feedback").className = "feedback";
+  $("btn-prev").disabled = current === 0;
+  $("btn-next").textContent = current === TOTAL - 1 ? "Terminer \u2713" : "Suivant \u2192";
+  $("btn-next").disabled = userAnswers[current] === null;
+  $("btn-check").disabled = true;
+  buildQCM(ex);
+  updateProgress();
+  if (userAnswers[current] !== null) showFeedback();
+}
+
+function buildQCM(ex) {
+  var list = $("qcm-list");
+  list.innerHTML = "";
+  var locked = userAnswers[current] !== null;
+  ex.choices.forEach(function(ch, idx) {
+    var opt = document.createElement("div");
+    opt.className = "qcm-opt" + (locked ? " locked" : "");
+    if (locked) {
+      if (idx === ex.correct) opt.classList.add("correct-opt");
+      else if (idx === userAnswers[current] && idx !== ex.correct) opt.classList.add("wrong-opt");
+    } else {
+      opt.addEventListener("click", function() { selectChoice(idx); });
+    }
+    var radio = document.createElement("div");
+    radio.className = "qcm-radio";
+    var label = document.createElement("span");
+    label.innerHTML = ch;
+    opt.appendChild(radio);
+    opt.appendChild(label);
+    list.appendChild(opt);
+  });
+}
+
+function selectChoice(idx) {
+  if (userAnswers[current] !== null) return;
+  selectedChoice = idx;
+  $("btn-check").disabled = false;
+  var opts = $("qcm-list").querySelectorAll(".qcm-opt");
+  opts.forEach(function(o, i) { o.classList.toggle("selected", i === idx); });
+}
+
+function checkAnswer() {
+  if (selectedChoice === null) return;
+  userAnswers[current] = selectedChoice;
+  $("btn-check").disabled = true;
+  buildQCM(EXERCISES[current]);
+  showFeedback();
+  $("btn-next").disabled = false;
+  updateProgress();
+}
+
+function showFeedback() {
+  var ex = EXERCISES[current];
+  var correct = userAnswers[current] === ex.correct;
+  var fb = $("feedback");
+  fb.className = "feedback show " + (correct ? "ok" : "ko");
+  $("fb-icon").textContent = correct ? "\u2705" : "\u274C";
+  $("fb-msg").textContent = correct ? "Bravo\u00a0! Bonne mod\u00e9lisation." : "Pas tout \u00e0 fait\u2026";
+  $("fb-detail").innerHTML = correct ? "" : "La bonne r\u00e9ponse \u00e9tait\u00a0: <strong>" + ex.choices[ex.correct] + "</strong>";
+  $("correction-content").innerHTML = ex.correction;
+  $("correction-box").classList.add("show");
+}
+
+function toggleHint() {
+  hintOpen = !hintOpen;
+  var h = $("hint-box");
+  if (hintOpen) {
+    h.innerHTML = "<strong>? Indice\u00a0:</strong> " + EXERCISES[current].hint;
+    h.classList.add("show");
+  } else {
+    h.classList.remove("show");
+  }
+}
+
+function updateProgress() {
+  var answered = userAnswers.filter(function(a){ return a !== null; }).length;
+  var ok = userAnswers.filter(function(a, i){ return a !== null && a === EXERCISES[i].correct; }).length;
+  var pct = Math.round(answered / TOTAL * 100);
+  $("progress-bar").style.width = pct + "%";
+  $("prog-label").textContent = "Probl\u00e8me " + (current + 1) + " / " + TOTAL;
+  $("prog-pct").textContent = pct + "\u00a0%";
+  $("count-ok").textContent = ok;
+  $("count-ko").textContent = answered - ok;
+  $("count-rem").textContent = TOTAL - answered;
+}
+
+function nextQ() {
+  if (current < TOTAL - 1) { current++; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else showResults();
+}
+function prevQ() { if (current > 0) { current--; render(); window.scrollTo({top:0,behavior:"smooth"}); } }
+
+function showResults() {
+  $("ex-card").style.display = "none";
+  $("results-screen").classList.add("show");
+  var ok = userAnswers.filter(function(a, i){ return a !== null && a === EXERCISES[i].correct; }).length;
+  $("score-num").textContent = ok;
+  var s = ok >= 5 ? 5 : ok >= 4 ? 4 : ok >= 3 ? 3 : ok >= 2 ? 2 : 1;
+  $("stars-row").textContent = "\u2B50".repeat(s) + "\u2606".repeat(5 - s);
+  var msgs = ["Continue \u00e0 t\u2019entra\u00eener\u00a0!", "Bon d\u00e9but\u00a0!", "Pas mal\u00a0!", "Bien jou\u00e9\u00a0!", "Tr\u00e8s bien\u00a0!", "Parfait\u00a0! \uD83C\uDF89"];
+  $("results-msg").textContent = msgs[Math.min(ok, 5)];
+  var list = $("recap-list"); list.innerHTML = "";
+  EXERCISES.forEach(function(ex, i) {
+    var correct = userAnswers[i] !== null && userAnswers[i] === ex.correct;
+    var d = document.createElement("div");
+    d.className = "recap-item " + (correct ? "ok-item" : "ko-item");
+    var icon = document.createElement("span"); icon.textContent = correct ? "\u2705" : "\u274C";
+    var eq = document.createElement("span"); eq.className = "eq";
+    eq.innerHTML = ex.choices[ex.correct];
+    d.appendChild(icon); d.appendChild(eq);
+    list.appendChild(d);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart() {
+  userAnswers = new Array(TOTAL).fill(null);
+  current = 0; selectedChoice = null;
+  $("ex-card").style.display = "block";
+  $("results-screen").classList.remove("show");
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
