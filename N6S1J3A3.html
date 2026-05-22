@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – 6e – Vrai ou Faux : fractions décimales</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#ffffff;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fff;color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;}
+header{text-align:center;margin-bottom:1.5rem;}
+.badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--yellow);color:#000;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.28rem .85rem;border-radius:99px;margin-bottom:.8rem;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+h1{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;line-height:1.2;color:var(--text);}
+h1 .gl{color:var(--green);}h1 .bl{color:var(--blue);}
+.sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-top:.3rem;margin-bottom:1.6rem;}
+.prog-wrap{width:100%;max-width:660px;margin-bottom:1.2rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.35rem;}
+.bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;transition:width .5s;}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+.chip{display:flex;align-items:center;gap:.35rem;padding:.28rem .7rem;border-radius:99px;font-size:.75rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:#fff;font-weight:600;color:var(--text);}
+.chip .cd{width:8px;height:8px;border-radius:50%;}
+.card{width:100%;max-width:660px;background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:1.8rem 1.8rem 1.4rem;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink),var(--blue),var(--green));}
+.qnum{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.08em;}
+.eq{font-size:clamp(1.05rem,2.2vw,1.3rem);font-weight:800;color:var(--text);margin-bottom:1rem;line-height:1.4;}
+.eq b{color:var(--blue);font-family:'JetBrains Mono',monospace;}
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;line-height:1;font-family:'JetBrains Mono',monospace;margin:0 .1rem;}
+.frac .num{border-bottom:2px solid var(--text);padding:0 .35rem 2px;}
+.frac .den{padding-top:2px;}
+
+/* ── Boutons Vrai / Faux ── */
+.vf-row{display:flex;gap:.8rem;margin-bottom:.4rem;}
+.vf-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.85rem 1rem;border-radius:14px;border:2.5px solid var(--border);background:#fff;font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:transform .12s,border-color .15s,background .15s;color:var(--text);}
+.vf-btn:active{transform:scale(.97);}
+.vf-btn .vf-ico{font-size:1.2rem;}
+.vf-btn.v:hover{border-color:var(--green);}
+.vf-btn.f:hover{border-color:var(--pink);}
+/* après validation : la justesse prime, pas le type de bouton */
+.vf-btn.correct{border-color:var(--green)!important;background:#f0faeb!important;color:#3a7d0a!important;}
+.vf-btn.wrong{border-color:var(--pink)!important;background:#fff0ef!important;color:#c0392b!important;}
+/* petit liseré sur le bouton effectivement choisi par l'élève */
+.vf-btn.picked{box-shadow:0 0 0 3px rgba(26,29,35,.12);}
+.vf-btn:disabled{cursor:default;}
+
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.48rem 1.1rem;border-radius:99px;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-p{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.25);}
+.btn-h{background:var(--yellow);color:#5a3e00;}
+.btn-g{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.fb{margin-top:.9rem;padding:.65rem .9rem;border-radius:10px;font-size:.86rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;}
+.fb.show{display:flex;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green);color:#3a7d0a;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.fb-det{font-size:.82rem;color:var(--text);margin-top:.25rem;line-height:1.55;}
+.fb-det b{color:var(--orange);}
+.hint-box{margin-top:.8rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.65rem .9rem;font-size:.82rem;color:#7a6010;display:none;line-height:1.6;}
+.hint-box.show{display:block;}
+.hint-box strong{color:var(--orange);}
+.nav{display:flex;justify-content:space-between;margin-top:1.2rem;gap:.5rem;}
+.results{width:100%;max-width:660px;text-align:center;display:none;}
+.results.show{display:block;}
+.results-card{background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:2.2rem 1.8rem;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.score{font-size:clamp(2.5rem,8vw,4.5rem);font-weight:800;line-height:1;margin:.6rem 0 .3rem;color:var(--blue);}
+.stars{font-size:1.8rem;margin:.3rem 0 .8rem;}
+.rmsg{color:var(--muted);font-size:.9rem;margin-bottom:1.8rem;}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.8rem;}
+.ritem{display:flex;align-items:center;gap:.6rem;padding:.5rem .9rem;background:#f7f6f2;border:1.5px solid var(--border);border-radius:10px;font-size:.8rem;color:var(--text);}
+.ritem.ok-i{border-color:#b5e08a;}
+.ritem.ko-i{border-color:#f9c0bb;}
+.ritem .re{flex:1;}
+.ritem .rv{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.74rem;color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">
+    <span class="dot" style="background:#f5c518"></span>
+    <span class="dot" style="background:#8dc63f"></span>
+    <span class="dot" style="background:#3ab5d8"></span>
+    Pazapa · Maths · 6e
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.73rem;color:#8a8f9a;margin-bottom:.35rem;letter-spacing:.06em;">Semaine 3 – Séance 6</div>
+  <h1>Vrai ou <span class="bl">Faux</span> : les fractions <span class="gl">décimales</span></h1>
+  <p class="sub">5 affirmations · niveau 6ème</p>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-lbl">Question 1 / 5</span><span id="prog-pct">0 %</span></div>
+  <div class="bar-bg"><div class="bar-fill" id="prog-bar" style="width:0%"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="cd" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correctes</div>
+  <div class="chip"><div class="cd" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreurs</div>
+  <div class="chip"><div class="cd" style="background:#8a8f9a"></div><span id="cnt-rem">5</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="stripe"></div>
+  <div class="qnum" id="q-num">Affirmation 1</div>
+  <div class="eq" id="q-eq"></div>
+  <div id="q-body"></div>
+  <div class="hint-box" id="hint-box"></div>
+  <div class="fb" id="feedback"><span id="fb-icon" style="font-size:1.1rem;flex-shrink:0"></span><div><div id="fb-msg"></div><div class="fb-det" id="fb-det"></div></div></div>
+  <div class="nav">
+    <button class="btn btn-g" id="btn-prev" onclick="prevQ()">← Précédent</button>
+    <div style="display:flex;gap:.5rem;">
+      <button class="btn btn-h" id="btn-hint" onclick="toggleHint()">? Indice</button>
+      <button class="btn btn-p" id="btn-next" onclick="nextQ()" disabled>Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="badge" style="margin-bottom:.5rem">
+      <span class="dot" style="background:#f5c518"></span>
+      <span class="dot" style="background:#8dc63f"></span>
+      <span class="dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="score"><span id="score-num">0</span>/5</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="rmsg" id="results-msg"></div>
+    <div class="recap" id="recap-list"></div>
+    <button class="btn btn-p" onclick="restart()" style="margin:0 auto;display:flex;">🔄 Recommencer</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  Semaine 3 – Séance 6 : Vrai / Faux – fractions décimales
+//  Rappel : une fraction décimale a pour dénominateur une
+//  PUISSANCE de 10 (1, 10, 100, 1000 …). Réponses :
+//   Q1 FAUX · Q2 VRAI · Q3 FAUX · Q4 FAUX · Q5 FAUX
+// ============================================================
+const EXS = [
+  {
+    html: 'Un nombre décimal ne peut <b>pas toujours</b> s\u2019écrire sous forme de fraction décimale.',
+    answer: false,
+    explain: 'Au contraire : <b>tout</b> nombre décimal peut s\u2019écrire sous forme de fraction décimale. C\u2019est même ce qui le définit. Ex. : 0,7 = 7/10 ; 2,35 = 235/100.',
+    hint: '<strong>Astuce :</strong> repense à un exemple. 0,7 = 7/10, 2,35 = 235/100… Trouves-tu un nombre décimal impossible à écrire ainsi ?'
+  },
+  {
+    html: '<span class="frac"><span class="num">4</span><span class="den">1</span></span> est une fraction décimale.',
+    answer: true,
+    explain: 'Vrai : le dénominateur 1 = 10<sup>0</sup> est une <b>puissance de 10</b>, et 4/1 = 4 est bien un nombre décimal.',
+    hint: '<strong>Astuce :</strong> une fraction décimale a un dénominateur égal à une puissance de 10 : 1, 10, 100, 1000… Le 1 en fait-il partie ?'
+  },
+  {
+    html: 'Une fraction décimale est une fraction dont le <b>numérateur</b> (le nombre « du haut ») est un multiple de 10.',
+    answer: false,
+    explain: 'C\u2019est le <b>dénominateur</b> (en bas) qui doit être une puissance de 10, pas le numérateur. Dans 7/10, le numérateur 7 n\u2019est pas un multiple de 10, et pourtant c\u2019est bien une fraction décimale.',
+    hint: '<strong>Astuce :</strong> dans une fraction décimale, quelle partie doit valoir 10, 100, 1000… : le haut ou le bas ?'
+  },
+  {
+    html: '<span class="frac"><span class="num">10</span><span class="den">3</span></span> est une fraction décimale.',
+    answer: false,
+    explain: 'Le dénominateur 3 n\u2019est pas une puissance de 10. De plus 10/3 = 3,333… n\u2019est même pas un nombre décimal.',
+    hint: '<strong>Astuce :</strong> regarde le dénominateur. 3 fait-il partie de 10, 100, 1000… ?'
+  },
+  {
+    html: 'Une fraction décimale est une fraction dont le dénominateur est un <b>multiple</b> de 10.',
+    answer: false,
+    explain: 'Presque ! Il faut une <b>puissance</b> de 10 (10, 100, 1000…), et non un simple multiple. 20, 30, 40 sont des multiples de 10 mais ne donnent pas tous des fractions décimales (ex. 1/30 = 0,0333…).',
+    hint: '<strong>Astuce :</strong> « multiple de 10 » (10, 20, 30…) et « puissance de 10 » (10, 100, 1000…), ce n\u2019est pas pareil. Lequel définit une fraction décimale ?'
+  },
+];
+
+const TOTAL=EXS.length;
+let cur=0, chosen=new Array(TOTAL).fill(null), hintOpen=false;
+const $=id=>document.getElementById(id);
+
+function renderQ(){
+  const ex=EXS[cur];
+  $('q-num').textContent='Affirmation '+(cur+1);
+  $('q-eq').innerHTML=ex.html;
+  $('hint-box').classList.remove('show');$('hint-box').innerHTML='';hintOpen=false;
+  $('feedback').className='fb';
+  $('btn-prev').disabled=cur===0;
+  $('btn-hint').style.display=ex.hint?'':'none';
+  $('btn-next').textContent=cur===TOTAL-1?'Terminer →':'Suivant →';
+  $('btn-next').disabled=chosen[cur]===null;
+
+  const body=$('q-body');body.innerHTML='';
+  const row=document.createElement('div');row.className='vf-row';
+  const bV=document.createElement('button');bV.className='vf-btn v';bV.innerHTML='<span class="vf-ico">✔</span> VRAI';bV.onclick=()=>choose(true);
+  const bF=document.createElement('button');bF.className='vf-btn f';bF.innerHTML='<span class="vf-ico">✘</span> FAUX';bF.onclick=()=>choose(false);
+  row.appendChild(bV);row.appendChild(bF);body.appendChild(row);
+
+  if(chosen[cur]!==null){ lockButtons(); showFB(); }
+  updateStats();
+}
+
+function choose(val){
+  if(chosen[cur]!==null)return;        // déjà répondu
+  chosen[cur]=val;
+  lockButtons();
+  showFB();
+  $('btn-next').disabled=false;
+  updateStats();
+}
+
+function lockButtons(){
+  const ex=EXS[cur];const btns=document.querySelectorAll('.vf-btn');
+  btns.forEach(b=>b.disabled=true);
+  const btnV=btns[0], btnF=btns[1];
+  const userVal=chosen[cur];
+  const goodBtn = ex.answer ? btnV : btnF;   // bouton de la bonne réponse
+  const userBtn = userVal   ? btnV : btnF;   // bouton choisi par l'élève
+  // la bonne réponse est toujours en vert
+  goodBtn.classList.add('correct');
+  // si l'élève s'est trompé, son bouton est en rouge
+  if(userVal!==ex.answer) userBtn.classList.add('wrong');
+  // liseré neutre sur le bouton réellement choisi
+  userBtn.classList.add('picked');
+}
+
+function showFB(){
+  const ex=EXS[cur];const ok=chosen[cur]===ex.answer;
+  $('feedback').className='fb show '+(ok?'ok':'ko');
+  $('fb-icon').textContent=ok?'✅':'❌';
+  $('fb-msg').textContent=ok?'Bonne réponse !':'Réponse incorrecte';
+  const bonne = ex.answer ? 'VRAI' : 'FAUX';
+  $('fb-det').innerHTML='Réponse : <b>'+bonne+'</b>. '+ex.explain;
+}
+
+function toggleHint(){
+  const h=$('hint-box');hintOpen=!hintOpen;
+  if(hintOpen){h.innerHTML=EXS[cur].hint;h.classList.add('show');}else h.classList.remove('show');
+}
+
+function updateStats(){
+  const done=chosen.filter(c=>c!==null).length;
+  $('prog-bar').style.width=Math.round(done/TOTAL*100)+'%';
+  $('prog-lbl').textContent='Question '+(cur+1)+' / '+TOTAL;
+  $('prog-pct').textContent=Math.round(done/TOTAL*100)+' %';
+  let ok=0,ko=0;
+  EXS.forEach((ex,i)=>{if(chosen[i]===null)return;if(chosen[i]===ex.answer)ok++;else ko++;});
+  $('cnt-ok').textContent=ok;$('cnt-ko').textContent=ko;
+  $('cnt-rem').textContent=chosen.filter(c=>c===null).length;
+}
+
+function nextQ(){if(cur<TOTAL-1){cur++;renderQ();window.scrollTo({top:0,behavior:'smooth'});}else showResults();}
+function prevQ(){if(cur>0){cur--;renderQ();window.scrollTo({top:0,behavior:'smooth'});}}
+
+function showResults(){
+  $('ex-card').style.display='none';$('results-screen').classList.add('show');
+  let ok=0;EXS.forEach((ex,i)=>{if(chosen[i]===ex.answer)ok++;});
+  $('score-num').textContent=ok;
+  const filled=Math.round(ok/TOTAL*5);
+  $('stars-row').textContent='⭐'.repeat(filled)+'☆'.repeat(5-filled);
+  const msgs=['Continue à t\u2019entraîner !','Quelques notions à revoir.','Tu progresses !','C\u2019est presque ça !','Très bien !','Parfait ! 🎉'];
+  $('results-msg').textContent=msgs[ok];
+  const list=$('recap-list');list.innerHTML='';
+  EXS.forEach((ex,i)=>{
+    const ok2=chosen[i]===ex.answer;
+    const d=document.createElement('div');d.className='ritem '+(ok2?'ok-i':'ko-i');
+    const txt=document.createElement('span');txt.className='re';txt.innerHTML='Affirmation '+(i+1);
+    const rv=document.createElement('span');rv.className='rv';rv.textContent=(ex.answer?'VRAI':'FAUX');
+    d.innerHTML='<span>'+(ok2?'✅':'❌')+'</span>';
+    d.appendChild(txt);d.appendChild(rv);list.appendChild(d);
+  });
+}
+
+function restart(){
+  cur=0;chosen=new Array(TOTAL).fill(null);
+  $('ex-card').style.display='block';$('results-screen').classList.remove('show');
+  renderQ();
+}
+
+// touche V / F et flèches pour répondre vite
+document.addEventListener('keydown',e=>{
+  if($('results-screen').classList.contains('show'))return;
+  const k=e.key.toLowerCase();
+  if(chosen[cur]===null){
+    if(k==='v')choose(true);
+    else if(k==='f')choose(false);
+  } else if(e.key==='Enter' && !$('btn-next').disabled){
+    nextQ();
+  }
+});
+
+renderQ();
+</script>
+</body>
+</html>
