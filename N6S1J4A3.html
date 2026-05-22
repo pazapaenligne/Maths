@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – 6e – Écriture décimale</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#ffffff;--border:#cfd6dc;--blue-hd:#1f72b8;--blue:#3ab5d8;
+  --green-bd:#8dc63f;--orange-bd:#f5a623;--pink-bd:#f28b82;
+  --text:#1a1d23;--muted:#6b7280;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:#fff;color:var(--text);font-family:'Syne',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.8rem 1rem 3rem;
+}
+.sheet{width:100%;max-width:760px;}
+
+.exo-title{
+  color:var(--blue-hd);font-weight:700;font-size:.95rem;
+  text-decoration:underline;text-underline-offset:3px;
+  margin:0 0 1.2rem;line-height:1.4;
+}
+
+.qrow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.55rem 0;}
+.qlabel{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text);min-width:18px;font-weight:600;}
+.qexpr{font-family:'Syne',sans-serif;font-size:.92rem;color:var(--text);line-height:1.5;}
+.arrow{color:var(--muted);font-size:1rem;}
+
+.cell-in{
+  border:1.6px solid var(--blue);border-radius:7px;
+  background:#f0f8fd;color:var(--blue);font-family:'JetBrains Mono',monospace;
+  font-size:.88rem;font-weight:600;text-align:center;padding:.3rem .6rem;outline:none;
+  transition:border-color .2s,background .2s;min-width:140px;
+}
+.cell-in:focus{border-color:#1a6a82;background:#fff;box-shadow:0 0 0 3px rgba(58,181,216,.15);}
+.cell-in.ok{background:#f0faeb;border-color:var(--green-bd);color:#3a7d0a;}
+.cell-in.ko{background:#fff0ef;border-color:var(--pink-bd);color:#c0392b;}
+.cell-in:disabled{cursor:default;}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.2rem 0 0;}
+.btn{
+  display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1.1rem;
+  border-radius:99px;font-family:'Syne',sans-serif;font-size:.84rem;font-weight:700;
+  cursor:pointer;border:none;transition:transform .12s;
+}
+.btn:active{transform:scale(.96);}
+.btn-p{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.25);}
+.btn-g{background:transparent;color:var(--muted);border:2px solid var(--border);}
+
+.fb{
+  margin:.9rem 0 0;padding:.6rem .9rem;border-radius:10px;
+  font-size:.85rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;
+}
+.fb.show{display:flex;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green-bd);color:#3a7d0a;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink-bd);color:#c0392b;}
+.fb .det{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);margin-top:.2rem;}
+
+.hint{
+  margin:.7rem 0 0;background:#fffbeb;border:1.5px dashed #f5c518;
+  border-radius:10px;padding:.55rem .9rem;font-size:.81rem;color:#7a6010;
+  line-height:1.55;display:none;
+}
+.hint.show{display:block;}
+.hint strong{color:var(--orange-bd);}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="exo-title">Donner l'écriture décimale de :</div>
+  <div id="ex"></div>
+
+  <div class="tools">
+    <button class="btn btn-g" onclick="toggleHint()">? Indice</button>
+    <button class="btn btn-p" onclick="check()">Valider ✓</button>
+  </div>
+  <div class="hint" id="hint">
+    <strong>Astuce :</strong> place chaque quantité à son rang. Centaines · dizaines · unités ,
+    dixièmes · centièmes · millièmes. Mets un 0 dans les rangs vides.
+    Ex : 7 unités et 457 millièmes → la partie décimale a 3 chiffres → 7,457.
+  </div>
+  <div class="fb" id="fb"><span class="i"></span><div><div class="m"></div><div class="det"></div></div></div>
+
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+function toggleHint(){$('#hint').classList.toggle('show');}
+function setFB(ok,msg,det){
+  const f=$('#fb');f.className='fb show '+(ok?'ok':'ko');
+  f.querySelector('.i').textContent=ok?'✅':'❌';
+  f.querySelector('.m').textContent=msg;
+  f.querySelector('.det').textContent=det||'';
+}
+function asNumber(s){
+  const n=parseFloat(s.trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',', '.'));
+  return isNaN(n)?null:n;
+}
+function frFmt(n){
+  // affichage français : espace insécable comme séparateur de milliers, virgule décimale
+  const parts=String(n).split('.');
+  parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');
+  return parts.join(',');
+}
+
+const EX=[
+  {lbl:'a)', txt:'7 unités et 457 millièmes.',                       val:7.457},
+  {lbl:'b)', txt:'3 centaines, 5 unités et un dixième.',             val:305.1},
+  {lbl:'c)', txt:'deux-cent-quatre-vingt-dix et sept dixièmes.',     val:290.7},
+  {lbl:'d)', txt:'7 dizaines et 4 centièmes.',                       val:70.04},
+  {lbl:'e)', txt:'trois-millions-huit-cent-mille.',                  val:3800000},
+];
+
+function build(){
+  const box=$('#ex');box.innerHTML='';
+  EX.forEach((it,i)=>{
+    const row=document.createElement('div');row.className='qrow';
+    row.innerHTML='<span class="qlabel">'+it.lbl+'</span><span class="qexpr">'+it.txt+'</span><span class="arrow">→</span>';
+    const inp=document.createElement('input');inp.className='cell-in';inp.id='e_'+i;
+    inp.placeholder='nombre ?';inp.autocomplete='off';
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+    row.appendChild(inp);box.appendChild(row);
+  });
+}
+function check(){
+  let ok=0;const wrong=[];
+  EX.forEach((it,i)=>{
+    const inp=$('#e_'+i);const n=asNumber(inp.value);
+    const good=n!==null && Math.abs(n-it.val)<1e-9;
+    inp.classList.toggle('ok',good);inp.classList.toggle('ko',!good);
+    if(good)ok++;else wrong.push(it.lbl+' '+frFmt(it.val));
+  });
+  setFB(ok===EX.length, ok===EX.length?'Parfait, tout est juste !':'Réponses correctes : '+ok+' / '+EX.length,
+        ok===EX.length?'':'Correction : '+wrong.join('   '));
+}
+build();
+</script>
+</body>
+</html>
