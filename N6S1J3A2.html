@@ -1,1 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – 6e – Semaine 3 Séance 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#ffffff;--border:#cfd6dc;--blue-hd:#1f72b8;--blue:#3ab5d8;
+  --green:#d9ead3;--green-bd:#8dc63f;
+  --orange:#fde3cf;--orange-bd:#f5a623;
+  --bluec:#cfe6f5;--bluec-bd:#3ab5d8;
+  --pink:#f7d4cf;--pink-bd:#f28b82;
+  --peach:#fce5d4;
+  --greenl:#e2efda;
+  --text:#1a1d23;--muted:#6b7280;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:#fff;color:var(--text);font-family:'Syne',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding-bottom:3rem;
+}
+.sheet{width:100%;max-width:760px;background:#fff;}
 
+/* ── BANDEAU BLEU ── */
+.topbar{
+  position:relative;background:var(--blue-hd);color:#fff;height:74px;
+  display:flex;align-items:center;width:100%;
+}
+.topbar .center{
+  position:absolute;left:0;right:0;text-align:center;
+  font-weight:700;font-size:1.05rem;letter-spacing:.01em;
+}
+.topbar .exo{
+  position:relative;z-index:2;font-family:'Syne',serif;font-weight:800;
+  font-style:italic;font-size:1.45rem;padding-left:1.4rem;
+  font-family:Georgia,'Times New Roman',serif;
+}
+/* la découpe arrondie blanche en bas-gauche */
+.topbar::after{
+  content:"";position:absolute;left:0;bottom:0;width:300px;height:26px;
+  background:#fff;border-top-right-radius:26px;
+}
+
+.body{padding:1.6rem 1.6rem 0;}
+
+/* ── TITRES D'EXERCICE ── */
+.exo-title{
+  color:var(--blue-hd);font-weight:700;font-size:.92rem;
+  text-decoration:underline;text-underline-offset:3px;
+  margin:1.8rem 0 1rem;
+}
+.exo-title:first-child{margin-top:.4rem;}
+
+/* ── TABLEAU 1 ── */
+.tbl{
+  border-collapse:collapse;width:100%;margin:0 auto;
+  font-size:.92rem;
+}
+.tbl th,.tbl td{
+  border:1px solid #9aa3ac;text-align:center;
+  padding:.55rem .4rem;vertical-align:middle;
+}
+.tbl th{font-weight:700;font-size:.88rem;line-height:1.25;}
+.tbl th.h-pe{background:var(--green);}
+.tbl th.h-vi{background:var(--orange);}
+.tbl th.h-pd{background:var(--bluec);}
+.tbl th.h-fd{background:var(--pink);}
+.tbl th.h-nd{background:var(--peach);}
+.tbl td{height:46px;}
+.given{font-weight:700;}
+.frac{display:inline-block;text-align:center;line-height:1;font-size:.86rem;}
+.frac .num{display:block;padding:0 .3rem 2px;border-bottom:1.4px solid var(--text);}
+.frac .den{display:block;padding-top:2px;}
+
+/* champ de saisie dans une case */
+.cell-in{
+  width:90%;max-width:120px;border:1.6px solid var(--blue);border-radius:6px;
+  background:#f0f8fd;color:var(--blue);font-family:'JetBrains Mono',monospace;
+  font-size:.85rem;font-weight:600;text-align:center;padding:.25rem .2rem;outline:none;
+  transition:border-color .2s,background .2s;
+}
+.cell-in:focus{border-color:#1a6a82;background:#fff;box-shadow:0 0 0 3px rgba(58,181,216,.15);}
+.cell-in.ok{background:#f0faeb;border-color:var(--green-bd);color:#3a7d0a;}
+.cell-in.ko{background:#fff0ef;border-color:var(--pink-bd);color:#c0392b;}
+.cell-in:disabled{cursor:default;}
+
+/* ── EXERCICE 2 : associations ── */
+.match{
+  position:relative;width:100%;max-width:620px;margin:0 auto;
+}
+.match-cols{display:flex;justify-content:space-between;gap:0;}
+.mcol{display:flex;flex-direction:column;gap:1.15rem;}
+.mcol.left{align-items:flex-end;text-align:right;}
+.mcol.right{align-items:flex-start;text-align:left;}
+.mitem{
+  font-family:'JetBrains Mono',monospace;font-size:.86rem;color:var(--text);
+  display:flex;align-items:center;gap:.6rem;cursor:pointer;user-select:none;
+  padding:.15rem .25rem;border-radius:6px;transition:background .15s;
+}
+.mitem:hover{background:#f3f7fa;}
+.mcol.right .mitem{flex-direction:row-reverse;}
+.mdot{
+  width:11px;height:11px;border-radius:50%;border:2px solid var(--blue-hd);
+  background:#fff;flex-shrink:0;transition:background .15s,transform .15s;
+}
+.mitem.sel .mdot{background:var(--orange-bd);transform:scale(1.25);}
+.mitem.linked .mdot{background:var(--blue);border-color:var(--blue);}
+.mitem.linked.good .mdot{background:var(--green-bd);border-color:var(--green-bd);}
+.mitem.linked.bad .mdot{background:var(--pink-bd);border-color:var(--pink-bd);}
+.mlabel{white-space:nowrap;}
+svg.links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+
+/* ── EXERCICE 3 : tableau des nombres égaux ── */
+.tbl3{border-collapse:collapse;width:100%;max-width:620px;margin:0 auto;}
+.tbl3 td{
+  border:1.4px solid #9aa3ac;text-align:center;vertical-align:middle;
+  height:66px;font-size:1rem;font-weight:600;cursor:pointer;
+  transition:filter .15s,outline .15s;
+}
+.tbl3 td:hover{filter:brightness(.96);}
+.c-or{background:var(--orange);}
+.c-bl{background:var(--bluec);}
+.c-gr{background:var(--green);}
+.c-pk{background:var(--pink);}
+.c-gl{background:var(--greenl);}
+.tbl3 td.sel{outline:3px solid var(--orange-bd);outline-offset:-3px;}
+.tbl3 td.matched{outline:3px solid var(--green-bd);outline-offset:-3px;}
+.tbl3 td.intrus-found{outline:3px dashed var(--pink-bd);outline-offset:-3px;}
+
+/* ── BOUTONS / FEEDBACK ── */
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem auto 0;justify-content:center;}
+.btn{
+  display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1.1rem;
+  border-radius:99px;font-family:'Syne',sans-serif;font-size:.84rem;font-weight:700;
+  cursor:pointer;border:none;transition:transform .12s;
+}
+.btn:active{transform:scale(.96);}
+.btn-p{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.25);}
+.btn-g{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.fb{
+  max-width:620px;margin:.9rem auto 0;padding:.6rem .9rem;border-radius:10px;
+  font-size:.85rem;display:none;align-items:center;gap:.5rem;
+}
+.fb.show{display:flex;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green-bd);color:#3a7d0a;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink-bd);color:#c0392b;}
+
+.hint{
+  max-width:620px;margin:.7rem auto 0;background:#fffbeb;border:1.5px dashed #f5c518;
+  border-radius:10px;padding:.55rem .9rem;font-size:.8rem;color:#7a6010;
+  line-height:1.55;display:none;
+}
+.hint.show{display:block;}
+.hint strong{color:var(--orange-bd);}
+
+@media(max-width:560px){
+  .topbar .exo{font-size:1.15rem;}
+  .topbar .center{font-size:.9rem;}
+  .tbl{font-size:.78rem;}
+  .match-cols{gap:0;}
+  .mitem{font-size:.76rem;}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- BANDEAU -->
+  <div class="topbar">
+    <span class="exo">Exercices</span>
+    <span class="center">Semaine 3 Séance 2</span>
+  </div>
+
+  <div class="body">
+
+    <!-- ─────────── EXERCICE 1 ─────────── -->
+    <div class="exo-title">1. Recopier et compléter le tableau suivant</div>
+
+    <table class="tbl" id="t1">
+      <thead>
+        <tr>
+          <th class="h-pe">Partie<br>entière</th>
+          <th class="h-vi">Virgule</th>
+          <th class="h-pd">Partie<br>décimale</th>
+          <th class="h-fd">Fraction<br>décimale</th>
+          <th class="h-nd">Nombre<br>décimal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- ligne 1 : 51 , 2  | 512/10 | ? -->
+        <tr>
+          <td class="given">51</td>
+          <td class="given">,</td>
+          <td class="given">2</td>
+          <td><span class="frac"><span class="num">512</span><span class="den">10</span></span></td>
+          <td><input class="cell-in" data-key="51,2" placeholder="?"/></td>
+        </tr>
+        <!-- ligne 2 : 3 , 72 | ? | ? -->
+        <tr>
+          <td class="given">3</td>
+          <td class="given">,</td>
+          <td class="given">72</td>
+          <td><input class="cell-in frac-in" data-key="372/100" placeholder="?/?"/></td>
+          <td><input class="cell-in" data-key="3,72" placeholder="?"/></td>
+        </tr>
+        <!-- ligne 3 : ? , ? | ? | 0,81 -->
+        <tr>
+          <td><input class="cell-in" data-key="0" placeholder="?"/></td>
+          <td class="given">,</td>
+          <td><input class="cell-in" data-key="81" placeholder="?"/></td>
+          <td><input class="cell-in frac-in" data-key="81/100" placeholder="?/?"/></td>
+          <td class="given">0,81</td>
+        </tr>
+        <!-- ligne 4 : ? , ? | 336/100 | ? -->
+        <tr>
+          <td><input class="cell-in" data-key="3" placeholder="?"/></td>
+          <td class="given">,</td>
+          <td><input class="cell-in" data-key="36" placeholder="?"/></td>
+          <td><span class="frac"><span class="num">336</span><span class="den">100</span></span></td>
+          <td><input class="cell-in" data-key="3,36" placeholder="?"/></td>
+        </tr>
+        <!-- ligne 5 : ? , ? | ? | 64,615 -->
+        <tr>
+          <td><input class="cell-in" data-key="64" placeholder="?"/></td>
+          <td class="given">,</td>
+          <td><input class="cell-in" data-key="615" placeholder="?"/></td>
+          <td><input class="cell-in frac-in" data-key="64615/1000" placeholder="?/?"/></td>
+          <td class="given">64,615</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tools">
+      <button class="btn btn-g" onclick="toggleHint('h1')">? Indice</button>
+      <button class="btn btn-p" onclick="checkT1()">Valider ✓</button>
+    </div>
+    <div class="hint" id="h1">
+      <strong>Astuce :</strong> partie décimale = chiffres après la virgule. La fraction décimale a pour
+      dénominateur 10 (1 chiffre), 100 (2 chiffres) ou 1 000 (3 chiffres) après la virgule.
+      Ex : 0,81 = 81/100 et 3,72 = 372/100.
+    </div>
+    <div class="fb" id="fb1"><span class="i"></span><span class="m"></span></div>
+
+
+    <!-- ─────────── EXERCICE 2 ─────────── -->
+    <div class="exo-title">2. Associer chaque nombre de la première colonne à un nombre de la deuxième colonne.</div>
+
+    <div class="match" id="match">
+      <svg class="links" id="svglinks"></svg>
+      <div class="match-cols">
+        <div class="mcol left" id="leftcol">
+          <div class="mitem" data-side="L" data-id="L0"><span class="mlabel">67 dixièmes</span><span class="mdot"></span></div>
+          <div class="mitem" data-side="L" data-id="L1"><span class="mlabel">670 millièmes</span><span class="mdot"></span></div>
+          <div class="mitem" data-side="L" data-id="L2"><span class="mlabel">670 dixièmes</span><span class="mdot"></span></div>
+          <div class="mitem" data-side="L" data-id="L3"><span class="mlabel">67 millièmes</span><span class="mdot"></span></div>
+          <div class="mitem" data-side="L" data-id="L4"><span class="mlabel">67 dix-millièmes</span><span class="mdot"></span></div>
+          <div class="mitem" data-side="L" data-id="L5"><span class="mlabel">67 centaines</span><span class="mdot"></span></div>
+        </div>
+        <div class="mcol right" id="rightcol">
+          <div class="mitem" data-side="R" data-id="R0"><span class="mdot"></span><span class="mlabel">67</span></div>
+          <div class="mitem" data-side="R" data-id="R1"><span class="mdot"></span><span class="mlabel">6 700</span></div>
+          <div class="mitem" data-side="R" data-id="R2"><span class="mdot"></span><span class="mlabel">0,67</span></div>
+          <div class="mitem" data-side="R" data-id="R3"><span class="mdot"></span><span class="mlabel">0,0067</span></div>
+          <div class="mitem" data-side="R" data-id="R4"><span class="mdot"></span><span class="mlabel">0,067</span></div>
+          <div class="mitem" data-side="R" data-id="R5"><span class="mdot"></span><span class="mlabel">6,7</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tools">
+      <button class="btn btn-g" onclick="resetMatch()">↺ Effacer</button>
+      <button class="btn btn-g" onclick="toggleHint('h2')">? Indice</button>
+      <button class="btn btn-p" onclick="checkMatch()">Valider ✓</button>
+    </div>
+    <div class="hint" id="h2">
+      <strong>Astuce :</strong> 67 dixièmes = 67 × 0,1 = 6,7. 670 millièmes = 670 × 0,001 = 0,67.
+      67 centaines = 67 × 100 = 6 700. Clique sur un nombre à gauche puis sur son égal à droite.
+    </div>
+    <div class="fb" id="fb2"><span class="i"></span><span class="m"></span></div>
+
+
+    <!-- ─────────── EXERCICE 3 ─────────── -->
+    <div class="exo-title">3. Associer par deux les nombres égaux. Attention, il y a un intrus !</div>
+
+    <table class="tbl3" id="t3">
+      <tr>
+        <td class="c-or" data-v="72"      data-id="A">72</td>
+        <td class="c-bl" data-v="7,2"     data-id="B"><span class="frac"><span class="num">72</span><span class="den">10</span></span></td>
+        <td class="c-gr" data-v="72"      data-id="C">720 dixièmes</td>
+      </tr>
+      <tr>
+        <td class="c-bl" data-v="0,72"    data-id="D">72 centièmes</td>
+        <td class="c-or" data-v="702"     data-id="E">702</td>
+        <td class="c-pk" data-v="0,72"    data-id="F">0,72</td>
+      </tr>
+      <tr>
+        <td class="c-bl" data-v="70,2"    data-id="G">70,2</td>
+        <td class="c-gl" data-v="702"     data-id="H"><span class="frac"><span class="num">70 200</span><span class="den">100</span></span></td>
+        <td class="c-bl" data-v="7,2"     data-id="I">7,2</td>
+      </tr>
+    </table>
+
+    <div class="tools">
+      <button class="btn btn-g" onclick="resetT3()">↺ Effacer</button>
+      <button class="btn btn-g" onclick="toggleHint('h3')">? Indice</button>
+      <button class="btn btn-p" onclick="checkT3()">Valider ✓</button>
+    </div>
+    <div class="hint" id="h3">
+      <strong>Astuce :</strong> transforme tout en nombre décimal. 720 dixièmes = 72.
+      72/10 = 7,2. 70 200/100 = 702. 72 centièmes = 0,72. Une case n'a pas de partenaire : c'est l'intrus !
+    </div>
+    <div class="fb" id="fb3"><span class="i"></span><span class="m"></span></div>
+
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+
+function norm(s){return s.trim().toLowerCase().replace(/\u202f/g,'').replace(/\s+/g,'').replace(/\./g,',');}
+function showFB(id,ok,msg){const f=$('#'+id);f.className='fb show '+(ok?'ok':'ko');f.querySelector('.i').textContent=ok?'✅':'❌';f.querySelector('.m').textContent=msg;}
+function toggleHint(id){$('#'+id).classList.toggle('show');}
+
+/* ── EX1 ── */
+function checkT1(){
+  const ins=$$('#t1 .cell-in');let ok=0,tot=ins.length;
+  ins.forEach(inp=>{
+    const good=norm(inp.value)===norm(inp.dataset.key);
+    inp.classList.toggle('ok',good);inp.classList.toggle('ko',!good);
+    if(good)ok++;
+  });
+  showFB('fb1',ok===tot, ok===tot?'Bravo, tableau complété !':'Réponses correctes : '+ok+' / '+tot+'. Corrige les cases en rouge.');
+}
+
+/* ── EX2 (associations) ── */
+// Correspondances :
+// L0 67 dixièmes      = 6,7   (R5)
+// L1 670 millièmes    = 0,67  (R2)
+// L2 670 dixièmes     = 67    (R0)
+// L3 67 millièmes     = 0,067 (R4)
+// L4 67 dix-millièmes = 0,0067(R3)
+// L5 67 centaines     = 6 700 (R1)
+const TRUE_PAIRS={L0:'R5',L1:'R2',L2:'R0',L3:'R4',L4:'R3',L5:'R1'};
+let selSide=null,selId=null,links={};
+function clearSel(){$$('.mitem').forEach(m=>m.classList.remove('sel'));selSide=null;selId=null;}
+$$('#match .mitem').forEach(m=>{
+  m.addEventListener('click',()=>{
+    const side=m.dataset.side,id=m.dataset.id;
+    if(selId===null){m.classList.add('sel');selSide=side;selId=id;return;}
+    if(side===selSide){clearSel();m.classList.add('sel');selSide=side;selId=id;return;}
+    const L=selSide==='L'?selId:id, R=selSide==='L'?id:selId;
+    // retire ancien lien de ce L ou ce R
+    Object.keys(links).forEach(k=>{if(k===L||links[k]===R)delete links[k];});
+    links[L]=R;clearSel();drawLinks();
+  });
+});
+function drawLinks(){
+  const svg=$('#svglinks');svg.innerHTML='';
+  const box=$('#match').getBoundingClientRect();
+  $$('.mitem').forEach(m=>m.classList.remove('linked','good','bad'));
+  Object.entries(links).forEach(([L,R])=>{
+    const a=$('.mitem[data-id="'+L+'"]'),b=$('.mitem[data-id="'+R+'"]');
+    const ad=a.querySelector('.mdot').getBoundingClientRect();
+    const bd=b.querySelector('.mdot').getBoundingClientRect();
+    const x1=ad.left+ad.width/2-box.left, y1=ad.top+ad.height/2-box.top;
+    const x2=bd.left+bd.width/2-box.left, y2=bd.top+bd.height/2-box.top;
+    const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1',x1);ln.setAttribute('y1',y1);ln.setAttribute('x2',x2);ln.setAttribute('y2',y2);
+    ln.setAttribute('stroke','#3ab5d8');ln.setAttribute('stroke-width','2.5');ln.setAttribute('stroke-linecap','round');
+    svg.appendChild(ln);
+    a.classList.add('linked');b.classList.add('linked');
+  });
+}
+function resetMatch(){links={};clearSel();drawLinks();$('#fb2').className='fb';}
+function checkMatch(){
+  let ok=0,tot=Object.keys(TRUE_PAIRS).length;
+  $$('.mitem').forEach(m=>m.classList.remove('good','bad'));
+  Object.entries(TRUE_PAIRS).forEach(([L,R])=>{
+    const a=$('.mitem[data-id="'+L+'"]'),b=$('.mitem[data-id="'+R+'"]');
+    if(links[L]===R){a.classList.add('good');b.classList.add('good');ok++;}
+    else{if(links[L]){a.classList.add('bad');$('.mitem[data-id="'+links[L]+'"]').classList.add('bad');}}
+  });
+  showFB('fb2',ok===tot, ok===tot?'Toutes les associations sont justes !':'Associations correctes : '+ok+' / '+tot+'.');
+}
+window.addEventListener('resize',drawLinks);
+
+/* ── EX3 (paires égales + intrus) ── */
+// valeurs décimales : 72=A,C ; 7,2=B,I ; 0,72=D,F ; 702=E,H ; 70,2=G(intrus)
+let selCell=null,matched=new Set();
+$$('#t3 td').forEach(td=>{
+  td.addEventListener('click',()=>{
+    if(matched.has(td.dataset.id))return;
+    if(!selCell){selCell=td;td.classList.add('sel');return;}
+    if(selCell===td){td.classList.remove('sel');selCell=null;return;}
+    // tentative de paire
+    if(selCell.dataset.v===td.dataset.v){
+      selCell.classList.remove('sel');
+      selCell.classList.add('matched');td.classList.add('matched');
+      matched.add(selCell.dataset.id);matched.add(td.dataset.id);
+      selCell=null;
+    } else {
+      selCell.classList.remove('sel');
+      td.classList.add('sel');selCell=td;
+    }
+  });
+});
+function resetT3(){
+  matched.clear();selCell=null;
+  $$('#t3 td').forEach(td=>td.classList.remove('sel','matched','intrus-found'));
+  $('#fb3').className='fb';
+}
+function checkT3(){
+  const total=9, intrus='G';
+  if(matched.size<8){showFB('fb3',false,'Il reste des paires à former. Continue !');return;}
+  // les 8 appariés doivent être les bons et G doit rester seul
+  const ok=!matched.has(intrus)&&matched.size===8;
+  const gcell=$('#t3 td[data-id="G"]');
+  if(ok){gcell.classList.add('intrus-found');showFB('fb3',true,'Parfait ! L\'intrus est 70,2 (aucun égal).');}
+  else showFB('fb3',false,'Vérifie tes paires : l\'intrus doit rester seul.');
+}
+
+drawLinks();
+</script>
+</body>
+</html>
