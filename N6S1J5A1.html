@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – 6e – Droites graduées</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#ffffff;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fff;color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;}
+header{text-align:center;margin-bottom:1.5rem;}
+.badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--yellow);color:#000;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.28rem .85rem;border-radius:99px;margin-bottom:.8rem;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+h1{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;line-height:1.2;color:var(--text);}
+h1 .gl{color:var(--green);}h1 .bl{color:var(--blue);}
+.sub{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-top:.3rem;margin-bottom:1.6rem;}
+.prog-wrap{width:100%;max-width:660px;margin-bottom:1.2rem;}
+.prog-info{display:flex;justify-content:space-between;font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.35rem;}
+.bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;transition:width .5s;}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+.chip{display:flex;align-items:center;gap:.35rem;padding:.28rem .7rem;border-radius:99px;font-size:.75rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:#fff;font-weight:600;color:var(--text);}
+.chip .cd{width:8px;height:8px;border-radius:50%;}
+.card{width:100%;max-width:660px;background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:1.8rem 1.8rem 1.4rem;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink),var(--blue),var(--green));}
+.qnum{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.08em;}
+.eq{font-size:clamp(1.05rem,2.2vw,1.35rem);font-weight:800;color:var(--green);margin-bottom:.5rem;line-height:1.3;}
+.qtxt{font-size:.88rem;color:var(--muted);margin-bottom:1rem;}
+.qtxt b{color:var(--orange);font-family:'JetBrains Mono',monospace;}
+
+/* ── Droites graduées (SVG + champs superposés) ── */
+.line-block{margin:1.1rem 0 1.4rem;}
+.line-sublbl{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;color:var(--blue);margin-bottom:.25rem;}
+.line-stage{position:relative;width:100%;}
+.line-stage svg{display:block;width:100%;height:auto;}
+.nl-input{position:absolute;transform:translateX(-50%);width:60px;background:#f7f6f2;border:2px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;text-align:center;padding:.22rem .1rem;outline:none;transition:border-color .2s,background .2s;}
+.nl-input:focus{border-color:var(--blue);background:#fff;z-index:5;}
+.nl-input.ok{border-color:var(--green);background:#f0faeb;color:#3a7d0a;}
+.nl-input.ko{border-color:var(--pink);background:#fff0ef;color:#c0392b;}
+.nl-input:disabled{cursor:default;}
+
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.48rem 1.1rem;border-radius:99px;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-p{background:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.25);}
+.btn-h{background:var(--yellow);color:#5a3e00;}
+.btn-g{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.fb{margin-top:.9rem;padding:.65rem .9rem;border-radius:10px;font-size:.86rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;}
+.fb.show{display:flex;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green);color:#3a7d0a;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.fb-det{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text);margin-top:.2rem;}
+.hint-box{margin-top:.8rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.65rem .9rem;font-size:.82rem;color:#7a6010;display:none;line-height:1.6;}
+.hint-box.show{display:block;}
+.hint-box strong{color:var(--orange);}
+.nav{display:flex;justify-content:space-between;margin-top:1.2rem;gap:.5rem;}
+.results{width:100%;max-width:660px;text-align:center;display:none;}
+.results.show{display:block;}
+.results-card{background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:2.2rem 1.8rem;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.score{font-size:clamp(2.5rem,8vw,4.5rem);font-weight:800;line-height:1;margin:.6rem 0 .3rem;color:var(--blue);}
+.stars{font-size:1.8rem;margin:.3rem 0 .8rem;}
+.rmsg{color:var(--muted);font-size:.9rem;margin-bottom:1.8rem;}
+.recap{text-align:left;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.8rem;}
+.ritem{display:flex;align-items:center;gap:.6rem;padding:.5rem .9rem;background:#f7f6f2;border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text);}
+.ritem.ok-i{border-color:#b5e08a;}
+.ritem.ko-i{border-color:#f9c0bb;}
+.ritem .re{color:var(--blue);flex:1;}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">
+    <span class="dot" style="background:#f5c518"></span>
+    <span class="dot" style="background:#8dc63f"></span>
+    <span class="dot" style="background:#3ab5d8"></span>
+    Pazapa · Maths · 6e
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.73rem;color:#8a8f9a;margin-bottom:.35rem;letter-spacing:.06em;">Semaine 3 – Séance 4</div>
+  <h1>La <span class="bl">droite</span> <span class="gl">graduée</span></h1>
+  <p class="sub">3 exercices · niveau 6ème</p>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-info"><span id="prog-lbl">Exercice 1 / 3</span><span id="prog-pct">0 %</span></div>
+  <div class="bar-bg"><div class="bar-fill" id="prog-bar" style="width:0%"></div></div>
+</div>
+<div class="chips">
+  <div class="chip"><div class="cd" style="background:#8dc63f"></div><span id="cnt-ok">0</span> correctes</div>
+  <div class="chip"><div class="cd" style="background:#f28b82"></div><span id="cnt-ko">0</span> erreurs</div>
+  <div class="chip"><div class="cd" style="background:#8a8f9a"></div><span id="cnt-rem">3</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="stripe"></div>
+  <div class="qnum" id="q-num">Exercice 1</div>
+  <div class="eq" id="q-eq"></div>
+  <div class="qtxt" id="q-txt"></div>
+  <div id="q-body"></div>
+  <div class="hint-box" id="hint-box"></div>
+  <div class="fb" id="feedback"><span id="fb-icon" style="font-size:1.1rem;flex-shrink:0"></span><div><div id="fb-msg"></div><div class="fb-det" id="fb-det"></div></div></div>
+  <div class="nav">
+    <button class="btn btn-g" id="btn-prev" onclick="prevQ()">← Précédent</button>
+    <div style="display:flex;gap:.5rem;">
+      <button class="btn btn-h" id="btn-hint" onclick="toggleHint()">? Indice</button>
+      <button class="btn btn-p" id="btn-next" onclick="nextQ()" disabled>Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="badge" style="margin-bottom:.5rem">
+      <span class="dot" style="background:#f5c518"></span>
+      <span class="dot" style="background:#8dc63f"></span>
+      <span class="dot" style="background:#3ab5d8"></span>
+      Résultats
+    </div>
+    <div class="score"><span id="score-num">0</span>/3</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="rmsg" id="results-msg"></div>
+    <div class="recap" id="recap-list"></div>
+    <button class="btn btn-p" onclick="restart()" style="margin:0 auto;display:flex;">🔄 Recommencer</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  Semaine 3 – Séance 4 : La droite graduée
+//  Positions vérifiées sur le support d'origine :
+//   Ex1 d1 (pas 0,1) : A=0,3 B=1,7 C=2,9 D=3,4
+//   Ex1 d2 (pas 0,1) : A=1,5 B=2,9
+//   Ex2 d1 (pas 0,5) : C=0,5 A=1,5 B=3 D=3,5
+//   Ex2 d2 (pas 0,2) : A=2,2 B=2,8 C=3,4
+//   Ex3 a  (pas 0,25): 5,75 6,25 6,75
+//   Ex3 b  (pas 0,01): 6,47 6,54 6,57
+// ============================================================
+const COL={A:'#e8453c',B:'#3ab5d8',C:'#8dc63f',D:'#f5a623',
+  Av:'#9b59b6',Bv:'#7fc7e8',
+  Cor:'#f5a623',Ar:'#e8453c',Bbl:'#3ab5d8',Dgr:'#8dc63f',
+  Apk:'#e84393',Bpu:'#9b59b6',Cor2:'#f5a623'};
+
+const EXS = [
+  {
+    title: '1. Donner l\u2019abscisse de chaque point',
+    txt: 'Lis l\u2019abscisse de chaque point coloré et écris-la dans la case sous la droite.',
+    lines: [
+      { start:0, end:3.5, step:0.1, majors:[0,1,2,3],
+        marks:[{name:'A',val:0.3,color:COL.A},{name:'B',val:1.7,color:COL.B},
+               {name:'C',val:2.9,color:COL.C},{name:'D',val:3.4,color:COL.D}] },
+      { start:0, end:4, step:0.1, majors:[0,1],
+        marks:[{name:'A',val:1.5,color:COL.Av},{name:'B',val:2.9,color:COL.Bv}] },
+    ],
+    hint: '<strong>Astuce :</strong> entre deux entiers il y a 10 intervalles, donc chaque graduation vaut 0,1. Compte les graduations depuis le repère connu le plus proche. Écris avec une virgule (ex. 0,3).'
+  },
+  {
+    title: '2. Donner l\u2019abscisse de chaque point',
+    txt: 'Attention : ici le pas n\u2019est pas toujours 0,1 !',
+    lines: [
+      { start:0, end:3.7, step:0.5, majors:[0,1,2,3],
+        marks:[{name:'C',val:0.5,color:COL.Cor},{name:'A',val:1.5,color:COL.Ar},
+               {name:'B',val:3,color:COL.Bbl},{name:'D',val:3.5,color:COL.Dgr}] },
+      { start:2, end:4.4, step:0.2, majors:[2,3,4],
+        marks:[{name:'A',val:2.2,color:COL.Apk},{name:'B',val:2.8,color:COL.Bpu},
+               {name:'C',val:3.4,color:COL.Cor2}] },
+    ],
+    hint: '<strong>Astuce :</strong> compte d\u2019abord le nombre d\u2019intervalles entre deux entiers. 2 intervalles → pas de 0,5 ; 5 intervalles → pas de 0,2.'
+  },
+  {
+    title: '3. Compléter les graduations indiquées',
+    txt: 'Trouve la valeur de chaque graduation marquée d\u2019une croix noire (les « … » à compléter).',
+    lines: [
+      { label:'a)', start:5.5, end:7, step:0.25, majors:[5.5,6,7],
+        marks:[{val:5.75},{val:6.25},{val:6.75}] },
+      { label:'b)', start:6.45, end:6.61, step:0.01, majors:[6.5,6.6],
+        marks:[{val:6.47},{val:6.54},{val:6.57}] },
+    ],
+    hint: '<strong>Astuce :</strong> trouve le pas entre deux graduations connues. a) de 5,5 à 6 en 2 sauts → pas de 0,25. b) de 6,5 à 6,6 en 10 sauts → pas de 0,01.'
+  },
+];
+
+const TOTAL = EXS.length;
+let cur = 0, answered = [false, false, false], hintOpen = false;
+const $ = id => document.getElementById(id);
+
+function rnd(v){return Math.round(v*1e6)/1e6;}
+function fr(v){return String(rnd(v)).replace('.',',');}
+function numNorm(s){const n=parseFloat(String(s).trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
+function valOk(target,val){const n=numNorm(val);return n!==null && Math.abs(n-target)<1e-9;}
+
+// Géométrie SVG interne (mise à l'échelle via width:100%)
+const VW=620, padL=38, padR=38, axisY=58, VH=132;
+
+function buildLine(cfg, exIdx, lineIdx){
+  const span=cfg.end-cfg.start;
+  const xv=v=>padL+(v-cfg.start)/span*(VW-padL-padR);
+  const NS='http://www.w3.org/2000/svg';
+
+  const block=document.createElement('div'); block.className='line-block';
+  if(cfg.label){const l=document.createElement('div'); l.className='line-sublbl'; l.textContent=cfg.label; block.appendChild(l);}
+
+  const stage=document.createElement('div'); stage.className='line-stage';
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
+  svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+
+  const axis=document.createElementNS(NS,'line');
+  axis.setAttribute('x1',padL-12);axis.setAttribute('y1',axisY);
+  axis.setAttribute('x2',VW-padR+6);axis.setAttribute('y2',axisY);
+  axis.setAttribute('stroke','#1a1d23');axis.setAttribute('stroke-width','2.4');
+  svg.appendChild(axis);
+  const arr=document.createElementNS(NS,'path');
+  arr.setAttribute('d','M'+(VW-padR+6)+','+(axisY-6)+' L'+(VW-padR+18)+','+axisY+' L'+(VW-padR+6)+','+(axisY+6)+' Z');
+  arr.setAttribute('fill','#1a1d23');svg.appendChild(arr);
+
+  const nb=Math.round(span/cfg.step);
+  for(let i=0;i<=nb;i++){
+    const v=rnd(cfg.start+i*cfg.step);
+    const isMajor=cfg.majors.some(m=>Math.abs(m-v)<1e-6);
+    const half=(i%5===0)&&!isMajor;
+    const h=isMajor?15:(half?10:7);
+    const tick=document.createElementNS(NS,'line');
+    tick.setAttribute('x1',xv(v));tick.setAttribute('y1',axisY-h);
+    tick.setAttribute('x2',xv(v));tick.setAttribute('y2',axisY+(isMajor?h:0));
+    tick.setAttribute('stroke','#1a1d23');tick.setAttribute('stroke-width',isMajor?'2.4':'1.3');
+    svg.appendChild(tick);
+    if(isMajor){
+      const t=document.createElementNS(NS,'text');
+      t.setAttribute('x',xv(v));t.setAttribute('y',axisY+32);
+      t.setAttribute('text-anchor','middle');t.setAttribute('font-family',"'JetBrains Mono',monospace");
+      t.setAttribute('font-size','14');t.setAttribute('font-weight','600');t.setAttribute('fill','#1a1d23');
+      t.textContent=fr(v);svg.appendChild(t);
+    }
+  }
+
+  cfg.marks.forEach(m=>{
+    const px=xv(m.val), col=m.color||'#1a1d23', s=5;
+    const cr=document.createElementNS(NS,'path');
+    cr.setAttribute('d','M'+(px-s)+','+(axisY-s)+' L'+(px+s)+','+(axisY+s)+' M'+(px-s)+','+(axisY+s)+' L'+(px+s)+','+(axisY-s));
+    cr.setAttribute('stroke',col);cr.setAttribute('stroke-width','2.5');cr.setAttribute('stroke-linecap','round');
+    svg.appendChild(cr);
+    if(m.name){
+      const lt=document.createElementNS(NS,'text');
+      lt.setAttribute('x',px);lt.setAttribute('y',axisY-24);lt.setAttribute('text-anchor','middle');
+      lt.setAttribute('font-family',"'Syne',sans-serif");lt.setAttribute('font-size','16');
+      lt.setAttribute('font-weight','800');lt.setAttribute('fill',col);lt.textContent=m.name;
+      svg.appendChild(lt);
+    }
+  });
+  stage.appendChild(svg);
+
+  cfg.marks.forEach((m,mi)=>{
+    const px=xv(m.val);
+    const inp=document.createElement('input');inp.type='text';inp.className='nl-input';
+    inp.placeholder='?';inp.autocomplete='off';
+    inp.id='i_'+exIdx+'_'+lineIdx+'_'+mi;
+    inp.dataset.val=m.val;
+    inp.style.left=(px/VW*100)+'%';
+    inp.style.top=((axisY+40)/VH*100)+'%';
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){const bc=$('btn-check');if(bc&&!bc.disabled)checkLine();}});
+    stage.appendChild(inp);
+  });
+
+  block.appendChild(stage);
+  return block;
+}
+
+function allInputs(){return [...document.querySelectorAll('#q-body .nl-input')];}
+
+function renderQ(){
+  const ex=EXS[cur];
+  $('q-num').textContent='Exercice '+(cur+1);
+  $('q-eq').textContent=ex.title;
+  $('q-txt').textContent=ex.txt;
+  $('hint-box').classList.remove('show');$('hint-box').innerHTML='';hintOpen=false;
+  $('feedback').className='fb';
+  $('btn-prev').disabled=cur===0;
+  $('btn-hint').style.display=ex.hint?'':'none';
+  $('btn-next').textContent=cur===TOTAL-1?'Terminer →':'Suivant →';
+  $('btn-next').disabled=!answered[cur];
+
+  const body=$('q-body');body.innerHTML='';
+  ex.lines.forEach((cfg,li)=>body.appendChild(buildLine(cfg,cur,li)));
+
+  const br=document.createElement('div');br.style.cssText='display:flex;gap:.5rem;margin-top:.7rem;';
+  const bv=document.createElement('button');bv.className='btn btn-p';bv.id='btn-check';bv.textContent='Valider ✓';bv.onclick=checkLine;
+  br.appendChild(bv);body.appendChild(br);
+
+  // restaurer si déjà répondu
+  if(answered[cur] && ex._ans){
+    allInputs().forEach(inp=>{
+      const v=ex._ans[inp.id]; if(v===undefined)return;
+      inp.value=v;
+      inp.className='nl-input '+(valOk(parseFloat(inp.dataset.val),v)?'ok':'ko');
+      inp.disabled=true;
+    });
+    bv.disabled=true;
+    showFB();
+  }
+  // focus 1er champ
+  setTimeout(()=>{const f=document.querySelector('#q-body .nl-input:not(:disabled)');if(f)f.focus();},40);
+  updateStats();
+}
+
+function exAllOk(ex){
+  if(!ex._ans)return false;
+  return ex._inputIds.every(id=>{
+    const target=ex._targets[id];
+    return valOk(target,ex._ans[id]||'');
+  });
+}
+
+function checkLine(){
+  const ex=EXS[cur];
+  ex._ans={};ex._targets={};ex._inputIds=[];
+  allInputs().forEach(inp=>{
+    const target=parseFloat(inp.dataset.val);
+    ex._ans[inp.id]=inp.value;
+    ex._targets[inp.id]=target;
+    ex._inputIds.push(inp.id);
+    const good=valOk(target,inp.value);
+    inp.className='nl-input '+(good?'ok':'ko');
+    inp.disabled=true;
+  });
+  answered[cur]=true;
+  const bc=$('btn-check');if(bc)bc.disabled=true;
+  showFB();$('btn-next').disabled=false;updateStats();
+}
+
+function showFB(){
+  const ex=EXS[cur];if(!ex._ans)return;
+  const ids=ex._inputIds;
+  const okCount=ids.filter(id=>valOk(ex._targets[id],ex._ans[id]||'')).length;
+  const allOk=okCount===ids.length;
+  $('feedback').className='fb show '+(allOk?'ok':'ko');
+  $('fb-icon').textContent=allOk?'✅':'❌';
+  $('fb-msg').textContent=allOk?'Parfait !':'Pas tout à fait…';
+  if(allOk){
+    $('fb-det').textContent='Toutes les abscisses sont correctes !';
+  }else{
+    const wrong=ids.filter(id=>!valOk(ex._targets[id],ex._ans[id]||'')).map(id=>fr(ex._targets[id]));
+    $('fb-det').textContent='Bonnes réponses : '+okCount+' / '+ids.length+'  ·  Valeurs attendues : '+wrong.join('  ·  ');
+  }
+}
+
+function toggleHint(){
+  const h=$('hint-box');hintOpen=!hintOpen;
+  if(hintOpen){h.innerHTML=EXS[cur].hint;h.classList.add('show');}else h.classList.remove('show');
+}
+
+function updateStats(){
+  const done=answered.filter(Boolean).length;
+  $('prog-bar').style.width=Math.round(done/TOTAL*100)+'%';
+  $('prog-lbl').textContent='Exercice '+(cur+1)+' / '+TOTAL;
+  $('prog-pct').textContent=Math.round(done/TOTAL*100)+' %';
+  let ok=0,ko=0;
+  EXS.forEach((ex,i)=>{
+    if(!answered[i]||!ex._ans)return;
+    if(exAllOk(ex))ok++;else ko++;
+  });
+  $('cnt-ok').textContent=ok;
+  $('cnt-ko').textContent=ko;
+  $('cnt-rem').textContent=EXS.filter((ex,i)=>!answered[i]||!ex._ans).length;
+}
+
+function nextQ(){
+  if(cur<TOTAL-1){cur++;renderQ();window.scrollTo({top:0,behavior:'smooth'});}
+  else showResults();
+}
+function prevQ(){if(cur>0){cur--;renderQ();window.scrollTo({top:0,behavior:'smooth'});}}
+
+function showResults(){
+  $('ex-card').style.display='none';$('results-screen').classList.add('show');
+  let ok=0;
+  EXS.forEach((ex,i)=>{if(answered[i]&&exAllOk(ex))ok++;});
+  $('score-num').textContent=ok;
+  const filled=ok===3?5:ok===2?4:ok===1?2:0;
+  $('stars-row').textContent='⭐'.repeat(filled)+'☆'.repeat(5-filled);
+  const msgs=['Continue à t\u2019entraîner !','Bon début, persévère !','Bien joué !','Parfait ! 🎉'];
+  $('results-msg').textContent=msgs[ok];
+  const list=$('recap-list');list.innerHTML='';
+  EXS.forEach((ex,i)=>{
+    const allOk=answered[i]&&exAllOk(ex);
+    const d=document.createElement('div');d.className='ritem '+(allOk?'ok-i':'ko-i');
+    d.innerHTML='<span>'+(allOk?'✅':'❌')+'</span><span class="re"></span>';
+    d.querySelector('.re').textContent=ex.title;
+    list.appendChild(d);
+  });
+}
+
+function restart(){
+  cur=0;answered=[false,false,false];
+  EXS.forEach(ex=>{delete ex._ans;delete ex._targets;delete ex._inputIds;});
+  $('ex-card').style.display='block';$('results-screen').classList.remove('show');
+  renderQ();
+}
+
+renderQ();
+</script>
+</body>
+</html>
