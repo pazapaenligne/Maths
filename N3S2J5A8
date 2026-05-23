@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa – Mission Pâte à Pouf</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#f5c518;
+  --day-dark:#8a6000;
+  --day-mid:#c49a00;
+  --day-light:#fffbeb;
+  --day-border:#f5e08a;
+  --day-glow:rgba(245,197,24,.2);
+  --bg:#fffdf7;
+  --surface:#ffffff;
+  --border:#e8e4d9;
+  --green:#8dc63f;
+  --pink:#f28b82;
+  --orange:#f5a623;
+  --text:#1a1d23;
+  --muted:#8a8f9a;
+  --radius:16px;
+  --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:0 0 4rem;
+  position:relative;
+  overflow-x:hidden;
+}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.10;width:260px;height:260px;background:var(--orange);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:180px;height:180px;background:var(--day-mid);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:120px;height:120px;background:var(--day-color);top:200px;left:-30px;pointer-events:none;}
+
+.hero{
+  background:#fffdf7;
+  border-bottom:2px solid #f0ead8;
+  padding:2.2rem 2rem 2rem;
+  text-align:center;
+  position:relative;
+  z-index:1;
+}
+.hero-badge{
+  display:inline-block;
+  background:#f5a623;color:#fff;
+  font-size:.85rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.45rem 1.3rem;border-radius:99px;margin-bottom:1.1rem;
+}
+.hero-dot{display:none;}
+.week-label{display:none;}
+.hero h1{font-size:clamp(1.3rem,3.5vw,1.8rem);font-weight:800;line-height:1.3;margin-bottom:.9rem;color:var(--text);}
+.hero h1 .hl{color:#f5a623;}
+.hero-script{max-width:620px;margin:0 auto;font-size:.9rem;line-height:1.8;color:var(--muted);}
+.hero-script strong{color:var(--text);font-weight:700;}
+
+.progress-wrap{max-width:720px;margin:1.8rem auto 0;padding:0 1.5rem;position:relative;z-index:1;}
+.progress-label{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:6px;}
+.progress-bar{height:5px;background:var(--border);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));border-radius:99px;width:0%;transition:width .4s ease;}
+
+.main{max-width:720px;margin:0 auto;padding:1.8rem 1.5rem 0;position:relative;z-index:1;}
+
+.card{
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin-bottom:1.2rem;
+  box-shadow:0 4px 20px rgba(0,0,0,.06);
+  transition:border-color .2s,box-shadow .2s;
+}
+.card:hover{border-color:var(--day-border);box-shadow:0 4px 20px var(--day-glow);}
+.card-stripe{height:3px;background:linear-gradient(90deg,#f5c518,#f5a623,#f28b82);}
+.card-inner{padding:1.4rem;}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+.step-num{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;font-weight:700;flex-shrink:0;
+  background:var(--day-light);color:var(--day-dark);
+  border:1px solid var(--day-border);
+}
+.card-title{font-size:1rem;font-weight:700;color:var(--text);}
+
+.ibox{border-left:3px solid var(--day-color);background:var(--day-light);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:10px 14px;margin:10px 0;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--day-dark);line-height:1.9;}
+.wbox{border-left:3px solid var(--orange);background:#fff8eb;border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:10px 14px;margin:10px 0;font-size:.88rem;color:#7a4e00;line-height:1.7;}
+
+.ql{list-style:none;margin:10px 0 0;}
+.ql li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:.88rem;color:var(--muted);border-bottom:1px solid var(--border);line-height:1.6;}
+.ql li:last-child{border-bottom:none;}
+.qm{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--day-dark);flex-shrink:0;margin-top:2px;background:var(--day-light);padding:2px 7px;border-radius:4px;border:1px solid var(--day-border);}
+
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px;}
+.lbl{font-size:.82rem;color:var(--muted);}
+input[type="number"],textarea{font-family:'JetBrains Mono',monospace;border:2px solid var(--border);border-radius:var(--radius-sm);padding:7px 12px;font-size:.85rem;color:var(--text);background:#fff;transition:border-color .2s,box-shadow .2s;}
+input[type="number"]{width:110px;text-align:center;}
+input[type="number"]:focus,textarea:focus{outline:none;border-color:var(--day-color);box-shadow:0 0 0 3px var(--day-glow);}
+textarea{width:100%;resize:vertical;min-height:80px;margin-top:10px;line-height:1.8;}
+
+.btn-check{background:var(--day-mid);color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:.82rem;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;transition:opacity .15s,transform .12s;}
+.btn-check:hover{opacity:.85;}
+.btn-check:active{transform:scale(.97);}
+
+.btn-reveal{display:inline-flex;align-items:center;gap:5px;background:transparent;border:2px solid var(--day-border);border-radius:7px;padding:6px 13px;font-size:.8rem;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;color:var(--day-dark);margin-top:10px;transition:background .15s;}
+.btn-reveal:hover{background:var(--day-light);}
+
+.fb{display:none;margin-top:8px;font-size:.82rem;font-weight:700;padding:7px 12px;border-radius:var(--radius-sm);}
+.fb.ok{display:block;background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.fb.ko{display:block;background:#fff0ef;border:1.5px solid var(--pink);color:#a93226;}
+
+.sol{display:none;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:var(--radius-sm);padding:12px 14px;margin-top:10px;font-size:.82rem;color:var(--day-dark);line-height:1.9;}
+.sol.show{display:block;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.78rem;background:rgba(196,154,0,.12);padding:1px 5px;border-radius:4px;color:var(--day-dark);}
+
+.mission{background:var(--day-light);border:2px solid var(--day-border);border-radius:var(--radius);overflow:hidden;margin-top:2rem;box-shadow:0 4px 24px var(--day-glow);}
+.mission-stripe{height:4px;background:linear-gradient(90deg,#f5c518,#f5a623,#f28b82);}
+.mission-inner{padding:1.6rem;}
+.mission .badge{display:inline-block;background:var(--day-mid);color:#fff;font-size:.65rem;font-weight:700;padding:.25rem .8rem;border-radius:4px;margin-bottom:.7rem;letter-spacing:.07em;text-transform:uppercase;}
+.mission h2{font-size:1.05rem;font-weight:700;color:var(--day-dark);margin-bottom:.7rem;}
+.mission p{font-size:.88rem;color:var(--day-dark);line-height:1.8;opacity:.9;}
+.mission textarea{background:#fff;border-color:var(--day-border);color:var(--text);margin-top:12px;}
+.mission textarea:focus{border-color:var(--day-mid);box-shadow:0 0 0 3px var(--day-glow);}
+.mission .btn-reveal{color:var(--day-dark);border-color:var(--day-border);}
+.mission .btn-reveal:hover{background:rgba(255,255,255,.6);}
+.mission .sol{background:#fff;border-color:var(--day-border);color:var(--day-dark);}
+
+footer{text-align:center;margin-top:3rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);position:relative;z-index:1;}
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<div class="hero">
+  <div class="hero-badge">Pazapa · Maths · 3ème · Jour 5</div>
+  <h1>🥐 Mission <span class="hl">Pâte à Pouf</span></h1>
+  <p class="hero-script">
+    Ce matin, M. Pouf a trouvé un message urgent collé sur la porte de sa boutique…
+    son fournisseur de farine <strong>menace de changer ses prix</strong>, une cliente réclame un remboursement
+    sans ticket de caisse, et les étiquettes de fin de semaine ne sont toujours pas imprimées.<br>
+    La boulangerie ouvre dans 20 minutes. Chaque erreur peut lui coûter cher — <strong>très cher</strong>.<br>
+    M. Pouf a besoin d'un expert… et cet expert, <strong>c'est toi</strong>.
+  </p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span>Progression</span>
+    <span id="score-label">0 / 5 bonnes réponses</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+</div>
+
+<div class="main">
+
+  <div class="card">
+    <div class="card-stripe"></div>
+    <div class="card-inner">
+      <div class="card-head">
+        <div class="step-num">1</div>
+        <div class="card-title">Les promotions de fin de semaine</div>
+      </div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.8">Vendredi soir, M. Pouf décide de brader ses invendus. Il affiche les remises suivantes :</p>
+      <div class="ibox">
+        <strong>Croissant :</strong> prix habituel 1,20 € → remise de 30 %<br>
+        <strong>Tarte aux fraises :</strong> prix habituel 18 € → remise de 15 %<br>
+        <strong>Brioche :</strong> prix habituel 6,50 € → hausse de 8 % (édition spéciale week-end)
+      </div>
+      <ul class="ql">
+        <li><span class="qm">Q1</span>Quel coefficient multiplicateur correspond à une remise de 30 % ?</li>
+        <li><span class="qm">Q2</span>Calcule le prix soldé du croissant.</li>
+        <li><span class="qm">Q3</span>Calcule le prix soldé de la tarte aux fraises.</li>
+        <li><span class="qm">Q4</span>Calcule le prix de la brioche édition spéciale.</li>
+      </ul>
+      <div class="row">
+        <span class="lbl">Prix croissant soldé :</span>
+        <input type="number" id="r1" step="0.01" placeholder="€"/>
+        <button class="btn-check" onclick="chk('r1',0.84,'f1','0,84 €')">Vérifier</button>
+      </div>
+      <div class="fb" id="f1"></div>
+      <div class="row">
+        <span class="lbl">Prix tarte soldée :</span>
+        <input type="number" id="r2" step="0.01" placeholder="€"/>
+        <button class="btn-check" onclick="chk('r2',15.30,'f2','15,30 €')">Vérifier</button>
+      </div>
+      <div class="fb" id="f2"></div>
+      <div class="row">
+        <span class="lbl">Prix brioche spéciale :</span>
+        <input type="number" id="r3" step="0.01" placeholder="€"/>
+        <button class="btn-check" onclick="chk('r3',7.02,'f3','7,02 €')">Vérifier</button>
+      </div>
+      <div class="fb" id="f3"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-stripe"></div>
+    <div class="card-inner">
+      <div class="card-head">
+        <div class="step-num">2</div>
+        <div class="card-title">Le piège du fournisseur de farine</div>
+      </div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.8">Le fournisseur a augmenté ses prix de <strong>20 %</strong> en janvier, puis accordé une remise de <strong>20 %</strong> en mars. Il affirme à M. Pouf :</p>
+      <div class="wbox">⚠ « Vous êtes revenu au prix d'origine, comme si rien ne s'était passé ! »</div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.8;margin-top:8px">M. Pouf n'est pas convaincu. Il te demande de vérifier.</p>
+      <ul class="ql">
+        <li><span class="qm">Q5</span>Prends un sac de farine à 10 €. Quel est son prix après la hausse de 20 % ?</li>
+        <li><span class="qm">Q6</span>Applique ensuite la remise de 20 % à ce nouveau prix.</li>
+        <li><span class="qm">Q7</span>Quel est le coefficient global ? Quel est le taux d'évolution global ?</li>
+        <li><span class="qm">Q8</span>Que réponds-tu au fournisseur ?</li>
+      </ul>
+      <textarea id="rep_piege" placeholder="Écris ta démarche et ta conclusion ici…"></textarea>
+      <button class="btn-reveal" onclick="toggle('sol_piege')">Voir la correction 👁</button>
+      <div class="sol" id="sol_piege">
+        Prix après +20 % : <span class="mono">10 × 1,2 = 12 €</span><br>
+        Prix après −20 % : <span class="mono">12 × 0,8 = 9,60 €</span><br>
+        Coefficient global : <span class="mono">1,2 × 0,8 = 0,96</span><br>
+        Taux d'évolution global : <span class="mono">0,96 − 1 = −0,04</span> soit <strong>−4 %</strong>.<br><br>
+        Conclusion : le fournisseur se trompe. Le prix final est 9,60 €, pas 10 €. Les deux pourcentages ne s'annulent pas car ils ne portent pas sur la même valeur de référence.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-stripe"></div>
+    <div class="card-inner">
+      <div class="card-head">
+        <div class="step-num">3</div>
+        <div class="card-title">Retrouver le prix d'origine d'une commande</div>
+      </div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.8">Une cliente rapporte une boîte de macarons achetée <strong>13,60 €</strong> après une remise de <strong>15 %</strong>. Elle veut être remboursée au prix d'origine, mais le ticket a été perdu.</p>
+      <ul class="ql">
+        <li><span class="qm">Q9</span>Quel coefficient multiplicateur correspond à −15 % ?</li>
+        <li><span class="qm">Q10</span>Comment retrouver le prix initial à partir du prix final et du coefficient ?</li>
+        <li><span class="qm">Q11</span>Calcule le prix initial des macarons (arrondi au centime).</li>
+      </ul>
+      <div class="row">
+        <span class="lbl">Prix initial des macarons :</span>
+        <input type="number" id="r4" step="0.01" placeholder="€"/>
+        <button class="btn-check" onclick="chkApprox('r4',16,'f4',0.05,'16,00 €')">Vérifier</button>
+      </div>
+      <div class="fb" id="f4"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-stripe"></div>
+    <div class="card-inner">
+      <div class="card-head">
+        <div class="step-num">4</div>
+        <div class="card-title">Le bilan de la semaine</div>
+      </div>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.8">M. Pouf compare ses ventes de gâteaux :</p>
+      <div class="ibox">
+        Semaine dernière : <strong>340 gâteaux</strong> vendus<br>
+        Cette semaine : <strong>391 gâteaux</strong> vendus
+      </div>
+      <ul class="ql">
+        <li><span class="qm">Q12</span>Calcule le taux d'évolution des ventes entre les deux semaines.</li>
+        <li><span class="qm">Q13</span>Hausse ou baisse ? De combien de pourcent (arrondi à 0,1 % près) ?</li>
+      </ul>
+      <div class="row">
+        <span class="lbl">Taux d'évolution :</span>
+        <input type="number" id="r5" step="0.1" placeholder="%"/>
+        <span style="font-size:.85rem;color:var(--muted)">%</span>
+        <button class="btn-check" onclick="chkApprox('r5',15,'f5',0.2,'15,0 %')">Vérifier</button>
+      </div>
+      <div class="fb" id="f5"></div>
+    </div>
+  </div>
+
+  <div class="mission">
+    <div class="mission-stripe"></div>
+    <div class="mission-inner">
+      <div class="badge">🏆 Mission finale</div>
+      <h2>Le mémo de M. Pouf</h2>
+      <p>
+        Tu as résolu toutes les situations de la boulangerie. Rédige un mémo pour M. Pouf qui résume les quatre règles essentielles :<br><br>
+        <strong>1.</strong> Comment calculer un nouveau prix après une hausse ou une baisse en %.<br>
+        <strong>2.</strong> Pourquoi deux pourcentages successifs ne s'additionnent pas.<br>
+        <strong>3.</strong> Comment retrouver un prix d'origine à partir d'un prix final et d'un taux.<br>
+        <strong>4.</strong> Comment calculer un taux d'évolution entre deux valeurs.<br><br>
+        Utilise les mots clés : <span class="mono">coefficient multiplicateur</span>, <span class="mono">taux d'évolution</span>, <span class="mono">valeur initiale</span>, <span class="mono">valeur finale</span>.
+      </p>
+      <textarea id="rapport" style="min-height:120px;" placeholder="Rédige ton mémo pour M. Pouf ici…"></textarea>
+      <button class="btn-reveal" onclick="toggle('sol_final')">Voir la synthèse de cours 👁</button>
+      <div class="sol" id="sol_final">
+        <strong>Évolutions en pourcentage — ce que M. Pouf doit savoir</strong><br><br>
+        <strong>1. Nouveau prix :</strong> valeur initiale × coefficient multiplicateur.<br>
+        &nbsp;&nbsp;• Hausse de t % → coefficient : <span class="mono">1 + t/100</span><br>
+        &nbsp;&nbsp;• Baisse de t % → coefficient : <span class="mono">1 − t/100</span><br><br>
+        <strong>2. Évolutions successives :</strong> on multiplie les coefficients — on ne les additionne jamais.<br>
+        &nbsp;&nbsp;• +20 % puis −20 % → <span class="mono">1,2 × 0,8 = 0,96</span> → évolution globale de −4 %.<br><br>
+        <strong>3. Retrouver la valeur initiale :</strong><br>
+        &nbsp;&nbsp;• <span class="mono">valeur initiale = valeur finale ÷ coefficient</span><br><br>
+        <strong>4. Taux d'évolution :</strong><br>
+        &nbsp;&nbsp;• <span class="mono">t (%) = (valeur finale − valeur initiale) ÷ valeur initiale × 100</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>N3 · S2 · J5 · Boulangerie Pâte à Pouf · Pazapa Maths 3ème · Évolutions en %</p>
+</footer>
+
+<script>
+  let score=0;const total=5;
+  function upd(){
+    document.getElementById('prog').style.width=Math.round(score/total*100)+'%';
+    document.getElementById('score-label').textContent=score+' / '+total+' bonnes réponses';
+  }
+  function chk(id,expected,fbId,label){
+    const v=parseFloat(document.getElementById(id).value);
+    const fb=document.getElementById(fbId);
+    if(isNaN(v)){fb.className='fb ko';fb.textContent='Entre un nombre valide.';return;}
+    if(Math.abs(v-expected)<0.02){fb.className='fb ok';fb.textContent='✅ Correct ! '+label;score=Math.min(score+1,total);upd();}
+    else{fb.className='fb ko';fb.textContent='❌ Pas tout à fait — vérifie ton coefficient et recommence.';}
+  }
+  function chkApprox(id,expected,fbId,tol,label){
+    const v=parseFloat(document.getElementById(id).value);
+    const fb=document.getElementById(fbId);
+    if(isNaN(v)){fb.className='fb ko';fb.textContent='Entre un nombre valide.';return;}
+    if(Math.abs(v-expected)<=tol+0.05){fb.className='fb ok';fb.textContent='✅ Correct ! ≈ '+label;score=Math.min(score+1,total);upd();}
+    else{fb.className='fb ko';fb.textContent='❌ Pas tout à fait — relis la méthode et réessaie.';}
+  }
+  function toggle(id){document.getElementById(id).classList.toggle('show');}
+</script>
+</body>
+</html>
