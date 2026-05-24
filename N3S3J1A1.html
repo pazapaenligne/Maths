@@ -199,9 +199,17 @@ body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tex
   border:4px solid #fff;box-shadow:0 4px 14px rgba(217,164,0,.5),inset 0 0 0 3px #e8b400;
   display:flex;align-items:center;justify-content:center;}
 .medal-disc .star{font-size:30px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.25);}
+/* variantes selon le score */
+.medal.argent .medal-disc{background:radial-gradient(circle at 35% 30%,#ffffff,#cfd4da 55%,#9aa1ab 100%);box-shadow:0 4px 14px rgba(154,161,171,.5),inset 0 0 0 3px #b6bcc4;}
+.medal.bronze .medal-disc{background:radial-gradient(circle at 35% 30%,#f6c89a,#cd7f32 55%,#9c5a1e 100%);box-shadow:0 4px 14px rgba(156,90,30,.5),inset 0 0 0 3px #b06a28;}
+.medal.encourage .medal-disc{background:radial-gradient(circle at 35% 30%,#bdf0c0,#8dc63f 55%,#5fa800 100%);box-shadow:0 4px 14px rgba(95,168,0,.45),inset 0 0 0 3px #7ab32f;}
+.medal.encourage .medal-disc .star{font-size:28px;}
 .medal-label{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);font-size:.85rem;
   background:var(--day-light);border:1.5px solid var(--day-border);border-radius:99px;padding:.35rem 1rem;
   letter-spacing:.03em;word-break:break-word;text-align:center;}
+.train-tip{background:#eef7fb;border:1.5px solid #9dd4e8;border-radius:12px;padding:.8rem 1rem;margin:0 0 1.1rem;
+  font-size:.86rem;line-height:1.7;color:#15506b;text-align:left;word-break:break-word;}
+.train-tip strong{color:#0f4257;}
 @keyframes medalIn{0%{opacity:0;transform:scale(.3) rotate(-20deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
 .recap-list{text-align:left;display:flex;flex-direction:column;gap:.45rem;margin-bottom:1.2rem;}
 .recap-item{display:flex;align-items:flex-start;gap:.6rem;padding:.55rem .8rem;background:#fff;border:1.5px solid var(--border);
@@ -329,7 +337,8 @@ function buildAll(){
 function lockCard(i){
   var ex=ITEMS[i];var ok=userOk[i];
   var fb=$("fb-"+i);fb.className="fb show "+(ok?"ok":"ko");
-  fb.innerHTML=ok?"✅ <strong>Bien joué, c'est juste !</strong>":"❌ <strong>Pas tout à fait.</strong> Clique « Indice » ou « Voir la correction ».";
+  var bravos=["Bien joué, c'est juste !","Exact, bravo !","Parfait !","Bien vu !","Tout à fait !","Super, c'est correct !"];
+  fb.innerHTML=ok?("✅ <strong>"+bravos[i % bravos.length]+"</strong>"):"❌ <strong>Pas tout à fait.</strong> Clique « Indice » ou « Voir la correction ».";
   $("chk-"+i).disabled=true;
   if(ex.typ==='expr'||ex.typ==='num'){var inp=$("inp-"+i);inp.value=userAns[i];inp.disabled=true;inp.classList.add(ok?"correct-input":"wrong-input");}
   else if(ex.typ==='vraifaux'){var o=$("opts-"+i).children,sol=dec(ex.enc);for(var k=0;k<o.length;k++){o[k].classList.add("locked");if(sol.indexOf(''+k)>-1)o[k].classList.add("correct");if(''+k===''+userAns[i]&&!ok)o[k].classList.add("wrong");}}
@@ -411,9 +420,30 @@ function showResults(){
                "Utilise « Voir la correction » pour comprendre, puis recommence."];
   }
   $("results-msg").innerHTML=pick(msgPool)+"<br><span style='font-weight:400;opacity:.85;'>"+pick(bonusPool)+"</span>";
-  if(ok>=TOTAL){$("concl-box").innerHTML="🎉 <strong>Mission accomplie !</strong><br>"+CONCL;$("concl-box").classList.add("show");
-    $("badge-zone").innerHTML='<div class="medal"><div class="medal-ribbons"><span class="rL"></span><span class="rR"></span></div><div class="medal-disc"><span class="star">★</span></div><div class="medal-label">🏅 R&eacute;compense d&eacute;bloqu&eacute;e&nbsp;: '+BADGE+'</div></div>';}
-  else{$("concl-box").innerHTML="🔒 Réussis <strong>tous</strong> les défis pour débloquer la conclusion et ton badge.";$("concl-box").classList.add("show");$("badge-zone").innerHTML="";}
+  // ----- badge selon les performances -----
+  var medalClass, medalLabel, conclTitle, trainTip="";
+  if(ok>=TOTAL){
+    medalClass=""; medalLabel="🥇 Médaille d'Or — "+BADGE; conclTitle="🎉 Mission accomplie !";
+  } else if(ratio>=0.7){
+    medalClass="argent"; medalLabel="🥈 Médaille d'Argent — "+BADGE; conclTitle="✅ Mission réussie !";
+  } else if(ratio>=0.55){
+    medalClass="bronze"; medalLabel="🥉 Médaille de Bronze — "+BADGE; conclTitle="👍 Mission validée !";
+  } else {
+    medalClass="encourage"; medalLabel="💚 Badge Persévérance"; conclTitle="🌱 Continue tes efforts !";
+    trainTip="<div class='train-tip'>💡 <strong>Petit conseil :</strong> entraîne-toi encore sur cette mission "
+      +"(clique sur « Recommencer » et utilise le « Résumé du cours » et les indices) "
+      +"<strong>avant de passer à la mission suivante</strong>. Tu seras alors fin prêt·e !</div>";
+  }
+  var medalHTML='<div class="medal '+medalClass+'"><div class="medal-ribbons"><span class="rL"></span><span class="rR"></span></div>'
+    +'<div class="medal-disc"><span class="star">★</span></div>'
+    +'<div class="medal-label">'+medalLabel+'</div></div>';
+  if(ok>=TOTAL){
+    $("concl-box").innerHTML="<strong>"+conclTitle+"</strong><br>"+CONCL;
+  } else {
+    $("concl-box").innerHTML="<strong>"+conclTitle+"</strong><br>Tu as r&eacute;ussi "+ok+" d&eacute;fi"+(ok>1?"s":"")+" sur "+TOTAL+". "+(trainTip?"":"Reprends les d&eacute;fis manqu&eacute;s pour viser la m&eacute;daille d'or&nbsp;!");
+  }
+  $("concl-box").classList.add("show");
+  $("badge-zone").innerHTML=medalHTML+trainTip;
 }
 function toggleResultsCours(){var c=$("results-cours");if(!c.innerHTML)c.innerHTML=COURS;c.classList.toggle("show");}
 function restartOne(i){userOk[i]=null;userAns[i]=null;ddState[i]=null;ITEMS[i]._order=null;$("results-screen").style.display="none";buildAll();lightStars();updateScore();$("exo-"+i).scrollIntoView({behavior:"smooth"});}
