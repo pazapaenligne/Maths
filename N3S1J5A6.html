@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths — Ce que je retiens S1 J5 : étapes d'une inéquation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day:#f5c518;--day-dark:#8a6000;--day-title:#c49a00;--day-light:#fffbeb;--day-border:#f5e08a;--badge-txt:#3a2600;--day-glow:rgba(245,197,24,.20);
+  --bg:#ffffff;--surface:#ffffff;--border:#ece7d6;--text:#1a1d23;--muted:#7a7568;--green:#5fa800;--green-soft:#8dc63f;--pink:#f28b82;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'JetBrains Mono',Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+  padding:0 0 3rem;overflow-x:hidden;line-height:1.7;letter-spacing:.02em;-webkit-tap-highlight-color:transparent;}
+.frame{position:relative;overflow:hidden;max-width:760px;margin:0 auto;
+  background:radial-gradient(300px 300px at 100% 0%,rgba(245,197,24,.16),transparent 60%),
+             radial-gradient(240px 240px at 0% 100%,rgba(245,224,138,.20),transparent 60%),var(--bg);}
+.bubble{position:absolute;border-radius:50%;pointer-events:none;}
+.b1{width:240px;height:240px;top:-70px;right:-80px;background:var(--day);opacity:.5;}
+.b2{width:200px;height:200px;bottom:140px;left:-80px;background:var(--day-border);opacity:.55;}
+.b4{width:150px;height:150px;bottom:-40px;right:-50px;background:var(--day-border);opacity:.5;}
+.layer{position:relative;z-index:1;}
+
+.hero{background:var(--surface);border-bottom:2px solid var(--day-light);padding:2rem 1.25rem 1.6rem;text-align:center;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;flex-wrap:wrap;background:var(--day);color:var(--badge-txt);
+  font-size:clamp(.66rem,2.6vw,.8rem);font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.4rem 1.1rem;border-radius:99px;margin-bottom:.8rem;white-space:nowrap;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--muted);letter-spacing:.14em;margin-bottom:.5rem;}
+.hero h1{font-family:'JetBrains Mono',monospace;font-size:clamp(1.6rem,6.5vw,2.3rem);font-weight:900;line-height:1.15;color:var(--text);}
+.hero h1 .hl{color:var(--day-title);}
+.hero .subtitle{color:var(--muted);font-size:clamp(.82rem,3vw,.92rem);margin-top:.5rem;}
+.hero-script{max-width:600px;margin:.9rem auto 0;font-size:clamp(.85rem,3vw,.93rem);line-height:1.8;color:var(--muted);}
+.hero-script strong{color:var(--text);}
+
+.main{max-width:760px;margin:0 auto;padding:1.4rem 1.25rem 0;}
+.play-card{background:var(--surface);border:2px solid var(--day-border);border-radius:18px;padding:1.6rem 1.4rem;margin-bottom:1.4rem;box-shadow:0 6px 24px var(--day-glow);}
+.controls{margin-top:1.4rem;}
+.layout{display:flex;gap:1.6rem;flex-wrap:wrap;align-items:flex-start;}
+.grid-wrap{flex:0 0 auto;margin:0 auto;position:relative;}
+.crossword{border-collapse:collapse;background:transparent;}
+.crossword td{width:38px;height:38px;padding:0;border:none;position:relative;}
+.cell-empty{background:transparent;}
+.cell{background:#fdeeb0;}
+.cell input{width:100%;height:100%;border:none;text-align:center;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--day-dark);background:transparent;outline:none;padding:.25rem 0 0 0;}
+.cell input:focus{background:var(--day-light);}
+.cell.correct{background:#eaf7ec;} .cell.correct input{color:#2f6e10;}
+.cell.wrong{background:#fbeae8;} .cell.wrong input{color:#c0392b;}
+/* contour continu par mot (pas de séparation intra-mot) */
+.word-outline{position:absolute;border:2.5px solid var(--day-dark);border-radius:8px;pointer-events:none;z-index:2;}
+.cell .cnum{position:absolute;top:1px;left:3px;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;color:#8a6000;line-height:1;}
+
+.clues{flex:1;min-width:240px;}
+.clues h3{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--day-dark);text-transform:uppercase;letter-spacing:.1em;margin:0 0 .6rem;}
+.clue{display:flex;gap:.6rem;align-items:flex-start;padding:.55rem .75rem;background:var(--day-light);border:1px solid var(--day-border);border-radius:10px;margin-bottom:.5rem;font-size:.86rem;line-height:1.5;cursor:pointer;transition:.15s;}
+.clue:hover{border-color:var(--day);}
+.clue.solved{background:#f0faeb;border-color:var(--green-soft);}
+.clue .cn{font-weight:800;color:var(--day-dark);flex-shrink:0;}
+.clue .ck{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+
+.controls{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-top:1.6rem;}
+.btn{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;letter-spacing:.04em;cursor:pointer;border:none;border-radius:10px;padding:.7rem 1.3rem;min-height:2.8rem;transition:.15s;text-transform:uppercase;-webkit-tap-highlight-color:transparent;}
+.btn:active{transform:scale(.97);}
+.btn-check{background:var(--green);color:#fff;}
+.btn-check:hover{box-shadow:0 4px 14px rgba(95,168,0,.4);}
+.btn-clear{background:#fff;border:2px solid var(--pink);color:#a93226;}
+.btn-clear:hover{background:#fff0ef;}
+.btn-sol{background:#fff;border:2px solid var(--day-border);color:var(--day-dark);}
+.btn-sol:hover{background:var(--day-light);}
+
+.fb{max-width:520px;margin:1.2rem auto 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.92rem;font-weight:700;padding:.8rem 1rem;border-radius:12px;display:none;}
+.fb.show{display:block;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green-soft);color:#2f6e10;}
+.fb.partial{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);}
+
+.recap{max-width:600px;margin:1.6rem auto 0;background:var(--surface);border:2px solid var(--day-border);border-radius:16px;padding:1.4rem 1.3rem;box-shadow:0 4px 16px var(--day-glow);}
+.recap h2{font-family:'JetBrains Mono',monospace;font-size:1.05rem;color:var(--day-title);text-align:center;margin-bottom:1rem;}
+.recap-step{display:flex;gap:.7rem;align-items:flex-start;padding:.6rem .8rem;background:var(--day-light);border:1px solid var(--day-border);border-radius:10px;margin-bottom:.5rem;font-size:.86rem;line-height:1.5;}
+.recap-step b{color:var(--day-dark);}
+
+footer{text-align:center;margin-top:2.2rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.06em;}
+@media(max-width:560px){
+  .crossword td{width:32px;height:32px;} .cell input{font-size:1rem;} .cell .cnum{font-size:.62rem;}
+  .hero{padding:1.6rem 1rem 1.4rem;} .main{padding:1.2rem 1rem 0;}
+  .layout{flex-direction:column;} .controls{flex-direction:column;} .btn{width:100%;}
+}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b4"></div>
+  <div class="layer">
+    <div class="hero">
+      <div class="logo-badge">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#f5e08a"></span>
+        <span class="logo-dot" style="background:#8a6000"></span>
+        Pazapa &middot; Maths &middot; 3&egrave;me
+      </div>
+      <div class="week-label">SEMAINE 1 &mdash; JOUR 5</div>
+      <h1>&#128218; <span class="hl">Ce que je retiens</span></h1>
+      <p class="subtitle">Les &eacute;tapes pour r&eacute;soudre un probl&egrave;me avec une in&eacute;quation</p>
+      <p class="hero-script">Retrouve les <strong>4 &eacute;tapes</strong> cach&eacute;es dans la grille. Clique sur un indice ou une case, puis tape les lettres. Utilise &laquo; V&eacute;rifier &raquo; pour contr&ocirc;ler tes r&eacute;ponses.</p>
+    </div>
+
+    <div class="main">
+      <div class="play-card">
+        <div class="layout">
+          <div class="grid-wrap"><table class="crossword" id="grid"></table></div>
+          <div class="clues" id="clues"></div>
+        </div>
+        <div class="controls">
+          <button class="btn btn-check" onclick="checkGrid()">&#10003; V&eacute;rifier</button>
+          <button class="btn btn-sol" onclick="showSolution()">&#128065; Solution</button>
+          <button class="btn btn-clear" onclick="clearGrid()">&#128260; Effacer</button>
+        </div>
+        <div class="fb" id="fb"></div>
+      </div>
+
+      <div class="recap">
+        <h2>&#128203; Les &eacute;tapes, dans l'ordre</h2>
+        <div class="recap-step"><b>1.</b><span><b>Mod&eacute;liser</b> : traduire le probl&egrave;me en in&eacute;quation.</span></div>
+        <div class="recap-step"><b>2.</b><span><b>R&eacute;soudre</b> : trouver les solutions de l'in&eacute;quation.</span></div>
+        <div class="recap-step"><b>3.</b><span><b>V&eacute;rifier</b> : contr&ocirc;ler si les solutions sont valides.</span></div>
+        <div class="recap-step"><b>4.</b><span><b>Conclure</b> : r&eacute;pondre &agrave; la question pos&eacute;e.</span></div>
+      </div>
+
+      <footer>N3 &middot; S1 &middot; J5 &middot; Ce que je retiens &middot; Pazapa Maths 3&egrave;me</footer>
+    </div>
+  </div>
+</div>
+
+<script>
+var DATA={"rows": 14, "cols": 9, "cells": [{"r": 7, "c": 0, "letter": "M", "num": 4}, {"r": 7, "c": 1, "letter": "O", "num": 0}, {"r": 7, "c": 2, "letter": "D", "num": 0}, {"r": 7, "c": 3, "letter": "E", "num": 0}, {"r": 7, "c": 4, "letter": "L", "num": 0}, {"r": 7, "c": 5, "letter": "I", "num": 0}, {"r": 7, "c": 6, "letter": "S", "num": 0}, {"r": 7, "c": 7, "letter": "E", "num": 0}, {"r": 7, "c": 8, "letter": "R", "num": 0}, {"r": 4, "c": 1, "letter": "R", "num": 2}, {"r": 5, "c": 1, "letter": "E", "num": 0}, {"r": 6, "c": 1, "letter": "S", "num": 0}, {"r": 8, "c": 1, "letter": "U", "num": 0}, {"r": 9, "c": 1, "letter": "D", "num": 0}, {"r": 10, "c": 1, "letter": "R", "num": 0}, {"r": 11, "c": 1, "letter": "E", "num": 0}, {"r": 6, "c": 3, "letter": "V", "num": 3}, {"r": 8, "c": 3, "letter": "R", "num": 0}, {"r": 9, "c": 3, "letter": "I", "num": 0}, {"r": 10, "c": 3, "letter": "F", "num": 0}, {"r": 11, "c": 3, "letter": "I", "num": 0}, {"r": 12, "c": 3, "letter": "E", "num": 0}, {"r": 13, "c": 3, "letter": "R", "num": 0}, {"r": 0, "c": 7, "letter": "C", "num": 1}, {"r": 1, "c": 7, "letter": "O", "num": 0}, {"r": 2, "c": 7, "letter": "N", "num": 0}, {"r": 3, "c": 7, "letter": "C", "num": 0}, {"r": 4, "c": 7, "letter": "L", "num": 0}, {"r": 5, "c": 7, "letter": "U", "num": 0}, {"r": 6, "c": 7, "letter": "R", "num": 0}], "entries": [{"number": 4, "display": "Modéliser", "clue": "Étape où on traduit le problème en inéquation.", "orient": "H", "coords": [[7, 0], [7, 1], [7, 2], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7], [7, 8]], "word": "MODELISER"}, {"number": 2, "display": "Résoudre", "clue": "Étape où on trouve les solutions de l'inéquation.", "orient": "V", "coords": [[4, 1], [5, 1], [6, 1], [7, 1], [8, 1], [9, 1], [10, 1], [11, 1]], "word": "RESOUDRE"}, {"number": 3, "display": "Vérifier", "clue": "Étape où on contrôle si les solutions sont valides.", "orient": "V", "coords": [[6, 3], [7, 3], [8, 3], [9, 3], [10, 3], [11, 3], [12, 3], [13, 3]], "word": "VERIFIER"}, {"number": 1, "display": "Conclure", "clue": "Étape finale où on répond à la question posée.", "orient": "V", "coords": [[0, 7], [1, 7], [2, 7], [3, 7], [4, 7], [5, 7], [6, 7], [7, 7]], "word": "CONCLURE"}]};
+var cellMap={}; // "r,c" -> {letter, input}
+function key(r,c){return r+","+c;}
+
+function buildGrid(){
+  var t=document.getElementById("grid");t.innerHTML="";
+  var cellLookup={};
+  DATA.cells.forEach(function(c){cellLookup[key(c.r,c.c)]=c;});
+  for(var r=0;r<DATA.rows;r++){
+    var tr=document.createElement("tr");
+    for(var c=0;c<DATA.cols;c++){
+      var td=document.createElement("td");
+      var cell=cellLookup[key(r,c)];
+      if(cell){
+        td.className="cell";
+        if(cell.num>0){var n=document.createElement("span");n.className="cnum";n.textContent=cell.num;td.appendChild(n);}
+        var inp=document.createElement("input");
+        inp.maxLength=1;inp.setAttribute("data-r",r);inp.setAttribute("data-c",c);
+        inp.addEventListener("input",function(e){
+          this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'');
+          // avancer au prochain input
+          if(this.value){ focusNext(this); }
+          clearMarks();
+        });
+        inp.addEventListener("keydown",function(e){
+          if(e.key==="Backspace"&&!this.value){ focusPrev(this); }
+        });
+        td.appendChild(inp);
+        cellMap[key(r,c)]={letter:cell.letter,input:inp};
+      }else{
+        td.className="cell-empty";
+      }
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  }
+  drawOutlines();
+}
+function drawOutlines(){
+  // Contour de la FORME ENTIÈRE : chaque case active reçoit une bordure
+  // uniquement sur les côtés qui touchent une case vide (pas de séparation interne,
+  // pas de double bordure aux croisements).
+  var active={};
+  DATA.cells.forEach(function(c){active[key(c.r,c.c)]=true;});
+  DATA.cells.forEach(function(c){
+    var cm=cellMap[key(c.r,c.c)];if(!cm)return;
+    var td=cm.input.parentNode;
+    var B="2.5px solid var(--day-dark)", N="none";
+    td.style.borderTop    = active[key(c.r-1,c.c)] ? N : B;
+    td.style.borderBottom = active[key(c.r+1,c.c)] ? N : B;
+    td.style.borderLeft   = active[key(c.r,c.c-1)] ? N : B;
+    td.style.borderRight  = active[key(c.r,c.c+1)] ? N : B;
+  });
+}
+window.addEventListener("resize",function(){drawOutlines();});
+function allInputs(){return Array.prototype.slice.call(document.querySelectorAll(".cell input"));}
+function focusNext(inp){
+  var arr=allInputs();var i=arr.indexOf(inp);
+  if(i<arr.length-1) arr[i+1].focus();
+}
+function focusPrev(inp){
+  var arr=allInputs();var i=arr.indexOf(inp);
+  if(i>0) arr[i-1].focus();
+}
+function clearMarks(){
+  document.querySelectorAll(".cell").forEach(function(td){td.classList.remove("correct","wrong");});
+  document.getElementById("fb").className="fb";
+}
+
+function buildClues(){
+  var box=document.getElementById("clues");box.innerHTML="";
+  var H=DATA.entries.filter(function(e){return e.orient==="H";}).sort(function(a,b){return a.number-b.number;});
+  var V=DATA.entries.filter(function(e){return e.orient==="V";}).sort(function(a,b){return a.number-b.number;});
+  function section(title,arr){
+    if(!arr.length)return;
+    var h=document.createElement("h3");h.textContent=title;box.appendChild(h);
+    arr.forEach(function(e){
+      var d=document.createElement("div");d.className="clue";d.id="clue-"+e.number+"-"+e.orient;
+      d.innerHTML='<span class="cn">'+e.number+'</span><span><span class="ck">'+e.display.length+' lettres</span><br>'+e.clue+'</span>';
+      d.onclick=function(){focusEntry(e);};
+      box.appendChild(d);
+    });
+  }
+  section("Horizontal \u2192",H);
+  section("Vertical \u2193",V);
+}
+function focusEntry(e){
+  var first=e.coords[0];
+  var k=key(first[0],first[1]);
+  if(cellMap[k]) cellMap[k].input.focus();
+}
+
+function checkGrid(){
+  var allCorrect=true, anyFilled=false, solvedEntries=0;
+  // marquer cases
+  Object.keys(cellMap).forEach(function(k){
+    var cm=cellMap[k];var td=cm.input.parentNode;
+    td.classList.remove("correct","wrong");
+    var v=(cm.input.value||"").toUpperCase();
+    if(v) anyFilled=true;
+    if(v===cm.letter){ td.classList.add("correct"); }
+    else { allCorrect=false; if(v) td.classList.add("wrong"); }
+  });
+  // marquer indices résolus
+  DATA.entries.forEach(function(e){
+    var ok=e.coords.every(function(co){
+      var cm=cellMap[key(co[0],co[1])];
+      return cm && (cm.input.value||"").toUpperCase()===cm.letter;
+    });
+    var cl=document.getElementById("clue-"+e.number+"-"+e.orient);
+    if(cl) cl.classList.toggle("solved",ok);
+    if(ok) solvedEntries++;
+  });
+  var fb=document.getElementById("fb");
+  if(allCorrect && anyFilled){
+    fb.className="fb show ok";
+    fb.innerHTML="\uD83C\uDF89 Grille compl&egrave;te ! Tu ma&icirc;trises les 4 &eacute;tapes : mod&eacute;liser, r&eacute;soudre, v&eacute;rifier, conclure.";
+  }else{
+    fb.className="fb show partial";
+    fb.innerHTML="\uD83D\uDD0D "+solvedEntries+" mot"+(solvedEntries>1?"s":"")+" sur "+DATA.entries.length+" trouv&eacute;"+(solvedEntries>1?"s":"")+". Continue !";
+  }
+}
+function showSolution(){
+  Object.keys(cellMap).forEach(function(k){
+    var cm=cellMap[k];cm.input.value=cm.letter;
+    cm.input.parentNode.classList.remove("wrong");cm.input.parentNode.classList.add("correct");
+  });
+  DATA.entries.forEach(function(e){
+    var cl=document.getElementById("clue-"+e.number+"-"+e.orient);if(cl) cl.classList.add("solved");
+  });
+  var fb=document.getElementById("fb");fb.className="fb show partial";
+  fb.innerHTML="\uD83D\uDC41\uFE0F Solution affich&eacute;e. Relis les 4 &eacute;tapes ci-dessous pour les m&eacute;moriser.";
+}
+function clearGrid(){
+  Object.keys(cellMap).forEach(function(k){cellMap[k].input.value="";});
+  clearMarks();
+  document.querySelectorAll(".clue").forEach(function(c){c.classList.remove("solved");});
+}
+
+buildGrid();buildClues();
+</script>
+</body>
+</html>
