@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 Ce que je retiens — Graphique d'une fonction affine</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --day:#3ab5d8;
+    --day-dark:#1a6e88;
+    --day-title:#1a6e88;
+    --day-light:#e8f6fb;
+    --day-border:#9dd4e8;
+    --glow:rgba(58,181,216,.20);
+    --text:#1f2937;
+    --muted:#5b6b78;
+    --white:#ffffff;
+    --success:#16a34a;
+    --error:#dc2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{font-family:'JetBrains Mono',monospace;color:var(--text);background:#fff;line-height:1.6;overflow-x:hidden}
+  body{position:relative;min-height:100vh;padding:20px 16px 60px}
+
+  /* ===== Bulles décoratives ===== */
+  .bubble{position:absolute;border-radius:50%;background:var(--day-light);border:2px solid var(--day-border);z-index:0;pointer-events:none}
+  .b1{width:140px;height:140px;top:40px;right:-40px;opacity:.55}
+  .b2{width:90px;height:90px;top:280px;left:-30px;opacity:.5}
+  .b3{width:60px;height:60px;top:520px;right:20px;opacity:.45}
+  .b4{width:110px;height:110px;top:880px;left:-40px;opacity:.5}
+  .b5{width:70px;height:70px;top:1180px;right:-20px;opacity:.45}
+  .b6{width:95px;height:95px;top:1550px;left:-35px;opacity:.5}
+  .b7{width:55px;height:55px;top:1850px;right:30px;opacity:.45}
+  .b8{width:120px;height:120px;bottom:60px;right:-45px;opacity:.5}
+  .b9{width:80px;height:80px;bottom:280px;left:-25px;opacity:.45}
+
+  /* ===== Container ===== */
+  .wrap{max-width:880px;margin:0 auto;position:relative;z-index:1}
+
+  /* ===== Hero ===== */
+  .hero{text-align:center;padding:32px 20px 28px}
+  .badge{display:inline-block;background:var(--day);color:#fff;padding:8px 20px;border-radius:999px;font-size:.78rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 6px 20px var(--glow);margin-bottom:18px}
+  h1{font-size:clamp(1.7rem,5vw,2.4rem);color:var(--day-title);font-weight:800;margin-bottom:12px;letter-spacing:-.5px}
+  .sub{color:var(--muted);font-size:1rem;font-weight:500;max-width:620px;margin:0 auto}
+
+  /* ===== Encadrés ===== */
+  .card{background:#fff;border:2px solid var(--day-border);border-radius:18px;padding:24px 22px;margin:22px 0;box-shadow:0 6px 24px var(--glow);position:relative;z-index:1}
+  .card h2{color:var(--day-title);font-size:1.25rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .card p{margin-bottom:10px}
+  .card p:last-child{margin-bottom:0}
+
+  /* Étiquettes de section dans les cards */
+  .tag{display:inline-block;background:var(--day);color:#fff;padding:5px 14px;border-radius:8px;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .tag-prop{background:var(--day-dark)}
+  .tag-vocab{background:#0d4f63}
+  .tag-ex{background:#2596b8}
+
+  /* Boîte intérieure douce */
+  .inner{background:var(--day-light);border-left:5px solid var(--day);border-radius:10px;padding:14px 16px;margin:10px 0}
+  .inner strong{color:var(--day-dark)}
+
+  /* Formule mise en valeur */
+  .formula{display:block;text-align:center;background:#fff;border:2px dashed var(--day-border);border-radius:10px;padding:14px;margin:14px auto;font-size:1.3rem;font-weight:700;color:var(--day-dark);letter-spacing:1px}
+  .var-a{color:#d97706;font-weight:800}
+  .var-b{color:#0891b2;font-weight:800}
+
+  /* Liste à puces stylée */
+  ul.clean{list-style:none;padding:0;margin:8px 0}
+  ul.clean li{position:relative;padding:8px 0 8px 32px;border-bottom:1px dashed var(--day-border)}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{content:"▸";position:absolute;left:8px;top:8px;color:var(--day);font-weight:800;font-size:1.1rem}
+
+  /* ===== SVG graphique ===== */
+  .graph-wrap{display:flex;justify-content:center;margin:18px 0 8px;padding:14px;background:#fff;border:2px solid var(--day-border);border-radius:14px}
+  .graph-wrap svg{max-width:100%;height:auto}
+  .graph-caption{text-align:center;font-size:.85rem;color:var(--muted);margin-top:6px;font-style:italic}
+
+  /* ===== Récap dépliable ===== */
+  details.recap{background:linear-gradient(135deg,#fff 0%,var(--day-light) 100%);border:2px solid var(--day-border);border-radius:18px;padding:0;margin:24px 0;overflow:hidden;box-shadow:0 6px 24px var(--glow)}
+  details.recap summary{cursor:pointer;padding:18px 22px;font-weight:700;color:var(--day-dark);font-size:1.05rem;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;transition:background .2s}
+  details.recap summary:hover{background:rgba(58,181,216,.08)}
+  details.recap summary::-webkit-details-marker{display:none}
+  details.recap summary::after{content:"▼";font-size:.85rem;transition:transform .25s;color:var(--day)}
+  details.recap[open] summary::after{transform:rotate(180deg)}
+  details.recap .recap-content{padding:0 22px 22px}
+  details.recap .recap-content ul.clean li{border-bottom-color:rgba(157,212,232,.5)}
+
+  /* ===== Quiz ===== */
+  .quiz{background:#fff;border:2px solid var(--day-border);border-radius:18px;padding:24px 22px;margin:24px 0;box-shadow:0 6px 24px var(--glow)}
+  .quiz h2{color:var(--day-title);font-size:1.25rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+  .quiz .intro{color:var(--muted);font-size:.95rem;margin-bottom:18px}
+  .group{background:var(--day-light);border-radius:14px;padding:16px 14px;margin:14px 0;border:2px solid transparent;transition:border-color .25s}
+  .group.ok{border-color:var(--success);background:#ecfdf5}
+  .group.ko{border-color:var(--error);background:#fef2f2}
+  .group-title{font-weight:700;color:var(--day-dark);margin-bottom:10px;font-size:.95rem}
+  .group.ok .group-title{color:var(--success)}
+  .group.ko .group-title{color:var(--error)}
+  .options{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;align-items:flex-start;gap:10px;background:#fff;border:2px solid var(--day-border);border-radius:10px;padding:11px 13px;cursor:pointer;transition:all .2s;font-size:.93rem;line-height:1.4;user-select:none}
+  .opt:hover{background:var(--day-light);border-color:var(--day)}
+  .opt input{margin-top:3px;accent-color:var(--day);width:18px;height:18px;cursor:pointer;flex-shrink:0}
+  .opt.checked{background:var(--day-light);border-color:var(--day-dark)}
+  .group.ok .opt{pointer-events:none;opacity:.85}
+  .quiz-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px;justify-content:center}
+  .btn{background:var(--day);color:#fff;border:none;padding:13px 24px;border-radius:12px;font-family:inherit;font-weight:700;font-size:1rem;cursor:pointer;transition:all .25s;box-shadow:0 4px 14px var(--glow);min-height:50px}
+  .btn:hover{background:var(--day-dark);transform:translateY(-2px);box-shadow:0 6px 18px var(--glow)}
+  .btn:active{transform:translateY(0)}
+  .btn.secondary{background:#fff;color:var(--day-dark);border:2px solid var(--day-border)}
+  .btn.secondary:hover{background:var(--day-light)}
+  .feedback{margin-top:14px;padding:12px 14px;border-radius:10px;font-weight:600;text-align:center;display:none}
+  .feedback.show{display:block}
+  .feedback.win{background:#ecfdf5;color:var(--success);border:2px solid var(--success)}
+  .feedback.retry{background:#fef2f2;color:var(--error);border:2px solid var(--error)}
+
+  /* ===== Responsive ===== */
+  @media (max-width:480px){
+    body{padding:14px 10px 50px}
+    .hero{padding:22px 10px 18px}
+    h1{font-size:1.55rem}
+    .card{padding:18px 16px;margin:18px 0}
+    .formula{font-size:1.1rem;padding:12px}
+    .quiz{padding:18px 14px}
+    .opt{font-size:.88rem;padding:10px 11px}
+    .btn{padding:12px 18px;font-size:.95rem;width:100%}
+    .b1,.b3,.b5,.b7,.b9{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- Bulles décoratives -->
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+<div class="bubble b5"></div>
+<div class="bubble b6"></div>
+<div class="bubble b7"></div>
+<div class="bubble b8"></div>
+<div class="bubble b9"></div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="badge">Séquence 2 · Jour 4</div>
+    <h1>📚 Ce que je retiens</h1>
+    <p class="sub">La représentation graphique d'une fonction affine f(x) = ax + b</p>
+  </header>
+
+  <!-- PROPRIÉTÉ 1 -->
+  <section class="card">
+    <h2><span class="tag tag-prop">Propriété 1</span></h2>
+    <p>Dans un repère, la courbe représentative d'une fonction affine <strong>f(x) = ax + b</strong> est une <strong>droite non verticale</strong>.</p>
+    <div class="inner">
+      <p>👉 Pour tracer la courbe d'une fonction affine, il suffit donc de trouver <strong>2 points</strong> et de les relier par une droite.</p>
+    </div>
+  </section>
+
+  <!-- PROPRIÉTÉ 2 -->
+  <section class="card">
+    <h2><span class="tag tag-prop">Propriété 2</span></h2>
+    <p>Dans l'écriture <strong>f(x) = ax + b</strong> :</p>
+    <div class="formula">
+      f(x) = <span class="var-a">a</span>x + <span class="var-b">b</span>
+    </div>
+    <ul class="clean">
+      <li><span class="var-a"><strong>a</strong></span> est le <strong>coefficient directeur</strong> (la pente de la droite) : il indique de combien y augmente quand x augmente de 1.</li>
+      <li><span class="var-b"><strong>b</strong></span> est l'<strong>ordonnée à l'origine</strong> : c'est le point où la droite coupe l'axe des ordonnées (axe vertical y).</li>
+    </ul>
+    <div class="inner">
+      <p>💡 La droite passe toujours par le point <strong>A(0 ; <span class="var-b">b</span>)</strong>.</p>
+    </div>
+  </section>
+
+  <!-- VOCABULAIRE -->
+  <section class="card">
+    <h2><span class="tag tag-vocab">Vocabulaire</span></h2>
+    <ul class="clean">
+      <li>Si <strong><span class="var-a">a</span> &gt; 0</strong> (positif) → la droite <strong>monte</strong> de gauche à droite.</li>
+      <li>Si <strong><span class="var-a">a</span> &lt; 0</strong> (négatif) → la droite <strong>descend</strong> de gauche à droite.</li>
+      <li>Si <strong><span class="var-a">a</span> = 0</strong> → la droite est <strong>horizontale</strong> (fonction constante).</li>
+    </ul>
+  </section>
+
+  <!-- EXEMPLE -->
+  <section class="card">
+    <h2><span class="tag tag-ex">Exemple</span></h2>
+    <p>Traçons la courbe de la fonction affine <strong>f(x) = 2x + 1</strong>.</p>
+
+    <div class="inner">
+      <p>Ici : <strong><span class="var-a">a</span> = 2</strong> (coefficient directeur) et <strong><span class="var-b">b</span> = 1</strong> (ordonnée à l'origine).</p>
+      <p style="margin-top:8px">▸ La droite coupe l'axe des y au point <strong>A(0 ; 1)</strong>.</p>
+      <p>▸ Quand x augmente de 1, f(x) augmente de 2 → on obtient un autre point <strong>B(1 ; 3)</strong>.</p>
+      <p>▸ On relie A et B par une droite : c'est la courbe de f.</p>
+    </div>
+
+    <!-- SVG GRAPHIQUE -->
+    <div class="graph-wrap">
+      <svg viewBox="0 0 460 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Courbe de f(x) = 2x + 1">
+        <!-- Fond -->
+        <rect width="460" height="380" fill="#ffffff"/>
+
+        <!-- Grille légère : pas de 50px, origine (200,220) -->
+        <g stroke="#e0eef4" stroke-width="1">
+          <!-- Verticales -->
+          <line x1="50"  y1="20" x2="50"  y2="360"/>
+          <line x1="100" y1="20" x2="100" y2="360"/>
+          <line x1="150" y1="20" x2="150" y2="360"/>
+          <line x1="250" y1="20" x2="250" y2="360"/>
+          <line x1="300" y1="20" x2="300" y2="360"/>
+          <line x1="350" y1="20" x2="350" y2="360"/>
+          <line x1="400" y1="20" x2="400" y2="360"/>
+          <!-- Horizontales -->
+          <line x1="30" y1="20"  x2="430" y2="20"/>
+          <line x1="30" y1="70"  x2="430" y2="70"/>
+          <line x1="30" y1="120" x2="430" y2="120"/>
+          <line x1="30" y1="170" x2="430" y2="170"/>
+          <line x1="30" y1="270" x2="430" y2="270"/>
+          <line x1="30" y1="320" x2="430" y2="320"/>
+          <line x1="30" y1="360" x2="430" y2="360"/>
+        </g>
+
+        <!-- Axes -->
+        <!-- Axe x (horizontal, y=220) -->
+        <line x1="30" y1="220" x2="430" y2="220" stroke="#1f2937" stroke-width="2"/>
+        <polygon points="430,220 420,215 420,225" fill="#1f2937"/>
+        <text x="438" y="225" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#1f2937">x</text>
+
+        <!-- Axe y (vertical, x=200) -->
+        <line x1="200" y1="360" x2="200" y2="20" stroke="#1f2937" stroke-width="2"/>
+        <polygon points="200,20 195,30 205,30" fill="#1f2937"/>
+        <text x="208" y="22" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#1f2937">y</text>
+
+        <!-- Graduations x -->
+        <g font-family="JetBrains Mono, monospace" font-size="11" fill="#5b6b78" text-anchor="middle">
+          <line x1="100" y1="217" x2="100" y2="223" stroke="#1f2937" stroke-width="2"/>
+          <text x="100" y="240">-2</text>
+          <line x1="150" y1="217" x2="150" y2="223" stroke="#1f2937" stroke-width="2"/>
+          <text x="150" y="240">-1</text>
+          <line x1="250" y1="217" x2="250" y2="223" stroke="#1f2937" stroke-width="2"/>
+          <text x="250" y="240">1</text>
+          <line x1="300" y1="217" x2="300" y2="223" stroke="#1f2937" stroke-width="2"/>
+          <text x="300" y="240">2</text>
+          <line x1="350" y1="217" x2="350" y2="223" stroke="#1f2937" stroke-width="2"/>
+          <text x="350" y="240">3</text>
+        </g>
+
+        <!-- Graduations y -->
+        <g font-family="JetBrains Mono, monospace" font-size="11" fill="#5b6b78" text-anchor="end">
+          <line x1="197" y1="170" x2="203" y2="170" stroke="#1f2937" stroke-width="2"/>
+          <text x="193" y="174">1</text>
+          <line x1="197" y1="120" x2="203" y2="120" stroke="#1f2937" stroke-width="2"/>
+          <text x="193" y="124">2</text>
+          <line x1="197" y1="70"  x2="203" y2="70"  stroke="#1f2937" stroke-width="2"/>
+          <text x="193" y="74">3</text>
+          <line x1="197" y1="270" x2="203" y2="270" stroke="#1f2937" stroke-width="2"/>
+          <text x="193" y="274">-1</text>
+          <line x1="197" y1="320" x2="203" y2="320" stroke="#1f2937" stroke-width="2"/>
+          <text x="193" y="324">-2</text>
+        </g>
+
+        <!-- Origine -->
+        <text x="190" y="240" font-family="JetBrains Mono, monospace" font-size="11" fill="#5b6b78" text-anchor="end">0</text>
+
+        <!-- DROITE f(x) = 2x + 1 : de (-1.6,-2.2) à (1.5,4) -->
+        <!-- SVG : (-1.6,-2.2)->(120,330) ; (1.5,4)->(275,20) -->
+        <line x1="120" y1="330" x2="275" y2="20" stroke="#3ab5d8" stroke-width="3.5" stroke-linecap="round"/>
+
+        <!-- Point A(0 ; 1) = (200, 170) -->
+        <circle cx="200" cy="170" r="6" fill="#d97706" stroke="#fff" stroke-width="2"/>
+        <text x="210" y="163" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="#d97706">A(0 ; 1)</text>
+
+        <!-- Point B(1 ; 3) = (250, 70) -->
+        <circle cx="250" cy="70" r="6" fill="#1a6e88" stroke="#fff" stroke-width="2"/>
+        <text x="260" y="65" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="#1a6e88">B(1 ; 3)</text>
+
+        <!-- Indication de la pente (petit triangle) entre A et B -->
+        <g stroke="#dc2626" stroke-width="1.8" stroke-dasharray="4,3" fill="none">
+          <line x1="200" y1="170" x2="250" y2="170"/>
+          <line x1="250" y1="170" x2="250" y2="70"/>
+        </g>
+        <text x="223" y="186" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#dc2626" text-anchor="middle">+1</text>
+        <text x="258" y="125" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#dc2626">+2</text>
+
+        <!-- Label de la droite -->
+        <text x="285" y="35" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" fill="#1a6e88">(d) : f(x)=2x+1</text>
+      </svg>
+    </div>
+    <p class="graph-caption">▲ La droite (d) passe par A(0 ; 1) et a une pente de 2 : quand x augmente de 1, y augmente de 2.</p>
+  </section>
+
+  <!-- RÉCAP DÉPLIABLE -->
+  <details class="recap">
+    <summary>👉 Clique ici pour l'essentiel en résumé</summary>
+    <div class="recap-content">
+      <ul class="clean">
+        <li>La courbe de <strong>f(x) = ax + b</strong> est une <strong>droite</strong>.</li>
+        <li><strong>a</strong> = pente (coefficient directeur).</li>
+        <li><strong>b</strong> = point où la droite coupe l'axe des y.</li>
+        <li>La droite passe toujours par <strong>(0 ; b)</strong>.</li>
+        <li>Quand x augmente de <strong>1</strong>, y augmente (ou diminue) de <strong>a</strong>.</li>
+        <li>Pour tracer la droite : 2 points suffisent !</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- MINI-QUIZ -->
+  <section class="quiz">
+    <h2>🎯 Mini-quiz : à toi de jouer !</h2>
+    <p class="intro">Pour chaque groupe, coche <strong>toutes les affirmations correctes</strong> (il peut y en avoir plusieurs). Clique sur « Vérifier » à la fin.</p>
+
+    <div id="quiz-groups"></div>
+
+    <div class="quiz-actions">
+      <button class="btn" id="check-btn">✅ Vérifier mes réponses</button>
+      <button class="btn secondary" id="reset-btn">🔄 Tout recommencer</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+</div>
+
+<script>
+  // ===== Données du quiz =====
+  // Pour chaque groupe : titre + options { texte, correct (bool) }
+  const QUIZ = [
+    {
+      title:"1 · La représentation graphique d'une fonction affine f(x)=ax+b est…",
+      options:[
+        { t:"une droite non verticale", ok:true },
+        { t:"une courbe quelconque", ok:false },
+        { t:"une parabole", ok:false },
+        { t:"une droite", ok:true }
+      ]
+    },
+    {
+      title:"2 · Dans f(x) = ax + b, le nombre a représente…",
+      options:[
+        { t:"l'ordonnée à l'origine", ok:false },
+        { t:"le coefficient directeur (la pente)", ok:true },
+        { t:"le point où la droite coupe l'axe des y", ok:false },
+        { t:"de combien y augmente quand x augmente de 1", ok:true }
+      ]
+    },
+    {
+      title:"3 · Dans f(x) = ax + b, le nombre b représente…",
+      options:[
+        { t:"la pente de la droite", ok:false },
+        { t:"l'ordonnée à l'origine", ok:true },
+        { t:"la valeur de f(0)", ok:true },
+        { t:"le point où la droite coupe l'axe des x", ok:false }
+      ]
+    },
+    {
+      title:"4 · Si a > 0 (a est positif), la droite…",
+      options:[
+        { t:"monte de gauche à droite", ok:true },
+        { t:"descend de gauche à droite", ok:false },
+        { t:"est horizontale", ok:false },
+        { t:"est verticale", ok:false }
+      ]
+    },
+    {
+      title:"5 · Pour la fonction f(x) = 2x + 1, quelles affirmations sont vraies ?",
+      options:[
+        { t:"La droite passe par le point (0 ; 1)", ok:true },
+        { t:"La droite passe par le point (0 ; 2)", ok:false },
+        { t:"Quand x augmente de 1, y augmente de 2", ok:true },
+        { t:"La pente vaut 1", ok:false }
+      ]
+    }
+  ];
+
+  // ===== Rendu du quiz =====
+  const container = document.getElementById('quiz-groups');
+  QUIZ.forEach((g, gi) => {
+    const groupEl = document.createElement('div');
+    groupEl.className = 'group';
+    groupEl.id = 'g'+gi;
+    let html = `<div class="group-title">${g.title}</div><div class="options">`;
+    g.options.forEach((o, oi) => {
+      html += `
+        <label class="opt" data-g="${gi}" data-o="${oi}">
+          <input type="checkbox" data-g="${gi}" data-o="${oi}" data-ok="${o.ok}">
+          <span>${o.t}</span>
+        </label>`;
+    });
+    html += `</div>`;
+    groupEl.innerHTML = html;
+    container.appendChild(groupEl);
+  });
+
+  // Mise en surbrillance visuelle des options cochées
+  container.addEventListener('change', (e) => {
+    if (e.target.matches('input[type="checkbox"]')) {
+      const label = e.target.closest('.opt');
+      if (e.target.checked) label.classList.add('checked');
+      else label.classList.remove('checked');
+    }
+  });
+
+  // ===== Vérification =====
+  const feedback = document.getElementById('feedback');
+  document.getElementById('check-btn').addEventListener('click', () => {
+    let allOk = true;
+    let firstError = null;
+    QUIZ.forEach((g, gi) => {
+      const groupEl = document.getElementById('g'+gi);
+      // Si le groupe est déjà validé, on le laisse
+      if (groupEl.classList.contains('ok')) return;
+
+      const inputs = groupEl.querySelectorAll('input[type="checkbox"]');
+      let correct = true;
+      inputs.forEach(inp => {
+        const isOk = inp.dataset.ok === 'true';
+        const checked = inp.checked;
+        if (isOk !== checked) correct = false;
+      });
+
+      if (correct) {
+        groupEl.classList.remove('ko');
+        groupEl.classList.add('ok');
+        // Verrouille les inputs validés
+        inputs.forEach(inp => inp.disabled = true);
+      } else {
+        groupEl.classList.remove('ok');
+        groupEl.classList.add('ko');
+        if (!firstError) firstError = groupEl;
+        allOk = false;
+      }
+    });
+
+    feedback.classList.remove('win','retry','show');
+    if (allOk) {
+      feedback.textContent = "🎉 Bravo ! Toutes tes réponses sont correctes. Tu as bien retenu la leçon !";
+      feedback.classList.add('win','show');
+    } else {
+      feedback.textContent = "✋ Il y a encore des erreurs. Les groupes en rouge sont à reprendre. Essaie à nouveau !";
+      feedback.classList.add('retry','show');
+      if (firstError) {
+        firstError.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    }
+  });
+
+  // ===== Reset =====
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    document.querySelectorAll('.group').forEach(g => g.classList.remove('ok','ko'));
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('checked'));
+    document.querySelectorAll('input[type="checkbox"]').forEach(inp => {
+      inp.checked = false;
+      inp.disabled = false;
+    });
+    feedback.classList.remove('show','win','retry');
+    feedback.textContent = "";
+  });
+</script>
+
+</body>
+</html>
