@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Résoudre les exercices — Calcul numérique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --j1-primary:#f5a623;
+  --j1-dark:#c47a10;
+  --j1-soft:#fff5e0;
+  --j1-accent:#f5d080;
+  --j1-badge-text:#3a2600;
+  --ink:#1f1a05;
+  --ink-soft:#5a4f2a;
+  --good:#2e7d32;
+  --good-bg:#e6f4e7;
+  --bad:#b71c1c;
+  --bad-bg:#fde7e7;
+  --border:#f0c47a;
+  --white:#ffffff;
+  --shadow:0 4px 20px rgba(196,122,16,0.12);
+  --shadow-soft:0 2px 10px rgba(196,122,16,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{
+  font-family:'JetBrains Mono', ui-monospace, monospace;
+  background:var(--white);
+  color:var(--ink);
+  line-height:1.55;
+  font-size:16px;
+  min-height:100vh;
+  position:relative;
+}
+
+/* ===== BULLES DE FOND ===== */
+.bg-bubbles{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  overflow:hidden;
+}
+.bubble{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(0.5px);
+}
+.b1{width:180px;height:180px;background:var(--j1-primary);opacity:0.50;top:-40px;left:-50px}
+.b2{width:140px;height:140px;background:var(--j1-accent);opacity:0.55;top:120px;right:-40px}
+.b3{width:110px;height:110px;background:var(--j1-primary);opacity:0.45;top:48%;left:-30px}
+.b4{width:160px;height:160px;background:var(--j1-accent);opacity:0.50;top:60%;right:-50px}
+.b5{width:90px;height:90px;background:var(--j1-primary);opacity:0.50;bottom:140px;left:5%}
+.b6{width:130px;height:130px;background:var(--j1-accent);opacity:0.50;bottom:-30px;right:8%}
+.b7{width:70px;height:70px;background:var(--j1-primary);opacity:0.45;top:30%;right:3%}
+.b8{width:80px;height:80px;background:var(--j1-accent);opacity:0.45;top:78%;left:2%}
+
+@media (max-width: 600px){
+  .b1{width:120px;height:120px}
+  .b2{width:90px;height:90px}
+  .b3{width:70px;height:70px}
+  .b4{width:100px;height:100px}
+  .b5{width:60px;height:60px}
+  .b6{width:90px;height:90px}
+  .b7,.b8{display:none}
+}
+
+/* ===== CONTENEUR ===== */
+.wrap{
+  position:relative;
+  z-index:1;
+  max-width:780px;
+  margin:0 auto;
+  padding:24px 18px 60px;
+}
+
+/* ===== HERO ===== */
+.hero{
+  text-align:center;
+  margin-bottom:28px;
+  padding:8px 0 4px;
+}
+.pill{
+  display:inline-block;
+  background:var(--j1-primary);
+  color:var(--j1-badge-text);
+  font-weight:700;
+  font-size:0.82rem;
+  padding:7px 16px;
+  border-radius:999px;
+  letter-spacing:0.6px;
+  text-transform:uppercase;
+  margin-bottom:14px;
+  box-shadow:var(--shadow-soft);
+}
+h1{
+  color:var(--j1-dark);
+  font-size:clamp(1.5rem, 4.5vw, 2rem);
+  font-weight:800;
+  letter-spacing:-0.5px;
+  margin-bottom:10px;
+  line-height:1.2;
+}
+.subtitle{
+  color:var(--ink-soft);
+  font-size:0.98rem;
+  font-weight:500;
+  max-width:560px;
+  margin:0 auto;
+}
+
+/* ===== SCOREBOARD STICKY ===== */
+.scoreboard{
+  position:sticky;
+  top:8px;
+  z-index:20;
+  background:var(--white);
+  border:2px solid var(--j1-primary);
+  border-radius:16px;
+  padding:14px 16px;
+  margin-bottom:26px;
+  box-shadow:var(--shadow);
+}
+.score-row{
+  display:flex;
+  justify-content:space-around;
+  gap:8px;
+  margin-bottom:10px;
+  flex-wrap:wrap;
+}
+.score-item{
+  text-align:center;
+  flex:1;
+  min-width:80px;
+}
+.score-label{
+  font-size:0.72rem;
+  color:var(--ink-soft);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:3px;
+}
+.score-value{
+  font-size:1.4rem;
+  font-weight:800;
+  color:var(--j1-dark);
+}
+.score-value.success{color:var(--good)}
+.score-value.error{color:var(--bad)}
+.xp-bar{
+  background:var(--j1-soft);
+  height:14px;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  position:relative;
+}
+.xp-fill{
+  background:linear-gradient(90deg, var(--j1-primary), var(--j1-accent));
+  height:100%;
+  width:0%;
+  transition:width 0.5s ease;
+  border-radius:999px;
+}
+.xp-text{
+  text-align:center;
+  font-size:0.78rem;
+  color:var(--ink-soft);
+  font-weight:600;
+  margin-top:6px;
+}
+
+/* ===== EXERCICES ===== */
+.exo{
+  background:var(--white);
+  border:2px solid var(--border);
+  border-radius:18px;
+  padding:22px 20px;
+  margin-bottom:22px;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+}
+.exo.done{
+  border-color:var(--good);
+  background:linear-gradient(180deg, #f6fbf5 0%, var(--white) 100%);
+}
+.exo-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+.exo-num{
+  background:var(--j1-primary);
+  color:var(--j1-badge-text);
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:1.05rem;
+  flex-shrink:0;
+}
+.exo-done-badge{
+  display:none;
+  background:var(--good);
+  color:white;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:0.78rem;
+  font-weight:700;
+  margin-left:auto;
+}
+.exo.done .exo-done-badge{display:inline-block}
+.exo-title{
+  font-weight:700;
+  color:var(--j1-dark);
+  font-size:1.02rem;
+  flex:1;
+}
+.enonce{
+  font-size:1rem;
+  line-height:1.65;
+  color:var(--ink);
+  margin-bottom:14px;
+}
+.enonce b{color:var(--j1-dark)}
+.context{
+  background:var(--j1-soft);
+  border-left:3px solid var(--j1-primary);
+  padding:8px 12px;
+  border-radius:8px;
+  font-size:0.94rem;
+  font-style:italic;
+  color:var(--ink-soft);
+  margin-bottom:12px;
+}
+
+/* ===== ÉNONCÉ MATH ===== */
+.math-box{
+  background:#fffaf0;
+  border:1.5px dashed var(--j1-accent);
+  border-radius:12px;
+  padding:14px 18px;
+  text-align:center;
+  font-size:1.35rem;
+  font-weight:700;
+  color:var(--j1-dark);
+  margin:12px 0;
+  overflow-x:auto;
+}
+
+/* ===== FRACTION VISUELLE ===== */
+.frac{
+  display:inline-flex;
+  flex-direction:column;
+  align-items:center;
+  vertical-align:middle;
+  margin:0 4px;
+  line-height:1.05;
+}
+.frac .num{
+  border-bottom:2px solid var(--ink);
+  padding:0 6px 1px;
+  font-size:0.95em;
+}
+.frac .den{
+  padding:1px 6px 0;
+  font-size:0.95em;
+}
+
+/* ===== CHOIX (QCM) ===== */
+.choices{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.choices.three{grid-template-columns:1fr 1fr 1fr}
+@media (max-width: 480px){
+  .choices, .choices.three{grid-template-columns:1fr}
+}
+.choice{
+  background:var(--white);
+  border:2px solid var(--border);
+  color:var(--ink);
+  font-family:inherit;
+  font-size:1.15rem;
+  font-weight:700;
+  padding:16px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:all 0.15s;
+  text-align:center;
+}
+.choice:hover:not(:disabled){
+  background:var(--j1-soft);
+  border-color:var(--j1-primary);
+  transform:translateY(-1px);
+}
+.choice:disabled{cursor:not-allowed;opacity:0.6}
+.choice.correct{
+  background:var(--good-bg);
+  border-color:var(--good);
+  color:var(--good);
+}
+.choice.wrong{
+  background:var(--bad-bg);
+  border-color:var(--bad);
+  color:var(--bad);
+}
+
+/* ===== INPUT NUMÉRIQUE / FRACTION ===== */
+.answer-input{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:1.3rem;
+  font-weight:700;
+  color:var(--j1-dark);
+  margin:14px 0;
+  flex-wrap:wrap;
+}
+.answer-input input{
+  width:110px;
+  padding:11px 8px;
+  font-family:inherit;
+  font-size:1.2rem;
+  font-weight:700;
+  text-align:center;
+  border:2px solid var(--border);
+  border-radius:10px;
+  background:var(--white);
+  color:var(--ink);
+}
+.answer-input input:focus{
+  outline:none;
+  border-color:var(--j1-primary);
+  background:var(--j1-soft);
+}
+.answer-input input.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.answer-input input.correct{border-color:var(--good);background:var(--good-bg)}
+
+.frac-input{
+  display:inline-flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  vertical-align:middle;
+}
+.frac-input input{
+  width:80px;
+  padding:8px 4px;
+  font-size:1.1rem;
+}
+.frac-input .bar{
+  width:80px;
+  height:2px;
+  background:var(--ink);
+}
+
+.hint{
+  text-align:center;
+  font-size:0.85rem;
+  color:var(--ink-soft);
+  margin-top:-6px;
+  margin-bottom:8px;
+  font-style:italic;
+}
+
+/* ===== BOUTONS ===== */
+.btn{
+  display:inline-block;
+  font-family:inherit;
+  font-weight:700;
+  font-size:1rem;
+  padding:13px 22px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  transition:all 0.15s;
+  margin:6px 4px;
+}
+.btn-primary{
+  background:var(--j1-primary);
+  color:var(--j1-badge-text);
+  box-shadow:var(--shadow-soft);
+}
+.btn-primary:hover{background:var(--j1-dark);color:var(--white);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.btn-retry{
+  background:var(--white);
+  color:var(--j1-dark);
+  border:2px solid var(--j1-primary);
+}
+.btn-retry:hover{background:var(--j1-soft)}
+.btn-restart{
+  background:var(--j1-dark);
+  color:var(--white);
+  font-size:1.05rem;
+  padding:15px 28px;
+}
+.btn-restart:hover{background:#8e5808}
+
+.actions{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px;
+}
+
+/* ===== FEEDBACK ===== */
+.feedback{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:0.95rem;
+  font-weight:600;
+  display:none;
+}
+.feedback.ok{background:var(--good-bg);color:var(--good);display:block}
+.feedback.ko{background:var(--bad-bg);color:var(--bad);display:block}
+.solution{
+  margin-top:12px;
+  padding:14px 16px;
+  background:var(--j1-soft);
+  border-left:4px solid var(--j1-primary);
+  border-radius:8px;
+  font-size:0.95rem;
+  color:var(--ink);
+  display:none;
+  line-height:1.7;
+}
+.solution.show{display:block}
+.solution b{color:var(--j1-dark)}
+
+/* ===== ZONE RECOMMENCER ===== */
+.bottom-actions{
+  text-align:center;
+  margin-top:30px;
+}
+
+/* ===== ÉCRAN RÉSULTATS ===== */
+.results{
+  display:none;
+  background:var(--white);
+  border:3px solid var(--j1-primary);
+  border-radius:24px;
+  padding:32px 24px;
+  text-align:center;
+  margin-top:20px;
+  box-shadow:var(--shadow);
+}
+.results.show{display:block}
+.trophy{font-size:4rem;margin-bottom:12px}
+.results h2{
+  color:var(--j1-dark);
+  font-size:1.6rem;
+  margin-bottom:10px;
+  font-weight:800;
+}
+.stars{font-size:1.8rem;margin:10px 0;letter-spacing:6px}
+.final-score{
+  font-size:1.2rem;
+  font-weight:700;
+  color:var(--j1-dark);
+  margin:14px 0;
+}
+.final-msg{
+  color:var(--ink-soft);
+  font-size:0.98rem;
+  font-weight:500;
+  max-width:480px;
+  margin:14px auto 18px;
+  line-height:1.6;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-bubbles" aria-hidden="true">
+  <div class="bubble b1"></div>
+  <div class="bubble b2"></div>
+  <div class="bubble b3"></div>
+  <div class="bubble b4"></div>
+  <div class="bubble b5"></div>
+  <div class="bubble b6"></div>
+  <div class="bubble b7"></div>
+  <div class="bubble b8"></div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="pill">Semaine 3 · Jour 1</span>
+    <h1>&#9999;&#65039; Résoudre les exercices</h1>
+    <p class="subtitle">Calcul numérique — comparer des relatifs, opérer avec relatifs et fractions, réduire une expression.</p>
+  </header>
+
+  <div class="scoreboard" role="status" aria-live="polite">
+    <div class="score-row">
+      <div class="score-item">
+        <div class="score-label">Réussies</div>
+        <div class="score-value success" id="sc-ok">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Restantes</div>
+        <div class="score-value" id="sc-rest">4</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Erreurs</div>
+        <div class="score-value error" id="sc-err">0</div>
+      </div>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+    <div class="xp-text" id="xp-text">0 / 4</div>
+  </div>
+
+  <div id="exos-container"></div>
+
+  <div class="bottom-actions">
+    <button class="btn btn-restart" id="btn-restart-mid">↻ Recommencer</button>
+  </div>
+
+  <div class="results" id="results" role="region" aria-live="polite">
+    <div class="trophy" id="trophy">🏆</div>
+    <h2 id="res-title">Exercices terminés !</h2>
+    <div class="stars" id="stars"></div>
+    <div class="final-score" id="final-score"></div>
+    <p class="final-msg" id="final-msg"></p>
+    <button class="btn btn-restart" id="btn-restart-end">↻ Recommencer</button>
+  </div>
+
+</div>
+
+<script>
+// ===================== UTILITAIRES =====================
+const rand = (min, max) => Math.floor(Math.random()*(max-min+1))+min;
+const randNonZero = (min, max) => { let v; do { v = rand(min,max); } while (v===0); return v; };
+const shuffle = (arr) => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+
+// pgcd
+function gcd(a, b){ a=Math.abs(a); b=Math.abs(b); while(b){[a,b]=[b,a%b];} return a; }
+
+// fraction irréductible avec dénominateur positif
+function reduceFrac(num, den){
+  if(den === 0) throw new Error('div0');
+  if(den < 0){ num = -num; den = -den; }
+  const g = gcd(num, den);
+  return [num/g, den/g];
+}
+
+// rendu HTML d'une fraction a/b (signe au numérateur, simplifiée)
+function fracHTML(num, den){
+  const [n,d] = reduceFrac(num, den);
+  if(d === 1) return `${n}`;
+  return `<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`;
+}
+
+// rendu non simplifié
+function fracHTMLraw(num, den){
+  return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+}
+
+// formatage d'un nombre négatif entre parenthèses si besoin
+function paren(n){ return n < 0 ? `(${n})` : `${n}`; }
+
+// ===================== GÉNÉRATEURS D'EXOS =====================
+
+// --- Exo 1 : comparer deux nombres relatifs (< > =) ---
+function genExo1(){
+  // a et b entiers entre -20 et 20, distincts, au moins l'un négatif pour intérêt
+  let a, b;
+  do {
+    a = rand(-15, 15);
+    b = rand(-15, 15);
+  } while (a === b || (a > 0 && b > 0));  // au moins un relatif négatif
+  
+  const correct = a < b ? '<' : '>';
+  const contexts = [
+    `Lors d'une randonnée, l'altitude au point M est de ${a} m et au point N de ${b} m.`,
+    `Au congélateur, la température d'un compartiment est de ${a} °C et celle d'un autre de ${b} °C.`,
+    `Dans un puits, deux marques sont placées à ${a} m et ${b} m par rapport au niveau du sol.`
+  ];
+  const context = contexts[rand(0, contexts.length-1)];
+  
+  return {
+    title: 'Comparer deux nombres relatifs',
+    context,
+    enonce: `Compare les nombres <b>${a}</b> et <b>${b}</b>. Choisis le bon symbole pour compléter :`,
+    mathDisplay: `${a} &nbsp;…&nbsp; ${b}`,
+    type: 'choice',
+    options: shuffle(['<', '>', '=']),
+    answer: correct,
+    choicesClass: 'three',
+    solution: `Sur une droite graduée, ${a} est ${a<b?'<strong>à gauche</strong>':'<strong>à droite</strong>'} de ${b}, donc ${a} ${correct} ${b}.<br>Astuce : pour deux nombres négatifs, <b>celui qui a la plus grande distance à zéro est le plus petit</b>.`
+  };
+}
+
+// --- Exo 2 : opération entre deux relatifs ---
+function genExo2(){
+  // tirage de l'opération
+  const ops = ['+', '-', '×', '÷'];
+  const op = ops[rand(0, 3)];
+  let a, b, result, expr;
+
+  if(op === '+'){
+    do { a = rand(-15, 15); b = rand(-15, 15); } while (a===0 || b===0);
+    result = a + b;
+    expr = `${paren(a)} + ${paren(b)}`;
+  } else if(op === '-'){
+    do { a = rand(-15, 15); b = rand(-15, 15); } while (a===0 || b===0);
+    result = a - b;
+    expr = `${paren(a)} − ${paren(b)}`;
+  } else if(op === '×'){
+    do { a = randNonZero(-10, 10); b = randNonZero(-10, 10); } while (Math.abs(a*b) > 80);
+    result = a * b;
+    expr = `${paren(a)} × ${paren(b)}`;
+  } else { // ÷
+    // choisir b puis k entier non nul, et a = b*k
+    let k;
+    do {
+      b = randNonZero(-9, 9);
+      k = randNonZero(-9, 9);
+      a = b * k;
+    } while (Math.abs(a) > 60);
+    result = k;
+    expr = `${paren(a)} ÷ ${paren(b)}`;
+  }
+
+  // Énoncé contextualisé selon l'opération
+  let context;
+  if(op === '+' || op === '-'){
+    context = `Une sonde plongée dans un lac mesure des températures et des profondeurs.`;
+  } else if(op === '×'){
+    context = `Pour préparer une recette, on multiplie des quantités relatives.`;
+  } else {
+    context = `On répartit équitablement des valeurs en sciences.`;
+  }
+
+  return {
+    title: 'Opération avec deux nombres relatifs',
+    context,
+    enonce: `Calcule le résultat de l'opération suivante :`,
+    mathDisplay: `${expr} = …`,
+    type: 'number',
+    answer: result,
+    solution: solutionRelatifs(a, b, op, result)
+  };
+}
+
+function solutionRelatifs(a, b, op, result){
+  if(op === '+'){
+    if(a > 0 && b > 0) return `Deux positifs : on additionne les distances. ${a} + ${b} = <b>${result}</b>.`;
+    if(a < 0 && b < 0) return `Deux négatifs : on additionne les distances et on garde le signe −. (${a}) + (${b}) = <b>${result}</b>.`;
+    return `Signes opposés : on soustrait les distances et on garde le signe du plus grand en valeur absolue. <b>${result}</b>.`;
+  }
+  if(op === '−' || op === '-'){
+    return `Soustraire un nombre, c'est ajouter son opposé : ${paren(a)} − ${paren(b)} = ${paren(a)} + ${paren(-b)} = <b>${result}</b>.`;
+  }
+  if(op === '×'){
+    const sign = (a*b >= 0) ? 'Deux signes identiques → produit positif.' : 'Deux signes différents → produit négatif.';
+    return `${sign}<br>${Math.abs(a)} × ${Math.abs(b)} = ${Math.abs(a*b)}, donc <b>${result}</b>.`;
+  }
+  if(op === '÷'){
+    const sign = (a*b >= 0) ? 'Deux signes identiques → quotient positif.' : 'Deux signes différents → quotient négatif.';
+    return `${sign}<br>${Math.abs(a)} ÷ ${Math.abs(b)} = ${Math.abs(result)}, donc <b>${result}</b>.`;
+  }
+}
+
+// --- Exo 3 : opération sur fractions (+, ×, ÷) ---
+function genExo3(){
+  const ops = ['+', '×', '÷'];
+  const op = ops[rand(0, 2)];
+  let n1, d1, n2, d2, resN, resD;
+  let solutionSteps = '';
+  
+  if(op === '+'){
+    // dénominateurs multiples l'un de l'autre pour cycle 4
+    // d1 ∈ {2,3,4,5,6}, d2 = d1 ou un multiple simple
+    const d1Pool = [2, 3, 4, 5, 6];
+    d1 = d1Pool[rand(0, d1Pool.length-1)];
+    // d2 = d1 ou 2*d1 ou 3*d1 (selon)
+    const opt = rand(0, 2);
+    d2 = (opt === 0) ? d1 : (opt === 1 ? 2*d1 : Math.min(3*d1, 12));
+    n1 = rand(1, d1-1);
+    n2 = rand(1, d2-1);
+    const dcom = Math.max(d1, d2);
+    const k1 = dcom / d1;
+    const k2 = dcom / d2;
+    const num = n1*k1 + n2*k2;
+    [resN, resD] = reduceFrac(num, dcom);
+    solutionSteps = `On met au même dénominateur (${dcom}) :<br>`
+      + fracHTMLraw(n1, d1) + ' + ' + fracHTMLraw(n2, d2)
+      + ' = ' + fracHTMLraw(n1*k1, dcom) + ' + ' + fracHTMLraw(n2*k2, dcom)
+      + ' = ' + fracHTMLraw(num, dcom)
+      + (num !== resN*dcom/resD || dcom !== resD ? ' = ' + fracHTML(num, dcom) : '');
+  } else if(op === '×'){
+    // numérateurs/dénominateurs entre 1 et 9
+    n1 = rand(1, 9); d1 = rand(2, 9);
+    n2 = rand(1, 9); d2 = rand(2, 9);
+    [resN, resD] = reduceFrac(n1*n2, d1*d2);
+    solutionSteps = `On multiplie les numérateurs entre eux et les dénominateurs entre eux :<br>`
+      + fracHTMLraw(n1, d1) + ' × ' + fracHTMLraw(n2, d2)
+      + ' = ' + fracHTMLraw(n1*n2, d1*d2)
+      + ' = ' + fracHTML(n1*n2, d1*d2);
+  } else { // ÷
+    n1 = rand(1, 9); d1 = rand(2, 9);
+    n2 = rand(1, 9); d2 = rand(2, 9);
+    // n2 != 0 garanti
+    [resN, resD] = reduceFrac(n1*d2, d1*n2);
+    solutionSteps = `Diviser par une fraction, c'est multiplier par son inverse :<br>`
+      + fracHTMLraw(n1, d1) + ' ÷ ' + fracHTMLraw(n2, d2)
+      + ' = ' + fracHTMLraw(n1, d1) + ' × ' + fracHTMLraw(d2, n2)
+      + ' = ' + fracHTMLraw(n1*d2, d1*n2)
+      + ' = ' + fracHTML(n1*d2, d1*n2);
+  }
+  
+  const opSymbol = op === '×' ? '×' : (op === '÷' ? '÷' : '+');
+  const mathDisplay = fracHTMLraw(n1, d1) + ' &nbsp;' + opSymbol + '&nbsp; ' + fracHTMLraw(n2, d2) + ' = …';
+  
+  const contexts = [
+    `Au verger, on mesure des proportions de récolte.`,
+    `En pâtisserie, on combine des quantités d'ingrédients sous forme de fractions.`,
+    `En sciences, on additionne ou multiplie des proportions.`
+  ];
+  
+  return {
+    title: 'Calcul avec des fractions',
+    context: contexts[rand(0, contexts.length-1)],
+    enonce: `Calcule et donne le résultat sous forme de fraction irréductible.`,
+    mathDisplay,
+    type: 'fraction',
+    answerN: resN,
+    answerD: resD,
+    solution: solutionSteps + `<br><br>Résultat : <b>${fracHTML(resN, resD)}</b>.`
+  };
+}
+
+// --- Exo 4 : réduire une expression littérale ---
+function genExo4(){
+  // Forme : ax + b + cx + d  (a, c non nuls et tels que a+c != 0)
+  let a, b, c, d;
+  do {
+    a = randNonZero(-7, 7);
+    c = randNonZero(-7, 7);
+  } while (a + c === 0);
+  b = randNonZero(-9, 9);
+  d = randNonZero(-9, 9);
+  
+  const ax = a + c;
+  const cst = b + d;
+  
+  // Affichage de l'énoncé
+  function termX(coef, first){
+    if(coef === 0) return '';
+    let s;
+    if(first){
+      s = (coef === 1) ? 'x' : (coef === -1 ? '−x' : `${coef}x`);
+    } else {
+      if(coef > 0) s = ' + ' + (coef === 1 ? 'x' : `${coef}x`);
+      else s = ' − ' + (coef === -1 ? 'x' : `${-coef}x`);
+    }
+    return s;
+  }
+  function termK(coef, first){
+    if(coef === 0) return '';
+    if(first) return `${coef}`;
+    return coef > 0 ? ` + ${coef}` : ` − ${-coef}`;
+  }
+  
+  // ordre : ax + b + cx + d
+  let expr = termX(a, true) + termK(b, false) + termX(c, false) + termK(d, false);
+  
+  // Affichage de la réponse attendue : (a+c)x + (b+d), simplifié
+  let expected;
+  if(ax === 0 && cst === 0) expected = '0';
+  else if(ax === 0) expected = `${cst}`;
+  else if(cst === 0){
+    expected = (ax === 1) ? 'x' : (ax === -1 ? '−x' : `${ax}x`);
+  } else {
+    const xpart = (ax === 1) ? 'x' : (ax === -1 ? '−x' : `${ax}x`);
+    const cpart = cst > 0 ? ` + ${cst}` : ` − ${-cst}`;
+    expected = xpart + cpart;
+  }
+  
+  // QCM : la bonne + 3 leurres
+  const leurres = new Set();
+  // leurre 1 : oubli du signe sur c
+  leurres.add(formExpr(a + Math.abs(c), cst));
+  // leurre 2 : oubli du signe sur d
+  leurres.add(formExpr(ax, b + Math.abs(d) + (d<0 ? 0 : 0)));
+  // leurre 3 : on inverse coefs et constante  
+  leurres.add(formExpr(cst === 0 ? 1 : cst, ax === 0 ? 1 : ax));
+  // leurre 4 : on additionne tout dans le coef x
+  leurres.add(formExpr(a + b + c + d, 0));
+  leurres.delete(expected);
+  const leurArr = [...leurres].slice(0, 3);
+  // s'il n'y en a pas assez, ajouter
+  while(leurArr.length < 3){
+    const fake = formExpr(ax + rand(-2,2)||1, cst + rand(-3,3));
+    if(fake !== expected && !leurArr.includes(fake)) leurArr.push(fake);
+  }
+  
+  const options = shuffle([expected, ...leurArr]);
+  
+  return {
+    title: 'Réduire une expression littérale',
+    context: `On simplifie une formule littérale apparue dans un calcul de périmètre ou de coûts au club de sport.`,
+    enonce: `Réduis l'expression suivante (regroupe les termes en x et les termes constants) :`,
+    mathDisplay: `${expr} = …`,
+    type: 'choice',
+    options,
+    answer: expected,
+    solution: `On regroupe les termes en x : ${termX(a,true)}${termX(c,false)} = ${ax === 0 ? '0' : (ax === 1 ? 'x' : (ax === -1 ? '−x' : `${ax}x`))}.<br>`
+            + `On regroupe les constantes : ${b} ${d>=0 ? '+ ' + d : '− ' + (-d)} = ${cst}.<br>`
+            + `Donc l'expression réduite est <b>${expected}</b>.`
+  };
+}
+
+function formExpr(coefX, cst){
+  if(coefX === 0 && cst === 0) return '0';
+  if(coefX === 0) return `${cst}`;
+  const xpart = (coefX === 1) ? 'x' : (coefX === -1 ? '−x' : `${coefX}x`);
+  if(cst === 0) return xpart;
+  const cpart = cst > 0 ? ` + ${cst}` : ` − ${-cst}`;
+  return xpart + cpart;
+}
+
+// ===================== ÉTAT GLOBAL =====================
+let exos = [];
+let state = [];
+const TOTAL = 4;
+
+function genAll(){
+  exos = [genExo1(), genExo2(), genExo3(), genExo4()];
+  state = exos.map(()=>({done:false, errors:0}));
+}
+
+// ===================== RENDU =====================
+function render(){
+  const container = document.getElementById('exos-container');
+  container.innerHTML = '';
+  exos.forEach((e,i) => {
+    const div = document.createElement('div');
+    div.className = 'exo';
+    div.id = `exo-${i}`;
+
+    let inner = `
+      <div class="exo-head">
+        <div class="exo-num">${i+1}</div>
+        <div class="exo-title">${e.title}</div>
+        <span class="exo-done-badge">✓ Réussi</span>
+      </div>
+      ${e.context ? `<div class="context">${e.context}</div>` : ''}
+      <div class="enonce">${e.enonce}</div>
+      <div class="math-box">${e.mathDisplay}</div>
+    `;
+
+    if(e.type === 'choice'){
+      const cls = e.choicesClass || '';
+      inner += `<div class="choices ${cls}" id="choices-${i}">`;
+      e.options.forEach((opt) => {
+        const safe = String(opt).replace(/"/g,'&quot;');
+        inner += `<button class="choice" data-i="${i}" data-val="${safe}">${opt}</button>`;
+      });
+      inner += `</div>`;
+    } else if(e.type === 'number'){
+      inner += `
+        <div class="answer-input">
+          <input type="text" inputmode="numeric" pattern="-?[0-9]*" id="in-${i}" aria-label="résultat" autocomplete="off" placeholder="?">
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" data-validate="${i}">Valider</button>
+        </div>
+      `;
+    } else if(e.type === 'fraction'){
+      inner += `
+        <div class="answer-input">
+          <span class="frac-input">
+            <input type="text" inputmode="numeric" pattern="-?[0-9]*" id="inN-${i}" aria-label="numérateur" autocomplete="off" placeholder="num">
+            <span class="bar"></span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="inD-${i}" aria-label="dénominateur" autocomplete="off" placeholder="dén">
+          </span>
+        </div>
+        <div class="hint">Donne la fraction irréductible.</div>
+        <div class="actions">
+          <button class="btn btn-primary" data-validate="${i}">Valider</button>
+        </div>
+      `;
+    }
+
+    inner += `<div class="feedback" id="fb-${i}"></div>`;
+    inner += `<div class="solution" id="sol-${i}"><b>Solution :</b><br>${e.solution}</div>`;
+    inner += `<div class="actions" id="retry-${i}" style="display:none;">
+                <button class="btn btn-retry" data-retry="${i}">↻ Réessayer</button>
+              </div>`;
+
+    div.innerHTML = inner;
+    container.appendChild(div);
+  });
+
+  // listeners
+  document.querySelectorAll('.choice').forEach(btn => {
+    btn.addEventListener('click', () => handleChoice(+btn.dataset.i, btn.dataset.val, btn));
+  });
+  document.querySelectorAll('[data-validate]').forEach(btn => {
+    btn.addEventListener('click', () => handleValidate(+btn.dataset.validate));
+  });
+  document.querySelectorAll('[data-retry]').forEach(btn => {
+    btn.addEventListener('click', () => retryExo(+btn.dataset.retry));
+  });
+
+  updateScore();
+  document.getElementById('results').classList.remove('show');
+}
+
+// ===================== HANDLERS =====================
+function handleChoice(i, val, btn){
+  if(state[i].done) return;
+  const e = exos[i];
+  const fb = document.getElementById(`fb-${i}`);
+  const retry = document.getElementById(`retry-${i}`);
+
+  if(val === e.answer){
+    btn.classList.add('correct');
+    document.querySelectorAll(`#choices-${i} .choice`).forEach(b => b.disabled = true);
+    fb.className = 'feedback ok';
+    fb.textContent = '✓ Bonne réponse !';
+    document.getElementById(`sol-${i}`).classList.add('show');
+    state[i].done = true;
+    document.getElementById(`exo-${i}`).classList.add('done');
+    retry.style.display = 'none';
+  } else {
+    btn.classList.add('wrong');
+    btn.disabled = true;
+    state[i].errors++;
+    fb.className = 'feedback ko';
+    fb.textContent = '✗ Pas tout à fait. Réessaie.';
+    retry.style.display = 'flex';
+  }
+  updateScore();
+}
+
+function handleValidate(i){
+  if(state[i].done) return;
+  const e = exos[i];
+  const fb = document.getElementById(`fb-${i}`);
+  const retry = document.getElementById(`retry-${i}`);
+
+  if(e.type === 'number'){
+    const el = document.getElementById(`in-${i}`);
+    const v = el.value.trim().replace(',', '.');
+    if(v === ''){ fb.className='feedback ko'; fb.textContent='Entre un nombre.'; return; }
+    const n = Number(v);
+    if(!Number.isFinite(n)){ fb.className='feedback ko'; fb.textContent='Entre un nombre valide.'; return; }
+    el.classList.remove('wrong','correct');
+    if(n === e.answer){
+      el.classList.add('correct');
+      el.disabled = true;
+      document.querySelector(`[data-validate="${i}"]`).disabled = true;
+      fb.className = 'feedback ok'; fb.textContent = '✓ Bonne réponse !';
+      document.getElementById(`sol-${i}`).classList.add('show');
+      state[i].done = true;
+      document.getElementById(`exo-${i}`).classList.add('done');
+      retry.style.display = 'none';
+    } else {
+      el.classList.add('wrong');
+      state[i].errors++;
+      fb.className = 'feedback ko'; fb.textContent = '✗ Pas tout à fait. Vérifie et réessaie.';
+      retry.style.display = 'flex';
+    }
+  }
+  else if(e.type === 'fraction'){
+    const nEl = document.getElementById(`inN-${i}`);
+    const dEl = document.getElementById(`inD-${i}`);
+    const nv = nEl.value.trim();
+    const dv = dEl.value.trim();
+    if(nv === '' || dv === ''){ fb.className='feedback ko'; fb.textContent='Remplis numérateur et dénominateur.'; return; }
+    const nn = Number(nv);
+    const dn = Number(dv);
+    if(!Number.isFinite(nn) || !Number.isFinite(dn) || dn === 0){
+      fb.className='feedback ko'; fb.textContent='Entre des entiers valides (dénominateur ≠ 0).'; return;
+    }
+    nEl.classList.remove('wrong','correct');
+    dEl.classList.remove('wrong','correct');
+    // accepter forme équivalente : nn/dn = answerN/answerD ET fraction irréductible (gcd(|nn|,dn)=1 et dn>0)
+    const equiv = (nn * e.answerD === dn * e.answerN);
+    const reduced = (gcd(Math.abs(nn), Math.abs(dn)) === 1) && (dn > 0);
+    if(equiv && reduced){
+      nEl.classList.add('correct'); dEl.classList.add('correct');
+      nEl.disabled = true; dEl.disabled = true;
+      document.querySelector(`[data-validate="${i}"]`).disabled = true;
+      fb.className = 'feedback ok'; fb.textContent = '✓ Bonne réponse !';
+      document.getElementById(`sol-${i}`).classList.add('show');
+      state[i].done = true;
+      document.getElementById(`exo-${i}`).classList.add('done');
+      retry.style.display = 'none';
+    } else {
+      nEl.classList.add('wrong'); dEl.classList.add('wrong');
+      state[i].errors++;
+      if(equiv && !reduced){
+        fb.className = 'feedback ko'; fb.textContent = '✗ Le résultat est juste mais la fraction n\'est pas irréductible. Simplifie.';
+      } else {
+        fb.className = 'feedback ko'; fb.textContent = '✗ Pas tout à fait. Vérifie et réessaie.';
+      }
+      retry.style.display = 'flex';
+    }
+  }
+  updateScore();
+}
+
+function retryExo(i){
+  const fb = document.getElementById(`fb-${i}`);
+  const retry = document.getElementById(`retry-${i}`);
+  fb.className = 'feedback';
+  fb.textContent = '';
+  retry.style.display = 'none';
+
+  const e = exos[i];
+  if(e.type === 'choice'){
+    document.querySelectorAll(`#choices-${i} .choice`).forEach(b => {
+      if(!b.classList.contains('wrong')){ b.disabled = false; }
+    });
+  } else if(e.type === 'number'){
+    const el = document.getElementById(`in-${i}`);
+    el.classList.remove('wrong'); el.value = ''; el.focus();
+  } else if(e.type === 'fraction'){
+    const nEl = document.getElementById(`inN-${i}`);
+    const dEl = document.getElementById(`inD-${i}`);
+    nEl.classList.remove('wrong'); dEl.classList.remove('wrong');
+    nEl.value = ''; dEl.value = '';
+    nEl.focus();
+  }
+}
+
+// ===================== SCORE =====================
+function updateScore(){
+  const ok = state.filter(s=>s.done).length;
+  const err = state.reduce((a,s)=>a+s.errors,0);
+  const rest = TOTAL - ok;
+  document.getElementById('sc-ok').textContent = ok;
+  document.getElementById('sc-rest').textContent = rest;
+  document.getElementById('sc-err').textContent = err;
+  const pct = (ok/TOTAL)*100;
+  document.getElementById('xp-fill').style.width = pct + '%';
+  document.getElementById('xp-text').textContent = `${ok} / ${TOTAL}`;
+  if(ok === TOTAL) setTimeout(showResults, 500);
+}
+
+function showResults(){
+  const ok = state.filter(s=>s.done).length;
+  const err = state.reduce((a,s)=>a+s.errors,0);
+  const res = document.getElementById('results');
+  res.classList.add('show');
+  let stars, trophy, msg;
+  if(err === 0){
+    stars = '⭐⭐⭐';
+    trophy = '🏆';
+    msg = "Tous les exercices réussis sans erreur. Beau travail régulier !";
+  } else if(err <= 2){
+    stars = '⭐⭐☆';
+    trophy = '🎯';
+    msg = "Très bon résultat. Les erreurs font partie de l'apprentissage — personne ne réussit tout du premier coup.";
+  } else {
+    stars = '⭐☆☆';
+    trophy = '🌱';
+    msg = "Bien terminé. Reprends les exos avec erreurs pour bien fixer la méthode, personne ne réussit tout du premier coup.";
+  }
+  document.getElementById('trophy').textContent = trophy;
+  document.getElementById('stars').textContent = stars;
+  document.getElementById('final-score').textContent = `${ok} / ${TOTAL} réussis — ${err} erreur${err>1?'s':''}`;
+  document.getElementById('final-msg').textContent = msg;
+  res.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function restart(){
+  genAll(); render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.getElementById('btn-restart-mid').addEventListener('click', restart);
+document.getElementById('btn-restart-end').addEventListener('click', restart);
+
+// ===================== INIT =====================
+genAll();
+render();
+</script>
+
+</body>
+</html>
