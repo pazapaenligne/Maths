@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Résoudre les exercices — Calcul mental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --j3-primary:#8dc63f;
+  --j3-dark:#3d7a10;
+  --j3-soft:#f0faeb;
+  --j3-accent:#b5e08a;
+  --bub-green-soft:#b5e08a;
+  --j3-badge-text:#1e3d08;
+  --ink:#1f1a05;
+  --ink-soft:#5a4f2a;
+  --good:#2e7d32;
+  --good-bg:#e6f4e7;
+  --bad:#b71c1c;
+  --bad-bg:#fde7e7;
+  --border:#c3e89a;
+  --white:#ffffff;
+  --shadow:0 4px 20px rgba(61,122,16,0.12);
+  --shadow-soft:0 2px 10px rgba(61,122,16,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{
+  font-family:'JetBrains Mono', ui-monospace, monospace;
+  background:var(--white);
+  color:var(--ink);
+  line-height:1.55;
+  font-size:16px;
+  min-height:100vh;
+  position:relative;
+}
+
+/* ===== FORMES DE FOND (façon fiche outils) ===== */
+.bg-bubbles{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  overflow:hidden;
+}
+.bubble{
+  position:absolute;
+  filter:blur(1px);
+}
+/* grandes formes organiques jaune pâle débordant des bords */
+.b2{width:340px;height:300px;background:var(--bub-green-soft);opacity:0.30;top:-90px;right:-120px;border-radius:55% 45% 50% 50% / 55% 50% 50% 45%}
+.b3{width:240px;height:260px;background:var(--bub-green-soft);opacity:0.26;top:30%;left:-130px;border-radius:50% 50% 45% 55% / 50% 45% 55% 50%}
+.b4{width:300px;height:280px;background:var(--bub-green-soft);opacity:0.28;bottom:-110px;left:-100px;border-radius:50% 50% 55% 45% / 45% 55% 50% 50%}
+
+@media (max-width: 600px){
+  .b2{width:200px;height:180px;top:-60px;right:-90px}
+  .b3{width:150px;height:160px;left:-90px}
+  .b4{width:180px;height:170px;bottom:-80px;left:-80px}
+}
+
+/* ===== CONTENEUR ===== */
+.wrap{
+  position:relative;
+  z-index:1;
+  max-width:780px;
+  margin:0 auto;
+  padding:24px 18px 60px;
+}
+
+/* ===== HERO ===== */
+.hero{
+  text-align:center;
+  margin-bottom:28px;
+  padding:8px 0 4px;
+}
+.pill{
+  display:inline-block;
+  background:var(--j3-primary);
+  color:var(--j3-badge-text);
+  font-weight:700;
+  font-size:0.82rem;
+  padding:7px 16px;
+  border-radius:999px;
+  letter-spacing:0.6px;
+  text-transform:uppercase;
+  margin-bottom:14px;
+  box-shadow:var(--shadow-soft);
+}
+h1{
+  color:var(--j3-dark);
+  font-size:clamp(1.5rem, 4.5vw, 2rem);
+  font-weight:800;
+  letter-spacing:-0.5px;
+  margin-bottom:10px;
+  line-height:1.2;
+}
+.subtitle{
+  color:var(--ink-soft);
+  font-size:0.98rem;
+  font-weight:500;
+  max-width:560px;
+  margin:0 auto;
+}
+
+/* ===== SCOREBOARD STICKY ===== */
+.scoreboard{
+  position:sticky;
+  top:8px;
+  z-index:20;
+  background:var(--white);
+  border:2px solid var(--j3-primary);
+  border-radius:16px;
+  padding:14px 16px;
+  margin-bottom:26px;
+  box-shadow:var(--shadow);
+}
+.score-row{
+  display:flex;
+  justify-content:space-around;
+  gap:8px;
+  margin-bottom:10px;
+  flex-wrap:wrap;
+}
+.score-item{
+  text-align:center;
+  flex:1;
+  min-width:80px;
+}
+.score-label{
+  font-size:0.72rem;
+  color:var(--ink-soft);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:3px;
+}
+.score-value{
+  font-size:1.4rem;
+  font-weight:800;
+  color:var(--j3-dark);
+}
+.score-value.success{color:var(--good)}
+.score-value.error{color:var(--bad)}
+.xp-bar{
+  background:var(--j3-soft);
+  height:14px;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  position:relative;
+}
+.xp-fill{
+  background:linear-gradient(90deg, var(--j3-primary), var(--j3-accent));
+  height:100%;
+  width:0%;
+  transition:width 0.5s ease;
+  border-radius:999px;
+}
+.xp-text{
+  text-align:center;
+  font-size:0.78rem;
+  color:var(--ink-soft);
+  font-weight:600;
+  margin-top:6px;
+}
+
+/* ===== EXERCICES ===== */
+.exo{
+  background:var(--white);
+  border:2px solid var(--border);
+  border-radius:18px;
+  padding:22px 20px;
+  margin-bottom:22px;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+}
+.exo.done{
+  border-color:var(--good);
+  background:linear-gradient(180deg, #f6fbf5 0%, var(--white) 100%);
+}
+.exo-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+.exo-num{
+  background:var(--j3-primary);
+  color:var(--j3-badge-text);
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:1.05rem;
+  flex-shrink:0;
+}
+.exo-done-badge{
+  display:none;
+  background:var(--good);
+  color:white;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:0.78rem;
+  font-weight:700;
+  margin-left:auto;
+}
+.exo.done .exo-done-badge{display:inline-block}
+.exo-title{
+  font-weight:700;
+  color:var(--j3-dark);
+  font-size:1.02rem;
+  flex:1;
+}
+.enonce{
+  font-size:1rem;
+  line-height:1.65;
+  color:var(--ink);
+  margin-bottom:14px;
+}
+.enonce b{color:var(--j3-dark)}
+.context{
+  background:var(--j3-soft);
+  border-left:3px solid var(--j3-primary);
+  padding:8px 12px;
+  border-radius:8px;
+  font-size:0.94rem;
+  font-style:italic;
+  color:var(--ink-soft);
+  margin-bottom:12px;
+}
+
+/* ===== ÉNONCÉ MATH ===== */
+.math-box{
+  background:#fffaf0;
+  border:1.5px dashed var(--j3-accent);
+  border-radius:12px;
+  padding:14px 18px;
+  text-align:center;
+  font-size:1.35rem;
+  font-weight:700;
+  color:var(--j3-dark);
+  margin:12px 0;
+  overflow-x:auto;
+}
+
+/* ===== FRACTION VISUELLE ===== */
+.frac{
+  display:inline-flex;
+  flex-direction:column;
+  align-items:center;
+  vertical-align:middle;
+  margin:0 4px;
+  line-height:1.05;
+}
+.frac .num{
+  border-bottom:2px solid var(--ink);
+  padding:0 6px 1px;
+  font-size:0.95em;
+}
+.frac .den{
+  padding:1px 6px 0;
+  font-size:0.95em;
+}
+
+/* ===== CHOIX (QCM) ===== */
+.choices{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.choices.three{grid-template-columns:1fr 1fr 1fr}
+@media (max-width: 480px){
+  .choices, .choices.three{grid-template-columns:1fr}
+}
+.choice{
+  background:var(--white);
+  border:2px solid var(--border);
+  color:var(--ink);
+  font-family:inherit;
+  font-size:1.15rem;
+  font-weight:700;
+  padding:16px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:all 0.15s;
+  text-align:center;
+}
+.choice:hover:not(:disabled){
+  background:var(--j3-soft);
+  border-color:var(--j3-primary);
+  transform:translateY(-1px);
+}
+.choice:disabled{cursor:not-allowed;opacity:0.6}
+.choice.correct{
+  background:var(--good-bg);
+  border-color:var(--good);
+  color:var(--good);
+}
+.choice.wrong{
+  background:var(--bad-bg);
+  border-color:var(--bad);
+  color:var(--bad);
+}
+
+/* ===== INPUT NUMÉRIQUE / FRACTION ===== */
+.answer-input{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:1.3rem;
+  font-weight:700;
+  color:var(--j3-dark);
+  margin:14px 0;
+  flex-wrap:wrap;
+}
+.answer-input input{
+  width:110px;
+  padding:11px 8px;
+  font-family:inherit;
+  font-size:1.2rem;
+  font-weight:700;
+  text-align:center;
+  border:2px solid var(--border);
+  border-radius:10px;
+  background:var(--white);
+  color:var(--ink);
+}
+.answer-input input:focus{
+  outline:none;
+  border-color:var(--j3-primary);
+  background:var(--j3-soft);
+}
+.answer-input input.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.answer-input input.correct{border-color:var(--good);background:var(--good-bg)}
+
+.frac-input{
+  display:inline-flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  vertical-align:middle;
+}
+.frac-input input{
+  width:80px;
+  padding:8px 4px;
+  font-size:1.1rem;
+}
+.frac-input .bar{
+  width:80px;
+  height:2px;
+  background:var(--ink);
+}
+
+.hint{
+  text-align:center;
+  font-size:0.85rem;
+  color:var(--ink-soft);
+  margin-top:-6px;
+  margin-bottom:8px;
+  font-style:italic;
+}
+
+/* ===== BOUTONS ===== */
+.btn{
+  display:inline-block;
+  font-family:inherit;
+  font-weight:700;
+  font-size:1rem;
+  padding:13px 22px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  transition:all 0.15s;
+  margin:6px 4px;
+}
+.btn-primary{
+  background:var(--j3-primary);
+  color:var(--j3-badge-text);
+  box-shadow:var(--shadow-soft);
+}
+.btn-primary:hover{background:var(--j3-dark);color:var(--white);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.btn-retry{
+  background:var(--white);
+  color:var(--j3-dark);
+  border:2px solid var(--j3-primary);
+}
+.btn-retry:hover{background:var(--j3-soft)}
+.btn-restart{
+  background:var(--j3-dark);
+  color:var(--white);
+  font-size:1.05rem;
+  padding:15px 28px;
+}
+.btn-restart:hover{background:#2b5808}
+
+.actions{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px;
+}
+
+/* ===== FEEDBACK ===== */
+.feedback{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:0.95rem;
+  font-weight:600;
+  display:none;
+}
+.feedback.ok{background:var(--good-bg);color:var(--good);display:block}
+.feedback.ko{background:var(--bad-bg);color:var(--bad);display:block}
+.solution{
+  margin-top:12px;
+  padding:14px 16px;
+  background:var(--j3-soft);
+  border-left:4px solid var(--j3-primary);
+  border-radius:8px;
+  font-size:0.95rem;
+  color:var(--ink);
+  display:none;
+  line-height:1.7;
+}
+.solution.show{display:block}
+.solution b{color:var(--j3-dark)}
+
+/* ===== ZONE RECOMMENCER ===== */
+.bottom-actions{
+  text-align:center;
+  margin-top:30px;
+}
+
+/* ===== ÉCRAN RÉSULTATS ===== */
+.results{
+  display:none;
+  background:var(--white);
+  border:3px solid var(--j3-primary);
+  border-radius:24px;
+  padding:32px 24px;
+  text-align:center;
+  margin-top:20px;
+  box-shadow:var(--shadow);
+}
+.results.show{display:block}
+.trophy{font-size:4rem;margin-bottom:12px}
+.results h2{
+  color:var(--j3-dark);
+  font-size:1.6rem;
+  margin-bottom:10px;
+  font-weight:800;
+}
+.stars{font-size:1.8rem;margin:10px 0;letter-spacing:6px}
+.final-score{
+  font-size:1.2rem;
+  font-weight:700;
+  color:var(--j3-dark);
+  margin:14px 0;
+}
+.final-msg{
+  color:var(--ink-soft);
+  font-size:0.98rem;
+  font-weight:500;
+  max-width:480px;
+  margin:14px auto 18px;
+  line-height:1.6;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-bubbles" aria-hidden="true">
+  <div class="bubble b2"></div>
+  <div class="bubble b3"></div>
+  <div class="bubble b4"></div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="pill">Semaine 3 · Jour 3</span>
+    <h1>&#9999;&#65039; Résoudre les exercices</h1>
+    <p class="subtitle">Calcul mental, sans calculatrice — calcul réfléchi, multiplication astucieuse, relatifs et ordre de grandeur.</p>
+  </header>
+
+  <div class="scoreboard" role="status" aria-live="polite">
+    <div class="score-row">
+      <div class="score-item">
+        <div class="score-label">Réussies</div>
+        <div class="score-value success" id="sc-ok">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Restantes</div>
+        <div class="score-value" id="sc-rest">4</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Erreurs</div>
+        <div class="score-value error" id="sc-err">0</div>
+      </div>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+    <div class="xp-text" id="xp-text">0 / 4</div>
+  </div>
+
+  <div id="exos-container"></div>
+
+  <div class="bottom-actions">
+    <button class="btn btn-restart" id="btn-restart-mid">↻ Recommencer</button>
+  </div>
+
+  <div class="results" id="results" role="region" aria-live="polite">
+    <div class="trophy" id="trophy">🏆</div>
+    <h2 id="res-title">Exercices terminés !</h2>
+    <div class="stars" id="stars"></div>
+    <div class="final-score" id="final-score"></div>
+    <p class="final-msg" id="final-msg"></p>
+    <button class="btn btn-restart" id="btn-restart-end">↻ Recommencer</button>
+  </div>
+
+</div>
+
+<script>
+// ===================== UTILITAIRES =====================
+const rand = (min, max) => Math.floor(Math.random()*(max-min+1))+min;
+const randNonZero = (min, max) => { let v; do { v = rand(min,max); } while (v===0); return v; };
+const shuffle = (arr) => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+
+// pgcd
+function gcd(a, b){ a=Math.abs(a); b=Math.abs(b); while(b){[a,b]=[b,a%b];} return a; }
+
+// fraction irréductible avec dénominateur positif
+function reduceFrac(num, den){
+  if(den === 0) throw new Error('div0');
+  if(den < 0){ num = -num; den = -den; }
+  const g = gcd(num, den);
+  return [num/g, den/g];
+}
+
+// rendu HTML d'une fraction a/b (signe au numérateur, simplifiée)
+function fracHTML(num, den){
+  const [n,d] = reduceFrac(num, den);
+  if(d === 1) return `${n}`;
+  return `<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`;
+}
+
+// rendu non simplifié
+function fracHTMLraw(num, den){
+  return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+}
+
+// formatage d'un nombre négatif entre parenthèses si besoin
+function paren(n){ return n < 0 ? `(${n})` : `${n}`; }
+
+// ===================== GÉNÉRATEURS D'EXOS =====================
+
+// --- Exo 1 : calcul réfléchi (somme / différence astucieuse) ---
+function genExo1(){
+  const variant = rand(0, 1);
+  let a, b, result, expr, sol;
+  if(variant === 0){
+    // somme : un nombre proche d'une dizaine/centaine
+    const kind = rand(0, 1);
+    if(kind === 0){
+      a = rand(21, 79);
+      b = rand(21, 69);
+      result = a + b;
+      expr = `${a} + ${b}`;
+      // astuce : arrondir b
+      const bRound = Math.round(b/10)*10;
+      const diff = b - bRound;
+      sol = `On peut décomposer : ${a} + ${b} = ${a} + ${bRound} ${diff>=0?'+ '+diff:'− '+(-diff)} = ${a+bRound} ${diff>=0?'+ '+diff:'− '+(-diff)} = <b>${result}</b>.`;
+    } else {
+      a = [99, 199, 198, 99, 98][rand(0,4)];
+      b = rand(24, 78);
+      result = a + b;
+      expr = `${a} + ${b}`;
+      const aUp = a + (100 - a%100 === 100 ? 0 : (a < 100 ? 100 - a : 200 - a));
+      const comp = aUp - a;
+      sol = `${a} est proche de ${aUp}. On calcule ${aUp} + ${b} = ${aUp+b}, puis on retire ${comp} : ${aUp+b} − ${comp} = <b>${result}</b>.`;
+    }
+  } else {
+    // différence : à partir d'une centaine
+    a = [100, 200, 150, 120, 300][rand(0,4)];
+    b = rand(31, Math.min(a-10, 99));
+    result = a - b;
+    expr = `${a} − ${b}`;
+    sol = `On complète : de ${b} pour aller à ${a}. ${b} + … = ${a}, donc ${a} − ${b} = <b>${result}</b>.`;
+  }
+  return {
+    title: 'Calcul réfléchi',
+    context: `On cherche une façon astucieuse de calculer de tête.`,
+    enonce: `Calcule mentalement :`,
+    mathDisplay: `${expr} = …`,
+    type: 'number',
+    answer: result,
+    solution: sol
+  };
+}
+
+// --- Exo 2 : multiplication astucieuse (×5, ×9, double, moitié) ---
+function genExo2(){
+  const kind = rand(0, 3);
+  let n, result, expr, sol;
+  if(kind === 0){
+    // ×5 = ×10 ÷ 2
+    n = rand(12, 98);
+    result = n * 5;
+    expr = `${n} × 5`;
+    sol = `Astuce : multiplier par 5, c'est multiplier par 10 puis diviser par 2.<br>${n} × 10 = ${n*10}, puis ${n*10} ÷ 2 = <b>${result}</b>.`;
+  } else if(kind === 1){
+    // ×9 = ×10 − n
+    n = rand(12, 89);
+    result = n * 9;
+    expr = `${n} × 9`;
+    sol = `Astuce : multiplier par 9, c'est multiplier par 10 puis retirer le nombre.<br>${n} × 10 = ${n*10}, puis ${n*10} − ${n} = <b>${result}</b>.`;
+  } else if(kind === 2){
+    // double
+    n = rand(23, 98);
+    result = n * 2;
+    expr = `Le double de ${n}`;
+    sol = `Le double, c'est ×2 : ${n} + ${n} = <b>${result}</b>.`;
+  } else {
+    // moitié (n pair)
+    n = rand(12, 49) * 2;
+    result = n / 2;
+    expr = `La moitié de ${n}`;
+    sol = `La moitié, c'est ÷2 : ${n} ÷ 2 = <b>${result}</b>.`;
+  }
+  return {
+    title: 'Multiplication astucieuse',
+    context: `On utilise une astuce de calcul rapide.`,
+    enonce: `Calcule mentalement :`,
+    mathDisplay: `${expr} = …`,
+    type: 'number',
+    answer: result,
+    solution: sol
+  };
+}
+
+// --- Exo 3 : calcul avec des relatifs (mental) ---
+function genExo3(){
+  const ops = ['+', '-', '×'];
+  const op = ops[rand(0, 2)];
+  let a, b, result, expr, sol;
+  if(op === '+'){
+    do { a = rand(-12, 12); b = rand(-12, 12); } while (a===0 || b===0);
+    result = a + b;
+    expr = `${paren(a)} + ${paren(b)}`;
+    if(a>0&&b>0) sol = `Deux positifs : on additionne. <b>${result}</b>.`;
+    else if(a<0&&b<0) sol = `Deux négatifs : on additionne les distances et on garde le signe −. <b>${result}</b>.`;
+    else sol = `Signes opposés : on soustrait les distances, signe du plus éloigné de 0. <b>${result}</b>.`;
+  } else if(op === '-'){
+    do { a = rand(-12, 12); b = rand(-12, 12); } while (a===0 || b===0);
+    result = a - b;
+    expr = `${paren(a)} − ${paren(b)}`;
+    sol = `Soustraire, c'est ajouter l'opposé : ${paren(a)} − ${paren(b)} = ${paren(a)} + ${paren(-b)} = <b>${result}</b>.`;
+  } else {
+    do { a = randNonZero(-9, 9); b = randNonZero(-9, 9); } while (Math.abs(a*b) > 81);
+    result = a * b;
+    expr = `${paren(a)} × ${paren(b)}`;
+    const sign = (a*b >= 0) ? 'Signes identiques → produit positif.' : 'Signes différents → produit négatif.';
+    sol = `${sign} ${Math.abs(a)} × ${Math.abs(b)} = ${Math.abs(result)}, donc <b>${result}</b>.`;
+  }
+  return {
+    title: 'Calcul avec des nombres relatifs',
+    context: `On applique les règles de calcul des relatifs (revoir la fiche outils).`,
+    enonce: `Calcule mentalement :`,
+    mathDisplay: `${expr} = …`,
+    type: 'number',
+    answer: result,
+    solution: sol
+  };
+}
+
+// --- Exo 4 : ordre de grandeur (estimation) ---
+function genExo4(){
+  const variant = rand(0, 1);
+  let exact, expr, choices, answer, sol;
+  if(variant === 0){
+    // produit du type (proche dizaine) × (proche dizaine)
+    const a = [19, 21, 18, 22, 29, 31, 48, 52][rand(0,7)];
+    const b = [21, 19, 11, 9, 31, 29][rand(0,5)];
+    exact = a * b;
+    expr = `${a} × ${b}`;
+    // arrondir chaque facteur à la dizaine
+    const ar = Math.round(a/10)*10;
+    const br = Math.round(b/10)*10;
+    answer = ar * br;
+    // choix : answer + 3 autres dizaines/centaines plausibles
+    const base = answer;
+    const set = new Set([base, base*2, Math.max(base/2, 50), base + (base>=200?200:100)]);
+    set.delete(undefined);
+    choices = shuffle([...set].map(x=>Math.round(x)).filter((v,k,arr)=>arr.indexOf(v)===k).slice(0,4));
+    if(!choices.includes(answer)) choices[0] = answer;
+    sol = `On arrondit chaque nombre : ${a} ≈ ${ar} et ${b} ≈ ${br}.<br>Ordre de grandeur : ${ar} × ${br} = <b>${answer}</b> (le calcul exact donne ${exact}).`;
+  } else {
+    // division : (proche centaine) ÷ petit entier
+    const d = [3, 4, 5, 6][rand(0,3)];
+    const q = [40, 60, 80, 90, 70][rand(0,4)];
+    const a = d * q + rand(-5, 5);   // proche d'un multiple
+    exact = a / d;
+    expr = `${a} ÷ ${d}`;
+    answer = q;
+    const set = new Set([q, q*2, Math.max(Math.round(q/2),10), q + (q>=80?60:40)]);
+    choices = shuffle([...set].map(x=>Math.round(x)).filter((v,k,arr)=>arr.indexOf(v)===k).slice(0,4));
+    if(!choices.includes(answer)) choices[0] = answer;
+    sol = `${a} est proche de ${d*q}. Comme ${d} × ${q} = ${d*q}, l'ordre de grandeur de ${a} ÷ ${d} est <b>${answer}</b> (valeur exacte ≈ ${(exact).toFixed(0)}).`;
+  }
+  return {
+    title: "Ordre de grandeur",
+    context: `On estime le résultat sans le calculer exactement.`,
+    enonce: `Quel est l'<b>ordre de grandeur</b> du résultat ?`,
+    mathDisplay: `${expr} ≈ …`,
+    type: 'choice',
+    options: choices.map(String),
+    answer: String(answer),
+    solution: sol
+  };
+}
+
+// ===================== ÉTAT GLOBAL =====================
+let exos = [];
+let state = [];
+const TOTAL = 4;
+
+function genAll(){
+  exos = [genExo1(), genExo2(), genExo3(), genExo4()];
+  state = exos.map(()=>({done:false, errors:0}));
+}
+
+// ===================== RENDU =====================
+function render(){
+  const container = document.getElementById('exos-container');
+  container.innerHTML = '';
+  exos.forEach((e,i) => {
+    const div = document.createElement('div');
+    div.className = 'exo';
+    div.id = `exo-${i}`;
+
+    let inner = `
+      <div class="exo-head">
+        <div class="exo-num">${i+1}</div>
+        <div class="exo-title">${e.title}</div>
+        <span class="exo-done-badge">✓ Réussi</span>
+      </div>
+      ${e.context ? `<div class="context">${e.context}</div>` : ''}
+      <div class="enonce">${e.enonce}</div>
+      <div class="math-box">${e.mathDisplay}</div>
+    `;
+
+    if(e.type === 'choice'){
+      const cls = e.choicesClass || '';
+      inner += `<div class="choices ${cls}" id="choices-${i}">`;
+      e.options.forEach((opt) => {
+        const safe = String(opt).replace(/"/g,'&quot;');
+        inner += `<button class="choice" data-i="${i}" data-val="${safe}">${opt}</button>`;
+      });
+      inner += `</div>`;
+    } else if(e.type === 'number'){
+      inner += `
+        <div class="answer-input">
+          <input type="text" inputmode="numeric" pattern="-?[0-9]*" id="in-${i}" aria-label="résultat" autocomplete="off" placeholder="?">
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" data-validate="${i}">Valider</button>
+        </div>
+      `;
+    } else if(e.type === 'fraction'){
+      inner += `
+        <div class="answer-input">
+          <span class="frac-input">
+            <input type="text" inputmode="numeric" pattern="-?[0-9]*" id="inN-${i}" aria-label="numérateur" autocomplete="off" placeholder="num">
+            <span class="bar"></span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="inD-${i}" aria-label="dénominateur" autocomplete="off" placeholder="dén">
+          </span>
+        </div>
+        <div class="hint">Donne la fraction irréductible.</div>
+        <div class="actions">
+          <button class="btn btn-primary" data-validate="${i}">Valider</button>
+        </div>
+      `;
+    }
+
+    inner += `<div class="feedback" id="fb-${i}"></div>`;
+    inner += `<div class="solution" id="sol-${i}"><b>Solution :</b><br>${e.solution}</div>`;
+    inner += `<div class="actions" id="retry-${i}" style="display:none;">
+                <button class="btn btn-retry" data-retry="${i}">↻ Réessayer</button>
+              </div>`;
+
+    div.innerHTML = inner;
+    container.appendChild(div);
+  });
+
+  // listeners
+  document.querySelectorAll('.choice').forEach(btn => {
+    btn.addEventListener('click', () => handleChoice(+btn.dataset.i, btn.dataset.val, btn));
+  });
+  document.querySelectorAll('[data-validate]').forEach(btn => {
+    btn.addEventListener('click', () => handleValidate(+btn.dataset.validate));
+  });
+  document.querySelectorAll('[data-retry]').forEach(btn => {
+    btn.addEventListener('click', () => retryExo(+btn.dataset.retry));
+  });
+
+  updateScore();
+  document.getElementById('results').classList.remove('show');
+}
+
+// ===================== HANDLERS =====================
+function handleChoice(i, val, btn){
+  if(state[i].done) return;
+  const e = exos[i];
+  const fb = document.getElementById(`fb-${i}`);
+  const retry = document.getElementById(`retry-${i}`);
+
+  if(val === e.answer){
+    btn.classList.add('correct');
+    document.querySelectorAll(`#choices-${i} .choice`).forEach(b => b.disabled = true);
+    fb.className = 'feedback ok';
+    fb.textContent = '✓ Bonne réponse !';
+    document.getElementById(`sol-${i}`).classList.add('show');
+    state[i].done = true;
+    document.getElementById(`exo-${i}`).classList.add('done');
+    retry.style.display = 'none';
+  } else {
+    btn.classList.add('wrong');
+    btn.disabled = true;
+    state[i].errors++;
+    fb.className = 'feedback ko';
+    fb.textContent = '✗ Pas tout à fait. Réessaie.';
+    retry.style.display = 'flex';
+  }
+  updateScore();
+}
+
+function handleValidate(i){
+  if(state[i].done) return;
+  const e = exos[i];
+  const fb = document.getElementById(`fb-${i}`);
+  const retry = document.getElementById(`retry-${i}`);
+
+  if(e.type === 'number'){
+    const el = document.getElementById(`in-${i}`);
+    const v = el.value.trim().replace(',', '.');
+    if(v === ''){ fb.className='feedback ko'; fb.textContent='Entre un nombre.'; return; }
+    const n = Number(v);
+    if(!Number.isFinite(n)){ fb.className='feedback ko'; fb.textContent='Entre un nombre valide.'; return; }
+    el.classList.remove('wrong','correct');
+    if(n === e.answer){
+      el.classList.add('correct');
+      el.disabled = true;
+      document.querySelector(`[data-validate="${i}"]`).disabled = true;
+      fb.className = 'feedback ok'; fb.textContent = '✓ Bonne réponse !';
+      document.getElementById(`sol-${i}`).classList.add('show');
+      state[i].done = true;
+      document.getElementById(`exo-${i}`).classList.add('done');
+      retry.style.display = 'none';
+    } else {
+      el.classList.add('wrong');
+      state[i].errors++;
+      fb.className = 'feedback ko'; fb.textContent = '✗ Pas tout à fait. Vérifie et réessaie.';
+      retry.style.display = 'flex';
+    }
+  }
+  else if(e.type === 'fraction'){
+    const nEl = document.getElementById(`inN-${i}`);
+    const dEl = document.getElementById(`inD-${i}`);
+    const nv = nEl.value.trim();
+    const dv = dEl.value.trim();
+    if(nv === '' || dv === ''){ fb.className='feedback ko'; fb.textContent='Remplis numérateur et dénominateur.'; return; }
+    const nn = Number(nv);
+    const dn = Number(dv);
+    if(!Number.isFinite(nn) || !Number.isFinite(dn) || dn === 0){
+      fb.className='feedback ko'; fb.textContent='Entre des entiers valides (dénominateur ≠ 0).'; return;
+    }
+    nEl.classList.remove('wrong','correct');
+    dEl.classList.remove('wrong','correct');
+    // accepter forme équivalente : nn/dn = answerN/answerD ET fraction irréductible (gcd(|nn|,dn)=1 et dn>0)
+    const equiv = (nn * e.answerD === dn * e.answerN);
+    const reduced = (gcd(Math.abs(nn), Math.abs(dn)) === 1) && (dn > 0);
+    if(equiv && reduced){
+      nEl.classList.add('correct'); dEl.classList.add('correct');
+      nEl.disabled = true; dEl.disabled = true;
+      document.querySelector(`[data-validate="${i}"]`).disabled = true;
+      fb.className = 'feedback ok'; fb.textContent = '✓ Bonne réponse !';
+      document.getElementById(`sol-${i}`).classList.add('show');
+      state[i].done = true;
+      document.getElementById(`exo-${i}`).classList.add('done');
+      retry.style.display = 'none';
+    } else {
+      nEl.classList.add('wrong'); dEl.classList.add('wrong');
+      state[i].errors++;
+      if(equiv && !reduced){
+        fb.className = 'feedback ko'; fb.textContent = '✗ Le résultat est juste mais la fraction n\'est pas irréductible. Simplifie.';
+      } else {
+        fb.className = 'feedback ko'; fb.textContent = '✗ Pas tout à fait. Vérifie et réessaie.';
+      }
+      retry.style.display = 'flex';
+    }
+  }
+  updateScore();
+}
+
+function retryExo(i){
+  const fb = document.getElementById(`fb-${i}`);
+  const retry = document.getElementById(`retry-${i}`);
+  fb.className = 'feedback';
+  fb.textContent = '';
+  retry.style.display = 'none';
+
+  const e = exos[i];
+  if(e.type === 'choice'){
+    document.querySelectorAll(`#choices-${i} .choice`).forEach(b => {
+      if(!b.classList.contains('wrong')){ b.disabled = false; }
+    });
+  } else if(e.type === 'number'){
+    const el = document.getElementById(`in-${i}`);
+    el.classList.remove('wrong'); el.value = ''; el.focus();
+  } else if(e.type === 'fraction'){
+    const nEl = document.getElementById(`inN-${i}`);
+    const dEl = document.getElementById(`inD-${i}`);
+    nEl.classList.remove('wrong'); dEl.classList.remove('wrong');
+    nEl.value = ''; dEl.value = '';
+    nEl.focus();
+  }
+}
+
+// ===================== SCORE =====================
+function updateScore(){
+  const ok = state.filter(s=>s.done).length;
+  const err = state.reduce((a,s)=>a+s.errors,0);
+  const rest = TOTAL - ok;
+  document.getElementById('sc-ok').textContent = ok;
+  document.getElementById('sc-rest').textContent = rest;
+  document.getElementById('sc-err').textContent = err;
+  const pct = (ok/TOTAL)*100;
+  document.getElementById('xp-fill').style.width = pct + '%';
+  document.getElementById('xp-text').textContent = `${ok} / ${TOTAL}`;
+  if(ok === TOTAL) setTimeout(showResults, 500);
+}
+
+function showResults(){
+  const ok = state.filter(s=>s.done).length;
+  const err = state.reduce((a,s)=>a+s.errors,0);
+  const res = document.getElementById('results');
+  res.classList.add('show');
+  let stars, trophy, msg;
+  if(err === 0){
+    stars = '⭐⭐⭐';
+    trophy = '🏆';
+    msg = "Tous les exercices réussis sans erreur. Beau travail régulier !";
+  } else if(err <= 2){
+    stars = '⭐⭐☆';
+    trophy = '🎯';
+    msg = "Très bon résultat. Les erreurs font partie de l'apprentissage — personne ne réussit tout du premier coup.";
+  } else {
+    stars = '⭐☆☆';
+    trophy = '🌱';
+    msg = "Bien terminé. Reprends les exos avec erreurs pour bien fixer la méthode, personne ne réussit tout du premier coup.";
+  }
+  document.getElementById('trophy').textContent = trophy;
+  document.getElementById('stars').textContent = stars;
+  document.getElementById('final-score').textContent = `${ok} / ${TOTAL} réussis — ${err} erreur${err>1?'s':''}`;
+  document.getElementById('final-msg').textContent = msg;
+  res.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function restart(){
+  genAll(); render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.getElementById('btn-restart-mid').addEventListener('click', restart);
+document.getElementById('btn-restart-end').addEventListener('click', restart);
+
+// ===================== INIT =====================
+genAll();
+render();
+</script>
+
+</body>
+</html>
