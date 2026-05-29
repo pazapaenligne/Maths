@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 6e S1 J1 · Le Corbeau et le Renard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   3e · Semaine 5 · Jour 1 (LUNDI)
+   Couleur du jour : #f5a623 / #c47a10 / #fff5e0 / #f5d080
+   ============================================================ */
+:root{
+  --jour:        #f5a623;   /* couleur principale du jour */
+  --jour-fonce:  #c47a10;   /* version foncée */
+  --jour-clair:  #fff5e0;   /* fond très clair */
+  --jour-pale:   #f5d080;   /* version pâle */
+
+  --bg:          #fffdf7;   /* fond général clair Pazapa */
+  --dark:        #1a1f2e;   /* encart game sombre */
+  --dark-2:      #232a3d;
+  --vert:        #22c55e;
+  --vert-neon:   #4ade80;
+  --rouge:       #ef4444;
+  --txt:         #2b2b2b;
+  --gris:        #8b8b8b;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  padding: 20px 16px 50px;
+}
+
+/* ====== BULLES STATIQUES DE FOND ======
+   - nettes (pas de blur), opacité douce, bulle rose retirée */
+.bulle{ position:fixed; border-radius:50%; opacity:.32; z-index:0; pointer-events:none; }
+.bulle-jaune  { width:200px; height:200px; background:#ffd84d; top:-60px;   right:-50px; }
+.bulle-jour   { width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-verte  { width:150px; height:150px; background:#9be7a5; top:45%;     right:-70px; }
+
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; }
+
+/* ====================== HEADER ====================== */
+.header{ text-align:center; margin-bottom:22px; }
+
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px rgba(245,166,35,.4);
+  margin-bottom:12px;
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+
+.semaine{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px;
+  color:var(--gris); text-transform:uppercase; margin-bottom:6px;
+}
+.titre{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size:2.3rem; line-height:1.1; color:var(--txt); margin-bottom:6px;
+}
+.titre .accent{ color:var(--jour); }
+.sous-titre{
+  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px;
+  color:var(--gris); margin-bottom:16px;
+}
+.sous-titre code{ color:var(--jour-fonce); font-weight:700; }
+
+.badge-revision{
+  display:inline-block;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:9px 22px; border-radius:24px;
+  box-shadow:0 4px 14px rgba(245,166,35,.45);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1);   box-shadow:0 4px 14px rgba(245,166,35,.45); }
+  50%    { transform:scale(1.05);box-shadow:0 6px 22px rgba(245,166,35,.7); }
+}
+
+/* ================ ENCART GAME (fond clair dys-friendly) ================ */
+.game{
+  background: #fff;
+  border:2px solid var(--jour);
+  border-radius:18px;
+  padding:18px 20px 16px;
+  margin-bottom:24px;
+  box-shadow:0 4px 16px rgba(245,166,35,.18);
+}
+.game-label{
+  font-family:'Orbitron',sans-serif; font-size:.66rem; font-weight:700;
+  letter-spacing:2px; color:var(--jour-fonce); margin-bottom:12px;
+}
+
+/* étoiles */
+.etoiles{ text-align:center; margin-bottom:18px; font-size:1.55rem; letter-spacing:8px; }
+.etoiles .star{ color:#dcd6c4; transition:.3s; display:inline-block; }
+.etoiles .star.on{
+  color:var(--jour);
+  animation: pop .5s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+
+/* scoreboard */
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.score-col{
+  background: #faf7ef;
+  border:1.5px solid #ece4cf;
+  border-radius:12px; padding:12px 6px; text-align:center;
+}
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.6rem; line-height:1; }
+.score-col.reussis  { border-color:#9be7a5; }
+.score-col.reussis  .score-num{ color:#157f3a; }
+.score-col.restants { border-color:var(--jour-pale); }
+.score-col.restants .score-num{ color:var(--jour-fonce); }
+.score-col.erreurs  { border-color:#f5b5b5; }
+.score-col.erreurs  .score-num{ color:#c0392b; }
+.score-lbl{
+  font-family:'Orbitron',sans-serif; font-size:.6rem; font-weight:700;
+  letter-spacing:1.5px; color:#7a7a7a; margin-top:6px; text-transform:uppercase;
+}
+
+/* barre XP */
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span:first-child{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:1.5px; color:var(--jour-fonce);
+}
+.xp-head span:last-child{
+  font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; color:var(--jour-fonce);
+}
+.xp-bar{ height:9px; background:#f0ead7; border-radius:8px; overflow:hidden; }
+.xp-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--jour-fonce), var(--jour), #f9c0bb);
+  border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1);
+}
+.defi-count{
+  text-align:center; margin-top:12px;
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:700;
+  letter-spacing:2px; color:#7a7a7a;
+}
+
+/* ================== CARD EXERCICE ================== */
+.card{
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
+}
+.rainbow{
+  height:6px;
+  background:linear-gradient(90deg,#ff5e5e,#f5a623,#9be7a5,#3ab5d8,#a884ff,#ff5e5e);
+  background-size:300% 100%;
+  animation: slide 4s linear infinite;
+}
+@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+
+.card-body{ padding:22px 24px 24px; }
+
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:10px; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--txt); }
+.type-badge{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; font-weight:700;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  padding:5px 11px; border-radius:14px; border:1px solid var(--jour-pale);
+  white-space:nowrap;
+}
+
+/* encart énoncé : FOND CLAIR (dys-friendly) */
+.texte-fable{
+  background:var(--jour-clair);
+  border:2px solid var(--jour);
+  border-radius:14px;
+  padding:18px 18px;
+  margin-bottom:16px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(245,166,35,.12);
+}
+.texte-fable .ft-titre{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1px; color:var(--jour-fonce); margin-bottom:10px;
+}
+.texte-fable .ft-expr{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem;
+  color:var(--jour-fonce); letter-spacing:1px;
+}
+
+/* style "blocs Scratch" : pseudo-code lisible */
+.scratch-script{
+  display:inline-block; text-align:left;
+  background:#fff; border:1.5px solid var(--jour-pale);
+  border-radius:10px; padding:12px 14px;
+  font-family:'Courier New', Consolas, monospace; font-size:.95rem;
+  line-height:1.55; color:#2b2b2b;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  white-space:pre;
+}
+.scratch-script .bloc{
+  display:inline-block; padding:1px 7px; margin:1px 1px;
+  border-radius:5px; font-weight:bold; color:#fff;
+}
+.scratch-script .b-mouv{ background:#4c97ff; }   /* mouvement bleu */
+.scratch-script .b-ctrl{ background:#ffab19; }   /* contrôle orange */
+.scratch-script .b-var { background:#ff8c1a; }   /* variables orange-rouge */
+.scratch-script .b-op  { background:#59c059; }   /* opérateurs vert */
+.scratch-script .b-look{ background:#9966ff; }   /* apparence violet */
+.scratch-script .b-pen { background:#0fbd8c; }   /* stylo vert-bleu */
+.scratch-script .indent{ padding-left:24px; }
+
+/* zone figure SVG (pour les questions de tracé) */
+.scratch-figure{
+  display:flex; justify-content:center; align-items:center;
+  margin-top:8px;
+}
+.scratch-figure svg{ max-width:160px; height:auto; }
+
+.cursor{
+  display:inline-block; width:3px; height:1.5rem; background:var(--jour-fonce);
+  margin-left:4px; vertical-align:-4px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink{ 0%,50%{ opacity:1; } 51%,100%{ opacity:0; } }
+
+.question-txt{
+  font-size:1.05rem; font-weight:bold; color:var(--txt);
+  margin-bottom:16px; line-height:1.5;
+}
+
+/* choix QCM */
+.choix{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+.choix-btn{
+  text-align:left; font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700;
+  padding:14px 16px; border:2px solid #e8e2d4; background:#fff;
+  border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt);
+  display:flex; align-items:center; gap:11px;
+}
+.choix-btn .choix-content{ flex:1; }
+.choix-btn .choix-content svg{ max-width:80px; max-height:55px; vertical-align:middle; margin-right:10px; }
+.choix-btn .lettre{
+  flex-shrink:0; width:28px; height:28px; border-radius:50%;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.85rem;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--jour-pale);
+}
+.choix-btn sup{ font-size:.7rem; }
+.choix-btn:hover:not(.locked){ border-color:var(--jour); background:var(--jour-clair); }
+.choix-btn.selected{
+  border-color:var(--jour); background:var(--jour-clair);
+  box-shadow:0 0 0 3px rgba(245,166,35,.25);
+}
+.choix-btn.selected .lettre{ background:var(--jour); color:#fff; }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{
+  border-color:var(--vert); background:#e7faec;
+}
+.choix-btn.good .lettre{ background:var(--vert); color:#fff; }
+.choix-btn.bad{
+  border-color:var(--rouge); background:#fdeaea;
+}
+.choix-btn.bad .lettre{ background:var(--rouge); color:#fff; }
+
+/* boutons */
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 4px; }
+.btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:11px 18px; border:none; border-radius:10px;
+  cursor:pointer; transition:transform .12s; color:#fff; position:relative;
+}
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-indice{  background:#3ab5d8; }
+.btn-suivant{ background:var(--jour); color:#3a2c00; }
+
+.btn-valider:not(:disabled){ animation: neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled){  animation: neon-bleu 1.4s ease-in-out infinite; }
+.btn-suivant:not(:disabled){ animation: neon-jour 1.4s ease-in-out infinite; }
+
+@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5);}  50%{ box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
+@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(245,166,35,.5);} 50%{ box-shadow:0 0 18px rgba(245,166,35,.95);} }
+
+.btn:disabled{
+  background:#d8d8d8 !important; color:#fff !important;
+  cursor:not-allowed; animation:none !important; box-shadow:none !important;
+}
+
+/* indice */
+.indice-box{
+  display:none; margin-top:14px; padding:13px 16px;
+  background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px;
+  font-size:.9rem; color:#1a6e88;
+}
+.indice-box.show{ display:block; animation: pop .35s ease; }
+
+/* feedback */
+.feedback{ display:none; margin-top:16px; padding:14px 16px; border-radius:10px; font-weight:bold; font-size:1rem; }
+.feedback.show{ display:block; animation: pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{  background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{  background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+
+/* correction */
+.correction{
+  display:none; margin-top:14px; padding:15px 18px;
+  background:#fff8e6; border:1px dashed var(--jour); border-radius:10px;
+  font-size:.92rem; color:#5a4500; line-height:1.6;
+}
+.correction.show{ display:block; animation: pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+
+/* navigation */
+.nav{ display:flex; justify-content:space-between; margin-top:20px; }
+.nav button{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:500;
+  letter-spacing:.5px; padding:9px 16px; border-radius:8px;
+  border:1px solid #ddd; background:#f7f7f7; color:#888; cursor:pointer; transition:.15s;
+}
+.nav button:not(:disabled):hover{ background:#eee; color:#555; }
+.nav button:disabled{ opacity:.4; cursor:not-allowed; }
+
+/* +25 XP flottant */
+.xp-pop{
+  position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5);
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3rem;
+  color:var(--jour); text-shadow:0 0 20px var(--jour), 0 4px 10px rgba(0,0,0,.3);
+  z-index:50; opacity:0; pointer-events:none;
+}
+.xp-pop.go{ animation: xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
+  25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); }
+  70%{ opacity:1; transform:translate(-50%,-80%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); }
+}
+
+/* ================= ÉCRAN RÉSULTATS ================= */
+.results{ display:none; }
+.results.show{ display:block; animation: pop .5s ease; }
+.results .mission{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.7rem;
+  text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px;
+}
+.results .big-score{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3.4rem;
+  text-align:center; color:var(--jour);
+  text-shadow:0 0 16px rgba(245,166,35,.5); margin:8px 0;
+}
+.results .res-stars{ text-align:center; font-size:1.7rem; letter-spacing:5px; color:var(--jour); margin-bottom:10px; }
+.results .gg{
+  text-align:center; font-family:'Orbitron',sans-serif; font-size:.88rem;
+  color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:20px;
+}
+.recap{ background:#faf7ef; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
+.recap-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:.86rem; gap:10px;
+}
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; }
+.recap-item .st{ font-size:1.1rem; flex-shrink:0; }
+.btn-rejouer{
+  display:block; width:100%;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px;
+  padding:14px; border:none; border-radius:12px; color:#3a2c00;
+  background:var(--jour); cursor:pointer;
+  animation: neon-jour 1.4s ease-in-out infinite;
+}
+.btn-rejouer:active{ transform:scale(.97); }
+</style>
+</head>
+<body>
+
+<!-- bulles statiques de fond -->
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+
+<div class="wrap">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 3ÈME
+    </div>
+    <div class="semaine">Semaine 5 – Jour 1</div>
+    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre">🐱 Scratch — lire un script · 6 challenges</div>
+    <div class="badge-revision">▶ DÉFI BREVET 3ÈME</div>
+  </div>
+
+  <!-- ===== ENCART GAME (fond clair) ===== -->
+  <div class="game">
+    <div class="game-label">▶ DÉFI BREVET 3ÈME</div>
+
+    <div class="etoiles" id="etoiles"></div>
+
+    <div class="scoreboard">
+      <div class="score-col reussis">
+        <div class="score-num" id="sc-reussis">0</div>
+        <div class="score-lbl">△ Réussis</div>
+      </div>
+      <div class="score-col restants">
+        <div class="score-num" id="sc-restants">6</div>
+        <div class="score-lbl">◆ Restants</div>
+      </div>
+      <div class="score-col erreurs">
+        <div class="score-num" id="sc-erreurs">0</div>
+        <div class="score-lbl">△ Erreurs</div>
+      </div>
+    </div>
+
+    <div class="xp-head">
+      <span>▶ XP PROGRESS</span>
+      <span id="xp-pct">0 %</span>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+
+    <div class="defi-count" id="defi-count">DÉFI 1 / 6</div>
+  </div>
+
+  <!-- ===== CARD EXERCICE ===== -->
+  <div class="card" id="exo-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="card-head">
+        <div class="defi-num" id="card-defi-num">DÉFI 01</div>
+        <div class="type-badge">SCRATCH</div>
+      </div>
+
+      <div class="texte-fable">
+        <div class="ft-titre">🐱 SCRIPT SCRATCH</div>
+        <div class="ft-expr" id="ft-expr"></div>
+      </div>
+
+      <div class="question-txt" id="question-txt"></div>
+
+      <div class="choix" id="choix"></div>
+
+      <div class="btns">
+        <button class="btn btn-valider" id="btn-valider" disabled>✓ VALIDER</button>
+        <button class="btn btn-indice"  id="btn-indice">? INDICE</button>
+        <button class="btn btn-suivant" id="btn-suivant" disabled>SUIVANT →</button>
+      </div>
+
+      <div class="indice-box" id="indice-box"></div>
+      <div class="feedback"   id="feedback"></div>
+      <div class="correction" id="correction"></div>
+
+      <div class="nav">
+        <button id="btn-retour" disabled>← Retour</button>
+        <button id="btn-nav-suivant" disabled>Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ÉCRAN RÉSULTATS ===== -->
+  <div class="card results" id="results-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">// MISSION ACCOMPLIE</div>
+      <div class="big-score" id="res-score">0 / 6</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg">// GG — validé !</div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" id="btn-rejouer">▶ NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- +25 XP flottant -->
+<div class="xp-pop" id="xp-pop">+25 XP !</div>
+
+<script>
+/* =========================================================
+   DONNÉES DES 6 DÉFIS — Scratch (Brevet 3e)
+   Lire un script Scratch et prédire son résultat :
+   - figure dessinée (carré, triangle, hexagone…)
+   - valeur d'une variable
+   - position finale
+   - sortie d'une conditionnelle
+   ========================================================= */
+const DEFIS = [
+  {
+    titre:"Quelle figure ?",
+    expr:'<div class="scratch-script">'
+       + '<span class="b-ctrl">répéter <b>4</b> fois</span>\n'
+       + '   <span class="b-mouv">avancer de 100</span>\n'
+       + '   <span class="b-mouv">tourner ↻ de 90°</span>'
+       + '</div>',
+    question:"Quelle figure ce script dessine-t-il ?",
+    choices:[
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><rect x="20" y="20" width="60" height="60" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un carré</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><polygon points="50,15 90,80 10,80" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un triangle</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><polygon points="50,10 88,30 88,70 50,90 12,70 12,30" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un hexagone</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un cercle</span>'
+    ],
+    correct:0,
+    indice:"4 segments de longueur 100, séparés par 4 rotations de 90°. La somme des rotations vaut 4 × 90° = 360° (tour complet). Combien de côtés ?",
+    correction:"Le script trace <b>4 segments</b> de 100 pas avec une rotation de 90° entre chaque. C'est un <b>carré</b> de côté 100."
+  },
+  {
+    titre:"Polygone régulier",
+    expr:'<div class="scratch-script">'
+       + '<span class="b-ctrl">répéter <b>3</b> fois</span>\n'
+       + '   <span class="b-mouv">avancer de 80</span>\n'
+       + '   <span class="b-mouv">tourner ↻ de 120°</span>'
+       + '</div>',
+    question:"Quelle figure ce script dessine-t-il ?",
+    choices:[
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><rect x="20" y="20" width="60" height="60" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un carré de côté 80</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><polygon points="50,15 90,80 10,80" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un triangle équilatéral de côté 80</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><polygon points="50,10 90,40 75,85 25,85 10,40" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un pentagone de côté 80</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><polygon points="50,10 88,30 88,70 50,90 12,70 12,30" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un hexagone de côté 80</span>'
+    ],
+    correct:1,
+    indice:"3 segments + 3 rotations de 120° (somme 360°). Quel polygone régulier a 3 côtés égaux ?",
+    correction:"3 côtés de longueur 80 et 3 rotations de 120° (somme = 360°) : c'est un <b>triangle équilatéral</b> de côté 80."
+  },
+  {
+    titre:"Valeur d'une variable",
+    expr:'<div class="scratch-script">'
+       + '<span class="b-var">mettre <i>x</i> à 0</span>\n'
+       + '<span class="b-ctrl">répéter <b>5</b> fois</span>\n'
+       + '   <span class="b-var">ajouter 3 à <i>x</i></span>'
+       + '</div>',
+    question:"Quelle est la valeur finale de la variable x ?",
+    choices:[
+      "x = 5",
+      "x = 8",
+      "x = 15",
+      "x = 35"
+    ],
+    correct:2,
+    indice:"x part de 0, et on lui ajoute 3 à chaque tour. Il y a 5 tours. Combien vaut x à la fin ?",
+    correction:"x part de 0. À chaque tour, on lui ajoute 3. Après 5 tours : x = 0 + 3 × 5 = <b>15</b>."
+  },
+  {
+    titre:"Position finale",
+    expr:'<div class="scratch-script">'
+       + '<span class="b-mouv">aller à x: 0 y: 0</span>\n'
+       + '<span class="b-mouv">s\'orienter à 90°</span>\n'
+       + '<span class="b-mouv">avancer de 50</span>\n'
+       + '<span class="b-mouv">tourner ↻ de 90°</span>\n'
+       + '<span class="b-mouv">avancer de 30</span>'
+       + '</div>',
+    question:"Quelle figure le tracé dessine-t-il (la croix marque le départ) ?",
+    choices:[
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><polyline points="20,20 80,20 80,80" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un L (droite puis haut)</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><polyline points="20,20 20,80 80,80" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un L (droite puis bas)</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><rect x="20" y="20" width="60" height="60" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un carré</span>',
+      '<span class="choix-content"><svg viewBox="0 0 100 100"><polygon points="50,15 90,80 10,80" fill="none" stroke="#1a1f2e" stroke-width="3"/></svg>Un triangle</span>'
+    ],
+    correct:1,
+    indice:"S'orienter à 90° = vers la droite. Avancer 50 (vers la droite). Tourner ↻ 90° = vers le bas. Avancer 30 (vers le bas).",
+    correction:"Au départ orienté à 90° (vers la droite), on avance de 50 (segment vers la droite). Puis tourner ↻ 90° oriente vers le <b>bas</b>, on avance de 30 (segment vers le bas). Le tracé forme un <b>L allant à droite puis vers le bas</b>."
+  },
+  {
+    titre:"Conditionnelle",
+    expr:'<div class="scratch-script">'
+       + '<span class="b-var">mettre <i>n</i> à 10</span>\n'
+       + '<span class="b-ctrl">si <i>n</i> > 5 alors</span>\n'
+       + '   <span class="b-look">dire « grand »</span>\n'
+       + '<span class="b-ctrl">sinon</span>\n'
+       + '   <span class="b-look">dire « petit »</span>'
+       + '</div>',
+    question:"Que dit le lutin (sprite) à la fin du script ?",
+    choices:[
+      "« grand »",
+      "« petit »",
+      "Rien du tout",
+      "« grand » puis « petit »"
+    ],
+    correct:0,
+    indice:"On a n = 10. Compare avec 5 : la condition n > 5 est-elle vraie ou fausse ? Si vraie → on prend la branche « alors ».",
+    correction:"n vaut 10. La condition <b>n > 5</b> est vraie (10 > 5), donc on exécute la branche « alors » : le lutin dit <b>« grand »</b>."
+  },
+  {
+    titre:"Nombre de côtés",
+    expr:'<div class="scratch-script">'
+       + '<span class="b-ctrl">répéter <b>?</b> fois</span>\n'
+       + '   <span class="b-mouv">avancer de 50</span>\n'
+       + '   <span class="b-mouv">tourner ↻ de 60°</span>'
+       + '</div>',
+    question:"Pour dessiner un hexagone régulier, par quoi faut-il remplacer « ? » ?",
+    choices:[
+      "3",
+      "5",
+      "6",
+      "60"
+    ],
+    correct:2,
+    indice:"Pour dessiner un polygone régulier à n côtés, on répète n fois (avancer ; tourner de 360°/n). Ici la rotation est 60° : combien fait 360 ÷ 60 ?",
+    correction:"Pour un polygone régulier à n côtés, l'angle de rotation est 360°/n. Ici 360° / 60° = <b>6</b> : on répète 6 fois pour obtenir un hexagone."
+  }
+];
+
+/* ===================== ÉTAT ===================== */
+let idx = 0;
+let reussis = 0;
+let erreurs = 0;
+let etat = [];           // {validated, correct, picked} par défi
+let selectedChoice = null;
+
+function resetState(){
+  idx = 0; reussis = 0; erreurs = 0;
+  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null }));
+  selectedChoice = null;
+}
+resetState();
+
+/* ============== RÉFÉRENCES DOM ============== */
+const $ = id => document.getElementById(id);
+const LETTRES = ['A','B','C','D','E','F'];
+
+const btnValider = $('btn-valider'), btnIndice = $('btn-indice'), btnSuivant = $('btn-suivant');
+const btnRetour = $('btn-retour'), btnNavSuivant = $('btn-nav-suivant');
+
+/* ============== INIT ÉTOILES (selon TOTAL) ============== */
+function buildStars(containerId){
+  const c = $(containerId);
+  c.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '★';
+    c.appendChild(s);
+  }
+}
+buildStars('etoiles');
+
+/* ===================== RENDER ===================== */
+function render(){
+  selectedChoice = null;   // remis à null à chaque rendu
+
+  const d = DEFIS[idx];
+  const e = etat[idx];
+
+  // scoreboard
+  $('sc-reussis').textContent  = reussis;
+  $('sc-erreurs').textContent  = erreurs;
+  $('sc-restants').textContent = TOTAL - reussis;
+
+  // étoiles (s'allument selon nb de réussis)
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
+    s.classList.toggle('on', i < reussis);
+  });
+
+  // XP
+  const pct = Math.round((reussis / TOTAL) * 100);
+  $('xp-fill').style.width = pct + '%';
+  $('xp-pct').textContent  = pct + ' %';
+
+  // compteurs
+  $('defi-count').textContent = 'DÉFI ' + (idx+1) + ' / ' + TOTAL;
+  $('card-defi-num').textContent = 'DÉFI ' + String(idx+1).padStart(2,'0');
+  $('ft-expr').innerHTML = d.expr + '<span class="cursor"></span>';
+  $('question-txt').textContent = d.question;
+
+  // construire les choix
+  const cont = $('choix');
+  cont.innerHTML = '';
+  d.choices.forEach((txt, i)=>{
+    const b = document.createElement('button');
+    b.className = 'choix-btn';
+    b.innerHTML = '<span class="lettre">'+LETTRES[i]+'</span><span>'+txt+'</span>';
+    b.dataset.i = i;
+
+    if(e.validated){
+      b.classList.add('locked');
+      if(i === d.correct) b.classList.add('good');
+      if(i === e.picked && i !== d.correct) b.classList.add('bad');
+    } else {
+      b.addEventListener('click', ()=> pickChoice(i, b));
+    }
+    cont.appendChild(b);
+  });
+
+  // si déjà validé : restaurer la sélection
+  if(e.validated){
+    selectedChoice = e.picked;
+  }
+
+  // reset zones
+  $('indice-box').className = 'indice-box';
+  $('indice-box').innerHTML = '';
+  $('feedback').className = 'feedback';
+  $('feedback').innerHTML = '';
+  $('correction').className = 'correction';
+  $('correction').innerHTML = '';
+
+  // réafficher feedback + correction si validé
+  if(e.validated){
+    showFeedback(e.correct);
+    showCorrection();
+  }
+
+  refreshButtons();
+  btnRetour.disabled = (idx === 0);
+}
+
+/* ============== SÉLECTION D'UN CHOIX ============== */
+function pickChoice(i, btn){
+  if(etat[idx].validated) return;
+  selectedChoice = i;
+  document.querySelectorAll('#choix .choix-btn').forEach(b=> b.classList.remove('selected'));
+  btn.classList.add('selected');
+  refreshButtons();
+}
+
+/* ============== GESTION DES BOUTONS ============== */
+function refreshButtons(){
+  const e = etat[idx];
+  // Valider : actif si un choix sélectionné ET pas encore validé
+  btnValider.disabled = (selectedChoice === null || e.validated);
+  // Suivant : actif uniquement si validé
+  btnSuivant.disabled = !e.validated;
+  btnNavSuivant.disabled = !e.validated;
+}
+
+/* ============== VALIDATION ============== */
+function valider(){
+  const d = DEFIS[idx];
+  const e = etat[idx];
+  if(e.validated || selectedChoice === null) return;
+
+  const correct = (selectedChoice === d.correct);
+  e.validated = true;
+  e.correct = correct;
+  e.picked = selectedChoice;
+
+  if(correct){ reussis++; fireXP(); }
+  else { erreurs++; }
+
+  showFeedback(correct);
+  showCorrection();
+  render();   // verrouille les choix, met à jour scoreboard/étoiles/XP
+}
+
+function showFeedback(correct){
+  const fb = $('feedback');
+  if(correct){
+    fb.className = 'feedback ok show';
+    fb.innerHTML = '✅ Bravo ! Bonne réponse.';
+  } else {
+    fb.className = 'feedback ko show';
+    fb.innerHTML = '❌ Pas tout à fait. Regarde la correction.';
+  }
+}
+
+function showCorrection(){
+  const d = DEFIS[idx];
+  const c = $('correction');
+  c.className = 'correction show';
+  c.innerHTML = '<b>Correction :</b> ' + d.correction;
+}
+
+/* ============== INDICE (jamais la réponse) ============== */
+function indice(){
+  const d = DEFIS[idx];
+  const box = $('indice-box');
+  box.className = 'indice-box show';
+  box.innerHTML = '💡 <b>Indice :</b> ' + d.indice;
+}
+
+/* ============== NAVIGATION ============== */
+function suivant(){
+  if(!etat[idx].validated) return;
+  if(idx < TOTAL - 1){
+    idx++; render(); window.scrollTo({ top:0, behavior:'smooth' });
+  } else {
+    showResults();
+  }
+}
+function retour(){
+  if(idx > 0){ idx--; render(); window.scrollTo({ top:0, behavior:'smooth' }); }
+}
+
+/* ============== +25 XP FLOTTANT ============== */
+function fireXP(){
+  const p = $('xp-pop');
+  p.classList.remove('go');
+  void p.offsetWidth;
+  p.classList.add('go');
+}
+
+/* ============== ÉCRAN RÉSULTATS ============== */
+function showResults(){
+  $('exo-card').style.display = 'none';
+  const r = $('results-card');
+  r.classList.add('show');
+
+  $('res-score').textContent = reussis + ' / ' + TOTAL;
+
+  let stars = '';
+  for(let i=0;i<TOTAL;i++) stars += (i < reussis) ? '★' : '☆';
+  $('res-stars').textContent = stars;
+
+  let msg;
+  const ratio = reussis / TOTAL;
+  if(reussis === TOTAL)        msg = '// PARFAIT — GG, sans-faute ! 🏆';
+  else if(ratio >= 0.75)       msg = '// EXCELLENT — très bonne compréhension !';
+  else if(ratio >= 0.5)        msg = '// BIEN JOUÉ — tu es sur la bonne voie !';
+  else if(reussis > 0)         msg = '// PAS MAL — relis la fable et réessaie !';
+  else                         msg = '// COURAGE — relis attentivement, tu vas y arriver !';
+  $('res-msg').textContent = msg;
+
+  let html = '';
+  DEFIS.forEach((d,i)=>{
+    const ok = etat[i].correct;
+    html += '<div class="recap-item">'
+          + '<span class="eq">Défi '+(i+1)+' — '+d.titre+'</span>'
+          + '<span class="st">' + (ok ? '✅' : '❌') + '</span>'
+          + '</div>';
+  });
+  $('res-recap').innerHTML = html;
+
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
+    s.classList.toggle('on', i < reussis);
+  });
+
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============== REJOUER ============== */
+function rejouer(){
+  resetState();
+  $('results-card').classList.remove('show');
+  $('exo-card').style.display = '';
+  render();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============== LISTENERS ============== */
+btnValider.addEventListener('click', valider);
+btnIndice .addEventListener('click', indice);
+btnSuivant.addEventListener('click', suivant);
+btnNavSuivant.addEventListener('click', suivant);
+btnRetour .addEventListener('click', retour);
+$('btn-rejouer').addEventListener('click', rejouer);
+
+/* ============== INIT ============== */
+render();
+</script>
+</body>
+</html>
