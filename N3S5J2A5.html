@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths – Ce que je retiens · Les boucles en algorithmique</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ═══════════ CHARTE ROSE J2 (Mardi) ═══════════ */
+  :root {
+    --day-color:  #f28b82;
+    --day-dark:   #c0392b;
+    --day-light:  #fff0ef;
+    --day-border: #f9c0bb;
+    --day-glow:   rgba(242,139,130,.3);
+  }
+  /* ═══════════ CHARTE PAZAPA — base ═══════════ */
+  :root {
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+    /* Scratch block colors */
+    --scratch-control:#ffab19;
+    --scratch-control-dark:#cf8b17;
+    --scratch-motion:#4c97ff;
+    --scratch-motion-dark:#3373cc;
+    --scratch-pen:#0fbd8c;
+    --scratch-pen-dark:#0b8e69;
+    --scratch-event:#ffbf00;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--green);top:200px;left:-30px;pointer-events:none;}
+  header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--day-color);
+    color:#fff;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.6rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.4rem,4vw,2.1rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.92rem;margin-top:.5rem;font-family:'JetBrains Mono',monospace;
+    max-width:600px;margin-left:auto;margin-right:auto;}
+  .card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+    border-radius:var(--radius);padding:1.8rem 1.8rem 1.6rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.4rem;animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green),var(--blue));}
+  .theme-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.25rem .75rem;border-radius:6px;
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;background:var(--day-light);
+    color:var(--day-dark);border:1.5px solid var(--day-border);}
+  .card h2{font-size:1.15rem;font-weight:800;color:var(--day-dark);margin-bottom:.9rem;}
+  .card p{margin-bottom:.7rem;}
+  .card p:last-child{margin-bottom:0;}
+  .inner{background:var(--day-light);border-left:5px solid var(--day-color);border-radius:10px;
+    padding:.9rem 1rem;margin:.9rem 0;line-height:1.85;}
+  .inner strong{color:var(--day-dark);}
+
+  /* ═══════════ BLOCS SCRATCH ═══════════ */
+  .scratch-program{background:#f4f4f4;border:2px solid #d9d9d9;border-radius:12px;
+    padding:1.2rem;margin:1rem 0;display:flex;flex-direction:column;gap:0;align-items:flex-start;
+    overflow-x:auto;}
+  .blk{display:inline-flex;align-items:center;gap:.4rem;color:#fff;font-weight:700;
+    font-family:'JetBrains Mono',monospace;font-size:.92rem;
+    padding:.55rem .9rem;border-radius:5px;line-height:1;
+    box-shadow:0 2px 0 rgba(0,0,0,.15);position:relative;}
+  .blk-event{background:var(--scratch-event);color:#fff;border-radius:5px 5px 0 0;
+    padding-top:.55rem;padding-bottom:.65rem;}
+  .blk-motion{background:var(--scratch-motion);}
+  .blk-pen{background:var(--scratch-pen);}
+  .blk-control{background:var(--scratch-control);}
+  /* Boucle "répéter" : bloc englobant orange en C */
+  .blk-repeat{display:flex;flex-direction:column;gap:0;align-items:flex-start;}
+  .blk-repeat-head{background:var(--scratch-control);color:#fff;font-weight:700;
+    font-family:'JetBrains Mono',monospace;font-size:.92rem;
+    padding:.55rem .9rem .55rem .9rem;border-radius:5px 5px 0 0;
+    display:inline-flex;align-items:center;gap:.4rem;}
+  .blk-repeat-body{background:var(--scratch-control);padding:.3rem 0 .3rem .8rem;
+    display:flex;flex-direction:column;gap:.2rem;border-radius:0;width:100%;}
+  .blk-repeat-foot{background:var(--scratch-control);color:#fff;font-family:'JetBrains Mono',monospace;
+    font-size:.85rem;padding:.45rem .9rem;border-radius:0 5px 5px 5px;font-weight:700;}
+  /* champ chiffre dans un bloc */
+  .blk-num{background:#fff;color:#333;border-radius:99px;padding:.1rem .6rem;
+    font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.85rem;display:inline-block;min-width:1.6rem;text-align:center;}
+  .blk-icon{font-size:1rem;}
+
+  /* SVG aperçu : carré dessiné */
+  .preview{display:flex;flex-direction:column;align-items:center;gap:.4rem;
+    background:#fff;border:2px dashed var(--day-border);border-radius:12px;
+    padding:1rem;margin:.8rem 0;}
+  .preview svg{max-width:100%;height:auto;}
+  .preview .legend{font-size:.82rem;color:var(--muted);font-style:italic;font-family:'JetBrains Mono',monospace;}
+
+  /* Layout 2 colonnes pour code + preview */
+  .code-and-preview{display:grid;grid-template-columns:1fr;gap:1rem;margin:.6rem 0;}
+  @media(min-width:640px){.code-and-preview{grid-template-columns:1fr 1fr;align-items:start;}}
+
+  /* Iframe Scratch */
+  .scratch-embed-wrap{display:flex;flex-direction:column;align-items:center;gap:.8rem;
+    background:var(--day-light);border:2px solid var(--day-color);border-radius:14px;padding:1rem;margin:.6rem 0;}
+  .scratch-embed-wrap iframe{width:100%;max-width:485px;height:402px;border:0;border-radius:8px;background:#fff;}
+  @media(max-width:480px){.scratch-embed-wrap iframe{height:340px;}}
+
+  ul.clean{list-style:none;padding:0;margin:.6rem 0;}
+  ul.clean li{position:relative;padding:.55rem 0 .55rem 1.8rem;border-bottom:1px dashed var(--day-border);line-height:1.75;}
+  ul.clean li:last-child{border-bottom:none;}
+  ul.clean li::before{content:"▸";position:absolute;left:.3rem;top:.55rem;color:var(--day-color);font-weight:800;font-size:1.05rem;}
+
+  .types-grid{display:grid;grid-template-columns:1fr;gap:1rem;margin:.8rem 0;}
+  @media(min-width:560px){.types-grid{grid-template-columns:1fr 1fr;}}
+  .type-card{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:1rem;}
+  .type-card h3{color:var(--day-dark);font-size:.95rem;font-weight:800;margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem;}
+  .type-card p{font-size:.88rem;margin:.3rem 0;}
+  .type-card .ex{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#fff;border:1.5px dashed var(--day-border);
+    border-radius:6px;padding:.4rem;margin-top:.4rem;text-align:center;color:var(--day-dark);}
+
+  details.recap{background:linear-gradient(135deg,var(--surface) 0%,var(--day-light) 100%);
+    border:2px solid var(--day-border);border-radius:var(--radius);padding:0;width:100%;max-width:720px;
+    margin-bottom:1.4rem;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;z-index:1;}
+  details.recap summary{cursor:pointer;padding:1.1rem 1.5rem;font-weight:700;color:var(--day-dark);font-size:1rem;
+    list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem;transition:background .2s;min-height:2.8rem;}
+  details.recap summary:hover{background:rgba(242,139,130,.10);}
+  details.recap summary::-webkit-details-marker{display:none;}
+  details.recap summary::after{content:"▼";font-size:.85rem;transition:transform .25s;color:var(--day-color);}
+  details.recap[open] summary::after{transform:rotate(180deg);}
+  details.recap .recap-content{padding:0 1.5rem 1.4rem;}
+
+  .quiz-intro{color:var(--muted);font-size:.92rem;margin-bottom:1rem;line-height:1.75;}
+  .group{background:var(--day-light);border-radius:12px;padding:1rem .9rem;margin:.9rem 0;border:2px solid transparent;transition:all .25s;}
+  .group.ok{border-color:var(--green);background:#f0faeb;}
+  .group.ko{border-color:var(--pink);background:#fff0ef;}
+  .group-title{font-weight:700;color:var(--day-dark);margin-bottom:.6rem;font-size:.92rem;line-height:1.6;}
+  .group.ok .group-title{color:#2f6e10;}
+  .group.ko .group-title{color:#c0392b;}
+  .options{display:flex;flex-direction:column;gap:.5rem;}
+  .opt{display:flex;align-items:flex-start;gap:.6rem;background:var(--surface);border:2px solid var(--day-border);
+    border-radius:10px;padding:.65rem .8rem;cursor:pointer;transition:all .2s;font-size:.9rem;line-height:1.55;
+    user-select:none;min-height:2.4rem;font-family:'JetBrains Mono',monospace;}
+  .opt:hover{background:var(--day-light);border-color:var(--day-color);}
+  .opt input{margin-top:.2rem;accent-color:var(--day-color);width:18px;height:18px;cursor:pointer;flex-shrink:0;}
+  .opt.checked{background:var(--day-light);border-color:var(--day-dark);}
+  .group.ok .opt{pointer-events:none;opacity:.85;}
+  .quiz-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.1rem;justify-content:center;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.3rem;border-radius:10px;
+    font-family:Arial,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+    transition:transform .12s,box-shadow .15s;position:relative;z-index:2;min-height:2.7rem;text-decoration:none;}
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+  .btn-ghost:hover{border-color:var(--day-color);background:var(--day-light);}
+  .feedback{margin-top:1.1rem;padding:.85rem 1rem;border-radius:10px;font-weight:600;text-align:center;display:none;line-height:1.7;}
+  .feedback.show{display:block;}
+  .feedback.win{background:#f0faeb;color:#2f6e10;border:1.5px solid var(--green);}
+  .feedback.retry{background:#fff0ef;color:#c0392b;border:1.5px solid var(--pink);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.2rem .8rem 3rem;}
+    .card{padding:1.3rem 1.1rem;}
+    .btn{font-size:.88rem;padding:.6rem 1rem;}
+    .quiz-actions .btn{flex:1;min-width:140px;justify-content:center;}
+    .blk{font-size:.82rem;padding:.4rem .7rem;}
+    .blk-repeat-head, .blk-repeat-foot{font-size:.82rem;padding:.4rem .7rem;}
+  }
+</style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      Pazapa &middot; Maths &middot; 3<sup>e</sup>
+    </div>
+    <div class="week-label">📚 Ce que je retiens &middot; Semaine 5 &middot; Jour 2</div>
+    <h1><span class="hl">Les boucles en algorithmique</span></h1>
+    <p class="subtitle">Quand on répète une même séquence d'instructions plusieurs fois</p>
+  </header>
+
+  <!-- DÉFINITION + PROGRAMME -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📖 Définition</div>
+    <h2>Qu'est-ce qu'une boucle ?</h2>
+    <p>Dans un algorithme, on dit que l'on a une <strong>boucle</strong> quand une même séquence d'instructions est <strong>répétée plusieurs fois</strong>.</p>
+
+    <p style="margin-top:1rem;">Voici un exemple de programme avec une boucle :</p>
+
+    <div class="code-and-preview">
+      <!-- Programme Scratch -->
+      <div class="scratch-program">
+        <div class="blk blk-pen"><span class="blk-icon">🖊️</span>stylo en position d'écriture</div>
+        <div class="blk-repeat">
+          <div class="blk-repeat-head">répéter <span class="blk-num">4</span> fois</div>
+          <div class="blk-repeat-body">
+            <div class="blk blk-motion">avancer de <span class="blk-num">50</span> pas</div>
+            <div class="blk blk-motion">tourner ↻ de <span class="blk-num">90</span> degrés</div>
+          </div>
+          <div class="blk-repeat-foot">fin ↪</div>
+        </div>
+      </div>
+
+      <!-- Aperçu : carré -->
+      <div class="preview">
+        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Carré dessiné par le programme">
+          <rect x="30" y="30" width="100" height="100" fill="none" stroke="#c47a10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Point de départ -->
+          <circle cx="30" cy="130" r="4" fill="#c0392b"/>
+          <text x="38" y="148" font-family="JetBrains Mono, monospace" font-size="11" fill="#c0392b" font-weight="700">départ</text>
+          <!-- Flèches indiquant le sens -->
+          <text x="80" y="148" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#1f2937">→</text>
+          <text x="145" y="80" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#1f2937">↑</text>
+          <text x="80" y="20" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#1f2937">←</text>
+          <text x="18" y="84" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#1f2937">↓</text>
+        </svg>
+        <div class="legend">▲ Le lutin dessine un <strong>carré</strong></div>
+      </div>
+    </div>
+
+    <div class="inner">
+      <p>Ce programme répète <strong>4 fois</strong> la séquence « avancer de 50 pas » et « tourner de 90 degrés ». Sans boucle, il aurait fallu écrire ces 2 instructions 4 fois de suite (soit 8 lignes au lieu de 2) !</p>
+    </div>
+  </section>
+
+  <!-- LES 2 TYPES DE BOUCLES -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🔁 Les 2 types de boucles</div>
+    <h2>Quelle boucle utiliser ?</h2>
+
+    <div class="types-grid">
+      <div class="type-card">
+        <h3>🔢 « répéter ... fois »</h3>
+        <p>Permet d'exécuter une séquence d'instructions un <strong>nombre de fois fixé</strong> et prévu à l'avance.</p>
+        <div class="ex">répéter 4 fois → on répète 4 fois</div>
+        <p style="margin-top:.5rem;font-size:.82rem;color:var(--muted);">👉 Utile quand on connaît à l'avance le nombre de répétitions (ex : dessiner un carré = 4 fois).</p>
+      </div>
+
+      <div class="type-card">
+        <h3>⏳ « répéter jusqu'à... »</h3>
+        <p>Permet d'exécuter une séquence d'instructions <strong>jusqu'à ce qu'une condition soit réalisée</strong>.</p>
+        <div class="ex">répéter jusqu'à toucher le bord</div>
+        <p style="margin-top:.5rem;font-size:.82rem;color:var(--muted);">👉 Utile quand on ne sait pas combien de fois on va répéter (ex : jusqu'à ce que le joueur gagne).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXÉCUTE LE PROGRAMME -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">▶️ À toi de jouer</div>
+    <h2>Exécute le programme sur Scratch</h2>
+    <p>Clique sur le drapeau vert 🟢 pour lancer le programme et regarde le lutin dessiner un carré !</p>
+
+    <div class="scratch-embed-wrap">
+      <iframe src="https://scratch.mit.edu/projects/504140440/embed"
+        allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen
+        title="Programme Scratch - dessiner un carré"></iframe>
+      <a class="btn btn-primary" href="https://scratch.mit.edu/projects/504140440/editor"
+         target="_blank" rel="noopener">🚀 Ouvrir dans Scratch (éditeur)</a>
+    </div>
+
+    <div class="inner">
+      <p>💡 Dans Scratch, tu peux modifier les nombres pour <strong>changer la taille</strong> du carré (essaie 100 au lieu de 50) ou <strong>dessiner d'autres figures</strong> en changeant l'angle.</p>
+    </div>
+  </section>
+
+  <!-- DÉFIS BONUS -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🎯 Défis bonus</div>
+    <h2>Et avec d'autres figures ?</h2>
+    <p>L'angle de rotation dépend du nombre de côtés. La règle :</p>
+    <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:800;background:var(--day-light);border:2px dashed var(--day-border);border-radius:10px;padding:.8rem;margin:.6rem 0;color:var(--day-dark);">
+      angle = 360° / nombre de côtés
+    </div>
+    <ul class="clean">
+      <li>Triangle équilatéral : 3 côtés → tourner de <strong>120°</strong></li>
+      <li>Carré : 4 côtés → tourner de <strong>90°</strong></li>
+      <li>Pentagone : 5 côtés → tourner de <strong>72°</strong></li>
+      <li>Hexagone : 6 côtés → tourner de <strong>60°</strong></li>
+      <li>Octogone : 8 côtés → tourner de <strong>45°</strong></li>
+    </ul>
+  </section>
+
+  <!-- RÉCAP -->
+  <details class="recap">
+    <summary>👉 Clique ici pour l'essentiel en résumé</summary>
+    <div class="recap-content">
+      <ul class="clean">
+        <li>Une <strong>boucle</strong> = une séquence d'instructions répétée plusieurs fois.</li>
+        <li><strong>« répéter ... fois »</strong> → nombre de répétitions connu à l'avance.</li>
+        <li><strong>« répéter jusqu'à... »</strong> → on répète jusqu'à ce qu'une condition soit vraie.</li>
+        <li>Pour un polygone régulier : angle de rotation = <strong>360° / nombre de côtés</strong>.</li>
+        <li>Avantage des boucles : on évite de réécrire plusieurs fois le même code.</li>
+        <li>Dans Scratch, le bloc de boucle est en <strong>orange</strong> (catégorie Contrôle).</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- MINI-QUIZ -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🎯 Mini-quiz</div>
+    <h2>À toi de vérifier !</h2>
+    <p class="quiz-intro">Pour chaque groupe, coche <strong>toutes les affirmations correctes</strong> (il peut y en avoir plusieurs). Puis clique sur « Vérifier ».</p>
+    <div id="quiz-groups"></div>
+    <div class="quiz-actions">
+      <button class="btn btn-primary" id="check-btn">✅ Vérifier mes réponses</button>
+      <button class="btn btn-ghost" id="reset-btn">🔄 Recommencer</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+<script>
+  var QUIZ = [
+    {
+      title:"1 \u00b7 Une boucle en algorithmique, c'est\u2026",
+      options:[
+        { t:"une s\u00e9quence d'instructions r\u00e9p\u00e9t\u00e9e plusieurs fois", ok:true },
+        { t:"une instruction unique", ok:false },
+        { t:"un moyen d'\u00e9viter de r\u00e9\u00e9crire le m\u00eame code", ok:true },
+        { t:"un type de variable", ok:false }
+      ]
+    },
+    {
+      title:"2 \u00b7 La boucle \u00ab r\u00e9p\u00e9ter ... fois \u00bb sert quand\u2026",
+      options:[
+        { t:"on conna\u00eet \u00e0 l'avance le nombre de r\u00e9p\u00e9titions", ok:true },
+        { t:"on veut dessiner un polygone r\u00e9gulier", ok:true },
+        { t:"on ne sait pas combien de fois r\u00e9p\u00e9ter", ok:false },
+        { t:"on attend qu'une condition soit vraie", ok:false }
+      ]
+    },
+    {
+      title:"3 \u00b7 La boucle \u00ab r\u00e9p\u00e9ter jusqu'\u00e0... \u00bb sert quand\u2026",
+      options:[
+        { t:"on r\u00e9p\u00e8te jusqu'\u00e0 ce qu'une condition soit r\u00e9alis\u00e9e", ok:true },
+        { t:"on ne sait pas \u00e0 l'avance le nombre de r\u00e9p\u00e9titions", ok:true },
+        { t:"on conna\u00eet le nombre exact de r\u00e9p\u00e9titions", ok:false },
+        { t:"on ne r\u00e9p\u00e8te qu'une seule fois", ok:false }
+      ]
+    },
+    {
+      title:"4 \u00b7 Le programme \u00ab r\u00e9p\u00e9ter 4 fois : avancer 50 / tourner 90\u00b0 \u00bb dessine\u2026",
+      options:[
+        { t:"un carr\u00e9", ok:true },
+        { t:"un carr\u00e9 de 50 pas de c\u00f4t\u00e9", ok:true },
+        { t:"un triangle", ok:false },
+        { t:"un cercle", ok:false }
+      ]
+    },
+    {
+      title:"5 \u00b7 Pour dessiner un triangle \u00e9quilat\u00e9ral, on doit\u2026",
+      options:[
+        { t:"r\u00e9p\u00e9ter 3 fois", ok:true },
+        { t:"tourner de 120\u00b0 \u00e0 chaque coin (360\u00b0 / 3)", ok:true },
+        { t:"tourner de 60\u00b0", ok:false },
+        { t:"r\u00e9p\u00e9ter 4 fois", ok:false }
+      ]
+    },
+    {
+      title:"6 \u00b7 Pour un polygone r\u00e9gulier, l'angle de rotation \u00e0 chaque coin =\u2026",
+      options:[
+        { t:"360\u00b0 / nombre de c\u00f4t\u00e9s", ok:true },
+        { t:"pour un hexagone : 60\u00b0", ok:true },
+        { t:"toujours 90\u00b0", ok:false },
+        { t:"180\u00b0 \u00d7 nombre de c\u00f4t\u00e9s", ok:false }
+      ]
+    }
+  ];
+
+  var container = document.getElementById('quiz-groups');
+  QUIZ.forEach(function(g, gi){
+    var groupEl = document.createElement('div');
+    groupEl.className = 'group';
+    groupEl.id = 'g' + gi;
+    var html = '<div class="group-title">' + g.title + '</div><div class="options">';
+    g.options.forEach(function(o, oi){
+      html += '<label class="opt" data-g="' + gi + '" data-o="' + oi + '">' +
+              '<input type="checkbox" data-g="' + gi + '" data-o="' + oi + '" data-ok="' + o.ok + '">' +
+              '<span>' + o.t + '</span></label>';
+    });
+    html += '</div>';
+    groupEl.innerHTML = html;
+    container.appendChild(groupEl);
+  });
+
+  container.addEventListener('change', function(e){
+    if(e.target.matches('input[type="checkbox"]')){
+      var label = e.target.closest('.opt');
+      if(e.target.checked) label.classList.add('checked');
+      else label.classList.remove('checked');
+    }
+  });
+
+  var feedback = document.getElementById('feedback');
+  document.getElementById('check-btn').addEventListener('click', function(){
+    var allOk = true, firstError = null;
+    QUIZ.forEach(function(g, gi){
+      var groupEl = document.getElementById('g' + gi);
+      if(groupEl.classList.contains('ok')) return;
+      var inputs = groupEl.querySelectorAll('input[type="checkbox"]');
+      var correct = true;
+      inputs.forEach(function(inp){
+        if((inp.dataset.ok === 'true') !== inp.checked) correct = false;
+      });
+      if(correct){
+        groupEl.classList.remove('ko'); groupEl.classList.add('ok');
+        inputs.forEach(function(inp){ inp.disabled = true; });
+      } else {
+        groupEl.classList.remove('ok'); groupEl.classList.add('ko');
+        if(!firstError) firstError = groupEl;
+        allOk = false;
+      }
+    });
+    feedback.classList.remove('win','retry','show');
+    if(allOk){
+      feedback.textContent = "\ud83c\udf89 Bravo ! Toutes tes r\u00e9ponses sont correctes. Tu as compris les boucles !";
+      feedback.classList.add('win','show');
+    } else {
+      feedback.textContent = "\u270b Il reste des erreurs. Les groupes en rouge sont \u00e0 reprendre. Essaie \u00e0 nouveau !";
+      feedback.classList.add('retry','show');
+      if(firstError) firstError.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    document.querySelectorAll('.group').forEach(function(g){ g.classList.remove('ok','ko'); });
+    document.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('checked'); });
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(inp){
+      inp.checked = false; inp.disabled = false;
+    });
+    feedback.classList.remove('show','win','retry');
+    feedback.textContent = "";
+  });
+</script>
+</body>
+</html>
