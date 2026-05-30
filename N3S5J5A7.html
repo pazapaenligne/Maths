@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths – Ce que je retiens · Les blocs personnalisés</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ═══════════ CHARTE JAUNE J5 (Vendredi) ═══════════ */
+  :root {
+    --day-color:  #f5c518;
+    --day-dark:   #8a6000;
+    --day-light:  #fffbeb;
+    --day-border: #f5e08a;
+    --day-glow:   rgba(245,197,24,.3);
+  }
+  /* ═══════════ CHARTE PAZAPA — base ═══════════ */
+  :root {
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+    /* Scratch block colors */
+    --scratch-motion:#4c97ff;
+    --scratch-pen:#0fbd8c;
+    --scratch-event:#ffbf00;
+    --scratch-control:#ffab19;
+    --scratch-myblock:#ff6680;
+    --scratch-myblock-dark:#d4406b;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--orange);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--green);top:200px;left:-30px;pointer-events:none;}
+  header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--day-color);
+    color:#fff;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.6rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.4rem,4vw,2.1rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.92rem;margin-top:.5rem;font-family:'JetBrains Mono',monospace;
+    max-width:600px;margin-left:auto;margin-right:auto;}
+  .card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+    border-radius:var(--radius);padding:1.8rem 1.8rem 1.6rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.4rem;animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--orange),var(--green),var(--blue));}
+  .theme-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.25rem .75rem;border-radius:6px;
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;background:var(--day-light);
+    color:var(--day-dark);border:1.5px solid var(--day-border);}
+  .card h2{font-size:1.15rem;font-weight:800;color:var(--day-dark);margin-bottom:.9rem;}
+  .card p{margin-bottom:.7rem;}
+  .card p:last-child{margin-bottom:0;}
+  .inner{background:var(--day-light);border-left:5px solid var(--day-color);border-radius:10px;
+    padding:.9rem 1rem;margin:.9rem 0;line-height:1.85;}
+  .inner strong{color:var(--day-dark);}
+
+  /* ═══════════ BLOCS SCRATCH ═══════════ */
+  .scratch-program{background:#f4f4f4;border:2px solid #d9d9d9;border-radius:12px;
+    padding:1rem;margin:.8rem 0;display:flex;flex-direction:column;gap:.05rem;align-items:flex-start;
+    overflow-x:auto;}
+  .scratch-program .label{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);
+    margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;}
+  .blk{display:inline-flex;align-items:center;gap:.35rem;color:#fff;font-weight:700;
+    font-family:'JetBrains Mono',monospace;font-size:.82rem;
+    padding:.45rem .7rem;border-radius:5px;line-height:1.2;
+    box-shadow:0 2px 0 rgba(0,0,0,.15);flex-wrap:wrap;}
+  .blk-motion{background:var(--scratch-motion);}
+  .blk-pen{background:var(--scratch-pen);}
+  .blk-event{background:var(--scratch-event);color:#fff;border-radius:5px 5px 0 0;}
+  .blk-myblock{background:var(--scratch-myblock);}
+  /* Define block : tête spéciale */
+  .blk-define{background:var(--scratch-myblock);color:#fff;font-weight:700;
+    font-family:'JetBrains Mono',monospace;font-size:.85rem;
+    padding:.5rem .85rem;border-radius:18px 18px 0 5px;
+    display:inline-flex;align-items:center;gap:.4rem;flex-wrap:wrap;
+    box-shadow:0 2px 0 var(--scratch-myblock-dark);}
+  /* Pilule paramètre violette (custom block input) */
+  .blk-param{background:#7d4ad4;color:#fff;border-radius:99px;padding:.1rem .55rem;
+    font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.78rem;display:inline-block;}
+  /* Pilule chiffre */
+  .blk-num{background:#fff;color:#333;border-radius:99px;padding:.1rem .5rem;
+    font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.78rem;display:inline-block;min-width:1.3rem;text-align:center;}
+  /* Reporter (variable) */
+  .blk-reporter{background:#7d4ad4;color:#fff;border-radius:99px;padding:.1rem .55rem;
+    font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.78rem;display:inline-block;}
+
+  /* Layout 2 colonnes */
+  .code-and-fig{display:grid;grid-template-columns:1fr;gap:1rem;margin:.6rem 0;}
+  @media(min-width:640px){.code-and-fig{grid-template-columns:1.1fr .9fr;align-items:start;}}
+
+  /* Figure SVG */
+  .figure{display:flex;flex-direction:column;align-items:center;gap:.4rem;
+    background:#fff;border:2px dashed var(--day-border);border-radius:12px;
+    padding:1rem;margin:.4rem 0;}
+  .figure svg{max-width:100%;height:auto;}
+  .figure .legend{font-size:.82rem;color:var(--muted);font-style:italic;font-family:'JetBrains Mono',monospace;text-align:center;}
+
+  ul.clean{list-style:none;padding:0;margin:.6rem 0;}
+  ul.clean li{position:relative;padding:.55rem 0 .55rem 1.8rem;border-bottom:1px dashed var(--day-border);line-height:1.75;}
+  ul.clean li:last-child{border-bottom:none;}
+  ul.clean li::before{content:"▸";position:absolute;left:.3rem;top:.55rem;color:var(--day-color);font-weight:800;font-size:1.05rem;}
+
+  ol.steps{list-style:none;padding:0;margin:.5rem 0;counter-reset:s;}
+  ol.steps li{position:relative;padding:.7rem 0 .7rem 2.4rem;border-bottom:1px dashed var(--day-border);counter-increment:s;line-height:1.75;}
+  ol.steps li:last-child{border-bottom:none;}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:.7rem;background:var(--day-color);color:#fff;
+    width:1.7rem;height:1.7rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.85rem;font-family:'JetBrains Mono',monospace;}
+
+  /* Avantages : grid */
+  .adv-grid{display:grid;grid-template-columns:1fr;gap:.8rem;margin:.8rem 0;}
+  @media(min-width:560px){.adv-grid{grid-template-columns:1fr 1fr;}}
+  .adv-card{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.9rem;}
+  .adv-card h3{color:var(--day-dark);font-size:.92rem;font-weight:800;margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem;}
+  .adv-card p{font-size:.86rem;margin:0;line-height:1.55;}
+
+  details.recap{background:linear-gradient(135deg,var(--surface) 0%,var(--day-light) 100%);
+    border:2px solid var(--day-border);border-radius:var(--radius);padding:0;width:100%;max-width:720px;
+    margin-bottom:1.4rem;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;z-index:1;}
+  details.recap summary{cursor:pointer;padding:1.1rem 1.5rem;font-weight:700;color:var(--day-dark);font-size:1rem;
+    list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem;transition:background .2s;min-height:2.8rem;}
+  details.recap summary:hover{background:rgba(245,197,24,.12);}
+  details.recap summary::-webkit-details-marker{display:none;}
+  details.recap summary::after{content:"▼";font-size:.85rem;transition:transform .25s;color:var(--day-color);}
+  details.recap[open] summary::after{transform:rotate(180deg);}
+  details.recap .recap-content{padding:0 1.5rem 1.4rem;}
+
+  .quiz-intro{color:var(--muted);font-size:.92rem;margin-bottom:1rem;line-height:1.75;}
+  .group{background:var(--day-light);border-radius:12px;padding:1rem .9rem;margin:.9rem 0;border:2px solid transparent;transition:all .25s;}
+  .group.ok{border-color:var(--green);background:#f0faeb;}
+  .group.ko{border-color:var(--pink);background:#fff0ef;}
+  .group-title{font-weight:700;color:var(--day-dark);margin-bottom:.6rem;font-size:.92rem;line-height:1.6;}
+  .group.ok .group-title{color:#2f6e10;}
+  .group.ko .group-title{color:#c0392b;}
+  .options{display:flex;flex-direction:column;gap:.5rem;}
+  .opt{display:flex;align-items:flex-start;gap:.6rem;background:var(--surface);border:2px solid var(--day-border);
+    border-radius:10px;padding:.65rem .8rem;cursor:pointer;transition:all .2s;font-size:.9rem;line-height:1.55;
+    user-select:none;min-height:2.4rem;font-family:'JetBrains Mono',monospace;}
+  .opt:hover{background:var(--day-light);border-color:var(--day-color);}
+  .opt input{margin-top:.2rem;accent-color:var(--day-color);width:18px;height:18px;cursor:pointer;flex-shrink:0;}
+  .opt.checked{background:var(--day-light);border-color:var(--day-dark);}
+  .group.ok .opt{pointer-events:none;opacity:.85;}
+  .quiz-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.1rem;justify-content:center;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.3rem;border-radius:10px;
+    font-family:Arial,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+    transition:transform .12s,box-shadow .15s;position:relative;z-index:2;min-height:2.7rem;text-decoration:none;}
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+  .btn-ghost:hover{border-color:var(--day-color);background:var(--day-light);}
+  .feedback{margin-top:1.1rem;padding:.85rem 1rem;border-radius:10px;font-weight:600;text-align:center;display:none;line-height:1.7;}
+  .feedback.show{display:block;}
+  .feedback.win{background:#f0faeb;color:#2f6e10;border:1.5px solid var(--green);}
+  .feedback.retry{background:#fff0ef;color:#c0392b;border:1.5px solid var(--pink);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.2rem .8rem 3rem;}
+    .card{padding:1.3rem 1.1rem;}
+    .btn{font-size:.88rem;padding:.6rem 1rem;}
+    .quiz-actions .btn{flex:1;min-width:140px;justify-content:center;}
+    .blk{font-size:.74rem;padding:.35rem .55rem;}
+    .blk-define{font-size:.78rem;padding:.4rem .65rem;}
+  }
+</style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      Pazapa &middot; Maths &middot; 3<sup>e</sup>
+    </div>
+    <div class="week-label">📚 Ce que je retiens &middot; Semaine 5 &middot; Jour 5</div>
+    <h1><span class="hl">Créer ses propres blocs</span></h1>
+    <p class="subtitle">Définir un sous-programme réutilisable, avec ou sans paramètres</p>
+  </header>
+
+  <!-- DÉFINITION -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📖 Définition</div>
+    <h2>Qu'est-ce qu'un bloc personnalisé ?</h2>
+    <p>Il est possible de créer ses propres <strong>blocs</strong> dans Scratch : il s'agit d'un <strong>programme créé à côté</strong>. Au lieu de recréer plusieurs fois une séquence d'instructions qui se répète, il suffit d'insérer le <strong>nom du bloc</strong> dans le programme principal à l'endroit où il doit être exécuté.</p>
+    <div class="inner">
+      <p>👉 Un bloc personnalisé, c'est comme une <strong>« recette »</strong> qu'on définit une seule fois et qu'on peut <strong>réutiliser</strong> autant de fois qu'on veut, n'importe où dans le programme.</p>
+      <p>Il est aussi possible de définir des <strong>variables en entrée</strong> du bloc (qu'on appelle des <strong>paramètres</strong>).</p>
+    </div>
+  </section>
+
+  <!-- EXEMPLE 1 : BLOC TRIANGLE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">💡 Exemple 1</div>
+    <h2>Le bloc « triangle »</h2>
+    <p>Ce bloc, quand il est appelé, permet de tracer un triangle de sommets <strong>(x1, y1)</strong>, <strong>(x2, y2)</strong> et <strong>(x3, y3)</strong>. Les 6 paramètres en entrée permettent de tracer <strong>n'importe quel</strong> triangle.</p>
+
+    <div class="code-and-fig">
+      <!-- Définition du bloc -->
+      <div class="scratch-program">
+        <div class="label">🧩 Définition du bloc</div>
+        <div class="blk-define">définir triangle <span class="blk-param">x1</span> <span class="blk-param">y1</span> <span class="blk-param">x2</span> <span class="blk-param">y2</span> <span class="blk-param">x3</span> <span class="blk-param">y3</span></div>
+        <div class="blk blk-motion">aller à x: <span class="blk-reporter">x1</span> y: <span class="blk-reporter">y1</span></div>
+        <div class="blk blk-pen">stylo en position d'écriture</div>
+        <div class="blk blk-motion">aller à x: <span class="blk-reporter">x2</span> y: <span class="blk-reporter">y2</span></div>
+        <div class="blk blk-motion">aller à x: <span class="blk-reporter">x3</span> y: <span class="blk-reporter">y3</span></div>
+        <div class="blk blk-motion">aller à x: <span class="blk-reporter">x1</span> y: <span class="blk-reporter">y1</span></div>
+        <div class="blk blk-pen">relever le stylo</div>
+      </div>
+
+      <!-- Triangle dessiné -->
+      <div class="figure">
+        <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Triangle tracé">
+          <polygon points="20,165 180,165 100,25" fill="none" stroke="#8a6000" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="20" cy="165" r="3" fill="#c0392b"/>
+          <circle cx="180" cy="165" r="3" fill="#c0392b"/>
+          <circle cx="100" cy="25" r="3" fill="#c0392b"/>
+          <text x="10" y="178" font-family="JetBrains Mono, monospace" font-size="10" fill="#1f2937" font-weight="700">(x1,y1)</text>
+          <text x="175" y="178" font-family="JetBrains Mono, monospace" font-size="10" fill="#1f2937" font-weight="700">(x2,y2)</text>
+          <text x="78" y="20" font-family="JetBrains Mono, monospace" font-size="10" fill="#1f2937" font-weight="700">(x3,y3)</text>
+        </svg>
+        <div class="legend">▲ Triangle avec 3 sommets</div>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem;">Et voici le <strong>programme principal</strong> qui utilise ce bloc :</p>
+
+    <div class="scratch-program">
+      <div class="label">▶️ Programme principal</div>
+      <div class="blk blk-event">quand <span class="blk-num">espace</span> est pressé</div>
+      <div class="blk blk-pen">relever le stylo</div>
+      <div class="blk blk-pen">effacer tout</div>
+      <div class="blk blk-myblock">triangle <span class="blk-num">-150</span> <span class="blk-num">-100</span> <span class="blk-num">150</span> <span class="blk-num">-100</span> <span class="blk-num">0</span> <span class="blk-num">100</span></div>
+    </div>
+
+    <div class="inner">
+      <p>💡 Quand on appuie sur la touche <strong>espace</strong>, le programme efface tout, puis appelle <strong>triangle(−150, −100, 150, −100, 0, 100)</strong> qui trace un triangle équilatéral.</p>
+    </div>
+  </section>
+
+  <!-- EXEMPLE 2 : SIERPIŃSKI -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">✨ Exemple 2 — Magie des blocs</div>
+    <h2>Le triangle de Sierpiński</h2>
+    <p>Les blocs permettent de faire beaucoup de figures compliquées à tracer à la main. C'est le cas du <strong>triangle de Sierpiński</strong>, une <strong>fractale</strong> célèbre obtenue en répétant le motif à différentes échelles.</p>
+
+    <div class="code-and-fig">
+      <div class="figure">
+        <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Triangle de Sierpiński">
+<polygon points="20.0,165.0 30.0,165.0 25.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="30.0,165.0 40.0,165.0 35.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="25.0,156.2 35.0,156.2 30.0,147.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="40.0,165.0 50.0,165.0 45.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="50.0,165.0 60.0,165.0 55.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="45.0,156.2 55.0,156.2 50.0,147.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="30.0,147.5 40.0,147.5 35.0,138.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="40.0,147.5 50.0,147.5 45.0,138.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="35.0,138.8 45.0,138.8 40.0,130.0" fill="#8a6000" opacity="0.85"/>
+<polygon points="60.0,165.0 70.0,165.0 65.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="70.0,165.0 80.0,165.0 75.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="65.0,156.2 75.0,156.2 70.0,147.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="80.0,165.0 90.0,165.0 85.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="90.0,165.0 100.0,165.0 95.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="85.0,156.2 95.0,156.2 90.0,147.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="70.0,147.5 80.0,147.5 75.0,138.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="80.0,147.5 90.0,147.5 85.0,138.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="75.0,138.8 85.0,138.8 80.0,130.0" fill="#8a6000" opacity="0.85"/>
+<polygon points="40.0,130.0 50.0,130.0 45.0,121.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="50.0,130.0 60.0,130.0 55.0,121.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="45.0,121.2 55.0,121.2 50.0,112.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="60.0,130.0 70.0,130.0 65.0,121.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="70.0,130.0 80.0,130.0 75.0,121.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="65.0,121.2 75.0,121.2 70.0,112.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="50.0,112.5 60.0,112.5 55.0,103.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="60.0,112.5 70.0,112.5 65.0,103.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="55.0,103.8 65.0,103.8 60.0,95.0" fill="#8a6000" opacity="0.85"/>
+<polygon points="100.0,165.0 110.0,165.0 105.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="110.0,165.0 120.0,165.0 115.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="105.0,156.2 115.0,156.2 110.0,147.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="120.0,165.0 130.0,165.0 125.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="130.0,165.0 140.0,165.0 135.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="125.0,156.2 135.0,156.2 130.0,147.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="110.0,147.5 120.0,147.5 115.0,138.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="120.0,147.5 130.0,147.5 125.0,138.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="115.0,138.8 125.0,138.8 120.0,130.0" fill="#8a6000" opacity="0.85"/>
+<polygon points="140.0,165.0 150.0,165.0 145.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="150.0,165.0 160.0,165.0 155.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="145.0,156.2 155.0,156.2 150.0,147.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="160.0,165.0 170.0,165.0 165.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="170.0,165.0 180.0,165.0 175.0,156.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="165.0,156.2 175.0,156.2 170.0,147.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="150.0,147.5 160.0,147.5 155.0,138.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="160.0,147.5 170.0,147.5 165.0,138.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="155.0,138.8 165.0,138.8 160.0,130.0" fill="#8a6000" opacity="0.85"/>
+<polygon points="120.0,130.0 130.0,130.0 125.0,121.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="130.0,130.0 140.0,130.0 135.0,121.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="125.0,121.2 135.0,121.2 130.0,112.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="140.0,130.0 150.0,130.0 145.0,121.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="150.0,130.0 160.0,130.0 155.0,121.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="145.0,121.2 155.0,121.2 150.0,112.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="130.0,112.5 140.0,112.5 135.0,103.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="140.0,112.5 150.0,112.5 145.0,103.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="135.0,103.8 145.0,103.8 140.0,95.0" fill="#8a6000" opacity="0.85"/>
+<polygon points="60.0,95.0 70.0,95.0 65.0,86.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="70.0,95.0 80.0,95.0 75.0,86.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="65.0,86.2 75.0,86.2 70.0,77.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="80.0,95.0 90.0,95.0 85.0,86.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="90.0,95.0 100.0,95.0 95.0,86.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="85.0,86.2 95.0,86.2 90.0,77.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="70.0,77.5 80.0,77.5 75.0,68.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="80.0,77.5 90.0,77.5 85.0,68.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="75.0,68.8 85.0,68.8 80.0,60.0" fill="#8a6000" opacity="0.85"/>
+<polygon points="100.0,95.0 110.0,95.0 105.0,86.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="110.0,95.0 120.0,95.0 115.0,86.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="105.0,86.2 115.0,86.2 110.0,77.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="120.0,95.0 130.0,95.0 125.0,86.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="130.0,95.0 140.0,95.0 135.0,86.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="125.0,86.2 135.0,86.2 130.0,77.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="110.0,77.5 120.0,77.5 115.0,68.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="120.0,77.5 130.0,77.5 125.0,68.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="115.0,68.8 125.0,68.8 120.0,60.0" fill="#8a6000" opacity="0.85"/>
+<polygon points="80.0,60.0 90.0,60.0 85.0,51.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="90.0,60.0 100.0,60.0 95.0,51.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="85.0,51.2 95.0,51.2 90.0,42.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="100.0,60.0 110.0,60.0 105.0,51.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="110.0,60.0 120.0,60.0 115.0,51.2" fill="#8a6000" opacity="0.85"/>
+<polygon points="105.0,51.2 115.0,51.2 110.0,42.5" fill="#8a6000" opacity="0.85"/>
+<polygon points="90.0,42.5 100.0,42.5 95.0,33.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="100.0,42.5 110.0,42.5 105.0,33.8" fill="#8a6000" opacity="0.85"/>
+<polygon points="95.0,33.8 105.0,33.8 100.0,25.0" fill="#8a6000" opacity="0.85"/>
+        </svg>
+        <div class="legend">▲ Triangle de Sierpiński (profondeur 4)</div>
+      </div>
+      <div>
+        <p>L'idée :</p>
+        <ul class="clean">
+          <li>On définit un bloc <strong>sierp</strong> qui utilise le bloc <strong>triangle</strong> précédent.</li>
+          <li>À chaque étape, on coupe le triangle en <strong>3 sous-triangles</strong> aux milieux des côtés.</li>
+          <li>On répète sur chaque sous-triangle (c'est une <strong>récursion</strong> : un bloc qui s'appelle lui-même).</li>
+          <li>Avec un bon paramètre <strong>itérations</strong>, on obtient cette magnifique fractale.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="inner">
+      <p>🎨 <strong>Sans le bloc personnalisé</strong>, il faudrait dessiner 81 petits triangles à la main (à la profondeur 4). Avec un bloc <strong>sierp</strong>, quelques lignes suffisent !</p>
+    </div>
+  </section>
+
+  <!-- AVANTAGES -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🎯 Avantages</div>
+    <h2>Pourquoi utiliser des blocs personnalisés ?</h2>
+    <div class="adv-grid">
+      <div class="adv-card">
+        <h3>♻️ Éviter la répétition</h3>
+        <p>On écrit la séquence <strong>une seule fois</strong> dans le bloc, et on l'appelle autant de fois qu'on veut.</p>
+      </div>
+      <div class="adv-card">
+        <h3>📖 Programme plus lisible</h3>
+        <p>Le <strong>nom du bloc</strong> (ex : « triangle ») décrit ce qu'il fait. Pas besoin de lire 6 lignes pour comprendre.</p>
+      </div>
+      <div class="adv-card">
+        <h3>🔧 Plus facile à modifier</h3>
+        <p>Si on change la définition du bloc, <strong>tous les appels</strong> sont mis à jour automatiquement.</p>
+      </div>
+      <div class="adv-card">
+        <h3>🧩 Composer des blocs</h3>
+        <p>Un bloc peut <strong>en appeler un autre</strong> (ex : « sierp » utilise « triangle »). On crée des programmes très puissants.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RÉCAP -->
+  <details class="recap">
+    <summary>👉 Clique ici pour l'essentiel en résumé</summary>
+    <div class="recap-content">
+      <ul class="clean">
+        <li>Un <strong>bloc personnalisé</strong> = un sous-programme qu'on définit à part.</li>
+        <li>On l'appelle dans le programme principal en utilisant son <strong>nom</strong>.</li>
+        <li>Un bloc peut prendre des <strong>paramètres</strong> en entrée (variables).</li>
+        <li>Avantages : éviter la répétition, code plus lisible, plus facile à modifier.</li>
+        <li>Un bloc peut <strong>appeler un autre bloc</strong> → on compose des programmes complexes.</li>
+        <li>Application : tracer une fractale comme le <strong>triangle de Sierpiński</strong>.</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- MINI-QUIZ -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🎯 Mini-quiz</div>
+    <h2>À toi de vérifier !</h2>
+    <p class="quiz-intro">Pour chaque groupe, coche <strong>toutes les affirmations correctes</strong> (il peut y en avoir plusieurs). Puis clique sur « Vérifier ».</p>
+    <div id="quiz-groups"></div>
+    <div class="quiz-actions">
+      <button class="btn btn-primary" id="check-btn">✅ Vérifier mes réponses</button>
+      <button class="btn btn-ghost" id="reset-btn">🔄 Recommencer</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+<script>
+  var QUIZ = [
+    {
+      title:"1 \u00b7 Un bloc personnalis\u00e9, c'est\u2026",
+      options:[
+        { t:"un programme cr\u00e9\u00e9 \u00e0 c\u00f4t\u00e9 du programme principal", ok:true },
+        { t:"un sous-programme r\u00e9utilisable", ok:true },
+        { t:"une boucle", ok:false },
+        { t:"un type de variable", ok:false }
+      ]
+    },
+    {
+      title:"2 \u00b7 Pour appeler un bloc personnalis\u00e9 dans le programme principal, on\u2026",
+      options:[
+        { t:"ins\u00e8re son nom \u00e0 l'endroit voulu", ok:true },
+        { t:"recopie tout le contenu du bloc", ok:false },
+        { t:"d\u00e9finit une nouvelle variable", ok:false },
+        { t:"peut le faire autant de fois qu'on veut", ok:true }
+      ]
+    },
+    {
+      title:"3 \u00b7 Les param\u00e8tres d'un bloc, c'est\u2026",
+      options:[
+        { t:"des variables en entr\u00e9e du bloc", ok:true },
+        { t:"des valeurs qu'on donne au bloc quand on l'appelle", ok:true },
+        { t:"des boucles", ok:false },
+        { t:"des conditions", ok:false }
+      ]
+    },
+    {
+      title:"4 \u00b7 Quels sont les avantages des blocs personnalis\u00e9s ?",
+      options:[
+        { t:"\u00e9viter de r\u00e9p\u00e9ter la m\u00eame s\u00e9quence", ok:true },
+        { t:"rendre le programme plus lisible", ok:true },
+        { t:"modifier en un seul endroit pour mettre \u00e0 jour partout", ok:true },
+        { t:"ralentir le programme", ok:false }
+      ]
+    },
+    {
+      title:"5 \u00b7 Le bloc \u00ab triangle x1 y1 x2 y2 x3 y3 \u00bb\u2026",
+      options:[
+        { t:"a 6 param\u00e8tres", ok:true },
+        { t:"trace un triangle de 3 sommets", ok:true },
+        { t:"trace toujours le m\u00eame triangle", ok:false },
+        { t:"a 3 param\u00e8tres", ok:false }
+      ]
+    },
+    {
+      title:"6 \u00b7 Le triangle de Sierpi\u0144ski\u2026",
+      options:[
+        { t:"est une fractale", ok:true },
+        { t:"utilise un bloc qui appelle un autre bloc", ok:true },
+        { t:"se r\u00e9p\u00e8te \u00e0 diff\u00e9rentes \u00e9chelles", ok:true },
+        { t:"se trace facilement \u00e0 la main", ok:false }
+      ]
+    }
+  ];
+
+  var container = document.getElementById('quiz-groups');
+  QUIZ.forEach(function(g, gi){
+    var groupEl = document.createElement('div');
+    groupEl.className = 'group';
+    groupEl.id = 'g' + gi;
+    var html = '<div class="group-title">' + g.title + '</div><div class="options">';
+    g.options.forEach(function(o, oi){
+      html += '<label class="opt" data-g="' + gi + '" data-o="' + oi + '">' +
+              '<input type="checkbox" data-g="' + gi + '" data-o="' + oi + '" data-ok="' + o.ok + '">' +
+              '<span>' + o.t + '</span></label>';
+    });
+    html += '</div>';
+    groupEl.innerHTML = html;
+    container.appendChild(groupEl);
+  });
+
+  container.addEventListener('change', function(e){
+    if(e.target.matches('input[type="checkbox"]')){
+      var label = e.target.closest('.opt');
+      if(e.target.checked) label.classList.add('checked');
+      else label.classList.remove('checked');
+    }
+  });
+
+  var feedback = document.getElementById('feedback');
+  document.getElementById('check-btn').addEventListener('click', function(){
+    var allOk = true, firstError = null;
+    QUIZ.forEach(function(g, gi){
+      var groupEl = document.getElementById('g' + gi);
+      if(groupEl.classList.contains('ok')) return;
+      var inputs = groupEl.querySelectorAll('input[type="checkbox"]');
+      var correct = true;
+      inputs.forEach(function(inp){
+        if((inp.dataset.ok === 'true') !== inp.checked) correct = false;
+      });
+      if(correct){
+        groupEl.classList.remove('ko'); groupEl.classList.add('ok');
+        inputs.forEach(function(inp){ inp.disabled = true; });
+      } else {
+        groupEl.classList.remove('ok'); groupEl.classList.add('ko');
+        if(!firstError) firstError = groupEl;
+        allOk = false;
+      }
+    });
+    feedback.classList.remove('win','retry','show');
+    if(allOk){
+      feedback.textContent = "\ud83c\udf89 Bravo ! Toutes tes r\u00e9ponses sont correctes. Tu sais cr\u00e9er des blocs personnalis\u00e9s !";
+      feedback.classList.add('win','show');
+    } else {
+      feedback.textContent = "\u270b Il reste des erreurs. Les groupes en rouge sont \u00e0 reprendre. Essaie \u00e0 nouveau !";
+      feedback.classList.add('retry','show');
+      if(firstError) firstError.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    document.querySelectorAll('.group').forEach(function(g){ g.classList.remove('ok','ko'); });
+    document.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('checked'); });
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(inp){
+      inp.checked = false; inp.disabled = false;
+    });
+    feedback.classList.remove('show','win','retry');
+    feedback.textContent = "";
+  });
+</script>
+</body>
+</html>
