@@ -202,7 +202,9 @@
   <div id="quiz-zone"></div>
 
   <div class="btn-row">
-    <button class="btn btn-primary" id="btn-check" onclick="checkAll()">&#10003; V&eacute;rifier</button>
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQuestion()" style="display:none;">&#8592; Pr&eacute;c&eacute;dent</button>
+    <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">Suivant &#8594;</button>
+    <button class="btn btn-primary" id="btn-check" onclick="checkAll()" style="display:none;">&#10003; V&eacute;rifier</button>
     <button class="btn btn-solution" id="btn-solution" onclick="showSolution()" style="display:none;">&#128161; Solution</button>
     <button class="btn btn-ghost" id="btn-restart-inline" onclick="restart()" style="display:none;">&#8635; Recommencer</button>
   </div>
@@ -257,6 +259,7 @@ var QUESTIONS = [
 var TOTAL = QUESTIONS.length;
 var selections = QUESTIONS.map(function(q){ return q.options.map(function(){ return false; }); });
 var validated = false;
+var currentQ = 0;
 
 function buildQuiz(){
   var z = document.getElementById("quiz-zone");
@@ -265,6 +268,8 @@ function buildQuiz(){
   QUESTIONS.forEach(function(q){
     var qDiv = document.createElement("div");
     qDiv.className = "question";
+    qDiv.id = "question-"+q.id;
+    if(q.id!==0) qDiv.style.display = "none";
 
     var qText = document.createElement("div");
     qText.className = "q-text";
@@ -300,6 +305,31 @@ function buildQuiz(){
   });
 }
 
+function showQuestion(qi){
+  if(validated) return;
+  QUESTIONS.forEach(function(q){
+    var el = document.getElementById("question-"+q.id);
+    if(el) el.style.display = (q.id===qi) ? "block" : "none";
+  });
+  currentQ = qi;
+  // Boutons de navigation
+  document.getElementById("btn-prev").style.display = (qi>0) ? "inline-flex" : "none";
+  var isLast = (qi === TOTAL-1);
+  document.getElementById("btn-next").style.display = isLast ? "none" : "inline-flex";
+  document.getElementById("btn-check").style.display = isLast ? "inline-flex" : "none";
+  updateProgress();
+}
+
+function nextQuestion(){
+  if(validated) return;
+  if(currentQ < TOTAL-1) showQuestion(currentQ+1);
+}
+
+function prevQuestion(){
+  if(validated) return;
+  if(currentQ > 0) showQuestion(currentQ-1);
+}
+
 function toggleOption(qi,oi){
   if(validated) return;
   var q = QUESTIONS[qi];
@@ -331,12 +361,11 @@ function questionAnswered(qi){
 }
 
 function updateProgress(){
-  var done = 0;
-  for(var i=0;i<TOTAL;i++){ if(questionAnswered(i)) done++; }
-  var pct = Math.round(done/TOTAL*100);
+  if(validated) return;
+  var pct = Math.round((currentQ+1)/TOTAL*100);
   document.getElementById("progress-bar").style.width = pct+"%";
   document.getElementById("prog-pct").textContent = pct+"\u00a0%";
-  document.getElementById("prog-label").textContent = "Question "+(Math.min(done+1,TOTAL))+" / "+TOTAL;
+  document.getElementById("prog-label").textContent = "Question "+(currentQ+1)+" / "+TOTAL;
 }
 
 function isQuestionCorrect(qi){
@@ -353,6 +382,14 @@ function checkAll(){
   for(var i=0;i<TOTAL;i++){ if(questionAnswered(i)) anyAnswer = true; }
   if(!anyAnswer) return;
   validated = true;
+
+  // Afficher toutes les questions pour la correction et masquer la navigation
+  QUESTIONS.forEach(function(q){
+    var el = document.getElementById("question-"+q.id);
+    if(el) el.style.display = "block";
+  });
+  document.getElementById("btn-prev").style.display = "none";
+  document.getElementById("btn-next").style.display = "none";
 
   var score = 0;
   var results = [];
@@ -434,10 +471,14 @@ function showResults(score,results){
 
 function restart(){
   validated=false;
+  currentQ=0;
   selections = QUESTIONS.map(function(q){ return q.options.map(function(){ return false; }); });
   document.getElementById("results-screen").classList.remove("show");
   document.getElementById("ex-card").style.display="block";
   document.getElementById("btn-check").disabled=false;
+  document.getElementById("btn-check").style.display="none";
+  document.getElementById("btn-next").style.display="inline-flex";
+  document.getElementById("btn-prev").style.display="none";
   document.getElementById("btn-solution").style.display="none";
   document.getElementById("btn-solution").disabled=false;
   document.getElementById("btn-restart-inline").style.display="none";
@@ -445,13 +486,15 @@ function restart(){
   document.getElementById("prog-pct").textContent="0\u00a0%";
   document.getElementById("prog-label").textContent="Question 1 / "+TOTAL;
   buildQuiz();
+  showQuestion(0);
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
 if(document.getElementById("quiz-zone")){
   buildQuiz();
+  showQuestion(0);
 } else {
-  window.addEventListener("load", buildQuiz);
+  window.addEventListener("load", function(){ buildQuiz(); showQuestion(0); });
 }
 </script>
 </body>
