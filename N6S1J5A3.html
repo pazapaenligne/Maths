@@ -400,4 +400,124 @@ function renderBody(gi){
   }
 }
 
-fun
+function placeAt(gi,v){
+  var ex=EXS[gi];if(done[gi])return;if(!sel[gi])return;
+  ex._placed[sel[gi]]=v;sel[gi]=null;renderBody(gi);
+}
+function updPlaceBtn(gi){
+  var ex=EXS[gi];
+  if(done[gi])return;
+  $("btnc-"+gi).disabled=Object.keys(ex._placed||{}).length<ex.points.length;
+}
+function updReadBtn(gi){
+  if(done[gi])return;
+  var ex=EXS[gi];var filled=ex.line.marks.every(function(m,mi){var el=$('r-'+gi+'-'+mi);return el&&el.value.trim()!=='';});
+  $("btnc-"+gi).disabled=!filled;
+}
+
+function toggleHint(gi){ if(done[gi])return; $("hint-"+gi).classList.toggle("show"); }
+
+function showSolution(gi){
+  if(!done[gi]) return;
+  var ex=EXS[gi];var box=$("solbox-"+gi);
+  if(box.classList.contains("show")){box.classList.remove("show");box.innerHTML="";return;}
+  var pts=(ex.mode==='place'?ex.points:ex.line.marks);
+  var arr=pts.map(function(p){return "<strong>"+p.name+"</strong> = "+fr(p.val);});
+  box.innerHTML="<strong>Solution&nbsp;:</strong> "+arr.join(" &middot; ")+".";
+  // Droite corrigée : tous les points/abscisses placés à la bonne valeur, en vert.
+  var r=makeSVG(ex.line);
+  pts.forEach(function(p){drawCross(r.svg,r.NS,r.xv(p.val),'#3a7d0a',p.name);});
+  var stage=document.createElement('div');stage.className='line-stage';stage.style.marginTop='.6rem';
+  stage.appendChild(r.svg);
+  box.appendChild(stage);
+  box.classList.add("show");
+}
+
+function checkGroup(gi){
+  if(done[gi]) return;
+  var ex=EXS[gi];
+  if(ex.mode==='read'){
+    ex._ans=ex.line.marks.map(function(m,mi){return ($('r-'+gi+'-'+mi)||{value:''}).value;});
+  }
+  done[gi]=true;
+  $("btnc-"+gi).disabled=true;$("btnc-"+gi).style.display="none";
+  $("btnr-"+gi).style.display="inline-flex";
+  $("btns-"+gi).disabled=false;
+  $("hint-"+gi).classList.remove("show");
+  var ok=0,total,wrong=[];
+  if(ex.mode==='read'){
+    total=ex.line.marks.length;
+    ex.line.marks.forEach(function(m,mi){if(valOk(m.val,ex._ans[mi])){ok++;}else{wrong.push(m.name+" = "+fr(m.val));}});
+  }else{
+    total=ex.points.length;
+    ex.points.forEach(function(p){if(ex._placed&&Math.abs(ex._placed[p.name]-p.val)<1e-9){ok++;}else{wrong.push(p.name+" = "+fr(p.val));}});
+  }
+  groupScore[gi]=ok;
+  renderBody(gi);
+  var ratio=ok/total;
+  var fb=$("fb-"+gi);fb.className="fb show "+(ok===total?"ok":"ko");
+  $("fbi-"+gi).textContent=ok===total?"✅":"❌";
+  $("fbm-"+gi).textContent=
+    ok===total ? "Parfait\u00a0! "+ok+" / "+total+" points justes." :
+    ratio>=.75 ? "Très bien\u00a0! "+ok+" / "+total+" justes. Vérifie les points en rouge." :
+    ratio>=.5  ? "Bien\u00a0! "+ok+" / "+total+" justes. Revois la méthode pour les autres." :
+                 "À retravailler\u00a0: "+ok+" / "+total+" justes. Relis la méthode et recommence.";
+  $("fbd-"+gi).innerHTML=ok===total?"":"À corriger&nbsp;: "+wrong.join(" &middot; ")+".";
+  updateScorebar();
+}
+
+function resetGroup(gi){
+  var ex=EXS[gi];
+  groupScore[gi]=0;done[gi]=false;sel[gi]=null;
+  delete ex._ans;delete ex._placed;
+  $("btnc-"+gi).style.display="inline-flex";$("btnc-"+gi).disabled=true;
+  $("btnr-"+gi).style.display="none";
+  $("btns-"+gi).disabled=true;
+  $("solbox-"+gi).classList.remove("show");$("solbox-"+gi).innerHTML="";
+  $("hint-"+gi).classList.remove("show");
+  $("fb-"+gi).className="fb";
+  renderBody(gi);
+  updateScorebar();
+}
+
+function updateScorebar(){
+  var pts=groupScore.reduce(function(a,b){return a+b;},0);
+  var answered=0;done.forEach(function(d,i){if(d)answered+=(EXS[i].mode==='place'?EXS[i].points.length:EXS[i].line.marks.length);});
+  var errs=answered-pts;
+  $("sb-ok").textContent=pts;$("sb-ko").textContent=errs;
+  $("sb-label").textContent=pts+" / "+TOTAL+" points";
+  $("sb-fill").style.width=Math.round(pts/TOTAL*100)+"%";
+  $("g-num").textContent=pts;
+  updateBilan();
+}
+
+function updateBilan(){
+  var nbDone=done.filter(Boolean).length,pts=groupScore.reduce(function(a,b){return a+b;},0);
+  if(nbDone<EXS.length){
+    $("g-msg").textContent="Valide les "+EXS.length+" exercices pour voir ton bilan. ("+nbDone+" / "+EXS.length+" faits)";
+    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";return;
+  }
+  var ratio=pts/TOTAL;
+  var stars=pts>=TOTAL?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:pts>0?1:0;
+  $("g-stars").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
+  var msg=pts===TOTAL?"Parfait\u00a0! Tu maîtrises la droite graduée.":
+    ratio>=.8?"Très bien\u00a0! Encore un petit effort.":
+    ratio>=.6?"Bien\u00a0! Quelques points à retravailler.":
+    ratio>=.4?"Passable. Revois la valeur des graduations.":
+    "À retravailler\u00a0: reprends la méthode et recommence.";
+  $("g-msg").textContent=msg;
+}
+
+function restartAll(){
+  done=new Array(EXS.length).fill(false);
+  groupScore=new Array(EXS.length).fill(0);
+  sel=new Array(EXS.length).fill(null);
+  EXS.forEach(function(ex){delete ex._ans;delete ex._placed;});
+  build();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+build();
+</script>
+</body>
+</html>
