@@ -1,1003 +1,498 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Pazapa — Texte à trous — Les nombres décimaux</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg: #fffdf7;
-  --surface: #ffffff;
-  --border: #e8e4d9;
-  --yellow: #f5c518;
-  --green: #8dc63f;
-  --green-light: #edf7d6;
-  --green-dark: #4a7a00;
-  --blue: #3ab5d8;
-  --blue-light: #e0f6fc;
-  --blue-dark: #1a6a82;
-  --pink: #f28b82;
-  --pink-light: #fdecea;
-  --pink-dark: #a83228;
-  --orange: #f5a623;
-  --purple: #9b59b6;
-  --text: #1a1d23;
-  --muted: #8a8f9a;
-  --radius: 16px;
-  --radius-sm: 10px;
-  --shadow: 0 2px 16px rgba(0,0,0,0.07);
-}
+  :root {
+    --day-color:  #3ab5d8;
+    --day-dark:   #1a6e88;
+    --day-light:  #e8f6fb;
+    --day-border: #9dd4e8;
+    --day-glow:   rgba(58,181,216,.3);
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:Arial,sans-serif;
+    min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; padding:2rem 1rem 4rem;
+    position:relative; overflow-x:hidden;
+    letter-spacing:.02em; word-spacing:.06em;
+  }
+  body::before{
+    content:''; position:fixed; border-radius:50%; z-index:0;
+    opacity:.13; width:340px; height:340px;
+    background:var(--yellow); top:-80px; right:-80px;
+    pointer-events:none;
+  }
+  body::after{
+    content:''; position:fixed; border-radius:50%; z-index:0;
+    opacity:.13; width:260px; height:260px;
+    background:var(--day-color); bottom:-60px; left:-60px;
+    pointer-events:none;
+  }
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+    width:180px;height:180px;background:var(--green);
+    bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+    width:120px;height:120px;background:var(--pink);
+    top:200px;left:-30px;pointer-events:none;}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+  .logo-badge{
+    display:inline-flex;align-items:center;gap:.5rem;
+    background:var(--yellow);color:#000;
+    font-size:.78rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;padding:.3rem .9rem;
+    border-radius:99px;margin-bottom:.5rem;
+  }
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-color);}
+  .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
 
-body {
-  font-family: 'Syne', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  padding: 0;
-  overflow-x: hidden;
-  position: relative;
-}
+  .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+  .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+  .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;}
 
-body::before {
-  content: '';
-  position: fixed; top: -80px; right: -80px;
-  width: 300px; height: 300px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(245,197,24,0.13) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-body::after {
-  content: '';
-  position: fixed; bottom: -60px; left: -60px;
-  width: 250px; height: 250px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(58,181,216,0.10) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
+  .card{width:100%;max-width:680px;background:var(--surface);
+    border:2px solid var(--border);border-radius:var(--radius);
+    padding:2rem 2rem 1.6rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+    border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
 
-.bubble1 {
-  position: fixed; top: 40%; right: 5%;
-  width: 120px; height: 120px;
-  border-radius: 50%;
-  background: rgba(141,198,63,0.08);
-  pointer-events: none; z-index: 0;
-}
-.bubble2 {
-  position: fixed; top: 20%; left: 3%;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: rgba(242,139,130,0.09);
-  pointer-events: none; z-index: 0;
-}
+  .theme-badge{display:inline-flex;align-items:center;gap:.4rem;
+    background:var(--day-light);color:var(--day-dark);
+    font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase;
+    padding:.3rem .8rem;border-radius:99px;border:1.5px solid var(--day-border);
+    margin-bottom:1rem;}
 
-.wrapper {
-  position: relative; z-index: 1;
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 24px 16px 48px;
-}
+  .word-bank{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;
+    margin-bottom:1.2rem;padding:.75rem 1rem;
+    background:var(--day-light);border-radius:10px;border:1.5px dashed var(--day-border);}
+  .word-bank-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+    color:var(--day-dark);text-transform:uppercase;letter-spacing:.08em;margin-right:.3rem;flex-shrink:0;}
+  .word-chip{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;
+    padding:.3rem .8rem;border-radius:99px;background:var(--surface);color:var(--day-dark);
+    border:1.5px solid var(--day-color);transition:opacity .2s,background .2s;user-select:none;}
+  .word-chip.used{opacity:.35;text-decoration:line-through;background:var(--border);border-color:var(--border);color:var(--muted);}
+  .word-chip.validated-ok{background:#f0faeb;border-color:var(--green);color:#2f6e10;opacity:1;text-decoration:none;}
+  .word-chip.validated-ko{background:var(--day-light);border-color:var(--day-color);color:var(--day-dark);opacity:1;text-decoration:none;}
 
-/* HEADER */
-.header {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  padding: 20px 24px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.header-icon {
-  width: 52px; height: 52px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 100%);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px; flex-shrink: 0;
-}
-.header-text {}
-.header-meta {
-  font-size: 11px; font-weight: 600; letter-spacing: 1.2px;
-  color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
-}
-.header-title {
-  font-size: 19px; font-weight: 800; color: var(--text); line-height: 1.2;
-  margin-bottom: 3px;
-}
-.header-sub {
-  font-size: 13px; color: var(--muted); font-weight: 400;
-}
+  .consigne{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+    letter-spacing:.1em;color:var(--day-dark);text-transform:uppercase;
+    margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem;}
+  .consigne::before{content:'';display:inline-block;width:3px;height:16px;border-radius:2px;background:var(--day-color);flex-shrink:0;}
 
-/* PROGRESS */
-.progress-bar-wrap {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  padding: 14px 20px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow);
-}
-.progress-top {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 10px;
-}
-.progress-label {
-  font-size: 13px; font-weight: 600; color: var(--text);
-}
-.progress-pct {
-  font-size: 13px; font-weight: 700; color: var(--blue);
-}
-.progress-track {
-  height: 8px; border-radius: 99px;
-  background: var(--border);
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%; border-radius: 99px;
-  background: linear-gradient(90deg, var(--blue) 0%, var(--green) 100%);
-  transition: width 0.5s cubic-bezier(.4,0,.2,1);
-  width: 0%;
-}
+  .texte-exercice{font-size:.95rem;line-height:2.6;color:var(--text);margin-bottom:1.2rem;}
+  .texte-exercice p{margin-bottom:.4rem;display:flex;flex-wrap:wrap;align-items:center;gap:0 2px;}
+  .puce{color:var(--day-color);font-weight:800;margin-right:.4rem;flex-shrink:0;}
 
-/* CARD */
-.card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  padding: 28px 24px 24px;
-  box-shadow: var(--shadow);
-  margin-bottom: 16px;
-}
+  .blank-wrap{display:inline-flex;align-items:center;margin:0 4px;}
+  .blank-input{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600;
+    color:var(--day-dark);background:var(--day-light);
+    border:2px solid var(--day-color);border-radius:8px;
+    padding:.3rem .7rem;text-align:center;
+    outline:none;transition:border-color .2s,background .2s,transform .1s;}
+  .blank-input:focus{border-color:var(--day-dark);background:#fff;transform:scale(1.04);box-shadow:0 0 0 3px var(--day-glow);}
+  .blank-input:disabled{cursor:default;transform:none;}
+  .blank-input.correct{background:#f0faeb;border-color:var(--green);color:#2f6e10;}
+  .blank-input.wrong{background:var(--day-light);border-color:var(--day-color);color:var(--day-dark);}
 
-.consigne {
-  font-size: 13px; font-weight: 700; letter-spacing: 0.8px;
-  color: var(--blue); text-transform: uppercase;
-  margin-bottom: 16px;
-  display: flex; align-items: center; gap: 8px;
-}
-.consigne::before {
-  content: '';
-  display: inline-block;
-  width: 4px; height: 18px;
-  border-radius: 2px;
-  background: var(--blue);
-  flex-shrink: 0;
-}
+  .hint-box{margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;
+    padding:.75rem 1rem;font-size:.85rem;color:#7a6010;display:none;line-height:1.8;font-family:'JetBrains Mono',monospace;}
+  .hint-box.show{display:block;}
 
-/* TEXT WITH BLANKS */
-.texte-exercice {
-  font-size: 16px; line-height: 2.2;
-  color: var(--text);
-}
-.texte-exercice p {
-  margin-bottom: 8px;
-}
+  .feedback{margin-top:1.2rem;padding:.8rem 1rem;border-radius:10px;font-size:.9rem;
+    display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+  .feedback.show{display:flex;}
+  .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .feedback.ko{background:var(--day-light);border:1.5px solid var(--day-color);color:var(--day-dark);}
+  .feedback.partial{background:#fffbeb;border:1.5px solid var(--yellow);color:#7a6010;}
+  .feedback-icon{font-size:1.4rem;flex-shrink:0;}
+  .feedback-detail{color:inherit;font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.3rem;line-height:1.8;}
+  .corr-list{list-style:none;padding:0;margin-top:.5rem;}
+  .corr-list li{padding:.3rem .6rem;border-radius:6px;margin-bottom:.3rem;font-size:.8rem;}
+  .corr-ok{background:#e8f7d4;color:#2f6e10;}
+  .corr-ko{background:var(--day-light);color:var(--day-dark);}
 
-.blank-wrap {
-  display: inline-flex;
-  align-items: center;
-  position: relative;
-  margin: 0 3px;
-}
-.blank-input {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--blue-dark);
-  background: var(--blue-light);
-  border: 2px solid var(--blue);
-  border-radius: 8px;
-  padding: 4px 10px;
-  min-width: 90px;
-  text-align: center;
-  outline: none;
-  transition: border-color 0.2s, background 0.2s, transform 0.1s;
-  cursor: text;
-}
-.blank-input:focus {
-  border-color: var(--blue-dark);
-  background: #fff;
-  transform: scale(1.03);
-  box-shadow: 0 0 0 3px rgba(58,181,216,0.18);
-}
-.blank-input:disabled {
-  cursor: default;
-  transform: none;
-}
-.blank-input.correct {
-  background: var(--green-light);
-  border-color: var(--green);
-  color: var(--green-dark);
-}
-.blank-input.wrong {
-  background: var(--pink-light);
-  border-color: var(--pink);
-  color: var(--pink-dark);
-}
-.blank-input.corrected {
-  background: #fff8e1;
-  border-color: var(--orange);
-  color: #7a4a00;
-  text-decoration: line-through;
-}
+  .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;position:relative;z-index:2;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;
+    font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;
+    transition:transform .12s,box-shadow .15s;min-height:2.75rem;}
+  .btn:active{transform:scale(.96);}
+  .btn:disabled{opacity:.38;cursor:default;}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-hint{background:var(--orange);color:#fff;}
+  .btn-solution{background:var(--day-dark);color:#fff;}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
 
-.blank-feedback-icon {
-  position: absolute;
-  right: -22px;
-  font-size: 15px;
-  display: none;
-}
+  .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+  .results.show{display:block;}
+  .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+    padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+  .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+  .results-score .s-num{color:var(--day-color);}
+  .stars{font-size:2rem;margin:.4rem 0 1rem;letter-spacing:.1em;}
+  .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+  .recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+  .recap-item{display:flex;align-items:flex-start;gap:.8rem;padding:.65rem 1rem;background:var(--bg);
+    border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.6;}
+  .recap-item .eq{color:var(--day-color);flex:1;}
+  .recap-item.ok-item{border-color:#b5e08a;}
+  .recap-item.ko-item{border-color:var(--day-border);}
 
-/* HINT */
-.hint-zone {
-  margin-top: 16px;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  border: 1.5px solid var(--border);
-}
-.hint-btn {
-  width: 100%;
-  background: #fdf9f0;
-  border: none;
-  padding: 11px 16px;
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--orange);
-  cursor: pointer;
-  display: flex; align-items: center; gap: 8px;
-  transition: background 0.2s;
-}
-.hint-btn:hover { background: #fdf0d0; }
-.hint-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-.hint-content {
-  display: none;
-  padding: 12px 16px;
-  background: #fffae8;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #6b4a00;
-  border-top: 1px solid #f5dea0;
-}
-.hint-content.visible { display: block; }
-
-/* FEEDBACK */
-.feedback-zone {
-  margin-top: 18px;
-  display: none;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.feedback-zone.visible { display: block; }
-.feedback-header {
-  padding: 12px 16px;
-  display: flex; align-items: center; gap: 10px;
-  font-size: 14px; font-weight: 700;
-}
-.feedback-header svg { width: 20px; height: 20px; flex-shrink: 0; }
-.feedback-ok .feedback-header {
-  background: var(--green-light);
-  color: var(--green-dark);
-  border: 1.5px solid var(--green);
-  border-bottom: none;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-}
-.feedback-ko .feedback-header {
-  background: var(--pink-light);
-  color: var(--pink-dark);
-  border: 1.5px solid var(--pink);
-  border-bottom: none;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-}
-.feedback-partial .feedback-header {
-  background: #fff8e1;
-  color: #7a4a00;
-  border: 1.5px solid var(--orange);
-  border-bottom: none;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-}
-.feedback-detail {
-  padding: 12px 16px;
-  font-size: 14px; line-height: 1.7;
-  background: var(--surface);
-  border-left: 1.5px solid;
-  border-right: 1.5px solid;
-  border-bottom: 1.5px solid;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-}
-.feedback-ok .feedback-detail { border-color: var(--green); color: var(--green-dark); }
-.feedback-ko .feedback-detail { border-color: var(--pink); color: #6b1d1a; }
-.feedback-partial .feedback-detail { border-color: var(--orange); color: #6b4a00; }
-.correction-list {
-  margin-top: 10px; padding-left: 0; list-style: none;
-}
-.correction-list li {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  margin-bottom: 5px;
-  display: flex; align-items: center; gap: 8px;
-}
-.corr-ok { background: var(--green-light); color: var(--green-dark); }
-.corr-ko { background: var(--pink-light); color: var(--pink-dark); }
-
-/* ACTIONS */
-.actions {
-  display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;
-}
-.btn {
-  font-family: 'Syne', sans-serif;
-  font-size: 15px; font-weight: 700;
-  border: none; border-radius: 12px;
-  padding: 13px 22px;
-  cursor: pointer;
-  transition: transform 0.12s, opacity 0.2s, box-shadow 0.2s;
-  display: flex; align-items: center; gap: 8px;
-  flex: 1; justify-content: center; min-width: 140px;
-}
-.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,0.13); }
-.btn:active { transform: scale(0.97); }
-.btn-primary {
-  background: linear-gradient(135deg, var(--blue) 0%, #1a8fb5 100%);
-  color: #fff;
-}
-.btn-secondary {
-  background: var(--border);
-  color: var(--text);
-}
-.btn:disabled {
-  opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
-}
-
-/* RESULT SCREEN */
-.result-screen {
-  display: none;
-}
-.result-screen.visible { display: block; }
-
-.result-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  padding: 32px 24px;
-  box-shadow: var(--shadow);
-  text-align: center;
-  margin-bottom: 16px;
-}
-.result-stars {
-  font-size: 36px; margin-bottom: 16px; letter-spacing: 4px;
-}
-.result-score {
-  font-size: 52px; font-weight: 800;
-  color: var(--text); line-height: 1;
-  margin-bottom: 4px;
-}
-.result-score span { color: var(--blue); }
-.result-label {
-  font-size: 15px; color: var(--muted); margin-bottom: 24px;
-}
-.result-msg {
-  font-size: 18px; font-weight: 700;
-  padding: 16px 20px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-}
-.result-msg.perfect { background: var(--green-light); color: var(--green-dark); }
-.result-msg.good { background: var(--blue-light); color: var(--blue-dark); }
-.result-msg.try-again { background: var(--pink-light); color: var(--pink-dark); }
-
-.recap-title {
-  font-size: 14px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: 1px;
-  margin-bottom: 12px; text-align: left;
-}
-.recap-list {
-  list-style: none; text-align: left;
-}
-.recap-list li {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  border: 1px solid transparent;
-}
-.recap-list li.ok {
-  background: var(--green-light);
-  border-color: rgba(141,198,63,0.3);
-  color: var(--green-dark);
-}
-.recap-list li.ko {
-  background: var(--pink-light);
-  border-color: rgba(242,139,130,0.3);
-  color: var(--pink-dark);
-}
-.recap-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px; font-weight: 700;
-  padding: 3px 8px; border-radius: 6px;
-  flex-shrink: 0;
-}
-.recap-list li.ok .recap-badge { background: rgba(141,198,63,0.25); color: var(--green-dark); }
-.recap-list li.ko .recap-badge { background: rgba(242,139,130,0.25); color: var(--pink-dark); }
-.recap-text { flex: 1; }
-
-.btn-restart {
-  width: 100%;
-  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 100%);
-  color: #fff;
-  font-size: 16px;
-  padding: 16px;
-  border-radius: var(--radius);
-  border: none;
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.12s, box-shadow 0.2s;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  margin-top: 8px;
-}
-.btn-restart:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,166,35,0.4); }
-.btn-restart:active { transform: scale(0.97); }
-
-/* WORD BANK */
-.word-bank {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  background: #f7f4ec;
-  border-radius: var(--radius-sm);
-  border: 1.5px dashed var(--border);
-}
-.word-bank-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-right: 4px;
-  flex-shrink: 0;
-}
-.word-chip {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 5px 13px;
-  border-radius: 20px;
-  background: var(--surface);
-  color: var(--blue-dark);
-  border: 1.5px solid var(--blue);
-  cursor: default;
-  transition: opacity 0.2s, text-decoration 0.2s, background 0.2s;
-  user-select: none;
-}
-.word-chip.used {
-  opacity: 0.38;
-  text-decoration: line-through;
-  background: var(--border);
-  border-color: var(--border);
-  color: var(--muted);
-}
-.word-chip.validated-ok {
-  background: var(--green-light);
-  border-color: var(--green);
-  color: var(--green-dark);
-  opacity: 1;
-  text-decoration: none;
-}
-.word-chip.validated-ko {
-  background: var(--pink-light);
-  border-color: var(--pink);
-  color: var(--pink-dark);
-  opacity: 1;
-  text-decoration: none;
-}
-
-@media (max-width: 480px) {
-  .wrapper { padding: 16px 12px 32px; }
-  .header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
-  .card { padding: 20px 16px; }
-  .result-score { font-size: 42px; }
-  .actions { flex-direction: column; }
-  .btn { min-width: unset; width: 100%; }
-  .texte-exercice { font-size: 15px; line-height: 2.4; }
-}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    .card,.results-card{padding:1.4rem;}
+    .btn{font-size:.85rem;padding:.55rem 1rem;}
+    .texte-exercice{font-size:.88rem;line-height:2.4;}
+  }
 </style>
 </head>
 <body>
-<div class="bubble1" aria-hidden="true"></div>
-<div class="bubble2" aria-hidden="true"></div>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
 
-<div class="wrapper">
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#f28b82"></span>
+    Pazapa &middot; Maths &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 1 &ndash; Jour 4</div>
+  <h1><span class="hl">Texte &agrave; trous &mdash; Les nombres d&eacute;cimaux</span></h1>
+  <p class="subtitle">6 blancs &middot; d&eacute;finition et &eacute;criture</p>
+</header>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-icon" aria-hidden="true">✏️</div>
-    <div class="header-text">
-      <div class="header-meta">6ème &nbsp;·&nbsp; Nombres &nbsp;·&nbsp; Décimaux</div>
-      <div class="header-title">Texte à trous — Les nombres décimaux</div>
-      <div class="header-sub">Compléter les propriétés des nombres décimaux</div>
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Blanc 1 / 6</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+
+  <div class="theme-badge">Nombres d&eacute;cimaux</div>
+
+  <div class="word-bank">
+    <span class="word-bank-label">Mots&nbsp;:</span>
+    <span class="word-chip" data-w="decimale">d&eacute;cimale</span>
+    <span class="word-chip" data-w="decimale">d&eacute;cimale</span>
+    <span class="word-chip" data-w="entiere">enti&egrave;re</span>
+    <span class="word-chip" data-w="infinie">infinie</span>
+    <span class="word-chip" data-w="inutiles">inutiles</span>
+    <span class="word-chip" data-w="numeration">num&eacute;ration</span>
+  </div>
+
+  <div class="consigne">Compl&egrave;te le texte avec les mots propos&eacute;s</div>
+
+  <div class="texte-exercice" id="texte-zone"></div>
+
+  <div class="hint-box" id="hint-box"></div>
+
+  <div class="feedback" id="feedback">
+    <span class="feedback-icon" id="fb-icon"></span>
+    <div>
+      <div id="fb-msg"></div>
+      <div class="feedback-detail" id="fb-detail"></div>
     </div>
   </div>
 
-  <!-- PROGRESS -->
-  <div class="progress-bar-wrap">
-    <div class="progress-top">
-      <span class="progress-label" id="progress-label">Blanc 1 / 5</span>
-      <span class="progress-pct" id="progress-pct">0 %</span>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-check" onclick="checkAll()">&#10003; V&eacute;rifier</button>
+    <button class="btn btn-hint" id="btn-hint" onclick="toggleHint()">? Indice</button>
+    <button class="btn btn-solution" id="btn-solution" onclick="showSolution()" style="display:none;">&#128161; Solution</button>
+    <button class="btn btn-ghost" id="btn-restart-inline" onclick="restart()" style="display:none;">&#8635; Recommencer</button>
   </div>
+</div>
 
-  <!-- EXERCISE CARD -->
-  <div class="card" id="exercise-card">
-    <div class="consigne">Complète le texte</div>
-    <div class="word-bank" id="word-bank" aria-label="Mots proposés">
-      <span class="word-bank-label">Mots à placer :</span>
-      <!-- chips injected & shuffled by JS -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f28b82"></span>
+      R&eacute;sultats
     </div>
-
-    <div class="texte-exercice" id="texte-zone">
-      <!-- injected by JS -->
-    </div>
-
-    <div class="hint-zone">
-      <button class="hint-btn" id="hint-btn" onclick="toggleHint()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        Indice
-      </button>
-      <div class="hint-content" id="hint-content">
-        <strong>Pour t'aider :</strong> les 5 mots manquants décrivent ce qu'est un nombre décimal.
-        Pense à : les deux parties de part et d'autre de la virgule, la forme fractionnaire,
-        le tableau qui range les chiffres, les zéros qu'on peut supprimer, et ce qui se passe quand un nombre n'est pas décimal.
-        <br><br>
-        <em>Exemple :</em> dans 12,75 la partie <strong>entière</strong> est 12 et la partie décimale est 75.
-      </div>
-    </div>
-
-    <div class="feedback-zone" id="feedback-zone">
-      <div class="feedback-header" id="feedback-header">
-        <span id="feedback-icon-svg"></span>
-        <span id="feedback-title"></span>
-      </div>
-      <div class="feedback-detail" id="feedback-detail"></div>
-    </div>
-
-    <div class="actions">
-      <button class="btn btn-primary" id="btn-valider" onclick="valider()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-        Vérifier
-      </button>
-      <button class="btn btn-secondary" id="btn-restart-inline" onclick="restart()" style="display:none;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
-        Recommencer
-      </button>
-    </div>
-  </div>
-
-  <!-- RESULT SCREEN -->
-  <div class="result-screen" id="result-screen">
-    <div class="result-card">
-      <div class="result-stars" id="result-stars">⭐⭐⭐</div>
-      <div class="result-score"><span id="score-num">5</span> / <span>5</span></div>
-      <div class="result-label">blancs correctement remplis</div>
-      <div class="result-msg" id="result-msg">Parfait !</div>
-
-      <div class="recap-title">Récapitulatif</div>
-      <ul class="recap-list" id="recap-list"></ul>
-    </div>
-
-    <button class="btn-restart" onclick="restart()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
-      Recommencer
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/6</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">
+      &#128260; Recommencer
     </button>
   </div>
-
-</div><!-- /wrapper -->
+</div>
 
 <script>
 var BLANKS = [
-  {
-    id: 0,
-    answer: "enti\u00e8re",
-    context: "Un nombre d\u00e9cimal a une partie",
-    suffix: " et une partie d\u00e9cimale, s\u00e9par\u00e9es par une virgule.",
-    explication: "Un nombre d\u00e9cimal poss\u00e8de une partie <strong>enti\u00e8re</strong> (\u00e0 gauche de la virgule) et une partie d\u00e9cimale (\u00e0 droite). Par exemple, dans 12,75 la partie enti\u00e8re est 12."
-  },
-  {
-    id: 1,
-    answer: "d\u00e9cimale",
-    context: "Il peut \u00eatre \u00e9crit sous forme de fraction",
-    suffix: ".",
-    explication: "Une fraction <strong>d\u00e9cimale</strong> a pour d\u00e9nominateur 10, 100, 1000\u2026 Par exemple, 0,7 = 7/10 et 0,75 = 75/100."
-  },
-  {
-    id: 2,
-    answer: "num\u00e9ration",
-    context: "Il peut \u00eatre plac\u00e9 dans un tableau de",
-    suffix: " allant jusqu\u2019aux dix-milli\u00e8mes.",
-    explication: "Le tableau de <strong>num\u00e9ration</strong> range chaque chiffre selon sa valeur : unit\u00e9s, dixi\u00e8mes, centi\u00e8mes, milli\u00e8mes, dix-milli\u00e8mes\u2026 Il aide \u00e0 lire et \u00e9crire les nombres d\u00e9cimaux."
-  },
-  {
-    id: 3,
-    answer: "inutiles",
-    context: "Il faut \u00e9liminer les z\u00e9ros",
-    suffix: " (avant le nombre ou apr\u00e8s la partie d\u00e9cimale).",
-    explication: "Les z\u00e9ros <strong>inutiles</strong> ne changent pas la valeur du nombre : 07,30 s\u2019\u00e9crit simplement 7,3. On supprime ceux plac\u00e9s devant la partie enti\u00e8re et ceux \u00e0 la fin de la partie d\u00e9cimale."
-  },
-  {
-    id: 4,
-    answer: "infinie",
-    context: "Un nombre non d\u00e9cimal a une partie d\u00e9cimale",
-    suffix: ".",
-    explication: "Un nombre non d\u00e9cimal (comme 1/3 = 0,333\u2026) a une partie d\u00e9cimale <strong>infinie</strong> : les chiffres apr\u00e8s la virgule ne s\u2019arr\u00eatent jamais."
-  }
+  { id:0, answer:"enti\u00e8re",    explication:"La partie <strong>enti\u00e8re</strong> est situ\u00e9e \u00e0 gauche de la virgule\u00a0; elle compte les unit\u00e9s enti\u00e8res." },
+  { id:1, answer:"d\u00e9cimale",   explication:"La partie <strong>d\u00e9cimale</strong> est situ\u00e9e \u00e0 droite de la virgule\u00a0; elle compte les dixi\u00e8mes, centi\u00e8mes, milli\u00e8mes\u2026" },
+  { id:2, answer:"d\u00e9cimale",   explication:"Une fraction <strong>d\u00e9cimale</strong> a pour d\u00e9nominateur 10, 100, 1\u202f000\u2026 (exemple\u00a0: 37/100)." },
+  { id:3, answer:"num\u00e9ration", explication:"Le tableau de <strong>num\u00e9ration</strong> range chaque chiffre selon son rang, des unit\u00e9s jusqu\u2019aux dix-milli\u00e8mes." },
+  { id:4, answer:"inutiles",     explication:"Les z\u00e9ros <strong>inutiles</strong> ne changent pas la valeur du nombre\u00a0: 04,50 s\u2019\u00e9crit 4,5." },
+  { id:5, answer:"infinie",      explication:"Un nombre non d\u00e9cimal a une partie d\u00e9cimale <strong>infinie</strong>\u00a0: ses chiffres apr\u00e8s la virgule ne s\u2019arr\u00eatent jamais (exemple\u00a0: 1/3 = 0,333\u2026)." }
 ];
 
 var TOTAL = BLANKS.length;
-var answered = false;
 var userAnswers = new Array(TOTAL).fill("");
-var results = new Array(TOTAL).fill(null);
+var validated = false;
+var hintOpen = false;
 
-function shuffle(arr) {
-  var a = arr.slice();
-  for (var i = a.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
-  }
-  return a;
+function normalise(s){
+  return s.trim().toLowerCase()
+    .replace(/[\u00e0\u00e2\u00e4]/g,"a").replace(/[\u00e9\u00e8\u00ea\u00eb]/g,"e")
+    .replace(/[\u00ee\u00ef]/g,"i").replace(/[\u00f4\u00f6]/g,"o")
+    .replace(/[\u00f9\u00fb\u00fc]/g,"u").replace(/\u00e7/g,"c");
 }
 
-function buildBank() {
-  var bank = document.getElementById("word-bank");
-  // remove any existing chips (keep the label)
-  var oldChips = bank.querySelectorAll(".word-chip");
-  oldChips.forEach(function(c) { c.remove(); });
-
-  // collect the words from the answers, then shuffle so the order
-  // never matches the order of the blanks
-  var words = BLANKS.map(function(b) { return b.answer; });
-  var shuffled = shuffle(words);
-  // make sure the shuffle is actually different from the blank order
-  if (shuffled.length > 1) {
-    var same = shuffled.every(function(w, i) {
-      return normalise(w) === normalise(words[i]);
-    });
-    var guard = 0;
-    while (same && guard < 20) {
-      shuffled = shuffle(words);
-      same = shuffled.every(function(w, i) {
-        return normalise(w) === normalise(words[i]);
-      });
-      guard++;
-    }
-  }
-
-  shuffled.forEach(function(w) {
-    var chip = document.createElement("span");
-    chip.className = "word-chip";
-    chip.setAttribute("data-word", normalise(w));
-    chip.textContent = w;
-    bank.appendChild(chip);
-  });
-}
-
-function buildTexte() {
-  buildBank();
-  var zone = document.getElementById("texte-zone");
-  zone.innerHTML = "";
-
-  var p1 = document.createElement("p");
-  p1.appendChild(document.createTextNode("\u25fe Un nombre d\u00e9cimal a une partie "));
-  p1.appendChild(makeBlankWrap(0));
-  p1.appendChild(document.createTextNode(" et une partie d\u00e9cimale, s\u00e9par\u00e9es par une virgule."));
-  zone.appendChild(p1);
-
-  var p2 = document.createElement("p");
-  p2.appendChild(document.createTextNode("\u25fe Il peut \u00eatre \u00e9crit sous forme de fraction "));
-  p2.appendChild(makeBlankWrap(1));
-  p2.appendChild(document.createTextNode("."));
-  zone.appendChild(p2);
-
-  var p3 = document.createElement("p");
-  p3.appendChild(document.createTextNode("\u25fe Il peut \u00eatre plac\u00e9 dans un tableau de "));
-  p3.appendChild(makeBlankWrap(2));
-  p3.appendChild(document.createTextNode(" allant jusqu\u2019aux dix-milli\u00e8mes."));
-  zone.appendChild(p3);
-
-  var p4 = document.createElement("p");
-  p4.appendChild(document.createTextNode("\u25fe Il faut \u00e9liminer les z\u00e9ros "));
-  p4.appendChild(makeBlankWrap(3));
-  p4.appendChild(document.createTextNode(" (avant le nombre ou apr\u00e8s la partie d\u00e9cimale)."));
-  zone.appendChild(p4);
-
-  var p5 = document.createElement("p");
-  p5.appendChild(document.createTextNode("\u25fe Un nombre non d\u00e9cimal a une partie d\u00e9cimale "));
-  p5.appendChild(makeBlankWrap(4));
-  p5.appendChild(document.createTextNode("."));
-  zone.appendChild(p5);
-
-  document.getElementById("blank-0").focus();
-}
-
-function makeBlankWrap(idx) {
+function makeInput(idx){
   var wrap = document.createElement("span");
   wrap.className = "blank-wrap";
-
   var inp = document.createElement("input");
   inp.type = "text";
   inp.className = "blank-input";
-  inp.id = "blank-" + idx;
-  inp.setAttribute("autocomplete", "off");
-  inp.setAttribute("autocorrect", "off");
-  inp.setAttribute("spellcheck", "false");
-  inp.setAttribute("placeholder", "...");
-  inp.setAttribute("aria-label", "Blanc " + (idx + 1) + " sur " + TOTAL);
-
-  var sizeMap = [8, 9, 11, 9, 8];
-  inp.style.minWidth = (sizeMap[idx] * 11 + 40) + "px";
-
-  inp.addEventListener("input", function() {
-    userAnswers[idx] = inp.value.trim();
-    updateProgress();
+  inp.id = "blank-"+idx;
+  inp.placeholder = "\u2026";
+  inp.setAttribute("autocomplete","off");
+  inp.setAttribute("autocorrect","off");
+  inp.setAttribute("spellcheck","false");
+  var sizes = [90,100,100,120,90,90];
+  inp.style.width = sizes[idx]+"px";
+  inp.addEventListener("input", function(){
+    userAnswers[idx] = inp.value;
     updateChips();
+    updateProgress();
   });
-  inp.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") { e.preventDefault(); valider(); }
+  inp.addEventListener("keydown", function(e){
+    if(e.key==="Enter"){ e.preventDefault(); checkAll(); }
   });
-
   wrap.appendChild(inp);
   return wrap;
 }
 
-function updateProgress() {
-  var filled = userAnswers.filter(function(a) { return a.length > 0; }).length;
-  var pct = Math.round((filled / TOTAL) * 100);
-  document.getElementById("progress-fill").style.width = pct + "%";
-  document.getElementById("progress-pct").textContent = pct + "\u00a0%";
-  document.getElementById("progress-label").textContent = "Blanc " + (filled < TOTAL ? (filled + 1) : TOTAL) + " / " + TOTAL;
+function buildTexte(){
+  var z = document.getElementById("texte-zone");
+  if(!z) return;
+  z.innerHTML = "";
+
+  function row(nodes){
+    var p = document.createElement("p");
+    var puce = document.createElement("span");
+    puce.className = "puce";
+    puce.textContent = "\u25fe";
+    p.appendChild(puce);
+    nodes.forEach(function(n){
+      p.appendChild(typeof n==="string" ? document.createTextNode(n) : n);
+    });
+    z.appendChild(p);
+  }
+
+  row(["Un nombre d\u00e9cimal a une partie ", makeInput(0), " et une partie ", makeInput(1), ", s\u00e9par\u00e9es par une virgule."]);
+  row(["Il peut \u00eatre \u00e9crit sous forme de fraction ", makeInput(2), "."]);
+  row(["Il peut \u00eatre plac\u00e9 dans un tableau de ", makeInput(3), " allant jusqu\u2019aux dix-milli\u00e8mes."]);
+  row(["Il faut \u00e9liminer les z\u00e9ros ", makeInput(4), " (avant le nombre ou apr\u00e8s la partie d\u00e9cimale)."]);
+  row(["Un nombre non d\u00e9cimal a une partie d\u00e9cimale ", makeInput(5), "."]);
+
+  var first = document.getElementById("blank-0");
+  if(first) first.focus();
 }
 
-function updateChips() {
-  var usedWords = userAnswers.map(function(a) { return normalise(a); });
-  var counts = {};
-  usedWords.forEach(function(w) { if (w) counts[w] = (counts[w] || 0) + 1; });
+function updateProgress(){
+  var filled = userAnswers.filter(function(a){ return a.trim().length>0; }).length;
+  var pct = Math.round(filled/TOTAL*100);
+  document.getElementById("progress-bar").style.width = pct+"%";
+  document.getElementById("prog-pct").textContent = pct+"\u00a0%";
+  document.getElementById("prog-label").textContent = "Blanc "+(Math.min(filled+1,TOTAL))+" / "+TOTAL;
+}
 
-  var needed = {};
-  BLANKS.forEach(function(b) {
-    var key = normalise(b.answer);
-    needed[key] = (needed[key] || 0) + 1;
-  });
-
+function updateChips(){
+  if(validated) return;
   var chips = document.querySelectorAll(".word-chip");
-  var remaining = {};
-  Object.keys(counts).forEach(function(k) { remaining[k] = counts[k]; });
-
-  chips.forEach(function(chip) {
-    chip.classList.remove("validated-ok", "validated-ko");
-    var w = normalise(chip.textContent);
-    if (remaining[w] && remaining[w] > 0) {
-      chip.classList.add("used");
-      remaining[w]--;
-    } else {
-      chip.classList.remove("used");
-    }
+  var typedCounts = {};
+  userAnswers.forEach(function(a){
+    var n = normalise(a);
+    if(n.length>0) typedCounts[n] = (typedCounts[n]||0)+1;
+  });
+  var seen = {};
+  chips.forEach(function(chip){
+    var w = chip.getAttribute("data-w");
+    seen[w] = (seen[w]||0)+1;
+    if(typedCounts[w] && seen[w] <= typedCounts[w]) chip.classList.add("used");
+    else chip.classList.remove("used");
   });
 }
 
-function validateChips() {
-  var chips = Array.prototype.slice.call(document.querySelectorAll(".word-chip"));
-  chips.forEach(function(c) { c.classList.remove("used", "validated-ok", "validated-ko"); });
-
-  BLANKS.forEach(function(b, i) {
-    var key = normalise(b.answer);
-    var match = null;
-    for (var k = 0; k < chips.length; k++) {
-      if (!chips[k].dataset.assigned && normalise(chips[k].textContent) === key) {
-        match = chips[k]; break;
-      }
-    }
-    if (match) {
-      match.dataset.assigned = "1";
-      match.classList.add(results[i] ? "validated-ok" : "validated-ko");
-    }
-  });
-  chips.forEach(function(c) { delete c.dataset.assigned; });
-}
-
-function toggleHint() {
-  var hc = document.getElementById("hint-content");
-  var hb = document.getElementById("hint-btn");
-  if (hc.classList.contains("visible")) {
-    hc.classList.remove("visible");
-    hb.childNodes[1].textContent = " Indice";
-  } else {
-    hc.classList.add("visible");
-  }
-}
-
-function normalise(s) {
-  return s.trim().toLowerCase()
-    .replace(/[\u00e0\u00e2\u00e4]/g, "a")
-    .replace(/[\u00e9\u00e8\u00ea\u00eb]/g, "e")
-    .replace(/[\u00ee\u00ef]/g, "i")
-    .replace(/[\u00f4\u00f6]/g, "o")
-    .replace(/[\u00f9\u00fb\u00fc]/g, "u")
-    .replace(/\u00e7/g, "c");
-}
-
-function valider() {
-  if (answered) return;
-  answered = true;
-
+function checkAll(){
+  if(validated) return;
+  if(userAnswers.every(function(a){ return a.trim().length===0; })) return;
+  validated = true;
   var score = 0;
-  var allEmpty = userAnswers.every(function(a) { return a.length === 0; });
-  if (allEmpty) { answered = false; return; }
-
-  for (var i = 0; i < TOTAL; i++) {
-    var inp = document.getElementById("blank-" + i);
-    var correct = normalise(BLANKS[i].answer) === normalise(userAnswers[i]);
-    results[i] = correct;
+  var results = [];
+  BLANKS.forEach(function(b,i){
+    var inp = document.getElementById("blank-"+i);
+    var ok = normalise(b.answer)===normalise(userAnswers[i]);
+    results.push(ok);
     inp.disabled = true;
+    inp.classList.add(ok ? "correct" : "wrong");
+    if(ok) score++;
+  });
+  markChips(results);
+  document.getElementById("progress-bar").style.width = "100%";
+  document.getElementById("prog-pct").textContent = "100\u00a0%";
+  document.getElementById("prog-label").textContent = "Termin\u00e9 \u2014 "+score+" / "+TOTAL;
+  document.getElementById("btn-check").disabled = true;
+  document.getElementById("btn-hint").disabled = true;
+  document.getElementById("btn-solution").style.display = "inline-flex";
+  document.getElementById("btn-restart-inline").style.display = "inline-flex";
 
-    if (correct) {
-      inp.classList.add("correct");
-      score++;
-    } else {
-      inp.classList.add("wrong");
-    }
-  }
+  var fb = document.getElementById("feedback");
+  var icon = document.getElementById("fb-icon");
+  var msg = document.getElementById("fb-msg");
+  var det = document.getElementById("fb-detail");
 
-  document.getElementById("progress-fill").style.width = "100%";
-  document.getElementById("progress-pct").textContent = "100\u00a0%";
-  document.getElementById("progress-label").textContent = "Termin\u00e9 — " + score + " / " + TOTAL;
-
-  validateChips();
-  showFeedback(score);
-
-  document.getElementById("btn-valider").disabled = true;
-  document.getElementById("btn-restart-inline").style.display = "flex";
-}
-
-var ICON_OK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>';
-var ICON_KO = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
-var ICON_PARTIAL = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-
-function showFeedback(score) {
-  var zone = document.getElementById("feedback-zone");
-  var iconEl = document.getElementById("feedback-icon-svg");
-  var titleEl = document.getElementById("feedback-title");
-  var detailEl = document.getElementById("feedback-detail");
-
-  zone.classList.remove("feedback-ok", "feedback-ko", "feedback-partial");
-  zone.classList.add("visible");
-
-  var html = "";
-
-  if (score === TOTAL) {
-    zone.classList.add("feedback-ok");
-    iconEl.innerHTML = ICON_OK;
-    titleEl.textContent = "Parfait ! Tous les blancs sont corrects.";
-    html = "<strong>Bravo !</strong> Tu as parfaitement retenu les propri\u00e9t\u00e9s des nombres d\u00e9cimaux.<br><br>";
-    html += "Un nombre d\u00e9cimal a une partie <strong>enti\u00e8re</strong> et une partie d\u00e9cimale, s\u2019\u00e9crit en fraction <strong>d\u00e9cimale</strong>, se range dans un tableau de <strong>num\u00e9ration</strong>, n\u2019a pas de z\u00e9ros <strong>inutiles</strong>, et un nombre non d\u00e9cimal a une partie d\u00e9cimale <strong>infinie</strong>.";
-  } else if (score === 0) {
-    zone.classList.add("feedback-ko");
-    iconEl.innerHTML = ICON_KO;
-    titleEl.textContent = "Aucun blanc correct. Voici les corrections :";
-    html = buildCorrectionHTML();
+  if(score===TOTAL){
+    fb.className="feedback show ok"; icon.textContent="\u2705";
+    msg.innerHTML="<strong>Parfait\u00a0!</strong> Tu connais toutes les caract\u00e9ristiques d\u2019un nombre d\u00e9cimal.";
+    det.innerHTML="Partie <strong>enti\u00e8re</strong> et partie <strong>d\u00e9cimale</strong>, fraction <strong>d\u00e9cimale</strong>, tableau de <strong>num\u00e9ration</strong>, z\u00e9ros <strong>inutiles</strong>, et partie <strong>infinie</strong> pour les non d\u00e9cimaux.";
+  } else if(score===0){
+    fb.className="feedback show ko"; icon.textContent="\u274c";
+    msg.innerHTML="<strong>Aucun blanc correct.</strong> Voici les corrections\u00a0:";
+    det.innerHTML=buildCorr(results);
   } else {
-    zone.classList.add("feedback-partial");
-    iconEl.innerHTML = ICON_PARTIAL;
-    titleEl.textContent = score + " blanc" + (score > 1 ? "s" : "") + " correct" + (score > 1 ? "s" : "") + " sur " + TOTAL + ".";
-    html = buildCorrectionHTML();
+    fb.className="feedback show partial"; icon.textContent="\u26a0";
+    msg.innerHTML="<strong>"+score+" / "+TOTAL+"</strong> blanc"+(score>1?"s":"")+" correct"+(score>1?"s":"")+". Regarde les corrections\u00a0:";
+    det.innerHTML=buildCorr(results);
   }
-
-  detailEl.innerHTML = html;
-  zone.scrollIntoView({ behavior: "smooth", block: "nearest" });
-
-  setTimeout(function() {
-    document.getElementById("result-screen").classList.add("visible");
-    buildRecap(score);
-    document.getElementById("exercise-card").style.display = "none";
-    document.getElementById("result-screen").scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 2200);
+  fb.scrollIntoView({behavior:"smooth",block:"nearest"});
+  setTimeout(function(){ showResults(score,results); }, 2200);
 }
 
-function buildCorrectionHTML() {
-  var html = "Corrections d\u00e9taill\u00e9es :<ul class='correction-list'>";
-  for (var i = 0; i < TOTAL; i++) {
-    if (results[i]) {
-      html += "<li class='corr-ok'>\u2705 Blanc " + (i + 1) + " : <strong>" + BLANKS[i].answer + "</strong> \u2014 correct !</li>";
-    } else {
-      html += "<li class='corr-ko'>\u274c Blanc " + (i + 1) + " : tu as \u00e9crit \u00ab\u00a0" + (userAnswers[i] || "(vide)") + "\u00a0\u00bb \u2014 r\u00e9ponse : <strong>" + BLANKS[i].answer + "</strong>. " + BLANKS[i].explication + "</li>";
+function markChips(results){
+  var chips = document.querySelectorAll(".word-chip");
+  chips.forEach(function(c){ c.className="word-chip"; });
+  var byWord = {};
+  chips.forEach(function(c){
+    var w = c.getAttribute("data-w");
+    (byWord[w]=byWord[w]||[]).push(c);
+  });
+  BLANKS.forEach(function(b,i){
+    var w = normalise(b.answer);
+    if(byWord[w] && byWord[w].length){
+      var chip = byWord[w].shift();
+      chip.classList.add(results[i]?"validated-ok":"validated-ko");
     }
-  }
-  html += "</ul>";
-  return html;
+  });
 }
 
-function buildRecap(score) {
-  var stars = score === TOTAL ? "\u2b50\u2b50\u2b50" : score >= 3 ? "\u2b50\u2b50" : "\u2b50";
-  document.getElementById("result-stars").textContent = stars;
-  document.getElementById("score-num").textContent = score;
-
-  var msg = document.getElementById("result-msg");
-  if (score === TOTAL) {
-    msg.textContent = "Parfait ! Tu ma\u00eetrises les nombres d\u00e9cimaux.";
-    msg.className = "result-msg perfect";
-  } else if (score >= 3) {
-    msg.textContent = "Bien jou\u00e9 ! Revois les blancs manqu\u00e9s.";
-    msg.className = "result-msg good";
-  } else {
-    msg.textContent = "Retente ! Relis les propri\u00e9t\u00e9s avant de recommencer.";
-    msg.className = "result-msg try-again";
-  }
-
-  var list = document.getElementById("recap-list");
-  list.innerHTML = "";
-  for (var i = 0; i < TOTAL; i++) {
-    var li = document.createElement("li");
-    li.className = results[i] ? "ok" : "ko";
-
-    var badge = document.createElement("span");
-    badge.className = "recap-badge";
-    badge.textContent = results[i] ? "\u2705" : "\u274c";
-
-    var txt = document.createElement("span");
-    txt.className = "recap-text";
-
-    var label = document.createElement("strong");
-    label.textContent = "Blanc " + (i + 1) + " : ";
-    txt.appendChild(label);
-    txt.appendChild(document.createTextNode(BLANKS[i].answer));
-
-    if (!results[i] && userAnswers[i]) {
-      var wrong = document.createElement("span");
-      wrong.style.opacity = "0.7";
-      wrong.textContent = " (tu as \u00e9crit : " + userAnswers[i] + ")";
-      txt.appendChild(wrong);
-    }
-
-    li.appendChild(badge);
-    li.appendChild(txt);
-    list.appendChild(li);
-  }
+function buildCorr(results){
+  var html="<ul class='corr-list'>";
+  BLANKS.forEach(function(b,i){
+    if(results[i]) html+="<li class='corr-ok'>\u2705 Blanc "+(i+1)+"\u00a0: <strong>"+b.answer+"</strong> \u2014 correct\u00a0!</li>";
+    else html+="<li class='corr-ko'>\u274c Blanc "+(i+1)+"\u00a0: \u00ab\u00a0"+(userAnswers[i].trim()||"(vide)")+"\u00a0\u00bb \u2192 <strong>"+b.answer+"</strong>. "+b.explication+"</li>";
+  });
+  return html+"</ul>";
 }
 
-function restart() {
-  answered = false;
-  userAnswers = new Array(TOTAL).fill("");
-  results = new Array(TOTAL).fill(null);
+function showResults(score,results){
+  document.getElementById("ex-card").style.display="none";
+  var rs=document.getElementById("results-screen");
+  rs.classList.add("show");
+  document.getElementById("score-num").textContent=score;
+  var stars = score===6?5 : score===5?4 : score>=3?3 : score>=1?2 : 1;
+  document.getElementById("stars-row").textContent="\u2b50".repeat(stars)+"\u2606".repeat(5-stars);
+  var msgs=[
+    "\u00c0 retravailler. Relis bien la le\u00e7on, puis recommence.",
+    "Bien. Quelques notions sont \u00e0 revoir.",
+    "Tr\u00e8s bien\u00a0! Tu ma\u00eetrises presque tout.",
+    "Parfait\u00a0! Toutes les r\u00e9ponses sont justes."
+  ];
+  var lvl = score===6?3 : score>=4?2 : score>=2?1 : 0;
+  document.getElementById("results-msg").textContent=msgs[lvl];
+  var list=document.getElementById("recap-list"); list.innerHTML="";
+  BLANKS.forEach(function(b,i){
+    var div=document.createElement("div");
+    div.className="recap-item "+(results[i]?"ok-item":"ko-item");
+    div.innerHTML="<span>"+(results[i]?"\u2705":"\u274c")+"</span>"
+      +"<span class='eq'>Blanc "+(i+1)+" \u2014 "+b.answer+"</span>"
+      +"<span>"+(results[i]?"\u2713":"\u2717 "+(userAnswers[i].trim()||"vide"))+"</span>";
+    list.appendChild(div);
+  });
+  rs.scrollIntoView({behavior:"smooth",block:"start"});
+}
 
-  document.getElementById("feedback-zone").classList.remove("visible");
-  document.getElementById("feedback-zone").className = "feedback-zone";
-  document.getElementById("hint-content").classList.remove("visible");
-  document.getElementById("btn-valider").disabled = false;
-  document.getElementById("btn-restart-inline").style.display = "none";
-  document.getElementById("result-screen").classList.remove("visible");
-  document.getElementById("exercise-card").style.display = "block";
+function showSolution(){
+  if(!validated) return;
+  BLANKS.forEach(function(b,i){
+    var inp = document.getElementById("blank-"+i);
+    inp.value = b.answer;
+    inp.classList.remove("wrong");
+    inp.classList.add("correct");
+  });
+  var fb = document.getElementById("feedback");
+  fb.className="feedback show ok";
+  document.getElementById("fb-icon").textContent="\u2705";
+  document.getElementById("fb-msg").innerHTML="<strong>Solution compl\u00e8te affich\u00e9e.</strong>";
+  document.getElementById("fb-detail").innerHTML=buildCorr(BLANKS.map(function(){return true;}));
+  document.getElementById("btn-solution").disabled = true;
+}
 
-  document.getElementById("progress-fill").style.width = "0%";
-  document.getElementById("progress-pct").textContent = "0\u00a0%";
-  document.getElementById("progress-label").textContent = "Blanc 1 / " + TOTAL;
+function toggleHint(){
+  if(validated) return;
+  hintOpen=!hintOpen;
+  var h=document.getElementById("hint-box");
+  if(hintOpen){
+    h.innerHTML="<strong>\u2753 Indice\u00a0:</strong> Pense \u00e0 ce qui se trouve de chaque c\u00f4t\u00e9 de la virgule. Quel type de fraction a pour d\u00e9nominateur 10, 100, 1\u202f000\u202f? Dans quel tableau range-t-on les chiffres\u202f? Quels z\u00e9ros peut-on supprimer\u202f? Et que dire de la partie apr\u00e8s la virgule d\u2019un nombre qui n\u2019est pas d\u00e9cimal\u202f?";
+    h.classList.add("show");
+  } else { h.classList.remove("show"); }
+}
 
+function restart(){
+  validated=false; hintOpen=false;
+  userAnswers=new Array(TOTAL).fill("");
+  document.getElementById("results-screen").classList.remove("show");
+  document.getElementById("ex-card").style.display="block";
+  document.getElementById("feedback").className="feedback";
+  document.getElementById("hint-box").classList.remove("show");
+  document.getElementById("btn-check").disabled=false;
+  document.getElementById("btn-hint").disabled=false;
+  document.getElementById("btn-solution").style.display="none";
+  document.getElementById("btn-solution").disabled=false;
+  document.getElementById("btn-restart-inline").style.display="none";
+  document.getElementById("progress-bar").style.width="0%";
+  document.getElementById("prog-pct").textContent="0\u00a0%";
+  document.getElementById("prog-label").textContent="Blanc 1 / "+TOTAL;
+  document.querySelectorAll(".word-chip").forEach(function(c){ c.className="word-chip"; });
   buildTexte();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
-buildTexte();
+if(document.getElementById("texte-zone")){
+  buildTexte();
+} else {
+  window.addEventListener("load", buildTexte);
+}
 </script>
 </body>
 </html>
