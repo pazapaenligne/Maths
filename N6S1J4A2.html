@@ -271,22 +271,26 @@ var EXERCISES=[
     "863 / 100",["863 / 10","8,63 / 100"],
     "Deux chiffres après la virgule, donc dénominateur 100.","863 centièmes."),
 
-  qcm("Écris en lettres&nbsp;: 56,9","En lettres",
-    "cinquante-six virgule neuf",
-    ["cinq-cent-soixante-neuf","cinquante-six virgule quatre-vingt-dix"],
-    "56 = cinquante-six, puis virgule neuf.","La partie décimale a un seul chiffre : neuf dixièmes."),
-  qcm("Écris en lettres&nbsp;: 47,8","En lettres",
-    "quarante-sept virgule huit",
-    ["quatre-cent-soixante-dix-huit","quarante-sept virgule quatre-vingts"],
-    "47 = quarante-sept, puis virgule huit.","Huit dixièmes."),
-  qcm("Écris en lettres&nbsp;: 235,01","En lettres",
-    "deux-cent-trente-cinq virgule zéro un",
-    ["deux-cent-trente-cinq virgule un","deux-cent-trente-cinq virgule onze"],
-    "235, puis virgule zéro un (un centième).","Le zéro des dixièmes se lit aussi.",true),
-  qcm("Écris en lettres&nbsp;: 8,63","En lettres",
-    "huit virgule soixante-trois",
-    ["huit virgule six cent trois","huit-cent-soixante-trois"],
-    "8, puis virgule soixante-trois (soixante-trois centièmes).","Soixante-trois centièmes.")
+  {kind:"txt",theme:"En lettres",
+   eqHtml:"Écris en lettres&nbsp;: 56,9",label:"En lettres =",
+   accepted:["cinquante-six virgule neuf","cinquante-six et neuf dixièmes"],
+   solution:"<strong>cinquante-six virgule neuf</strong> (ou cinquante-six et neuf dixièmes).",
+   hint:"56 = cinquante-six, puis la partie décimale."},
+  {kind:"txt",theme:"En lettres",
+   eqHtml:"Écris en lettres&nbsp;: 47,8",label:"En lettres =",
+   accepted:["quarante-sept virgule huit","quarante-sept et huit dixièmes"],
+   solution:"<strong>quarante-sept virgule huit</strong> (ou quarante-sept et huit dixièmes).",
+   hint:"47 = quarante-sept, puis huit dixièmes."},
+  {kind:"txt",theme:"En lettres",
+   eqHtml:"Écris en lettres&nbsp;: 235,01",label:"En lettres =",
+   accepted:["deux-cent-trente-cinq virgule zéro un","deux-cent-trente-cinq et un centième"],
+   solution:"<strong>deux-cent-trente-cinq virgule zéro un</strong> (ou deux-cent-trente-cinq et un centième).",
+   hint:"235, puis le zéro des dixièmes se lit aussi."},
+  {kind:"txt",theme:"En lettres",
+   eqHtml:"Écris en lettres&nbsp;: 8,63",label:"En lettres =",
+   accepted:["huit virgule soixante-trois","huit et soixante-trois centièmes"],
+   solution:"<strong>huit virgule soixante-trois</strong> (ou huit et soixante-trois centièmes).",
+   hint:"8, puis soixante-trois centièmes."}
 ];
 
 var TOTAL=EXERCISES.length;
@@ -296,6 +300,13 @@ var qcmSel=new Array(TOTAL).fill(null);
 var allDone=false;
 function $(id){return document.getElementById(id);}
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function norm(s){
+  return (s||"").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[-_]/g," ")
+    .replace(/[.,;:!?]/g," ")
+    .replace(/\s+/g," ").trim();
+}
 
 function buildAll(){
   var host=$("cards");host.innerHTML="";
@@ -310,6 +321,9 @@ function buildAll(){
     if(ex.kind==="num"){
       inner+='<div class="input-row"><span class="input-label">'+ex.label+'</span>'
         +'<input type="number" class="answer-input" id="inp-'+i+'" placeholder="?" autocomplete="off" step="any"/></div>';
+    }else if(ex.kind==="txt"){
+      inner+='<div class="input-row"><span class="input-label">'+ex.label+'</span>'
+        +'<input type="text" class="answer-input txt-input" id="inp-'+i+'" placeholder="ta réponse en lettres" autocomplete="off" autocapitalize="off" spellcheck="false"/></div>';
     }else{
       inner+='<div class="qcm-row" id="qcm-'+i+'"></div>';
     }
@@ -377,6 +391,10 @@ function checkItem(i){
     var val=parseFloat($("inp-"+i).value);
     if(isNaN(val)){$("inp-"+i).focus();return;}
     userAnswers[i]=val;
+  }else if(ex.kind==="txt"){
+    var raw=$("inp-"+i).value;
+    if(norm(raw)===""){$("inp-"+i).focus();return;}
+    userAnswers[i]=raw;
   }else{
     if(qcmSel[i]===null) return;
     userAnswers[i]=qcmSel[i];
@@ -388,6 +406,7 @@ function checkItem(i){
 function checkCorrect(i){
   var ex=EXERCISES[i];
   if(ex.kind==="qcm") return userAnswers[i]===ex.correctIdx;
+  if(ex.kind==="txt") return ex.accepted.some(function(a){return norm(a)===norm(userAnswers[i]);});
   return parseFloat(userAnswers[i])===ex.ans;
 }
 
@@ -401,11 +420,17 @@ function lock(i){
     det.innerHTML=ex.solution;
   }else{
     $("fbm-"+i).textContent="Pas tout à fait…";
-    var bonne=(ex.kind==="qcm")?ex.choices[ex.correctIdx].text:ex.ans;
-    det.innerHTML="Bonne réponse : <strong>"+bonne+"</strong>.<br>"+ex.solution;
+    if(ex.kind==="txt"){
+      det.innerHTML=ex.solution;
+    }else{
+      var bonne=(ex.kind==="qcm")?ex.choices[ex.correctIdx].text:ex.ans;
+      det.innerHTML="Bonne réponse : <strong>"+bonne+"</strong>.<br>"+ex.solution;
+    }
   }
   if(ex.kind==="num"){
     var inp=$("inp-"+i);inp.disabled=true;inp.className="answer-input "+(correct?"correct-input":"wrong-input");
+  }else if(ex.kind==="txt"){
+    var inpt=$("inp-"+i);inpt.disabled=true;inpt.className="answer-input txt-input "+(correct?"correct-input":"wrong-input");
   }else{
     buildQcm(i);
   }
