@@ -105,9 +105,48 @@
   .star-on{ color:var(--j1); } .star-off{ color:var(--line); }
   .results .rmsg{ color:var(--ink-soft); font-weight:500; max-width:440px; margin:0 auto 6px; }
 
+  /* ===== Chronomètre ===== */
+  .timerbar{ display:flex; align-items:center; gap:12px; margin-top:14px; padding-top:12px; border-top:1.5px dashed var(--line); }
+  .timer-clock{ display:flex; align-items:center; gap:8px; font-weight:800; font-size:1.35rem; color:var(--j1-dark);
+    background:var(--j1-soft); border:2px solid var(--j1-accent); border-radius:12px; padding:6px 14px; min-width:120px; justify-content:center; }
+  .timer-clock .ic{ font-size:1.1rem; }
+  .timer-clock.warn{ color:var(--err); background:var(--err-soft); border-color:#f3c6c0; animation:tick 1s steps(1) infinite; }
+  @keyframes tick{ 50%{ transform:scale(1.06); } }
+  .timer-prog{ flex:1; height:14px; background:var(--j1-soft); border-radius:999px; overflow:hidden; border:1.5px solid var(--j1-accent); }
+  .timer-prog .fill{ height:100%; width:100%; background:linear-gradient(90deg, var(--j1), var(--j1-dark)); border-radius:999px; transition:width 1s linear; }
+  .timer-prog .fill.warn{ background:linear-gradient(90deg, #e8896f, var(--err)); }
+  .sound-toggle{ flex:0 0 auto; background:var(--white); border:2px solid var(--j1-accent); border-radius:10px; cursor:pointer;
+    font-family:inherit; font-size:1.1rem; padding:6px 10px; color:var(--j1-dark); }
+  .sound-toggle:hover{ background:var(--j1-soft); }
+
+  /* écran de démarrage + compte à rebours */
+  .startgate{ text-align:center; background:var(--white); border:2px solid var(--line); border-radius:18px; padding:26px 22px; margin-bottom:22px;
+    box-shadow:0 4px 14px rgba(44,36,24,0.05); }
+  .startgate h2{ color:var(--j1-dark); font-size:1.3rem; margin-bottom:8px; }
+  .startgate p{ color:var(--ink-soft); font-weight:500; margin-bottom:16px; font-size:0.96rem; }
+
+  .countdown{ position:fixed; inset:0; z-index:60; background:rgba(44,36,24,0.78); display:none;
+    align-items:center; justify-content:center; flex-direction:column; }
+  .countdown.show{ display:flex; }
+  .countdown .num{ font-size:8rem; font-weight:800; color:#fff; line-height:1; animation:cdpop 1s ease; }
+  .countdown .go{ font-size:4rem; color:var(--j1); }
+  @keyframes cdpop{ from{ transform:scale(0.4); opacity:0; } 40%{ transform:scale(1.1); opacity:1; } to{ transform:scale(1); opacity:1; } }
+
+  .exos-hidden{ filter:blur(7px); pointer-events:none; user-select:none; opacity:0.5; }
+
+  /* écran "temps écoulé" */
+  .timeup{ display:none; text-align:center; background:var(--white); border:2.5px solid #f3c6c0; border-radius:20px;
+    padding:30px 22px; margin-bottom:24px; box-shadow:0 10px 30px rgba(192,57,43,0.14); }
+  .timeup.show{ display:block; animation:pop 0.4s ease; }
+  .timeup .clock-ic{ font-size:3rem; }
+  .timeup h2{ color:var(--err); font-size:1.5rem; margin:8px 0 4px; }
+  .timeup p{ color:var(--ink-soft); font-weight:500; max-width:440px; margin:0 auto 6px; }
+  .timeup .rscore{ font-size:1.05rem; font-weight:700; color:var(--ink); margin:6px 0; }
+
   @media (max-width:430px){
     .hero h1{ font-size:1.62rem; } .stat .num{ font-size:1.25rem; } .stat .lbl{ font-size:0.64rem; }
     .num-input{ width:120px; } .wrap{ padding:20px 12px 50px; } .qcm-btn{ font-size:0.95rem; }
+    .timer-clock{ font-size:1.15rem; min-width:96px; } .countdown .num{ font-size:6rem; }
   }
 </style>
 </head>
@@ -134,6 +173,11 @@
         <div class="xp-top"><span>Progression</span><span id="xp-text">0 / 4</span></div>
         <div class="xp-track"><div class="xp-fill" id="xp-fill"></div></div>
       </div>
+      <div class="timerbar">
+        <div class="timer-clock" id="timer-clock"><span class="ic">&#9201;&#65039;</span><span id="timer-txt">1:30</span></div>
+        <div class="timer-prog"><div class="fill" id="timer-fill"></div></div>
+        <button class="sound-toggle" id="sound-toggle" title="Activer/couper le son" aria-label="son">&#128266;</button>
+      </div>
     </section>
 
     <div id="results" class="results">
@@ -145,9 +189,25 @@
       <button class="btn btn-big" onclick="generateAll()">&#8635; Recommencer</button>
     </div>
 
-    <main id="exoList"></main>
-    <button class="btn btn-big" onclick="generateAll()">&#8635; Recommencer tous les exercices</button>
+    <div id="startgate" class="startgate">
+      <h2>&#9201;&#65039; Défi chrono&nbsp;: 1 min 30</h2>
+      <p>Tu as <b>1 minute 30</b> pour compléter les 4 exercices. Prêt&nbsp;? Le compte à rebours démarre quand tu cliques.</p>
+      <button class="btn btn-big" id="start-btn" style="margin-top:0;">&#9654;&#65039; Démarrer le défi</button>
+    </div>
+
+    <div id="timeup" class="timeup">
+      <div class="clock-ic">&#9203;</div>
+      <h2>Temps écoulé&nbsp;!</h2>
+      <div class="rscore" id="tu-score"></div>
+      <p id="tu-msg"></p>
+      <button class="btn btn-big" onclick="restartChrono()">&#8635; Réessayer le défi</button>
+    </div>
+
+    <main id="exoList" class="exos-hidden"></main>
+    <button class="btn btn-big" id="restart-btn" onclick="restartChrono()" style="display:none;">&#8635; Recommencer le défi</button>
   </div>
+
+  <div id="countdown" class="countdown" aria-hidden="true"><div id="cd-inner"></div></div>
 
 <script>
 /* ============================================================
@@ -409,7 +469,148 @@ function checkFinished(){
     setTimeout(()=>res.scrollIntoView({behavior:'smooth', block:'center'}), 250);
   }
 }
+/* ============================================================
+   Chronomètre + compte à rebours + son (Web Audio API)
+   ============================================================ */
+const DUREE = 90;          /* 1 min 30 en secondes */
+let timeLeft = DUREE;
+let timerId = null;
+let running = false;
+let soundOn = true;
+
+/* --- Son via Web Audio (aucun fichier externe) --- */
+let actx = null;
+function audio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
+function beep(freq, dur, type, vol){
+  if(!soundOn) return;
+  const a = audio(); if(!a) return;
+  if(a.state==='suspended') a.resume();
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type||'sine'; o.frequency.value = freq;
+  g.gain.value = 0.0001;
+  o.connect(g); g.connect(a.destination);
+  const t = a.currentTime;
+  g.gain.exponentialRampToValueAtTime(vol||0.25, t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+(dur||0.15));
+  o.start(t); o.stop(t+(dur||0.15)+0.02);
+}
+function soundCountdown(){ beep(440,0.18,'square',0.3); }      /* bip 3,2,1 */
+function soundGo(){ beep(880,0.35,'square',0.32); }            /* Partez ! */
+function soundTick(){ beep(660,0.07,'sine',0.18); }            /* tic-tac final */
+function soundWin(){ /* petite fanfare montante */
+  if(!soundOn) return; const a=audio(); if(!a) return;
+  [523,659,784,1047].forEach((f,k)=> setTimeout(()=>beep(f,0.18,'triangle',0.28), k*140));
+}
+function soundTimeUp(){ /* sonnerie de fin (3 buzz graves) */
+  if(!soundOn) return;
+  [0,1,2].forEach(k=> setTimeout(()=>beep(200,0.32,'sawtooth',0.32), k*360));
+}
+
+/* --- Affichage du temps --- */
+function fmt(s){ const m=Math.floor(s/60), r=s%60; return m+':'+String(r).padStart(2,'0'); }
+function renderTimer(){
+  document.getElementById('timer-txt').textContent = fmt(timeLeft);
+  const fill = document.getElementById('timer-fill');
+  fill.style.width = (100*timeLeft/DUREE)+'%';
+  const warn = timeLeft<=10;
+  document.getElementById('timer-clock').classList.toggle('warn', warn);
+  fill.classList.toggle('warn', timeLeft<=20);
+}
+
+/* --- Compte à rebours 3,2,1, Partez ! --- */
+function runCountdown(done){
+  const ov = document.getElementById('countdown');
+  const inner = document.getElementById('cd-inner');
+  ov.classList.add('show');
+  let seq = ['3','2','1','Partez !'];
+  let k=0;
+  function step(){
+    if(k<seq.length){
+      const isGo = (seq[k]==='Partez !');
+      inner.className = isGo ? 'go' : 'num';
+      inner.textContent = seq[k];
+      /* re-trigger l'animation */
+      inner.style.animation='none'; void inner.offsetWidth; inner.style.animation='';
+      if(isGo) soundGo(); else soundCountdown();
+      k++;
+      setTimeout(step, isGo?700:850);
+    } else {
+      ov.classList.remove('show');
+      done();
+    }
+  }
+  step();
+}
+
+/* --- Démarrage / arrêt du chrono --- */
+function startTimer(){
+  timeLeft = DUREE; running = true;
+  renderTimer();
+  if(timerId) clearInterval(timerId);
+  timerId = setInterval(()=>{
+    if(!running) return;
+    timeLeft--;
+    renderTimer();
+    if(timeLeft<=5 && timeLeft>0) soundTick();
+    if(timeLeft<=0){ stopTimer(); onTimeUp(); }
+  }, 1000);
+}
+function stopTimer(){ running=false; if(timerId){ clearInterval(timerId); timerId=null; } }
+
+function onTimeUp(){
+  /* fige les exercices et affiche l'écran "temps écoulé" */
+  document.getElementById('exoList').classList.add('exos-hidden');
+  const ok = state.filter(s=>s.correct).length;
+  document.getElementById('tu-score').textContent = `Tu as réussi ${ok} exercice${ok>1?'s':''} sur ${TOTAL} dans le temps.`;
+  document.getElementById('tu-msg').textContent = 'Pas de panique — l\u2019entraînement régulier rend de plus en plus rapide. Relance le défi quand tu veux !';
+  document.getElementById('timeup').classList.add('show');
+  document.getElementById('timeup').scrollIntoView({behavior:'smooth', block:'center'});
+  soundTimeUp();
+}
+
+/* --- Lancement complet du défi --- */
+function launchDefi(){
+  document.getElementById('startgate').style.display='none';
+  document.getElementById('timeup').classList.remove('show');
+  document.getElementById('restart-btn').style.display='none';
+  generateAll();                                   /* (re)génère les 4 exos */
+  document.getElementById('exoList').classList.add('exos-hidden');  /* cachés pendant le décompte */
+  runCountdown(()=>{
+    document.getElementById('exoList').classList.remove('exos-hidden');
+    document.getElementById('restart-btn').style.display='block';
+    startTimer();
+    /* focus le 1er champ si présent */
+    const f = document.querySelector('#card-0 .num-input, #card-0 .qcm-btn');
+    if(f && f.focus) try{ f.focus(); }catch(e){}
+  });
+}
+function restartChrono(){ stopTimer(); launchDefi(); }
+
+/* quand tout est réussi avant la fin : on stoppe le chrono + son de victoire */
+const _origCheckFinished = checkFinished;
+checkFinished = function(){
+  if(state.every(s=>s.correct)){
+    stopTimer();
+    soundWin();
+  }
+  _origCheckFinished();
+};
+
+/* bouton son */
+document.getElementById('sound-toggle').addEventListener('click', function(){
+  soundOn = !soundOn;
+  this.innerHTML = soundOn ? '&#128266;' : '&#128263;';
+  if(soundOn){ audio(); beep(660,0.1,'sine',0.2); }
+});
+/* bouton démarrer */
+document.getElementById('start-btn').addEventListener('click', function(){
+  audio(); /* débloque l'audio sur interaction utilisateur */
+  launchDefi();
+});
+
+/* on prépare une première grille (cachée) sans démarrer le chrono */
 generateAll();
-</script>
+document.getElementById('exoList').classList.add('exos-hidden');
+renderTimer();</script>
 </body>
 </html>
