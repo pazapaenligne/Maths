@@ -64,6 +64,17 @@
   .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
   .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;}
 
+  .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;
+    flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+  .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;
+    border-radius:99px;font-size:.8rem;
+    font-family:'JetBrains Mono',monospace;
+    border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+  .chip .dot{width:8px;height:8px;border-radius:50%;}
+  .chip.correct .dot{background:var(--green);}
+  .chip.wrong   .dot{background:var(--pink);}
+  .chip.remaining .dot{background:var(--muted);}
+
   .card{width:100%;max-width:680px;background:var(--surface);
     border:2px solid var(--border);border-radius:var(--radius);
     padding:2rem 2rem 1.6rem;position:relative;z-index:1;
@@ -98,7 +109,7 @@
   .options{display:flex;flex-direction:column;gap:.55rem;margin-left:2.3rem;}
   .option{display:flex;align-items:center;gap:.7rem;
     padding:.7rem 1rem;border:2px solid var(--border);border-radius:10px;
-    background:var(--surface);cursor:pointer;min-height:2.75rem;
+    background:var(--surface);cursor:pointer;min-height:2.6rem;
     transition:border-color .15s,background .15s,transform .1s;font-size:.92rem;}
   .option:hover:not(.locked){border-color:var(--day-border);background:var(--day-light);}
   .option:active:not(.locked){transform:scale(.99);}
@@ -113,14 +124,14 @@
   .opt-label{flex:1;line-height:1.4;}
   .option.correct{border-color:var(--green);background:#f0faeb;}
   .option.correct .opt-box{background:var(--green);border-color:var(--green);}
-  .option.wrong{border-color:var(--day-color);background:var(--day-light);}
-  .option.wrong .opt-box{background:var(--day-color);border-color:var(--day-color);}
+  .option.wrong{border-color:var(--pink);background:#fff0ef;}
+  .option.wrong .opt-box{background:var(--pink);border-color:var(--pink);}
   .option.missed{border-color:var(--orange);background:#fffbeb;}
   .option.missed .opt-box{background:transparent;border-color:var(--orange);color:var(--orange);}
   .opt-tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
     margin-left:auto;padding:.15rem .5rem;border-radius:99px;display:none;}
   .option.correct .opt-tag{display:inline;background:var(--green);color:#fff;}
-  .option.wrong .opt-tag{display:inline;background:var(--day-color);color:#fff;}
+  .option.wrong .opt-tag{display:inline;background:var(--pink);color:#fff;}
   .option.missed .opt-tag{display:inline;background:var(--orange);color:#fff;}
 
   .q-feedback{margin:.7rem 0 0 2.3rem;padding:.6rem .9rem;border-radius:8px;
@@ -128,12 +139,12 @@
     display:none;}
   .q-feedback.show{display:block;}
   .q-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
-  .q-feedback.ko{background:var(--day-light);border:1.5px solid var(--day-color);color:var(--day-dark);}
+  .q-feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
 
   .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.6rem;position:relative;z-index:2;}
   .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;
     font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;
-    transition:transform .12s,box-shadow .15s;min-height:2.75rem;}
+    transition:transform .12s,box-shadow .15s;min-height:2.6rem;}
   .btn:active{transform:scale(.96);}
   .btn:disabled{opacity:.38;cursor:default;}
   .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
@@ -155,7 +166,7 @@
     border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.6;}
   .recap-item .eq{color:var(--day-color);flex:1;}
   .recap-item.ok-item{border-color:#b5e08a;}
-  .recap-item.ko-item{border-color:var(--day-border);}
+  .recap-item.ko-item{border-color:#f9c0bb;}
 
   @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
   @media(max-width:480px){
@@ -190,6 +201,12 @@
   <div class="progress-bar-bg">
     <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
   </div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">2</span> restantes</div>
 </div>
 
 <div class="card" id="ex-card">
@@ -413,6 +430,9 @@ function checkAll(){
   document.getElementById("progress-bar").style.width = "100%";
   document.getElementById("prog-pct").textContent = "100\u00a0%";
   document.getElementById("prog-label").textContent = "Termin\u00e9 \u2014 "+score+" / "+TOTAL;
+  document.getElementById("count-ok").textContent = score;
+  document.getElementById("count-ko").textContent = TOTAL - score;
+  document.getElementById("count-rem").textContent = 0;
   document.getElementById("btn-check").disabled = true;
   document.getElementById("btn-solution").style.display = "inline-flex";
   document.getElementById("btn-restart-inline").style.display = "inline-flex";
@@ -485,6 +505,9 @@ function restart(){
   document.getElementById("progress-bar").style.width="0%";
   document.getElementById("prog-pct").textContent="0\u00a0%";
   document.getElementById("prog-label").textContent="Question 1 / "+TOTAL;
+  document.getElementById("count-ok").textContent="0";
+  document.getElementById("count-ko").textContent="0";
+  document.getElementById("count-rem").textContent=TOTAL;
   buildQuiz();
   showQuestion(0);
   window.scrollTo({top:0,behavior:"smooth"});
