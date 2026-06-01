@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Semaine 2 Jour 3 — Multiplier des nombres décimaux</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — Mercredi (Jour 3) → Vert ═══ */
+    :root {
+      --day-color:  #8dc63f;
+      --day-dark:   #3d7a10;
+      --day-light:  #f0faeb;
+      --day-border: #b5e08a;
+      --day-glow:   rgba(141,198,63,.3);
+    }
+    /* ═══ CHARTE PAZAPA — NE PAS TOUCHER ═══ */
+    :root {
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+      position:relative;overflow-x:hidden;letter-spacing:.02em;word-spacing:.06em;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;}
+
+    .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong .dot{background:var(--pink);}
+    .chip.remaining .dot{background:var(--muted);}
+
+    .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--blue));}
+
+    .q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.7rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .q-title{font-size:1.02rem;font-weight:800;color:var(--text);margin-bottom:.4rem;line-height:1.35;}
+    .consigne{font-size:.88rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;}
+    .method-box{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.2rem;font-size:.84rem;font-family:'JetBrains Mono',monospace;color:var(--day-dark);line-height:1.8;}
+    .method-box strong{color:var(--day-dark);}
+
+    /* Ex1 : retrouver la virgule (saisie du 1er facteur) */
+    .v-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);position:relative;z-index:2;}
+    /* Ex1 : poser la virgule en cliquant entre les chiffres */
+    .v-number{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.4rem;color:var(--text);user-select:none;}
+    .v-digit{padding:.1rem .05rem;}
+    .v-slot{display:inline-block;width:14px;height:1.7rem;margin:0 1px;border-radius:4px;cursor:pointer;position:relative;transition:background .15s;}
+    .v-slot:hover:not(.locked){background:var(--day-light);}
+    .v-slot.placed{background:transparent;}
+    .v-slot.placed::after{content:'\002C';position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font-size:1.6rem;font-weight:800;color:var(--day-dark);line-height:1;}
+    .v-slot.slot-correct::after{content:'\002C';position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font-size:1.6rem;font-weight:800;color:#2f6e10;line-height:1;}
+    .v-slot.slot-correct{background:#f0faeb;}
+    .v-slot.slot-wrong::after{content:'\002C';position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font-size:1.6rem;font-weight:800;color:#c0392b;line-height:1;}
+    .v-slot.slot-wrong{background:#fff0ef;}
+    .v-slot.locked{cursor:default;}
+    .v-entier{margin-left:.6rem;padding:.25rem .6rem;border:1.5px dashed var(--day-border);border-radius:8px;font-size:.72rem;font-weight:700;color:var(--muted);cursor:pointer;min-height:2rem;display:inline-flex;align-items:center;transition:all .15s;}
+    .v-entier:hover:not(.locked){border-color:var(--day-color);color:var(--day-dark);}
+    .v-entier.placed{background:var(--day-light);border-style:solid;border-color:var(--day-color);color:var(--day-dark);}
+    .v-entier.slot-correct{background:#f0faeb;border-color:var(--green);color:#2f6e10;border-style:solid;}
+    .v-entier.slot-wrong{background:#fff0ef;border-color:var(--pink);color:#c0392b;border-style:solid;}
+    .v-entier.locked{cursor:default;}
+    .v-rest{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.02rem;margin-left:.3rem;}
+
+    /* Ex3 : poser et effectuer (saisie du résultat) */
+    .op-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.9rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);position:relative;z-index:2;}
+    .op-lbl{font-family:'JetBrains Mono',monospace;font-weight:700;min-width:1.6rem;color:var(--muted);}
+    .op-calc{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;min-width:8rem;}
+    .op-eq{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--muted);}
+    .answer-input{width:120px;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1.05rem;padding:.5rem .85rem;outline:none;transition:border-color .2s;height:2.6rem;text-align:center;}
+    .answer-input:focus{border-color:var(--day-color);}
+    .answer-input.correct-input{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .answer-input.wrong-input{border-color:var(--pink);background:#fff0ef;color:#c0392b;}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;position:relative;z-index:2;margin-top:.4rem;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;position:relative;z-index:2;min-height:2.6rem;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#234d06;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-hint{background:var(--orange);color:#fff;}
+    .btn-solution{background:var(--day-dark);color:#fff;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    .hint-box{margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.75rem 1rem;font-size:.85rem;color:#7a6010;display:none;line-height:1.8;font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
+
+    .feedback{margin-top:1.2rem;padding:.8rem 1rem;border-radius:10px;font-size:.9rem;display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback.partial{background:#fffbeb;border:1.5px solid var(--yellow);color:#7a6010;}
+    .feedback-icon{font-size:1.4rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;margin-top:.3rem;line-height:1.8;}
+
+    .nav-row{display:flex;justify-content:space-between;margin-top:1.4rem;gap:.7rem;position:relative;z-index:2;flex-wrap:wrap;}
+
+    .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-dark);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;letter-spacing:.1em;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.8rem;padding:.65rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.6;}
+    .recap-item .eq{color:var(--day-dark);flex:1;}
+    .recap-item.ok-item{border-color:#b5e08a;}
+    .recap-item.ko-item{border-color:#f9c0bb;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      .card,.results-card{padding:1.4rem;}
+      .btn{font-size:.85rem;padding:.55rem 1rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f28b82"></span>
+      Pazapa &middot; Maths &middot; 6&egrave;me
+    </div>
+    <div class="week-label">Semaine 2 &ndash; Jour 3</div>
+    <h1><span style="color:var(--text)">Multiplier</span> <span class="hl">des nombres d&eacute;cimaux</span></h1>
+    <p class="subtitle">2 exercices &middot; 6 items &middot; produits et virgule</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="prog-label">Exercice 1 / 2</span>
+      <span id="prog-pct">0&nbsp;%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="score-row">
+    <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+    <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+    <div class="chip remaining"><div class="dot"></div><span id="count-rem">6</span> restantes</div>
+  </div>
+
+  <div class="card" id="ex-card">
+    <div class="card-stripe"></div>
+    <div class="q-num" id="q-num">Exercice 1</div>
+    <div class="theme-badge" id="q-theme">Multiplier les d&eacute;cimaux</div>
+    <div class="q-title" id="q-title"></div>
+    <div class="consigne" id="q-consigne"></div>
+    <div class="method-box" id="method-box"></div>
+
+    <div id="answer-zone"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-check" onclick="checkAnswer()">&#10003; V&eacute;rifier</button>
+      <button class="btn btn-hint" id="btn-hint" onclick="toggleHint()">? Indice</button>
+      <button class="btn btn-solution" id="btn-solution" onclick="showSolution()" style="display:none;">&#128161; Solution</button>
+    </div>
+
+    <div class="hint-box" id="hint-box"></div>
+
+    <div class="feedback" id="feedback">
+      <span class="feedback-icon" id="fb-icon"></span>
+      <div>
+        <div id="fb-msg"></div>
+        <div class="feedback-detail" id="fb-detail"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()">&larr; Pr&eacute;c&eacute;dent</button>
+      <button class="btn btn-ghost" id="btn-restart" onclick="restartCurrent()">&#128260; Recommencer</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Suivant &rarr;</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-screen">
+    <div class="results-card">
+      <div class="logo-badge" style="margin-bottom:.5rem">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#f28b82"></span>
+        R&eacute;sultats
+      </div>
+      <div class="results-score"><span class="s-num" id="score-num">0</span>/6</div>
+      <div class="stars" id="stars-row"></div>
+      <div class="results-msg" id="results-msg"></div>
+      <div class="recap-list" id="recap-list"></div>
+      <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">&#128260; Recommencer</button>
+    </div>
+  </div>
+
+<script>
+function toNum(s){ return parseFloat(String(s).replace(',', '.').replace(/\s/g, '')); }
+function sameNum(a, b){ var x=toNum(a),y=toNum(b); return !isNaN(x)&&!isNaN(y)&&Math.abs(x-y)<1e-9; }
+var $ = function(id){ return document.getElementById(id); };
+
+var EXERCISES = [
+  {
+    type:"virgule",
+    title:"1. Retrouver l\u2019emplacement de la virgule dans le premier facteur.",
+    consigne:"Clique entre deux chiffres du premier nombre pour y placer la virgule au bon endroit. Si le nombre reste entier, choisis &laquo;&nbsp;entier&nbsp;&raquo;.",
+    method:"<strong>M\u00e9thode\u00a0:</strong> compte les chiffres apr\u00e8s la virgule des deux nombres\u00a0: le r\u00e9sultat en a le m\u00eame nombre.",
+    rows:[
+      { digits:"358",  f2:"4,88", res:"174,704",   virgPos:2, ans:"35,8" },
+      { digits:"5911", f2:"17,6", res:"104 033,6", virgPos:4, ans:"5911" },
+      { digits:"29",   f2:"78,3", res:"227,07",    virgPos:1, ans:"2,9" }
+    ],
+    hint:"Regarde combien le r\u00e9sultat a de chiffres apr\u00e8s la virgule. Place la virgule dans le premier nombre pour retrouver ce m\u00eame nombre de d\u00e9cimales."
+  },
+  {
+    type:"ops",
+    title:"2. Poser et effectuer les op\u00e9rations suivantes.",
+    consigne:"Calcule chaque produit, puis \u00e9cris le r\u00e9sultat.",
+    method:"<strong>M\u00e9thode\u00a0:</strong> compte les chiffres apr\u00e8s la virgule des deux nombres\u00a0: le r\u00e9sultat en a le m\u00eame nombre.",
+    items:[
+      { lbl:"a.", calc:"4,3 \u00d7 5,2",  ans:"22,36" },
+      { lbl:"b.", calc:"16,8 \u00d7 2,7", ans:"45,36" },
+      { lbl:"c.", calc:"3,61 \u00d7 0,9", ans:"3,249" }
+    ],
+    hint:"Calcule le produit des nombres entiers (sans virgule), puis compte le nombre total de d\u00e9cimales des deux facteurs pour placer la virgule."
+  }
+];
+
+var TOTAL = EXERCISES.length;
+function itemsOf(ex){ return ex.type==="virgule" ? ex.rows.length : ex.items.length; }
+var TOTAL_PTS = EXERCISES.reduce(function(s,ex){ return s+itemsOf(ex); }, 0); // 3+3=6
+
+var current = 0;
+var userAnswers = new Array(TOTAL).fill(null);
+var hintOpen = false;
+var draftV = [], draftOps = [];
+
+function render(){
+  var ex = EXERCISES[current];
+  $("q-num").textContent = "Exercice " + (current+1);
+  $("q-theme").textContent = "Multiplier les d\u00e9cimaux";
+  $("q-title").textContent = ex.title;
+  $("q-consigne").innerHTML = ex.consigne;
+  $("method-box").innerHTML = ex.method;
+  $("hint-box").innerHTML=""; $("hint-box").classList.remove("show"); hintOpen=false;
+  $("feedback").className="feedback";
+
+  var done = userAnswers[current] !== null;
+  var zone = $("answer-zone"); zone.innerHTML="";
+  if(ex.type==="virgule") buildVirgule(zone, ex, done);
+  else buildOps(zone, ex, done);
+
+  $("btn-check").style.display = done ? "none" : "inline-flex";
+  $("btn-check").disabled = done;
+  $("btn-hint").disabled = done;
+  $("btn-solution").style.display = done ? "inline-flex" : "none";
+  $("btn-solution").disabled = false;
+  $("btn-next").disabled = !done;
+  $("btn-prev").disabled = current===0;
+  $("btn-next").textContent = (current===TOTAL-1) ? "Terminer \u2192" : "Suivant \u2192";
+
+  if(done) showFeedback();
+  updateProgress();
+}
+
+function buildVirgule(zone, ex, done){
+  if(draftV.length !== ex.rows.length) draftV = new Array(ex.rows.length).fill(null);
+  var saved = done ? userAnswers[current].data : null;
+  ex.rows.forEach(function(row, i){
+    var line = document.createElement("div"); line.className="v-row";
+    // Bloc cliquable : chiffres + emplacements de virgule entre eux
+    var nb = document.createElement("span"); nb.className="v-number"; nb.id="vnum"+i;
+    var chars = row.digits.split("");
+    var chosen = done ? saved[i].pos : draftV[i];
+    chars.forEach(function(ch, k){
+      var d = document.createElement("span"); d.className="v-digit"; d.textContent = ch;
+      nb.appendChild(d);
+      if(k < chars.length-1){ // emplacement de virgule entre k et k+1 (après k+1 chiffres)
+        var slot = document.createElement("span");
+        var posAfter = k+1;
+        slot.className = "v-slot"; slot.setAttribute("data-pos", posAfter);
+        if(chosen === posAfter) slot.classList.add("placed");
+        if(done){
+          slot.classList.add("locked");
+          if(posAfter === row.virgPos) slot.classList.add("slot-correct");
+          else if(chosen === posAfter) slot.classList.add("slot-wrong");
+        } else {
+          slot.onclick = (function(idx, pos){ return function(){
+            draftV[idx] = (draftV[idx]===pos) ? null : pos;
+            render();
+          };})(i, posAfter);
+        }
+        nb.appendChild(slot);
+      }
+    });
+    // choix "nombre entier" (pas de virgule) = position = longueur
+    var entierPos = chars.length;
+    var ent = document.createElement("span");
+    ent.className = "v-entier"; ent.textContent = "entier";
+    if(chosen === entierPos) ent.classList.add("placed");
+    if(done){
+      ent.classList.add("locked");
+      if(row.virgPos === entierPos) ent.classList.add("slot-correct");
+      else if(chosen === entierPos) ent.classList.add("slot-wrong");
+    } else {
+      ent.onclick = (function(idx, pos){ return function(){
+        draftV[idx] = (draftV[idx]===pos) ? null : pos;
+        render();
+      };})(i, entierPos);
+    }
+    nb.appendChild(ent);
+    line.appendChild(nb);
+    var rest = document.createElement("span"); rest.className="v-rest"; rest.textContent = " \u00d7 " + row.f2 + " = " + row.res;
+    line.appendChild(rest);
+    zone.appendChild(line);
+  });
+}
+
+function buildOps(zone, ex, done){
+  if(draftOps.length !== ex.items.length) draftOps = new Array(ex.items.length).fill("");
+  var saved = done ? userAnswers[current].data : null;
+  ex.items.forEach(function(it, i){
+    var row = document.createElement("div"); row.className="op-row";
+    var lbl = document.createElement("span"); lbl.className="op-lbl"; lbl.textContent=it.lbl; row.appendChild(lbl);
+    var calc = document.createElement("span"); calc.className="op-calc"; calc.textContent=it.calc; row.appendChild(calc);
+    var eq = document.createElement("span"); eq.className="op-eq"; eq.textContent="="; row.appendChild(eq);
+    var inp = document.createElement("input"); inp.type="text"; inp.className="answer-input"; inp.placeholder="?"; inp.autocomplete="off"; inp.id="op"+i;
+    if(done){
+      inp.value = saved[i].val; inp.disabled=true;
+      inp.className = "answer-input " + (saved[i].ok ? "correct-input" : "wrong-input");
+    } else {
+      inp.value = draftOps[i];
+      inp.oninput = (function(idx){ return function(){ draftOps[idx]=this.value; }; })(i);
+      inp.addEventListener("keydown", function(e){ if(e.key==="Enter" && !$("btn-check").disabled) checkAnswer(); });
+    }
+    row.appendChild(inp); zone.appendChild(row);
+  });
+}
+
+function emptyWarning(){
+  var fb=$("feedback");
+  fb.className="feedback show ko";
+  $("fb-icon").textContent="\u270b";
+  $("fb-msg").innerHTML="<strong>R\u00e9ponds d\u2019abord\u00a0!</strong>";
+  $("fb-detail").textContent="\u00c9cris au moins une r\u00e9ponse avant de v\u00e9rifier.";
+}
+
+function checkAnswer(){
+  if(userAnswers[current] !== null) return;
+  var ex = EXERCISES[current];
+  if(ex.type==="virgule"){
+    if(!draftV.some(function(v){ return v!==null && v!==undefined; })){ emptyWarning(); return; }
+    var data = ex.rows.map(function(r,i){
+      var pos = draftV[i];
+      return { pos:pos, ok: (pos!==null && pos!==undefined && pos===r.virgPos) };
+    });
+    var okCount = data.reduce(function(n,d){ return n+(d.ok?1:0); }, 0);
+    userAnswers[current] = { okCount:okCount, total:ex.rows.length, data:data };
+  } else {
+    if(!draftOps.some(function(v){ return (v||"").trim().length>0; })){ emptyWarning(); return; }
+    var data2 = ex.items.map(function(it,i){
+      var raw=(draftOps[i]||"").trim();
+      return { val:raw, ok: raw!=="" && sameNum(raw, it.ans) };
+    });
+    var okCount2 = data2.reduce(function(n,d){ return n+(d.ok?1:0); }, 0);
+    userAnswers[current] = { okCount:okCount2, total:ex.items.length, data:data2 };
+  }
+  render();
+}
+
+function showFeedback(){
+  var ex = EXERCISES[current];
+  var a = userAnswers[current];
+  var ratio = a.okCount / a.total;
+  var fb = $("feedback");
+  fb.className = "feedback show " + (ratio>=1 ? "ok" : (a.okCount===0 ? "ko" : "partial"));
+  $("fb-icon").textContent = ratio>=1 ? "\u2705" : (a.okCount===0 ? "\u274c" : "\u26a0");
+  var msg;
+  if(ratio>=1) msg="Parfait\u00a0! Tout est correct.";
+  else if(ratio>=0.5) msg="Bien, mais quelques erreurs.";
+  else if(a.okCount>0) msg="\u00c0 retravailler.";
+  else msg="Rien de correct cette fois.";
+  $("fb-msg").innerHTML = "<strong>"+a.okCount+" / "+a.total+"</strong> \u2014 "+msg;
+  $("fb-detail").innerHTML = ratio>=1 ? "" : buildCorrection(ex, a);
+}
+
+function buildCorrection(ex, a){
+  var L=[];
+  if(ex.type==="virgule"){
+    ex.rows.forEach(function(r,i){
+      var d=a.data[i];
+      if(!d.ok){
+        if(d.pos===null || d.pos===undefined) L.push(r.digits+" \u00d7 "+r.f2+"\u00a0: tu n\u2019as pas plac\u00e9 la virgule.");
+        else L.push(r.digits+" \u00d7 "+r.f2+" = "+r.res+" \u2192 le premier nombre est "+r.ans+" (compte les chiffres apr\u00e8s la virgule du r\u00e9sultat).");
+      }
+    });
+  } else {
+    ex.items.forEach(function(it,i){
+      var d=a.data[i];
+      if(!d.ok){
+        if(d.val==="") L.push(it.lbl+" tu n\u2019as pas r\u00e9pondu.");
+        else L.push(it.lbl+" "+it.calc+" = "+it.ans+" (place la virgule selon le nombre de d\u00e9cimales).");
+      }
+    });
+  }
+  if(L.length===0) return "";
+  return "\u00c0 revoir\u00a0:<br>"+L.join("<br>");
+}
+
+function showSolution(){
+  if(userAnswers[current] === null) return;
+  var ex = EXERCISES[current];
+  if(ex.type==="virgule"){
+    // forcer l'affichage de la bonne position de virgule
+    userAnswers[current].data = ex.rows.map(function(r){ return { pos:r.virgPos, ok:true }; });
+    var zone=$("answer-zone"); zone.innerHTML=""; buildVirgule(zone, ex, true);
+  } else {
+    ex.items.forEach(function(it,i){ var el=$("op"+i); if(el){ el.value=it.ans; el.className="answer-input correct-input"; } });
+  }
+  $("feedback").className="feedback show ok";
+  $("fb-icon").textContent="\u2705";
+  $("fb-msg").innerHTML="<strong>Solution affich\u00e9e.</strong>";
+  $("fb-detail").textContent="Les bonnes r\u00e9ponses de cet exercice sont affich\u00e9es.";
+  $("btn-solution").disabled=true;
+}
+
+function toggleHint(){
+  if(userAnswers[current] !== null) return;
+  hintOpen = !hintOpen;
+  var h=$("hint-box");
+  if(hintOpen){ h.innerHTML="<strong>? Indice\u00a0:</strong> "+EXERCISES[current].hint; h.classList.add("show"); }
+  else h.classList.remove("show");
+}
+
+function updateProgress(){
+  var okPts=0, total=0;
+  userAnswers.forEach(function(a){ if(a!==null){ okPts+=a.okCount; total+=a.total; } });
+  $("progress-bar").style.width = Math.round(total/TOTAL_PTS*100)+"%";
+  $("prog-label").textContent = "Exercice " + (current+1) + " / " + TOTAL;
+  $("prog-pct").textContent = Math.round(total/TOTAL_PTS*100)+"\u00a0%";
+  $("count-ok").textContent = okPts;
+  $("count-ko").textContent = total - okPts;
+  $("count-rem").textContent = TOTAL_PTS - total;
+}
+
+function nextQ(){ if(current<TOTAL-1){ current++; render(); window.scrollTo({top:0,behavior:"smooth"}); } else showResults(); }
+function prevQ(){ if(current>0){ current--; render(); window.scrollTo({top:0,behavior:"smooth"}); } }
+
+function totalScore(){ return userAnswers.reduce(function(s,a){ return s+(a?a.okCount:0); }, 0); }
+
+function showResults(){
+  $("ex-card").style.display="none";
+  $("results-screen").classList.add("show");
+  var ok = totalScore();
+  $("score-num").textContent = ok;
+  var ratio = ok / TOTAL_PTS;
+  var stars = ratio>=1?5 : ratio>=0.8?4 : ratio>=0.6?3 : ratio>=0.4?2 : 1;
+  $("stars-row").textContent = "\u2b50".repeat(stars)+"\u2606".repeat(5-stars);
+  var msg;
+  if(ratio>=1) msg="Parfait\u00a0! Les 6 items sont justes.";
+  else if(ratio>=0.8) msg="Tr\u00e8s bien\u00a0! Tu ma\u00eetrises la multiplication des d\u00e9cimaux.";
+  else if(ratio>=0.5) msg="Bien. Quelques items sont \u00e0 revoir.";
+  else msg="\u00c0 retravailler. Relis la m\u00e9thode, puis recommence.";
+  $("results-msg").textContent = msg;
+  var list=$("recap-list"); list.innerHTML="";
+  var titles=["1. Emplacement de la virgule","2. Poser et effectuer"];
+  EXERCISES.forEach(function(ex,i){
+    var a=userAnswers[i]; var sc=a?a.okCount:0, tot=itemsOf(ex);
+    var full=a && a.okCount===a.total;
+    var div=document.createElement("div");
+    div.className="recap-item "+(full?"ok-item":"ko-item");
+    div.innerHTML="<span>"+(full?"\u2705":"\u274c")+"</span><span class='eq'></span><span>"+sc+" / "+tot+"</span>";
+    div.querySelector(".eq").textContent=titles[i];
+    list.appendChild(div);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restartCurrent(){
+  var ex = EXERCISES[current];
+  userAnswers[current] = null;
+  if(ex.type==="virgule") draftV = new Array(ex.rows.length).fill(null);
+  else draftOps = new Array(ex.items.length).fill("");
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  userAnswers = new Array(TOTAL).fill(null);
+  draftV=[]; draftOps=[]; current=0;
+  $("ex-card").style.display="block";
+  $("results-screen").classList.remove("show");
+  $("count-ok").textContent="0"; $("count-ko").textContent="0"; $("count-rem").textContent=TOTAL_PTS;
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  $("count-rem").textContent = TOTAL_PTS;
+  render();
+});
+</script>
+</body>
+</html>
