@@ -240,6 +240,7 @@
     <button class="btn btn-primary" id="btn-check" onclick="checkAll()">&#10003; V&eacute;rifier</button>
     <button class="btn btn-hint" id="btn-hint" onclick="toggleHint()">? Indice</button>
     <button class="btn btn-ghost" id="btn-solution" onclick="showSolution()" style="display:none;">&#128161; Solution</button>
+    <button class="btn btn-primary" id="btn-results" onclick="goResults()" style="display:none;">Voir les résultats &#8594;</button>
     <button class="btn btn-ghost" id="btn-restart-inline" onclick="restart()" style="display:none;">&#8635; Recommencer</button>
   </div>
 </div>
@@ -275,6 +276,8 @@ var BLANKS = [
 var TOTAL = BLANKS.length;
 var userAnswers = new Array(TOTAL).fill("");
 var validated = false;
+var pendingScore = 0;
+var pendingResults = [];
 var hintOpen = false;
 var $ = function(id){ return document.getElementById(id); };
 
@@ -402,7 +405,13 @@ function checkAll(){
     $("fb-detail").innerHTML=buildCorr(results);
   }
   fb.scrollIntoView({behavior:"smooth",block:"nearest"});
-  setTimeout(function(){ showResults(score,results); }, 2200);
+  pendingScore = score;
+  pendingResults = results;
+  $("btn-results").style.display = "inline-flex";
+}
+
+function goResults(){
+  showResults(pendingScore, pendingResults);
 }
 
 function markChips(results){
@@ -494,6 +503,7 @@ function restart(){
   $("btn-check").disabled=false;
   $("btn-hint").disabled=false;
   $("btn-solution").style.display="none";
+  $("btn-results").style.display="none";
   $("btn-solution").disabled=false;
   $("btn-restart-inline").style.display="none";
   $("progress-bar").style.width="0%";
