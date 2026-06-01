@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Résoudre les exercices — Quel est l'intrus ?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ===== Charte du jour : J4 BLEU ===== */
+  :root{
+    --j4:#3ab5d8; --j4-dark:#1a6e88; --j4-soft:#e8f6fb; --j4-accent:#9dd4e8;
+    --ink:#1b2a30; --ink-soft:#4d6470; --ok:#3d8b40; --ok-soft:#eaf6ea;
+    --err:#c0392b; --err-soft:#fdecea; --line:#cfe6ee; --white:#ffffff;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ width:100%; overflow-x:hidden; }
+  body{ font-family:'JetBrains Mono', ui-monospace, monospace; color:var(--ink); background:var(--white);
+    line-height:1.55; -webkit-font-smoothing:antialiased; position:relative; min-height:100vh; }
+
+  .blob{ position:fixed; z-index:0; background:var(--j4-accent); opacity:0.28; filter:blur(1px); pointer-events:none; }
+  .blob-1{ top:-160px; right:-150px; width:460px; height:430px; border-radius:62% 38% 46% 54% / 58% 47% 53% 42%; }
+  .blob-2{ top:42%; left:-190px; width:430px; height:470px; border-radius:44% 56% 63% 37% / 49% 38% 62% 51%; opacity:0.26; }
+  .blob-3{ bottom:-180px; left:14%; width:500px; height:420px; border-radius:55% 45% 38% 62% / 42% 60% 40% 58%; opacity:0.27; }
+
+  .wrap{ position:relative; z-index:1; max-width:760px; margin:0 auto; padding:26px 18px 60px; }
+  .hero{ text-align:center; padding:14px 6px 22px; }
+  .pill{ display:inline-block; background:var(--j4-soft); border:2px solid var(--j4-accent); color:var(--j4-dark);
+    font-weight:700; font-size:0.82rem; letter-spacing:0.06em; text-transform:uppercase; padding:7px 16px; border-radius:999px; margin-bottom:16px; }
+  .hero h1{ font-size:2.05rem; font-weight:800; color:var(--j4-dark); line-height:1.15; margin-bottom:10px; }
+  .hero p.sub{ font-size:1.02rem; color:var(--ink-soft); max-width:560px; margin:0 auto; font-weight:500; }
+  .hero .consigne{ display:inline-block; margin-top:14px; background:var(--white); border:2px dashed var(--j4-accent);
+    border-radius:12px; padding:8px 16px; font-weight:600; color:var(--j4-dark); font-size:0.92rem; }
+
+  .topbar{ position:sticky; top:10px; z-index:20; background:var(--white); border:2px solid var(--line); border-radius:16px;
+    box-shadow:0 6px 20px rgba(26,110,136,0.10); padding:14px 16px; margin:10px 0 26px; }
+  .dots{ display:flex; gap:8px; justify-content:center; margin-bottom:12px; }
+  .dot{ width:30px; height:30px; border-radius:50%; border:2.5px solid var(--j4-accent); background:var(--white);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; color:var(--j4-dark); }
+  .dot.active{ background:var(--j4); color:var(--white); border-color:var(--j4-dark); box-shadow:0 0 0 4px rgba(58,181,216,0.25); }
+  .dot.ok{ background:var(--ok); color:#fff; border-color:var(--ok); }
+  .dot.ko{ background:var(--err); color:#fff; border-color:var(--err); }
+  .chrono-row{ display:flex; align-items:center; gap:12px; }
+  .chrono-clock{ display:flex; align-items:center; gap:7px; font-weight:800; font-size:1.3rem; color:var(--j4-dark);
+    background:var(--j4-soft); border:2px solid var(--j4-accent); border-radius:12px; padding:6px 14px; min-width:84px; justify-content:center; }
+  .chrono-clock.warn{ color:var(--err); background:var(--err-soft); border-color:#f3c6c0; animation:tick 1s steps(1) infinite; }
+  @keyframes tick{ 50%{ transform:scale(1.08); } }
+  .chrono-prog{ flex:1; height:14px; background:var(--j4-soft); border-radius:999px; overflow:hidden; border:1.5px solid var(--j4-accent); }
+  .chrono-prog .fill{ height:100%; width:100%; background:linear-gradient(90deg, var(--j4), var(--j4-dark)); border-radius:999px; transition:width 1s linear; }
+  .chrono-prog .fill.warn{ background:linear-gradient(90deg, #e8896f, var(--err)); }
+  .sound-toggle{ flex:0 0 auto; background:var(--white); border:2px solid var(--j4-accent); border-radius:10px; cursor:pointer;
+    font-family:inherit; font-size:1.1rem; padding:6px 10px; color:var(--j4-dark); }
+  .sound-toggle:hover{ background:var(--j4-soft); }
+
+  .card{ background:var(--white); border:2px solid var(--line); border-radius:18px; padding:24px 20px; margin-bottom:22px;
+    box-shadow:0 4px 14px rgba(27,42,48,0.05); }
+  .card.is-correct{ border-color:#bfe0c0; }
+  .card.is-error{ border-color:#f3c6c0; }
+  .card-head{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .badge-num{ flex:0 0 auto; width:42px; height:42px; background:var(--j4); color:var(--white); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.25rem; }
+  .card-head .ctitle{ font-weight:700; font-size:1.02rem; color:var(--j4-dark); }
+
+  .qline{ font-size:1.18rem; line-height:1.5; margin-bottom:6px; text-align:center; font-weight:600; }
+  .qline b{ color:var(--j4-dark); }
+  .qhint{ text-align:center; font-size:0.9rem; color:var(--ink-soft); margin-bottom:16px; }
+
+  .choices{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .choice{ position:relative; font-family:inherit; min-height:132px; display:flex; align-items:center; justify-content:center;
+    text-align:center; border:2.5px solid var(--j4-accent); border-radius:14px; background:var(--white); color:var(--ink);
+    cursor:pointer; transition:0.15s; padding:22px 14px 16px; font-size:1.4rem; }
+  .choice:hover{ background:var(--j4-soft); } .choice:active{ transform:scale(0.97); }
+  .choice .lab{ position:absolute; top:8px; left:12px; font-size:0.85rem; font-weight:800; color:var(--j4); }
+  .choice em{ font-style:italic; }
+  .choice svg{ width:100%; height:auto; max-height:160px; }
+  .choice.is-correct{ border-color:var(--ok); background:var(--ok-soft); }
+  .choice.is-error{ border-color:var(--err); background:var(--err-soft); }
+  .choice.lock{ cursor:default; }
+
+  .feedback{ margin-top:16px; font-weight:700; text-align:center; min-height:1.4em; }
+  .feedback.ok{ color:var(--ok); } .feedback.bad{ color:var(--err); }
+
+  .startgate{ text-align:center; background:var(--white); border:2px solid var(--line); border-radius:18px; padding:26px 22px; margin-bottom:22px;
+    box-shadow:0 4px 14px rgba(27,42,48,0.05); }
+  .startgate h2{ color:var(--j4-dark); font-size:1.3rem; margin-bottom:8px; }
+  .startgate p{ color:var(--ink-soft); font-weight:500; margin-bottom:16px; font-size:0.96rem; }
+
+  .btn{ font-family:inherit; font-weight:700; font-size:1.02rem; padding:14px 26px; border:none; border-radius:12px; cursor:pointer; transition:0.12s; }
+  .btn:active{ transform:scale(0.97); }
+  .btn-big{ display:block; width:100%; max-width:360px; margin:18px auto 0; background:var(--j4-dark); color:var(--white);
+    font-size:1.08rem; padding:16px; box-shadow:0 5px 0 #124f63; }
+  .btn-big:hover{ background:#155f78; }
+
+  .countdown{ position:fixed; inset:0; z-index:60; background:rgba(20,50,62,0.80); display:none; align-items:center; justify-content:center; }
+  .countdown.show{ display:flex; }
+  .countdown .num{ font-size:8rem; font-weight:800; color:#fff; line-height:1; animation:cdpop 1s ease; }
+  .countdown .go{ font-size:4rem; color:var(--j4); }
+  @keyframes cdpop{ from{ transform:scale(0.4); opacity:0; } 40%{ transform:scale(1.1); opacity:1; } to{ transform:scale(1); opacity:1; } }
+
+  .results{ display:none; text-align:center; background:var(--white); border:2.5px solid var(--j4-accent); border-radius:20px;
+    padding:34px 22px; margin-bottom:24px; box-shadow:0 10px 30px rgba(26,110,136,0.16); }
+  .results.show{ display:block; animation:pop 0.5s ease; }
+  @keyframes pop{ from{ transform:scale(0.9); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .results .trophy{ font-size:3.4rem; line-height:1; }
+  .results h2{ color:var(--j4-dark); font-size:1.6rem; margin:10px 0 4px; }
+  .results .rscore{ font-size:1.1rem; font-weight:700; color:var(--ink); margin-bottom:8px; }
+  .stars{ font-size:2rem; letter-spacing:6px; margin:6px 0 12px; }
+  .star-on{ color:var(--j4); } .star-off{ color:var(--line); }
+  .results .rmsg{ color:var(--ink-soft); font-weight:500; max-width:460px; margin:0 auto 6px; }
+  .recap{ list-style:none; max-width:520px; margin:14px auto 0; text-align:left; }
+  .recap li{ display:flex; align-items:flex-start; gap:10px; padding:9px 12px; border-radius:10px; margin-bottom:6px; font-size:0.9rem; background:var(--j4-soft); }
+  .recap li.ko{ background:var(--err-soft); }
+  .recap li .ic{ font-size:1.1rem; flex:0 0 auto; }
+  .recap em{ font-style:italic; }
+
+  @media (max-width:430px){
+    .hero h1{ font-size:1.62rem; } .wrap{ padding:20px 12px 50px; } .qline{ font-size:1.06rem; }
+    .countdown .num{ font-size:6rem; } .dot{ width:26px; height:26px; font-size:0.78rem; }
+    .choice{ min-height:112px; font-size:1.2rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="wrap">
+    <header class="hero">
+      <span class="pill">Semaine 6 · Jour 4</span>
+      <h1>&#9999;&#65039; Résoudre les exercices</h1>
+      <p class="sub">Fonctions : reconnaître une même fonction <b>linéaire</b> sous ses différentes écritures (image, antécédent, <em>f</em>(<em>x</em>)=<em>kx</em>, graphique) et repérer <b>l&rsquo;intrus</b>.</p>
+      <div class="consigne">&#9889; Je travaille mes automatismes&nbsp;: <b>15 s par question</b>, réponds vite&nbsp;!</div>
+    </header>
+
+    <div id="startgate" class="startgate">
+      <h2>&#9201;&#65039; Défi flash&nbsp;: 15 s par question</h2>
+      <p>5 questions s&rsquo;enchaînent. Sur chacune, <b>3 cartes</b> décrivent la même fonction et <b>1 carte est l&rsquo;intrus</b>&nbsp;: clique dessus en moins de <b>15 secondes</b>.<br>
+      &#128260; Tu peux <b>recommencer autant de fois que tu veux</b>&nbsp;: ce seront à chaque fois de <b>nouvelles questions</b>&nbsp;!</p>
+      <button class="btn btn-big" id="start-btn" style="margin-top:0;">&#9654;&#65039; Démarrer le défi</button>
+    </div>
+
+    <section id="topbar" class="topbar" style="display:none;" aria-label="Progression et chronomètre">
+      <div class="dots" id="dots"></div>
+      <div class="chrono-row">
+        <div class="chrono-clock" id="chrono-clock"><span class="ic">&#9201;&#65039;</span><span id="chrono-txt">15</span></div>
+        <div class="chrono-prog"><div class="fill" id="chrono-fill"></div></div>
+        <button class="sound-toggle" id="sound-toggle" title="Activer/couper le son" aria-label="son">&#128266;</button>
+      </div>
+    </section>
+
+    <div id="results" class="results">
+      <div class="trophy">&#127942;</div>
+      <h2>Défi terminé&nbsp;!</h2>
+      <div class="rscore" id="r-score"></div>
+      <div class="stars" id="r-stars"></div>
+      <p class="rmsg" id="r-msg"></p>
+      <ul class="recap" id="recap"></ul>
+      <button class="btn btn-big" onclick="restartDefi()">&#8635; Rejouer avec de nouvelles questions</button>
+    </div>
+
+    <main id="exoZone"></main>
+  </div>
+
+  <div id="countdown" class="countdown" aria-hidden="true"><div id="cd-inner"></div></div>
+
+<script>
+/* ============================================================
+   PAZAPA — N3S6J4 — « Quel est l'intrus ? » fonction linéaire
+   (chrono flash 15 s / question, 5 questions, génération aléatoire)
+   ============================================================ */
+const TOTAL = 5;
+const TEMPS_PAR_EXO = 15;
+const rint = n => Math.floor(Math.random()*n);
+const pick = a => a[rint(a.length)];
+
+let exos = [];
+let results = [];
+let current = 0;
+let chronoId = null;
+let timeLeft = TEMPS_PAR_EXO;
+let answered = false;
+let soundOn = true;
+
+/* ---------- Son (Web Audio) ---------- */
+let actx=null;
+function audio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
+function beep(freq,dur,type,vol){ if(!soundOn) return; const a=audio(); if(!a) return; if(a.state==='suspended') a.resume();
+  const o=a.createOscillator(), g=a.createGain(); o.type=type||'sine'; o.frequency.value=freq; g.gain.value=0.0001;
+  o.connect(g); g.connect(a.destination); const t=a.currentTime;
+  g.gain.exponentialRampToValueAtTime(vol||0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.15));
+  o.start(t); o.stop(t+(dur||0.15)+0.02); }
+function sCount(){ beep(440,0.18,'square',0.3); }
+function sGo(){ beep(880,0.32,'square',0.32); }
+function sTick(){ beep(660,0.07,'sine',0.18); }
+function sGood(){ [660,990].forEach((f,k)=>setTimeout(()=>beep(f,0.14,'triangle',0.26),k*110)); }
+function sBad(){ beep(196,0.28,'sawtooth',0.28); }
+function sTimeout(){ beep(160,0.4,'sawtooth',0.3); }
+function sWin(){ if(!soundOn) return; [523,659,784,1047].forEach((f,k)=>setTimeout(()=>beep(f,0.18,'triangle',0.28),k*140)); }
+
+/* ============================================================
+   GÉNÉRATEUR — une fonction linéaire f(x)=k x décrite de plusieurs façons.
+   3 cartes -> coefficient k ; 1 carte (intrus) -> coefficient k' != k
+   ============================================================ */
+const TEXT_FORMS = ['image1','image2','antecedent1','antecedent2','value'];
+
+function cardData(k, form){
+  if(form==='equation') return {k, form, a:null, b:null};
+  if(form==='graph'){ const a=1+rint(3); return {k, form, a, b:k*a}; }
+  const a=2+rint(8); return {k, form, a, b:k*a};
+}
+function cardText(c){
+  switch(c.form){
+    case 'equation':    return '<em>f</em>(<em>x</em>) = '+c.k+'<em>x</em>';
+    case 'value':       return '<em>f</em>('+c.a+') = '+c.b;
+    case 'image1':      return c.a+' a pour image '+c.b+' par <em>f</em>.';
+    case 'image2':      return c.b+' est l\u2019image de '+c.a+' par <em>f</em>.';
+    case 'antecedent1': return c.a+' est l\u2019ant\u00e9c\u00e9dent de '+c.b+' par <em>f</em>.';
+    case 'antecedent2': return c.b+' a pour ant\u00e9c\u00e9dent '+c.a+' par <em>f</em>.';
+    case 'graph':       return graphSVG(c.a, c.b);
+  }
+  return '';
+}
+function cardTextPlain(c){
+  switch(c.form){
+    case 'equation':    return 'f(x) = '+c.k+'x';
+    case 'value':       return 'f('+c.a+') = '+c.b;
+    case 'image1':      return c.a+' a pour image '+c.b+' par f.';
+    case 'image2':      return c.b+' est l\u2019image de '+c.a+' par f.';
+    case 'antecedent1': return c.a+' est l\u2019ant\u00e9c\u00e9dent de '+c.b+' par f.';
+    case 'antecedent2': return c.b+' a pour ant\u00e9c\u00e9dent '+c.a+' par f.';
+    case 'graph':       return 'le graphique (passe par '+c.a+'\u2009;\u2009'+c.b+')';
+  }
+  return '';
+}
+
+/* ---------- SVG graphique : droite y = k x passant par (a,b) ---------- */
+function graphSVG(a, b){
+  const W=210, H=200, ox=44, oy=166;
+  const xPix=148, yPix=134;
+  const sx = xPix/(a+0.7);
+  const sy = yPix/(b*1.18);
+  const px = ox + a*sx;
+  const py = oy - b*sy;
+  const k1x = ox - 0.22*(px-ox), k1y = oy - 0.22*(py-oy);
+  const k2x = ox + 1.16*(px-ox), k2y = oy + 1.16*(py-oy);
+  const col = '#1a6e88';
+  return ''+
+  '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="droite passant par l\u2019origine">'+
+    '<line x1="'+ox+'" y1="184" x2="'+ox+'" y2="14" stroke="#647a84" stroke-width="1.6"/>'+
+    '<line x1="20" y1="'+oy+'" x2="200" y2="'+oy+'" stroke="#647a84" stroke-width="1.6"/>'+
+    '<polygon points="'+ox+',10 '+(ox-4)+',20 '+(ox+4)+',20" fill="#647a84"/>'+
+    '<polygon points="204,'+oy+' 194,'+(oy-4)+' 194,'+(oy+4)+'" fill="#647a84"/>'+
+    '<line x1="'+ox+'" y1="'+py+'" x2="'+px+'" y2="'+py+'" stroke="#9fb4bd" stroke-width="1.3" stroke-dasharray="4 3"/>'+
+    '<line x1="'+px+'" y1="'+oy+'" x2="'+px+'" y2="'+py+'" stroke="#9fb4bd" stroke-width="1.3" stroke-dasharray="4 3"/>'+
+    '<line x1="'+k1x.toFixed(1)+'" y1="'+k1y.toFixed(1)+'" x2="'+k2x.toFixed(1)+'" y2="'+k2y.toFixed(1)+'" stroke="'+col+'" stroke-width="2.6" stroke-linecap="round"/>'+
+    '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="3.4" fill="'+col+'"/>'+
+    '<text x="'+(ox-8)+'" y="'+(oy+15)+'" font-family="JetBrains Mono,monospace" font-size="12" fill="#647a84" text-anchor="end">0</text>'+
+    '<text x="'+(ox-8)+'" y="'+(py+4)+'" font-family="JetBrains Mono,monospace" font-size="13" fill="#1b2a30" text-anchor="end">'+b+'</text>'+
+    '<text x="'+px.toFixed(1)+'" y="'+(oy+16)+'" font-family="JetBrains Mono,monospace" font-size="13" fill="#1b2a30" text-anchor="middle">'+a+'</text>'+
+    '<text x="198" y="'+(oy-7)+'" font-family="JetBrains Mono,monospace" font-size="12" font-style="italic" fill="#647a84">x</text>'+
+    '<text x="'+(ox+7)+'" y="20" font-family="JetBrains Mono,monospace" font-size="12" font-style="italic" fill="#647a84">y</text>'+
+  '</svg>';
+}
+
+/* ---------- une question : 4 cartes, textes tous distincts ---------- */
+function makeQuestion(){
+  let q, tries=0;
+  do{
+    tries++;
+    const k = 2+rint(9);          // 2..10
+    let kp; do{ kp = 2+rint(11); } while(kp===k); // 2..12
+    let forms, guard=0;
+    while(true){
+      guard++;
+      forms=[]; let eq=0, gr=0;
+      for(let i=0;i<4;i++){
+        let f = pick(['equation','graph'].concat(TEXT_FORMS, TEXT_FORMS));
+        if(f==='equation' && eq>=1) f = pick(TEXT_FORMS);
+        if(f==='graph'    && gr>=1) f = pick(TEXT_FORMS);
+        if(f==='equation') eq++; if(f==='graph') gr++;
+        forms.push(f);
+      }
+      if(!forms.every(x=>x===forms[0]) || guard>20) break;
+    }
+    const intrusIdx = rint(4);
+    const cards = forms.map((f,i)=> cardData(i===intrusIdx?kp:k, f));
+    const plains = cards.map(cardTextPlain);
+    if(new Set(plains).size===4) q = {k, kp, intrusIdx, cards};
+  } while(!q && tries<40);
+  if(!q){
+    const k=3,kp=5;
+    q={k,kp,intrusIdx:0,cards:[cardData(kp,'equation'),cardData(k,'image1'),cardData(k,'value'),cardData(k,'antecedent1')]};
+  }
+  // pré-calc figures
+  q.cards.forEach(c=>{ c.html = cardText(c); });
+  return q;
+}
+
+/* ============================================================
+   Déroulé du défi
+   ============================================================ */
+const LAB = ['A','B','C','D'];
+function buildDots(){
+  const d=document.getElementById('dots'); d.innerHTML='';
+  for(let i=0;i<TOTAL;i++){ const el=document.createElement('div'); el.className='dot'; el.id='dot-'+i; el.textContent=(i+1); d.appendChild(el); }
+}
+function refreshDots(){
+  for(let i=0;i<TOTAL;i++){
+    const el=document.getElementById('dot-'+i);
+    el.className='dot' + (i===current?' active':'') + (results[i]==='ok'?' ok':'') + (results[i]==='ko'?' ko':'');
+    if(results[i]==='ok') el.innerHTML='&#10004;';
+    else if(results[i]==='ko') el.innerHTML='&#10008;';
+    else el.textContent=(i+1);
+  }
+}
+function renderChrono(){
+  document.getElementById('chrono-txt').textContent = timeLeft;
+  const fill=document.getElementById('chrono-fill');
+  fill.style.width=(100*timeLeft/TEMPS_PAR_EXO)+'%';
+  const warn = timeLeft<=5;
+  document.getElementById('chrono-clock').classList.toggle('warn', warn);
+  fill.classList.toggle('warn', warn);
+}
+function showExo(i){
+  current=i; answered=false;
+  const ex=exos[i];
+  refreshDots();
+  let cells='';
+  ex.cards.forEach((c,idx)=>{
+    cells += '<button class="choice" data-idx="'+idx+'"><span class="lab">'+LAB[idx]+'</span><div>'+c.html+'</div></button>';
+  });
+  document.getElementById('exoZone').innerHTML=`
+    <div class="card" id="card">
+      <div class="card-head">
+        <div class="badge-num">${i+1}</div>
+        <div class="ctitle">Question ${i+1} sur ${TOTAL}</div>
+      </div>
+      <div class="qline">Clique sur <b>l\u2019intrus</b>&nbsp;: la carte dont le coefficient est différent des 3 autres.</div>
+      <div class="qhint">Astuce : calcule le coefficient de chaque carte (image \u00f7 antécédent).</div>
+      <div class="choices" id="choices">${cells}</div>
+      <div class="feedback" id="fb"></div>
+    </div>`;
+  setTimeout(()=>{
+    document.querySelectorAll('#choices .choice').forEach(btn=>{
+      btn.addEventListener('click', ()=>validate(parseInt(btn.dataset.idx,10), btn));
+    });
+  },0);
+  timeLeft=TEMPS_PAR_EXO; renderChrono();
+  if(chronoId) clearInterval(chronoId);
+  chronoId=setInterval(()=>{
+    timeLeft--; renderChrono();
+    if(timeLeft<=5 && timeLeft>0) sTick();
+    if(timeLeft<=0){ clearInterval(chronoId); onTimeout(); }
+  },1000);
+}
+function stopChrono(){ if(chronoId){ clearInterval(chronoId); chronoId=null; } }
+
+function lockChoices(){ document.querySelectorAll('#choices .choice').forEach(b=>{ b.style.pointerEvents='none'; b.classList.add('lock'); }); }
+
+function validate(idx, btn){
+  if(answered) return;
+  answered=true; stopChrono();
+  const ex=exos[current]; const fb=document.getElementById('fb');
+  lockChoices();
+  const choices=document.querySelectorAll('#choices .choice');
+  if(idx===ex.intrusIdx){
+    results[current]='ok'; sGood();
+    btn.classList.add('is-correct');
+    document.getElementById('card').classList.add('is-correct');
+    fb.className='feedback ok'; fb.innerHTML='&#10004; Bravo&nbsp;! La carte '+LAB[idx]+' était bien l\u2019intrus (coefficient \u00d7'+ex.kp+', les autres \u00d7'+ex.k+').';
+  } else {
+    results[current]='ko'; sBad();
+    btn.classList.add('is-error');
+    choices[ex.intrusIdx].classList.add('is-correct');
+    document.getElementById('card').classList.add('is-error');
+    fb.className='feedback bad'; fb.innerHTML='&#10008; L\u2019intrus était la carte '+LAB[ex.intrusIdx]+' (coefficient \u00d7'+ex.kp+').';
+  }
+  refreshDots();
+  setTimeout(nextExo, 1800);
+}
+function onTimeout(){
+  if(answered) return; answered=true;
+  const ex=exos[current];
+  results[current]='ko'; sTimeout();
+  const card=document.getElementById('card'); if(card) card.classList.add('is-error');
+  lockChoices();
+  const choices=document.querySelectorAll('#choices .choice');
+  if(choices[ex.intrusIdx]) choices[ex.intrusIdx].classList.add('is-correct');
+  const fb=document.getElementById('fb');
+  if(fb){ fb.className='feedback bad'; fb.innerHTML='&#9203; Temps écoulé&nbsp;! L\u2019intrus était la carte '+LAB[ex.intrusIdx]+' (coefficient \u00d7'+ex.kp+').'; }
+  refreshDots();
+  setTimeout(nextExo, 1900);
+}
+function nextExo(){ if(current+1 < TOTAL) showExo(current+1); else finishDefi(); }
+
+function finishDefi(){
+  stopChrono();
+  document.getElementById('topbar').style.display='none';
+  document.getElementById('exoZone').innerHTML='';
+  const ok=results.filter(r=>r==='ok').length;
+  let stars=1; if(ok===TOTAL) stars=3; else if(ok>=3) stars=2;
+  document.getElementById('r-score').textContent=`${ok} / ${TOTAL} bonnes réponses dans le temps`;
+  let sh=''; for(let k=0;k<3;k++) sh+=`<span class="${k<stars?'star-on':'star-off'}">&#9733;</span>`;
+  document.getElementById('r-stars').innerHTML=sh;
+  document.getElementById('r-msg').textContent = ok===TOTAL
+    ? 'Sans faute et dans le temps — tu reconnais une fonction linéaire sous toutes ses formes\u00a0! Relance pour t\u2019entraîner sur de nouvelles questions.'
+    : 'Personne ne réussit tout du premier coup — pour trouver l\u2019intrus, calcule le coefficient de chaque carte. Relance autant de fois que tu veux\u00a0: ce seront de nouvelles questions\u00a0!';
+  const recap=document.getElementById('recap'); recap.innerHTML='';
+  exos.forEach((ex,i)=>{
+    const li=document.createElement('li'); const good=results[i]==='ok';
+    li.className=good?'':'ko';
+    const intrus=ex.cards[ex.intrusIdx];
+    li.innerHTML=`<span class="ic">${good?'&#10004;&#65039;':'&#10008;'}</span> <span><b>Q${i+1}</b> · les 3 cartes correctes étaient \u00d7${ex.k}. L\u2019intrus (carte ${LAB[ex.intrusIdx]}) était <em>${cardTextPlain(intrus)}</em> \u2014 \u00d7${ex.kp}.</span>`;
+    recap.appendChild(li);
+  });
+  const res=document.getElementById('results'); res.classList.add('show');
+  if(ok===TOTAL) sWin();
+  res.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function runCountdown(done){
+  const ov=document.getElementById('countdown'), inner=document.getElementById('cd-inner');
+  ov.classList.add('show');
+  const seq=['3','2','1','Partez !']; let k=0;
+  (function step(){
+    if(k<seq.length){ const go=(seq[k]==='Partez !');
+      inner.className=go?'go':'num'; inner.textContent=seq[k];
+      inner.style.animation='none'; void inner.offsetWidth; inner.style.animation='';
+      if(go) sGo(); else sCount(); k++; setTimeout(step, go?700:850);
+    } else { ov.classList.remove('show'); done(); }
+  })();
+}
+function launchDefi(){
+  exos = Array.from({length:TOTAL}, ()=>makeQuestion());
+  results = new Array(TOTAL).fill(null);
+  window.__exos=exos; window.__results=results;
+  document.getElementById('startgate').style.display='none';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('topbar').style.display='block';
+  buildDots(); refreshDots(); current=0;
+  runCountdown(()=>{ showExo(0); });
+}
+function restartDefi(){ stopChrono(); launchDefi(); }
+
+document.getElementById('sound-toggle').addEventListener('click', function(){
+  soundOn=!soundOn; this.innerHTML = soundOn?'&#128266;':'&#128263;';
+  if(soundOn){ audio(); beep(660,0.1,'sine',0.2); }
+});
+document.getElementById('start-btn').addEventListener('click', function(){ audio(); launchDefi(); });
+window.__makeQuestion = makeQuestion;
+window.__exosRef = ()=>exos;
+</script>
+</body>
+</html>
