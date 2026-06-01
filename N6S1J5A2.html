@@ -228,6 +228,7 @@
     <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">Suivant &#8594;</button>
     <button class="btn btn-primary" id="btn-check" onclick="checkAll()" style="display:none;">&#10003; V&eacute;rifier</button>
     <button class="btn btn-solution" id="btn-solution" onclick="showSolution()" style="display:none;">&#128161; Solution</button>
+    <button class="btn btn-primary" id="btn-results" onclick="goResults()" style="display:none;">Voir les r&eacute;sultats &#8594;</button>
     <button class="btn btn-ghost" id="btn-restart-inline" onclick="restart()" style="display:none;">&#8635; Recommencer</button>
   </div>
 </div>
@@ -345,6 +346,8 @@ var TOTAL = QUESTIONS.length;
 var selections = QUESTIONS.map(function(q){ return q.options.map(function(){ return false; }); });
 var validated = false;
 var currentQ = 0;
+var pendingScore = 0;
+var pendingResults = [];
 
 function buildQuiz(){
   var z = $("quiz-zone");
@@ -492,11 +495,17 @@ function checkAll(){
   $("count-rem").textContent = 0;
   $("btn-check").disabled = true;
   $("btn-solution").style.display = "inline-flex";
+  $("btn-results").style.display = "inline-flex";
   $("btn-restart-inline").style.display = "inline-flex";
 
+  pendingScore = score;
+  pendingResults = results;
   var firstFb = $("qfb-0");
   if(firstFb) firstFb.scrollIntoView({behavior:"smooth",block:"nearest"});
-  setTimeout(function(){ showResults(score,results); }, 2600);
+}
+
+function goResults(){
+  showResults(pendingScore, pendingResults);
 }
 
 function showSolution(){
@@ -551,6 +560,7 @@ function restart(){
   $("btn-prev").style.display="none";
   $("btn-solution").style.display="none";
   $("btn-solution").disabled=false;
+  $("btn-results").style.display="none";
   $("btn-restart-inline").style.display="none";
   $("progress-bar").style.width="0%";
   $("prog-pct").textContent="0\u00a0%";
