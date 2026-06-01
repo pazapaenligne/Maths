@@ -223,6 +223,7 @@
     <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">Suivant &#8594;</button>
     <button class="btn btn-primary" id="btn-check" onclick="checkAll()" style="display:none;">&#10003; V&eacute;rifier</button>
     <button class="btn btn-solution" id="btn-solution" onclick="showSolution()" style="display:none;">&#128161; Solution</button>
+    <button class="btn btn-primary" id="btn-results" onclick="goResults()" style="display:none;">Voir les résultats &#8594;</button>
     <button class="btn btn-ghost" id="btn-restart-inline" onclick="restart()" style="display:none;">&#8635; Recommencer</button>
   </div>
 </div>
@@ -277,6 +278,8 @@ var TOTAL = QUESTIONS.length;
 var selections = QUESTIONS.map(function(q){ return q.options.map(function(){ return false; }); });
 var validated = false;
 var currentQ = 0;
+var pendingScore = 0;
+var pendingResults = [];
 
 function buildQuiz(){
   var z = document.getElementById("quiz-zone");
@@ -435,11 +438,17 @@ function checkAll(){
   document.getElementById("count-rem").textContent = 0;
   document.getElementById("btn-check").disabled = true;
   document.getElementById("btn-solution").style.display = "inline-flex";
+  document.getElementById("btn-results").style.display = "inline-flex";
   document.getElementById("btn-restart-inline").style.display = "inline-flex";
 
+  pendingScore = score;
+  pendingResults = results;
   var firstFb = document.getElementById("qfb-0");
   if(firstFb) firstFb.scrollIntoView({behavior:"smooth",block:"nearest"});
-  setTimeout(function(){ showResults(score,results); }, 2400);
+}
+
+function goResults(){
+  showResults(pendingScore, pendingResults);
 }
 
 function showSolution(){
@@ -500,6 +509,7 @@ function restart(){
   document.getElementById("btn-next").style.display="inline-flex";
   document.getElementById("btn-prev").style.display="none";
   document.getElementById("btn-solution").style.display="none";
+  document.getElementById("btn-results").style.display="none";
   document.getElementById("btn-solution").disabled=false;
   document.getElementById("btn-restart-inline").style.display="none";
   document.getElementById("progress-bar").style.width="0%";
