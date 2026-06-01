@@ -72,6 +72,7 @@
   .cmp-btn.correct{background:#f0faeb;border-color:var(--green);color:#2f6e10;}
   .cmp-btn.wrong{background:#fff0ef;border-color:var(--pink);color:#c0392b;}
   .cmp-btn:disabled{cursor:default;}
+  .cmp-group.cmp-empty{outline:2px dashed var(--orange);outline-offset:3px;border-radius:8px;}
 
   /* saisies (Ex2, Ex3) */
   .blank-input{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600;color:var(--day-dark);
@@ -145,7 +146,7 @@
     Pazapa &middot; Maths &middot; 6&egrave;me
   </div>
   <div class="week-label">Semaine 2 &ndash; Jour 1</div>
-  <h1><span class="hl">Comparer et ordonner les d&eacute;cimaux</span></h1>
+  <h1><span style="color:var(--text)">Comparer et ordonner</span> <span class="hl">les d&eacute;cimaux</span></h1>
   <p class="subtitle">3 exercices &middot; 17 items</p>
 </header>
 
@@ -443,6 +444,11 @@ function checkEx(){
       var grp=$("cmp-"+i);
       [].slice.call(grp.children).forEach(function(b){ b.disabled=true; });
       var sel=pickState[i];
+      if(sel===undefined || sel===null){
+        // item non répondu : on ne dévoile pas la bonne réponse, on signale juste "non répondu"
+        grp.classList.add("cmp-empty");
+        return;
+      }
       [].slice.call(grp.children).forEach(function(b){
         var s=b.getAttribute("data-s");
         if(s===it.rep){ b.classList.add("correct"); }
@@ -549,14 +555,34 @@ function pourquoiCmp(a,b,rep){
   }
   return " (parties enti\u00e8res \u00e9gales, on compare alors les chiffres apr\u00e8s la virgule).";
 }
+function isAnswered(ex,i){
+  if(ex.type==="cmp"){ return pickState[i]!==undefined && pickState[i]!==null; }
+  if(ex.type==="order"){ return ex.data[i].cells.some(function(_,k){ var el=$("o_"+i+"_"+k); return el && el.value.trim().length>0; }); }
+  var el=$("b_"+i); return el && el.value.trim().length>0;
+}
 function buildCorr(ex,info){
   var L=[];
   if(ex.type==="cmp"){
-    ex.data.forEach(function(it,i){ if(!info.detail[i]) L.push(String.fromCharCode(97+i)+")\u00a0"+it.a+" "+it.rep+" "+it.b+pourquoiCmp(it.a,it.b,it.rep)); });
+    ex.data.forEach(function(it,i){
+      if(info.detail[i]) return;
+      var lbl=String.fromCharCode(97+i)+")\u00a0";
+      if(!isAnswered(ex,i)) L.push(lbl+"tu n\u2019as pas r\u00e9pondu \u00e0 cet item.");
+      else L.push(lbl+it.a+" "+it.rep+" "+it.b+pourquoiCmp(it.a,it.b,it.rep));
+    });
   } else if(ex.type==="order"){
-    ex.data.forEach(function(it,i){ if(!info.detail[i]) L.push(String.fromCharCode(97+i)+")\u00a0"+serieText(it)+" (on range du plus petit au plus grand en comparant rang par rang)."); });
+    ex.data.forEach(function(it,i){
+      if(info.detail[i]) return;
+      var lbl=String.fromCharCode(97+i)+")\u00a0";
+      if(!isAnswered(ex,i)) L.push(lbl+"tu n\u2019as pas r\u00e9pondu \u00e0 cette s\u00e9rie.");
+      else L.push(lbl+serieText(it)+" (on range du plus petit au plus grand en comparant rang par rang).");
+    });
   } else {
-    ex.data.forEach(function(it,i){ if(!info.detail[i]) L.push(String.fromCharCode(97+i)+")\u00a0un nombre entre "+it.a+" et "+it.b+", par exemple "+fr((it.lo+it.hi)/2)+" (il doit \u00eatre plus grand que "+it.a+" et plus petit que "+it.b+")."); });
+    ex.data.forEach(function(it,i){
+      if(info.detail[i]) return;
+      var lbl=String.fromCharCode(97+i)+")\u00a0";
+      if(!isAnswered(ex,i)) L.push(lbl+"tu n\u2019as pas r\u00e9pondu \u00e0 cet item.");
+      else L.push(lbl+"un nombre entre "+it.a+" et "+it.b+", par exemple "+fr((it.lo+it.hi)/2)+" (il doit \u00eatre plus grand que "+it.a+" et plus petit que "+it.b+").");
+    });
   }
   if(L.length===0) return "Tout est correct pour cet exercice.";
   return "\u00c0 revoir\u00a0:<br>"+L.join("<br>");
