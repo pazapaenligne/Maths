@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 6e S1 J1 · Le Corbeau et le Renard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   3e · Semaine 6 · Jour 4 (JEUDI)
+   Couleur du jour : #3ab5d8 / #1a6e88 / #e8f6fb / #9dd4e8
+   ============================================================ */
+:root{
+  --jour:        #3ab5d8;   /* couleur principale du jour */
+  --jour-fonce:  #1a6e88;   /* version foncée */
+  --jour-clair:  #e8f6fb;   /* fond très clair */
+  --jour-pale:   #9dd4e8;   /* version pâle */
+
+  --bg:          #fffdf7;   /* fond général clair Pazapa */
+  --dark:        #1a1f2e;   /* encart game sombre */
+  --dark-2:      #232a3d;
+  --vert:        #22c55e;
+  --vert-neon:   #4ade80;
+  --rouge:       #ef4444;
+  --txt:         #2b2b2b;
+  --gris:        #8b8b8b;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  padding: 20px 16px 50px;
+}
+
+/* ====== BULLES STATIQUES DE FOND ======
+   - nettes (pas de blur), opacité douce, bulle rose retirée */
+.bulle{ position:fixed; border-radius:50%; opacity:.32; z-index:0; pointer-events:none; }
+.bulle-jaune  { width:200px; height:200px; background:#ffd84d; top:-60px;   right:-50px; }
+.bulle-jour   { width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-verte  { width:150px; height:150px; background:#9be7a5; top:45%;     right:-70px; }
+
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; }
+
+/* ====================== HEADER ====================== */
+.header{ text-align:center; margin-bottom:22px; }
+
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px rgba(58,181,216,.4);
+  margin-bottom:12px;
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+
+.semaine{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px;
+  color:var(--gris); text-transform:uppercase; margin-bottom:6px;
+}
+.titre{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size:2.3rem; line-height:1.1; color:var(--txt); margin-bottom:6px;
+}
+.titre .accent{ color:var(--jour); }
+.sous-titre{
+  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px;
+  color:var(--gris); margin-bottom:16px;
+}
+.sous-titre code{ color:var(--jour-fonce); font-weight:700; }
+
+.badge-revision{
+  display:inline-block;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:9px 22px; border-radius:24px;
+  box-shadow:0 4px 14px rgba(58,181,216,.45);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1);   box-shadow:0 4px 14px rgba(58,181,216,.45); }
+  50%    { transform:scale(1.05);box-shadow:0 6px 22px rgba(58,181,216,.7); }
+}
+
+/* ================ ENCART GAME (fond clair dys-friendly) ================ */
+.game{
+  background: #fff;
+  border:2px solid var(--jour);
+  border-radius:18px;
+  padding:18px 20px 16px;
+  margin-bottom:24px;
+  box-shadow:0 4px 16px rgba(58,181,216,.18);
+}
+.game-label{
+  font-family:'Orbitron',sans-serif; font-size:.66rem; font-weight:700;
+  letter-spacing:2px; color:var(--jour-fonce); margin-bottom:12px;
+}
+
+/* étoiles */
+.etoiles{ text-align:center; margin-bottom:18px; font-size:1.55rem; letter-spacing:8px; }
+.etoiles .star{ color:#c2d4dc; transition:.3s; display:inline-block; }
+.etoiles .star.on{
+  color:var(--jour);
+  animation: pop .5s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+
+/* scoreboard */
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.score-col{
+  background: #eef7fb;
+  border:1.5px solid #d3e8f0;
+  border-radius:12px; padding:12px 6px; text-align:center;
+}
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.6rem; line-height:1; }
+.score-col.reussis  { border-color:#9be7a5; }
+.score-col.reussis  .score-num{ color:#157f3a; }
+.score-col.restants { border-color:var(--jour-pale); }
+.score-col.restants .score-num{ color:var(--jour-fonce); }
+.score-col.erreurs  { border-color:#f5b5b5; }
+.score-col.erreurs  .score-num{ color:#c0392b; }
+.score-lbl{
+  font-family:'Orbitron',sans-serif; font-size:.6rem; font-weight:700;
+  letter-spacing:1.5px; color:#7a7a7a; margin-top:6px; text-transform:uppercase;
+}
+
+/* barre XP */
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span:first-child{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:1.5px; color:var(--jour-fonce);
+}
+.xp-head span:last-child{
+  font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; color:var(--jour-fonce);
+}
+.xp-bar{ height:9px; background:#dcecf3; border-radius:8px; overflow:hidden; }
+.xp-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--jour-fonce), var(--jour), #f9c0bb);
+  border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1);
+}
+.defi-count{
+  text-align:center; margin-top:12px;
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:700;
+  letter-spacing:2px; color:#7a7a7a;
+}
+
+/* ================== CARD EXERCICE ================== */
+.card{
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
+}
+.rainbow{
+  height:6px;
+  background:linear-gradient(90deg,#ff5e5e,#f5a623,#9be7a5,#3ab5d8,#a884ff,#ff5e5e);
+  background-size:300% 100%;
+  animation: slide 4s linear infinite;
+}
+@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+
+.card-body{ padding:22px 24px 24px; }
+
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:10px; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--txt); }
+.type-badge{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; font-weight:700;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  padding:5px 11px; border-radius:14px; border:1px solid var(--jour-pale);
+  white-space:nowrap;
+}
+
+/* encart énoncé : FOND CLAIR (dys-friendly) */
+.texte-fable{
+  background:var(--jour-clair);
+  border:2px solid var(--jour);
+  border-radius:14px;
+  padding:18px 18px;
+  margin-bottom:16px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(58,181,216,.12);
+}
+.texte-fable .ft-titre{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1px; color:var(--jour-fonce); margin-bottom:10px;
+}
+.texte-fable .ft-expr{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem;
+  color:var(--jour-fonce); letter-spacing:1px;
+}
+
+/* style "blocs Scratch" : pseudo-code lisible */
+.scratch-script{
+  display:inline-block; text-align:left;
+  background:#fff; border:1.5px solid var(--jour-pale);
+  border-radius:10px; padding:12px 14px;
+  font-family:'Courier New', Consolas, monospace; font-size:.95rem;
+  line-height:1.55; color:#2b2b2b;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  white-space:pre;
+}
+.scratch-script .bloc{
+  display:inline-block; padding:1px 7px; margin:1px 1px;
+  border-radius:5px; font-weight:bold; color:#fff;
+}
+.scratch-script .b-mouv{ background:#4c97ff; }   /* mouvement bleu */
+.scratch-script .b-ctrl{ background:#ffab19; }   /* contrôle orange */
+.scratch-script .b-var { background:#ff8c1a; }   /* variables orange-rouge */
+.scratch-script .b-op  { background:#59c059; }   /* opérateurs vert */
+.scratch-script .b-look{ background:#9966ff; }   /* apparence violet */
+.scratch-script .b-pen { background:#0fbd8c; }   /* stylo vert-bleu */
+.scratch-script .indent{ padding-left:24px; }
+
+/* zone figure SVG (pour les questions de tracé) */
+.scratch-figure{
+  display:flex; justify-content:center; align-items:center;
+  margin-top:8px;
+}
+.scratch-figure svg{ max-width:160px; height:auto; }
+
+.cursor{
+  display:inline-block; width:3px; height:1.5rem; background:var(--jour-fonce);
+  margin-left:4px; vertical-align:-4px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink{ 0%,50%{ opacity:1; } 51%,100%{ opacity:0; } }
+
+.question-txt{
+  font-size:1.05rem; font-weight:bold; color:var(--txt);
+  margin-bottom:16px; line-height:1.5;
+}
+
+/* choix QCM */
+.choix{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+.choix-btn{
+  text-align:left; font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700;
+  padding:14px 16px; border:2px solid #e8e2d4; background:#fff;
+  border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt);
+  display:flex; align-items:center; gap:11px;
+}
+.choix-btn .choix-content{ flex:1; }
+.choix-btn .choix-content svg{ max-width:140px; max-height:60px; vertical-align:middle; margin-right:10px; }
+.choix-btn .lettre{
+  flex-shrink:0; width:28px; height:28px; border-radius:50%;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.85rem;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--jour-pale);
+}
+.choix-btn sup{ font-size:.7rem; }
+.choix-btn:hover:not(.locked){ border-color:var(--jour); background:var(--jour-clair); }
+.choix-btn.selected{
+  border-color:var(--jour); background:var(--jour-clair);
+  box-shadow:0 0 0 3px rgba(58,181,216,.25);
+}
+.choix-btn.selected .lettre{ background:var(--jour); color:#fff; }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{
+  border-color:var(--vert); background:#e7faec;
+}
+.choix-btn.good .lettre{ background:var(--vert); color:#fff; }
+.choix-btn.bad{
+  border-color:var(--rouge); background:#fdeaea;
+}
+.choix-btn.bad .lettre{ background:var(--rouge); color:#fff; }
+
+/* boutons */
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 4px; }
+.btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:11px 18px; border:none; border-radius:10px;
+  cursor:pointer; transition:transform .12s; color:#fff; position:relative;
+}
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-indice{  background:#3ab5d8; }
+.btn-suivant{ background:var(--jour); color:#3a2c00; }
+
+.btn-valider:not(:disabled){ animation: neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled){  animation: neon-bleu 1.4s ease-in-out infinite; }
+.btn-suivant:not(:disabled){ animation: neon-jour 1.4s ease-in-out infinite; }
+
+@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5);}  50%{ box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
+@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
+
+.btn:disabled{
+  background:#d8d8d8 !important; color:#fff !important;
+  cursor:not-allowed; animation:none !important; box-shadow:none !important;
+}
+
+/* indice */
+.indice-box{
+  display:none; margin-top:14px; padding:13px 16px;
+  background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px;
+  font-size:.9rem; color:#1a6e88;
+}
+.indice-box.show{ display:block; animation: pop .35s ease; }
+
+/* feedback */
+.feedback{ display:none; margin-top:16px; padding:14px 16px; border-radius:10px; font-weight:bold; font-size:1rem; }
+.feedback.show{ display:block; animation: pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{  background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{  background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+
+/* correction */
+.correction{
+  display:none; margin-top:14px; padding:15px 18px;
+  background:#fff8e6; border:1px dashed var(--jour); border-radius:10px;
+  font-size:.92rem; color:#5a4500; line-height:1.6;
+}
+.correction.show{ display:block; animation: pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+
+/* navigation */
+.nav{ display:flex; justify-content:space-between; margin-top:20px; }
+.nav button{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:500;
+  letter-spacing:.5px; padding:9px 16px; border-radius:8px;
+  border:1px solid #ddd; background:#f7f7f7; color:#888; cursor:pointer; transition:.15s;
+}
+.nav button:not(:disabled):hover{ background:#eee; color:#555; }
+.nav button:disabled{ opacity:.4; cursor:not-allowed; }
+
+/* +25 XP flottant */
+.xp-pop{
+  position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5);
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3rem;
+  color:var(--jour); text-shadow:0 0 20px var(--jour), 0 4px 10px rgba(0,0,0,.3);
+  z-index:50; opacity:0; pointer-events:none;
+}
+.xp-pop.go{ animation: xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
+  25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); }
+  70%{ opacity:1; transform:translate(-50%,-80%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); }
+}
+
+/* ================= ÉCRAN RÉSULTATS ================= */
+.results{ display:none; }
+.results.show{ display:block; animation: pop .5s ease; }
+.results .mission{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.7rem;
+  text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px;
+}
+.results .big-score{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3.4rem;
+  text-align:center; color:var(--jour);
+  text-shadow:0 0 16px rgba(58,181,216,.5); margin:8px 0;
+}
+.results .res-stars{ text-align:center; font-size:1.7rem; letter-spacing:5px; color:var(--jour); margin-bottom:10px; }
+.results .gg{
+  text-align:center; font-family:'Orbitron',sans-serif; font-size:.88rem;
+  color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:20px;
+}
+.recap{ background:#faf7ef; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
+.recap-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:.86rem; gap:10px;
+}
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; }
+.recap-item .st{ font-size:1.1rem; flex-shrink:0; }
+.btn-rejouer{
+  display:block; width:100%;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px;
+  padding:14px; border:none; border-radius:12px; color:#3a2c00;
+  background:var(--jour); cursor:pointer;
+  animation: neon-jour 1.4s ease-in-out infinite;
+}
+.btn-rejouer:active{ transform:scale(.97); }
+</style>
+</head>
+<body>
+
+<!-- bulles statiques de fond -->
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+
+<div class="wrap">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 3ÈME
+    </div>
+    <div class="semaine">Semaine 6 – Jour 4</div>
+    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre">🔷 Sections planes de solides · cylindre, pavé, cône</div>
+    <div class="badge-revision">▶ DÉFI BREVET 3ÈME</div>
+  </div>
+
+  <!-- ===== ENCART GAME (fond clair) ===== -->
+  <div class="game">
+    <div class="game-label">▶ DÉFI BREVET 3ÈME</div>
+
+    <div class="etoiles" id="etoiles"></div>
+
+    <div class="scoreboard">
+      <div class="score-col reussis">
+        <div class="score-num" id="sc-reussis">0</div>
+        <div class="score-lbl">△ Réussis</div>
+      </div>
+      <div class="score-col restants">
+        <div class="score-num" id="sc-restants">6</div>
+        <div class="score-lbl">◆ Restants</div>
+      </div>
+      <div class="score-col erreurs">
+        <div class="score-num" id="sc-erreurs">0</div>
+        <div class="score-lbl">△ Erreurs</div>
+      </div>
+    </div>
+
+    <div class="xp-head">
+      <span>▶ XP PROGRESS</span>
+      <span id="xp-pct">0 %</span>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+
+    <div class="defi-count" id="defi-count">DÉFI 1 / 6</div>
+  </div>
+
+  <!-- ===== CARD EXERCICE ===== -->
+  <div class="card" id="exo-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="card-head">
+        <div class="defi-num" id="card-defi-num">DÉFI 01</div>
+        <div class="type-badge">SECTIONS</div>
+      </div>
+
+      <div class="texte-fable">
+        <div class="ft-titre">🚀 ESCAPE GAME — SECTIONS</div>
+        <div class="ft-expr" id="ft-expr"></div>
+      </div>
+
+      <div class="question-txt" id="question-txt"></div>
+
+      <div class="choix" id="choix"></div>
+
+      <div class="btns">
+        <button class="btn btn-valider" id="btn-valider" disabled>✓ VALIDER</button>
+        <button class="btn btn-indice"  id="btn-indice">? INDICE</button>
+        <button class="btn btn-suivant" id="btn-suivant" disabled>SUIVANT →</button>
+      </div>
+
+      <div class="indice-box" id="indice-box"></div>
+      <div class="feedback"   id="feedback"></div>
+      <div class="correction" id="correction"></div>
+
+      <div class="nav">
+        <button id="btn-retour" disabled>← Retour</button>
+        <button id="btn-nav-suivant" disabled>Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ÉCRAN RÉSULTATS ===== -->
+  <div class="card results" id="results-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">// MISSION ACCOMPLIE</div>
+      <div class="big-score" id="res-score">0 / 6</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg">// GG — validé !</div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" id="btn-rejouer">▶ NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- +25 XP flottant -->
+<div class="xp-pop" id="xp-pop">+25 XP !</div>
+
+<script>
+/* =========================================================
+   DONNÉES DES 6 DÉFIS — Sections planes de solides (Brevet 3e)
+   Inspiré de l'escape game "L'IMPOSTEUR" (A. Chauvin Cellas / H. Soulier).
+   Couvre : sections de cylindre, pavé droit et cône (Thalès / Pythagore).
+   ========================================================= */
+const DEFIS = [
+  {
+    titre:"Cylindre — plan parallèle à la base",
+    expr:'<div style="font-size:.9rem; line-height:1.5; padding:6px;">'
+       + '🚀 <b>Mission n°1 :</b> Pour fermer la trappe principale du vaisseau, identifie correctement la section ci-dessous.<br>'
+       + 'Le plan de coupe (orange pointillé) est parallèle à la <b>base</b> du cylindre.'
+       + '</div>'
+       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 260 220" style="background:#fff; max-width:240px;"><ellipse cx="130" cy="40" rx="70" ry="18" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><path d="M 60,40 L 60,170 A 70,18 0 0 0 200,170 L 200,40" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><ellipse cx="130" cy="170" rx="70" ry="18" fill="none" stroke="#1a6e88" stroke-width="2"/><ellipse cx="130" cy="100" rx="70" ry="18" fill="rgba(245,166,35,0.35)" stroke="#c47a10" stroke-width="2" stroke-dasharray="5,3"/><text x="135" y="105" font-size="11" fill="#c47a10" font-weight="bold">section</text><line x1="130" y1="40" x2="130" y2="170" stroke="#888" stroke-width="1" stroke-dasharray="2,3"/><text x="207" y="44" font-size="10" fill="#1a6e88">base</text><text x="135" y="38" font-size="10" fill="#888" font-style="italic">axe</text></svg></div>',
+    question:"Quelle est la nature de la section ?",
+    choices:[
+      '<span class="choix-content"><svg viewBox="0 0 80 60"><rect x="15" y="10" width="50" height="40" fill="none" stroke="#1a1f2e" stroke-width="2"/></svg>Un rectangle</span>',
+      '<span class="choix-content"><svg viewBox="0 0 80 60"><circle cx="40" cy="30" r="22" fill="none" stroke="#1a1f2e" stroke-width="2"/></svg>Un disque</span>',
+      '<span class="choix-content"><svg viewBox="0 0 80 60"><polygon points="20,15 70,15 60,50 10,50" fill="none" stroke="#1a1f2e" stroke-width="2"/></svg>Un parallélogramme</span>',
+      '<span class="choix-content"><svg viewBox="0 0 80 60"><ellipse cx="40" cy="30" rx="30" ry="10" fill="none" stroke="#1a1f2e" stroke-width="2"/></svg>Une ellipse</span>'
+    ],
+    correct:1,
+    indice:"Quand on coupe un cylindre par un plan parallèle à sa base, la section a la même forme que la base. Or la base d\'un cylindre est…",
+    correction:"La base d\'un cylindre est un <b>disque</b>. Un plan parallèle à la base produit une section qui est un disque de même rayon."
+  },
+  {
+    titre:"Cylindre — plan parallèle à l\'axe",
+    expr:'<div style="font-size:.9rem; line-height:1.5; padding:6px;">'
+       + '🚀 <b>Mission n°2 :</b> Cette fois, le plan de coupe est parallèle à <b>l\'axe</b> du cylindre.'
+       + '</div>'
+       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 260 220" style="background:#fff; max-width:240px;"><ellipse cx="130" cy="40" rx="70" ry="18" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><path d="M 60,40 L 60,170 A 70,18 0 0 0 200,170 L 200,40" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><ellipse cx="130" cy="170" rx="70" ry="18" fill="none" stroke="#1a6e88" stroke-width="2"/><polygon points="80,32 180,32 180,178 80,178" fill="rgba(245,166,35,0.35)" stroke="#c47a10" stroke-width="2" stroke-dasharray="5,3"/><text x="100" y="105" font-size="11" fill="#c47a10" font-weight="bold">section</text><line x1="130" y1="40" x2="130" y2="170" stroke="#888" stroke-width="1" stroke-dasharray="2,3"/><text x="135" y="35" font-size="10" fill="#888" font-style="italic">axe</text></svg></div>',
+    question:"Quelle est la nature de la section ?",
+    choices:[
+      '<span class="choix-content"><svg viewBox="0 0 80 60"><circle cx="40" cy="30" r="22" fill="none" stroke="#1a1f2e" stroke-width="2"/></svg>Un disque</span>',
+      '<span class="choix-content"><svg viewBox="0 0 80 60"><rect x="15" y="10" width="50" height="40" fill="none" stroke="#1a1f2e" stroke-width="2"/></svg>Un rectangle</span>',
+      '<span class="choix-content"><svg viewBox="0 0 80 60"><polygon points="20,15 70,15 60,50 10,50" fill="none" stroke="#1a1f2e" stroke-width="2"/></svg>Un parallélogramme</span>',
+      '<span class="choix-content"><svg viewBox="0 0 80 60"><ellipse cx="40" cy="30" rx="30" ry="10" fill="none" stroke="#1a1f2e" stroke-width="2"/></svg>Un cercle</span>'
+    ],
+    correct:1,
+    indice:"Imagine que tu coupes une boîte de conserve verticalement (parallèlement à son axe vertical). Quelle forme as-tu sur la coupe ?",
+    correction:"Un plan parallèle à l\'axe du cylindre donne une section <b>rectangulaire</b>. La hauteur de ce rectangle est la hauteur du cylindre ; sa largeur dépend de la position du plan."
+  },
+  {
+    titre:"Pavé droit — section",
+    expr:'<div style="font-size:.9rem; line-height:1.5; padding:6px;">'
+       + '🚀 <b>Mission n°3 :</b> Dans la salle suivante, observe ce pavé droit ABCDEFGH. Le plan de coupe est parallèle à l\'arête <b>[GH]</b>.'
+       + '</div>'
+       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 280 220" style="background:#fff; max-width:240px;"><polygon points="60,30 220,30 220,140 60,140" fill="#e8f6fb" stroke="#1a6e88" stroke-width="1.5" stroke-dasharray="3,2"/><polygon points="30,60 190,60 190,170 30,170" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><line x1="190" y1="60" x2="220" y2="30" stroke="#1a6e88" stroke-width="2"/><line x1="190" y1="170" x2="220" y2="140" stroke="#1a6e88" stroke-width="2"/><line x1="30" y1="60" x2="60" y2="30" stroke="#1a6e88" stroke-width="1.5" stroke-dasharray="3,2"/><line x1="30" y1="170" x2="60" y2="140" stroke="#1a6e88" stroke-width="1.5" stroke-dasharray="3,2"/><text x="22" y="58" font-size="11" fill="#1a6e88" font-weight="bold">A</text><text x="193" y="58" font-size="11" fill="#1a6e88" font-weight="bold">B</text><text x="220" y="25" font-size="11" fill="#1a6e88" font-weight="bold">C</text><text x="52" y="28" font-size="11" fill="#1a6e88" font-weight="bold">D</text><text x="22" y="183" font-size="11" fill="#1a6e88" font-weight="bold">E</text><text x="193" y="183" font-size="11" fill="#1a6e88" font-weight="bold">F</text><text x="222" y="145" font-size="11" fill="#1a6e88" font-weight="bold">G</text><text x="50" y="148" font-size="11" fill="#1a6e88" font-weight="bold">H</text><polygon points="100,60 100,170 130,140 130,30" fill="rgba(245,166,35,0.4)" stroke="#c47a10" stroke-width="2" stroke-dasharray="5,3"/><text x="135" y="100" font-size="11" fill="#c47a10" font-weight="bold">section</text></svg></div>',
+    question:"Quelle est la nature de la section ?",
+    choices:[
+      "Un triangle",
+      "Un disque",
+      "Un rectangle",
+      "Un parallélogramme quelconque"
+    ],
+    correct:2,
+    indice:"Toutes les sections d\'un pavé droit par un plan parallèle à une de ses arêtes (ou à une de ses faces) sont des… ",
+    correction:"Toute section d\'un pavé droit par un plan parallèle à une de ses arêtes est un <b>rectangle</b>. Ici, l\'un des côtés du rectangle est parallèle (et égal) à [GH]."
+  },
+  {
+    titre:"Cône — plan parallèle à la base",
+    expr:'<div style="font-size:.9rem; line-height:1.5; padding:6px;">'
+       + '🚀 <b>Mission n°4 :</b> Le vaisseau contient aussi un cône de révolution. Le plan de coupe est parallèle à la <b>base</b> (un disque) du cône.'
+       + '</div>'
+       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 260 230" style="background:#fff; max-width:240px;"><polygon points="130,25 60,170 200,170" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><ellipse cx="130" cy="170" rx="70" ry="14" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><path d="M 60,170 A 70,14 0 0 1 200,170" fill="none" stroke="#1a6e88" stroke-width="1.5" stroke-dasharray="3,2"/><ellipse cx="130" cy="120" rx="44" ry="9" fill="rgba(245,166,35,0.4)" stroke="#c47a10" stroke-width="2" stroke-dasharray="5,3"/><line x1="130" y1="25" x2="130" y2="170" stroke="#888" stroke-width="1" stroke-dasharray="2,3"/><text x="124" y="20" font-size="13" fill="#1a6e88" font-weight="bold">S</text><text x="125" y="186" font-size="13" fill="#1a6e88" font-weight="bold">O</text><text x="200" y="180" font-size="11" fill="#1a6e88">A</text><text x="178" y="123" font-size="11" fill="#c47a10" font-weight="bold">B</text><text x="119" y="115" font-size="11" fill="#c47a10" font-weight="bold">I</text><circle cx="174" cy="120" r="2.5" fill="#c47a10"/><circle cx="130" cy="120" r="2.5" fill="#c47a10"/><circle cx="200" cy="170" r="2.5" fill="#1a6e88"/><circle cx="130" cy="170" r="2.5" fill="#1a6e88"/><circle cx="130" cy="25" r="2.5" fill="#1a6e88"/></svg></div>',
+    question:"Quelle est la nature de la section obtenue ?",
+    choices:[
+      "Un triangle plus petit",
+      "Un disque plus petit que la base",
+      "Une ellipse",
+      "Un rectangle"
+    ],
+    correct:1,
+    indice:"Comme pour le cylindre, un plan parallèle à la base donne une section de même forme que la base. La base du cône est un disque, donc…",
+    correction:"Un plan parallèle à la base d\'un cône donne un <b>disque réduit</b>. C\'est une <i>réduction</i> du disque de base (la section est plus petite que la base, plus on s\'approche du sommet)."
+  },
+  {
+    titre:"Cône — calcul du rayon (Thalès)",
+    expr:'<div style="font-size:.9rem; line-height:1.5; padding:6px;">'
+       + '🚀 <b>Mission n°5 :</b> Un cône a une hauteur SO = 10 cm et un rayon de base OA = 6 cm. Il est coupé par un plan parallèle à sa base, à <b>7 cm du sommet S</b>. Le plan coupe [SO] en I et [SA] en B.'
+       + '</div>'
+       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 260 230" style="background:#fff; max-width:240px;"><polygon points="130,25 60,170 200,170" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><ellipse cx="130" cy="170" rx="70" ry="14" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/><path d="M 60,170 A 70,14 0 0 1 200,170" fill="none" stroke="#1a6e88" stroke-width="1.5" stroke-dasharray="3,2"/><ellipse cx="130" cy="120" rx="44" ry="9" fill="rgba(245,166,35,0.4)" stroke="#c47a10" stroke-width="2" stroke-dasharray="5,3"/><line x1="130" y1="25" x2="130" y2="170" stroke="#888" stroke-width="1" stroke-dasharray="2,3"/><text x="124" y="20" font-size="13" fill="#1a6e88" font-weight="bold">S</text><text x="125" y="186" font-size="13" fill="#1a6e88" font-weight="bold">O</text><text x="200" y="180" font-size="11" fill="#1a6e88">A</text><text x="178" y="123" font-size="11" fill="#c47a10" font-weight="bold">B</text><text x="119" y="115" font-size="11" fill="#c47a10" font-weight="bold">I</text><circle cx="174" cy="120" r="2.5" fill="#c47a10"/><circle cx="130" cy="120" r="2.5" fill="#c47a10"/><circle cx="200" cy="170" r="2.5" fill="#1a6e88"/><circle cx="130" cy="170" r="2.5" fill="#1a6e88"/><circle cx="130" cy="25" r="2.5" fill="#1a6e88"/></svg></div>',
+    question:"Quel est le rayon IB de la section (en cm) ?",
+    choices:[
+      "IB = 4,2 cm",
+      "IB = 6 cm",
+      "IB = 7 cm",
+      "IB = 8,6 cm"
+    ],
+    correct:0,
+    indice:"D\'après le théorème de Thalès dans le triangle SOA : SI / SO = IB / OA. On connaît SI = 7, SO = 10, OA = 6. Isole IB.",
+    correction:"Par Thalès dans le triangle SOA, comme (IB) // (OA) : SI/SO = IB/OA, donc IB = OA × (SI/SO) = 6 × 7/10 = <b>4,2 cm</b>."
+  },
+  {
+    titre:"Pavé droit — diagonale d\'une face (Pythagore)",
+    expr:'<div style="font-size:.9rem; line-height:1.5; padding:6px;">'
+       + '🚀 <b>Mission finale :</b> Sur l\'une des faces d\'un pavé droit, on a tracé la diagonale [HI]. La face est un rectangle de dimensions 6 cm × 8 cm.'
+       + '</div>',
+    question:"Quelle est la longueur de la diagonale [HI] ?",
+    choices:[
+      "HI = 14 cm (6 + 8)",
+      "HI = 10 cm",
+      "HI = √14 cm",
+      "HI = 48 cm (6 × 8)"
+    ],
+    correct:1,
+    indice:"La face est un rectangle, donc son angle en H (entre les deux côtés 6 et 8) est droit. Applique le théorème de Pythagore : HI² = 6² + 8².",
+    correction:"Par Pythagore dans le triangle rectangle de la face : HI² = 6² + 8² = 36 + 64 = 100, donc HI = √100 = <b>10 cm</b>. (Triplet pythagoricien 6-8-10.)"
+  }
+];
+
+const TOTAL = DEFIS.length;
+
+/* ===================== ÉTAT ===================== */
+let idx = 0;
+let reussis = 0;
+let erreurs = 0;
+let etat = [];           // {validated, correct, picked} par défi
+let selectedChoice = null;
+
+function resetState(){
+  idx = 0; reussis = 0; erreurs = 0;
+  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null }));
+  selectedChoice = null;
+}
+resetState();
+
+/* ============== RÉFÉRENCES DOM ============== */
+const $ = id => document.getElementById(id);
+const LETTRES = ['A','B','C','D','E','F'];
+
+const btnValider = $('btn-valider'), btnIndice = $('btn-indice'), btnSuivant = $('btn-suivant');
+const btnRetour = $('btn-retour'), btnNavSuivant = $('btn-nav-suivant');
+
+/* ============== INIT ÉTOILES (selon TOTAL) ============== */
+function buildStars(containerId){
+  const c = $(containerId);
+  c.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '★';
+    c.appendChild(s);
+  }
+}
+buildStars('etoiles');
+
+/* ===================== RENDER ===================== */
+function render(){
+  selectedChoice = null;   // remis à null à chaque rendu
+
+  const d = DEFIS[idx];
+  const e = etat[idx];
+
+  // scoreboard
+  $('sc-reussis').textContent  = reussis;
+  $('sc-erreurs').textContent  = erreurs;
+  $('sc-restants').textContent = TOTAL - reussis;
+
+  // étoiles (s'allument selon nb de réussis)
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
+    s.classList.toggle('on', i < reussis);
+  });
+
+  // XP
+  const pct = Math.round((reussis / TOTAL) * 100);
+  $('xp-fill').style.width = pct + '%';
+  $('xp-pct').textContent  = pct + ' %';
+
+  // compteurs
+  $('defi-count').textContent = 'DÉFI ' + (idx+1) + ' / ' + TOTAL;
+  $('card-defi-num').textContent = 'DÉFI ' + String(idx+1).padStart(2,'0');
+  $('ft-expr').innerHTML = d.expr + '<span class="cursor"></span>';
+  $('question-txt').textContent = d.question;
+
+  // construire les choix
+  const cont = $('choix');
+  cont.innerHTML = '';
+  d.choices.forEach((txt, i)=>{
+    const b = document.createElement('button');
+    b.className = 'choix-btn';
+    b.innerHTML = '<span class="lettre">'+LETTRES[i]+'</span><span>'+txt+'</span>';
+    b.dataset.i = i;
+
+    if(e.validated){
+      b.classList.add('locked');
+      if(i === d.correct) b.classList.add('good');
+      if(i === e.picked && i !== d.correct) b.classList.add('bad');
+    } else {
+      b.addEventListener('click', ()=> pickChoice(i, b));
+    }
+    cont.appendChild(b);
+  });
+
+  // si déjà validé : restaurer la sélection
+  if(e.validated){
+    selectedChoice = e.picked;
+  }
+
+  // reset zones
+  $('indice-box').className = 'indice-box';
+  $('indice-box').innerHTML = '';
+  $('feedback').className = 'feedback';
+  $('feedback').innerHTML = '';
+  $('correction').className = 'correction';
+  $('correction').innerHTML = '';
+
+  // réafficher feedback + correction si validé
+  if(e.validated){
+    showFeedback(e.correct);
+    showCorrection();
+  }
+
+  refreshButtons();
+  btnRetour.disabled = (idx === 0);
+}
+
+/* ============== SÉLECTION D'UN CHOIX ============== */
+function pickChoice(i, btn){
+  if(etat[idx].validated) return;
+  selectedChoice = i;
+  document.querySelectorAll('#choix .choix-btn').forEach(b=> b.classList.remove('selected'));
+  btn.classList.add('selected');
+  refreshButtons();
+}
+
+/* ============== GESTION DES BOUTONS ============== */
+function refreshButtons(){
+  const e = etat[idx];
+  // Valider : actif si un choix sélectionné ET pas encore validé
+  btnValider.disabled = (selectedChoice === null || e.validated);
+  // Suivant : actif uniquement si validé
+  btnSuivant.disabled = !e.validated;
+  btnNavSuivant.disabled = !e.validated;
+}
+
+/* ============== VALIDATION ============== */
+function valider(){
+  const d = DEFIS[idx];
+  const e = etat[idx];
+  if(e.validated || selectedChoice === null) return;
+
+  const correct = (selectedChoice === d.correct);
+  e.validated = true;
+  e.correct = correct;
+  e.picked = selectedChoice;
+
+  if(correct){ reussis++; fireXP(); }
+  else { erreurs++; }
+
+  showFeedback(correct);
+  showCorrection();
+  render();   // verrouille les choix, met à jour scoreboard/étoiles/XP
+}
+
+function showFeedback(correct){
+  const fb = $('feedback');
+  if(correct){
+    fb.className = 'feedback ok show';
+    fb.innerHTML = '✅ Bravo ! Bonne réponse.';
+  } else {
+    fb.className = 'feedback ko show';
+    fb.innerHTML = '❌ Pas tout à fait. Regarde la correction.';
+  }
+}
+
+function showCorrection(){
+  const d = DEFIS[idx];
+  const c = $('correction');
+  c.className = 'correction show';
+  c.innerHTML = '<b>Correction :</b> ' + d.correction;
+}
+
+/* ============== INDICE (jamais la réponse) ============== */
+function indice(){
+  const d = DEFIS[idx];
+  const box = $('indice-box');
+  box.className = 'indice-box show';
+  box.innerHTML = '💡 <b>Indice :</b> ' + d.indice;
+}
+
+/* ============== NAVIGATION ============== */
+function suivant(){
+  if(!etat[idx].validated) return;
+  if(idx < TOTAL - 1){
+    idx++; render(); window.scrollTo({ top:0, behavior:'smooth' });
+  } else {
+    showResults();
+  }
+}
+function retour(){
+  if(idx > 0){ idx--; render(); window.scrollTo({ top:0, behavior:'smooth' }); }
+}
+
+/* ============== +25 XP FLOTTANT ============== */
+function fireXP(){
+  const p = $('xp-pop');
+  p.classList.remove('go');
+  void p.offsetWidth;
+  p.classList.add('go');
+}
+
+/* ============== ÉCRAN RÉSULTATS ============== */
+function showResults(){
+  $('exo-card').style.display = 'none';
+  const r = $('results-card');
+  r.classList.add('show');
+
+  $('res-score').textContent = reussis + ' / ' + TOTAL;
+
+  let stars = '';
+  for(let i=0;i<TOTAL;i++) stars += (i < reussis) ? '★' : '☆';
+  $('res-stars').textContent = stars;
+
+  let msg;
+  const ratio = reussis / TOTAL;
+  if(reussis === TOTAL)        msg = '// PARFAIT — GG, sans-faute ! 🏆';
+  else if(ratio >= 0.75)       msg = '// EXCELLENT — très bonne compréhension !';
+  else if(ratio >= 0.5)        msg = '// BIEN JOUÉ — tu es sur la bonne voie !';
+  else if(reussis > 0)         msg = '// PAS MAL — relis la fable et réessaie !';
+  else                         msg = '// COURAGE — relis attentivement, tu vas y arriver !';
+  $('res-msg').textContent = msg;
+
+  let html = '';
+  DEFIS.forEach((d,i)=>{
+    const ok = etat[i].correct;
+    html += '<div class="recap-item">'
+          + '<span class="eq">Défi '+(i+1)+' — '+d.titre+'</span>'
+          + '<span class="st">' + (ok ? '✅' : '❌') + '</span>'
+          + '</div>';
+  });
+  $('res-recap').innerHTML = html;
+
+  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
+    s.classList.toggle('on', i < reussis);
+  });
+
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============== REJOUER ============== */
+function rejouer(){
+  resetState();
+  $('results-card').classList.remove('show');
+  $('exo-card').style.display = '';
+  render();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============== LISTENERS ============== */
+btnValider.addEventListener('click', valider);
+btnIndice .addEventListener('click', indice);
+btnSuivant.addEventListener('click', suivant);
+btnNavSuivant.addEventListener('click', suivant);
+btnRetour .addEventListener('click', retour);
+$('btn-rejouer').addEventListener('click', rejouer);
+
+/* ============== INIT ============== */
+render();
+</script>
+</body>
+</html>
