@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths – Ce que je retiens · Se repérer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ═══════════ CHARTE ORANGE J1 (Lundi) ═══════════ */
+  :root {
+    --day-color:  #f5a623;
+    --day-dark:   #c47a10;
+    --day-light:  #fff5e0;
+    --day-border: #f5d080;
+    --day-glow:   rgba(245,166,35,.3);
+  }
+  /* ═══════════ CHARTE PAZAPA — base ═══════════ */
+  :root {
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623; --purple:#9966ff;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--blue);top:200px;left:-30px;pointer-events:none;}
+  header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--day-color);
+    color:#fff;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.6rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.4rem,4vw,2.1rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.92rem;margin-top:.5rem;font-family:'JetBrains Mono',monospace;
+    max-width:600px;margin-left:auto;margin-right:auto;}
+  .card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+    border-radius:var(--radius);padding:1.8rem 1.8rem 1.6rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.4rem;animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green),var(--blue));}
+  .theme-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.25rem .75rem;border-radius:6px;
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;background:var(--day-light);
+    color:var(--day-dark);border:1.5px solid var(--day-border);}
+  .card h2{font-size:1.15rem;font-weight:800;color:var(--day-dark);margin-bottom:.9rem;}
+  .card p{margin-bottom:.7rem;}
+  .card p:last-child{margin-bottom:0;}
+  .inner{background:var(--day-light);border-left:5px solid var(--day-color);border-radius:10px;
+    padding:.9rem 1rem;margin:.9rem 0;line-height:1.85;}
+  .inner strong{color:var(--day-dark);}
+
+  /* ═══════════ MINI-CARTE MENTALE (vue d'ensemble) ═══════════ */
+  .overview{display:flex;flex-direction:column;align-items:center;gap:0;margin:.6rem 0;}
+  .overview-center{background:var(--day-dark);color:#fff;font-weight:800;letter-spacing:.08em;
+    text-transform:uppercase;padding:.85rem 1.6rem;border-radius:99px;font-size:.95rem;
+    box-shadow:0 4px 14px var(--day-glow);margin-bottom:1rem;}
+  .overview-branches{display:grid;grid-template-columns:1fr;gap:.7rem;width:100%;}
+  @media(min-width:640px){.overview-branches{grid-template-columns:repeat(5, 1fr);}}
+  .branch{background:#fff;border:2px solid;border-radius:12px;padding:.7rem .5rem;text-align:center;
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;
+    display:flex;flex-direction:column;gap:.3rem;align-items:center;justify-content:center;min-height:90px;}
+  .branch .ic{font-size:1.4rem;line-height:1;}
+  .branch .name{font-size:.85rem;}
+  .branch .coords{font-size:.7rem;color:var(--muted);font-weight:600;}
+  .branch.b1{border-color:#e84d8a;color:#c0265a;}     /* pink */
+  .branch.b2{border-color:var(--blue);color:#1a6e88;}
+  .branch.b3{border-color:var(--purple);color:#5c2cb0;}
+  .branch.b4{border-color:var(--green);color:#2f6e10;}
+  .branch.b5{border-color:var(--day-color);color:var(--day-dark);}
+
+  /* SVG figure */
+  .fig-wrap{display:flex;justify-content:center;margin:.8rem 0;padding:1rem;background:var(--surface);
+    border:2px solid var(--day-border);border-radius:12px;}
+  .fig-wrap svg{max-width:100%;height:auto;}
+  .fig-caption{text-align:center;font-size:.82rem;color:var(--muted);margin-top:.4rem;font-style:italic;font-family:'JetBrains Mono',monospace;}
+
+  /* Formules / coords sortantes */
+  .formula{display:block;text-align:center;background:var(--surface);border:2px dashed var(--day-border);
+    border-radius:12px;padding:.85rem 1.2rem;margin:.8rem auto;font-family:'JetBrains Mono',monospace;
+    font-size:clamp(.95rem,2.4vw,1.15rem);font-weight:700;color:var(--day-dark);}
+  /* couleurs sémantiques pour les coords */
+  .c-abs{color:#2f6e10;font-weight:800;}
+  .c-ord{color:#1a6e88;font-weight:800;}
+  .c-alt{color:#c0392b;font-weight:800;}
+  .c-lat{color:#d97706;font-weight:800;}
+  .c-lon{color:#5c2cb0;font-weight:800;}
+
+  ul.clean{list-style:none;padding:0;margin:.6rem 0;}
+  ul.clean li{position:relative;padding:.55rem 0 .55rem 1.8rem;border-bottom:1px dashed var(--day-border);line-height:1.75;}
+  ul.clean li:last-child{border-bottom:none;}
+  ul.clean li::before{content:"▸";position:absolute;left:.3rem;top:.55rem;color:var(--day-color);font-weight:800;font-size:1.05rem;}
+
+  details.recap{background:linear-gradient(135deg,var(--surface) 0%,var(--day-light) 100%);
+    border:2px solid var(--day-border);border-radius:var(--radius);padding:0;width:100%;max-width:720px;
+    margin-bottom:1.4rem;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;z-index:1;}
+  details.recap summary{cursor:pointer;padding:1.1rem 1.5rem;font-weight:700;color:var(--day-dark);font-size:1rem;
+    list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem;transition:background .2s;min-height:2.8rem;}
+  details.recap summary:hover{background:rgba(245,166,35,.10);}
+  details.recap summary::-webkit-details-marker{display:none;}
+  details.recap summary::after{content:"▼";font-size:.85rem;transition:transform .25s;color:var(--day-color);}
+  details.recap[open] summary::after{transform:rotate(180deg);}
+  details.recap .recap-content{padding:0 1.5rem 1.4rem;}
+
+  .quiz-intro{color:var(--muted);font-size:.92rem;margin-bottom:1rem;line-height:1.75;}
+  .group{background:var(--day-light);border-radius:12px;padding:1rem .9rem;margin:.9rem 0;border:2px solid transparent;transition:all .25s;}
+  .group.ok{border-color:var(--green);background:#f0faeb;}
+  .group.ko{border-color:var(--pink);background:#fff0ef;}
+  .group-title{font-weight:700;color:var(--day-dark);margin-bottom:.6rem;font-size:.92rem;line-height:1.6;}
+  .group.ok .group-title{color:#2f6e10;}
+  .group.ko .group-title{color:#c0392b;}
+  .options{display:flex;flex-direction:column;gap:.5rem;}
+  .opt{display:flex;align-items:flex-start;gap:.6rem;background:var(--surface);border:2px solid var(--day-border);
+    border-radius:10px;padding:.65rem .8rem;cursor:pointer;transition:all .2s;font-size:.9rem;line-height:1.55;
+    user-select:none;min-height:2.4rem;font-family:'JetBrains Mono',monospace;}
+  .opt:hover{background:var(--day-light);border-color:var(--day-color);}
+  .opt input{margin-top:.2rem;accent-color:var(--day-color);width:18px;height:18px;cursor:pointer;flex-shrink:0;}
+  .opt.checked{background:var(--day-light);border-color:var(--day-dark);}
+  .group.ok .opt{pointer-events:none;opacity:.85;}
+  .quiz-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.1rem;justify-content:center;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.3rem;border-radius:10px;
+    font-family:Arial,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+    transition:transform .12s,box-shadow .15s;position:relative;z-index:2;min-height:2.7rem;text-decoration:none;}
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+  .btn-ghost:hover{border-color:var(--day-color);background:var(--day-light);}
+  .feedback{margin-top:1.1rem;padding:.85rem 1rem;border-radius:10px;font-weight:600;text-align:center;display:none;line-height:1.7;}
+  .feedback.show{display:block;}
+  .feedback.win{background:#f0faeb;color:#2f6e10;border:1.5px solid var(--green);}
+  .feedback.retry{background:#fff0ef;color:#c0392b;border:1.5px solid var(--pink);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.2rem .8rem 3rem;}
+    .card{padding:1.3rem 1.1rem;}
+    .btn{font-size:.88rem;padding:.6rem 1rem;}
+    .quiz-actions .btn{flex:1;min-width:140px;justify-content:center;}
+    .formula{font-size:.88rem;padding:.7rem;}
+  }
+</style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      Pazapa &middot; Maths &middot; 3<sup>e</sup>
+    </div>
+    <div class="week-label">📚 Ce que je retiens &middot; Semaine 6 &middot; Jour 1</div>
+    <h1><span class="hl">Se repérer</span></h1>
+    <p class="subtitle">5 façons de donner la position d'un point : sur une droite, dans un plan, dans un pavé, sur une sphère, ou dans Scratch</p>
+  </header>
+
+  <!-- VUE D'ENSEMBLE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🧭 Vue d'ensemble</div>
+    <h2>Tout dépend de l'objet où on se trouve</h2>
+    <p>Pour <strong>repérer un point</strong>, on a besoin de coordonnées. Leur <strong>nombre</strong> dépend de l'endroit :</p>
+
+    <div class="overview">
+      <div class="overview-center">SE REPÉRER</div>
+      <div class="overview-branches">
+        <div class="branch b1">
+          <span class="ic">📏</span>
+          <span class="name">Sur une droite</span>
+          <span class="coords">1 coord.</span>
+        </div>
+        <div class="branch b2">
+          <span class="ic">📐</span>
+          <span class="name">Dans le plan</span>
+          <span class="coords">2 coord.</span>
+        </div>
+        <div class="branch b3">
+          <span class="ic">📦</span>
+          <span class="name">Dans un pavé</span>
+          <span class="coords">3 coord.</span>
+        </div>
+        <div class="branch b4">
+          <span class="ic">🌍</span>
+          <span class="name">Sur une sphère</span>
+          <span class="coords">2 coord.</span>
+        </div>
+        <div class="branch b5">
+          <span class="ic">🐱</span>
+          <span class="name">Sur Scratch</span>
+          <span class="coords">2 coord.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. SUR UNE DROITE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📏 1 · Sur une droite</div>
+    <h2>L'abscisse d'un point</h2>
+    <p>Sur une droite graduée, un point est repéré par <strong>un seul nombre</strong> appelé son <strong class="c-abs">abscisse</strong>.</p>
+
+    <div class="fig-wrap">
+      <svg viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Droite graduée avec points A et B">
+        <!-- Axe horizontal -->
+        <line x1="20" y1="55" x2="380" y2="55" stroke="#1f2937" stroke-width="2"/>
+        <polygon points="380,55 372,50 372,60" fill="#1f2937"/>
+        <!-- Graduations -->
+        <g font-family="JetBrains Mono, monospace" font-size="12" fill="#5b6b78" text-anchor="middle">
+          <line x1="60" y1="50" x2="60" y2="60" stroke="#1f2937" stroke-width="2"/>
+          <text x="60" y="80">-3</text>
+          <line x1="110" y1="50" x2="110" y2="60" stroke="#1f2937" stroke-width="2"/>
+          <text x="110" y="80">-2</text>
+          <line x1="160" y1="50" x2="160" y2="60" stroke="#1f2937" stroke-width="2"/>
+          <text x="160" y="80">-1</text>
+          <line x1="210" y1="50" x2="210" y2="60" stroke="#1f2937" stroke-width="2"/>
+          <text x="210" y="80">0</text>
+          <line x1="260" y1="50" x2="260" y2="60" stroke="#1f2937" stroke-width="2"/>
+          <text x="260" y="80">1</text>
+          <line x1="310" y1="50" x2="310" y2="60" stroke="#1f2937" stroke-width="2"/>
+          <text x="310" y="80">2</text>
+          <line x1="360" y1="50" x2="360" y2="60" stroke="#1f2937" stroke-width="2"/>
+          <text x="360" y="80">3</text>
+        </g>
+        <!-- Point B(-2,5) -->
+        <text x="85" y="35" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="15" font-weight="700" fill="#c0265a">B</text>
+        <circle cx="85" cy="55" r="5" fill="#c0265a"/>
+        <!-- Point A(3) -->
+        <text x="360" y="35" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="15" font-weight="700" fill="#c0265a">A</text>
+        <circle cx="360" cy="55" r="5" fill="#c0265a"/>
+      </svg>
+    </div>
+    <p class="fig-caption">▲ A a pour abscisse 3 ; B a pour abscisse −2,5</p>
+
+    <ul class="clean">
+      <li>Le point <strong>A</strong> a pour abscisse <strong>3</strong>, on note <strong>A(3)</strong>.</li>
+      <li>Le point <strong>B</strong> a pour abscisse <strong>−2,5</strong>, on note <strong>B(−2,5)</strong>.</li>
+    </ul>
+  </section>
+
+  <!-- 2. DANS LE PLAN -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📐 2 · Dans le plan</div>
+    <h2>Les coordonnées d'un point</h2>
+    <p>Dans un plan (une feuille), un point a <strong>deux coordonnées</strong> notées dans l'ordre <strong class="c-abs">(abscisse</strong> ; <strong class="c-ord">ordonnée)</strong>.</p>
+
+    <div class="formula">
+      Point M(<span class="c-abs">x</span> ; <span class="c-ord">y</span>)
+    </div>
+
+    <div class="fig-wrap">
+      <svg viewBox="0 0 380 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Repère du plan avec points C, D, E, F">
+        <!-- Grille -->
+        <g stroke="#e0eef4" stroke-width="1">
+          <line x1="20" y1="40" x2="340" y2="40"/>
+          <line x1="20" y1="80" x2="340" y2="80"/>
+          <line x1="20" y1="160" x2="340" y2="160"/>
+          <line x1="20" y1="200" x2="340" y2="200"/>
+          <line x1="20" y1="240" x2="340" y2="240"/>
+          <line x1="60" y1="20" x2="60" y2="260"/>
+          <line x1="100" y1="20" x2="100" y2="260"/>
+          <line x1="140" y1="20" x2="140" y2="260"/>
+          <line x1="220" y1="20" x2="220" y2="260"/>
+          <line x1="260" y1="20" x2="260" y2="260"/>
+          <line x1="300" y1="20" x2="300" y2="260"/>
+          <line x1="340" y1="20" x2="340" y2="260"/>
+        </g>
+        <!-- Axes : centre en (180,120). 1 unité = 40px -->
+        <line x1="20" y1="120" x2="340" y2="120" stroke="#1f2937" stroke-width="2"/>
+        <polygon points="340,120 332,115 332,125" fill="#1f2937"/>
+        <text x="244" y="112" font-family="JetBrains Mono, monospace" font-size="12" fill="#1a6e88" font-weight="700">abscisse</text>
+        <line x1="180" y1="260" x2="180" y2="20" stroke="#1f2937" stroke-width="2"/>
+        <polygon points="180,20 175,28 185,28" fill="#1f2937"/>
+        <text x="185" y="18" font-family="JetBrains Mono, monospace" font-size="12" fill="#1a6e88" font-weight="700">ordonnée</text>
+        <!-- Graduations x -->
+        <g font-family="JetBrains Mono, monospace" font-size="10" fill="#5b6b78" text-anchor="middle">
+          <text x="20" y="135">-4</text>
+          <text x="60" y="135">-3</text>
+          <text x="100" y="135">-2</text>
+          <text x="140" y="135">-1</text>
+          <text x="180" y="135">0</text>
+          <text x="220" y="135">1</text>
+          <text x="260" y="135">2</text>
+          <text x="300" y="135">3</text>
+          <text x="340" y="135">4</text>
+        </g>
+        <!-- Graduations y -->
+        <g font-family="JetBrains Mono, monospace" font-size="10" fill="#5b6b78" text-anchor="end">
+          <text x="173" y="44">4</text>
+          <text x="173" y="84">2</text>
+          <text x="173" y="164">-1</text>
+          <text x="173" y="204">-2</text>
+          <text x="173" y="244">-3</text>
+        </g>
+        <!-- C(-3 ; 1,5) : x=-3 → 60, y=1.5 → 120 - 1.5*40 = 60 -->
+        <text x="60" y="65" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#c0392b">×</text>
+        <text x="48" y="69" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#c0392b">C</text>
+        <!-- D(0 ; -2) -->
+        <text x="180" y="205" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#c0392b">×</text>
+        <text x="195" y="209" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#c0392b">D</text>
+        <!-- E(1,5 ; -3) -->
+        <text x="240" y="245" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#c0392b">×</text>
+        <text x="255" y="249" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#c0392b">E</text>
+        <!-- F(3 ; 0) -->
+        <text x="300" y="125" text-anchor="middle" font-family="Arial" font-size="14" font-weight="700" fill="#c0392b">×</text>
+        <text x="306" y="138" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#c0392b">F</text>
+      </svg>
+    </div>
+
+    <ul class="clean">
+      <li><strong>C</strong>(<span class="c-abs">−3</span> ; <span class="c-ord">1,5</span>) &nbsp;&nbsp; <strong>D</strong>(<span class="c-abs">0</span> ; <span class="c-ord">−2</span>)</li>
+      <li><strong>E</strong>(<span class="c-abs">1,5</span> ; <span class="c-ord">−3</span>) &nbsp;&nbsp; <strong>F</strong>(<span class="c-abs">3</span> ; <span class="c-ord">0</span>)</li>
+    </ul>
+
+    <div class="inner">
+      <p>⚠️ L'<strong>ordre</strong> compte ! On écrit toujours <strong>(abscisse ; ordonnée)</strong>. C(−3 ; 1,5) ≠ C(1,5 ; −3).</p>
+    </div>
+  </section>
+
+  <!-- 3. DANS UN PAVÉ -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📦 3 · Dans un pavé (3D)</div>
+    <h2>Trois coordonnées</h2>
+    <p>Dans l'espace à 3 dimensions, on a besoin de <strong>trois nombres</strong> : <strong class="c-abs">abscisse</strong>, <strong class="c-ord">ordonnée</strong>, et <strong class="c-alt">altitude</strong>.</p>
+
+    <div class="formula">
+      Point P(<span class="c-abs">x</span> ; <span class="c-ord">y</span> ; <span class="c-alt">z</span>)
+    </div>
+
+    <div class="fig-wrap">
+      <svg viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Repère 3D avec point P">
+        <!-- Pavé en pointillés -->
+        <g stroke="#aaa" stroke-width="1" stroke-dasharray="3,3" fill="none">
+          <!-- face avant -->
+          <line x1="100" y1="200" x2="280" y2="200"/>
+          <line x1="280" y1="200" x2="280" y2="70"/>
+          <line x1="280" y1="70" x2="100" y2="70"/>
+          <line x1="100" y1="70" x2="100" y2="200"/>
+          <!-- face arrière -->
+          <line x1="60" y1="160" x2="240" y2="160"/>
+          <line x1="240" y1="160" x2="240" y2="30"/>
+          <line x1="240" y1="30" x2="60" y2="30"/>
+          <line x1="60" y1="30" x2="60" y2="160"/>
+          <!-- arêtes obliques -->
+          <line x1="100" y1="200" x2="60" y2="160"/>
+          <line x1="280" y1="200" x2="240" y2="160"/>
+          <line x1="280" y1="70" x2="240" y2="30"/>
+          <line x1="100" y1="70" x2="60" y2="30"/>
+        </g>
+        <!-- Axes principaux -->
+        <!-- abscisse (vert, oblique) -->
+        <line x1="100" y1="200" x2="40" y2="240" stroke="#2f6e10" stroke-width="2.5"/>
+        <polygon points="40,240 50,232 47,243" fill="#2f6e10"/>
+        <text x="20" y="252" font-family="Arial" font-size="12" font-weight="700" fill="#2f6e10">abscisse</text>
+        <!-- ordonnée (bleu, horizontal) -->
+        <line x1="100" y1="200" x2="330" y2="200" stroke="#1a6e88" stroke-width="2.5"/>
+        <polygon points="330,200 322,196 322,204" fill="#1a6e88"/>
+        <text x="290" y="218" font-family="Arial" font-size="12" font-weight="700" fill="#1a6e88">ordonnée</text>
+        <!-- altitude (rouge, vertical) -->
+        <line x1="100" y1="200" x2="100" y2="20" stroke="#c0392b" stroke-width="2.5"/>
+        <polygon points="100,20 96,28 104,28" fill="#c0392b"/>
+        <text x="65" y="20" font-family="Arial" font-size="12" font-weight="700" fill="#c0392b">altitude</text>
+        <!-- Graduations -->
+        <g font-family="JetBrains Mono, monospace" font-size="10" fill="#5b6b78">
+          <text x="155" y="215">1</text>
+          <text x="195" y="215">2</text>
+          <text x="235" y="215">3</text>
+          <text x="275" y="215">4</text>
+          <text x="85" y="160">1</text>
+          <text x="85" y="120">2</text>
+          <text x="85" y="80">3</text>
+        </g>
+        <!-- Point P(4 ; 3 ; 4,2) -->
+        <!-- On le place visuellement -->
+        <circle cx="220" cy="55" r="4" fill="#1f2937"/>
+        <text x="228" y="55" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#1f2937">P</text>
+        <!-- Pointillés vers les axes -->
+        <line x1="220" y1="55" x2="220" y2="200" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="220" y1="200" x2="100" y2="200" stroke="#1a6e88" stroke-width="1" stroke-dasharray="3,3"/>
+      </svg>
+    </div>
+
+    <p style="text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1rem;">
+      Exemple : P(<span class="c-abs">4</span> ; <span class="c-ord">3</span> ; <span class="c-alt">4,2</span>)
+    </p>
+  </section>
+
+  <!-- 4. SUR UNE SPHÈRE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🌍 4 · Sur une sphère (la Terre)</div>
+    <h2>Latitude et longitude</h2>
+    <p>Sur la Terre, on utilise <strong>deux angles</strong> pour repérer un point :</p>
+    <ul class="clean">
+      <li><strong class="c-lat">Latitude</strong> : angle de <strong>0° à 90°</strong>, qui détermine la position d'un cercle appelé <strong>parallèle</strong>, et la direction <strong>Nord</strong> ou <strong>Sud</strong>. Pour la Terre, le parallèle 0° est l'<strong>équateur</strong>.</li>
+      <li><strong class="c-lon">Longitude</strong> : angle de <strong>0° à 180°</strong>, qui détermine la position d'un demi-cercle appelé <strong>méridien</strong>, et la direction <strong>Est</strong> ou <strong>Ouest</strong>. Pour la Terre, le méridien 0° est le <strong>méridien de Greenwich</strong>.</li>
+    </ul>
+
+    <div class="fig-wrap">
+      <svg viewBox="0 0 340 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Globe avec latitude et longitude">
+        <!-- Globe -->
+        <circle cx="150" cy="130" r="100" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+        <!-- Équateur (ellipse horizontale) -->
+        <ellipse cx="150" cy="130" rx="100" ry="22" fill="none" stroke="#c47a10" stroke-width="1.5"/>
+        <text x="255" y="135" font-family="Arial" font-size="11" font-weight="700" fill="#c47a10">équateur</text>
+        <!-- Méridien de Greenwich (ellipse verticale, partie visible) -->
+        <ellipse cx="150" cy="130" rx="35" ry="100" fill="none" stroke="#5c2cb0" stroke-width="1.5"/>
+        <text x="5" y="248" font-family="Arial" font-size="10" font-weight="700" fill="#5c2cb0">méridien de Greenwich</text>
+        <!-- Parallèle latitude 40° N -->
+        <ellipse cx="150" cy="80" rx="78" ry="14" fill="none" stroke="#d97706" stroke-width="2"/>
+        <!-- Point T sur le globe -->
+        <circle cx="205" cy="75" r="4" fill="#1f2937"/>
+        <text x="215" y="78" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#1f2937">T</text>
+        <!-- Étiquettes des angles -->
+        <text x="170" y="115" font-family="Arial" font-size="11" font-weight="700" fill="#d97706">40° lat.</text>
+        <text x="165" y="155" font-family="Arial" font-size="11" font-weight="700" fill="#5c2cb0">70° long.</text>
+      </svg>
+    </div>
+
+    <div class="formula">
+      Exemple : T(<span class="c-lat">40°N</span> ; <span class="c-lon">70°E</span>)
+    </div>
+    <p class="fig-caption">▲ T est à 40° au Nord de l'équateur et 70° à l'Est de Greenwich</p>
+  </section>
+
+  <!-- 5. AVEC SCRATCH -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🐱 5 · Avec le logiciel Scratch</div>
+    <h2>La scène de Scratch est un repère</h2>
+    <p>Sur Scratch, on repère le lutin avec <strong>2 coordonnées (x ; y)</strong>. La scène mesure <strong>480 × 360</strong>, avec le <strong>centre en (0 ; 0)</strong>.</p>
+
+    <div class="fig-wrap">
+      <svg viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Repère de Scratch">
+        <!-- Cadre scène -->
+        <rect x="40" y="30" width="280" height="220" fill="#fff" stroke="#3ab5d8" stroke-width="2.5" rx="4"/>
+        <!-- Axe x -->
+        <line x1="40" y1="140" x2="320" y2="140" stroke="#3ab5d8" stroke-width="2"/>
+        <polygon points="320,140 312,135 312,145" fill="#3ab5d8"/>
+        <text x="328" y="145" font-family="JetBrains Mono, monospace" font-size="12" fill="#3ab5d8" font-weight="700">x</text>
+        <!-- Axe y -->
+        <line x1="180" y1="250" x2="180" y2="30" stroke="#3ab5d8" stroke-width="2"/>
+        <polygon points="180,30 176,38 184,38" fill="#3ab5d8"/>
+        <text x="185" y="28" font-family="JetBrains Mono, monospace" font-size="12" fill="#3ab5d8" font-weight="700">y</text>
+        <!-- Origine -->
+        <circle cx="180" cy="140" r="3.5" fill="#1f2937"/>
+        <text x="186" y="156" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#1f2937">(0 ; 0)</text>
+        <!-- Bord haut (0 ; 180) -->
+        <circle cx="180" cy="30" r="3" fill="#c0392b"/>
+        <text x="186" y="26" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#c0392b">(0 ; 180)</text>
+        <!-- Bord bas (0 ; -180) -->
+        <circle cx="180" cy="250" r="3" fill="#c0392b"/>
+        <text x="186" y="264" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#c0392b">(0 ; -180)</text>
+        <!-- Bord gauche (-240 ; 0) -->
+        <circle cx="40" cy="140" r="3" fill="#2f6e10"/>
+        <text x="0" y="135" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#2f6e10">(-240 ; 0)</text>
+        <!-- Bord droit (240 ; 0) -->
+        <circle cx="320" cy="140" r="3" fill="#2f6e10"/>
+        <text x="285" y="135" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#2f6e10">(240 ; 0)</text>
+        <!-- Chat -->
+        <text x="290" y="48" font-family="Arial" font-size="20">🐱</text>
+      </svg>
+    </div>
+
+    <ul class="clean">
+      <li>L'abscisse <strong>x</strong> va de <strong>−240</strong> (gauche) à <strong>240</strong> (droite).</li>
+      <li>L'ordonnée <strong>y</strong> va de <strong>−180</strong> (bas) à <strong>180</strong> (haut).</li>
+      <li>Le centre de la scène est l'origine <strong>(0 ; 0)</strong>.</li>
+    </ul>
+  </section>
+
+  <!-- RÉCAP -->
+  <details class="recap">
+    <summary>👉 Clique ici pour l'essentiel en résumé</summary>
+    <div class="recap-content">
+      <ul class="clean">
+        <li>Sur une <strong>droite</strong> : 1 coordonnée (l'<strong>abscisse</strong>). Ex : A(3).</li>
+        <li>Dans le <strong>plan</strong> : 2 coordonnées (<strong>abscisse ; ordonnée</strong>). Ex : C(−3 ; 1,5).</li>
+        <li>Dans un <strong>pavé</strong> (3D) : 3 coordonnées (<strong>x ; y ; z</strong> = abscisse ; ordonnée ; altitude).</li>
+        <li>Sur une <strong>sphère</strong> (Terre) : 2 angles (<strong>latitude N/S ; longitude E/O</strong>).</li>
+        <li>Sur <strong>Scratch</strong> : 2 coords (x de −240 à 240, y de −180 à 180), centre en (0 ; 0).</li>
+        <li>L'<strong>ordre</strong> des coordonnées compte toujours !</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- MINI-QUIZ -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🎯 Mini-quiz</div>
+    <h2>À toi de vérifier !</h2>
+    <p class="quiz-intro">Pour chaque groupe, coche <strong>toutes les affirmations correctes</strong> (il peut y en avoir plusieurs). Puis clique sur « Vérifier ».</p>
+    <div id="quiz-groups"></div>
+    <div class="quiz-actions">
+      <button class="btn btn-primary" id="check-btn">✅ Vérifier mes réponses</button>
+      <button class="btn btn-ghost" id="reset-btn">🔄 Recommencer</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+<script>
+  var QUIZ = [
+    {
+      title:"1 \u00b7 Sur une droite gradu\u00e9e, un point est rep\u00e9r\u00e9 par\u2026",
+      options:[
+        { t:"1 seul nombre (son abscisse)", ok:true },
+        { t:"2 nombres", ok:false },
+        { t:"3 nombres", ok:false },
+        { t:"un angle", ok:false }
+      ]
+    },
+    {
+      title:"2 \u00b7 Dans le plan, les coordonn\u00e9es d'un point\u2026",
+      options:[
+        { t:"sont (abscisse ; ordonn\u00e9e)", ok:true },
+        { t:"l'ordre compte : C(\u22123 ; 1,5) \u2260 C(1,5 ; \u22123)", ok:true },
+        { t:"sont au nombre de 3", ok:false },
+        { t:"sont toujours positives", ok:false }
+      ]
+    },
+    {
+      title:"3 \u00b7 Dans un pav\u00e9 (3D), un point\u2026",
+      options:[
+        { t:"a 3 coordonn\u00e9es : abscisse, ordonn\u00e9e, altitude", ok:true },
+        { t:"P(4 ; 3 ; 4,2) est valide", ok:true },
+        { t:"n'a que 2 coordonn\u00e9es", ok:false },
+        { t:"est rep\u00e9r\u00e9 par latitude/longitude", ok:false }
+      ]
+    },
+    {
+      title:"4 \u00b7 Sur la Terre (sph\u00e8re)\u2026",
+      options:[
+        { t:"latitude = angle de 0\u00b0 \u00e0 90\u00b0 (Nord ou Sud)", ok:true },
+        { t:"longitude = angle de 0\u00b0 \u00e0 180\u00b0 (Est ou Ouest)", ok:true },
+        { t:"l'\u00e9quateur a une latitude de 0\u00b0", ok:true },
+        { t:"le m\u00e9ridien 0\u00b0 est en France", ok:false }
+      ]
+    },
+    {
+      title:"5 \u00b7 Sur la sc\u00e8ne de Scratch\u2026",
+      options:[
+        { t:"le centre est (0 ; 0)", ok:true },
+        { t:"x va de \u2212240 \u00e0 240", ok:true },
+        { t:"y va de \u2212180 \u00e0 180", ok:true },
+        { t:"y va de \u2212100 \u00e0 100", ok:false }
+      ]
+    },
+    {
+      title:"6 \u00b7 Combien faut-il de coordonn\u00e9es pour\u2026",
+      options:[
+        { t:"un point dans le plan : 2", ok:true },
+        { t:"un point sur la Terre : 2 (lat ; long)", ok:true },
+        { t:"un point dans un pav\u00e9 : 3", ok:true },
+        { t:"un point sur une droite : 2", ok:false }
+      ]
+    }
+  ];
+
+  var container = document.getElementById('quiz-groups');
+  QUIZ.forEach(function(g, gi){
+    var groupEl = document.createElement('div');
+    groupEl.className = 'group';
+    groupEl.id = 'g' + gi;
+    var html = '<div class="group-title">' + g.title + '</div><div class="options">';
+    g.options.forEach(function(o, oi){
+      html += '<label class="opt" data-g="' + gi + '" data-o="' + oi + '">' +
+              '<input type="checkbox" data-g="' + gi + '" data-o="' + oi + '" data-ok="' + o.ok + '">' +
+              '<span>' + o.t + '</span></label>';
+    });
+    html += '</div>';
+    groupEl.innerHTML = html;
+    container.appendChild(groupEl);
+  });
+
+  container.addEventListener('change', function(e){
+    if(e.target.matches('input[type="checkbox"]')){
+      var label = e.target.closest('.opt');
+      if(e.target.checked) label.classList.add('checked');
+      else label.classList.remove('checked');
+    }
+  });
+
+  var feedback = document.getElementById('feedback');
+  document.getElementById('check-btn').addEventListener('click', function(){
+    var allOk = true, firstError = null;
+    QUIZ.forEach(function(g, gi){
+      var groupEl = document.getElementById('g' + gi);
+      if(groupEl.classList.contains('ok')) return;
+      var inputs = groupEl.querySelectorAll('input[type="checkbox"]');
+      var correct = true;
+      inputs.forEach(function(inp){
+        if((inp.dataset.ok === 'true') !== inp.checked) correct = false;
+      });
+      if(correct){
+        groupEl.classList.remove('ko'); groupEl.classList.add('ok');
+        inputs.forEach(function(inp){ inp.disabled = true; });
+      } else {
+        groupEl.classList.remove('ok'); groupEl.classList.add('ko');
+        if(!firstError) firstError = groupEl;
+        allOk = false;
+      }
+    });
+    feedback.classList.remove('win','retry','show');
+    if(allOk){
+      feedback.textContent = "\ud83c\udf89 Bravo ! Toutes tes r\u00e9ponses sont correctes. Tu sais te rep\u00e9rer dans toutes les situations !";
+      feedback.classList.add('win','show');
+    } else {
+      feedback.textContent = "\u270b Il reste des erreurs. Les groupes en rouge sont \u00e0 reprendre. Essaie \u00e0 nouveau !";
+      feedback.classList.add('retry','show');
+      if(firstError) firstError.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    document.querySelectorAll('.group').forEach(function(g){ g.classList.remove('ok','ko'); });
+    document.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('checked'); });
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(inp){
+      inp.checked = false; inp.disabled = false;
+    });
+    feedback.classList.remove('show','win','retry');
+    feedback.textContent = "";
+  });
+</script>
+</body>
+</html>
