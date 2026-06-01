@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths – Ce que je retiens · Section d'un solide par un plan</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ═══════════ CHARTE BLEU J4 (Jeudi) ═══════════ */
+  :root {
+    --day-color:  #3ab5d8;
+    --day-dark:   #1a6e88;
+    --day-light:  #e8f6fb;
+    --day-border: #9dd4e8;
+    --day-glow:   rgba(58,181,216,.3);
+  }
+  /* ═══════════ CHARTE PAZAPA — base ═══════════ */
+  :root {
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623; --purple:#9966ff;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--green);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--yellow);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+  header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--day-color);
+    color:#fff;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.6rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.4rem,4vw,2.1rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.92rem;margin-top:.5rem;font-family:'JetBrains Mono',monospace;
+    max-width:600px;margin-left:auto;margin-right:auto;}
+  .card{width:100%;max-width:760px;background:var(--surface);border:2px solid var(--border);
+    border-radius:var(--radius);padding:1.8rem 1.8rem 1.6rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.4rem;animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--green),var(--yellow),var(--orange));}
+  .theme-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.25rem .75rem;border-radius:6px;
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;background:var(--day-light);
+    color:var(--day-dark);border:1.5px solid var(--day-border);}
+  .card h2{font-size:1.15rem;font-weight:800;color:var(--day-dark);margin-bottom:.9rem;}
+  .card p{margin-bottom:.7rem;}
+  .card p:last-child{margin-bottom:0;}
+  .inner{background:var(--day-light);border-left:5px solid var(--day-color);border-radius:10px;
+    padding:.9rem 1rem;margin:.9rem 0;line-height:1.85;}
+  .inner strong{color:var(--day-dark);}
+  .formula{display:block;text-align:center;background:var(--surface);border:2px dashed var(--day-border);
+    border-radius:12px;padding:.85rem 1.2rem;margin:.8rem auto;font-family:'JetBrains Mono',monospace;
+    font-size:clamp(.95rem,2.4vw,1.15rem);font-weight:700;color:var(--day-dark);}
+
+  /* Case d'un cas particulier (1 solide × 1 type de coupe) */
+  .case-row{display:grid;grid-template-columns:1fr;gap:1rem;margin:1rem 0;align-items:stretch;}
+  @media(min-width:560px){.case-row{grid-template-columns:1fr 1fr;}}
+  .case-svg{background:var(--surface);border:2px solid var(--day-border);border-radius:12px;
+    padding:.8rem;display:flex;justify-content:center;align-items:center;}
+  .case-svg svg{max-width:100%;height:auto;max-height:170px;}
+  .case-info{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;
+    padding:.9rem 1rem;display:flex;flex-direction:column;justify-content:center;gap:.4rem;}
+  .case-info .label{font-family:'JetBrains Mono',monospace;font-size:.78rem;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--day-dark);font-weight:700;}
+  .case-info .result{font-size:1rem;font-weight:800;color:var(--day-dark);}
+  .case-info .desc{font-size:.85rem;color:#5b6b78;line-height:1.55;}
+
+  /* Tableau coefficient k */
+  .coef-table{width:100%;margin:.8rem 0;border-collapse:collapse;font-family:'JetBrains Mono',monospace;text-align:center;}
+  .coef-table th{background:var(--day-color);color:#fff;padding:.55rem .5rem;font-size:.85rem;border:1.5px solid var(--day-dark);}
+  .coef-table td{padding:.55rem .5rem;border:1px solid var(--day-border);background:var(--surface);font-size:.92rem;font-weight:700;}
+  .coef-table td.head{background:var(--day-light);color:var(--day-dark);font-weight:800;}
+
+  ul.clean{list-style:none;padding:0;margin:.6rem 0;}
+  ul.clean li{position:relative;padding:.55rem 0 .55rem 1.8rem;border-bottom:1px dashed var(--day-border);line-height:1.75;}
+  ul.clean li:last-child{border-bottom:none;}
+  ul.clean li::before{content:"▸";position:absolute;left:.3rem;top:.55rem;color:var(--day-color);font-weight:800;font-size:1.05rem;}
+
+  details.recap{background:linear-gradient(135deg,var(--surface) 0%,var(--day-light) 100%);
+    border:2px solid var(--day-border);border-radius:var(--radius);padding:0;width:100%;max-width:760px;
+    margin-bottom:1.4rem;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;z-index:1;}
+  details.recap summary{cursor:pointer;padding:1.1rem 1.5rem;font-weight:700;color:var(--day-dark);font-size:1rem;
+    list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem;transition:background .2s;min-height:2.8rem;}
+  details.recap summary:hover{background:rgba(58,181,216,.10);}
+  details.recap summary::-webkit-details-marker{display:none;}
+  details.recap summary::after{content:"▼";font-size:.85rem;transition:transform .25s;color:var(--day-color);}
+  details.recap[open] summary::after{transform:rotate(180deg);}
+  details.recap .recap-content{padding:0 1.5rem 1.4rem;}
+
+  .quiz-intro{color:var(--muted);font-size:.92rem;margin-bottom:1rem;line-height:1.75;}
+  .group{background:var(--day-light);border-radius:12px;padding:1rem .9rem;margin:.9rem 0;border:2px solid transparent;transition:all .25s;}
+  .group.ok{border-color:var(--green);background:#f0faeb;}
+  .group.ko{border-color:var(--pink);background:#fff0ef;}
+  .group-title{font-weight:700;color:var(--day-dark);margin-bottom:.6rem;font-size:.92rem;line-height:1.6;}
+  .group.ok .group-title{color:#2f6e10;}
+  .group.ko .group-title{color:#c0392b;}
+  .options{display:flex;flex-direction:column;gap:.5rem;}
+  .opt{display:flex;align-items:flex-start;gap:.6rem;background:var(--surface);border:2px solid var(--day-border);
+    border-radius:10px;padding:.65rem .8rem;cursor:pointer;transition:all .2s;font-size:.9rem;line-height:1.55;
+    user-select:none;min-height:2.4rem;font-family:'JetBrains Mono',monospace;}
+  .opt:hover{background:var(--day-light);border-color:var(--day-color);}
+  .opt input{margin-top:.2rem;accent-color:var(--day-color);width:18px;height:18px;cursor:pointer;flex-shrink:0;}
+  .opt.checked{background:var(--day-light);border-color:var(--day-dark);}
+  .group.ok .opt{pointer-events:none;opacity:.85;}
+  .quiz-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.1rem;justify-content:center;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.3rem;border-radius:10px;
+    font-family:Arial,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+    transition:transform .12s,box-shadow .15s;position:relative;z-index:2;min-height:2.7rem;text-decoration:none;}
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+  .btn-ghost:hover{border-color:var(--day-color);background:var(--day-light);}
+  .feedback{margin-top:1.1rem;padding:.85rem 1rem;border-radius:10px;font-weight:600;text-align:center;display:none;line-height:1.7;}
+  .feedback.show{display:block;}
+  .feedback.win{background:#f0faeb;color:#2f6e10;border:1.5px solid var(--green);}
+  .feedback.retry{background:#fff0ef;color:#c0392b;border:1.5px solid var(--pink);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.2rem .8rem 3rem;}
+    .card{padding:1.3rem 1.1rem;}
+    .btn{font-size:.88rem;padding:.6rem 1rem;}
+    .quiz-actions .btn{flex:1;min-width:140px;justify-content:center;}
+    .formula{font-size:.88rem;padding:.7rem;}
+    .coef-table th, .coef-table td{font-size:.78rem;padding:.4rem .2rem;}
+  }
+</style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      Pazapa &middot; Maths &middot; 3<sup>e</sup>
+    </div>
+    <div class="week-label">📚 Ce que je retiens &middot; Semaine 6 &middot; Jour 4</div>
+    <h1><span class="hl">Section d'un solide par un plan</span></h1>
+    <p class="subtitle">Quand on « coupe » un solide : quelle forme obtient-on ?</p>
+  </header>
+
+  <!-- DÉFINITION -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📖 Définition</div>
+    <h2>C'est quoi, une section ?</h2>
+    <p>La <strong>section</strong> d'un solide par un plan, c'est <strong>la forme obtenue lorsqu'on coupe un solide par un plan</strong>.</p>
+    <div class="inner">
+      <p>👉 Imagine que tu coupes une orange ou une boîte avec un couteau bien droit. La forme que tu vois sur la « tranche » est la <strong>section</strong>.</p>
+      <p>La forme dépend de <strong>2 choses</strong> :</p>
+      <ul style="list-style:none;padding-left:1rem;margin:.4rem 0;">
+        <li>▸ <strong>le solide</strong> (pavé, cylindre, cône, sphère…),</li>
+        <li>▸ <strong>la direction du plan</strong> qui coupe.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 1. PAVÉ DROIT -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📦 1 · Pavé droit</div>
+    <h2>Coupes d'un pavé droit</h2>
+
+    <!-- Cas 1 : parallèle à la base -->
+    <div class="case-row">
+      <div class="case-svg">
+        <svg viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pavé coupé parallèlement à la base">
+          <!-- pavé -->
+          <rect x="30" y="40" width="100" height="70" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+          <polygon points="30,40 50,20 150,20 130,40" fill="#f5fbfd" stroke="#1a6e88" stroke-width="2"/>
+          <polygon points="130,40 150,20 150,90 130,110" fill="#9dd4e8" stroke="#1a6e88" stroke-width="2" opacity="0.7"/>
+          <!-- plan horizontal coupant -->
+          <polygon points="20,70 40,50 165,50 145,70" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.55"/>
+          <!-- section (rectangle horizontal en gras) -->
+          <rect x="30" y="70" width="100" height="3" fill="#c0392b"/>
+          <line x1="30" y1="70" x2="50" y2="50" stroke="#c0392b" stroke-width="2"/>
+          <line x1="130" y1="70" x2="150" y2="50" stroke="#c0392b" stroke-width="2"/>
+          <line x1="50" y1="50" x2="150" y2="50" stroke="#c0392b" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="case-info">
+        <span class="label">Section parallèle à la base</span>
+        <span class="result">➜ un rectangle</span>
+        <span class="desc">C'est le <strong>même rectangle que la base</strong> du pavé.</span>
+      </div>
+    </div>
+
+    <!-- Cas 2 : parallèle à une arête -->
+    <div class="case-row">
+      <div class="case-svg">
+        <svg viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pavé coupé parallèlement à une arête">
+          <!-- pavé -->
+          <rect x="30" y="40" width="100" height="70" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+          <polygon points="30,40 50,20 150,20 130,40" fill="#f5fbfd" stroke="#1a6e88" stroke-width="2"/>
+          <polygon points="130,40 150,20 150,90 130,110" fill="#9dd4e8" stroke="#1a6e88" stroke-width="2" opacity="0.7"/>
+          <!-- plan vertical coupant en biais -->
+          <polygon points="60,110 75,90 165,90 150,110" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.4"/>
+          <polygon points="60,40 75,20 75,90 60,110" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.55"/>
+          <!-- section (rectangle vertical en gras) -->
+          <line x1="60" y1="40" x2="60" y2="110" stroke="#c0392b" stroke-width="3"/>
+          <line x1="75" y1="20" x2="75" y2="90" stroke="#c0392b" stroke-width="2"/>
+          <line x1="60" y1="40" x2="75" y2="20" stroke="#c0392b" stroke-width="2"/>
+          <line x1="60" y1="110" x2="75" y2="90" stroke="#c0392b" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="case-info">
+        <span class="label">Section parallèle à une arête</span>
+        <span class="result">➜ un rectangle</span>
+        <span class="desc">La section est toujours un <strong>rectangle</strong>, mais ses dimensions dépendent de l'endroit où on coupe.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. CYLINDRE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🥫 2 · Cylindre</div>
+    <h2>Coupes d'un cylindre</h2>
+
+    <!-- Cas 1 : parallèle à la base -->
+    <div class="case-row">
+      <div class="case-svg">
+        <svg viewBox="0 0 180 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cylindre coupé parallèlement à la base">
+          <!-- cylindre -->
+          <path d="M 55 35 L 55 130 A 35 9 0 0 0 125 130 L 125 35" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+          <ellipse cx="90" cy="35" rx="35" ry="9" fill="#f5fbfd" stroke="#1a6e88" stroke-width="2"/>
+          <path d="M 55 130 A 35 9 0 0 1 125 130" fill="none" stroke="#1a6e88" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <!-- plan coupant horizontal -->
+          <ellipse cx="90" cy="80" rx="42" ry="11" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.45"/>
+          <!-- section (disque rouge) -->
+          <ellipse cx="90" cy="80" rx="35" ry="9" fill="#c0392b" stroke="#7a1f15" stroke-width="2" opacity="0.65"/>
+        </svg>
+      </div>
+      <div class="case-info">
+        <span class="label">Section parallèle à la base</span>
+        <span class="result">➜ un disque</span>
+        <span class="desc">C'est le <strong>même disque que la base</strong> du cylindre.</span>
+      </div>
+    </div>
+
+    <!-- Cas 2 : parallèle à la hauteur -->
+    <div class="case-row">
+      <div class="case-svg">
+        <svg viewBox="0 0 180 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cylindre coupé parallèlement à la hauteur">
+          <!-- cylindre -->
+          <path d="M 55 35 L 55 130 A 35 9 0 0 0 125 130 L 125 35" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+          <ellipse cx="90" cy="35" rx="35" ry="9" fill="#f5fbfd" stroke="#1a6e88" stroke-width="2"/>
+          <path d="M 55 130 A 35 9 0 0 1 125 130" fill="none" stroke="#1a6e88" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <!-- plan vertical coupant -->
+          <rect x="75" y="22" width="35" height="120" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.4"/>
+          <!-- section (rectangle rouge à l'intérieur) -->
+          <rect x="75" y="32" width="35" height="100" fill="#c0392b" stroke="#7a1f15" stroke-width="2" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="case-info">
+        <span class="label">Section parallèle à la hauteur</span>
+        <span class="result">➜ un rectangle</span>
+        <span class="desc">La section est un <strong>rectangle</strong> dont une dimension est la hauteur du cylindre.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. CÔNE ET PYRAMIDE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🔺 3 · Cône et pyramide</div>
+    <h2>Section parallèle à la base = une réduction</h2>
+
+    <div class="case-row">
+      <div class="case-svg">
+        <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cône coupé parallèlement à la base">
+          <!-- cône -->
+          <path d="M 90 20 L 50 145 A 40 10 0 0 0 130 145 Z" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+          <ellipse cx="90" cy="145" rx="40" ry="10" fill="#9dd4e8" stroke="#1a6e88" stroke-width="2" opacity="0.7"/>
+          <!-- plan coupant horizontal (à hauteur 80) -->
+          <ellipse cx="90" cy="80" rx="42" ry="10" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.45"/>
+          <!-- section (petit disque rouge) -->
+          <ellipse cx="90" cy="80" rx="19" ry="5" fill="#c0392b" stroke="#7a1f15" stroke-width="2" opacity="0.7"/>
+          <!-- hauteurs -->
+          <line x1="90" y1="20" x2="90" y2="80" stroke="#c47a10" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <line x1="90" y1="80" x2="90" y2="145" stroke="#2f6e10" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="96" y="55" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#c47a10">h_petit</text>
+          <text x="96" y="118" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#2f6e10">h_grand</text>
+        </svg>
+      </div>
+      <div class="case-info">
+        <span class="label">Section parallèle à la base</span>
+        <span class="result">➜ une réduction de la base</span>
+        <span class="desc">C'est un <strong>disque plus petit</strong> (pour le cône) ou un <strong>polygone plus petit</strong> (pour la pyramide), de la <strong>même forme</strong> que la base.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:1rem;">Le <strong>coefficient de réduction k</strong> se calcule ainsi :</p>
+    <div class="formula">
+      k = hauteur_petit / hauteur_grand
+    </div>
+
+    <p>Et toutes les longueurs, aires et volumes du petit cône (ou de la petite pyramide) se déduisent en multipliant par k, k² ou k³ :</p>
+
+    <table class="coef-table">
+      <thead>
+        <tr>
+          <th>On multiplie</th>
+          <th>par</th>
+          <th>Exemple</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="head">les longueurs</td>
+          <td>k</td>
+          <td>nouveau rayon = k × ancien rayon</td>
+        </tr>
+        <tr>
+          <td class="head">les aires</td>
+          <td>k²</td>
+          <td style="font-size:.85rem;">Aire_section = k² × Aire_base</td>
+        </tr>
+        <tr>
+          <td class="head">les volumes</td>
+          <td>k³</td>
+          <td style="font-size:.85rem;">V_réduit = k³ × V_départ</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="inner">
+      <p>💡 <strong>Exemple :</strong> si k = ½ (le petit cône a une hauteur deux fois plus petite), alors :</p>
+      <ul style="list-style:none;padding-left:1rem;margin:.3rem 0;">
+        <li>▸ les longueurs sont divisées par <strong>2</strong></li>
+        <li>▸ les aires sont divisées par <strong>4</strong> (= 2²)</li>
+        <li>▸ les volumes sont divisés par <strong>8</strong> (= 2³)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4. SPHÈRE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">⚽ 4 · Sphère</div>
+    <h2>Coupes d'une sphère</h2>
+    <p>Selon la position du plan par rapport à la sphère, on obtient <strong>3 résultats différents</strong> :</p>
+
+    <!-- Cas 1 : tangent -->
+    <div class="case-row">
+      <div class="case-svg">
+        <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan tangent à la sphère">
+          <circle cx="80" cy="65" r="45" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+          <ellipse cx="80" cy="65" rx="45" ry="11" fill="none" stroke="#1a6e88" stroke-width="1.3" stroke-dasharray="3,2"/>
+          <!-- plan tangent à droite -->
+          <polygon points="125,30 165,15 165,105 125,100" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.45"/>
+          <circle cx="125" cy="65" r="3.5" fill="#c0392b"/>
+        </svg>
+      </div>
+      <div class="case-info">
+        <span class="label">Le plan est tangent à la sphère</span>
+        <span class="result">➜ un point</span>
+        <span class="desc">Le plan ne touche la sphère qu'en <strong>un seul point</strong>.</span>
+      </div>
+    </div>
+
+    <!-- Cas 2 : section = cercle -->
+    <div class="case-row">
+      <div class="case-svg">
+        <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Section d'une sphère par un plan qui ne passe pas par le centre">
+          <circle cx="90" cy="65" r="45" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+          <!-- plan coupant horizontal au-dessus du centre -->
+          <ellipse cx="90" cy="45" rx="55" ry="11" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.45"/>
+          <!-- section (cercle rouge, plus petit que le grand cercle) -->
+          <ellipse cx="90" cy="45" rx="40" ry="8" fill="#c0392b" stroke="#7a1f15" stroke-width="2" opacity="0.7"/>
+          <!-- centre -->
+          <circle cx="90" cy="65" r="2" fill="#1f2937"/>
+        </svg>
+      </div>
+      <div class="case-info">
+        <span class="label">Le plan coupe la sphère (sans passer par le centre)</span>
+        <span class="result">➜ un cercle</span>
+        <span class="desc">La section est un <strong>cercle</strong> plus petit que la sphère.</span>
+      </div>
+    </div>
+
+    <!-- Cas 3 : grand cercle -->
+    <div class="case-row">
+      <div class="case-svg">
+        <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Section d'une sphère passant par le centre">
+          <circle cx="90" cy="65" r="45" fill="#e8f6fb" stroke="#1a6e88" stroke-width="2"/>
+          <!-- plan passant par le centre -->
+          <ellipse cx="90" cy="65" rx="60" ry="11" fill="#3ab5d8" stroke="#1a6e88" stroke-width="1.5" opacity="0.45"/>
+          <!-- section (grand cercle rouge, même rayon que la sphère) -->
+          <ellipse cx="90" cy="65" rx="45" ry="9" fill="#c0392b" stroke="#7a1f15" stroke-width="2" opacity="0.7"/>
+          <!-- centre -->
+          <circle cx="90" cy="65" r="3" fill="#1f2937"/>
+        </svg>
+      </div>
+      <div class="case-info">
+        <span class="label">Le plan passe par le centre</span>
+        <span class="result">➜ un grand cercle</span>
+        <span class="desc">La section est le <strong>plus grand cercle possible</strong> : son rayon est égal au rayon de la sphère.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- RÉCAP -->
+  <details class="recap">
+    <summary>👉 Clique ici pour l'essentiel en résumé</summary>
+    <div class="recap-content">
+      <ul class="clean">
+        <li>La <strong>section</strong> = la forme obtenue quand on coupe un solide par un plan.</li>
+        <li><strong>Pavé droit</strong> : la section est toujours un <strong>rectangle</strong>.</li>
+        <li><strong>Cylindre</strong> : parallèle à la base → un disque ; parallèle à la hauteur → un rectangle.</li>
+        <li><strong>Cône / pyramide</strong> : section parallèle à la base = <strong>réduction</strong> de la base.</li>
+        <li>Coefficient de réduction : <strong>k = h_petit / h_grand</strong>.</li>
+        <li>Pour les réductions : longueurs × k, <strong>aires × k²</strong>, <strong>volumes × k³</strong>.</li>
+        <li><strong>Sphère</strong> : plan tangent → 1 point ; plan coupant → cercle ; plan par le centre → grand cercle.</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- MINI-QUIZ -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🎯 Mini-quiz</div>
+    <h2>À toi de vérifier !</h2>
+    <p class="quiz-intro">Pour chaque groupe, coche <strong>toutes les affirmations correctes</strong> (il peut y en avoir plusieurs). Puis clique sur « Vérifier ».</p>
+    <div id="quiz-groups"></div>
+    <div class="quiz-actions">
+      <button class="btn btn-primary" id="check-btn">✅ Vérifier mes réponses</button>
+      <button class="btn btn-ghost" id="reset-btn">🔄 Recommencer</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+<script>
+  var QUIZ = [
+    {
+      title:"1 \u00b7 La section d'un solide par un plan, c'est\u2026",
+      options:[
+        { t:"la forme obtenue en coupant le solide par un plan", ok:true },
+        { t:"\u00e7a d\u00e9pend du solide et de la direction du plan", ok:true },
+        { t:"toujours un cercle", ok:false },
+        { t:"toujours un rectangle", ok:false }
+      ]
+    },
+    {
+      title:"2 \u00b7 Pour un pav\u00e9 droit\u2026",
+      options:[
+        { t:"section parall\u00e8le \u00e0 la base = un rectangle", ok:true },
+        { t:"section parall\u00e8le \u00e0 une ar\u00eate = un rectangle", ok:true },
+        { t:"section = un disque", ok:false },
+        { t:"section = un triangle", ok:false }
+      ]
+    },
+    {
+      title:"3 \u00b7 Pour un cylindre\u2026",
+      options:[
+        { t:"section parall\u00e8le \u00e0 la base = un disque (m\u00eame que la base)", ok:true },
+        { t:"section parall\u00e8le \u00e0 la hauteur = un rectangle", ok:true },
+        { t:"section parall\u00e8le \u00e0 la base = un rectangle", ok:false },
+        { t:"section parall\u00e8le \u00e0 la hauteur = un disque", ok:false }
+      ]
+    },
+    {
+      title:"4 \u00b7 La section d'un c\u00f4ne par un plan parall\u00e8le \u00e0 la base\u2026",
+      options:[
+        { t:"est une r\u00e9duction de la base", ok:true },
+        { t:"est un disque plus petit", ok:true },
+        { t:"est un grand cercle", ok:false },
+        { t:"est un rectangle", ok:false }
+      ]
+    },
+    {
+      title:"5 \u00b7 Si k = 1/2 (coefficient de r\u00e9duction)\u2026",
+      options:[
+        { t:"les longueurs sont divis\u00e9es par 2", ok:true },
+        { t:"les aires sont divis\u00e9es par 4 (= 2\u00b2)", ok:true },
+        { t:"les volumes sont divis\u00e9s par 8 (= 2\u00b3)", ok:true },
+        { t:"les volumes sont divis\u00e9s par 2", ok:false }
+      ]
+    },
+    {
+      title:"6 \u00b7 Pour une sph\u00e8re, la section\u2026",
+      options:[
+        { t:"par un plan tangent = un point", ok:true },
+        { t:"par un plan qui coupe = un cercle", ok:true },
+        { t:"par un plan passant par le centre = un grand cercle", ok:true },
+        { t:"est toujours un rectangle", ok:false }
+      ]
+    },
+    {
+      title:"7 \u00b7 Le grand cercle d'une sph\u00e8re\u2026",
+      options:[
+        { t:"a le m\u00eame rayon que la sph\u00e8re", ok:true },
+        { t:"est obtenu quand le plan passe par le centre", ok:true },
+        { t:"est le plus petit cercle possible", ok:false },
+        { t:"est un point", ok:false }
+      ]
+    }
+  ];
+
+  var container = document.getElementById('quiz-groups');
+  QUIZ.forEach(function(g, gi){
+    var groupEl = document.createElement('div');
+    groupEl.className = 'group';
+    groupEl.id = 'g' + gi;
+    var html = '<div class="group-title">' + g.title + '</div><div class="options">';
+    g.options.forEach(function(o, oi){
+      html += '<label class="opt" data-g="' + gi + '" data-o="' + oi + '">' +
+              '<input type="checkbox" data-g="' + gi + '" data-o="' + oi + '" data-ok="' + o.ok + '">' +
+              '<span>' + o.t + '</span></label>';
+    });
+    html += '</div>';
+    groupEl.innerHTML = html;
+    container.appendChild(groupEl);
+  });
+
+  container.addEventListener('change', function(e){
+    if(e.target.matches('input[type="checkbox"]')){
+      var label = e.target.closest('.opt');
+      if(e.target.checked) label.classList.add('checked');
+      else label.classList.remove('checked');
+    }
+  });
+
+  var feedback = document.getElementById('feedback');
+  document.getElementById('check-btn').addEventListener('click', function(){
+    var allOk = true, firstError = null;
+    QUIZ.forEach(function(g, gi){
+      var groupEl = document.getElementById('g' + gi);
+      if(groupEl.classList.contains('ok')) return;
+      var inputs = groupEl.querySelectorAll('input[type="checkbox"]');
+      var correct = true;
+      inputs.forEach(function(inp){
+        if((inp.dataset.ok === 'true') !== inp.checked) correct = false;
+      });
+      if(correct){
+        groupEl.classList.remove('ko'); groupEl.classList.add('ok');
+        inputs.forEach(function(inp){ inp.disabled = true; });
+      } else {
+        groupEl.classList.remove('ok'); groupEl.classList.add('ko');
+        if(!firstError) firstError = groupEl;
+        allOk = false;
+      }
+    });
+    feedback.classList.remove('win','retry','show');
+    if(allOk){
+      feedback.textContent = "\ud83c\udf89 Bravo ! Toutes tes r\u00e9ponses sont correctes. Tu sais identifier toutes les sections !";
+      feedback.classList.add('win','show');
+    } else {
+      feedback.textContent = "\u270b Il reste des erreurs. Les groupes en rouge sont \u00e0 reprendre. Essaie \u00e0 nouveau !";
+      feedback.classList.add('retry','show');
+      if(firstError) firstError.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    document.querySelectorAll('.group').forEach(function(g){ g.classList.remove('ok','ko'); });
+    document.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('checked'); });
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(inp){
+      inp.checked = false; inp.disabled = false;
+    });
+    feedback.classList.remove('show','win','retry');
+    feedback.textContent = "";
+  });
+</script>
+</body>
+</html>
