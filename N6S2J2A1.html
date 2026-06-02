@@ -8,11 +8,11 @@
   <style>
     /* ═══ COULEUR DU JOUR — Mardi (Jour 2) → Rose ═══ */
     :root {
-      --day-color:  #f28b82;
-      --day-dark:   #c0392b;
-      --day-light:  #fff0ef;
+      --day-color:  #b94040;
+      --day-dark:   #7a1f1f;
+      --day-light:  #f7eded;
       --day-border: #f9c0bb;
-      --day-glow:   rgba(242,139,130,.3);
+      --day-glow:   rgba(185,64,64,.3);
     }
     /* ═══ CHARTE PAZAPA — NE PAS TOUCHER ═══ */
     :root {
@@ -278,8 +278,10 @@ var current = 0;
 var userAnswers = new Array(TOTAL).fill(null); // {okCount, total, data}
 var hintOpen = false;
 var draftCols = [], draftOps = [], draftDur = [];
+var solutionShown = false;
 
 function render(){
+  solutionShown = false;
   var ex = EXERCISES[current];
   $("q-num").textContent = "Exercice " + (current+1);
   $("q-theme").textContent = ex.theme;
@@ -323,8 +325,13 @@ function buildColumns(zone, ex, done){
       if(done){
         b.classList.add("locked");
         var chosen = saved[i];
-        if(c === chosen) b.classList.add(c === row.ans ? "correct-opt" : "wrong-opt");
-        if(c === row.ans && chosen !== row.ans) b.classList.add("correct-opt");
+        var answered = (chosen !== null && chosen !== undefined);
+        if(answered && c === chosen){
+          b.classList.add(c === row.ans ? "correct-opt" : "wrong-opt");
+        }
+        // En mode Solution seulement : on révèle la bonne colonne en vert
+        if(solutionShown && c === row.ans){ b.classList.add("correct-opt"); }
+        // Sinon, une réponse fausse n'affiche PAS la bonne colonne (l'élève ne la connaît pas)
       } else {
         if(draftCols[i] === c) b.classList.add("selected");
         b.onclick = (function(idx, val){ return function(){
@@ -467,7 +474,7 @@ function buildCorrection(ex, a){
     ex.rows.forEach(function(r,i){
       if(a.data[i] !== r.ans){
         if(!a.data[i]) L.push(r.calc+"\u00a0: tu n\u2019as pas r\u00e9pondu.");
-        else L.push(r.calc+" \u2192 colonne "+r.ans+" (arrondis puis calcule de t\u00eate).");
+        else L.push(r.calc+"\u00a0: ce n\u2019est pas la bonne colonne (arrondis chaque nombre, puis calcule de t\u00eate).");
       }
     });
   } else if(ex.type === "ops"){
@@ -475,7 +482,7 @@ function buildCorrection(ex, a){
       var d=a.data[i];
       if(!d.ok){
         if(d.val==="") L.push(it.lbl+" tu n\u2019as pas r\u00e9pondu.");
-        else L.push(it.lbl+" "+it.calc+" = "+it.ans+" (aligne les virgules).");
+        else L.push(it.lbl+" "+it.calc+"\u00a0: r\u00e9sultat incorrect (aligne bien les virgules et recommence).");
       }
     });
   } else if(ex.type === "durations"){
@@ -483,12 +490,12 @@ function buildCorrection(ex, a){
       var d=a.data[i];
       if(!d.ok){
         if(d.h==="" && d.m==="") L.push(it.lbl+" tu n\u2019as pas r\u00e9pondu.");
-        else L.push(it.lbl+" "+it.ansH+" h "+pad(it.ansM)+" min (calcule les minutes, convertis si \u2265 60).");
+        else L.push(it.lbl+" dur\u00e9e incorrecte (calcule les minutes, convertis si \u2265 60).");
       }
     });
   }
   if(L.length===0) return "";
-  return "\u00c0 revoir\u00a0:<br>"+L.join("<br>");
+  return "\u00c0 revoir\u00a0:<br>"+L.join("<br>") + "<br><span style='color:var(--muted)'>Clique sur \u00ab Solution \u00bb pour voir les bonnes r\u00e9ponses.</span>";
 }
 
 /* ---------- SOLUTION ---------- */
