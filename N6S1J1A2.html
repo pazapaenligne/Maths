@@ -45,7 +45,6 @@
     .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;
       font-family:'JetBrains Mono',monospace;word-break:break-word;}
 
-    /* barre de score collante en haut */
     .scorebar{position:sticky;top:0;z-index:5;width:100%;max-width:760px;
       background:var(--surface);border:2px solid var(--border);border-radius:99px;
       padding:.5rem .9rem;margin-bottom:1.4rem;display:flex;align-items:center;
@@ -155,7 +154,6 @@
     .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;
       font-size:clamp(.78rem,2.3vw,.84rem);margin-top:.3rem;line-height:1.8;word-break:break-word;}
 
-    /* bloc résultat global (bas de page) */
     .global{width:100%;max-width:760px;background:var(--surface);border:2px solid var(--border);
       border-radius:var(--radius);padding:2rem 1.6rem;text-align:center;position:relative;z-index:1;
       box-shadow:0 4px 20px rgba(0,0,0,.06);}
@@ -211,13 +209,6 @@
   </div>
 
 <script>
-/* ════════════════════════════════════════════════════════════
-   Semaine 1 Jour 1 — Numération
-   Page unique : 4 exercices visibles, chacun son bouton Vérifier,
-   score global en bas. 100% autonome (aucune iframe). Compatible Moodle.
-   Contenu mathématique vérifié.
-════════════════════════════════════════════════════════════ */
-
 var ENIGMES = [
   { indices:["2 centaines de mille","3 dizaines de mille","0 unité de mille","5 centaines","1 dizaine","7 unités"], rep:230517, aff:"230 517" },
   { indices:["4 millions","0 centaine de mille","6 dizaines de mille","0 unité de mille","0 centaine","0 dizaine","8 unités"], rep:4060008, aff:"4 060 008" },
@@ -240,7 +231,7 @@ var EXERCISES = [
   {
     type:"qcm", theme:"En lettres",
     eq:"Écrire les nombres en lettres",
-    method:"<strong>Règles :</strong> « cent » et « vingt » prennent un s seulement quand ils terminent le nombre (deux cents, quatre-vingts), jamais suivis d&rsquo;un autre nombre. « mille » est invariable.",
+    method:"<strong>Règles :</strong> « cent » et « vingt » prennent un s seulement quand ils terminent le nombre, jamais suivis d&rsquo;un autre nombre. « mille » est invariable.",
     rows:[
       { lbl:"a) 305", options:["trois cent cinq","trois cents cinq","trois cent cinquante"], ans:0 },
       { lbl:"b) 80", options:["quatre-vingt","quatre-vingts","quatre vingt"], ans:1 },
@@ -253,7 +244,7 @@ var EXERCISES = [
   {
     type:"fields", theme:"Rang des chiffres",
     eq:"Dans le nombre 4 567 802",
-    method:"<strong>Méthode :</strong> lis le nombre de droite à gauche. 4 567 802 = millions (4) | centaines/dizaines/unités de mille (567) | centaines/dizaines/unités (802).",
+    method:"<strong>Méthode :</strong> lis le nombre de droite à gauche. Les trois premiers chiffres à droite sont les unités, dizaines, centaines ; les trois suivants la classe des mille ; puis les millions. Exemple : dans 8&nbsp;219&nbsp;354, le chiffre des dizaines de mille est 1.",
     items:[
       { lbl:"a) chiffre des unités", ans:"2" },
       { lbl:"b) chiffre des centaines", ans:"8" },
@@ -263,12 +254,12 @@ var EXERCISES = [
       { lbl:"f) chiffre des millions", ans:"4" }
     ],
     numeric:true,
-    hint:"4 567 802 : les unités sont tout à droite (2), puis dizaines (0), centaines (8), unités de mille (7)&hellip;"
+    hint:"Lis de droite à gauche : le 1er chiffre à droite, ce sont les unités, puis les dizaines, les centaines, les unités de mille, et ainsi de suite."
   },
   {
     type:"fields", theme:"Conversions",
     eq:"Convertir avec les unités de numération",
-    method:"<strong>Méthode :</strong> 1 dizaine = 10 unités, 1 centaine = 100, 1 millier = 1 000. Pour « combien de dizaines dans 3 400 », on divise par 10 : 3 400 &divide; 10 = 340.",
+    method:"<strong>Méthode :</strong> 1 dizaine = 10 unités, 1 centaine = 100, 1 millier = 1 000. Pour « combien de dizaines dans un nombre », on divise par 10. Exemple : 6 800 &divide; 10 = 680 dizaines.",
     items:[
       { lbl:"a) Combien de dizaines dans 3 400 ?", ans:"340" },
       { lbl:"b) Combien de centaines dans 5 200 ?", ans:"52" },
@@ -283,7 +274,6 @@ var EXERCISES = [
 var TOTAL = EXERCISES.length;
 var $ = function(id){ return document.getElementById(id); };
 
-/* état par exercice */
 var state = EXERCISES.map(function(ex){
   if(ex.type === "mystery") return { done:false, ok:false, idx:0, score:0, log:[] };
   if(ex.type === "qcm")     return { done:false, ok:false, sel:new Array(ex.rows.length).fill(null) };
@@ -292,7 +282,6 @@ var state = EXERCISES.map(function(ex){
 
 function cleanNum(s){ return String(s).replace(/\s/g,"").replace(/\u00a0/g,""); }
 
-/* ── construction de toute la page ── */
 function buildAll(){
   var root = $("exos"); root.innerHTML = "";
   EXERCISES.forEach(function(ex, ei){
@@ -326,7 +315,6 @@ function buildAll(){
   updateGlobal();
 }
 
-/* ── rendu de la zone de réponse d'un exercice ── */
 function renderZone(ei){
   var ex = EXERCISES[ei], st = state[ei];
   var zone = $("zone-" + ei); zone.innerHTML = "";
@@ -335,7 +323,6 @@ function renderZone(ei){
   else renderFields(ei, zone);
 }
 
-/* EX mystère : mini-jeu de 8 énigmes dans la carte */
 function renderMystery(ei, zone){
   var ex = EXERCISES[ei], st = state[ei];
 
@@ -387,7 +374,6 @@ function renderMystery(ei, zone){
   fr.appendChild(inp); zone.appendChild(fr);
 }
 
-/* EX QCM */
 function renderQcm(ei, zone){
   var ex = EXERCISES[ei], st = state[ei];
   var letters = ["A","B","C","D"];
@@ -425,7 +411,6 @@ function renderQcm(ei, zone){
   });
 }
 
-/* EX champs */
 function renderFields(ei, zone){
   var ex = EXERCISES[ei], st = state[ei];
   ex.items.forEach(function(it, i){
@@ -450,7 +435,6 @@ function renderFields(ei, zone){
   });
 }
 
-/* ── validation d'un exercice ── */
 function checkEx(ei){
   var ex = EXERCISES[ei], st = state[ei];
   if(ex.type === "mystery") return checkMystery(ei);
@@ -473,8 +457,14 @@ function checkMystery(ei){
          "Le nombre mystère était <strong>" + e.aff + "</strong>.");
 
   if(st.idx < ex.enigmes.length - 1){
+    // Avance automatique après un délai laissant le temps de lire la réponse
     $("check-"+ei).disabled = true;
-    setTimeout(function(){ st.idx++; renderZone(ei); $("fb-"+ei).className = "feedback"; $("check-"+ei).disabled = false; }, 1100);
+    setTimeout(function(){
+      st.idx++;
+      renderZone(ei);
+      $("fb-"+ei).className = "feedback";
+      $("check-"+ei).disabled = false;
+    }, 5000);
   } else {
     st.done = true;
     st.ok = (st.log.filter(function(x){ return x===true; }).length === ex.enigmes.length);
@@ -487,8 +477,8 @@ function checkQcm(ei){
   for(var i=0;i<ex.rows.length;i++){ if(st.sel[i] === null) return; }
   st.ok = ex.rows.every(function(r,i){ return st.sel[i] === r.ans; });
   st.done = true;
-  var detail = st.ok ? "" : ("Correction : " + ex.rows.filter(function(r,i){ return st.sel[i] !== r.ans; })
-    .map(function(r){ return r.lbl + " &rarr; " + r.options[r.ans]; }).join("&nbsp;&nbsp;|&nbsp;&nbsp;"));
+  var detail = st.ok ? "" : ("Correction :<br>" + ex.rows.filter(function(r,i){ return st.sel[i] !== r.ans; })
+    .map(function(r){ return r.lbl + " &rarr; " + r.options[r.ans]; }).join("<br>"));
   showFb(ei, st.ok, st.ok ? "Bravo ! Tout est correct." : "Pas tout à fait\u2026", detail);
   finishEx(ei);
 }
@@ -498,13 +488,12 @@ function checkFields(ei){
   for(var i=0;i<ex.items.length;i++){ if((st.vals[i]||"").trim() === "") return; }
   st.ok = ex.items.every(function(it,i){ return cleanNum(st.vals[i]) === cleanNum(it.ans); });
   st.done = true;
-  var detail = st.ok ? "" : ("Correction : " + ex.items.filter(function(it,i){ return cleanNum(st.vals[i]) !== cleanNum(it.ans); })
-    .map(function(it){ return it.lbl + " &rarr; " + it.ans; }).join("&nbsp;&nbsp;|&nbsp;&nbsp;"));
+  var detail = st.ok ? "" : ("Correction :<br>" + ex.items.filter(function(it,i){ return cleanNum(st.vals[i]) !== cleanNum(it.ans); })
+    .map(function(it){ return it.lbl + " &rarr; " + it.ans; }).join("<br>"));
   showFb(ei, st.ok, st.ok ? "Bravo ! Tout est correct." : "Pas tout à fait\u2026", detail);
   finishEx(ei);
 }
 
-/* après validation : verrouille, montre Refaire, met à jour le bilan */
 function finishEx(ei){
   renderZone(ei);
   $("check-"+ei).disabled = true;
@@ -541,7 +530,6 @@ function toggleHint(ei){
   else { h.innerHTML = "<strong>? Indice :</strong> " + EXERCISES[ei].hint; h.classList.add("show"); }
 }
 
-/* ── bilan global ── */
 function updateGlobal(){
   var done = state.filter(function(s){ return s.done; }).length;
   var ok = state.filter(function(s){ return s.done && s.ok; }).length;
@@ -557,7 +545,6 @@ function updateGlobal(){
     $("g-msg").textContent = "Réponds aux " + TOTAL + " exercices puis vérifie-les pour voir ton bilan. (" + done + " / " + TOTAL + " faits)";
     return;
   }
-  /* tous faits : étoiles + message à 4 niveaux */
   var ratio = ok / TOTAL;
   var stars = ok >= TOTAL ? 5 : ratio >= .75 ? 4 : ratio >= .5 ? 3 : ratio >= .25 ? 2 : ok >= 1 ? 1 : 0;
   $("g-stars").textContent = "\u2B50".repeat(stars) + "\u2606".repeat(5-stars);
