@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Résoudre les exercices — Égalité vraie ou fausse ?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ===== Charte du jour : J5 JAUNE ===== */
+  :root{
+    --j5:#f5c518; --j5-dark:#8a6000; --j5-soft:#fffbeb; --j5-accent:#f5e08a;
+    --j5-title:#c49a00; --j5-badge-ink:#3a2600;
+    --ink:#2a2410; --ink-soft:#6b5d3a; --ok:#3d8b40; --ok-soft:#eaf6ea;
+    --err:#c0392b; --err-soft:#fdecea; --line:#ece2c2; --white:#ffffff;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ width:100%; overflow-x:hidden; }
+  body{ font-family:'JetBrains Mono', ui-monospace, monospace; color:var(--ink); background:var(--white);
+    line-height:1.55; -webkit-font-smoothing:antialiased; position:relative; min-height:100vh; }
+
+  .blob{ position:fixed; z-index:0; background:var(--j5-accent); opacity:0.30; filter:blur(1px); pointer-events:none; }
+  .blob-1{ top:-160px; right:-150px; width:460px; height:430px; border-radius:62% 38% 46% 54% / 58% 47% 53% 42%; }
+  .blob-2{ top:42%; left:-190px; width:430px; height:470px; border-radius:44% 56% 63% 37% / 49% 38% 62% 51%; opacity:0.27; }
+  .blob-3{ bottom:-180px; left:14%; width:500px; height:420px; border-radius:55% 45% 38% 62% / 42% 60% 40% 58%; opacity:0.28; }
+
+  .wrap{ position:relative; z-index:1; max-width:760px; margin:0 auto; padding:26px 18px 60px; }
+  .hero{ text-align:center; padding:14px 6px 22px; }
+  .pill{ display:inline-block; background:var(--j5-soft); border:2px solid var(--j5); color:var(--j5-badge-ink);
+    font-weight:700; font-size:0.82rem; letter-spacing:0.06em; text-transform:uppercase; padding:7px 16px; border-radius:999px; margin-bottom:16px; }
+  .hero h1{ font-size:2.05rem; font-weight:800; color:var(--j5-title); line-height:1.15; margin-bottom:10px; }
+  .hero p.sub{ font-size:1.02rem; color:var(--ink-soft); max-width:580px; margin:0 auto; font-weight:500; }
+  .hero .consigne{ display:inline-block; margin-top:14px; background:var(--white); border:2px dashed var(--j5);
+    border-radius:12px; padding:8px 16px; font-weight:600; color:var(--j5-dark); font-size:0.92rem; }
+
+  .topbar{ position:sticky; top:10px; z-index:20; background:var(--white); border:2px solid var(--line); border-radius:16px;
+    box-shadow:0 6px 20px rgba(138,96,0,0.12); padding:14px 16px; margin:10px 0 26px; }
+  .dots{ display:flex; gap:8px; justify-content:center; margin-bottom:12px; }
+  .dot{ width:30px; height:30px; border-radius:50%; border:2.5px solid var(--j5); background:var(--white);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; color:var(--j5-dark); }
+  .dot.active{ background:var(--j5); color:var(--j5-badge-ink); border-color:var(--j5-dark); box-shadow:0 0 0 4px rgba(245,197,24,0.30); }
+  .dot.ok{ background:var(--ok); color:#fff; border-color:var(--ok); }
+  .dot.ko{ background:var(--err); color:#fff; border-color:var(--err); }
+  .chrono-row{ display:flex; align-items:center; gap:12px; }
+  .chrono-clock{ display:flex; align-items:center; gap:7px; font-weight:800; font-size:1.3rem; color:var(--j5-dark);
+    background:var(--j5-soft); border:2px solid var(--j5); border-radius:12px; padding:6px 14px; min-width:84px; justify-content:center; }
+  .chrono-clock.warn{ color:var(--err); background:var(--err-soft); border-color:#f3c6c0; animation:tick 1s steps(1) infinite; }
+  @keyframes tick{ 50%{ transform:scale(1.08); } }
+  .chrono-prog{ flex:1; height:14px; background:var(--j5-soft); border-radius:999px; overflow:hidden; border:1.5px solid var(--j5); }
+  .chrono-prog .fill{ height:100%; width:100%; background:linear-gradient(90deg, var(--j5), var(--j5-dark)); border-radius:999px; transition:width 1s linear; }
+  .chrono-prog .fill.warn{ background:linear-gradient(90deg, #e8896f, var(--err)); }
+  .sound-toggle{ flex:0 0 auto; background:var(--white); border:2px solid var(--j5); border-radius:10px; cursor:pointer;
+    font-family:inherit; font-size:1.1rem; padding:6px 10px; color:var(--j5-dark); }
+  .sound-toggle:hover{ background:var(--j5-soft); }
+
+  .card{ background:var(--white); border:2px solid var(--line); border-radius:18px; padding:24px 20px; margin-bottom:22px;
+    box-shadow:0 4px 14px rgba(42,36,16,0.05); }
+  .card.is-correct{ border-color:#bfe0c0; }
+  .card.is-error{ border-color:#f3c6c0; }
+  .card-head{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .badge-num{ flex:0 0 auto; width:42px; height:42px; background:var(--j5); color:var(--j5-badge-ink); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.25rem; }
+  .card-head .ctitle{ font-weight:700; font-size:1.02rem; color:var(--j5-dark); }
+
+  .qline{ font-size:0.98rem; color:var(--ink-soft); text-align:center; font-weight:600; margin-bottom:14px; }
+  .equality{ font-size:2rem; font-weight:800; color:var(--ink); text-align:center; margin:18px 0 22px; line-height:1.4; }
+  .equality em{ font-style:italic; }
+
+  .qcm{ display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:440px; margin:0 auto; }
+  .qcm-btn{ font-family:inherit; font-size:1.3rem; font-weight:800; padding:22px 12px;
+    border:3px solid var(--j5); border-radius:16px; background:var(--white); color:var(--j5-dark); cursor:pointer; transition:0.15s; }
+  .qcm-btn:hover{ background:var(--j5-soft); } .qcm-btn:active{ transform:scale(0.97); }
+  .qcm-btn.vrai{ } .qcm-btn.faux{ }
+  .qcm-btn.is-correct{ border-color:var(--ok); background:var(--ok-soft); color:var(--ok); }
+  .qcm-btn.is-error{ border-color:var(--err); background:var(--err-soft); color:var(--err); }
+  .qcm-btn.lock{ cursor:default; }
+
+  .feedback{ margin-top:16px; font-weight:700; text-align:center; min-height:1.4em; font-size:1.02rem; }
+  .feedback.ok{ color:var(--ok); } .feedback.bad{ color:var(--err); }
+  .feedback .meth{ display:block; font-weight:600; color:var(--ink-soft); font-size:0.95rem; margin-top:6px; line-height:1.5; }
+  .feedback em{ font-style:italic; }
+
+  .startgate{ text-align:center; background:var(--white); border:2px solid var(--line); border-radius:18px; padding:26px 22px; margin-bottom:22px;
+    box-shadow:0 4px 14px rgba(42,36,16,0.05); }
+  .startgate h2{ color:var(--j5-dark); font-size:1.3rem; margin-bottom:8px; }
+  .startgate p{ color:var(--ink-soft); font-weight:500; margin-bottom:16px; font-size:0.96rem; }
+  .startgate .memo{ display:inline-block; text-align:left; background:var(--j5-soft); border:2px solid var(--j5); border-radius:10px;
+    padding:10px 16px; font-weight:600; color:var(--j5-dark); font-size:0.9rem; margin-bottom:16px; line-height:1.8; }
+
+  .btn{ font-family:inherit; font-weight:700; font-size:1.02rem; padding:14px 26px; border:none; border-radius:12px; cursor:pointer; transition:0.12s; }
+  .btn:active{ transform:scale(0.97); }
+  .btn-big{ display:block; width:100%; max-width:360px; margin:18px auto 0; background:var(--j5-dark); color:var(--white);
+    font-size:1.08rem; padding:16px; box-shadow:0 5px 0 #5e4200; }
+  .btn-big:hover{ background:#724f00; }
+
+  .countdown{ position:fixed; inset:0; z-index:60; background:rgba(60,48,8,0.80); display:none; align-items:center; justify-content:center; }
+  .countdown.show{ display:flex; }
+  .countdown .num{ font-size:8rem; font-weight:800; color:#fff; line-height:1; animation:cdpop 1s ease; }
+  .countdown .go{ font-size:4rem; color:var(--j5); }
+  @keyframes cdpop{ from{ transform:scale(0.4); opacity:0; } 40%{ transform:scale(1.1); opacity:1; } to{ transform:scale(1); opacity:1; } }
+
+  .results{ display:none; text-align:center; background:var(--white); border:2.5px solid var(--j5); border-radius:20px;
+    padding:34px 22px; margin-bottom:24px; box-shadow:0 10px 30px rgba(138,96,0,0.18); }
+  .results.show{ display:block; animation:pop 0.5s ease; }
+  @keyframes pop{ from{ transform:scale(0.9); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .results .trophy{ font-size:3.4rem; line-height:1; }
+  .results h2{ color:var(--j5-dark); font-size:1.6rem; margin:10px 0 4px; }
+  .results .rscore{ font-size:1.1rem; font-weight:700; color:var(--ink); margin-bottom:8px; }
+  .stars{ font-size:2rem; letter-spacing:6px; margin:6px 0 12px; }
+  .star-on{ color:var(--j5); } .star-off{ color:var(--line); }
+  .results .rmsg{ color:var(--ink-soft); font-weight:500; max-width:480px; margin:0 auto 6px; }
+  .recap{ list-style:none; max-width:540px; margin:14px auto 0; text-align:left; }
+  .recap li{ display:flex; align-items:flex-start; gap:10px; padding:9px 12px; border-radius:10px; margin-bottom:6px; font-size:0.95rem; background:var(--j5-soft); }
+  .recap li.ko{ background:var(--err-soft); }
+  .recap li .ic{ font-size:1.1rem; flex:0 0 auto; }
+  .recap em{ font-style:italic; }
+
+  @media (max-width:430px){
+    .hero h1{ font-size:1.62rem; } .wrap{ padding:20px 12px 50px; } .equality{ font-size:1.55rem; }
+    .countdown .num{ font-size:6rem; } .dot{ width:26px; height:26px; font-size:0.78rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="wrap">
+    <header class="hero">
+      <span class="pill">Semaine 7 · Jour 5</span>
+      <h1>&#9999;&#65039; Résoudre les exercices</h1>
+      <p class="sub">Calcul littéral : l&rsquo;égalité est-elle <b>vraie</b> ou <b>fausse</b> ? (distributivité et réduction d&rsquo;expressions avec <em>x</em>)</p>
+      <div class="consigne">&#9889; Je travaille mes automatismes&nbsp;: <b>15 s par question</b>, réponds vite&nbsp;!</div>
+    </header>
+
+    <div id="startgate" class="startgate">
+      <h2>&#9201;&#65039; Défi flash&nbsp;: 15 s par question</h2>
+      <p>5 égalités s&rsquo;enchaînent. Pour chacune, dis si elle est <b>Vraie</b> ou <b>Fausse</b> en moins de <b>15 secondes</b>.<br>
+      &#128260; Tu peux <b>recommencer autant de fois que tu veux</b>&nbsp;: ce seront à chaque fois de <b>nouvelles égalités</b>&nbsp;!</p>
+      <div class="memo">
+        &#128161; <b>Pour vérifier&nbsp;:</b><br>
+        &bull; <b>Distribuer&nbsp;:</b> <em>k</em>&#8201;&times;&#8201;(<em>x</em> + <em>n</em>) = <em>k</em>&#8201;<em>x</em> + <em>k</em>&#8201;&times;&#8201;<em>n</em><br>
+        &bull; <b>Réduire&nbsp;:</b> on regroupe les <em>x</em> ensemble et les nombres ensemble
+      </div><br>
+      <button class="btn btn-big" id="start-btn" style="margin-top:0;">&#9654;&#65039; Démarrer le défi</button>
+    </div>
+
+    <section id="topbar" class="topbar" style="display:none;" aria-label="Progression et chronomètre">
+      <div class="dots" id="dots"></div>
+      <div class="chrono-row">
+        <div class="chrono-clock" id="chrono-clock"><span class="ic">&#9201;&#65039;</span><span id="chrono-txt">15</span></div>
+        <div class="chrono-prog"><div class="fill" id="chrono-fill"></div></div>
+        <button class="sound-toggle" id="sound-toggle" title="Activer/couper le son" aria-label="son">&#128266;</button>
+      </div>
+    </section>
+
+    <div id="results" class="results">
+      <div class="trophy">&#127942;</div>
+      <h2>Défi terminé&nbsp;!</h2>
+      <div class="rscore" id="r-score"></div>
+      <div class="stars" id="r-stars"></div>
+      <p class="rmsg" id="r-msg"></p>
+      <ul class="recap" id="recap"></ul>
+      <button class="btn btn-big" onclick="restartDefi()">&#8635; Rejouer avec de nouvelles égalités</button>
+    </div>
+
+    <main id="exoZone"></main>
+  </div>
+
+  <div id="countdown" class="countdown" aria-hidden="true"><div id="cd-inner"></div></div>
+
+<script>
+/* ============================================================
+   PAZAPA — N3S7J5 — Égalité vraie ou fausse ? (calcul littéral)
+   (chrono flash 15 s / question, 5 questions, génération aléatoire)
+   ============================================================ */
+const TOTAL = 5;
+const TEMPS_PAR_EXO = 15;
+const rint=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const coin=()=>Math.random()<0.5;
+
+let exos=[], results=[], current=0, chronoId=null, timeLeft=TEMPS_PAR_EXO, answered=false, soundOn=true;
+
+/* ---------- Son ---------- */
+let actx=null;
+function audio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
+function beep(freq,dur,type,vol){ if(!soundOn) return; const a=audio(); if(!a) return; if(a.state==='suspended') a.resume();
+  const o=a.createOscillator(), g=a.createGain(); o.type=type||'sine'; o.frequency.value=freq; g.gain.value=0.0001;
+  o.connect(g); g.connect(a.destination); const t=a.currentTime;
+  g.gain.exponentialRampToValueAtTime(vol||0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.15));
+  o.start(t); o.stop(t+(dur||0.15)+0.02); }
+function sCount(){ beep(440,0.18,'square',0.3); }
+function sGo(){ beep(880,0.32,'square',0.32); }
+function sTick(){ beep(660,0.07,'sine',0.18); }
+function sGood(){ [660,990].forEach((f,k)=>setTimeout(()=>beep(f,0.14,'triangle',0.26),k*110)); }
+function sBad(){ beep(196,0.28,'sawtooth',0.28); }
+function sTimeout(){ beep(160,0.4,'sawtooth',0.3); }
+function sWin(){ if(!soundOn) return; [523,659,784,1047].forEach((f,k)=>setTimeout(()=>beep(f,0.18,'triangle',0.28),k*140)); }
+
+/* ============================================================
+   GÉNÉRATEUR (équilibré ~50/50, étiquette vérifiée numériquement)
+   ============================================================ */
+function equalFn(fL,fR){ for(const xv of [0,1,2,3,5,7,11,-2,-4,0.5]){ if(Math.abs(fL(xv)-fR(xv))>1e-9) return false; } return true; }
+function xterm(c){ // coefficient -> "x", "3x", "-2x"...
+  if(c===1) return 'x'; if(c===-1) return '\u2212x';
+  return (c<0?'\u2212':'')+Math.abs(c)+'x';
+}
+function reduit(M,C){ // forme réduite "Mx + C" lisible
+  if(M===0) return ''+C;
+  if(C===0) return xterm(M);
+  return xterm(M)+(C<0?' \u2212 ':' + ')+Math.abs(C);
+}
+
+function genRaw(fam){
+  if(fam==='distrib'){
+    const k=rint(2,9), n=rint(2,12), sign=coin()?1:-1;
+    const opTxt=sign>0?'+':'\u2212';
+    const left=x=>k*(x+sign*n);
+    const variants=[
+      {f:x=>k*x+sign*k*n, t:`${k}x ${sign>0?'+':'\u2212'} ${k*n}`},
+      {f:x=>k*x+sign*k*n, t:`${k}x ${sign>0?'+':'\u2212'} ${k*n}`},
+      {f:x=>k*x+sign*n,    t:`${k}x ${sign>0?'+':'\u2212'} ${n}`},
+      {f:x=>k*x+sign*(k+n),t:`${k}x ${sign>0?'+':'\u2212'} ${k+n}`},
+    ];
+    const v=pick(variants);
+    return {html:`${k} \u00d7 (x ${opTxt} ${n}) = ${v.t}`, left, right:v.f, reduit:reduit(k, sign*k*n)};
+  }
+  if(fam==='reduc2'){
+    const a=rint(2,20), b=rint(2,Math.min(a,15)); const sub=coin();
+    const left=sub?(x=>(a-b)*x):(x=>(a+b)*x);
+    const trueC=sub?a-b:a+b;
+    let c;
+    if(coin()) c=trueC;
+    else { const alt=[sub?a+b:Math.abs(a-b), trueC+rint(1,3), Math.max(1,trueC-rint(1,3))].filter(v=>v!==trueC); c=alt.length?pick(alt):trueC+1; }
+    return {html:`${a}x ${sub?'\u2212':'+'} ${b}x = ${xterm(c)}`, left, right:x=>c*x, reduit:xterm(trueC)};
+  }
+  // reducSplit
+  const m1=rint(1,12), c1=rint(1,12), c2=rint(1,12);
+  const hasSecond=coin(); const m2=hasSecond?rint(1,12):0;
+  const leftTxt=hasSecond?`${c1} + ${xterm(m1)} + ${c2} + ${xterm(m2)}`
+    :(coin()?`${c1} + ${xterm(m1)} + ${c2}`:`${xterm(m1)} + ${c1} + ${c2}`);
+  const M=m1+m2, C=c1+c2; const left=x=>M*x+C;
+  let f,t;
+  if(coin()){ f=x=>M*x+C; t=reduit(M,C); }
+  else { const e=pick([
+      {f:x=>(M+C)*x, t:xterm(M+C)},
+      {f:x=>M*x+(C+rint(1,4)), t:reduit(M, C+rint(1,4))},
+      {f:x=>(M+rint(1,3))*x+C, t:reduit(M+rint(1,3), C)} ]); f=e.f; t=e.t; }
+  return {html:`${leftTxt} = ${t}`, left, right:f, reduit:reduit(M,C)};
+}
+function makeQuestion(){
+  const wantTrue=coin();
+  const fam=pick(['distrib','distrib','reduc2','reducSplit','reducSplit']);
+  let q=null;
+  for(let tries=0; tries<80; tries++){
+    const r=genRaw(fam);
+    if(equalFn(r.left,r.right)===wantTrue){ q=r; break; }
+  }
+  if(!q) q=genRaw(fam);
+  const isTrue=equalFn(q.left,q.right);
+  // rendu HTML (x en italique)
+  const html=q.html.replace(/x/g,'<em>x</em>');
+  const reducHtml=q.reduit.replace(/x/g,'<em>x</em>');
+  return { html, isTrue, reduc:reducHtml, fam };
+}
+
+/* ============================================================
+   Déroulé du défi
+   ============================================================ */
+function buildDots(){
+  const d=document.getElementById('dots'); d.innerHTML='';
+  for(let i=0;i<TOTAL;i++){ const el=document.createElement('div'); el.className='dot'; el.id='dot-'+i; el.textContent=(i+1); d.appendChild(el); }
+}
+function refreshDots(){
+  for(let i=0;i<TOTAL;i++){
+    const el=document.getElementById('dot-'+i);
+    el.className='dot' + (i===current?' active':'') + (results[i]==='ok'?' ok':'') + (results[i]==='ko'?' ko':'');
+    if(results[i]==='ok') el.innerHTML='&#10004;';
+    else if(results[i]==='ko') el.innerHTML='&#10008;';
+    else el.textContent=(i+1);
+  }
+}
+function renderChrono(){
+  document.getElementById('chrono-txt').textContent = timeLeft;
+  const fill=document.getElementById('chrono-fill');
+  fill.style.width=(100*timeLeft/TEMPS_PAR_EXO)+'%';
+  const warn = timeLeft<=5;
+  document.getElementById('chrono-clock').classList.toggle('warn', warn);
+  fill.classList.toggle('warn', warn);
+}
+function showExo(i){
+  current=i; answered=false;
+  const ex=exos[i];
+  refreshDots();
+  document.getElementById('exoZone').innerHTML=`
+    <div class="card" id="card">
+      <div class="card-head">
+        <div class="badge-num">${i+1}</div>
+        <div class="ctitle">Question ${i+1} sur ${TOTAL}</div>
+      </div>
+      <div class="qline">Cette égalité est-elle vraie ou fausse ?</div>
+      <div class="equality">${ex.html}</div>
+      <div class="qcm" id="qcm">
+        <button class="qcm-btn vrai" data-val="V">Vrai</button>
+        <button class="qcm-btn faux" data-val="F">Faux</button>
+      </div>
+      <div class="feedback" id="fb"></div>
+    </div>`;
+  setTimeout(()=>{
+    document.querySelectorAll('#qcm .qcm-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>validate(btn.dataset.val, btn));
+    });
+  },0);
+  timeLeft=TEMPS_PAR_EXO; renderChrono();
+  if(chronoId) clearInterval(chronoId);
+  chronoId=setInterval(()=>{
+    timeLeft--; renderChrono();
+    if(timeLeft<=5 && timeLeft>0) sTick();
+    if(timeLeft<=0){ clearInterval(chronoId); onTimeout(); }
+  },1000);
+}
+function stopChrono(){ if(chronoId){ clearInterval(chronoId); chronoId=null; } }
+function lockBtns(){ document.querySelectorAll('#qcm .qcm-btn').forEach(b=>{ b.style.pointerEvents='none'; b.classList.add('lock'); }); }
+function markCorrect(){ const want=exos[current].isTrue?'V':'F';
+  document.querySelectorAll('#qcm .qcm-btn').forEach(b=>{ if(b.dataset.val===want) b.classList.add('is-correct'); }); }
+function methText(ex){
+  return (ex.isTrue ? 'C\u2019est vrai. ' : 'C\u2019est faux. ') + 'En réduisant le membre de gauche, on obtient <b>'+ex.reduc+'</b>.';
+}
+function validate(val, btn){
+  if(answered) return;
+  answered=true; stopChrono();
+  const ex=exos[current]; const fb=document.getElementById('fb');
+  lockBtns();
+  const want=ex.isTrue?'V':'F';
+  if(val===want){
+    results[current]='ok'; sGood();
+    btn.classList.add('is-correct'); document.getElementById('card').classList.add('is-correct');
+    fb.className='feedback ok'; fb.innerHTML='&#10004; Bravo&nbsp;!<span class="meth">'+methText(ex)+'</span>';
+  } else {
+    results[current]='ko'; sBad();
+    btn.classList.add('is-error'); markCorrect();
+    document.getElementById('card').classList.add('is-error');
+    fb.className='feedback bad'; fb.innerHTML='&#10008; La bonne réponse était <b>'+(ex.isTrue?'Vrai':'Faux')+'</b>.<span class="meth">'+methText(ex)+'</span>';
+  }
+  refreshDots();
+  setTimeout(nextExo, 2300);
+}
+function onTimeout(){
+  if(answered) return; answered=true;
+  const ex=exos[current];
+  results[current]='ko'; sTimeout();
+  const card=document.getElementById('card'); if(card) card.classList.add('is-error');
+  lockBtns(); markCorrect();
+  const fb=document.getElementById('fb');
+  if(fb){ fb.className='feedback bad'; fb.innerHTML='&#9203; Temps écoulé&nbsp;! La bonne réponse était <b>'+(ex.isTrue?'Vrai':'Faux')+'</b>.<span class="meth">'+methText(ex)+'</span>'; }
+  refreshDots();
+  setTimeout(nextExo, 2500);
+}
+function nextExo(){ if(current+1 < TOTAL) showExo(current+1); else finishDefi(); }
+
+function finishDefi(){
+  stopChrono();
+  document.getElementById('topbar').style.display='none';
+  document.getElementById('exoZone').innerHTML='';
+  const ok=results.filter(r=>r==='ok').length;
+  let stars=1; if(ok===TOTAL) stars=3; else if(ok>=3) stars=2;
+  document.getElementById('r-score').textContent=`${ok} / ${TOTAL} bonnes réponses dans le temps`;
+  let sh=''; for(let k=0;k<3;k++) sh+=`<span class="${k<stars?'star-on':'star-off'}">&#9733;</span>`;
+  document.getElementById('r-stars').innerHTML=sh;
+  document.getElementById('r-msg').textContent = ok===TOTAL
+    ? 'Sans faute et dans le temps — tu maîtrises la distributivité et la réduction\u00a0! Relance pour de nouvelles égalités.'
+    : 'Personne ne réussit tout du premier coup. Pense à bien distribuer (k(x+n)=kx+kn) et à regrouper les x ensemble, les nombres ensemble. Relance autant de fois que tu veux\u00a0!';
+  const recap=document.getElementById('recap'); recap.innerHTML='';
+  exos.forEach((ex,i)=>{
+    const li=document.createElement('li'); const good=results[i]==='ok';
+    li.className=good?'':'ko';
+    li.innerHTML=`<span class="ic">${good?'&#10004;&#65039;':'&#10008;'}</span> <span><b>Q${i+1}</b> · ${ex.html} \u2192 <b>${ex.isTrue?'Vrai':'Faux'}</b></span>`;
+    recap.appendChild(li);
+  });
+  const res=document.getElementById('results'); res.classList.add('show');
+  if(ok===TOTAL) sWin();
+  res.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function runCountdown(done){
+  const ov=document.getElementById('countdown'), inner=document.getElementById('cd-inner');
+  ov.classList.add('show');
+  const seq=['3','2','1','Partez !']; let k=0;
+  (function step(){
+    if(k<seq.length){ const go=(seq[k]==='Partez !');
+      inner.className=go?'go':'num'; inner.textContent=seq[k];
+      inner.style.animation='none'; void inner.offsetWidth; inner.style.animation='';
+      if(go) sGo(); else sCount(); k++; setTimeout(step, go?700:850);
+    } else { ov.classList.remove('show'); done(); }
+  })();
+}
+function launchDefi(){
+  exos = Array.from({length:TOTAL}, ()=>makeQuestion());
+  results = new Array(TOTAL).fill(null);
+  window.__exos=exos;
+  document.getElementById('startgate').style.display='none';
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('topbar').style.display='block';
+  buildDots(); refreshDots(); current=0;
+  runCountdown(()=>{ showExo(0); });
+}
+function restartDefi(){ stopChrono(); launchDefi(); }
+
+document.getElementById('sound-toggle').addEventListener('click', function(){
+  soundOn=!soundOn; this.innerHTML = soundOn?'&#128266;':'&#128263;';
+  if(soundOn){ audio(); beep(660,0.1,'sine',0.2); }
+});
+document.getElementById('start-btn').addEventListener('click', function(){ audio(); launchDefi(); });
+window.__makeQuestion = makeQuestion;
+window.__exosRef = ()=>exos;
+</script>
+</body>
+</html>
