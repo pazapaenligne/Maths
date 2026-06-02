@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths – Ce que je retiens · Fréquences et moyennes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ═══════════ CHARTE ORANGE J1 (Lundi) ═══════════ */
+  :root {
+    --day-color:  #f5a623;
+    --day-dark:   #c47a10;
+    --day-light:  #fff5e0;
+    --day-border: #f5d080;
+    --day-glow:   rgba(245,166,35,.3);
+  }
+  /* ═══════════ CHARTE PAZAPA — base ═══════════ */
+  :root {
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623; --purple:#9966ff;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--green);top:200px;left:-30px;pointer-events:none;}
+  header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--day-color);
+    color:#fff;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.6rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.4rem,4vw,2.1rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.92rem;margin-top:.5rem;font-family:'JetBrains Mono',monospace;
+    max-width:600px;margin-left:auto;margin-right:auto;}
+  .card{width:100%;max-width:760px;background:var(--surface);border:2px solid var(--border);
+    border-radius:var(--radius);padding:1.8rem 1.8rem 1.6rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.4rem;animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green),var(--blue));}
+  .theme-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.25rem .75rem;border-radius:6px;
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;background:var(--day-light);
+    color:var(--day-dark);border:1.5px solid var(--day-border);}
+  .card h2{font-size:1.15rem;font-weight:800;color:var(--day-dark);margin-bottom:.9rem;}
+  .card p{margin-bottom:.7rem;}
+  .card p:last-child{margin-bottom:0;}
+  .inner{background:var(--day-light);border-left:5px solid var(--day-color);border-radius:10px;
+    padding:.9rem 1rem;margin:.9rem 0;line-height:1.85;}
+  .inner strong{color:var(--day-dark);}
+  .formula{display:block;text-align:center;background:var(--surface);border:2px dashed var(--day-border);
+    border-radius:12px;padding:.85rem 1.2rem;margin:.8rem auto;font-family:'JetBrains Mono',monospace;
+    font-size:clamp(.95rem,2.4vw,1.15rem);font-weight:700;color:var(--day-dark);}
+
+  /* Tableaux de données */
+  .data-table{width:100%;margin:.8rem 0;border-collapse:collapse;font-family:'JetBrains Mono',monospace;text-align:center;}
+  .data-table th{background:var(--day-color);color:#fff;padding:.55rem .5rem;font-size:.85rem;border:1.5px solid var(--day-dark);}
+  .data-table td{padding:.55rem .5rem;border:1px solid var(--day-border);background:var(--surface);font-size:.92rem;font-weight:700;}
+  .data-table td.head{background:var(--day-light);color:var(--day-dark);font-weight:800;text-align:left;}
+  .data-table td.total{background:var(--day-light);color:var(--day-dark);font-weight:800;}
+  .data-table .hl{color:var(--day-dark);}
+
+  /* Diagramme circulaire SVG */
+  .pie-wrap{display:flex;justify-content:center;align-items:center;gap:1rem;flex-wrap:wrap;margin:.8rem 0;padding:1rem;background:var(--surface);border:2px solid var(--day-border);border-radius:12px;}
+  .pie-wrap svg{max-width:200px;height:auto;}
+  .pie-legend{display:flex;flex-direction:column;gap:.4rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;}
+  .pie-legend .lg{display:flex;align-items:center;gap:.5rem;}
+  .pie-legend .sw{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+
+  .ex-line{font-family:'JetBrains Mono',monospace;font-weight:700;background:var(--surface);
+    border:1.5px solid var(--day-border);border-radius:8px;padding:.6rem .8rem;margin:.4rem 0;font-size:.92rem;text-align:center;}
+  .ex-line.final{background:var(--day-light);border-color:var(--day-color);border-width:2px;color:var(--day-dark);}
+
+  ul.clean{list-style:none;padding:0;margin:.6rem 0;}
+  ul.clean li{position:relative;padding:.55rem 0 .55rem 1.8rem;border-bottom:1px dashed var(--day-border);line-height:1.75;}
+  ul.clean li:last-child{border-bottom:none;}
+  ul.clean li::before{content:"▸";position:absolute;left:.3rem;top:.55rem;color:var(--day-color);font-weight:800;font-size:1.05rem;}
+
+  ol.steps{list-style:none;padding:0;margin:.5rem 0;counter-reset:s;}
+  ol.steps li{position:relative;padding:.7rem 0 .7rem 2.4rem;border-bottom:1px dashed var(--day-border);counter-increment:s;line-height:1.75;}
+  ol.steps li:last-child{border-bottom:none;}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:.7rem;background:var(--day-color);color:#fff;
+    width:1.7rem;height:1.7rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.85rem;font-family:'JetBrains Mono',monospace;}
+
+  details.recap{background:linear-gradient(135deg,var(--surface) 0%,var(--day-light) 100%);
+    border:2px solid var(--day-border);border-radius:var(--radius);padding:0;width:100%;max-width:760px;
+    margin-bottom:1.4rem;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);position:relative;z-index:1;}
+  details.recap summary{cursor:pointer;padding:1.1rem 1.5rem;font-weight:700;color:var(--day-dark);font-size:1rem;
+    list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem;transition:background .2s;min-height:2.8rem;}
+  details.recap summary:hover{background:rgba(245,166,35,.10);}
+  details.recap summary::-webkit-details-marker{display:none;}
+  details.recap summary::after{content:"▼";font-size:.85rem;transition:transform .25s;color:var(--day-color);}
+  details.recap[open] summary::after{transform:rotate(180deg);}
+  details.recap .recap-content{padding:0 1.5rem 1.4rem;}
+
+  .quiz-intro{color:var(--muted);font-size:.92rem;margin-bottom:1rem;line-height:1.75;}
+  .group{background:var(--day-light);border-radius:12px;padding:1rem .9rem;margin:.9rem 0;border:2px solid transparent;transition:all .25s;}
+  .group.ok{border-color:var(--green);background:#f0faeb;}
+  .group.ko{border-color:var(--pink);background:#fff0ef;}
+  .group-title{font-weight:700;color:var(--day-dark);margin-bottom:.6rem;font-size:.92rem;line-height:1.6;}
+  .group.ok .group-title{color:#2f6e10;}
+  .group.ko .group-title{color:#c0392b;}
+  .options{display:flex;flex-direction:column;gap:.5rem;}
+  .opt{display:flex;align-items:flex-start;gap:.6rem;background:var(--surface);border:2px solid var(--day-border);
+    border-radius:10px;padding:.65rem .8rem;cursor:pointer;transition:all .2s;font-size:.9rem;line-height:1.55;
+    user-select:none;min-height:2.4rem;font-family:'JetBrains Mono',monospace;}
+  .opt:hover{background:var(--day-light);border-color:var(--day-color);}
+  .opt input{margin-top:.2rem;accent-color:var(--day-color);width:18px;height:18px;cursor:pointer;flex-shrink:0;}
+  .opt.checked{background:var(--day-light);border-color:var(--day-dark);}
+  .group.ok .opt{pointer-events:none;opacity:.85;}
+  .quiz-actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.1rem;justify-content:center;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.3rem;border-radius:10px;
+    font-family:Arial,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+    transition:transform .12s,box-shadow .15s;position:relative;z-index:2;min-height:2.7rem;text-decoration:none;}
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+  .btn-ghost:hover{border-color:var(--day-color);background:var(--day-light);}
+  .feedback{margin-top:1.1rem;padding:.85rem 1rem;border-radius:10px;font-weight:600;text-align:center;display:none;line-height:1.7;}
+  .feedback.show{display:block;}
+  .feedback.win{background:#f0faeb;color:#2f6e10;border:1.5px solid var(--green);}
+  .feedback.retry{background:#fff0ef;color:#c0392b;border:1.5px solid var(--pink);}
+  .extra-quiz{width:100%;max-width:760px;margin-bottom:1.4rem;position:relative;z-index:1;}
+  .extra-quiz h2{font-size:1.05rem;color:var(--day-dark);margin-bottom:.6rem;font-weight:800;text-align:center;}
+  .extra-quiz p{color:var(--muted);font-size:.88rem;margin-bottom:.7rem;text-align:center;}
+  .extra-quiz iframe{width:100%;border:2px solid var(--day-border);border-radius:12px;background:var(--surface);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.2rem .8rem 3rem;}
+    .card{padding:1.3rem 1.1rem;}
+    .btn{font-size:.88rem;padding:.6rem 1rem;}
+    .quiz-actions .btn{flex:1;min-width:140px;justify-content:center;}
+    .formula{font-size:.88rem;padding:.7rem;}
+    .data-table th, .data-table td{font-size:.78rem;padding:.35rem .25rem;}
+    .ex-line{font-size:.82rem;}
+  }
+</style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      Pazapa &middot; Maths &middot; 3<sup>e</sup>
+    </div>
+    <div class="week-label">📚 Ce que je retiens &middot; Semaine 7 &middot; Jour 1</div>
+    <h1><span class="hl">Fréquences et moyennes</span></h1>
+    <p class="subtitle">Deux outils essentiels pour résumer et analyser des données</p>
+  </header>
+
+  <!-- VOCABULAIRE DE BASE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📚 Vocabulaire</div>
+    <h2>Effectif et effectif total</h2>
+    <p>Avant tout, deux mots à connaître :</p>
+    <ul class="clean">
+      <li><strong>Effectif</strong> d'une valeur = le <strong>nombre de fois</strong> où cette valeur apparaît dans une série.</li>
+      <li><strong>Effectif total</strong> = la somme de tous les effectifs (= nombre total de données).</li>
+    </ul>
+    <div class="inner">
+      <p>💡 Exemple : si on demande à 30 élèves leur couleur préférée et que 12 disent « rouge », alors l'effectif de « rouge » est <strong>12</strong>, et l'effectif total est <strong>30</strong>.</p>
+    </div>
+  </section>
+
+  <!-- LA FRÉQUENCE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📊 La fréquence</div>
+    <h2>Quelle proportion représente chaque valeur ?</h2>
+    <p>La <strong>fréquence</strong> d'une valeur, c'est sa <strong>proportion</strong> dans la série totale.</p>
+
+    <div class="formula">
+      fréquence = effectif de la valeur / effectif total
+    </div>
+
+    <ul class="clean">
+      <li>La fréquence est un <strong>nombre entre 0 et 1</strong>.</li>
+      <li>On peut l'écrire en <strong>pourcentage</strong> (en multipliant par 100).</li>
+      <li>La <strong>somme</strong> de toutes les fréquences vaut <strong>1</strong> (ou 100 %).</li>
+    </ul>
+  </section>
+
+  <!-- EXEMPLE FRÉQUENCE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">💡 Exemple · Fréquence</div>
+    <h2>Couleur préférée de 30 élèves</h2>
+    <p>On a interrogé 30 élèves sur leur couleur préférée :</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Couleur</th>
+          <th>Effectif</th>
+          <th>Fréquence</th>
+          <th>Pourcentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="head">🔴 Rouge</td><td>12</td><td>12/30 = 0,4</td><td class="hl">40 %</td></tr>
+        <tr><td class="head">🔵 Bleu</td><td>9</td><td>9/30 = 0,3</td><td class="hl">30 %</td></tr>
+        <tr><td class="head">🟢 Vert</td><td>6</td><td>6/30 = 0,2</td><td class="hl">20 %</td></tr>
+        <tr><td class="head">🟡 Jaune</td><td>3</td><td>3/30 = 0,1</td><td class="hl">10 %</td></tr>
+        <tr><td class="total">Total</td><td class="total">30</td><td class="total">1</td><td class="total">100 %</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Diagramme circulaire -->
+    <div class="pie-wrap">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagramme circulaire des couleurs">
+        <!-- Rouge 40% = 144° (0° à 144°) -->
+        <path d="M 100 100 L 100 20 A 80 80 0 0 1 169.28 140 Z" fill="#e63946"/>
+        <!-- Bleu 30% = 108° (144° à 252°) -->
+        <path d="M 100 100 L 169.28 140 A 80 80 0 0 1 24.72 124.72 Z" fill="#3ab5d8"/>
+        <!-- Vert 20% = 72° (252° à 324°) -->
+        <path d="M 100 100 L 24.72 124.72 A 80 80 0 0 1 53.4 33.4 Z" fill="#8dc63f"/>
+        <!-- Jaune 10% = 36° (324° à 360°) -->
+        <path d="M 100 100 L 53.4 33.4 A 80 80 0 0 1 100 20 Z" fill="#f5c518"/>
+        <!-- Étiquettes pourcentages -->
+        <text x="138" y="70" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" font-weight="800" fill="#fff">40%</text>
+        <text x="125" y="155" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="800" fill="#fff">30%</text>
+        <text x="55" y="125" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" font-weight="800" fill="#fff">20%</text>
+        <text x="68" y="55" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" font-weight="800" fill="#1f2937">10%</text>
+      </svg>
+      <div class="pie-legend">
+        <div class="lg"><span class="sw" style="background:#e63946;"></span> Rouge — 40 %</div>
+        <div class="lg"><span class="sw" style="background:#3ab5d8;"></span> Bleu — 30 %</div>
+        <div class="lg"><span class="sw" style="background:#8dc63f;"></span> Vert — 20 %</div>
+        <div class="lg"><span class="sw" style="background:#f5c518;"></span> Jaune — 10 %</div>
+      </div>
+    </div>
+
+    <div class="inner">
+      <p>✅ <strong>Vérification :</strong> 40 + 30 + 20 + 10 = 100 % → la somme fait bien 100 %.</p>
+    </div>
+  </section>
+
+  <!-- LA MOYENNE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">📈 La moyenne</div>
+    <h2>Une « valeur centrale » qui résume la série</h2>
+    <p>La <strong>moyenne</strong> d'une série de valeurs, c'est la somme des valeurs divisée par leur nombre.</p>
+
+    <div class="formula">
+      moyenne = (somme des valeurs) / (nombre de valeurs)
+    </div>
+
+    <p style="margin-top:1rem;"><strong>Exemple simple :</strong> notes d'un élève en maths sur le trimestre.</p>
+    <div class="ex-line">Notes : 12 — 15 — 8 — 14 — 11</div>
+    <div class="ex-line">moyenne = (12 + 15 + 8 + 14 + 11) / 5 = 60 / 5 = <strong style="color:var(--day-dark);">12</strong></div>
+  </section>
+
+  <!-- MOYENNE PONDÉRÉE -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">⚖️ Moyenne pondérée</div>
+    <h2>Quand les valeurs ont des effectifs (ou coefficients)</h2>
+    <p>Quand chaque valeur apparaît plusieurs fois, ou a un <strong>coefficient</strong> différent, on calcule une <strong>moyenne pondérée</strong>.</p>
+
+    <div class="formula" style="font-size:1rem;">
+      moyenne = (somme des « valeur × effectif ») / (somme des effectifs)
+    </div>
+
+    <p style="margin-top:1rem;"><strong>Exemple 1 : notes d'un contrôle</strong> (25 élèves)</p>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Note (x)</th>
+          <th>Effectif (n)</th>
+          <th>x × n</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>8</td><td>3</td><td>24</td></tr>
+        <tr><td>10</td><td>5</td><td>50</td></tr>
+        <tr><td>12</td><td>7</td><td>84</td></tr>
+        <tr><td>14</td><td>6</td><td>84</td></tr>
+        <tr><td>16</td><td>4</td><td>64</td></tr>
+        <tr><td class="total">Total</td><td class="total">25</td><td class="total">306</td></tr>
+      </tbody>
+    </table>
+    <div class="ex-line final">moyenne = 306 / 25 = <strong>12,24</strong></div>
+
+    <p style="margin-top:1rem;"><strong>Exemple 2 : moyenne avec coefficients</strong> (notes du trimestre)</p>
+    <ul class="clean">
+      <li>Brevet blanc : <strong>12</strong> (coef <strong>2</strong>)</li>
+      <li>Devoir surveillé : <strong>14</strong> (coef <strong>3</strong>)</li>
+      <li>Devoir maison : <strong>8</strong> (coef <strong>1</strong>)</li>
+    </ul>
+    <ol class="steps">
+      <li>On multiplie chaque note par son coefficient : 12 × 2 = 24 ; 14 × 3 = 42 ; 8 × 1 = 8.</li>
+      <li>On additionne : 24 + 42 + 8 = <strong>74</strong>.</li>
+      <li>On divise par la somme des coefficients (2 + 3 + 1 = 6) : <strong>74 / 6 ≈ 12,33</strong>.</li>
+    </ol>
+    <div class="ex-line final">moyenne du trimestre ≈ <strong>12,33</strong></div>
+  </section>
+
+  <!-- ATTENTION -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">⚠️ À ne pas confondre</div>
+    <h2>Fréquence ≠ moyenne</h2>
+    <ul class="clean">
+      <li>La <strong>fréquence</strong> répond à : « <em>quelle part représente cette valeur dans le total ?</em> » (proportion).</li>
+      <li>La <strong>moyenne</strong> répond à : « <em>autour de quelle valeur se situent les données ?</em> » (valeur centrale).</li>
+    </ul>
+    <div class="inner">
+      <p>💡 La moyenne sert pour des données <strong>numériques</strong> (notes, tailles, âges…).<br>
+      La fréquence marche aussi pour des données <strong>non numériques</strong> (couleurs, sports préférés, oui/non…).</p>
+    </div>
+  </section>
+
+  <!-- RÉCAP -->
+  <details class="recap">
+    <summary>👉 Clique ici pour l'essentiel en résumé</summary>
+    <div class="recap-content">
+      <ul class="clean">
+        <li><strong>Effectif</strong> = nombre de fois où une valeur apparaît.</li>
+        <li><strong>Fréquence</strong> = effectif / effectif total (entre 0 et 1, ou en %).</li>
+        <li>La somme des fréquences vaut toujours <strong>1</strong> (ou 100 %).</li>
+        <li><strong>Moyenne simple</strong> = somme des valeurs / nombre de valeurs.</li>
+        <li><strong>Moyenne pondérée</strong> = somme des (valeur × effectif) / somme des effectifs.</li>
+        <li>Les <strong>coefficients</strong> fonctionnent comme des effectifs dans le calcul.</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- MINI-QUIZ -->
+  <section class="card">
+    <div class="card-stripe"></div>
+    <div class="theme-badge">🎯 Mini-quiz</div>
+    <h2>À toi de vérifier !</h2>
+    <p class="quiz-intro">Pour chaque groupe, coche <strong>toutes les affirmations correctes</strong> (il peut y en avoir plusieurs). Puis clique sur « Vérifier ».</p>
+    <div id="quiz-groups"></div>
+    <div class="quiz-actions">
+      <button class="btn btn-primary" id="check-btn">✅ Vérifier mes réponses</button>
+      <button class="btn btn-ghost" id="reset-btn">🔄 Recommencer</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+  <!-- IFRAME DIGIFLASHCARDS -->
+  <section class="extra-quiz">
+    <h2>🧩 Cartes mémo (Digiflashcards)</h2>
+    <p>Pour t'entraîner, mémorise les définitions et formules avec ces flashcards :</p>
+    <iframe src="https://ladigitale.dev/digiflashcards/#/f/64e5f788d1f4b?vue=apprenant" style="height:500px;"
+      allowfullscreen frameborder="0"></iframe>
+  </section>
+
+<script>
+  var QUIZ = [
+    {
+      title:"1 \u00b7 L'effectif d'une valeur, c'est\u2026",
+      options:[
+        { t:"le nombre de fois o\u00f9 cette valeur appara\u00eet", ok:true },
+        { t:"la proportion de cette valeur dans le total", ok:false },
+        { t:"la somme des valeurs", ok:false },
+        { t:"toujours \u00e9gal \u00e0 100", ok:false }
+      ]
+    },
+    {
+      title:"2 \u00b7 La fr\u00e9quence d'une valeur, c'est\u2026",
+      options:[
+        { t:"effectif de la valeur / effectif total", ok:true },
+        { t:"un nombre entre 0 et 1", ok:true },
+        { t:"la somme de toutes les fr\u00e9quences fait 1 (ou 100 %)", ok:true },
+        { t:"toujours un nombre entier", ok:false }
+      ]
+    },
+    {
+      title:"3 \u00b7 Sur 30 \u00e9l\u00e8ves, 12 pr\u00e9f\u00e8rent le rouge. La fr\u00e9quence du rouge\u2026",
+      options:[
+        { t:"vaut 12/30 = 0,4", ok:true },
+        { t:"vaut 40 %", ok:true },
+        { t:"vaut 12 %", ok:false },
+        { t:"vaut 30 %", ok:false }
+      ]
+    },
+    {
+      title:"4 \u00b7 La moyenne d'une s\u00e9rie de valeurs, c'est\u2026",
+      options:[
+        { t:"somme des valeurs / nombre de valeurs", ok:true },
+        { t:"la valeur qui appara\u00eet le plus souvent", ok:false },
+        { t:"la plus grande valeur", ok:false },
+        { t:"un nombre qui r\u00e9sume la s\u00e9rie", ok:true }
+      ]
+    },
+    {
+      title:"5 \u00b7 Notes : 10, 12, 8, 14, 6. La moyenne est\u2026",
+      options:[
+        { t:"(10 + 12 + 8 + 14 + 6) / 5 = 50 / 5 = 10", ok:true },
+        { t:"10", ok:true },
+        { t:"12", ok:false },
+        { t:"50", ok:false }
+      ]
+    },
+    {
+      title:"6 \u00b7 Moyenne pond\u00e9r\u00e9e (avec effectifs ou coefficients)\u2026",
+      options:[
+        { t:"somme des (valeur \u00d7 effectif) / somme des effectifs", ok:true },
+        { t:"un coefficient agit comme un effectif", ok:true },
+        { t:"on additionne juste toutes les valeurs", ok:false },
+        { t:"on divise par le nombre de valeurs diff\u00e9rentes", ok:false }
+      ]
+    },
+    {
+      title:"7 \u00b7 Notes : 12 (coef 2), 14 (coef 3), 8 (coef 1). La moyenne du trimestre\u2026",
+      options:[
+        { t:"(12\u00d72 + 14\u00d73 + 8\u00d71) / (2+3+1) = 74 / 6 \u2248 12,33", ok:true },
+        { t:"\u2248 12,33", ok:true },
+        { t:"= (12 + 14 + 8) / 3 = 11,33", ok:false },
+        { t:"= 74 / 3 \u2248 24,67", ok:false }
+      ]
+    }
+  ];
+
+  var container = document.getElementById('quiz-groups');
+  QUIZ.forEach(function(g, gi){
+    var groupEl = document.createElement('div');
+    groupEl.className = 'group';
+    groupEl.id = 'g' + gi;
+    var html = '<div class="group-title">' + g.title + '</div><div class="options">';
+    g.options.forEach(function(o, oi){
+      html += '<label class="opt" data-g="' + gi + '" data-o="' + oi + '">' +
+              '<input type="checkbox" data-g="' + gi + '" data-o="' + oi + '" data-ok="' + o.ok + '">' +
+              '<span>' + o.t + '</span></label>';
+    });
+    html += '</div>';
+    groupEl.innerHTML = html;
+    container.appendChild(groupEl);
+  });
+
+  container.addEventListener('change', function(e){
+    if(e.target.matches('input[type="checkbox"]')){
+      var label = e.target.closest('.opt');
+      if(e.target.checked) label.classList.add('checked');
+      else label.classList.remove('checked');
+    }
+  });
+
+  var feedback = document.getElementById('feedback');
+  document.getElementById('check-btn').addEventListener('click', function(){
+    var allOk = true, firstError = null;
+    QUIZ.forEach(function(g, gi){
+      var groupEl = document.getElementById('g' + gi);
+      if(groupEl.classList.contains('ok')) return;
+      var inputs = groupEl.querySelectorAll('input[type="checkbox"]');
+      var correct = true;
+      inputs.forEach(function(inp){
+        if((inp.dataset.ok === 'true') !== inp.checked) correct = false;
+      });
+      if(correct){
+        groupEl.classList.remove('ko'); groupEl.classList.add('ok');
+        inputs.forEach(function(inp){ inp.disabled = true; });
+      } else {
+        groupEl.classList.remove('ok'); groupEl.classList.add('ko');
+        if(!firstError) firstError = groupEl;
+        allOk = false;
+      }
+    });
+    feedback.classList.remove('win','retry','show');
+    if(allOk){
+      feedback.textContent = "\ud83c\udf89 Bravo ! Toutes tes r\u00e9ponses sont correctes. Tu sais calculer fr\u00e9quences et moyennes !";
+      feedback.classList.add('win','show');
+    } else {
+      feedback.textContent = "\u270b Il reste des erreurs. Les groupes en rouge sont \u00e0 reprendre. Essaie \u00e0 nouveau !";
+      feedback.classList.add('retry','show');
+      if(firstError) firstError.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    document.querySelectorAll('.group').forEach(function(g){ g.classList.remove('ok','ko'); });
+    document.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('checked'); });
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(inp){
+      inp.checked = false; inp.disabled = false;
+    });
+    feedback.classList.remove('show','win','retry');
+    feedback.textContent = "";
+  });
+</script>
+</body>
+</html>
