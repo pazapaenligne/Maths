@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ce que je retiens — Variable aléatoire & Bernoulli · 3e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --day-color:#f5c518;
+  --day-dark:#8a6000;
+  --day-light:#fffbeb;
+  --day-border:#f5e08a;
+  --day-glow:rgba(245,197,24,.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;background:#fffdf7;color:#2b2b2b;line-height:1.65;padding:24px 16px 60px;position:relative;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;border-radius:50%;z-index:0;pointer-events:none;filter:blur(2px)}
+body::before{width:260px;height:260px;background:var(--day-glow);top:-80px;right:-70px}
+body::after{width:200px;height:200px;background:var(--day-glow);bottom:-60px;left:-60px}
+.bubble{position:fixed;border-radius:50%;background:var(--day-glow);z-index:0;pointer-events:none;opacity:.5}
+.bubble.b1{width:90px;height:90px;top:40%;left:-30px}
+.bubble.b2{width:60px;height:60px;top:18%;left:8%}
+.bubble.b3{width:120px;height:120px;bottom:12%;right:-40px}
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto}
+
+.hero{text-align:center;margin-bottom:30px}
+.pill{display:inline-block;background:var(--day-color);color:#fff;font-weight:bold;font-size:.85rem;letter-spacing:.5px;padding:7px 18px;border-radius:999px;box-shadow:0 4px 12px var(--day-glow);text-shadow:0 1px 2px rgba(138,96,0,.45)}
+.hero h1{font-size:1.9rem;color:var(--day-dark);margin:14px 0 8px;line-height:1.2}
+.hero .week-line{font-size:1.02rem;color:#8a8a8a;font-weight:600;margin-top:12px;letter-spacing:.3px}
+.hero .sub{font-size:1.05rem;color:#555;max-width:580px;margin:0 auto}
+
+.card{background:#fff;border-radius:16px;padding:26px 24px 24px;margin:0 auto 26px;max-width:760px;position:relative;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.06);border:1px solid #efe9d8}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--day-color),var(--day-border))}
+.theme-badge{display:inline-flex;align-items:center;gap:8px;background:var(--day-light);color:var(--day-dark);font-weight:bold;font-size:.95rem;padding:7px 16px;border-radius:999px;margin-bottom:16px;border:2px solid var(--day-border)}
+.card h2{color:var(--day-dark);font-size:1.32rem;margin-bottom:12px;line-height:1.3}
+.card h3{color:var(--day-dark);font-size:1.08rem;margin:18px 0 8px}
+.card p{margin-bottom:10px}
+.card ul{margin:8px 0 12px;padding-left:22px}
+.card li{margin-bottom:7px}
+b,strong{color:var(--day-dark)}
+.hl{background:var(--day-light);padding:1px 6px;border-radius:5px;font-weight:bold;color:var(--day-dark)}
+
+.def{list-style:none;padding:0;margin:8px 0}
+.def li{display:flex;gap:10px;align-items:baseline;padding:10px 12px;border-radius:10px;background:#fdfaf0;margin-bottom:8px;border-left:4px solid var(--day-color)}
+.def .term{font-weight:700;color:var(--day-dark);min-width:max-content}
+
+.formule{font-family:'JetBrains Mono',monospace;background:var(--day-light);border:2px dashed var(--day-border);border-radius:12px;padding:16px 18px;margin:14px 0;text-align:center;font-size:1.02rem;color:var(--day-dark);font-weight:600}
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 4px}
+.frac .num{border-bottom:2px solid var(--day-dark);padding:0 8px}
+.frac .den{padding:2px 8px 0}
+
+.exemple{background:#fafafa;border-left:5px solid var(--day-color);border-radius:0 12px 12px 0;padding:14px 16px;margin:14px 0}
+.exemple .tag{display:inline-block;font-weight:bold;color:var(--day-dark);font-size:.85rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.95rem}
+
+.tbl-scroll{overflow-x:auto;margin:12px 0;-webkit-overflow-scrolling:touch}
+table.data{border-collapse:collapse;width:100%;min-width:360px;font-size:.95rem}
+table.data th,table.data td{border:1px solid #ece2c4;padding:8px 12px;text-align:center;font-family:'JetBrains Mono',monospace}
+table.data td.lbl{background:var(--day-light);color:var(--day-dark);font-weight:700;font-family:Arial,sans-serif;text-align:left;white-space:nowrap}
+table.data th{background:var(--day-color);color:#fff;font-weight:700;text-shadow:0 1px 2px rgba(138,96,0,.45)}
+
+/* tree wrap */
+.tree-box{text-align:center;margin:10px 0}
+.tree-box svg{width:100%;max-width:360px;height:auto;display:block;margin:0 auto}
+.tree-legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;font-size:.85rem;color:#555;margin-top:8px}
+.tree-legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:2px solid}
+
+details.recap{background:var(--day-light);border:2px solid var(--day-border);border-radius:14px;padding:0;margin:0 auto 26px;max-width:760px;overflow:hidden}
+details.recap summary{cursor:pointer;list-style:none;padding:16px 20px;font-weight:bold;color:var(--day-dark);font-size:1.1rem;display:flex;align-items:center;gap:10px}
+details.recap summary::-webkit-details-marker{display:none}
+details.recap summary::after{content:"▼";margin-left:auto;font-size:.8rem;transition:transform .2s}
+details.recap[open] summary::after{transform:rotate(180deg)}
+details.recap .recap-body{padding:0 20px 18px}
+.recap-body ul{padding-left:20px}.recap-body li{margin-bottom:8px}
+
+.quiz{background:#fff;border-radius:16px;padding:26px 24px;margin:0 auto 26px;max-width:760px;position:relative;overflow:hidden;border:1px solid #efe9d8;box-shadow:0 6px 22px rgba(0,0,0,.06)}
+.quiz h2{color:var(--day-dark);font-size:1.35rem;margin-bottom:6px}
+.quiz .intro{color:#666;font-size:.95rem;margin-bottom:18px}
+.qgroup{border:2px solid #eee;border-radius:14px;padding:16px 16px 14px;margin-bottom:18px;transition:border-color .25s,background .25s}
+.qgroup.ok{border-color:#8dc63f;background:#f4fbed}
+.qgroup.ko{border-color:#e06b62;background:#fdeceb}
+.qgroup .q{font-weight:bold;color:#333;margin-bottom:6px}
+.qgroup .multi{font-size:.82rem;color:#999;margin-bottom:10px;font-style:italic}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;margin-bottom:7px;border:2px solid #eee;border-radius:10px;cursor:pointer;transition:all .15s;background:#fff}
+.opt:hover{border-color:var(--day-border)}
+.opt input{margin-top:3px;width:17px;height:17px;accent-color:var(--day-color);flex-shrink:0;cursor:pointer}
+.opt.picked{border-color:var(--day-color);background:var(--day-light)}
+.opt.reveal-good{border-color:#8dc63f;background:#eef8e2}
+.opt.locked{cursor:default;opacity:.95}
+.btn-check{background:var(--day-color);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-weight:bold;font-size:.92rem;cursor:pointer;font-family:Arial,sans-serif;box-shadow:0 3px 10px var(--day-glow);transition:transform .1s;text-shadow:0 1px 2px rgba(138,96,0,.45)}
+.btn-check:hover{transform:translateY(-1px)}
+.btn-check:disabled{opacity:.45;cursor:default;transform:none;box-shadow:none}
+.fb{margin-top:9px;font-weight:bold;font-size:.92rem;min-height:1px}
+.fb.win{color:#5a9216}.fb.retry{color:#c0392b}
+.quiz-foot{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.btn-reset{background:#fff;color:var(--day-dark);border:2px solid var(--day-border);border-radius:10px;padding:8px 18px;font-weight:bold;cursor:pointer;font-family:Arial,sans-serif}
+.score{font-weight:bold;color:var(--day-dark)}
+
+@media(max-width:480px){
+  .hero h1{font-size:1.5rem}
+  .card,.quiz{padding:20px 16px}
+  .formule{font-size:.92rem;padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="pill">Pazapa · 3e · Mathématiques</span>
+    <div class="week-line">Semaine 7 – Jour 5</div>
+    <h1>Variable aléatoire &amp; loi de Bernoulli</h1>
+    <p class="sub">L'essentiel à retenir : décrire une expérience par des nombres, calculer une espérance et lire un arbre de probabilités.</p>
+  </div>
+
+  <!-- CARD 1 : VARIABLE ALEATOIRE -->
+  <section class="card">
+    <span class="card-stripe"></span>
+    <span class="theme-badge">🎯 Variable aléatoire réelle</span>
+    <h2>Mettre des nombres sur le hasard</h2>
+    <ul class="def">
+      <li><span class="term">Définition :</span><span>une <b>variable aléatoire</b> X associe un <b>nombre</b> à chaque issue d'une expérience aléatoire.</span></li>
+      <li><span class="term">Loi de probabilité :</span><span>le <b>tableau</b> qui associe à chaque valeur de X sa probabilité.</span></li>
+    </ul>
+    <div class="tbl-scroll">
+      <table class="data">
+        <tr><td class="lbl">Valeurs xᵢ</td><td>x₁</td><td>x₂</td><td>…</td><td>xₙ</td></tr>
+        <tr><td class="lbl">Probabilités pᵢ</td><td>p₁</td><td>p₂</td><td>…</td><td>pₙ</td></tr>
+      </table>
+    </div>
+    <p style="font-size:.95rem;color:#666">La somme de toutes les probabilités vaut toujours <b>1</b>.</p>
+    <h3>L'espérance E(X)</h3>
+    <p>L'<b>espérance</b> est la <span class="hl">valeur moyenne</span> que l'on peut attendre, en répétant l'expérience un grand nombre de fois.</p>
+    <div class="formule">E(X) = x₁ × p₁ + x₂ × p₂ + … + xₙ × pₙ</div>
+    <div class="exemple">
+      <span class="tag">Exemple · un jeu au dé</span>
+      <p>On lance un dé. On gagne <b>5 €</b> si on fait un 6, on perd <b>1 €</b> sinon. Soit X le gain :</p>
+      <div class="tbl-scroll">
+        <table class="data">
+          <tr><td class="lbl">Gain xᵢ</td><td>+5</td><td>−1</td></tr>
+          <tr><td class="lbl">Probabilité pᵢ</td><td>1/6</td><td>5/6</td></tr>
+        </table>
+      </div>
+      <p class="mono">E(X) = 5 × 1/6 + (−1) × 5/6 = 5/6 − 5/6 = <b>0</b></p>
+      <p>👉 L'espérance est <b>nulle</b> : le jeu est <b>équitable</b> (ni gagnant ni perdant à long terme).</p>
+    </div>
+  </section>
+
+  <!-- CARD 2 : BERNOULLI -->
+  <section class="card">
+    <span class="card-stripe"></span>
+    <span class="theme-badge">🪙 Épreuve de Bernoulli</span>
+    <h2>Une expérience à deux issues</h2>
+    <p>Une <b>épreuve de Bernoulli</b> est une expérience qui n'a que <span class="hl">deux issues</span> : le <b>succès</b> et l'<b>échec</b>. On note la probabilité du succès <b>p</b>.</p>
+    <ul>
+      <li>On code le <b>succès</b> par la valeur <b>1</b> et l'<b>échec</b> par <b>0</b>.</li>
+      <li>La probabilité de l'échec est donc <b>1 − p</b>.</li>
+    </ul>
+    <h3>Loi de probabilité</h3>
+    <div class="tbl-scroll">
+      <table class="data">
+        <tr><td class="lbl">Valeurs</td><td>0 (échec)</td><td>1 (succès)</td></tr>
+        <tr><td class="lbl">Probabilités</td><td>1 − p</td><td>p</td></tr>
+      </table>
+    </div>
+    <h3>Espérance</h3>
+    <div class="formule">E(X) = 0 × (1 − p) + 1 × p = <b>p</b></div>
+    <div class="exemple">
+      <span class="tag">Exemple</span>
+      <p>« Obtenir un 6 en lançant un dé » est une épreuve de Bernoulli de paramètre <span class="mono">p = 1/6</span>. Son espérance vaut donc <b>1/6 ≈ 0,17</b>.</p>
+    </div>
+  </section>
+
+  <!-- CARD 3 : DEUX EPREUVES INDEPENDANTES -->
+  <section class="card">
+    <span class="card-stripe"></span>
+    <span class="theme-badge">🔀 Deux épreuves indépendantes</span>
+    <h2>Multiplier le long des branches</h2>
+    <p>Deux épreuves sont <b>indépendantes</b> quand le résultat de l'une <span class="hl">n'influence pas</span> l'autre. On les représente par un <b>arbre</b>.</p>
+    <div class="tree-box">
+      <svg viewBox="0 0 320 236" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Arbre deux epreuves independantes"><circle cx="26" cy="116" r="7" fill="#fffbeb" stroke="#8a6000" stroke-width="2.5"/><line x1="33" y1="116" x2="135" y2="60" stroke="#f5c518" stroke-width="4"/><text x="84.0" y="80.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">p</text><line x1="33" y1="116" x2="135" y2="172" stroke="#cdbb6e" stroke-width="2"/><text x="84.0" y="136.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">1-p</text><line x1="165" y1="60" x2="255" y2="32" stroke="#f5c518" stroke-width="4"/><text x="210.0" y="38.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">q</text><line x1="165" y1="60" x2="255" y2="88" stroke="#cdbb6e" stroke-width="2"/><text x="210.0" y="66.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">1-q</text><line x1="165" y1="172" x2="255" y2="148" stroke="#cdbb6e" stroke-width="2"/><text x="210.0" y="152.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">q</text><line x1="165" y1="172" x2="255" y2="206" stroke="#cdbb6e" stroke-width="2"/><text x="210.0" y="181.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">1-q</text><circle cx="150" cy="60" r="15" fill="#fffbeb" stroke="#5a9216" stroke-width="2.5"/><text x="150" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#5a9216" font-family="JetBrains Mono,monospace">A</text><circle cx="150" cy="172" r="15" fill="#fffbeb" stroke="#c0392b" stroke-width="2.5"/><text x="150" y="177" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b" font-family="JetBrains Mono,monospace">A̅</text><circle cx="270" cy="32" r="15" fill="#fffbeb" stroke="#5a9216" stroke-width="2.5"/><text x="270" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#5a9216" font-family="JetBrains Mono,monospace">B</text><circle cx="270" cy="88" r="15" fill="#fffbeb" stroke="#c0392b" stroke-width="2.5"/><text x="270" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b" font-family="JetBrains Mono,monospace">B̅</text><circle cx="270" cy="148" r="15" fill="#fffbeb" stroke="#5a9216" stroke-width="2.5"/><text x="270" y="153" text-anchor="middle" font-size="14" font-weight="700" fill="#5a9216" font-family="JetBrains Mono,monospace">B</text><circle cx="270" cy="206" r="15" fill="#fffbeb" stroke="#c0392b" stroke-width="2.5"/><text x="270" y="211" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b" font-family="JetBrains Mono,monospace">B̅</text><text x="150" y="231" text-anchor="middle" font-size="11" fill="#8a6000" font-weight="700">Épreuve 1</text><text x="270" y="231" text-anchor="middle" font-size="11" fill="#8a6000" font-weight="700">Épreuve 2</text></svg>
+      <div class="tree-legend">
+        <span><span class="dot" style="border-color:#5a9216;background:#fffbeb"></span> succès</span>
+        <span><span class="dot" style="border-color:#c0392b;background:#fffbeb"></span> échec</span>
+      </div>
+    </div>
+    <p>Pour trouver la probabilité d'un <b>chemin</b>, on <span class="hl">multiplie</span> les probabilités rencontrées le long des branches :</p>
+    <div class="formule">P(A ∩ B) = p × q</div>
+  </section>
+
+  <!-- CARD 4 : SCHEMA DE BERNOULLI -->
+  <section class="card">
+    <span class="card-stripe"></span>
+    <span class="theme-badge">🌿 Schéma de Bernoulli</span>
+    <h2>Répéter la même épreuve</h2>
+    <p>Un <b>schéma de Bernoulli</b>, c'est répéter <span class="hl">plusieurs fois</span> la même épreuve de Bernoulli, dans des conditions <b>identiques et indépendantes</b>.</p>
+    <div class="tree-box">
+      <svg viewBox="0 0 340 240" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Schema de Bernoulli"><circle cx="26" cy="118" r="7" fill="#fffbeb" stroke="#8a6000" stroke-width="2.5"/><text x="26" y="123" text-anchor="middle" font-size="14" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace"></text><line x1="33" y1="118" x2="140" y2="62" stroke="#f5c518" stroke-width="4"/><text x="86.5" y="82.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">p</text><line x1="33" y1="118" x2="140" y2="174" stroke="#cdbb6e" stroke-width="2"/><text x="86.5" y="138.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">1-p</text><line x1="170" y1="62" x2="263" y2="34" stroke="#f5c518" stroke-width="4"/><text x="216.5" y="40.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">p</text><line x1="170" y1="62" x2="263" y2="92" stroke="#cdbb6e" stroke-width="2"/><text x="216.5" y="69.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">1-p</text><line x1="170" y1="174" x2="263" y2="150" stroke="#cdbb6e" stroke-width="2"/><text x="216.5" y="154.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">p</text><line x1="170" y1="174" x2="263" y2="208" stroke="#cdbb6e" stroke-width="2"/><text x="216.5" y="183.0" text-anchor="middle" font-size="12" font-weight="700" fill="#8a6000" font-family="JetBrains Mono,monospace">1-p</text><circle cx="155" cy="62" r="15" fill="#fffbeb" stroke="#5a9216" stroke-width="2.5"/><text x="155" y="67" text-anchor="middle" font-size="14" font-weight="700" fill="#5a9216" font-family="JetBrains Mono,monospace">S</text><circle cx="155" cy="174" r="15" fill="#fffbeb" stroke="#c0392b" stroke-width="2.5"/><text x="155" y="179" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b" font-family="JetBrains Mono,monospace">E</text><circle cx="278" cy="34" r="15" fill="#fffbeb" stroke="#5a9216" stroke-width="2.5"/><text x="278" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#5a9216" font-family="JetBrains Mono,monospace">S</text><circle cx="278" cy="92" r="15" fill="#fffbeb" stroke="#c0392b" stroke-width="2.5"/><text x="278" y="97" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b" font-family="JetBrains Mono,monospace">E</text><circle cx="278" cy="150" r="15" fill="#fffbeb" stroke="#5a9216" stroke-width="2.5"/><text x="278" y="155" text-anchor="middle" font-size="14" font-weight="700" fill="#5a9216" font-family="JetBrains Mono,monospace">S</text><circle cx="278" cy="208" r="15" fill="#fffbeb" stroke="#c0392b" stroke-width="2.5"/><text x="278" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="#c0392b" font-family="JetBrains Mono,monospace">E</text><text x="155" y="234" text-anchor="middle" font-size="11" fill="#8a6000" font-weight="700">1re épreuve</text><text x="278" y="234" text-anchor="middle" font-size="11" fill="#8a6000" font-weight="700">2e épreuve</text></svg>
+      <div class="tree-legend">
+        <span><span class="dot" style="border-color:#5a9216;background:#fffbeb"></span> S = succès (p)</span>
+        <span><span class="dot" style="border-color:#c0392b;background:#fffbeb"></span> E = échec (1 − p)</span>
+      </div>
+    </div>
+    <p style="color:#666;font-size:.95rem">À chaque épreuve, la probabilité du succès reste la <b>même</b> (p) : les épreuves sont <b>identiques</b>.</p>
+  </section>
+
+  <!-- RECAP -->
+  <details class="recap">
+    <summary>📝 Récap express — tout en 6 points</summary>
+    <div class="recap-body">
+      <ul>
+        <li><b>Variable aléatoire</b> X : associe un nombre à chaque issue.</li>
+        <li><b>Loi de probabilité</b> : tableau valeurs ↔ probabilités (somme = 1).</li>
+        <li><b>Espérance</b> : E(X) = x₁p₁ + x₂p₂ + … + xₙpₙ (valeur moyenne).</li>
+        <li><b>Épreuve de Bernoulli</b> : 2 issues (succès = 1, échec = 0), E(X) = <b>p</b>.</li>
+        <li>Épreuves <b>indépendantes</b> : on <b>multiplie</b> le long des branches, P(A ∩ B) = p × q.</li>
+        <li><b>Schéma de Bernoulli</b> : répétition d'épreuves identiques et indépendantes.</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- QUIZ -->
+  <section class="quiz" id="quiz">
+    <h2>🎯 Mini-quiz</h2>
+    <p class="intro">Coche toutes les bonnes réponses de chaque question, puis clique sur « Vérifier ». Une question juste se verrouille en vert ✅</p>
+    <div id="quizBody"></div>
+    <div class="quiz-foot">
+      <button class="btn-reset" id="resetBtn">↺ Recommencer</button>
+      <span class="score" id="scoreTxt"></span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const QUIZ=[
+  {q:"Une variable aléatoire réelle…",
+   opts:[
+     {t:"associe un nombre à chaque issue d'une expérience aléatoire",ok:true},
+     {t:"décrit le résultat numérique d'une expérience aléatoire",ok:true},
+     {t:"est toujours un nombre négatif",ok:false},
+   ]},
+  {q:"La loi de probabilité d'une variable aléatoire…",
+   opts:[
+     {t:"associe à chaque valeur sa probabilité",ok:true},
+     {t:"a une somme des probabilités égale à 1",ok:true},
+     {t:"a une somme des probabilités égale à 0",ok:false},
+   ]},
+  {q:"L'espérance E(X)…",
+   opts:[
+     {t:"se calcule par x₁p₁ + x₂p₂ + … + xₙpₙ",ok:true},
+     {t:"représente la valeur moyenne attendue",ok:true},
+     {t:"est égale à la plus grande valeur de X",ok:false},
+   ]},
+  {q:"Dans une épreuve de Bernoulli…",
+   opts:[
+     {t:"il y a exactement deux issues : succès et échec",ok:true},
+     {t:"on code le succès par 1 et l'échec par 0",ok:true},
+     {t:"il y a trois issues possibles",ok:false},
+   ]},
+  {q:"L'espérance d'une épreuve de Bernoulli de paramètre p vaut…",
+   opts:[
+     {t:"p",ok:true},
+     {t:"1 − p",ok:false},
+     {t:"0",ok:false},
+   ]},
+  {q:"Deux épreuves indépendantes A et B. P(A ∩ B) = ?",
+   opts:[
+     {t:"p × q  (on multiplie le long des branches)",ok:true},
+     {t:"p + q",ok:false},
+     {t:"p − q",ok:false},
+   ]},
+  {q:"Un schéma de Bernoulli, c'est…",
+   opts:[
+     {t:"répéter plusieurs fois la même épreuve de Bernoulli",ok:true},
+     {t:"des épreuves identiques et indépendantes",ok:true},
+     {t:"des épreuves toutes différentes les unes des autres",ok:false},
+   ]},
+];
+const body=document.getElementById('quizBody');
+const scoreTxt=document.getElementById('scoreTxt');
+let solved=new Array(QUIZ.length).fill(false);
+function build(){
+  body.innerHTML='';solved=new Array(QUIZ.length).fill(false);
+  QUIZ.forEach((g,gi)=>{
+    const div=document.createElement('div');div.className='qgroup';div.id='g'+gi;
+    let html='<div class="q">'+(gi+1)+'. '+g.q+'</div><div class="multi">Plusieurs réponses possibles</div>';
+    g.opts.forEach((o,oi)=>{html+='<label class="opt" data-g="'+gi+'" data-o="'+oi+'"><input type="checkbox" data-g="'+gi+'" data-o="'+oi+'"><span>'+o.t+'</span></label>';});
+    html+='<button class="btn-check" data-g="'+gi+'">Vérifier</button><div class="fb" id="fb'+gi+'"></div>';
+    div.innerHTML=html;body.appendChild(div);
+  });
+  body.querySelectorAll('.opt input').forEach(cb=>{cb.addEventListener('change',()=>{cb.closest('.opt').classList.toggle('picked',cb.checked);});});
+  body.querySelectorAll('.btn-check').forEach(b=>{b.addEventListener('click',()=>check(parseInt(b.dataset.g)));});
+  updateScore();
+}
+function check(gi){
+  if(solved[gi])return;
+  const g=QUIZ[gi];const grp=document.getElementById('g'+gi);const fb=document.getElementById('fb'+gi);
+  let allCorrect=true;
+  g.opts.forEach((o,oi)=>{const lab=grp.querySelector('.opt[data-o="'+oi+'"]');if(lab.querySelector('input').checked!==o.ok)allCorrect=false;});
+  if(allCorrect){
+    solved[gi]=true;grp.classList.remove('ko');grp.classList.add('ok');
+    fb.className='fb win';fb.textContent='✅ Bravo, c\'est juste !';
+    g.opts.forEach((o,oi)=>{const lab=grp.querySelector('.opt[data-o="'+oi+'"]');lab.classList.add('locked');lab.querySelector('input').disabled=true;if(o.ok)lab.classList.add('reveal-good');});
+    grp.querySelector('.btn-check').disabled=true;
+  }else{grp.classList.add('ko');fb.className='fb retry';fb.textContent='❌ Pas encore… revois tes cases et réessaie.';}
+  updateScore();
+  if(!allCorrect)grp.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function updateScore(){const n=solved.filter(Boolean).length;scoreTxt.textContent=(n===QUIZ.length)?('🎉 '+n+'/'+QUIZ.length+' — parfait, tout est maîtrisé !'):(n+'/'+QUIZ.length+' question(s) réussie(s)');}
+document.getElementById('resetBtn').addEventListener('click',build);
+build();
+</script>
+</body>
+</html>
