@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 6e S1 J1 · Le Corbeau et le Renard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   3e · Semaine 8 · Jour 3 (MERCREDI)
+   Couleur du jour : #8dc63f / #3d7a10 / #f0faeb / #b5e08a
+   ============================================================ */
+:root{
+  --jour:        #8dc63f;   /* couleur principale du jour */
+  --jour-fonce:  #3d7a10;   /* version foncée */
+  --jour-clair:  #f0faeb;   /* fond très clair */
+  --jour-pale:   #b5e08a;   /* version pâle */
+
+  --bg:          #fffdf7;   /* fond général clair Pazapa */
+  --dark:        #1a1f2e;   /* encart game sombre */
+  --dark-2:      #232a3d;
+  --vert:        #22c55e;
+  --vert-neon:   #4ade80;
+  --rouge:       #ef4444;
+  --txt:         #2b2b2b;
+  --gris:        #8b8b8b;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  padding: 20px 16px 50px;
+}
+
+/* ====== BULLES STATIQUES DE FOND ======
+   - nettes (pas de blur), opacité douce, bulle rose retirée */
+.bulle{ position:fixed; border-radius:50%; opacity:.32; z-index:0; pointer-events:none; }
+.bulle-jaune  { width:200px; height:200px; background:#ffd84d; top:-60px;   right:-50px; }
+.bulle-jour   { width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-verte  { width:150px; height:150px; background:#9be7a5; top:45%;     right:-70px; }
+
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; }
+
+/* ====================== HEADER ====================== */
+.header{ text-align:center; margin-bottom:22px; }
+
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px rgba(141,198,63,.4);
+  margin-bottom:12px;
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+
+.semaine{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px;
+  color:var(--gris); text-transform:uppercase; margin-bottom:6px;
+}
+.titre{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size:2.3rem; line-height:1.1; color:var(--txt); margin-bottom:6px;
+}
+.titre .accent{ color:var(--jour); }
+.sous-titre{
+  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px;
+  color:var(--gris); margin-bottom:16px;
+}
+.sous-titre code{ color:var(--jour-fonce); font-weight:700; }
+
+.badge-revision{
+  display:inline-block;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:9px 22px; border-radius:24px;
+  box-shadow:0 4px 14px rgba(141,198,63,.45);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1);   box-shadow:0 4px 14px rgba(141,198,63,.45); }
+  50%    { transform:scale(1.05);box-shadow:0 6px 22px rgba(141,198,63,.7); }
+}
+
+/* ================ ENCART GAME (fond clair dys-friendly) ================ */
+.game{
+  background: #fff;
+  border:2px solid var(--jour);
+  border-radius:18px;
+  padding:18px 20px 16px;
+  margin-bottom:24px;
+  box-shadow:0 4px 16px rgba(141,198,63,.18);
+}
+.game-label{
+  font-family:'Orbitron',sans-serif; font-size:.66rem; font-weight:700;
+  letter-spacing:2px; color:var(--jour-fonce); margin-bottom:12px;
+}
+
+/* étoiles */
+.etoiles{ text-align:center; margin-bottom:18px; font-size:1.55rem; letter-spacing:8px; }
+.etoiles .star{ color:#cdd9c2; transition:.3s; display:inline-block; }
+.etoiles .star.on{
+  color:var(--jour);
+  animation: pop .5s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+
+/* scoreboard */
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.score-col{
+  background: #f5faef;
+  border:1.5px solid #e0ecd2;
+  border-radius:12px; padding:12px 6px; text-align:center;
+}
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.6rem; line-height:1; }
+.score-col.reussis  { border-color:#9be7a5; }
+.score-col.reussis  .score-num{ color:#157f3a; }
+.score-col.restants { border-color:var(--jour-pale); }
+.score-col.restants .score-num{ color:var(--jour-fonce); }
+.score-col.erreurs  { border-color:#f5b5b5; }
+.score-col.erreurs  .score-num{ color:#c0392b; }
+.score-lbl{
+  font-family:'Orbitron',sans-serif; font-size:.6rem; font-weight:700;
+  letter-spacing:1.5px; color:#7a7a7a; margin-top:6px; text-transform:uppercase;
+}
+
+/* barre XP */
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span:first-child{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:1.5px; color:var(--jour-fonce);
+}
+.xp-head span:last-child{
+  font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; color:var(--jour-fonce);
+}
+.xp-bar{ height:9px; background:#e6f0da; border-radius:8px; overflow:hidden; }
+.xp-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--jour-fonce), var(--jour), #f9c0bb);
+  border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1);
+}
+.defi-count{
+  text-align:center; margin-top:12px;
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:700;
+  letter-spacing:2px; color:#7a7a7a;
+}
+
+/* ================== CARD EXERCICE ================== */
+.card{
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
+}
+.rainbow{
+  height:6px;
+  background:linear-gradient(90deg,#ff5e5e,#8dc63f,#3ab5d8,#3ab5d8,#a884ff,#ff5e5e);
+  background-size:300% 100%;
+  animation: slide 4s linear infinite;
+}
+@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+
+.card-body{ padding:22px 24px 24px; }
+
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:10px; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--txt); }
+.type-badge{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; font-weight:700;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  padding:5px 11px; border-radius:14px; border:1px solid var(--jour-pale);
+  white-space:nowrap;
+}
+
+/* encart énoncé : FOND CLAIR (dys-friendly) */
+.texte-fable{
+  background:var(--jour-clair);
+  border:2px solid var(--jour);
+  border-radius:14px;
+  padding:18px 18px;
+  margin-bottom:16px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(141,198,63,.12);
+}
+.texte-fable .ft-titre{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1px; color:var(--jour-fonce); margin-bottom:10px;
+}
+.texte-fable .ft-expr{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem;
+  color:var(--jour-fonce); letter-spacing:1px;
+}
+
+/* style "blocs Scratch" : pseudo-code lisible */
+.scratch-script{
+  display:inline-block; text-align:left;
+  background:#fff; border:1.5px solid var(--jour-pale);
+  border-radius:10px; padding:12px 14px;
+  font-family:'Courier New', Consolas, monospace; font-size:.95rem;
+  line-height:1.55; color:#2b2b2b;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  white-space:pre;
+}
+.scratch-script .bloc{
+  display:inline-block; padding:1px 7px; margin:1px 1px;
+  border-radius:5px; font-weight:bold; color:#fff;
+}
+.scratch-script .b-mouv{ background:#4c97ff; }   /* mouvement bleu */
+.scratch-script .b-ctrl{ background:#ffab19; }   /* contrôle orange */
+.scratch-script .b-var { background:#ff8c1a; }   /* variables orange-rouge */
+.scratch-script .b-op  { background:#59c059; }   /* opérateurs vert */
+.scratch-script .b-look{ background:#9966ff; }   /* apparence violet */
+.scratch-script .b-pen { background:#0fbd8c; }   /* stylo vert-bleu */
+.scratch-script .indent{ padding-left:24px; }
+
+/* zone figure SVG (pour les questions de tracé) */
+.scratch-figure{
+  display:flex; justify-content:center; align-items:center;
+  margin-top:8px;
+}
+.scratch-figure svg{ max-width:160px; height:auto; }
+
+.cursor{
+  display:inline-block; width:3px; height:1.5rem; background:var(--jour-fonce);
+  margin-left:4px; vertical-align:-4px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink{ 0%,50%{ opacity:1; } 51%,100%{ opacity:0; } }
+
+.question-txt{
+  font-size:1.05rem; font-weight:bold; color:var(--txt);
+  margin-bottom:16px; line-height:1.5;
+}
+
+/* choix QCM */
+.choix{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+.choix-btn{
+  text-align:left; font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700;
+  padding:14px 16px; border:2px solid #e8e2d4; background:#fff;
+  border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt);
+  display:flex; align-items:center; gap:11px;
+}
+.choix-btn .choix-content{ flex:1; }
+.choix-btn .choix-content svg{ max-width:140px; max-height:60px; vertical-align:middle; margin-right:10px; }
+.choix-btn .lettre{
+  flex-shrink:0; width:28px; height:28px; border-radius:50%;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.85rem;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--jour-pale);
+}
+.choix-btn sup{ font-size:.7rem; }
+.choix-btn:hover:not(.locked){ border-color:var(--jour); background:var(--jour-clair); }
+.choix-btn.selected{
+  border-color:var(--jour); background:var(--jour-clair);
+  box-shadow:0 0 0 3px rgba(141,198,63,.25);
+}
+.choix-btn.selected .lettre{ background:var(--jour); color:#fff; }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{
+  border-color:var(--vert); background:#e7faec;
+}
+.choix-btn.good .lettre{ background:var(--vert); color:#fff; }
+.choix-btn.bad{
+  border-color:var(--rouge); background:#fdeaea;
+}
+.choix-btn.bad .lettre{ background:var(--rouge); color:#fff; }
+
+/* boutons */
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 4px; }
+.btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:11px 18px; border:none; border-radius:10px;
+  cursor:pointer; transition:transform .12s; color:#fff; position:relative;
+}
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-indice{  background:#3ab5d8; }
+.btn-suivant{ background:var(--jour); color:#3a2c00; }
+
+.btn-valider:not(:disabled){ animation: neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled){  animation: neon-bleu 1.4s ease-in-out infinite; }
+.btn-suivant:not(:disabled){ animation: neon-jour 1.4s ease-in-out infinite; }
+
+@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5);}  50%{ box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
+@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(141,198,63,.5);} 50%{ box-shadow:0 0 18px rgba(141,198,63,.95);} }
+
+.btn:disabled{
+  background:#d8d8d8 !important; color:#fff !important;
+  cursor:not-allowed; animation:none !important; box-shadow:none !important;
+}
+
+/* indice */
+.indice-box{
+  display:none; margin-top:14px; padding:13px 16px;
+  background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px;
+  font-size:.9rem; color:#1a6e88;
+}
+.indice-box.show{ display:block; animation: pop .35s ease; }
+
+/* feedback */
+.feedback{ display:none; margin-top:16px; padding:14px 16px; border-radius:10px; font-weight:bold; font-size:1rem; }
+.feedback.show{ display:block; animation: pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{  background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{  background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+
+/* correction */
+.correction{
+  display:none; margin-top:14px; padding:15px 18px;
+  background:#fff8e6; border:1px dashed var(--jour); border-radius:10px;
+  font-size:.92rem; color:#5a4500; line-height:1.6;
+}
+.correction.show{ display:block; animation: pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+
+/* navigation */
+.nav{ display:flex; justify-content:space-between; margin-top:20px; }
+.nav button{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:500;
+  letter-spacing:.5px; padding:9px 16px; border-radius:8px;
+  border:1px solid #ddd; background:#f7f7f7; color:#888; cursor:pointer; transition:.15s;
+}
+.nav button:not(:disabled):hover{ background:#eee; color:#555; }
+.nav button:disabled{ opacity:.4; cursor:not-allowed; }
+
+/* +25 XP flottant */
+.xp-pop{
+  position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5);
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3rem;
+  color:var(--jour); text-shadow:0 0 20px var(--jour), 0 4px 10px rgba(0,0,0,.3);
+  z-index:50; opacity:0; pointer-events:none;
+}
+.xp-pop.go{ animation: xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
+  25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); }
+  70%{ opacity:1; transform:translate(-50%,-80%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); }
+}
+
+/* ================= ÉCRAN RÉSULTATS ================= */
+.results{ display:none; }
+.results.show{ display:block; animation: pop .5s ease; }
+.results .mission{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.7rem;
+  text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px;
+}
+.results .big-score{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3.4rem;
+  text-align:center; color:var(--jour);
+  text-shadow:0 0 16px rgba(141,198,63,.5); margin:8px 0;
+}
+.results .res-stars{ text-align:center; font-size:1.7rem; letter-spacing:5px; color:var(--jour); margin-bottom:10px; }
+.results .gg{
+  text-align:center; font-family:'Orbitron',sans-serif; font-size:.88rem;
+  color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:20px;
+}
+.recap{ background:#faf7ef; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
+.recap-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:.86rem; gap:10px;
+}
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; }
+.recap-item .st{ font-size:1.1rem; flex-shrink:0; }
+.btn-rejouer{
+  display:block; width:100%;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px;
+  padding:14px; border:none; border-radius:12px; color:#3a2c00;
+  background:var(--jour); cursor:pointer;
+  animation: neon-jour 1.4s ease-in-out infinite;
+}
+.btn-rejouer:active{ transform:scale(.97); }
+
+/* ========== BOUTON SCORE FINAL (mode liste) ========== */
+.btn-score-final{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem;
+  letter-spacing:1.5px; padding:16px 32px;
+  border:2px solid var(--jour); border-radius:14px;
+  background:#fff; color:var(--gris);
+  cursor:not-allowed; transition:all .25s;
+  opacity:.55;
+}
+.btn-score-final:not(:disabled){
+  background:linear-gradient(135deg, var(--jour) 0%, #fff8d0 50%, var(--jour) 100%);
+  background-size:200% 100%;
+  color:#3a2c00; cursor:pointer; opacity:1;
+  border-color:var(--jour-fonce);
+  animation: shine-final 2s linear infinite, pulse-final 1.6s ease-in-out infinite;
+  box-shadow:0 6px 20px rgba(141,198,63,.4);
+}
+.btn-score-final:not(:disabled):hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(141,198,63,.5);
+}
+.btn-score-final:not(:disabled):active{
+  transform:translateY(0) scale(.97);
+}
+@keyframes shine-final{
+  0%{ background-position:0% 0; }
+  100%{ background-position:200% 0; }
+}
+@keyframes pulse-final{
+  0%,100%{ box-shadow:0 6px 20px rgba(141,198,63,.4); }
+  50%    { box-shadow:0 8px 28px rgba(141,198,63,.7); }
+}
+.hint-score{
+  font-family:'Orbitron',sans-serif; font-size:.7rem;
+  letter-spacing:1px; color:var(--gris);
+  margin-top:8px; text-transform:uppercase;
+  transition:opacity .3s;
+}
+.hint-score.hidden{ opacity:0; }
+</style>
+</head>
+<body>
+
+<!-- bulles statiques de fond -->
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+
+<div class="wrap">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 3ÈME
+    </div>
+    <div class="semaine">Semaine 8 – Jour 3</div>
+    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre">🔢 Fractions & PPCM · 6 challenges</div>
+    <div class="badge-revision">▶ DÉFI BREVET 3ÈME</div>
+  </div>
+
+  <!-- ===== ENCART GAME (fond clair) ===== -->
+  <div class="game">
+    <div class="game-label">▶ DÉFI BREVET 3ÈME</div>
+
+    <div class="etoiles" id="etoiles"></div>
+
+    <div class="scoreboard">
+      <div class="score-col reussis">
+        <div class="score-num" id="sc-reussis">0</div>
+        <div class="score-lbl">△ Réussis</div>
+      </div>
+      <div class="score-col restants">
+        <div class="score-num" id="sc-restants">6</div>
+        <div class="score-lbl">◆ Restants</div>
+      </div>
+      <div class="score-col erreurs">
+        <div class="score-num" id="sc-erreurs">0</div>
+        <div class="score-lbl">△ Erreurs</div>
+      </div>
+    </div>
+
+    <div class="xp-head">
+      <span>▶ XP PROGRESS</span>
+      <span id="xp-pct">0 %</span>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+
+    <div class="defi-count" id="defi-count">6 DÉFIS À RÉSOUDRE</div>
+  </div>
+
+  <!-- ===== TOUS LES DÉFIS (générés par JS) ===== -->
+  <div id="defis-container"></div>
+
+  <!-- ===== BOUTON FINAL ===== -->
+  <div style="margin: 24px 0 10px; text-align:center;">
+    <button class="btn-score-final" id="btn-score-final" disabled>
+      🏆 VOIR MON SCORE FINAL
+    </button>
+    <div class="hint-score" id="hint-score">Termine les 6 défis pour débloquer ton score final</div>
+  </div>
+
+  <!-- ===== ÉCRAN RÉSULTATS ===== -->
+  <div class="card results" id="results-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">// MISSION ACCOMPLIE</div>
+      <div class="big-score" id="res-score">0 / 6</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg">// GG — validé !</div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" id="btn-rejouer">▶ NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- +25 XP flottant -->
+<div class="xp-pop" id="xp-pop">+25 XP !</div>
+
+<script>
+/* =========================================================
+   DONNÉES DES 6 DÉFIS — Fractions & PPCM (Brevet 3e)
+   Inspiré de Mathalea : "Simplifier des fractions à l'aide des nombres premiers"
+   et "Résoudre des problèmes de conjonction de phénomènes" (PPCM).
+   Suite logique de S8J2 (décomposition en facteurs premiers).
+   ========================================================= */
+const DEFIS = [
+  {
+    titre:"Fraction irréductible",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
+       + '🔢 Une fraction est dite <b>irréductible</b> quand on ne peut plus la simplifier (PGCD numérateur/dénominateur = 1).<br>'
+       + 'Parmi ces 4 fractions, lesquelles sont irréductibles ?'
+       + '</div>'
+       + '<div style="margin-top:6px;"><div style="display:flex; justify-content:center; gap:18px; margin:10px 0; font-family:Orbitron,sans-serif;"><div style="text-align:center; padding:8px 14px; background:#fff; border:2px solid #b5e08a; border-radius:10px;"><div style="font-size:1.6rem; font-weight:900; color:#3d7a10;">3</div><div style="height:2px; background:#3d7a10; margin:2px 0;"></div><div style="font-size:1.6rem; font-weight:900; color:#3d7a10;">5</div></div><div style="text-align:center; padding:8px 14px; background:#fff; border:2px solid #b5e08a; border-radius:10px;"><div style="font-size:1.6rem; font-weight:900; color:#3d7a10;">4</div><div style="height:2px; background:#3d7a10; margin:2px 0;"></div><div style="font-size:1.6rem; font-weight:900; color:#3d7a10;">6</div></div><div style="text-align:center; padding:8px 14px; background:#fff; border:2px solid #b5e08a; border-radius:10px;"><div style="font-size:1.6rem; font-weight:900; color:#3d7a10;">7</div><div style="height:2px; background:#3d7a10; margin:2px 0;"></div><div style="font-size:1.6rem; font-weight:900; color:#3d7a10;">9</div></div><div style="text-align:center; padding:8px 14px; background:#fff; border:2px solid #b5e08a; border-radius:10px;"><div style="font-size:1.6rem; font-weight:900; color:#3d7a10;">8</div><div style="height:2px; background:#3d7a10; margin:2px 0;"></div><div style="font-size:1.6rem; font-weight:900; color:#3d7a10;">10</div></div></div></div>',
+    question:"Quelles sont les deux fractions IRRÉDUCTIBLES ?",
+    choices:[
+      "3/5 et 7/9",
+      "3/5 et 4/6",
+      "4/6 et 8/10",
+      "Aucune n\'est irréductible"
+    ],
+    correct:0,
+    indice:"Une fraction est irréductible quand numérateur et dénominateur n\'ont aucun diviseur commun (sauf 1). Pour 4/6, on peut diviser haut et bas par 2 (donc PAS irréductible).",
+    correction:"<b>3/5</b> : 3 et 5 n\'ont aucun diviseur commun (PGCD = 1) → irréductible.<br><b>7/9</b> : 7 (premier) et 9 = 3² n\'ont aucun diviseur commun → irréductible.<br>4/6 = 2/3 et 8/10 = 4/5 sont simplifiables, donc <b>pas</b> irréductibles."
+  },
+  {
+    titre:"Simplifier 36/60",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
+       + '🔢 On veut simplifier la fraction <b>36/60</b>. On utilise les décompositions :'
+       + '</div>'
+       + '<div style="margin-top:6px;"><div style="display:flex; justify-content:center; gap:30px; margin:10px 0; font-family:Orbitron,sans-serif;"><div style="text-align:center;"><div style="font-size:1.8rem; font-weight:900; color:#3d7a10;">36</div><div style="font-size:.8rem; color:#3d7a10; margin-top:2px;">= 2² × 3²</div></div><div style="font-size:2rem; color:#888; align-self:center;">/</div><div style="text-align:center;"><div style="font-size:1.8rem; font-weight:900; color:#3d7a10;">60</div><div style="font-size:.8rem; color:#3d7a10; margin-top:2px;">= 2² × 3 × 5</div></div></div></div>',
+    question:"Quelle est la forme irréductible de 36/60 ?",
+    choices:[
+      "9/15",
+      "6/10",
+      "3/5",
+      "2/3"
+    ],
+    correct:2,
+    indice:"36 = 2² × 3² et 60 = 2² × 3 × 5. Repère les facteurs COMMUNS au numérateur et au dénominateur (2² et 3) : tu peux les SIMPLIFIER en haut et en bas.",
+    correction:"36 = 2² × 3 × 3 et 60 = 2² × 3 × 5. Les facteurs communs sont 2² et 3 ; on les simplifie :<br>36/60 = (<s>2²</s> × <s>3</s> × 3) / (<s>2²</s> × <s>3</s> × 5) = <b>3/5</b>.<br>(9/15 et 6/10 sont des écritures intermédiaires non encore réduites.)"
+  },
+  {
+    titre:"Simplifier 84/126",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
+       + '🔢 On donne : <b>84 = 2² × 3 × 7</b> et <b>126 = 2 × 3² × 7</b>.<br>Rends la fraction 84/126 irréductible.'
+       + '</div>'
+       + '<div style="margin-top:6px;"><div style="display:flex; justify-content:center; margin:8px 0;"><div style="text-align:center; padding:14px 22px; background:#fff; border:2px solid #b5e08a; border-radius:12px;"><div style="font-size:2rem; font-weight:900; color:#3d7a10; font-family:Orbitron,sans-serif;">84</div><div style="height:3px; background:#3d7a10; margin:4px 0; width:60px;"></div><div style="font-size:2rem; font-weight:900; color:#3d7a10; font-family:Orbitron,sans-serif;">126</div></div></div></div>',
+    question:"Quelle est la forme irréductible de 84/126 ?",
+    choices:[
+      "12/18",
+      "14/21",
+      "2/3",
+      "4/6"
+    ],
+    correct:2,
+    indice:"Cherche les facteurs COMMUNS à 84 et 126 dans leurs décompositions. Le PGCD est 2 × 3 × 7 = 42. Tu peux donc diviser haut et bas par 42.",
+    correction:"PGCD(84, 126) = 2 × 3 × 7 = 42 (on prend les facteurs communs aux deux décompositions).<br>84/126 = (84 ÷ 42) / (126 ÷ 42) = <b>2/3</b>.<br>(12/18 et 14/21 ne sont que des étapes — pas encore irréductibles. 4/6 ≠ 2/3 / 84/126 ≠ 4/6.)"
+  },
+  {
+    titre:"Vocabulaire — PPCM",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '🔢 <b>Définition :</b> Le <b>PPCM</b> de deux entiers est le <b>P</b>lus <b>P</b>etit nombre <b>C</b>ommun à leurs deux listes de <b>M</b>ultiples (autre que 0).<br>'
+       + 'Exemple : multiples de 4 → 4, 8, <b>12</b>, 16, 20… ; multiples de 6 → 6, <b>12</b>, 18, 24…'
+       + '</div>',
+    question:"Quel est le PPCM de 4 et 6 ?",
+    choices:[
+      "PPCM(4, 6) = 2 (le plus petit diviseur commun)",
+      "PPCM(4, 6) = 12",
+      "PPCM(4, 6) = 24 (4 × 6)",
+      "PPCM(4, 6) = 10 (4 + 6)"
+    ],
+    correct:1,
+    indice:"Liste les multiples de 4 et de 6, puis trouve le plus PETIT qui apparaît dans les deux listes.",
+    correction:"Multiples de 4 : 4, 8, <b>12</b>, 16…<br>Multiples de 6 : 6, <b>12</b>, 18…<br>Le plus petit nombre commun aux deux listes est <b>12</b>. Donc PPCM(4, 6) = 12. (Attention : 4 × 6 = 24 fonctionne mais n\'est PAS le plus petit.)"
+  },
+  {
+    titre:"PPCM via décomposition",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
+       + '🔢 On peut calculer le PPCM avec les décompositions en facteurs premiers.<br>'
+       + 'Règle : on prend TOUS les facteurs premiers présents, chacun à sa plus grande puissance.<br>'
+       + 'Données : <b>20 = 2² × 5</b> et <b>12 = 2² × 3</b>.'
+       + '</div>',
+    question:"Quel est le PPCM de 20 et 12 ?",
+    choices:[
+      "PPCM = 4 (le PGCD)",
+      "PPCM = 60",
+      "PPCM = 240 (20 × 12)",
+      "PPCM = 30"
+    ],
+    correct:1,
+    indice:"Prends chaque facteur premier à sa plus grande puissance : 2² (présent dans les deux), 3 (de 12) et 5 (de 20). Multiplie le tout.",
+    correction:"On prend chaque facteur premier à sa plus grande puissance :<br>• 2² (présent dans les deux à la puissance 2)<br>• 3 (présent dans 12)<br>• 5 (présent dans 20)<br>PPCM = 2² × 3 × 5 = 4 × 3 × 5 = <b>60</b>. (60 est bien multiple de 20 ET de 12.)"
+  },
+  {
+    titre:"Problème concret",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '🔢 <b>Situation :</b> À un arrêt de bus, deux lignes passent à intervalle régulier :<br>'
+       + '• La ligne A passe toutes les <b>8 minutes</b>.<br>'
+       + '• La ligne B passe toutes les <b>12 minutes</b>.<br>'
+       + 'Les deux bus viennent de passer en même temps à 8h00.'
+       + '</div>',
+    question:"Dans combien de minutes les deux bus se croiseront-ils à nouveau ?",
+    choices:[
+      "Toutes les 4 minutes (PGCD)",
+      "Toutes les 20 minutes (8 + 12)",
+      "Toutes les 24 minutes (PPCM)",
+      "Toutes les 96 minutes (8 × 12)"
+    ],
+    correct:2,
+    indice:"Cherche le plus petit nombre qui est à la fois multiple de 8 ET de 12 : c\'est le PPCM. Décompose 8 = 2³ et 12 = 2² × 3.",
+    correction:"On cherche le PPCM de 8 et 12 (« en même temps » = à un instant qui est multiple des deux périodes).<br>8 = 2³ et 12 = 2² × 3. PPCM = 2³ × 3 = <b>24 minutes</b>.<br>Les deux bus se recroiseront à 8h24, 8h48, etc."
+  }
+];
+
+const TOTAL = DEFIS.length;
+
+/* ===================== ÉTAT (mode liste) ===================== */
+/*
+   Mode "tout sur une page" : on génère 6 cards et chacune a son état propre.
+   etat[i] = { validated:bool, correct:bool, picked:int|null, indiceShown:bool }
+*/
+let etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
+let reussis = 0;
+let erreurs = 0;
+
+/* ============== RÉFÉRENCES DOM ============== */
+const $ = id => document.getElementById(id);
+const LETTRES = ['A','B','C','D','E','F'];
+
+/* ============== INIT ÉTOILES ============== */
+function buildStars(containerId){
+  const c = $(containerId); if(!c) return;
+  c.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const s = document.createElement('span');
+    s.className = 'star'; s.textContent = '★';
+    c.appendChild(s);
+  }
+}
+buildStars('etoiles');
+
+/* ============== GÉNÉRATION DES 6 CARDS ============== */
+const container = $('defis-container');
+container.innerHTML = '';
+
+DEFIS.forEach((d, idx) => {
+  const card = document.createElement('div');
+  card.className = 'card defi-card';
+  card.id = 'defi-card-' + idx;
+  card.style.marginBottom = '20px';
+
+  let choicesHTML = '';
+  d.choices.forEach((ch, ci) => {
+    choicesHTML += '<button class="choix-btn" data-idx="'+idx+'" data-ci="'+ci+'">'
+                + '<span class="lettre">'+LETTRES[ci]+'</span>'
+                + '<span class="choix-content">'+ch+'</span>'
+                + '</button>';
+  });
+
+  card.innerHTML =
+    '<div class="rainbow"></div>'
+  + '<div class="card-body">'
+  +   '<div class="card-head">'
+  +     '<div class="defi-num">DÉFI ' + String(idx+1).padStart(2,'0') + '</div>'
+  +     '<div class="type-badge">ARITHMÉTIQUE</div>'
+  +   '</div>'
+  +   '<div class="texte-fable">'
+  +     '<div class="ft-titre">🔢 ' + (d.titre ? d.titre.toUpperCase() : 'DÉFI') + '</div>'
+  +     '<div class="ft-expr">' + d.expr + '</div>'
+  +   '</div>'
+  +   '<div class="question-txt">' + d.question + '</div>'
+  +   '<div class="choix" id="choix-'+idx+'">' + choicesHTML + '</div>'
+  +   '<div class="btns">'
+  +     '<button class="btn btn-valider" id="btn-valider-'+idx+'" disabled>✓ VALIDER</button>'
+  +     '<button class="btn btn-indice"  id="btn-indice-'+idx+'">? INDICE</button>'
+  +   '</div>'
+  +   '<div class="indice-box" id="indice-box-'+idx+'"></div>'
+  +   '<div class="feedback"   id="feedback-'+idx+'"></div>'
+  +   '<div class="correction" id="correction-'+idx+'"></div>'
+  + '</div>';
+
+  container.appendChild(card);
+});
+
+/* ============== ÉVÉNEMENTS sur les choix (délégation) ============== */
+container.addEventListener('click', (e) => {
+  const btn = e.target.closest('.choix-btn');
+  if(btn){
+    const i = parseInt(btn.dataset.idx, 10);
+    const ci = parseInt(btn.dataset.ci, 10);
+    if(etat[i].validated) return;     // figé après validation
+    etat[i].picked = ci;
+    // mise à jour visuelle de la sélection
+    const choixZone = $('choix-'+i);
+    choixZone.querySelectorAll('.choix-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    // activer Valider
+    $('btn-valider-'+i).disabled = false;
+    return;
+  }
+  // Boutons Valider / Indice (délégation aussi)
+  if(e.target.id && e.target.id.startsWith('btn-valider-')){
+    const i = parseInt(e.target.id.split('-').pop(), 10);
+    valider(i);
+  } else if(e.target.id && e.target.id.startsWith('btn-indice-')){
+    const i = parseInt(e.target.id.split('-').pop(), 10);
+    indice(i);
+  }
+});
+
+/* ============== VALIDATION D'UN EXO ============== */
+function valider(i){
+  const e = etat[i];
+  if(e.validated) return;
+  if(e.picked == null) return;
+
+  e.validated = true;
+  e.correct = (e.picked === DEFIS[i].correct);
+  if(e.correct) reussis++;
+  else erreurs++;
+
+  // figer la zone de choix : surligner bon/mauvais
+  const choixZone = $('choix-'+i);
+  choixZone.querySelectorAll('.choix-btn').forEach((b, ci) => {
+    b.disabled = true;
+    b.classList.add('locked');
+    if(ci === DEFIS[i].correct) b.classList.add('good');
+    else if(ci === e.picked)     b.classList.add('bad');
+  });
+
+  // feedback + correction
+  const fb = $('feedback-'+i);
+  if(e.correct){
+    fb.className = 'feedback ok show';
+    fb.innerHTML = '✅ Bonne réponse !';
+    fireXP();
+  } else {
+    fb.className = 'feedback ko show';
+    fb.innerHTML = '❌ Réponse incorrecte. Regarde la correction.';
+  }
+  const corr = $('correction-'+i);
+  corr.className = 'correction show';
+  corr.innerHTML = '<b>📖 Correction :</b> ' + DEFIS[i].correction;
+
+  // désactiver Valider + Indice
+  $('btn-valider-'+i).disabled = true;
+  $('btn-indice-'+i).disabled = true;
+
+  // mise à jour scoreboard
+  updateScoreboard();
+
+  // si tous validés → activer le bouton final (l'utilisateur cliquera pour voir le bilan)
+  const tousValides = etat.every(s => s.validated);
+  if(tousValides){
+    activerBoutonFinal();
+  }
+}
+
+/* ============== ACTIVATION BOUTON FINAL ============== */
+function activerBoutonFinal(){
+  const btn = $('btn-score-final');
+  btn.disabled = false;
+  btn.textContent = '🏆 VOIR MON SCORE FINAL';
+  $('hint-score').classList.add('hidden');
+  // discret rebond visuel à l'activation
+  btn.style.transform = 'scale(1.1)';
+  setTimeout(()=> btn.style.transform = '', 250);
+}
+
+/* ============== INDICE ============== */
+function indice(i){
+  const e = etat[i];
+  if(e.validated) return;
+  const box = $('indice-box-'+i);
+  box.className = 'indice-box show';
+  box.innerHTML = '💡 <b>Indice :</b> ' + DEFIS[i].indice;
+  e.indiceShown = true;
+  $('btn-indice-'+i).disabled = true;
+}
+
+/* ============== SCOREBOARD ============== */
+function updateScoreboard(){
+  $('sc-reussis').textContent = reussis;
+  $('sc-erreurs').textContent = erreurs;
+  $('sc-restants').textContent = TOTAL - reussis - erreurs;
+
+  // étoiles : 1 étoile par exo réussi
+  const stars = document.querySelectorAll('#etoiles .star');
+  stars.forEach((s, k) => s.classList.toggle('on', k < reussis));
+
+  // XP : % de défis validés (réussis OU erreurs)
+  const finis = etat.filter(s => s.validated).length;
+  const pct = Math.round((finis / TOTAL) * 100);
+  $('xp-fill').style.width = pct + '%';
+  $('xp-pct').textContent = pct + ' %';
+
+  // compteur (info)
+  $('defi-count').textContent = finis + ' / ' + TOTAL + ' DÉFIS VALIDÉS';
+}
+
+/* ============== +25 XP FLOTTANT ============== */
+function fireXP(){
+  const p = $('xp-pop');
+  p.classList.remove('go');
+  void p.offsetWidth;
+  p.classList.add('go');
+}
+
+/* ============== ÉCRAN RÉSULTATS FINAL ============== */
+function showResults(){
+  const r = $('results-card');
+  r.classList.add('show');
+
+  $('res-score').textContent = reussis + ' / ' + TOTAL;
+  let stars = '';
+  for(let i=0;i<TOTAL;i++) stars += (i < reussis) ? '★' : '☆';
+  $('res-stars').textContent = stars;
+
+  let msg;
+  const ratio = reussis / TOTAL;
+  if(reussis === TOTAL)        msg = '// PARFAIT — GG, sans-faute ! 🏆';
+  else if(ratio >= 0.75)       msg = '// EXCELLENT — beau score !';
+  else if(ratio >= 0.5)        msg = '// BIEN JOUÉ — continue à t\'entraîner !';
+  else if(reussis > 0)         msg = '// PAS MAL — relis le cours et réessaie !';
+  else                         msg = '// COURAGE — révise et relance !';
+  $('res-msg').textContent = msg;
+
+  let html = '';
+  DEFIS.forEach((d, i) => {
+    html += '<div class="recap-item">'
+         + '<span class="eq">' + (d.titre || 'Défi ' + (i+1)) + '</span>'
+         + '<span class="st">' + (etat[i].correct ? '✅' : '❌') + '</span>'
+         + '</div>';
+  });
+  $('res-recap').innerHTML = html;
+
+  // remonter en haut de la page pour voir le scoreboard final + le récap
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============== REJOUER ============== */
+function rejouer(){
+  // reset état
+  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
+  reussis = 0;
+  erreurs = 0;
+
+  // cacher écran résultats
+  $('results-card').classList.remove('show');
+
+  // reset visuel de chaque card
+  DEFIS.forEach((d, i) => {
+    // choix
+    const choixZone = $('choix-'+i);
+    choixZone.querySelectorAll('.choix-btn').forEach(b => {
+      b.disabled = false;
+      b.classList.remove('selected','good','bad','locked');
+    });
+    // boutons
+    $('btn-valider-'+i).disabled = true;
+    $('btn-indice-'+i).disabled = false;
+    // feedback/correction/indice
+    $('feedback-'+i).className = 'feedback';
+    $('feedback-'+i).innerHTML = '';
+    $('correction-'+i).className = 'correction';
+    $('correction-'+i).innerHTML = '';
+    $('indice-box-'+i).className = 'indice-box';
+    $('indice-box-'+i).innerHTML = '';
+  });
+
+  updateScoreboard();
+
+  // reset bouton final
+  const btnF = $('btn-score-final');
+  btnF.disabled = true;
+  $('hint-score').classList.remove('hidden');
+
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+$('btn-rejouer').addEventListener('click', rejouer);
+$('btn-score-final').addEventListener('click', showResults);
+
+/* ============== INIT ============== */
+updateScoreboard();
+</script>
+</body>
+</html>
