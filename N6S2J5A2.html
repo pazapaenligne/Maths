@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Mission finale</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* COULEUR DU JOUR — VENDREDI (jaune). Titres en #8a6000 (lisible), titres lisibles */
+    :root{--day-color:#f5c518;--day-dark:#8a6000;--day-light:#fffbeb;--day-border:#f5e08a;--day-glow:rgba(245,197,24,.3);}
+    :root{--bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;letter-spacing:.01em;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-bottom:.6rem;}
+    h1{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;line-height:1.2;}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+    .slides-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .slide{display:none;animation:fadeUp .4s ease both;}
+    .slide.active{display:block;position:relative;z-index:2;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem;box-shadow:0 4px 24px rgba(0,0,0,.06);margin-bottom:1rem;position:relative;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--green));}
+
+    .hero{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:center;}
+    .hero-text h2{font-size:1.25rem;font-weight:800;margin-bottom:.6rem;line-height:1.3;}
+    .hero-text p{font-size:.9rem;color:var(--muted);line-height:1.7;}
+    .hero-text .mission-badge{display:inline-block;background:var(--day-light);color:var(--day-dark);font-size:.75rem;font-weight:700;padding:.25rem .7rem;border-radius:6px;margin-bottom:.7rem;border:1.5px solid var(--day-border);}
+
+    .ticket{width:100%;max-width:200px;margin:0 auto;transform:rotate(1.5deg);filter:drop-shadow(0 6px 12px rgba(0,0,0,.18));}
+    .ticket-top{height:7px;background:linear-gradient(135deg,#fff 33.33%,transparent 33.33%) 0 0/12px 7px repeat-x,linear-gradient(-135deg,#fff 33.33%,transparent 33.33%) 0 0/12px 7px repeat-x;}
+    .ticket-bot{height:7px;background:linear-gradient(45deg,#fdf6e3 33.33%,transparent 33.33%) 0 0/12px 7px repeat-x,linear-gradient(-45deg,#fdf6e3 33.33%,transparent 33.33%) 0 0/12px 7px repeat-x;}
+    .ticket-body{background:linear-gradient(180deg,#fffefb 0%,#fdf6e3 100%);padding:9px 13px;font-family:'JetBrains Mono',monospace;color:#2a2a2a;}
+    .ticket-name{text-align:center;margin-bottom:7px;}
+    .ticket-name .t{font-size:.72rem;font-weight:bold;letter-spacing:.06em;color:var(--day-dark);}
+    .ticket-name .s{font-size:.52rem;color:#9a9a9a;margin-top:1px;}
+    .ticket-meta{display:flex;justify-content:space-between;font-size:.52rem;color:#777;border-top:1px dashed #e0cf9a;border-bottom:1px dashed #e0cf9a;padding:3px 0;margin-bottom:6px;}
+    .ticket-li{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:1px;}
+    .ticket-rr{border-top:2px solid #2a2a2a;margin:3px 0 6px;}
+    .ticket-pay{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;font-weight:bold;}
+    .ticket-pay .lab{color:var(--day-dark);}
+    .ticket-pay .amt{background:var(--day-light);border:1.5px dashed var(--day-color);border-radius:4px;padding:1px 8px;color:var(--day-dark);letter-spacing:1px;}
+    .ticket-bc{display:flex;justify-content:center;gap:1px;align-items:flex-end;height:20px;margin-top:8px;}
+    .ticket-bc span{background:#2a2a2a;height:20px;display:block;}
+    .ticket-code{text-align:center;font-size:.52rem;color:#9a9a9a;letter-spacing:.12em;margin-top:2px;}
+    .receipt-mini{width:100%;max-width:175px;margin:0 auto;font-family:'JetBrains Mono',monospace;background:linear-gradient(180deg,#fffefb 0%,#fdf8f0 100%);border-radius:6px;padding:10px 12px;color:#2a2a2a;border:1px solid #efe7d6;}
+    .receipt-mini .sh{text-align:center;font-size:.6rem;font-weight:bold;color:var(--day-dark);margin-bottom:6px;border-bottom:1px dashed #d8cfb8;padding-bottom:4px;}
+    .receipt-mini .rl{display:flex;justify-content:space-between;font-size:.66rem;margin-bottom:3px;}
+    .receipt-mini .rr{border-top:2px solid #2a2a2a;margin:4px 0;}
+    .receipt-mini .ch{display:flex;justify-content:space-between;font-size:.66rem;font-weight:bold;color:var(--day-dark);}
+    .receipt-mini .ch .amt{background:#fff;border:1px dashed var(--day-color);border-radius:3px;padding:0 6px;}
+
+    .warning-box{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:.85rem 1rem;margin:.8rem 0;font-size:.9rem;color:var(--day-dark);line-height:1.8;}
+    .warning-box strong{color:var(--day-dark);}
+    .recall-box{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:10px;padding:.8rem 1rem;margin-bottom:.8rem;font-size:.88rem;color:var(--day-dark);line-height:1.7;}
+
+    /* dictionnaire mots-clés */
+    .dict{width:100%;border-collapse:separate;border-spacing:0 5px;margin:1rem 0;}
+    .dict td{padding:9px 10px;font-size:.84rem;line-height:1.5;}
+    .dict .op{text-align:center;width:26%;background:#fff;border:2px solid var(--day-border);border-radius:8px;}
+    .dict .op .sym{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:900;color:var(--day-dark);}
+    .dict .op .nm{color:var(--muted);font-size:.66rem;}
+    .dict .kw{background:var(--day-light);border:2px solid var(--day-border);border-radius:8px;color:var(--text);}
+
+    .steps4{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.3rem;margin:1rem 0;}
+    .st{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:8px;padding:.5rem .6rem;text-align:center;font-size:.72rem;font-weight:700;color:var(--day-dark);}
+    .st .s{display:block;color:var(--muted);font-size:.6rem;font-weight:400;}
+    .stsep{color:var(--day-color);font-weight:900;font-size:1.1rem;}
+
+    /* mini-parcours */
+    .miniprob{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:.85rem 1rem;margin-bottom:.7rem;font-size:.9rem;line-height:1.6;}
+    .miniprob .q{color:var(--text);}
+    .miniprob .kwhl{background:#fff3c4;border-radius:3px;padding:0 3px;font-weight:700;color:var(--day-dark);}
+    .opts{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-top:.6rem;}
+    .opt{border:2px solid var(--border);border-radius:8px;background:#fff;font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:900;color:var(--day-dark);padding:.4rem 0;cursor:pointer;transition:border-color .15s,background .15s;min-height:2.6rem;}
+    .opt:hover:not(:disabled){border-color:var(--day-color);background:var(--day-light);}
+    .opt.sel{border-color:var(--day-color);background:var(--day-light);}
+    .opt.good{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .opt.bad{border-color:var(--pink);background:#fff0ef;color:#c0392b;}
+    .opt:disabled{cursor:default;}
+
+    .group-block{margin-bottom:1.3rem;}
+    .group-label{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.7rem;}
+    .choice{display:flex;align-items:flex-start;gap:.8rem;padding:.8rem 1rem;border:2px solid var(--border);border-radius:10px;cursor:pointer;font-size:.92rem;line-height:1.6;background:var(--bg);transition:border-color .15s,background .15s;margin-bottom:.5rem;position:relative;z-index:3;}
+    .choice:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+    .choice.selected{border-color:var(--day-color);background:var(--day-light);}
+    .choice.correct-c{border-color:var(--green);background:#f0faeb;cursor:default;}
+    .choice.wrong-c{border-color:var(--pink);background:#fff0ef;cursor:default;opacity:.8;}
+    .choice.locked{cursor:default;}
+    .choice .eq{font-family:'JetBrains Mono',monospace;}
+    .ci{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.78rem;margin-top:.1rem;}
+    .choice.selected .ci{background:var(--day-color);border-color:var(--day-color);color:#1a1d23;}
+    .choice.correct-c .ci{background:var(--green);border-color:var(--green);color:#fff;}
+    .choice.wrong-c .ci{background:var(--pink);border-color:var(--pink);color:#fff;}
+
+    .feedback{margin-top:1rem;padding:.85rem 1rem;border-radius:10px;font-size:.9rem;display:none;line-height:1.7;}
+    .feedback.show{display:block;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-detail{margin-top:.4rem;font-size:.85rem;color:var(--text);}
+
+    .nav-dots{display:flex;justify-content:center;gap:.5rem;margin-bottom:1.2rem;}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .2s;cursor:pointer;}
+    .dot.active{background:var(--day-color);}
+
+    .btn-row{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:1.2rem;position:relative;z-index:3;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:99px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s;min-height:2.7rem;position:relative;z-index:3;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-day{background:var(--day-color);color:#1a1d23;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary{background:var(--day-color);color:#1a1d23;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    .ans-in{width:8rem;text-align:center;font-size:1.2rem;font-weight:900;font-family:'JetBrains Mono',monospace;border:2px solid var(--border);border-radius:8px;background:var(--bg);outline:none;height:2.7rem;}
+    .ans-in:focus{border-color:var(--day-color);}
+    .ans-in.correct{border-color:var(--green);background:#f0faeb;}
+    .ans-in.wrong{border-color:var(--pink);background:#fff0ef;}
+
+    .success-screen{display:none;text-align:center;padding:2rem;}
+    .success-screen.show{display:block;}
+    .success-icon{font-size:3.5rem;margin-bottom:.5rem;}
+    .success-title{font-size:1.5rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:560px){.hero{grid-template-columns:1fr;}.card{padding:1.4rem;}.opts{grid-template-columns:repeat(4,1fr);}}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 2 &ndash; Jour 5</div>
+  <h1>&#127942; Mission <span style="color:var(--day-dark)">finale</span></h1>
+  <p class="subtitle">R&eacute;soudre un probl&egrave;me</p>
+</header>
+
+<div class="nav-dots">
+  <div class="dot active" onclick="goSlide(0)"></div>
+  <div class="dot" id="dot1" onclick="goSlide(1)"></div>
+  <div class="dot" id="dot2" onclick="tryDot(2)"></div>
+  <div class="dot" id="dot3" onclick="tryDot(3)"></div>
+</div>
+
+<div class="slides-wrap">
+
+  <!-- SLIDE 1 : Intro -->
+  <div class="slide active" id="slide-0">
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="hero">
+        <div class="ticket">
+          <div class="ticket-top"></div>
+          <div class="ticket-body">
+            <div class="ticket-name">
+              <div class="t">&#127838; BOULANGERIE AL-BARAKA</div>
+              <div class="s">Pains &middot; Viennoiseries &middot; G&acirc;teaux</div>
+            </div>
+            <div class="ticket-meta"><span>Re&ccedil;u n&deg;084</span><span>08:15</span><span>Merci&nbsp;!</span></div>
+            <div class="ticket-li"><span>Pain complet &times;3</span><span>1,25 &euro;/u</span></div>
+            <div class="ticket-li"><span>G&acirc;teau &times;1</span><span>4,50 &euro;</span></div>
+            <div class="ticket-rr"></div>
+            <div class="ticket-pay"><span class="lab">&Agrave; PAYER</span><span class="amt">?,?? &euro;</span></div>
+            <div class="ticket-bc"><span style="width:2px"></span><span style="width:1px"></span><span style="width:3px"></span><span style="width:1px"></span><span style="width:1px"></span><span style="width:2px"></span><span style="width:3px"></span><span style="width:1px"></span><span style="width:2px"></span><span style="width:1px"></span><span style="width:1px"></span><span style="width:3px"></span><span style="width:2px"></span><span style="width:1px"></span><span style="width:2px"></span></div>
+            <div class="ticket-code">3 760145 008250</div>
+          </div>
+          <div class="ticket-bot"></div>
+        </div>
+        <div class="hero-text">
+          <div class="mission-badge">L&rsquo;&eacute;nigme du jour</div>
+          <h2>Trouver le total &agrave; payer</h2>
+          <p>Yacine ach&egrave;te 3 pains &agrave; 1,25 &euro; et 1 g&acirc;teau &agrave; 4,50 &euro;. Faut-il multiplier, additionner, les deux&nbsp;? Apprends &agrave; choisir les bonnes op&eacute;rations, puis trouve le total.</p>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-day" onclick="goSlide(1)">Commencer la mission &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 : Leçon mots-clés -->
+  <div class="slide" id="slide-1">
+    <div class="card">
+      <div class="card-stripe"></div>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:1rem;">1. Choisir la bonne op&eacute;ration</h2>
+      <div class="warning-box">
+        R&eacute;soudre un probl&egrave;me, c&rsquo;est <strong>traduire</strong> une situation en une <strong>op&eacute;ration</strong>. Je rep&egrave;re d&rsquo;abord les <strong>mots-cl&eacute;s</strong> de l&rsquo;&eacute;nonc&eacute;.
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .2rem;">Les mots-cl&eacute;s et leur op&eacute;ration</p>
+      <table class="dict">
+        <tr><td class="op"><span class="sym">+</span><span class="nm">addition</span></td><td class="kw">en tout &middot; ajouter &middot; total &middot; de plus &middot; ensemble</td></tr>
+        <tr><td class="op"><span class="sym">&minus;</span><span class="nm">soustraction</span></td><td class="kw">reste &middot; enlever &middot; de moins &middot; diff&eacute;rence &middot; rendre</td></tr>
+        <tr><td class="op"><span class="sym">&times;</span><span class="nm">multiplication</span></td><td class="kw">fois &middot; chaque &middot; par &middot; le double &middot; groupes &eacute;gaux</td></tr>
+        <tr><td class="op"><span class="sym">&divide;</span><span class="nm">division</span></td><td class="kw">partager &middot; r&eacute;partir &middot; par personne &middot; combien de fois</td></tr>
+      </table>
+      <div class="steps4">
+        <span class="st">Je lis<span class="s">l&rsquo;&eacute;nonc&eacute;</span></span>
+        <span class="stsep">&rarr;</span>
+        <span class="st">Je rep&egrave;re<span class="s">les mots-cl&eacute;s</span></span>
+        <span class="stsep">&rarr;</span>
+        <span class="st">Je choisis<span class="s">l&rsquo;op&eacute;ration</span></span>
+        <span class="stsep">&rarr;</span>
+        <span class="st">Je calcule<span class="s">et je r&eacute;ponds</span></span>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:.84rem;margin-top:.6rem;">Je termine par une <strong style="color:var(--day-dark)">phrase-r&eacute;ponse</strong> avec l&rsquo;unit&eacute; (&euro;, kg, &eacute;l&egrave;ves&hellip;).</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goSlide(0)">&larr; Retour</button>
+      <button class="btn btn-day" onclick="goSlide(2)">Suite &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 : Mini-parcours +−×÷ -->
+  <div class="slide" id="slide-2">
+    <div class="card">
+      <div class="card-stripe"></div>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:1rem;">2. Entra&icirc;nement : quelle op&eacute;ration&nbsp;?</h2>
+      <p style="color:var(--muted);font-size:.86rem;margin-bottom:1rem;">Pour chaque petit probl&egrave;me, choisis l&rsquo;op&eacute;ration qui correspond au mot-cl&eacute; surlign&eacute;.</p>
+
+      <div class="miniprob" id="m1">
+        <div class="q">Sara ach&egrave;te 6,50 &euro; de pain et 3,20 &euro; de lait. Combien d&eacute;pense-t-elle <span class="kwhl">en tout</span>&nbsp;?</div>
+        <div class="opts">
+          <button class="opt" id="m1o0" onclick="pickM(1,0)">&times;</button>
+          <button class="opt" id="m1o1" onclick="pickM(1,1)">+</button>
+          <button class="opt" id="m1o2" onclick="pickM(1,2)">&divide;</button>
+          <button class="opt" id="m1o3" onclick="pickM(1,3)">&minus;</button>
+        </div>
+        <div class="feedback" id="fb-m1"></div>
+      </div>
+
+      <div class="miniprob" id="m2">
+        <div class="q">Karim a 15 &euro;. Il ach&egrave;te un cahier &agrave; 8,40 &euro;. Combien lui <span class="kwhl">reste</span>-t-il&nbsp;?</div>
+        <div class="opts">
+          <button class="opt" id="m2o0" onclick="pickM(2,0)">&divide;</button>
+          <button class="opt" id="m2o1" onclick="pickM(2,1)">&times;</button>
+          <button class="opt" id="m2o2" onclick="pickM(2,2)">&minus;</button>
+          <button class="opt" id="m2o3" onclick="pickM(2,3)">+</button>
+        </div>
+        <div class="feedback" id="fb-m2"></div>
+      </div>
+
+      <div class="miniprob" id="m3">
+        <div class="q">Un paquet co&ucirc;te 2,50 &euro;. J&rsquo;en ach&egrave;te 4. <span class="kwhl">Chaque</span> paquet est identique&nbsp;: combien au total&nbsp;?</div>
+        <div class="opts">
+          <button class="opt" id="m3o0" onclick="pickM(3,0)">+</button>
+          <button class="opt" id="m3o1" onclick="pickM(3,1)">&divide;</button>
+          <button class="opt" id="m3o2" onclick="pickM(3,2)">&times;</button>
+          <button class="opt" id="m3o3" onclick="pickM(3,3)">&minus;</button>
+        </div>
+        <div class="feedback" id="fb-m3"></div>
+      </div>
+
+      <div class="miniprob" id="m4">
+        <div class="q">On veut <span class="kwhl">partager</span> 18,6 &euro; entre 3 amis, &eacute;quitablement. Combien par personne&nbsp;?</div>
+        <div class="opts">
+          <button class="opt" id="m4o0" onclick="pickM(4,0)">&times;</button>
+          <button class="opt" id="m4o1" onclick="pickM(4,1)">+</button>
+          <button class="opt" id="m4o2" onclick="pickM(4,2)">&minus;</button>
+          <button class="opt" id="m4o3" onclick="pickM(4,3)">&divide;</button>
+        </div>
+        <div class="feedback" id="fb-m4"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goSlide(1)">&larr; Retour</button>
+      <div id="hint-2" style="font-size:.82rem;color:var(--muted);font-family:'JetBrains Mono',monospace;font-style:italic;">R&eacute;ussis les 4 pour continuer &rarr;</div>
+      <button class="btn btn-day" id="btn-next-2" onclick="goSlide(3)" disabled style="display:none;">Suite &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 : Énigme 2 étapes -->
+  <div class="slide" id="slide-3">
+    <div class="card">
+      <div class="card-stripe"></div>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:1rem;">3. R&eacute;sous l&rsquo;&eacute;nigme</h2>
+      <div class="recall-box">
+        <strong>Retour &agrave; l&rsquo;&eacute;nigme :</strong> Yacine ach&egrave;te <strong>3 pains</strong> &agrave; <strong>1,25 &euro;</strong> et <strong>1 g&acirc;teau</strong> &agrave; <strong>4,50 &euro;</strong>. Combien va-t-il payer en tout&nbsp;?
+      </div>
+
+      <div class="group-block" id="g1">
+        <div class="group-label">&Eacute;tape 1 / 3 &middot; Le prix des pains</div>
+        <div class="choice" id="g1c0" onclick="pickG(1,0)"><div class="ci" id="g1i0"></div><span>addition : <span class="eq">3 + 1,25 = 4,25 &euro;</span></span></div>
+        <div class="choice" id="g1c1" onclick="pickG(1,1)"><div class="ci" id="g1i1"></div><span>&laquo; 3 fois le m&ecirc;me prix &raquo; &rarr; multiplication : <span class="eq">3 &times; 1,25 = 3,75 &euro;</span></span></div>
+        <div class="choice" id="g1c2" onclick="pickG(1,2)"><div class="ci" id="g1i2"></div><span>division : <span class="eq">1,25 &divide; 3</span></span></div>
+        <button class="btn btn-primary" id="btn-g1" onclick="validateG(1)" disabled style="margin-top:.7rem;">Valider</button>
+        <div class="feedback" id="fb-g1"></div>
+      </div>
+
+      <div class="group-block" id="g2" style="opacity:.4;pointer-events:none;">
+        <div class="group-label">&Eacute;tape 2 / 3 &middot; Le total &agrave; payer</div>
+        <div class="choice" id="g2c0" onclick="pickG(2,0)"><div class="ci" id="g2i0"></div><span>soustraction : <span class="eq">4,50 &minus; 3,75 = 0,75 &euro;</span></span></div>
+        <div class="choice" id="g2c1" onclick="pickG(2,1)"><div class="ci" id="g2i1"></div><span>&laquo; en tout &raquo; (pains + g&acirc;teau) &rarr; addition : <span class="eq">3,75 + 4,50 = 8,25 &euro;</span></span></div>
+        <div class="choice" id="g2c2" onclick="pickG(2,2)"><div class="ci" id="g2i2"></div><span>multiplication : <span class="eq">3,75 &times; 4,50</span></span></div>
+        <button class="btn btn-primary" id="btn-g2" onclick="validateG(2)" disabled style="margin-top:.7rem;">Valider</button>
+        <div class="feedback" id="fb-g2"></div>
+      </div>
+
+      <div class="group-block" id="g3" style="opacity:.4;pointer-events:none;">
+        <div class="group-label">&Eacute;tape 3 / 3 &middot; &Eacute;cris le total</div>
+        <p style="font-size:.9rem;color:var(--day-dark);font-weight:700;margin-bottom:.6rem;">3,75 + 4,50 = ?</p>
+        <input class="ans-in" id="ans" inputmode="decimal" placeholder="?,?? &euro;"/>
+        <button class="btn btn-primary" id="btn-g3" onclick="validateAns()" style="margin-top:.7rem;display:block;">V&eacute;rifier &check;</button>
+        <div class="feedback" id="fb-g3"></div>
+      </div>
+    </div>
+
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">&#127942;</div>
+      <div class="success-title">&Eacute;nigme r&eacute;solue&nbsp;!</div>
+      <div style="background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:1.2rem;margin:1.2rem auto;max-width:470px;">
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--day-dark);text-transform:uppercase;margin-bottom:.7rem;">Le total &agrave; payer</p>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text);margin:0;line-height:1.8;">3 &times; 1,25 = <strong style="color:var(--day-dark)">3,75 &euro;</strong> (pains)<br>3,75 + 4,50 = <strong style="color:var(--day-dark)">8,25 &euro;</strong> (total)</p>
+        <p style="font-size:.84rem;color:var(--day-dark);margin-top:.8rem;line-height:1.6;">Yacine paie <strong>8,25 &euro;</strong> en tout.</p>
+      </div>
+      <p style="font-size:.9rem;color:var(--muted);line-height:1.7;">Tu as r&eacute;solu l&rsquo;&eacute;nigme : tu as rep&eacute;r&eacute; les mots-cl&eacute;s, choisi les bonnes op&eacute;rations, puis calcul&eacute;.</p>
+      <button class="btn btn-day" onclick="restartAll()" style="margin:1rem auto 0;display:flex;">&#8635; Recommencer</button>
+    </div>
+
+    <div class="btn-row" style="margin-top:.5rem;">
+      <button class="btn btn-ghost" onclick="goSlide(2)">&larr; Retour</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* mini-parcours : position de la bonne opération (boutons mélangés) */
+var MINI = {1:1, 2:2, 3:2, 4:3};
+var miniOk = {};
+var selM = {};
+
+/* énigme : ét1 mult pos1, ét2 addition pos1, ét3 saisie 8,25 */
+var CORRECT_G = {1:1, 2:1};
+var NBG = {1:3, 2:3};
+var selG = {};
+var ANS = '8,25';
+
+function goSlide(n){
+  var slides=document.querySelectorAll('.slide');
+  var dots=document.querySelectorAll('.dot');
+  for(var i=0;i<slides.length;i++){ slides[i].classList.toggle('active', i===n); }
+  for(var j=0;j<dots.length;j++){ dots[j].classList.toggle('active', j===n); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tryDot(n){
+  if(n===2){ goSlide(2); }
+  if(n===3 && allMiniDone()){ goSlide(3); }
+}
+
+/* ---- mini-parcours ---- */
+function pickM(m,i){
+  if(miniOk[m]) return;
+  selM[m]=i;
+  for(var j=0;j<4;j++){ document.getElementById('m'+m+'o'+j).classList.toggle('sel', j===i); }
+  validateM(m);
+}
+function validateM(m){
+  var ok=(selM[m]===MINI[m]);
+  var fb=document.getElementById('fb-m'+m);
+  if(ok){
+    miniOk[m]=true;
+    for(var j=0;j<4;j++){ var b=document.getElementById('m'+m+'o'+j); b.disabled=true; b.classList.remove('sel'); if(j===MINI[m]) b.classList.add('good'); }
+    fb.className='feedback show ok';
+    var why={1:'\u00ab en tout \u00bb : on ajoute. 6,50 + 3,20 = 9,70 \u20ac.',2:'\u00ab reste \u00bb : on enl\u00e8ve. 15 \u2212 8,40 = 6,60 \u20ac.',3:'\u00ab chaque \u00bb (groupes \u00e9gaux) : on multiplie. 2,50 \u00d7 4 = 10 \u20ac.',4:'\u00ab partager \u00bb : on divise. 18,6 \u00f7 3 = 6,20 \u20ac.'};
+    fb.innerHTML='\u2705 '+why[m];
+    checkMiniProgress();
+  } else {
+    for(var k=0;k<4;k++){ document.getElementById('m'+m+'o'+k).classList.remove('sel'); }
+    var bad=document.getElementById('m'+m+'o'+selM[m]); bad.classList.add('bad');
+    fb.className='feedback show ko';
+    fb.innerHTML='\u274C Pas le bon signe. Relis le mot-cl\u00e9 surlign\u00e9 et r\u00e9essaie.';
+    setTimeout(function(){ bad.classList.remove('bad'); fb.className='feedback'; },1100);
+  }
+}
+function allMiniDone(){ return miniOk[1]&&miniOk[2]&&miniOk[3]&&miniOk[4]; }
+function checkMiniProgress(){
+  if(allMiniDone()){
+    var b=document.getElementById('btn-next-2');
+    b.disabled=false; b.style.display='inline-flex';
+    document.getElementById('hint-2').style.display='none';
+  }
+}
+
+/* ---- énigme QCM ---- */
+function pickG(g,i){
+  selG[g]=i;
+  for(var j=0;j<NBG[g];j++){
+    document.getElementById('g'+g+'c'+j).classList.toggle('selected', j===i);
+    document.getElementById('g'+g+'i'+j).textContent=(j===i)?'\u2713':'';
+  }
+  document.getElementById('btn-g'+g).disabled=false;
+}
+function validateG(g){
+  var ok=(selG[g]===CORRECT_G[g]);
+  var fb=document.getElementById('fb-g'+g);
+  fb.className='feedback show '+(ok?'ok':'ko');
+  if(ok){
+    /* verrouille seulement si bonne réponse */
+    for(var j=0;j<NBG[g];j++){
+      var c=document.getElementById('g'+g+'c'+j);
+      c.onclick=null; c.classList.add('locked'); c.classList.remove('selected');
+      if(j===CORRECT_G[g]){ c.classList.add('correct-c'); document.getElementById('g'+g+'i'+j).textContent='\u2713'; }
+    }
+    document.getElementById('btn-g'+g).disabled=true;
+  } else {
+    /* mauvaise réponse : on marque en rouge mais on laisse réessayer */
+    var bad=document.getElementById('g'+g+'c'+selG[g]);
+    bad.classList.add('wrong-c'); bad.classList.remove('selected');
+    document.getElementById('g'+g+'i'+selG[g]).textContent='\u2717';
+    document.getElementById('btn-g'+g).disabled=true;
+    (function(gg){
+      setTimeout(function(){
+        var b=document.getElementById('g'+gg+'c'+selG[gg]);
+        if(b){ b.classList.remove('wrong-c'); document.getElementById('g'+gg+'i'+selG[gg]).textContent=''; }
+        document.getElementById('fb-g'+gg).className='feedback';
+        delete selG[gg];
+      },1400);
+    })(g);
+  }
+  if(g===1){
+    fb.innerHTML=ok ? '\u2705 Oui ! 3 fois le m\u00eame prix = multiplication. 3 \u00d7 1,25 = 3,75 \u20ac.'
+                    : '\u274C Pas le bon choix. Relis le mot-cl\u00e9 et r\u00e9essaie.';
+    if(ok){ setTimeout(function(){ document.getElementById('g2').style.opacity='1'; document.getElementById('g2').style.pointerEvents='auto'; },600); }
+  } else {
+    fb.innerHTML=ok ? '\u2705 Exact ! \u00ab en tout \u00bb = addition. 3,75 + 4,50 = 8,25 \u20ac.'
+                    : '\u274C Pas le bon choix. Le total r\u00e9unit les articles : pense \u00e0 \u00ab en tout \u00bb.';
+    if(ok){ setTimeout(function(){ document.getElementById('g3').style.opacity='1'; document.getElementById('g3').style.pointerEvents='auto'; },600); }
+  }
+}
+function normAns(v){ return (v||'').trim().replace(/\s/g,'').replace('.',',').replace(/eur(o|os)?|\u20ac/gi,'').trim(); }
+function validateAns(){
+  var ok=(normAns(document.getElementById('ans').value)===ANS);
+  document.getElementById('ans').className='ans-in '+(ok?'correct':'wrong');
+  var fb=document.getElementById('fb-g3');
+  fb.className='feedback show '+(ok?'ok':'ko');
+  if(ok){
+    fb.innerHTML='\u2705 Bravo ! 3,75 + 4,50 = 8,25 \u20ac.';
+    document.getElementById('btn-g3').disabled=true;
+    setTimeout(function(){ document.getElementById('success-screen').classList.add('show'); },700);
+  } else {
+    fb.innerHTML='\u274C Pas tout \u00e0 fait. <div class="feedback-detail">Pose 3,75 + 4,50. R\u00e9sultat : 8,25 \u20ac.</div>';
+  }
+}
+
+function restartAll(){
+  goSlide(0);
+  miniOk={}; selM={};
+  for(var m=1;m<=4;m++){ for(var j=0;j<4;j++){ (function(mm,jj){ var b=document.getElementById('m'+mm+'o'+jj); b.disabled=false; b.className='opt'; b.onclick=function(){pickM(mm,jj);}; })(m,j); } document.getElementById('fb-m'+m).className='feedback'; }
+  document.getElementById('btn-next-2').disabled=true;
+  document.getElementById('btn-next-2').style.display='none';
+  document.getElementById('hint-2').style.display='block';
+  var gs=[1,2];
+  for(var k=0;k<gs.length;k++){
+    var g=gs[k]; delete selG[g];
+    for(var jj=0;jj<NBG[g];jj++){
+      (function(gg,j2){ var c=document.getElementById('g'+gg+'c'+j2); c.className='choice'; c.onclick=function(){pickG(gg,j2);}; document.getElementById('g'+gg+'i'+j2).textContent=''; })(g,jj);
+    }
+    document.getElementById('btn-g'+g).disabled=true;
+    document.getElementById('fb-g'+g).className='feedback';
+  }
+  document.getElementById('g2').style.opacity='0.4'; document.getElementById('g2').style.pointerEvents='none';
+  document.getElementById('g3').style.opacity='0.4'; document.getElementById('g3').style.pointerEvents='none';
+  var a=document.getElementById('ans'); a.value=''; a.className='ans-in';
+  document.getElementById('fb-g3').className='feedback';
+  document.getElementById('btn-g3').disabled=false;
+  document.getElementById('success-screen').classList.remove('show');
+}
+</script>
+</body>
+</html>
