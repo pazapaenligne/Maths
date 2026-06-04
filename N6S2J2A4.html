@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – Mission finale</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--day-color:#b94040;--day-dark:#7a1f1f;--day-light:#f7eded;--day-border:#f9c0bb;--day-glow:rgba(185,64,64,.3);}
+    :root{--bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;letter-spacing:.01em;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-bottom:.6rem;}
+    h1{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;line-height:1.2;}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+    .slides-wrap{width:100%;max-width:720px;position:relative;z-index:1;}
+    .slide{display:none;animation:fadeUp .4s ease both;}
+    .slide.active{display:block;position:relative;z-index:2;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem;box-shadow:0 4px 24px rgba(0,0,0,.06);margin-bottom:1rem;position:relative;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--yellow));}
+
+    .hero{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:center;}
+    .hero-text h2{font-size:1.25rem;font-weight:800;margin-bottom:.6rem;line-height:1.3;}
+    .hero-text p{font-size:.9rem;color:var(--muted);line-height:1.7;}
+    .hero-text .mission-badge{display:inline-block;background:var(--day-light);color:var(--day-dark);font-size:.75rem;font-weight:700;padding:.25rem .7rem;border-radius:6px;margin-bottom:.7rem;border:1.5px solid var(--day-border);}
+
+    .receipt-mini{width:100%;max-width:200px;margin:0 auto;font-family:'JetBrains Mono',monospace;background:linear-gradient(180deg,#fffefb 0%,#fdf8f0 100%);border-radius:6px;padding:10px 12px;box-shadow:0 3px 10px rgba(0,0,0,.12);color:#2a2a2a;}
+    .receipt-mini .sh{text-align:center;font-size:.65rem;font-weight:bold;color:var(--day-dark);letter-spacing:.08em;margin-bottom:6px;}
+    .receipt-mini .rl{display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:3px;}
+    .receipt-mini .rr{border-top:2px solid #2a2a2a;margin:4px 0;}
+    .receipt-mini .tt{display:flex;justify-content:space-between;font-size:.78rem;font-weight:bold;color:var(--day-dark);}
+
+    .warning-box{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:.85rem 1rem;margin:.8rem 0;font-size:.9rem;color:var(--day-dark);line-height:1.8;}
+    .warning-box strong{color:var(--day-dark);}
+    .recall-box{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:10px;padding:.8rem 1rem;margin-bottom:.8rem;font-size:.88rem;color:var(--day-dark);line-height:1.7;}
+
+    /* Opération posée : colonnes signe | D | U | , | d | c */
+    .op{display:flex;justify-content:center;margin:1.2rem 0;font-family:'JetBrains Mono',monospace;}
+    .op-grid{display:inline-grid;gap:3px;}
+    .op-line{display:grid;grid-template-columns:1.6rem 2.6rem 2.6rem .8rem 2.6rem 2.6rem;gap:4px;align-items:end;}
+    .op-sign{font-size:1.4rem;font-weight:900;color:var(--day-dark);text-align:center;align-self:center;}
+    .cell{width:2.6rem;height:2.6rem;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;border:2px solid var(--border);border-radius:6px;background:#fff;position:relative;}
+    .cell.given{border-color:var(--day-border);background:var(--day-light);color:var(--day-dark);}
+    .op-comma{display:flex;align-items:flex-end;justify-content:center;font-size:1.4rem;font-weight:900;color:var(--day-color);height:2.6rem;padding-bottom:.3rem;}
+    /* mini-case de retenue / compensation (petit 1) */
+    .carry{width:2.6rem;height:1.3rem;display:flex;align-items:center;justify-content:center;}
+    .carry-in{width:1.3rem;height:1.3rem;text-align:center;font-size:.85rem;font-weight:900;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--day-border);border-radius:4px;background:#fff;color:var(--day-dark);outline:none;padding:0;}
+    .carry-in:focus{border-color:var(--day-color);}
+    .carry-in.correct{border-color:var(--green);background:#f0faeb;}
+    .carry-in.wrong{border-color:var(--pink);background:#fff0ef;}
+    .bar-line{display:grid;grid-template-columns:1.6rem 2.6rem 2.6rem .8rem 2.6rem 2.6rem;gap:4px;}
+    .bar{grid-column:2 / 7;height:3px;background:var(--text);border-radius:2px;margin:3px 0;}
+    .ans{width:2.6rem;height:2.6rem;text-align:center;font-size:1.3rem;font-weight:900;font-family:'JetBrains Mono',monospace;border:2px solid var(--border);border-radius:6px;background:var(--bg);outline:none;}
+    .ans:focus{border-color:var(--day-color);}
+    .ans.correct{border-color:var(--green);background:#f0faeb;}
+    .ans.wrong{border-color:var(--pink);background:#fff0ef;}
+
+    .feedback{margin-top:1rem;padding:.85rem 1rem;border-radius:10px;font-size:.9rem;display:none;line-height:1.7;}
+    .feedback.show{display:block;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-detail{margin-top:.4rem;font-size:.85rem;color:var(--text);}
+
+    .nav-dots{display:flex;justify-content:center;gap:.5rem;margin-bottom:1.2rem;}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .2s;cursor:pointer;}
+    .dot.active{background:var(--day-color);}
+
+    .btn-row{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:1.2rem;position:relative;z-index:3;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:99px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s;min-height:2.7rem;position:relative;z-index:3;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-day{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary{background:var(--day-color);color:#fff;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    .success-screen{display:none;text-align:center;padding:2rem;}
+    .success-screen.show{display:block;}
+    .success-icon{font-size:3.5rem;margin-bottom:.5rem;}
+    .success-title{font-size:1.5rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:560px){.hero{grid-template-columns:1fr;}.card{padding:1.4rem;}.op-line,.bar-line{grid-template-columns:1.4rem 2.2rem 2.2rem .7rem 2.2rem 2.2rem;}.cell,.ans{width:2.2rem;height:2.2rem;font-size:1.2rem;}.carry{width:2.2rem;}}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 2 &ndash; Jour 2</div>
+  <h1>&#127942; Mission <span style="color:var(--day-color)">finale</span></h1>
+  <p class="subtitle">Additionner et soustraire des d&eacute;cimaux</p>
+</header>
+
+<div class="nav-dots">
+  <div class="dot active" onclick="goSlide(0)"></div>
+  <div class="dot" id="dot1" onclick="goSlide(1)"></div>
+  <div class="dot" id="dot2" onclick="tryDot(2)"></div>
+  <div class="dot" id="dot3" onclick="tryDot(3)"></div>
+</div>
+
+<div class="slides-wrap">
+
+  <!-- SLIDE 1 : Intro -->
+  <div class="slide active" id="slide-0">
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="hero">
+        <div class="receipt-mini">
+          <div class="sh">&#129362; EPICERIE DU SOUK</div>
+          <div class="rl"><span>L&eacute;gumes</span><span>12,80 &euro;</span></div>
+          <div class="rl"><span>Fruits</span><span>7,35 &euro;</span></div>
+          <div class="rr"></div>
+          <div class="tt"><span>TOTAL</span><span>?,?? &euro;</span></div>
+        </div>
+        <div class="hero-text">
+          <div class="mission-badge">L&rsquo;&eacute;nigme du jour</div>
+          <h2>Trouver le total du ticket</h2>
+          <p>Le marchand additionne 12,8 &euro; de l&eacute;gumes et 7,35 &euro; de fruits, mais les chiffres ne tombent pas en face. Apprends &agrave; poser l&rsquo;op&eacute;ration, puis trouve le total.</p>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-day" onclick="goSlide(1)">Commencer la mission &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 : Leçon 12,4 + 3,75 (montrée) -->
+  <div class="slide" id="slide-1">
+    <div class="card">
+      <div class="card-stripe"></div>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:1rem;">1. Poser une op&eacute;ration &agrave; virgule</h2>
+      <div class="warning-box">
+        Pour additionner ou soustraire des d&eacute;cimaux, l&rsquo;<strong>alignement vertical des virgules est obligatoire</strong>, afin de calculer des chiffres de <strong>m&ecirc;me rang</strong>. On compl&egrave;te avec des <strong>z&eacute;ros utiles</strong> et on note la <strong>retenue</strong>.
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;margin:1rem 0 .2rem;">Exemple : 12,4 + 3,75</p>
+      <div class="op">
+        <div class="op-grid">
+          <div class="op-line"><span></span><span class="carry"></span><span class="carry"><span style="font-size:.85rem;font-weight:900;color:var(--day-dark);">1</span></span><span></span><span class="carry"></span><span class="carry"></span></div>
+          <div class="op-line"><span class="op-sign"></span><span class="cell">1</span><span class="cell">2</span><span class="op-comma">,</span><span class="cell">4</span><span class="cell given">0</span></div>
+          <div class="op-line"><span class="op-sign">+</span><span class="cell given">0</span><span class="cell">3</span><span class="op-comma">,</span><span class="cell">7</span><span class="cell">5</span></div>
+          <div class="bar-line"><span></span><span class="bar"></span></div>
+          <div class="op-line"><span class="op-sign">=</span><span class="cell given">1</span><span class="cell given">6</span><span class="op-comma">,</span><span class="cell given">1</span><span class="cell given">5</span></div>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:.84rem;">Les virgules sont align&eacute;es. J&rsquo;ajoute un z&eacute;ro utile (12,4 &rarr; 12,40).<br>Aux dixi&egrave;mes 4+7=11 : j&rsquo;&eacute;cris 1 et je retiens <strong style="color:var(--day-dark)">1</strong>. R&eacute;sultat : <strong style="color:var(--day-dark)">12,4 + 3,75 = 16,15</strong>.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goSlide(0)">&larr; Retour</button>
+      <button class="btn btn-day" onclick="goSlide(2)">Suite &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 : Soustraction 15,7 - 8,25 (compensation, à saisir) -->
+  <div class="slide" id="slide-2">
+    <div class="card">
+      <div class="card-stripe"></div>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:1rem;">2. &Agrave; toi : une soustraction</h2>
+      <div class="warning-box">
+        Pose <strong>15,7 &minus; 8,25</strong>. Quand un chiffre du haut est trop petit, j&rsquo;ajoute <strong>10</strong> en haut (petit 1) et je compense par <strong>+1</strong> au rang de gauche du bas. Remplis tout, puis le r&eacute;sultat.
+      </div>
+      <div class="op">
+        <div class="op-grid">
+          <!-- retenue haut (petit 1 devant un chiffre du HAUT) : col U et col c -->
+          <div class="op-line"><span></span><span class="carry"></span><span class="carry"><input class="carry-in" id="sh1" inputmode="numeric" maxlength="1"/></span><span></span><span class="carry"></span><span class="carry"><input class="carry-in" id="sh3" inputmode="numeric" maxlength="1"/></span></div>
+          <div class="op-line"><span class="op-sign"></span><input class="ans" id="sa0" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="sa1" inputmode="numeric" maxlength="1" placeholder="?"/><span class="op-comma">,</span><input class="ans" id="sa2" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="sa3" inputmode="numeric" maxlength="1" placeholder="?"/></div>
+          <div class="op-line"><span class="op-sign">&minus;</span><input class="ans" id="sb0" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="sb1" inputmode="numeric" maxlength="1" placeholder="?"/><span class="op-comma">,</span><input class="ans" id="sb2" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="sb3" inputmode="numeric" maxlength="1" placeholder="?"/></div>
+          <!-- compensation bas (petit 1 devant un chiffre du BAS) : col D et col d -->
+          <div class="op-line"><span></span><span class="carry"><input class="carry-in" id="sl0" inputmode="numeric" maxlength="1"/></span><span class="carry"></span><span></span><span class="carry"><input class="carry-in" id="sl2" inputmode="numeric" maxlength="1"/></span><span class="carry"></span></div>
+          <div class="bar-line"><span></span><span class="bar"></span></div>
+          <div class="op-line"><span class="op-sign">=</span><input class="ans" id="sr0" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="sr1" inputmode="numeric" maxlength="1" placeholder="?"/><span class="op-comma">,</span><input class="ans" id="sr2" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="sr3" inputmode="numeric" maxlength="1" placeholder="?"/></div>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:.78rem;font-style:italic;">Petites cases = les 1 d&rsquo;emprunt (en haut) et de compensation (en bas).</p>
+      <div class="feedback" id="fb-s"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-check-s" onclick="checkS()">V&eacute;rifier &check;</button>
+        <button class="btn btn-ghost" id="btn-reset-s" style="display:none;" onclick="resetS()">&#8635; Recommencer</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goSlide(1)">&larr; Retour</button>
+      <div id="hint-2" style="font-size:.82rem;color:var(--muted);font-family:'JetBrains Mono',monospace;font-style:italic;">R&eacute;ussis pour continuer &rarr;</div>
+      <button class="btn btn-day" id="btn-next-2" onclick="goSlide(3)" disabled style="display:none;">Suite &rarr;</button>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 : Énigme 12,8 + 7,35 (retenue, à saisir) -->
+  <div class="slide" id="slide-3">
+    <div class="card">
+      <div class="card-stripe"></div>
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:1rem;">3. R&eacute;sous l&rsquo;&eacute;nigme</h2>
+      <div class="recall-box">
+        <strong>Retour &agrave; l&rsquo;&eacute;nigme :</strong> le ticket affiche <strong>12,8 &euro;</strong> de l&eacute;gumes et <strong>7,35 &euro;</strong> de fruits. Pose l&rsquo;addition align&eacute;e, note les retenues et trouve le total.
+      </div>
+      <div class="op">
+        <div class="op-grid">
+          <!-- retenue addition (en haut) : col D et col U -->
+          <div class="op-line"><span></span><span class="carry"><input class="carry-in" id="eh0" inputmode="numeric" maxlength="1"/></span><span class="carry"><input class="carry-in" id="eh1" inputmode="numeric" maxlength="1"/></span><span></span><span class="carry"></span><span class="carry"></span></div>
+          <div class="op-line"><span class="op-sign"></span><input class="ans" id="ea0" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="ea1" inputmode="numeric" maxlength="1" placeholder="?"/><span class="op-comma">,</span><input class="ans" id="ea2" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="ea3" inputmode="numeric" maxlength="1" placeholder="?"/></div>
+          <div class="op-line"><span class="op-sign">+</span><input class="ans" id="eb0" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="eb1" inputmode="numeric" maxlength="1" placeholder="?"/><span class="op-comma">,</span><input class="ans" id="eb2" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="eb3" inputmode="numeric" maxlength="1" placeholder="?"/></div>
+          <div class="bar-line"><span></span><span class="bar"></span></div>
+          <div class="op-line"><span class="op-sign">=</span><input class="ans" id="er0" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="er1" inputmode="numeric" maxlength="1" placeholder="?"/><span class="op-comma">,</span><input class="ans" id="er2" inputmode="numeric" maxlength="1" placeholder="?"/><input class="ans" id="er3" inputmode="numeric" maxlength="1" placeholder="?"/></div>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:.78rem;font-style:italic;">Petites cases du haut = les retenues. Remplis les deux nombres, les retenues et le total.</p>
+      <div class="feedback" id="fb-e"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-check-e" onclick="checkE()">V&eacute;rifier &check;</button>
+        <button class="btn btn-ghost" id="btn-reset-e" style="display:none;" onclick="resetE()">&#8635; Recommencer</button>
+      </div>
+    </div>
+
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">&#127942;</div>
+      <div class="success-title">Total trouv&eacute;&nbsp;!</div>
+      <div style="background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:1.2rem;margin:1.2rem auto;max-width:460px;">
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--day-dark);text-transform:uppercase;margin-bottom:.7rem;">Le total du ticket</p>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:1.25rem;color:var(--text);margin:0;"><strong style="color:var(--day-dark)">12,8 + 7,35 = 20,15 &euro;</strong></p>
+        <p style="font-size:.84rem;color:var(--day-dark);margin-top:.8rem;line-height:1.6;">En alignant les virgules (12,80 + 7,35) et en gérant les retenues : le marchand encaisse 20,15 &euro;.</p>
+      </div>
+      <p style="font-size:.9rem;color:var(--muted);line-height:1.7;">Tu as r&eacute;solu l&rsquo;&eacute;nigme du d&eacute;part : tu sais poser, aligner et calculer une op&eacute;ration &agrave; virgule.</p>
+      <button class="btn btn-day" onclick="restartAll()" style="margin:1rem auto 0;display:flex;">&#8635; Recommencer</button>
+    </div>
+
+    <div class="btn-row" style="margin-top:.5rem;">
+      <button class="btn btn-ghost" onclick="goSlide(2)">&larr; Retour</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* colonnes : 0=D 1=U 2=d 3=c */
+var SUB={a:['1','5','7','0'], b:['0','8','2','5'], r:['0','7','4','5'], h:{1:'1',3:'1'}, l:{0:'1',2:'1'}};
+var ENI={a:['1','2','8','0'], b:['0','7','3','5'], r:['2','0','1','5'], h:{0:'1',1:'1'}};
+var sOk=false;
+
+function goSlide(n){
+  var slides=document.querySelectorAll('.slide');
+  var dots=document.querySelectorAll('.dot');
+  for(var i=0;i<slides.length;i++){ slides[i].classList.toggle('active', i===n); }
+  for(var j=0;j<dots.length;j++){ dots[j].classList.toggle('active', j===n); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tryDot(n){
+  if(n===2){ goSlide(2); }
+  if(n===3 && sOk){ goSlide(3); }
+}
+
+function checkS(){
+  var allOk=true;
+  var rows=['a','b','r'];
+  for(var k=0;k<rows.length;k++){ for(var i=0;i<4;i++){
+    var el=document.getElementById('s'+rows[k]+i);
+    var ok=((el.value||'').trim()===SUB[rows[k]][i]);
+    el.className='ans '+(ok?'correct':'wrong'); if(!ok) allOk=false;
+  }}
+  /* retenue haut : cases sh1, sh3 doivent valoir 1 */
+  for(var key in SUB.h){ var e=document.getElementById('sh'+key); var ok=((e.value||'').trim()===SUB.h[key]); e.className='carry-in '+(ok?'correct':'wrong'); if(!ok) allOk=false; }
+  /* compensation bas : sl0, sl2 doivent valoir 1 */
+  for(var key2 in SUB.l){ var e2=document.getElementById('sl'+key2); var ok2=((e2.value||'').trim()===SUB.l[key2]); e2.className='carry-in '+(ok2?'correct':'wrong'); if(!ok2) allOk=false; }
+  var fb=document.getElementById('fb-s');
+  fb.className='feedback show '+(allOk?'ok':'ko');
+  if(allOk){
+    fb.innerHTML='\u2705 Exact ! 15,7 = 15,70. Aux centi\u00e8mes 0-5 : j\u2019emprunte (10-5=5) et je compense. R\u00e9sultat : 7,45.';
+  } else {
+    fb.innerHTML='\u274C Pas tout \u00e0 fait. <div class="feedback-detail">15,70 - 8,25 : centi\u00e8mes 10-5=5, dixi\u00e8mes 7-(2+1)=4, unit\u00e9s 15-8=7, dizaines 1-(0+1)=0. R\u00e9sultat 7,45.</div>';
+  }
+  document.getElementById('btn-reset-s').style.display='inline-flex';
+  if(allOk){
+    sOk=true;
+    var b=document.getElementById('btn-next-2');
+    b.disabled=false; b.style.display='inline-flex';
+    document.getElementById('hint-2').style.display='none';
+    document.getElementById('btn-check-s').disabled=true;
+  }
+}
+function resetS(){
+  var rows=['a','b','r'];
+  for(var k=0;k<rows.length;k++){ for(var i=0;i<4;i++){ var e=document.getElementById('s'+rows[k]+i); e.value=''; e.className='ans'; } }
+  ['sh1','sh3','sl0','sl2'].forEach(function(id){ var e=document.getElementById(id); e.value=''; e.className='carry-in'; });
+  document.getElementById('fb-s').className='feedback';
+  document.getElementById('btn-reset-s').style.display='none';
+  document.getElementById('btn-check-s').disabled=false;
+}
+
+function checkE(){
+  var allOk=true;
+  var rows=['a','b','r'];
+  for(var k=0;k<rows.length;k++){ for(var i=0;i<4;i++){
+    var el=document.getElementById('e'+rows[k]+i);
+    var ok=((el.value||'').trim()===ENI[rows[k]][i]);
+    el.className='ans '+(ok?'correct':'wrong'); if(!ok) allOk=false;
+  }}
+  for(var key in ENI.h){ var e=document.getElementById('eh'+key); var ok2=((e.value||'').trim()===ENI.h[key]); e.className='carry-in '+(ok2?'correct':'wrong'); if(!ok2) allOk=false; }
+  var fb=document.getElementById('fb-e');
+  fb.className='feedback show '+(allOk?'ok':'ko');
+  if(allOk){
+    fb.innerHTML='\u2705 Bravo ! 12,8 = 12,80. Aux dixi\u00e8mes 8+3=11 (retiens 1), aux unit\u00e9s 2+7+1=10 (retiens 1) : 12,80 + 7,35 = 20,15.';
+  } else {
+    fb.innerHTML='\u274C Pas tout \u00e0 fait. <div class="feedback-detail">12,80 + 7,35 : c 0+5=5, d 8+3=11 (1 + retenue 1), U 2+7+1=10 (0 + retenue 1), D 1+0+1=2. R\u00e9sultat 20,15.</div>';
+  }
+  document.getElementById('btn-reset-e').style.display='inline-flex';
+  if(allOk){
+    document.getElementById('btn-check-e').disabled=true;
+    setTimeout(function(){ document.getElementById('success-screen').classList.add('show'); },700);
+  }
+}
+function resetE(){
+  var rows=['a','b','r'];
+  for(var k=0;k<rows.length;k++){ for(var i=0;i<4;i++){ var e=document.getElementById('e'+rows[k]+i); e.value=''; e.className='ans'; } }
+  ['eh0','eh1'].forEach(function(id){ var e=document.getElementById(id); e.value=''; e.className='carry-in'; });
+  document.getElementById('fb-e').className='feedback';
+  document.getElementById('btn-reset-e').style.display='none';
+  document.getElementById('btn-check-e').disabled=false;
+}
+
+function restartAll(){
+  sOk=false;
+  resetS(); resetE();
+  document.getElementById('btn-next-2').disabled=true;
+  document.getElementById('btn-next-2').style.display='none';
+  document.getElementById('hint-2').style.display='block';
+  document.getElementById('success-screen').classList.remove('show');
+  goSlide(0);
+}
+</script>
+</body>
+</html>
