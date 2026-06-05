@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Semaine 1 Jour 3 — Le mystère des nombres négatifs</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — Mercredi (Jour 3) → Vert ═══ */
+    :root{
+      --day-color:#8dc63f; --day-dark:#3d7a10; --day-light:#f0faeb;
+      --day-border:#b5e08a; --day-glow:rgba(141,198,63,.3);
+    }
+    :root{
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+      --err-bg:#fff0ef; --err-border:#c0392b; --err-text:#c0392b;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 3.5rem;
+      position:relative;overflow-x:hidden;letter-spacing:.02em;word-spacing:.06em;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.3rem,5vw,1.9rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .scorebar{position:sticky;top:0;z-index:5;width:100%;max-width:820px;background:var(--surface);border:2px solid var(--border);border-radius:99px;padding:.5rem .9rem;margin-bottom:1.4rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+    .scorebar .sb-label{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:var(--day-dark);white-space:nowrap;}
+    .sb-track{flex:1;min-width:120px;height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+    .sb-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;}
+    .chip{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .65rem;border-radius:99px;font-size:.74rem;font-family:'JetBrains Mono',monospace;white-space:nowrap;border:1.5px solid var(--border);background:var(--bg);font-weight:600;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong .dot{background:var(--err-border);}
+
+    .card{width:100%;max-width:820px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.8rem 1.6rem 1.4rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;margin-bottom:1.4rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--blue));}
+
+    .ex-title{font-size:clamp(1.05rem,3vw,1.25rem);font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+    .theme-badge{display:inline-block;font-size:.64rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);white-space:nowrap;}
+    .consigne{font-size:clamp(.85rem,2.5vw,.95rem);color:var(--text);margin-bottom:1rem;line-height:1.6;}
+    .method-box{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.1rem;font-size:clamp(.78rem,2.4vw,.84rem);font-family:'JetBrains Mono',monospace;color:var(--day-dark);line-height:1.8;word-break:break-word;}
+    .method-box strong{color:var(--day-dark);}
+
+    /* droite graduée */
+    .line-wrap{width:100%;overflow-x:auto;margin-bottom:1.1rem;padding:.4rem 0;}
+    svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+    .axis{stroke:var(--text);stroke-width:2.5;}
+    .tick{stroke:var(--text);stroke-width:1.5;}
+    .tick-main{stroke:var(--text);stroke-width:2.5;}
+    .tick-mid{stroke:var(--text);stroke-width:2;}
+    .pt-tick{stroke:var(--day-dark);stroke-width:3;}
+    .pt-label{fill:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;text-anchor:middle;}
+    .axis-num{fill:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;text-anchor:middle;}
+
+    .grp-title{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;color:var(--muted);margin:.6rem 0 .5rem;text-transform:uppercase;letter-spacing:.06em;}
+    .item-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem;position:relative;z-index:2;}
+    .item-lbl{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(.86rem,2.5vw,1rem);flex:1 1 auto;min-width:8rem;}
+    .ans-input{background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;padding:.55rem .85rem;outline:none;transition:border-color .2s;min-height:44px;width:130px;text-align:center;}
+    .ans-input:focus{border-color:var(--day-color);}
+    .ans-input.correct-input{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .ans-input.wrong-input{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .ans-wide{width:100%;text-align:left;}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;position:relative;z-index:2;margin-top:1.1rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.7rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.85rem,2.5vw,.95rem);font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-hint{background:var(--orange);color:#fff;}
+    .btn-solution{background:var(--day-dark);color:#fff;}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    .hint-box{margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.75rem 1rem;font-size:clamp(.8rem,2.4vw,.85rem);color:#7a6010;display:none;line-height:1.8;font-family:'JetBrains Mono',monospace;word-break:break-word;}
+    .hint-box.show{display:block;}
+
+    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.92rem);display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback.partial{background:#fffbeb;border:1.5px solid var(--yellow);color:#7a6010;}
+    .feedback-icon{font-size:1.4rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:clamp(.76rem,2.3vw,.82rem);margin-top:.3rem;line-height:1.9;word-break:break-word;}
+
+    .global{width:100%;max-width:820px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 1.6rem;text-align:center;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .global-score{font-size:clamp(2.6rem,11vw,4.5rem);font-weight:800;line-height:1;margin:.4rem 0;}
+    .global-score .s-num{color:var(--day-dark);}
+    .stars{font-size:1.9rem;margin:.3rem 0 .9rem;}
+    .global-msg{color:var(--text);font-size:clamp(.86rem,2.6vw,.94rem);margin-bottom:0;font-weight:600;line-height:1.7;word-break:break-word;min-height:1.4rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .card,.global{animation:fadeUp .4s ease both;}
+    /* ── Ex3 : glisser-déposer des étiquettes ── */
+    .drag-zone{position:relative;width:100%;max-width:760px;margin:0 auto 1rem;}
+    .drag-stage{position:relative;width:100%;height:160px;}
+    .tokens{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1rem;}
+    .token{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;
+      background:var(--surface);border:2px solid var(--day-border);border-radius:10px;padding:.4rem .7rem;
+      font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.08);user-select:none;min-height:44px;min-width:54px;
+      transition:box-shadow .15s,transform .08s,border-color .15s;z-index:3;}
+    .token .tk-name{font-size:1.05rem;line-height:1;}
+    .token .tk-abs{font-size:.72rem;color:var(--muted);line-height:1;}
+    .token.placed{position:absolute;margin:0;pointer-events:none;background:none;border:none;box-shadow:none;
+      padding:0;min-width:0;min-height:0;}
+    .token.placed .tk-name{font-size:1rem;color:var(--day-dark);}
+    .token.placed .tk-abs{display:none;}
+    .token.placed::after{content:"";position:absolute;left:50%;transform:translateX(-50%);
+      top:1.25rem;width:3px;height:30px;background:var(--day-dark);border-radius:2px;}
+    .token.placed.wrong-tok .tk-name{color:var(--err-text);}
+    .token.placed.wrong-tok::after{background:var(--err-border);}
+    .token.placed.correct-tok .tk-name{color:#2f6e10;}
+    .token.placed.correct-tok::after{background:var(--green);}
+    .token.selected-tok{border-color:var(--day-color);box-shadow:0 0 0 3px var(--day-glow);transform:translateY(-2px);}
+    .token.correct-tok{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .token.wrong-tok{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .token.locked{cursor:default;}
+    #svg3{cursor:pointer;}
+    .drop-hint{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted);text-align:center;margin-bottom:.5rem;}
+    .placed-list{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:.4rem;min-height:1.6rem;}
+    .placed-chip{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--day-dark);
+      background:var(--day-light);border:1.5px solid var(--day-border);border-radius:99px;padding:.2rem .7rem;cursor:pointer;}
+    .placed-chip:hover{border-color:var(--day-color);}
+    .placed-chip .rm{color:var(--err-text);margin-left:.4rem;font-weight:700;}
+
+    @media(max-width:480px){
+      body{padding:1.2rem .75rem 3rem;}
+      .card{padding:1.3rem 1.1rem;}
+      .item-row{flex-direction:column;align-items:stretch;}
+      .ans-input{width:100%;}
+      .btn-row .btn{flex:1 1 100%;width:100%;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5ème
+    </div>
+    <div class="week-label">Semaine 1 &ndash; Jour 3</div>
+    <h1>Le mystère des <span class="hl">nombres négatifs</span></h1>
+    <p class="subtitle">3 exercices &middot; repérage sur une droite graduée</p>
+  </header>
+
+  <div class="scorebar">
+    <span class="sb-label" id="sb-label">0 / 20 items réussis</span>
+    <div class="sb-track"><div class="sb-fill" id="sb-fill"></div></div>
+    <span class="chip correct"><span class="dot"></span><span id="sb-ok">0</span></span>
+    <span class="chip wrong"><span class="dot"></span><span id="sb-ko">0</span></span>
+  </div>
+
+  <div id="exos"></div>
+
+  <div class="global">
+    <div class="theme-badge" style="background:none;border:none;color:var(--muted);padding:0;">Bilan</div>
+    <div class="global-score"><span class="s-num" id="g-num">0</span>/20</div>
+    <div class="stars" id="g-stars">&#9734;&#9734;&#9734;&#9734;&#9734;</div>
+    <div class="global-msg" id="g-msg">Réponds aux 3 exercices puis vérifie-les pour voir ton bilan.</div>
+    <button class="btn btn-primary" id="btn-restart" onclick="restartAll()" style="margin:1.2rem auto 0;display:none;">&#128260; Recommencer</button>
+  </div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   Semaine 1 Jour 3 — Découvrir les nombres relatifs (5e)
+   Réponses d'après la correction officielle (Séquence 5 Séance 1).
+   Score par item : Ex1 = 7 abscisses + 3 opposés = 10 ;
+   Ex2 = 3 (nombre, signe, partie num) ; Ex3 = 6 abscisses + 1 nom = 7.
+   Total = 20.
+════════════════════════════════════════════════════════════ */
+
+var $ = function(id){ return document.getElementById(id); };
+
+/* normalise une saisie de nombre : virgule/point, espaces, −, + initial */
+function normNum(s){
+  return String(s).trim().replace(/\u00a0/g,"").replace(/\s/g,"")
+    .replace(/\u2212/g,"-").replace(",", ".").replace(/^\+/,"");
+}
+function numEq(a, b){
+  var x = parseFloat(normNum(a));
+  if(isNaN(x)) return false;
+  return Math.abs(x - b) < 1e-9;
+}
+function textEq(a, b){
+  return String(a).trim().toUpperCase().replace(/\s/g,"") === b.toUpperCase().replace(/\s/g,"");
+}
+
+/* Données Ex1 : points et abscisses (graduation 0,25) */
+var EX1_PTS = [
+  { p:"A", x:0 },   { p:"B", x:1 },  { p:"C", x:-1 }, { p:"D", x:-2 },
+  { p:"E", x:-1.75 },{ p:"F", x:1.75 }, { p:"G", x:-0.25 }
+];
+/* Opposés à trouver (point -> point opposé présent sur la droite) */
+var EX1_OPP = [
+  { of:"A", ans:"A" },   // 0 est son propre opposé
+  { of:"B", ans:"C" },   // 1 <-> -1
+  { of:"E", ans:"F" }    // -1,75 <-> 1,75
+];
+
+/* Données Ex3 : graduation 0,01, droite -0,2 à 0,2 */
+var EX3_PTS = [
+  { p:"T", x:-0.21 }, { p:"H", x:-0.18 }, { p:"A", x:-0.05 },
+  { p:"L", x:0.03 },  { p:"E", x:0.1 },   { p:"S", x:0.14 }
+];
+
+/* ── état ── */
+var st1, st2, st3;
+function initState(){
+  st1 = { done:false, abs:{}, opp:{}, res:{} };
+  st2 = { done:false, num:"", signe:"", part:"", res:{} };
+  st3 = { done:false, placed:{}, nom:"", res:{} };  // placed[p] = abscisse posée (ou undefined)
+}
+initState();
+
+/* ── SVG droite graduée Ex1 : de -2,25 à 2,25, pas 0,25 ── */
+function svgLine1(){
+  var W=760, H=120, padL=40, padR=40;
+  var xmin=-2.25, xmax=2.25;
+  var span=xmax-xmin;
+  function X(v){ return padL + (v - xmin)/span * (W - padL - padR); }
+  var y=70;
+  var s = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Droite graduée de -2 à 2, graduée tous les 0,25">';
+  // axe
+  s += '<line class="axis" x1="'+X(xmin)+'" y1="'+y+'" x2="'+(X(xmax)+10)+'" y2="'+y+'"/>';
+  s += '<polygon points="'+(X(xmax)+10)+','+(y-6)+' '+(X(xmax)+22)+','+y+' '+(X(xmax)+10)+','+(y+6)+'" fill="var(--text)"/>';
+  // graduations tous les 0,25
+  for(var v=-2; v<=2.0001; v+=0.25){
+    var main = Math.abs(v - Math.round(v)) < 1e-9;
+    s += '<line class="'+(main?"tick-main":"tick")+'" x1="'+X(v)+'" y1="'+(y-(main?10:6))+'" x2="'+X(v)+'" y2="'+(y+(main?10:6))+'"/>';
+  }
+  // nombres entiers -2 .. 2
+  [-2,-1,0,1,2].forEach(function(v){ s += '<text class="axis-num" x="'+X(v)+'" y="'+(y+30)+'">'+v+'</text>'; });
+  // points
+  EX1_PTS.forEach(function(o){
+    s += '<line class="pt-tick" x1="'+X(o.x)+'" y1="'+(y-16)+'" x2="'+X(o.x)+'" y2="'+(y+16)+'"/>';
+    s += '<text class="pt-label" x="'+X(o.x)+'" y="'+(y-22)+'">'+o.p+'</text>';
+  });
+  s += '</svg>';
+  return s;
+}
+
+/* Géométrie commune de la droite Ex3 (utilisée par le SVG et le drag&drop) */
+var L3 = { W:760, H:130, padL:30, padR:30, xmin:-0.23, xmax:0.23, y:70 };
+L3.span = L3.xmax - L3.xmin;
+function X3(v){ return L3.padL + (v - L3.xmin)/L3.span * (L3.W - L3.padL - L3.padR); }
+function val3FromX(px){ // px en coordonnées viewBox -> valeur arrondie au 0,01
+  var v = (px - L3.padL)/(L3.W - L3.padL - L3.padR) * L3.span + L3.xmin;
+  return Math.round(v*100)/100;
+}
+
+/* ── SVG droite graduée Ex3 : VIDE (l'élève place les points) ── */
+function svgLine3(){
+  var W=L3.W, y=L3.y;
+  var s = '<svg id="svg3" viewBox="0 0 '+W+' '+L3.H+'" role="img" aria-label="Droite graduée vide de -0,2 à 0,2, graduée tous les 0,01">';
+  s += '<line class="axis" x1="'+X3(L3.xmin)+'" y1="'+y+'" x2="'+(X3(L3.xmax)+10)+'" y2="'+y+'"/>';
+  s += '<polygon points="'+(X3(L3.xmax)+10)+','+(y-6)+' '+(X3(L3.xmax)+22)+','+y+' '+(X3(L3.xmax)+10)+','+(y+6)+'" fill="var(--text)"/>';
+  for(var i=-22; i<=22; i++){
+    var v=i/100;
+    var main = (i % 10 === 0);
+    var mid  = (i % 5 === 0) && !main;   // trait moyen tous les 0,05
+    var len = main ? 10 : (mid ? 8 : 5);
+    var cls = main ? "tick-main" : (mid ? "tick-mid" : "tick");
+    s += '<line class="'+cls+'" x1="'+X3(v)+'" y1="'+(y-len)+'" x2="'+X3(v)+'" y2="'+(y+len)+'"/>';
+  }
+  [-0.2,-0.1,0,0.1,0.2].forEach(function(v){
+    var lab = (v===0)?"0":String(v).replace(".",",");
+    s += '<text class="axis-num" x="'+X3(v)+'" y="'+(y+30)+'">'+lab+'</text>';
+  });
+  return s + '</svg>';
+}
+
+function buildAll(){
+  var root = $("exos"); root.innerHTML = "";
+  root.appendChild(buildEx1());
+  root.appendChild(buildEx2());
+  root.appendChild(buildEx3());
+  updateGlobal();
+}
+
+function card(id){
+  var c = document.createElement("div"); c.className="card"; c.id=id;
+  return c;
+}
+
+/* ───────── EX1 ───────── */
+function buildEx1(){
+  var c = card("card-1");
+  var h = '<div class="card-stripe"></div>'
+    + '<div class="ex-title">Exercice 1 · La droite graduée</div>'
+    + '<div class="theme-badge">Abscisses et opposés</div>'
+    + '<div class="consigne">Donne l\u2019abscisse de chaque point, puis indique le point dont l\u2019abscisse est opposée.</div>'
+    + '<div class="method-box"><strong>Rappel :</strong> à gauche de zéro les abscisses sont négatives ; deux nombres opposés sont à la même distance de zéro.</div>'
+    + '<div class="line-wrap">' + svgLine1() + '</div>'
+    + '<div class="grp-title">Abscisse de chaque point</div>';
+  EX1_PTS.forEach(function(o){
+    h += '<div class="item-row"><span class="item-lbl">Point ' + o.p + '</span>'
+      + '<input type="text" class="ans-input" id="e1-abs-' + o.p + '" placeholder="?" autocomplete="off" inputmode="text"></div>';
+  });
+  h += '<div class="grp-title">Points d\u2019abscisses opposées</div>';
+  EX1_OPP.forEach(function(o){
+    h += '<div class="item-row"><span class="item-lbl">Opposé de ' + o.of + '</span>'
+      + '<input type="text" class="ans-input" id="e1-opp-' + o.of + '" placeholder="?" autocomplete="off"></div>';
+  });
+  h += btnRow(1) + hintFb(1);
+  c.innerHTML = h;
+  return c;
+}
+
+/* ───────── EX2 ───────── */
+function buildEx2(){
+  var c = card("card-2");
+  var h = '<div class="card-stripe"></div>'
+    + '<div class="ex-title">Exercice 2 · Une date dans l\u2019Histoire</div>'
+    + '<div class="theme-badge">Signe et partie numérique</div>'
+    + '<div class="consigne">Rome a été fondée en 753 avant Jésus-Christ. Donne le nombre relatif associé à cette date, son signe, puis sa partie numérique.</div>'
+    + '<div class="method-box"><strong>Rappel :</strong> un nombre relatif a un signe (+ ou −) et une partie numérique (le nombre sans son signe).</div>'
+    + '<div class="item-row"><span class="item-lbl">Nombre relatif</span><input type="text" class="ans-input" id="e2-num" placeholder="?" autocomplete="off"></div>'
+    + '<div class="item-row"><span class="item-lbl">Signe</span><input type="text" class="ans-input" id="e2-signe" placeholder="+ ou −" autocomplete="off"></div>'
+    + '<div class="item-row"><span class="item-lbl">Partie numérique</span><input type="text" class="ans-input" id="e2-part" placeholder="?" autocomplete="off"></div>'
+    + btnRow(2) + hintFb(2);
+  c.innerHTML = h;
+  return c;
+}
+
+/* ───────── EX3 ───────── */
+function buildEx3(){
+  var c = card("card-3");
+  var h = '<div class="card-stripe"></div>'
+    + '<div class="ex-title">Exercice 3 · Le mathématicien caché</div>'
+    + '<div class="theme-badge">Placer des points</div>'
+    + '<div class="consigne">Place chaque point à son abscisse, puis retrouve le nom du mathématicien en lisant les lettres de gauche à droite.</div>'
+    + '<div class="drop-hint">Clique sur une lettre, puis clique sur la droite pour la poser. Pour retirer une lettre, clique sur son étiquette dans la liste en dessous.</div>'
+    + '<div class="drag-zone"><div class="drag-stage" id="stage3">' + svgLine3() + '</div></div>'
+    + '<div class="tokens" id="tokens3"></div>'
+    + '<div class="placed-list" id="placed-list3"></div>'
+    + '<div class="grp-title">Le nom du mathématicien</div>'
+    + '<div class="item-row"><span class="item-lbl">En lisant de gauche à droite</span>'
+    + '<input type="text" class="ans-input ans-wide" id="e3-nom" placeholder="Écris le nom" autocomplete="off"></div>'
+    + btnRow(3) + hintFb(3);
+  c.innerHTML = h;
+  return c;
+}
+
+function btnRow(n){
+  return '<div class="btn-row">'
+    + '<button class="btn btn-primary" id="check-' + n + '">&#10003; Vérifier</button>'
+    + '<button class="btn btn-hint" id="hintbtn-' + n + '">? Indice</button>'
+    + '<button class="btn btn-solution" id="solbtn-' + n + '" style="display:none;">&#128161; Solution</button>'
+    + '</div>';
+}
+function hintFb(n){
+  return '<div class="hint-box" id="hint-' + n + '"></div>'
+    + '<div class="feedback" id="fb-' + n + '"><span class="feedback-icon" id="fbi-' + n + '"></span>'
+    + '<div><div id="fbm-' + n + '"></div><div class="feedback-detail" id="fbd-' + n + '"></div></div></div>';
+}
+
+var HINTS = {
+  1:"Pour trouver la valeur d\u2019un pas, compte les graduations entre deux nombres connus. Place-toi ensuite sur le 0 et avance graduation par graduation. Pour un opposé, cherche le point situé à la même distance de zéro, mais de l\u2019autre côté.",
+  2:"« Avant Jésus-Christ » veut dire avant l\u2019an zéro. De quel côté de zéro se trouve-t-on alors\u00a0? Le signe et la partie numérique se lisent ensuite sur ce nombre.",
+  3:"Repère d\u2019abord le 0 et les graduations principales (−0,1\u00a0; 0,1). Glisse chaque étiquette en comptant les petits traits depuis 0. Pour le nom, lis les lettres de la plus petite abscisse à la plus grande."
+};
+
+/* ════ Ex3 : glisser-déposer des étiquettes ════ */
+function setupTokens3(){
+  var bank = $("tokens3");
+  if(!bank) return;
+  bank.innerHTML = "";
+  selTok = null;
+  EX3_PTS.forEach(function(o){
+    var t = document.createElement("div");
+    t.className = "token"; t.id = "tok-"+o.p; t.setAttribute("data-p", o.p);
+    t.innerHTML = '<span class="tk-name">'+o.p+'</span><span class="tk-abs">'+frNum(o.x)+'</span>';
+    t.addEventListener("click", function(){ onTokenClick(o.p); });
+    bank.appendChild(t);
+  });
+  // clic sur la zone de la droite pour poser la lettre sélectionnée
+  var stage = $("stage3");
+  if(stage) stage.addEventListener("click", onLineClick);
+}
+
+var selTok = null;  // lettre actuellement sélectionnée
+
+function onTokenClick(p){
+  if(st3.done) return;
+  if(st3.placed[p] !== undefined) return;   // déjà posée : se retire via la liste en bas
+  if(selTok === p){ selTok = null; }
+  else { selTok = p; }
+  refreshSelection();
+}
+
+function onLineClick(ev){
+  if(st3.done) return;
+  // ignore si le clic est sur une étiquette (posée) : son propre handler gère le retrait
+  if(ev.target.closest && ev.target.closest(".token")) return;
+  if(selTok === null) return;          // aucune lettre choisie : rien à poser
+  var svg = $("svg3"); var sr = svg.getBoundingClientRect();
+  var vbX = (ev.clientX - sr.left)/sr.width * L3.W;
+  var v = val3FromX(vbX);              // aimant : arrondi au 0,01
+  if(v < -0.22) v = -0.22; if(v > 0.22) v = 0.22;
+  placeToken(selTok, v, false);
+  selTok = null;
+  refreshSelection();
+}
+
+function refreshSelection(){
+  EX3_PTS.forEach(function(o){
+    var t = $("tok-"+o.p);
+    if(!t) return;
+    if(o.p === selTok) t.classList.add("selected-tok");
+    else t.classList.remove("selected-tok");
+  });
+}
+
+/* place l'étiquette p à l'abscisse v sur la droite */
+function placeToken(p, v, lock){
+  var t = $("tok-"+p); if(!t) return;
+  st3.placed[p] = v;
+  var svg = $("svg3");
+  var card = $("card-3");
+  var sr = svg.getBoundingClientRect(); var cr = card.getBoundingClientRect();
+  var pxX = sr.left - cr.left + (X3(v)/L3.W) * sr.width;
+  var pxY = sr.top  - cr.top  + (L3.y/L3.H) * sr.height - 38;
+  if(t.parentNode !== card) card.appendChild(t);
+  t.classList.add("placed");
+  t.style.position = "absolute";
+  t.style.left = (pxX - t.offsetWidth/2) + "px";
+  t.style.top  = pxY + "px";
+  if(lock){ t.classList.add("locked"); }
+  refreshPlacedList();
+}
+
+function returnToken(t){
+  t.classList.remove("placed");
+  t.style.position = ""; t.style.left = ""; t.style.top = "";
+  st3.placed[t.getAttribute("data-p")] = undefined;
+  $("tokens3").appendChild(t);
+  refreshPlacedList();
+}
+
+/* liste « lettre : abscisse » des étiquettes posées (aide avant validation) */
+function refreshPlacedList(){
+  var box = $("placed-list3");
+  if(!box) return;
+  if(st3.done){ box.innerHTML = ""; return; }   // masquée après validation
+  box.innerHTML = "";
+  EX3_PTS
+    .filter(function(o){ return st3.placed[o.p] !== undefined; })
+    .sort(function(a,b){ return st3.placed[a.p] - st3.placed[b.p]; })
+    .forEach(function(o){
+      var chip = document.createElement("span");
+      chip.className = "placed-chip";
+      chip.innerHTML = o.p + ' : ' + frNum(st3.placed[o.p]) + '<span class="rm">&#10005;</span>';
+      chip.title = "Retirer " + o.p;
+      chip.onclick = function(){ var t = $("tok-"+o.p); if(t) returnToken(t); };
+      box.appendChild(chip);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  buildAll();
+  bindCard(1, checkEx1);
+  bindCard(2, checkEx2);
+  bindCard(3, checkEx3);
+  setupTokens3();
+});
+
+function bindCard(n, fn){
+  $("check-"+n).onclick = fn;
+  $("hintbtn-"+n).onclick = function(){ toggleHint(n); };
+  $("solbtn-"+n).onclick = function(){ showSolution(n); };
+}
+
+/* ── lecture des saisies ── */
+function readEx1(){
+  EX1_PTS.forEach(function(o){ st1.abs[o.p] = $("e1-abs-"+o.p).value; });
+  EX1_OPP.forEach(function(o){ st1.opp[o.of] = $("e1-opp-"+o.of).value; });
+}
+function readEx2(){
+  st2.num = $("e2-num").value; st2.signe = $("e2-signe").value; st2.part = $("e2-part").value;
+}
+function readEx3(){
+  st3.nom = $("e3-nom").value;
+}
+
+function anyFilled(vals){ return vals.some(function(v){ return (v||"").trim().length>0; }); }
+
+/* ── vérifications ── */
+function checkEx1(){
+  if(st1.done) return;
+  readEx1();
+  var all = EX1_PTS.map(function(o){ return st1.abs[o.p]; }).concat(EX1_OPP.map(function(o){ return st1.opp[o.of]; }));
+  if(!anyFilled(all)){ warnEmpty(1); return; }
+  EX1_PTS.forEach(function(o){ st1.res["abs-"+o.p] = numEq(st1.abs[o.p], o.x); });
+  EX1_OPP.forEach(function(o){ st1.res["opp-"+o.of] = textEq(st1.opp[o.of], o.ans); });
+  st1.done = true; lockInputs("e1"); finish(1);
+}
+function checkEx2(){
+  if(st2.done) return;
+  readEx2();
+  if(!anyFilled([st2.num, st2.signe, st2.part])){ warnEmpty(2); return; }
+  st2.res["num"] = numEq(st2.num, -753);
+  var sg = normNum(st2.signe).replace("moins","-");
+  st2.res["signe"] = (sg === "-");
+  st2.res["part"] = numEq(st2.part, 753);
+  st2.done = true; lockInputs("e2"); finish(2);
+}
+function checkEx3(){
+  if(st3.done) return;
+  readEx3();
+  var placedCount = EX3_PTS.filter(function(o){ return st3.placed[o.p] !== undefined; }).length;
+  if(placedCount === 0 && (st3.nom||"").trim()===""){ warnEmpty(3); return; }
+  EX3_PTS.forEach(function(o){
+    var pl = st3.placed[o.p];
+    st3.res["abs-"+o.p] = (pl !== undefined && Math.abs(pl - o.x) < 0.0051);
+  });
+  st3.res["nom"] = textEq(st3.nom, "THALES");
+  st3.done = true;
+  lockTokens3();
+  refreshPlacedList();
+  var nomInp = $("e3-nom");
+  if(nomInp){
+    nomInp.disabled = true;
+    var nomCls = st3.res["nom"] ? "correct-input" : ((st3.nom||"").trim() !== "" ? "wrong-input" : "");
+    if(nomCls) nomInp.classList.add(nomCls);
+  }
+  finish(3);
+}
+
+/* verrouille et colore les étiquettes après validation */
+function lockTokens3(){
+  EX3_PTS.forEach(function(o){
+    var tk = $("tok-"+o.p);
+    if(!tk) return;
+    tk.classList.add("locked");
+    tk.classList.remove("correct-tok","wrong-tok");
+    if(st3.placed[o.p] !== undefined) tk.classList.add(st3.res["abs-"+o.p] ? "correct-tok" : "wrong-tok");
+  });
+}
+
+function lockInputs(prefix){
+  document.querySelectorAll("input[id^='"+prefix+"']").forEach(function(inp){
+    inp.disabled = true;
+    var key = inp.id;
+    var ok = inputIsOk(prefix, key);
+    inp.classList.remove("correct-input","wrong-input");
+    if(ok === true) inp.classList.add("correct-input");
+    else if((inp.value||"").trim() !== "") inp.classList.add("wrong-input");
+  });
+}
+function inputIsOk(prefix, id){
+  if(prefix==="e1"){
+    if(id.indexOf("e1-abs-")===0) return st1.res["abs-"+id.slice(7)];
+    if(id.indexOf("e1-opp-")===0) return st1.res["opp-"+id.slice(7)];
+  }
+  if(prefix==="e2"){
+    if(id==="e2-num") return st2.res["num"];
+    if(id==="e2-signe") return st2.res["signe"];
+    if(id==="e2-part") return st2.res["part"];
+  }
+  if(prefix==="e3"){
+    if(id.indexOf("e3-abs-")===0) return st3.res["abs-"+id.slice(7)];
+    if(id==="e3-nom") return st3.res["nom"];
+  }
+  return null;
+}
+
+function countOk(st){ var n=0; for(var k in st.res){ if(st.res[k]) n++; } return n; }
+function countItems(st){ var n=0; for(var k in st.res){ n++; } return n; }
+
+function warnEmpty(n){
+  var fb=$("fb-"+n); fb.className="feedback show ko";
+  $("fbi-"+n).textContent="\u270B";
+  $("fbm-"+n).innerHTML="<strong>Réponds d\u2019abord\u00a0!</strong>";
+  $("fbd-"+n).textContent="Écris au moins une réponse avant de vérifier.";
+}
+
+function finish(n){
+  var st = (n===1)?st1:(n===2)?st2:st3;
+  var ok = countOk(st), tot = countItems(st), ratio = ok/tot;
+  var fb=$("fb-"+n);
+  fb.className="feedback show " + (ratio>=1?"ok":(ok===0?"ko":"partial"));
+  $("fbi-"+n).textContent = ratio>=1?"\u2705":(ok===0?"\u274C":"\u26A0");
+  var msg;
+  if(ratio>=1) msg="Parfait\u00a0! Tout est correct.";
+  else if(ratio>=0.5) msg="Bien, mais quelques erreurs.";
+  else if(ok>0) msg="À retravailler.";
+  else msg="Rien de correct cette fois.";
+  $("fbm-"+n).innerHTML="<strong>"+ok+" / "+tot+"</strong> &mdash; "+msg;
+  $("fbd-"+n).innerHTML = (ratio>=1)? "" : buildCorr(n);
+  $("check-"+n).disabled=true; $("check-"+n).style.display="none";
+  $("hintbtn-"+n).disabled=true;
+  $("solbtn-"+n).style.display="inline-flex";
+  $("hint-"+n).classList.remove("show");
+  updateGlobal();
+}
+
+function buildCorr(n){
+  var L=[];
+  if(n===1){
+    EX1_PTS.forEach(function(o){ if(!st1.res["abs-"+o.p]) L.push("Point "+o.p+" : "+( (st1.abs[o.p]||"").trim()===""? "tu n\u2019as pas répondu." : "abscisse incorrecte (compte les graduations depuis 0)." )); });
+    EX1_OPP.forEach(function(o){ if(!st1.res["opp-"+o.of]) L.push("Opposé de "+o.of+" : "+( (st1.opp[o.of]||"").trim()===""? "tu n\u2019as pas répondu." : "ce n\u2019est pas le bon point (cherche la même distance de l\u2019autre côté de 0)." )); });
+  } else if(n===2){
+    if(!st2.res["num"]) L.push("Nombre relatif : "+((st2.num||"").trim()===""?"tu n\u2019as pas répondu.":"incorrect (une date avant J-C est négative)."));
+    if(!st2.res["signe"]) L.push("Signe : "+((st2.signe||"").trim()===""?"tu n\u2019as pas répondu.":"incorrect (avant J-C → de quel côté de zéro\u00a0?)."));
+    if(!st2.res["part"]) L.push("Partie numérique : "+((st2.part||"").trim()===""?"tu n\u2019as pas répondu.":"incorrecte (c\u2019est le nombre sans son signe)."));
+  } else {
+    EX3_PTS.forEach(function(o){ if(!st3.res["abs-"+o.p]) L.push("Point "+o.p+" : "+( st3.placed[o.p]===undefined ? "tu n\u2019as pas placé ce point." : "ce point n\u2019est pas à la bonne place (vérifie son abscisse)." )); });
+    if(!st3.res["nom"]) L.push("Nom : "+((st3.nom||"").trim()===""?"tu n\u2019as pas répondu.":"ce n\u2019est pas le bon nom (remets les lettres dans l\u2019ordre des abscisses)."));
+  }
+  if(L.length===0) return "";
+  return "À revoir\u00a0:<br>"+L.join("<br>")+"<br><span style='color:var(--muted)'>Clique sur «\u00a0Solution\u00a0» pour voir les bonnes réponses.</span>";
+}
+
+function showSolution(n){
+  var st=(n===1)?st1:(n===2)?st2:st3;
+  if(!st.done) return;
+  if(n===1){
+    EX1_PTS.forEach(function(o){ setSol("e1-abs-"+o.p, frNum(o.x)); });
+    EX1_OPP.forEach(function(o){ setSol("e1-opp-"+o.of, o.ans); });
+  } else if(n===2){
+    setSol("e2-num", "-753"); setSol("e2-signe", "−"); setSol("e2-part", "753");
+  } else {
+    EX3_PTS.forEach(function(o){ placeToken(o.p, o.x, true); });
+    setSol("e3-nom", "THALES");
+  }
+  var fb=$("fb-"+n); fb.className="feedback show ok";
+  $("fbi-"+n).textContent="\u2705";
+  $("fbm-"+n).innerHTML="<strong>Solution affichée.</strong>";
+  $("fbd-"+n).textContent="Les bonnes réponses sont affichées dans chaque case.";
+  $("solbtn-"+n).disabled=true;
+}
+function setSol(id, val){
+  var inp=$(id); if(!inp) return;
+  inp.value=val; inp.disabled=true;
+  inp.classList.remove("wrong-input"); inp.classList.add("correct-input");
+}
+function frNum(x){ return String(x).replace(".",","); }
+
+function toggleHint(n){
+  var st=(n===1)?st1:(n===2)?st2:st3;
+  if(st.done) return;
+  var h=$("hint-"+n);
+  if(h.classList.contains("show")) h.classList.remove("show");
+  else { h.innerHTML="<strong>?\u00a0Indice\u00a0:</strong> "+HINTS[n]; h.classList.add("show"); }
+}
+
+function updateGlobal(){
+  var ok = countOk(st1)+countOk(st2)+countOk(st3);
+  var answered = (st1.done?countItems(st1):0)+(st2.done?countItems(st2):0)+(st3.done?countItems(st3):0);
+  var TOTAL = 20;
+  $("sb-ok").textContent = ok;
+  $("sb-ko").textContent = answered - ok;
+  $("sb-label").textContent = ok + " / " + TOTAL + " items réussis";
+  $("sb-fill").style.width = Math.round(answered / TOTAL * 100) + "%";
+  $("g-num").textContent = ok;
+
+  var doneCount = (st1.done?1:0)+(st2.done?1:0)+(st3.done?1:0);
+  if(doneCount < 3){
+    $("g-stars").innerHTML = "&#9734;&#9734;&#9734;&#9734;&#9734;";
+    $("g-msg").textContent = "Réponds aux 3 exercices puis vérifie-les pour voir ton bilan. (" + doneCount + " / 3 faits)";
+    $("btn-restart").style.display = doneCount>0 ? "flex" : "none";
+    return;
+  }
+  var ratio = ok / TOTAL;
+  var stars = ok >= TOTAL ? 5 : ratio >= .8 ? 4 : ratio >= .6 ? 3 : ratio >= .4 ? 2 : ok >= 1 ? 1 : 0;
+  $("g-stars").textContent = "\u2B50".repeat(stars) + "\u2606".repeat(5-stars);
+  var msg;
+  if(ok === TOTAL) msg = "Excellent\u00a0! Tu sais repérer et lire les nombres relatifs sur une droite graduée.";
+  else if(ratio >= .6) msg = "Très bien\u00a0! Encore quelques repérages à revoir.";
+  else if(ratio >= .3) msg = "Passable. Relis la méthode de chaque exercice, puis réessaie.";
+  else msg = "À retravailler\u00a0: reprends la lecture des graduations, puis recommence.";
+  $("g-msg").textContent = msg;
+  $("btn-restart").style.display = "flex";
+}
+
+function restartAll(){
+  initState();
+  buildAll();
+  // re-bind après reconstruction
+  bindCard(1, checkEx1); bindCard(2, checkEx2); bindCard(3, checkEx3);
+  setupTokens3();
+  $("btn-restart").style.display = "none";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
