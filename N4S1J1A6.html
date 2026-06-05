@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 4ème S1 J1 · Calcul littéral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   4e · Semaine 1 · Jour 1 (LUNDI)
+   Couleur du jour : #f5a623 / #c47a10 / #fff5e0 / #f5d080
+   ============================================================ */
+:root{
+  --jour:        #f5a623;   /* couleur principale du jour */
+  --jour-fonce:  #c47a10;   /* version foncée */
+  --jour-clair:  #fff5e0;   /* fond très clair */
+  --jour-pale:   #f5d080;   /* version pâle */
+
+  --bg:          #fffdf7;   /* fond général clair Pazapa */
+  --dark:        #1a1f2e;   /* encart game sombre */
+  --dark-2:      #232a3d;
+  --vert:        #22c55e;
+  --vert-neon:   #4ade80;
+  --rouge:       #ef4444;
+  --txt:         #2b2b2b;
+  --gris:        #8b8b8b;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  padding: 20px 16px 50px;
+}
+
+/* ====== BULLES STATIQUES DE FOND ======
+   - nettes (pas de blur), opacité douce, bulle rose retirée */
+.bulle{ position:fixed; border-radius:50%; opacity:.32; z-index:0; pointer-events:none; }
+.bulle-jaune  { width:200px; height:200px; background:#ffd84d; top:-60px;   right:-50px; }
+.bulle-jour   { width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-verte  { width:150px; height:150px; background:#9be7a5; top:45%;     right:-70px; }
+
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; }
+
+/* ====================== HEADER ====================== */
+.header{ text-align:center; margin-bottom:22px; }
+
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px rgba(245,166,35,.4);
+  margin-bottom:12px;
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+
+.semaine{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px;
+  color:var(--gris); text-transform:uppercase; margin-bottom:6px;
+}
+.titre{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size:2.3rem; line-height:1.1; color:var(--txt); margin-bottom:6px;
+}
+.titre .accent{ color:var(--jour); }
+.sous-titre{
+  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px;
+  color:var(--gris); margin-bottom:16px;
+}
+.sous-titre code{ color:var(--jour-fonce); font-weight:700; }
+
+.badge-revision{
+  display:inline-block;
+  background: var(--jour);
+  color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:9px 22px; border-radius:24px;
+  box-shadow:0 4px 14px rgba(245,166,35,.45);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{ transform:scale(1);   box-shadow:0 4px 14px rgba(245,166,35,.45); }
+  50%    { transform:scale(1.05);box-shadow:0 6px 22px rgba(245,166,35,.7); }
+}
+
+/* ================ ENCART GAME (fond clair dys-friendly) ================ */
+.game{
+  background: #fff;
+  border:2px solid var(--jour);
+  border-radius:18px;
+  padding:18px 20px 16px;
+  margin-bottom:24px;
+  box-shadow:0 4px 16px rgba(245,166,35,.18);
+}
+.game-label{
+  font-family:'Orbitron',sans-serif; font-size:.66rem; font-weight:700;
+  letter-spacing:2px; color:var(--jour-fonce); margin-bottom:12px;
+}
+
+/* étoiles */
+.etoiles{ text-align:center; margin-bottom:18px; font-size:1.55rem; letter-spacing:8px; }
+.etoiles .star{ color:#dcd6c4; transition:.3s; display:inline-block; }
+.etoiles .star.on{
+  color:var(--jour);
+  animation: pop .5s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+
+/* scoreboard */
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.score-col{
+  background: #faf7ef;
+  border:1.5px solid #ece4cf;
+  border-radius:12px; padding:12px 6px; text-align:center;
+}
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.6rem; line-height:1; }
+.score-col.reussis  { border-color:#9be7a5; }
+.score-col.reussis  .score-num{ color:#157f3a; }
+.score-col.restants { border-color:var(--jour-pale); }
+.score-col.restants .score-num{ color:var(--jour-fonce); }
+.score-col.erreurs  { border-color:#f5b5b5; }
+.score-col.erreurs  .score-num{ color:#c0392b; }
+.score-lbl{
+  font-family:'Orbitron',sans-serif; font-size:.6rem; font-weight:700;
+  letter-spacing:1.5px; color:#7a7a7a; margin-top:6px; text-transform:uppercase;
+}
+
+/* barre XP */
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span:first-child{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:1.5px; color:var(--jour-fonce);
+}
+.xp-head span:last-child{
+  font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; color:var(--jour-fonce);
+}
+.xp-bar{ height:9px; background:#f0ead7; border-radius:8px; overflow:hidden; }
+.xp-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--jour-fonce), var(--jour), #f9c0bb);
+  border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1);
+}
+.defi-count{
+  text-align:center; margin-top:12px;
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:700;
+  letter-spacing:2px; color:#7a7a7a;
+}
+
+/* ================== CARD EXERCICE ================== */
+.card{
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
+}
+.rainbow{
+  height:6px;
+  background:linear-gradient(90deg,#ff5e5e,#f5a623,#9be7a5,#3ab5d8,#a884ff,#ff5e5e);
+  background-size:300% 100%;
+  animation: slide 4s linear infinite;
+}
+@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+
+.card-body{ padding:22px 24px 24px; }
+
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:10px; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--txt); }
+.type-badge{
+  font-family:'Orbitron',sans-serif; font-size:.62rem; font-weight:700;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  padding:5px 11px; border-radius:14px; border:1px solid var(--jour-pale);
+  white-space:nowrap;
+}
+
+/* encart énoncé : FOND CLAIR (dys-friendly) */
+.texte-fable{
+  background:var(--jour-clair);
+  border:2px solid var(--jour);
+  border-radius:14px;
+  padding:18px 18px;
+  margin-bottom:16px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(245,166,35,.12);
+}
+.texte-fable .ft-titre{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1px; color:var(--jour-fonce); margin-bottom:10px;
+}
+.texte-fable .ft-expr{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem;
+  color:var(--jour-fonce); letter-spacing:1px;
+}
+
+/* style "blocs Scratch" : pseudo-code lisible */
+.scratch-script{
+  display:inline-block; text-align:left;
+  background:#fff; border:1.5px solid var(--jour-pale);
+  border-radius:10px; padding:12px 14px;
+  font-family:'Courier New', Consolas, monospace; font-size:.95rem;
+  line-height:1.55; color:#2b2b2b;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  white-space:pre;
+}
+.scratch-script .bloc{
+  display:inline-block; padding:1px 7px; margin:1px 1px;
+  border-radius:5px; font-weight:bold; color:#fff;
+}
+.scratch-script .b-mouv{ background:#4c97ff; }   /* mouvement bleu */
+.scratch-script .b-ctrl{ background:#ffab19; }   /* contrôle orange */
+.scratch-script .b-var { background:#ff8c1a; }   /* variables orange-rouge */
+.scratch-script .b-op  { background:#59c059; }   /* opérateurs vert */
+.scratch-script .b-look{ background:#9966ff; }   /* apparence violet */
+.scratch-script .b-pen { background:#0fbd8c; }   /* stylo vert-bleu */
+.scratch-script .indent{ padding-left:24px; }
+
+/* zone figure SVG (pour les questions de tracé) */
+.scratch-figure{
+  display:flex; justify-content:center; align-items:center;
+  margin-top:8px;
+}
+.scratch-figure svg{ max-width:160px; height:auto; }
+
+.cursor{
+  display:inline-block; width:3px; height:1.5rem; background:var(--jour-fonce);
+  margin-left:4px; vertical-align:-4px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink{ 0%,50%{ opacity:1; } 51%,100%{ opacity:0; } }
+
+.question-txt{
+  font-size:1.05rem; font-weight:bold; color:var(--txt);
+  margin-bottom:16px; line-height:1.5;
+}
+
+/* choix QCM */
+.choix{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+.choix-btn{
+  text-align:left; font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700;
+  padding:14px 16px; border:2px solid #e8e2d4; background:#fff;
+  border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt);
+  display:flex; align-items:center; gap:11px;
+}
+.choix-btn .choix-content{ flex:1; }
+.choix-btn .choix-content svg{ max-width:140px; max-height:60px; vertical-align:middle; margin-right:10px; }
+.choix-btn .lettre{
+  flex-shrink:0; width:28px; height:28px; border-radius:50%;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.85rem;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--jour-pale);
+}
+.choix-btn sup{ font-size:.7rem; }
+.choix-btn:hover:not(.locked){ border-color:var(--jour); background:var(--jour-clair); }
+.choix-btn.selected{
+  border-color:var(--jour); background:var(--jour-clair);
+  box-shadow:0 0 0 3px rgba(245,166,35,.25);
+}
+.choix-btn.selected .lettre{ background:var(--jour); color:#fff; }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{
+  border-color:var(--vert); background:#e7faec;
+}
+.choix-btn.good .lettre{ background:var(--vert); color:#fff; }
+.choix-btn.bad{
+  border-color:var(--rouge); background:#fdeaea;
+}
+.choix-btn.bad .lettre{ background:var(--rouge); color:#fff; }
+
+/* boutons */
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 4px; }
+.btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:11px 18px; border:none; border-radius:10px;
+  cursor:pointer; transition:transform .12s; color:#fff; position:relative;
+}
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-indice{  background:#3ab5d8; }
+.btn-suivant{ background:var(--jour); color:#3a2c00; }
+
+.btn-valider:not(:disabled){ animation: neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled){  animation: neon-bleu 1.4s ease-in-out infinite; }
+.btn-suivant:not(:disabled){ animation: neon-jour 1.4s ease-in-out infinite; }
+
+@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5);}  50%{ box-shadow:0 0 18px rgba(34,197,94,.95);} }
+@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
+@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(245,166,35,.5);} 50%{ box-shadow:0 0 18px rgba(245,166,35,.95);} }
+
+.btn:disabled{
+  background:#d8d8d8 !important; color:#fff !important;
+  cursor:not-allowed; animation:none !important; box-shadow:none !important;
+}
+
+/* indice */
+.indice-box{
+  display:none; margin-top:14px; padding:13px 16px;
+  background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px;
+  font-size:.9rem; color:#1a6e88;
+}
+.indice-box.show{ display:block; animation: pop .35s ease; }
+
+/* feedback */
+.feedback{ display:none; margin-top:16px; padding:14px 16px; border-radius:10px; font-weight:bold; font-size:1rem; }
+.feedback.show{ display:block; animation: pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{  background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{  background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+
+/* correction */
+.correction{
+  display:none; margin-top:14px; padding:15px 18px;
+  background:#fff8e6; border:1px dashed var(--jour); border-radius:10px;
+  font-size:.92rem; color:#5a4500; line-height:1.6;
+}
+.correction.show{ display:block; animation: pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+
+/* navigation */
+.nav{ display:flex; justify-content:space-between; margin-top:20px; }
+.nav button{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:500;
+  letter-spacing:.5px; padding:9px 16px; border-radius:8px;
+  border:1px solid #ddd; background:#f7f7f7; color:#888; cursor:pointer; transition:.15s;
+}
+.nav button:not(:disabled):hover{ background:#eee; color:#555; }
+.nav button:disabled{ opacity:.4; cursor:not-allowed; }
+
+/* +25 XP flottant */
+.xp-pop{
+  position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5);
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3rem;
+  color:var(--jour); text-shadow:0 0 20px var(--jour), 0 4px 10px rgba(0,0,0,.3);
+  z-index:50; opacity:0; pointer-events:none;
+}
+.xp-pop.go{ animation: xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
+  25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); }
+  70%{ opacity:1; transform:translate(-50%,-80%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); }
+}
+
+/* ================= ÉCRAN RÉSULTATS ================= */
+.results{ display:none; }
+.results.show{ display:block; animation: pop .5s ease; }
+.results .mission{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.7rem;
+  text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px;
+}
+.results .big-score{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3.4rem;
+  text-align:center; color:var(--jour);
+  text-shadow:0 0 16px rgba(245,166,35,.5); margin:8px 0;
+}
+.results .res-stars{ text-align:center; font-size:1.7rem; letter-spacing:5px; color:var(--jour); margin-bottom:10px; }
+.results .gg{
+  text-align:center; font-family:'Orbitron',sans-serif; font-size:.88rem;
+  color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:20px;
+}
+.recap{ background:#faf7ef; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
+.recap-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:.86rem; gap:10px;
+}
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; }
+.recap-item .st{ font-size:1.1rem; flex-shrink:0; }
+.btn-rejouer{
+  display:block; width:100%;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px;
+  padding:14px; border:none; border-radius:12px; color:#3a2c00;
+  background:var(--jour); cursor:pointer;
+  animation: neon-jour 1.4s ease-in-out infinite;
+}
+.btn-rejouer:active{ transform:scale(.97); }
+
+/* ========== BOUTON SCORE FINAL (mode liste) ========== */
+.btn-score-final{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem;
+  letter-spacing:1.5px; padding:16px 32px;
+  border:2px solid var(--jour); border-radius:14px;
+  background:#fff; color:var(--gris);
+  cursor:not-allowed; transition:all .25s;
+  opacity:.55;
+}
+.btn-score-final:not(:disabled){
+  background:linear-gradient(135deg, var(--jour) 0%, #fff8d0 50%, var(--jour) 100%);
+  background-size:200% 100%;
+  color:#3a2c00; cursor:pointer; opacity:1;
+  border-color:var(--jour-fonce);
+  animation: shine-final 2s linear infinite, pulse-final 1.6s ease-in-out infinite;
+  box-shadow:0 6px 20px rgba(245,166,35,.4);
+}
+.btn-score-final:not(:disabled):hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(245,166,35,.5);
+}
+.btn-score-final:not(:disabled):active{
+  transform:translateY(0) scale(.97);
+}
+@keyframes shine-final{
+  0%{ background-position:0% 0; }
+  100%{ background-position:200% 0; }
+}
+@keyframes pulse-final{
+  0%,100%{ box-shadow:0 6px 20px rgba(245,166,35,.4); }
+  50%    { box-shadow:0 8px 28px rgba(245,166,35,.7); }
+}
+.hint-score{
+  font-family:'Orbitron',sans-serif; font-size:.7rem;
+  letter-spacing:1px; color:var(--gris);
+  margin-top:8px; text-transform:uppercase;
+  transition:opacity .3s;
+}
+.hint-score.hidden{ opacity:0; }
+</style>
+</head>
+<body>
+
+<!-- bulles statiques de fond -->
+<div class="bulle bulle-jaune"></div>
+<div class="bulle bulle-jour"></div>
+<div class="bulle bulle-verte"></div>
+
+<div class="wrap">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 3ÈME
+    </div>
+    <div class="semaine">Semaine 1 – Jour 1</div>
+    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre">📐 Calcul littéral · substituer, réduire, vérifier · 10 challenges</div>
+    <div class="badge-revision">▶ DÉFI BREVET 3ÈME</div>
+  </div>
+
+  <!-- ===== ENCART GAME (fond clair) ===== -->
+  <div class="game">
+    <div class="game-label">▶ DÉFI BREVET 3ÈME</div>
+
+    <div class="etoiles" id="etoiles"></div>
+
+    <div class="scoreboard">
+      <div class="score-col reussis">
+        <div class="score-num" id="sc-reussis">0</div>
+        <div class="score-lbl">△ Réussis</div>
+      </div>
+      <div class="score-col restants">
+        <div class="score-num" id="sc-restants">6</div>
+        <div class="score-lbl">◆ Restants</div>
+      </div>
+      <div class="score-col erreurs">
+        <div class="score-num" id="sc-erreurs">0</div>
+        <div class="score-lbl">△ Erreurs</div>
+      </div>
+    </div>
+
+    <div class="xp-head">
+      <span>▶ XP PROGRESS</span>
+      <span id="xp-pct">0 %</span>
+    </div>
+    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+
+    <div class="defi-count" id="defi-count">10 DÉFIS À RÉSOUDRE</div>
+  </div>
+
+  <!-- ===== TOUS LES DÉFIS (générés par JS) ===== -->
+  <div id="defis-container"></div>
+
+  <!-- ===== BOUTON FINAL ===== -->
+  <div style="margin: 24px 0 10px; text-align:center;">
+    <button class="btn-score-final" id="btn-score-final" disabled>
+      🏆 VOIR MON SCORE FINAL
+    </button>
+    <div class="hint-score" id="hint-score">Termine les 10 défis pour débloquer ton score final</div>
+  </div>
+
+  <!-- ===== ÉCRAN RÉSULTATS ===== -->
+  <div class="card results" id="results-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">// MISSION ACCOMPLIE</div>
+      <div class="big-score" id="res-score">0 / 10</div>
+      <div class="res-stars" id="res-stars"></div>
+      <div class="gg" id="res-msg">// GG — validé !</div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" id="btn-rejouer">▶ NOUVEAU DÉFI</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- +25 XP flottant -->
+<div class="xp-pop" id="xp-pop">+25 XP !</div>
+
+<script>
+/* =========================================================
+   DONNÉES DES 10 DÉFIS — Calcul littéral (4e)
+   Inspiré de Mathalea : substituer une valeur dans une expression,
+   réduire des expressions, vérifier une égalité, traduire un
+   programme de calcul.
+   Progression : substitution simple → carrés → cubes → parenthèses →
+   réduire → vérifier → traduire.
+   ========================================================= */
+const DEFIS = [
+  {
+    titre:"Substituer (simple)",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 Calcule l\'expression :'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.35rem;">6z − 2</div>'
+       + '<div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>z = −5</b></div>',
+    question:"Quel est le résultat ?",
+    choices:[
+      "28",
+      "−28",
+      "−32",
+      "−30"
+    ],
+    correct:2,
+    indice:"Remplace z par −5 dans l\'expression : 6 × (−5) − 2. Attention au signe de la multiplication par un négatif !",
+    correction:"6z − 2 pour z = −5 : 6 × (−5) − 2 = −30 − 2 = <b>−32</b>.<br>(Erreur classique : oublier le signe du produit, ou compter −30 + 2 au lieu de −30 − 2.)"
+  },
+  {
+    titre:"Réduire (simple)",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 Réduis l\'expression suivante (regroupe les termes semblables) :'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.35rem;">4c + 5c</div>',
+    question:"Quelle est la forme réduite ?",
+    choices:[
+      "20c",
+      "9c",
+      "9c²",
+      "Impossible à réduire"
+    ],
+    correct:1,
+    indice:"4c et 5c sont des termes SEMBLABLES (même lettre, même puissance). On additionne juste les coefficients.",
+    correction:"4c + 5c = (4 + 5)c = <b>9c</b>. C'est comme : 4 chats + 5 chats = 9 chats.<br>(Attention : on n\'additionne PAS les c entre eux, donc pas de c².)"
+  },
+  {
+    titre:"Carré d\'un négatif",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 Calcule l\'expression :'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.35rem;">−5u² − 4</div>'
+       + '<div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>u = −3</b></div>',
+    question:"Quel est le résultat ?",
+    choices:[
+      "41 (car (−3)² = −9 dans cette logique)",
+      "−49",
+      "−41",
+      "11"
+    ],
+    correct:1,
+    indice:"Étape 1 : calcule u². Attention : (−3)² = (−3) × (−3) = +9 (pas −9 !). Puis multiplie par −5, et retranche 4.",
+    correction:"u² = (−3)² = 9 (un carré est TOUJOURS positif).<br>−5u² = −5 × 9 = −45.<br>−5u² − 4 = −45 − 4 = <b>−49</b>."
+  },
+  {
+    titre:"Polynôme du 2nd degré",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 Calcule l\'expression :'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.35rem;">8t² + 6t + 1</div>'
+       + '<div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>t = −1</b></div>',
+    question:"Quel est le résultat ?",
+    choices:[
+      "15",
+      "3",
+      "−13",
+      "9"
+    ],
+    correct:1,
+    indice:"Calcule terme par terme : 8 × (−1)², puis 6 × (−1), puis + 1. (−1)² vaut bien +1.",
+    correction:"t² = (−1)² = 1, donc 8t² = 8.<br>6t = 6 × (−1) = −6.<br>8t² + 6t + 1 = 8 + (−6) + 1 = 8 − 6 + 1 = <b>3</b>."
+  },
+  {
+    titre:"Puissance 3",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 Calcule l\'expression :'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.35rem;">9t³ − 1</div>'
+       + '<div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>t = 2</b></div>',
+    question:"Quel est le résultat ?",
+    choices:[
+      "53",
+      "71",
+      "215",
+      "17"
+    ],
+    correct:1,
+    indice:"Calcule d'abord t³ = 2 × 2 × 2 = 8. Puis multiplie par 9 et retranche 1.",
+    correction:"t³ = 2³ = 2 × 2 × 2 = 8.<br>9t³ = 9 × 8 = 72.<br>9t³ − 1 = 72 − 1 = <b>71</b>. (Erreur classique : confondre t³ avec 3t = 6, qui donnerait 9×6−1 = 53.)"
+  },
+  {
+    titre:"Parenthèses + négatifs",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 Calcule l\'expression :'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.35rem;">(y + 2) × (−3)</div>'
+       + '<div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>y = −5</b></div>',
+    question:"Quel est le résultat ?",
+    choices:[
+      "−9",
+      "9",
+      "21",
+      "−21"
+    ],
+    correct:1,
+    indice:"Étape 1 : calcule ce qui est dans les parenthèses (y + 2 avec y = −5). Étape 2 : multiplie le résultat par (−3). Règle des signes : un négatif × un négatif = positif !",
+    correction:"y + 2 = (−5) + 2 = −3.<br>(y + 2) × (−3) = (−3) × (−3) = <b>9</b> (négatif × négatif = positif)."
+  },
+  {
+    titre:"Parenthèses + ordre",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 Calcule l\'expression :'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.35rem;">(4 − 7x) × 2</div>'
+       + '<div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>x = 3</b></div>',
+    question:"Quel est le résultat ?",
+    choices:[
+      "−6",
+      "−34",
+      "−42",
+      "50"
+    ],
+    correct:1,
+    indice:"Étape 1 : calcule 4 − 7 × 3 (priorité au produit !). Étape 2 : multiplie le résultat par 2.",
+    correction:"4 − 7x = 4 − 7 × 3 = 4 − 21 = −17 (priorité à la multiplication).<br>(4 − 7x) × 2 = (−17) × 2 = <b>−34</b>.<br>(Erreur classique : faire (4 − 7) × 3 × 2, qui donnerait −18.)"
+  },
+  {
+    titre:"Réduire (piège y vs y²)",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 Réduis l\'expression :'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.35rem;">3y + 6 + 7y² + 6y²</div>',
+    question:"Quelle est la forme réduite ?",
+    choices:[
+      "22y²",
+      "13y² + 9y",
+      "13y² + 3y + 6",
+      "3y³ + 13y² + 6"
+    ],
+    correct:2,
+    indice:"Attention : 3y et 7y² ne sont PAS des termes semblables (l'un a y, l\'autre y²). On ne peut additionner QUE les termes ayant exactement la MÊME partie littérale.",
+    correction:"On regroupe les termes en y² ensemble : 7y² + 6y² = 13y².<br>Le terme en y (3y) reste seul.<br>Le terme constant (6) reste seul.<br>Forme réduite : <b>13y² + 3y + 6</b>. (3y et 13y² ne se réduisent PAS — partie littérale différente.)"
+  },
+  {
+    titre:"Vérifier une égalité",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '📐 L\'égalité ci-dessous est-elle vraie ?'
+       + '</div>'
+       + '<div class="ft-expr" style="font-size:1.3rem;">4v + 2 = 2v + 14</div>'
+       + '<div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>v = 6</b></div>',
+    question:"L\'égalité est-elle vérifiée ?",
+    choices:[
+      "Vraie : les deux membres valent 26",
+      "Vraie : les deux membres valent 24",
+      "Fausse : 24 ≠ 26",
+      "On ne peut pas le savoir sans résoudre l'équation"
+    ],
+    correct:0,
+    indice:"Calcule le MEMBRE DE GAUCHE (4v + 2 pour v = 6) puis le MEMBRE DE DROITE (2v + 14 pour v = 6). Si les deux donnent le même résultat, l'égalité est vraie pour cette valeur.",
+    correction:"Membre de gauche : 4v + 2 = 4 × 6 + 2 = 24 + 2 = <b>26</b>.<br>Membre de droite : 2v + 14 = 2 × 6 + 14 = 12 + 14 = <b>26</b>.<br>Les deux membres sont égaux à 26 → l'égalité est <b>vraie</b> pour v = 6.<br>(Plus tard tu apprendras à RÉSOUDRE cette équation pour trouver v = 6 sans le savoir à l\'avance.)"
+  },
+  {
+    titre:"Traduire un programme",
+    expr:'<div style="font-size:.95rem; line-height:1.6; padding:10px; text-align:left; background:#fff5e0; border-left:3px solid #c47a10; border-radius:6px;">'
+       + '📐 <b>Programme de calcul :</b>'
+       + '<ul style="margin:6px 0 0 18px; padding:0;">'
+       + '<li>Choisir un nombre.</li>'
+       + '<li>Lui retrancher 9.</li>'
+       + '<li>Lui retrancher 5.</li>'
+       + '<li>Multiplier les deux résultats précédents.</li>'
+       + '</ul>'
+       + '</div>'
+       + '<div style="font-size:.92rem; padding:8px; text-align:center;">Note le nombre de départ <b>x</b>. Quelle est l\'expression obtenue ?</div>',
+    question:"Quelle expression traduit ce programme ?",
+    choices:[
+      "x − 9 − 5 = x − 14",
+      "(x − 9) × (x − 5)",
+      "x − 9 × x − 5",
+      "(x − 9) + (x − 5)"
+    ],
+    correct:1,
+    indice:"Le programme parle de DEUX résultats qu\'il faut multiplier ensuite. Le 1er résultat = (x − 9), le 2e résultat = (x − 5). Ensuite on les multiplie.",
+    correction:"Note le nombre choisi <b>x</b>.<br>• Lui retrancher 9 : <b>x − 9</b> (1er résultat)<br>• Lui retrancher 5 (toujours à partir de x) : <b>x − 5</b> (2e résultat)<br>• Multiplier les deux : <b>(x − 9) × (x − 5)</b><br>(Les parenthèses sont nécessaires car on multiplie les expressions entières, pas juste 9 par x.)"
+  }
+];
+
+const TOTAL = DEFIS.length;
+
+/* ===================== ÉTAT (mode liste) ===================== */
+/*
+   Mode "tout sur une page" : on génère 6 cards et chacune a son état propre.
+   etat[i] = { validated:bool, correct:bool, picked:int|null, indiceShown:bool }
+*/
+let etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
+let reussis = 0;
+let erreurs = 0;
+
+/* ============== RÉFÉRENCES DOM ============== */
+const $ = id => document.getElementById(id);
+const LETTRES = ['A','B','C','D','E','F'];
+
+/* ============== INIT ÉTOILES ============== */
+function buildStars(containerId){
+  const c = $(containerId); if(!c) return;
+  c.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const s = document.createElement('span');
+    s.className = 'star'; s.textContent = '★';
+    c.appendChild(s);
+  }
+}
+buildStars('etoiles');
+
+/* ============== GÉNÉRATION DES 6 CARDS ============== */
+const container = $('defis-container');
+container.innerHTML = '';
+
+DEFIS.forEach((d, idx) => {
+  const card = document.createElement('div');
+  card.className = 'card defi-card';
+  card.id = 'defi-card-' + idx;
+  card.style.marginBottom = '20px';
+
+  let choicesHTML = '';
+  d.choices.forEach((ch, ci) => {
+    choicesHTML += '<button class="choix-btn" data-idx="'+idx+'" data-ci="'+ci+'">'
+                + '<span class="lettre">'+LETTRES[ci]+'</span>'
+                + '<span class="choix-content">'+ch+'</span>'
+                + '</button>';
+  });
+
+  card.innerHTML =
+    '<div class="rainbow"></div>'
+  + '<div class="card-body">'
+  +   '<div class="card-head">'
+  +     '<div class="defi-num">DÉFI ' + String(idx+1).padStart(2,'0') + '</div>'
+  +     '<div class="type-badge">CALCUL LITTÉRAL</div>'
+  +   '</div>'
+  +   '<div class="texte-fable">'
+  +     '<div class="ft-titre">🔢 ' + (d.titre ? d.titre.toUpperCase() : 'DÉFI') + '</div>'
+  +     '<div class="ft-expr">' + d.expr + '</div>'
+  +   '</div>'
+  +   '<div class="question-txt">' + d.question + '</div>'
+  +   '<div class="choix" id="choix-'+idx+'">' + choicesHTML + '</div>'
+  +   '<div class="btns">'
+  +     '<button class="btn btn-valider" id="btn-valider-'+idx+'" disabled>✓ VALIDER</button>'
+  +     '<button class="btn btn-indice"  id="btn-indice-'+idx+'">? INDICE</button>'
+  +   '</div>'
+  +   '<div class="indice-box" id="indice-box-'+idx+'"></div>'
+  +   '<div class="feedback"   id="feedback-'+idx+'"></div>'
+  +   '<div class="correction" id="correction-'+idx+'"></div>'
+  + '</div>';
+
+  container.appendChild(card);
+});
+
+/* ============== ÉVÉNEMENTS sur les choix (délégation) ============== */
+container.addEventListener('click', (e) => {
+  const btn = e.target.closest('.choix-btn');
+  if(btn){
+    const i = parseInt(btn.dataset.idx, 10);
+    const ci = parseInt(btn.dataset.ci, 10);
+    if(etat[i].validated) return;     // figé après validation
+    etat[i].picked = ci;
+    // mise à jour visuelle de la sélection
+    const choixZone = $('choix-'+i);
+    choixZone.querySelectorAll('.choix-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    // activer Valider
+    $('btn-valider-'+i).disabled = false;
+    return;
+  }
+  // Boutons Valider / Indice (délégation aussi)
+  if(e.target.id && e.target.id.startsWith('btn-valider-')){
+    const i = parseInt(e.target.id.split('-').pop(), 10);
+    valider(i);
+  } else if(e.target.id && e.target.id.startsWith('btn-indice-')){
+    const i = parseInt(e.target.id.split('-').pop(), 10);
+    indice(i);
+  }
+});
+
+/* ============== VALIDATION D'UN EXO ============== */
+function valider(i){
+  const e = etat[i];
+  if(e.validated) return;
+  if(e.picked == null) return;
+
+  e.validated = true;
+  e.correct = (e.picked === DEFIS[i].correct);
+  if(e.correct) reussis++;
+  else erreurs++;
+
+  // figer la zone de choix : surligner bon/mauvais
+  const choixZone = $('choix-'+i);
+  choixZone.querySelectorAll('.choix-btn').forEach((b, ci) => {
+    b.disabled = true;
+    b.classList.add('locked');
+    if(ci === DEFIS[i].correct) b.classList.add('good');
+    else if(ci === e.picked)     b.classList.add('bad');
+  });
+
+  // feedback + correction
+  const fb = $('feedback-'+i);
+  if(e.correct){
+    fb.className = 'feedback ok show';
+    fb.innerHTML = '✅ Bonne réponse !';
+    fireXP();
+  } else {
+    fb.className = 'feedback ko show';
+    fb.innerHTML = '❌ Réponse incorrecte. Regarde la correction.';
+  }
+  const corr = $('correction-'+i);
+  corr.className = 'correction show';
+  corr.innerHTML = '<b>📖 Correction :</b> ' + DEFIS[i].correction;
+
+  // désactiver Valider + Indice
+  $('btn-valider-'+i).disabled = true;
+  $('btn-indice-'+i).disabled = true;
+
+  // mise à jour scoreboard
+  updateScoreboard();
+
+  // si tous validés → activer le bouton final (l'utilisateur cliquera pour voir le bilan)
+  const tousValides = etat.every(s => s.validated);
+  if(tousValides){
+    activerBoutonFinal();
+  }
+}
+
+/* ============== ACTIVATION BOUTON FINAL ============== */
+function activerBoutonFinal(){
+  const btn = $('btn-score-final');
+  btn.disabled = false;
+  btn.textContent = '🏆 VOIR MON SCORE FINAL';
+  $('hint-score').classList.add('hidden');
+  // discret rebond visuel à l'activation
+  btn.style.transform = 'scale(1.1)';
+  setTimeout(()=> btn.style.transform = '', 250);
+}
+
+/* ============== INDICE ============== */
+function indice(i){
+  const e = etat[i];
+  if(e.validated) return;
+  const box = $('indice-box-'+i);
+  box.className = 'indice-box show';
+  box.innerHTML = '💡 <b>Indice :</b> ' + DEFIS[i].indice;
+  e.indiceShown = true;
+  $('btn-indice-'+i).disabled = true;
+}
+
+/* ============== SCOREBOARD ============== */
+function updateScoreboard(){
+  $('sc-reussis').textContent = reussis;
+  $('sc-erreurs').textContent = erreurs;
+  $('sc-restants').textContent = TOTAL - reussis - erreurs;
+
+  // étoiles : 1 étoile par exo réussi
+  const stars = document.querySelectorAll('#etoiles .star');
+  stars.forEach((s, k) => s.classList.toggle('on', k < reussis));
+
+  // XP : % de défis validés (réussis OU erreurs)
+  const finis = etat.filter(s => s.validated).length;
+  const pct = Math.round((finis / TOTAL) * 100);
+  $('xp-fill').style.width = pct + '%';
+  $('xp-pct').textContent = pct + ' %';
+
+  // compteur (info)
+  $('defi-count').textContent = finis + ' / ' + TOTAL + ' DÉFIS VALIDÉS';
+}
+
+/* ============== +25 XP FLOTTANT ============== */
+function fireXP(){
+  const p = $('xp-pop');
+  p.classList.remove('go');
+  void p.offsetWidth;
+  p.classList.add('go');
+}
+
+/* ============== ÉCRAN RÉSULTATS FINAL ============== */
+function showResults(){
+  const r = $('results-card');
+  r.classList.add('show');
+
+  $('res-score').textContent = reussis + ' / ' + TOTAL;
+  let stars = '';
+  for(let i=0;i<TOTAL;i++) stars += (i < reussis) ? '★' : '☆';
+  $('res-stars').textContent = stars;
+
+  let msg;
+  const ratio = reussis / TOTAL;
+  if(reussis === TOTAL)        msg = '// PARFAIT — GG, sans-faute ! 🏆';
+  else if(ratio >= 0.75)       msg = '// EXCELLENT — beau score !';
+  else if(ratio >= 0.5)        msg = '// BIEN JOUÉ — continue à t\'entraîner !';
+  else if(reussis > 0)         msg = '// PAS MAL — relis le cours et réessaie !';
+  else                         msg = '// COURAGE — révise et relance !';
+  $('res-msg').textContent = msg;
+
+  let html = '';
+  DEFIS.forEach((d, i) => {
+    html += '<div class="recap-item">'
+         + '<span class="eq">' + (d.titre || 'Défi ' + (i+1)) + '</span>'
+         + '<span class="st">' + (etat[i].correct ? '✅' : '❌') + '</span>'
+         + '</div>';
+  });
+  $('res-recap').innerHTML = html;
+
+  // remonter en haut de la page pour voir le scoreboard final + le récap
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============== REJOUER ============== */
+function rejouer(){
+  // reset état
+  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
+  reussis = 0;
+  erreurs = 0;
+
+  // cacher écran résultats
+  $('results-card').classList.remove('show');
+
+  // reset visuel de chaque card
+  DEFIS.forEach((d, i) => {
+    // choix
+    const choixZone = $('choix-'+i);
+    choixZone.querySelectorAll('.choix-btn').forEach(b => {
+      b.disabled = false;
+      b.classList.remove('selected','good','bad','locked');
+    });
+    // boutons
+    $('btn-valider-'+i).disabled = true;
+    $('btn-indice-'+i).disabled = false;
+    // feedback/correction/indice
+    $('feedback-'+i).className = 'feedback';
+    $('feedback-'+i).innerHTML = '';
+    $('correction-'+i).className = 'correction';
+    $('correction-'+i).innerHTML = '';
+    $('indice-box-'+i).className = 'indice-box';
+    $('indice-box-'+i).innerHTML = '';
+  });
+
+  updateScoreboard();
+
+  // reset bouton final
+  const btnF = $('btn-score-final');
+  btnF.disabled = true;
+  $('hint-score').classList.remove('hidden');
+
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+$('btn-rejouer').addEventListener('click', rejouer);
+$('btn-score-final').addEventListener('click', showResults);
+
+/* ============== INIT ============== */
+updateScoreboard();
+</script>
+</body>
+</html>
