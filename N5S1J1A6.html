@@ -121,6 +121,8 @@
     .feedback.show{display:flex;}
     .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
     .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback.info{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);
+      font-size:clamp(.82rem,2.4vw,.9rem);}
     .feedback .fi{font-size:1.4rem;flex-shrink:0;}
 
     .results{display:none;text-align:center;}
@@ -173,7 +175,7 @@
     <!-- Plateau -->
     <div class="board" id="board">
       <div class="hud">
-        <div class="hud-chip" id="timer"><span class="ic">⏱️</span><span id="timer-val">2:00</span></div>
+        <div class="hud-chip" id="timer"><span class="ic">⏱️</span><span id="timer-val">1:30</span></div>
         <div class="hud-chip placed"><span class="ic">✅</span><span id="placed-val">0</span> / 6 placées</div>
         <button class="btn btn-ghost" style="padding:.4rem .9rem;min-height:auto;" onclick="resetTags()">↩️ Tout vider</button>
       </div>
@@ -272,7 +274,7 @@ var TAGS = [
   { mot:"plus grande partie numérique",     slot:4 },
   { mot:"plus PETITE partie numérique",     slot:5 }
 ];
-var DUREE = 120; // 2 minutes
+var DUREE = 90; // 1 min 30
 
 /* ═══ MOTEUR ═══ */
 var $ = function(id){ return document.getElementById(id); };
@@ -287,6 +289,7 @@ function startGame(){
   $("start-overlay").style.display="none";
   $("board").classList.add("show");
   $("results").classList.remove("show");
+  var tz=document.querySelector(".tray-zone"); if(tz) tz.style.display="";
   placement=new Array(NB).fill(null);
   // restaurer le bouton "Vérifier" AVANT tout appel à refreshState (via buildTray)
   $("actions-row").innerHTML = "<button class='btn btn-primary' id='btn-check' onclick='checkAll()' disabled>✓ Vérifier</button>";
@@ -457,35 +460,24 @@ function finish(timeout){
   for(var i=0;i<NB;i++){
     var slot=document.querySelector('.slot[data-slot="'+i+'"]');
     var id=placement[i];
-    if(id!==null){
-      var el=tagEl(id); el.classList.remove("ok","ko","corrige");
-      if(TAGS[id].slot===i){ el.classList.add("ok"); ok++; }
-      else {
-        // mauvais mot : on le marque faux, on le renvoie au tray,
-        // et on met le BON mot (corrigé) dans le trou
-        el.classList.add("ko");
-        $("tray").appendChild(el);
-        placement[i]=null;
-        slot.classList.remove("filled");
-        poseCorrige(slot, bonneEtiquette[i]);
-      }
+    if(id!==null && TAGS[id].slot===i){
+      // bonne réponse : on la garde, marquée verte
+      var el=tagEl(id); el.classList.remove("ko","corrige"); el.classList.add("ok");
+      ok++;
     } else {
-      // trou laissé vide : on affiche le bon mot (corrigé)
+      // faux OU vide : on vide le trou et on affiche le bon mot (corrigé)
+      if(id!==null){ var bad=tagEl(id); if(bad) bad.remove(); placement[i]=null; }
+      slot.innerHTML=""; slot.classList.remove("filled");
       poseCorrige(slot, bonneEtiquette[i]);
     }
   }
+  // la réserve n'a plus d'utilité après correction : on la masque
+  var tz=document.querySelector(".tray-zone"); if(tz) tz.style.display="none";
   var bc=$("btn-check"); if(bc) bc.disabled=true;
   var fb=$("feedback");
-  if(timeout){
-    fb.className="feedback show ko"; $("fb-ic").textContent="\u23F1\uFE0F";
-    $("fb-msg").innerHTML="<strong>Temps écoulé\u00a0!</strong> La carte complète et corrigée est affichée ci-dessus (vert plein = tes bonnes réponses, ✔ en pointillé = la bonne réponse).";
-  } else if(ok===NB){
-    fb.className="feedback show ok"; $("fb-ic").textContent="\uD83C\uDF89";
-    $("fb-msg").innerHTML="<strong>Carte complétée\u00a0!</strong> Les 6 mots sont bien placés.";
-  } else {
-    fb.className="feedback show ko"; $("fb-ic").textContent="\u274C";
-    $("fb-msg").innerHTML="<strong>"+ok+" sur "+NB+" bien placés.</strong> La carte est maintenant complète\u00a0: vert plein = tes bonnes réponses, ✔ en pointillé = la bonne réponse à retenir.";
-  }
+  // Légende sobre et unique (le score détaillé est sur l'écran suivant).
+  fb.className="feedback show info"; $("fb-ic").textContent="\uD83D\uDD0E";
+  $("fb-msg").innerHTML="Carte corrigée : <b>vert</b> = juste, <b>✔ pointillé</b> = la bonne réponse.";
   // La carte corrigée reste seule à l'écran (aérée). L'élève la lit,
   // puis clique pour voir son score sur un écran séparé.
   lastOk=ok; lastTimeout=timeout;
@@ -498,15 +490,26 @@ function showResults(ok,timeout){
   $("board").classList.remove("show");
   $("results").classList.add("show");
   $("score-num").textContent=ok;
-  var stars=ok>=NB?5:ok>=5?4:ok>=4?3:ok>=2?2:ok>=1?1:0;
+  var used=DUREE-timeLeft;   // temps écoulé en secondes
+
+  // ─── Barème ───
+  // 6/6 en < 45 s : 5 ⭐ | 6/6 : 4 ⭐ | 5/6 : 4 ⭐ | 4/6 : 3 ⭐
+  // 2-3/6 : 2 ⭐ | 0-1/6 : 1 ⭐  (un temps dépassé n'empêche que le bonus 5⭐)
+  var stars, rang;
+  if(ok===6 && !timeout && used<45){ stars=5; rang="Maître des nombres relatifs"; }
+  else if(ok===6){ stars=4; rang="Expert"; }
+  else if(ok===5){ stars=4; rang="Expert"; }
+  else if(ok===4){ stars=3; rang="Bon travail"; }
+  else if(ok>=2){ stars=2; rang="En progrès"; }
+  else { stars=1; rang="Continue à t\u2019entraîner"; }
+
   $("stars").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
-  var msg;
-  if(ok===NB) msg="Parfait\u00a0! Tu connais les règles pour ranger les nombres relatifs.";
-  else if(ok>=4) msg="Bien joué\u00a0! Clique sur «\u00a0Revoir la carte\u00a0» pour mémoriser, puis rejoue.";
-  else msg="À retravailler\u00a0: clique sur «\u00a0Revoir la carte\u00a0» pour voir la version juste, mémorise-la, puis rejoue.";
-  $("results-msg").textContent=msg;
-  var used=DUREE-timeLeft;
-  $("time-note").textContent = timeout ? "Chrono terminé avant la fin." : "Temps utilisé : "+fmt(used)+" sur "+fmt(DUREE);
+  $("results-msg").innerHTML = "<strong>"+rang+"</strong><br/>"
+    + (ok===NB ? "Carte complétée sans faute\u00a0!"
+               : ok+" bonnes réponses sur "+NB+". Clique sur «\u00a0Revoir la carte\u00a0» pour mémoriser la version juste.");
+  $("time-note").textContent = timeout
+    ? "Chrono écoulé (1 min 30)."
+    : "Temps : "+fmt(used)+" (chrono 1 min 30)";
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
