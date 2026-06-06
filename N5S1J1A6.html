@@ -128,6 +128,36 @@
     .results{display:none;text-align:center;}
     .results.show{display:block;animation:fadeUp .4s ease both;}
     .results-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:.4rem;}
+
+    /* Exercice d'application */
+    .appli{display:none;}
+    .appli.show{display:block;animation:fadeUp .4s ease both;}
+    .appli-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.8rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+    .appli-title{font-weight:800;color:var(--day-dark);font-size:clamp(1.1rem,3.4vw,1.3rem);margin-bottom:.5rem;}
+    .appli-consigne{font-size:clamp(.9rem,2.6vw,1rem);line-height:1.9;margin-bottom:1.2rem;}
+    .appli-consigne strong{color:var(--day-dark);}
+    .num-pool{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-bottom:1.4rem;}
+    .num{min-width:64px;min-height:48px;padding:.5rem 1rem;border-radius:10px;border:2px solid var(--day-border);
+      background:var(--day-light);color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:700;
+      font-size:clamp(1rem,3vw,1.2rem);cursor:pointer;transition:transform .1s,border-color .15s,background .15s;
+      display:inline-flex;align-items:center;justify-content:center;}
+    .num:hover:not(.used){border-color:var(--day-color);background:#e7f5da;}
+    .num:active{transform:scale(.94);}
+    .num.used{opacity:.32;cursor:default;border-style:dashed;}
+
+    .seq-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);
+      text-align:left;margin-bottom:.4rem;}
+    .seq{min-height:56px;border:2px dashed var(--border);border-radius:12px;background:var(--bg);
+      display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:center;padding:.7rem;margin-bottom:.6rem;}
+    .seq-ph{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.82rem;}
+    .seq-item{display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;
+      font-weight:700;font-size:clamp(.95rem,2.9vw,1.15rem);color:var(--day-dark);
+      background:var(--surface);border:2px solid var(--day-border);border-radius:8px;padding:.35rem .7rem;}
+    .seq-item.ok{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .seq-item.ko{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .seq-sep{color:var(--day-color);font-weight:700;font-family:'JetBrains Mono',monospace;}
+    .appli-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
     .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
       padding:2.2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
     .results-score{font-size:clamp(2.4rem,11vw,4.4rem);font-weight:800;line-height:1;margin:.6rem 0 .3rem;}
@@ -249,7 +279,40 @@
         <div class="time-note" id="time-note"></div>
         <div class="results-btns">
           <button class="btn btn-ghost" onclick="backToCard()">↩️ Revoir la carte</button>
-          <button class="btn btn-primary" onclick="restart()">🔄 Rejouer</button>
+          <button class="btn btn-ghost" onclick="restart()">🔄 Rejouer</button>
+          <button class="btn btn-primary" onclick="goApplication()">✏️ Exercice d&rsquo;application</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercice d'application : cliquer les nombres dans l'ordre croissant -->
+    <div class="appli" id="appli">
+      <div class="appli-card">
+        <div class="logo-badge" style="margin-bottom:.6rem">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#3ab5d8"></span>
+          Application
+        </div>
+        <div class="appli-title">✏️ À toi de jouer&nbsp;!</div>
+        <p class="appli-consigne">Range ces nombres dans l&rsquo;ordre <strong>croissant</strong> (du plus petit au plus grand).<br/>
+          <span style="color:var(--muted);font-size:.85rem;">Clique les nombres un par un, dans le bon ordre.</span></p>
+
+        <!-- nombres à cliquer -->
+        <div class="num-pool" id="num-pool"></div>
+
+        <!-- séquence construite -->
+        <div class="seq-label">Ta réponse :</div>
+        <div class="seq" id="seq"><span class="seq-ph" id="seq-ph">clique un nombre pour commencer…</span></div>
+
+        <div class="feedback" id="appli-fb">
+          <span class="fi" id="appli-fb-ic"></span>
+          <div id="appli-fb-msg"></div>
+        </div>
+
+        <div class="appli-btns" id="appli-btns">
+          <button class="btn btn-ghost" id="appli-undo" onclick="undoSeq()">↩️ Annuler le dernier</button>
+          <button class="btn btn-primary" id="appli-check" onclick="checkAppli()" disabled>✓ Vérifier</button>
         </div>
       </div>
     </div>
@@ -521,6 +584,104 @@ function backToCard(){
 }
 
 function restart(){ finished=false; $("results").classList.remove("show"); startGame(); }
+
+/* ═══ EXERCICE D'APPLICATION : cliquer dans l'ordre croissant ═══ */
+var APPLI_NUMS = [-5.04, 3.9, -5.4, -4.5, 2.6];           // suite du corrigé
+var APPLI_LABELS = ["-5,04","3,9","-5,4","-4,5","2,6"];   // affichage français
+var appliSeq = [];          // indices cliqués, dans l'ordre
+var appliDone = false;
+
+function appliShuffle(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+
+function goApplication(){
+  $("results").classList.remove("show");
+  $("board").classList.remove("show");
+  $("appli").classList.add("show");
+  appliSeq=[]; appliDone=false;
+  buildPool();
+  renderSeq();
+  $("appli-fb").className="feedback";
+  $("appli-btns").innerHTML = "<button class='btn btn-ghost' id='appli-undo' onclick='undoSeq()'>↩️ Annuler le dernier</button>"
+    + "<button class='btn btn-primary' id='appli-check' onclick='checkAppli()' disabled>✓ Vérifier</button>";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function buildPool(){
+  var pool=$("num-pool"); pool.innerHTML="";
+  var order=appliShuffle(APPLI_NUMS.map(function(_,i){return i;}));
+  order.forEach(function(idx){
+    var b=document.createElement("div");
+    b.className="num"; b.textContent=APPLI_LABELS[idx];
+    b.setAttribute("data-idx",idx);
+    b.onclick=function(){ clickNum(idx, b); };
+    pool.appendChild(b);
+  });
+}
+
+function clickNum(idx, el){
+  if(appliDone) return;
+  if(appliSeq.indexOf(idx)!==-1) return;   // déjà utilisé
+  appliSeq.push(idx);
+  el.classList.add("used");
+  renderSeq();
+}
+
+function undoSeq(){
+  if(appliDone || appliSeq.length===0) return;
+  var last=appliSeq.pop();
+  var el=document.querySelector('.num[data-idx="'+last+'"]');
+  if(el) el.classList.remove("used");
+  renderSeq();
+}
+
+function renderSeq(){
+  var seq=$("seq");
+  if(appliSeq.length===0){
+    seq.innerHTML="<span class='seq-ph'>clique un nombre pour commencer…</span>";
+  } else {
+    var html="";
+    appliSeq.forEach(function(idx,k){
+      if(k>0) html+="<span class='seq-sep'>&lt;</span>";
+      html+="<span class='seq-item' data-k='"+k+"'>"+APPLI_LABELS[idx]+"</span>";
+    });
+    seq.innerHTML=html;
+  }
+  var chk=$("appli-check");
+  if(chk) chk.disabled = appliSeq.length<APPLI_NUMS.length;
+}
+
+function checkAppli(){
+  if(appliDone) return;
+  appliDone=true;
+  // ordre croissant attendu
+  var correctOrder = APPLI_NUMS.map(function(_,i){return i;})
+    .sort(function(a,b){ return APPLI_NUMS[a]-APPLI_NUMS[b]; });
+  var allOk=true;
+  appliSeq.forEach(function(idx,k){
+    var item=document.querySelector('.seq-item[data-k="'+k+'"]');
+    if(APPLI_NUMS[idx]===APPLI_NUMS[correctOrder[k]]){ if(item) item.classList.add("ok"); }
+    else { if(item) item.classList.add("ko"); allOk=false; }
+  });
+  var fb=$("appli-fb");
+  if(allOk){
+    fb.className="feedback show ok"; $("appli-fb-ic").textContent="\uD83C\uDF89";
+    $("appli-fb-msg").innerHTML="<strong>Parfait\u00a0!</strong> "+APPLI_LABELS.slice().sort(function(a,b){return parseFloat(a.replace(',','.'))-parseFloat(b.replace(',','.'));}).join(" &lt; ");
+  } else {
+    fb.className="feedback show ko"; $("appli-fb-ic").textContent="\u274C";
+    var bon = correctOrder.map(function(i){return APPLI_LABELS[i];}).join(" &lt; ");
+    $("appli-fb-msg").innerHTML="<strong>Pas tout à fait.</strong> Le bon rangement est&nbsp;: "+bon
+      + "<br/><span style='font-size:.85em;color:var(--text)'>Astuce\u00a0: pense à −5,4 = −5,40, donc −5,40 &lt; −5,04.</span>";
+  }
+  // boutons de fin
+  $("appli-btns").innerHTML = "<button class='btn btn-ghost' onclick='goApplication()'>🔄 Refaire</button>"
+    + "<button class='btn btn-primary' onclick='backToResultsFromAppli()'>↩️ Retour au bilan</button>";
+}
+
+function backToResultsFromAppli(){
+  $("appli").classList.remove("show");
+  $("results").classList.add("show");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
 
 document.addEventListener("DOMContentLoaded", function(){ initSlotDrop(); });
 </script>
