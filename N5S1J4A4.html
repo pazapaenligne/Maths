@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – Laboratoire de données – S1 J4</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#3ab5d8; --day-dark:#1a6e88; --day-light:#e8f6fb; --day-border:#9dd4e8;
+  --gold:#e8b54a; --gold-d:#b8862a;
+  --bg:#0b1014; --panel:#13191e; --panel2:#1a232a;
+  --line:#27323a; --text:#eef5f8; --muted:#8fa3ad;
+  --green:#3fb56a;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 16px rgba(58,181,216,.5), 0 0 40px rgba(58,181,216,.22);
+  --glow-gold:0 0 16px rgba(232,181,74,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:radial-gradient(circle at 50% -10%, #16242c 0%, var(--bg) 60%);color:var(--text);
+  font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#fff;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.1;margin-bottom:.4rem;}
+.title .hl{color:var(--gold);text-shadow:var(--glow-gold);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(40px);opacity:.14;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#3ab5d8;top:-60px;left:-80px;}
+.b2{width:260px;height:260px;background:#e8b54a;bottom:-70px;right:-60px;}
+.b3{width:200px;height:200px;background:#8dc63f;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#f28b82;bottom:8%;left:-60px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(11,16,20,.92);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-keys{display:flex;gap:.35rem;}
+.hud-key{width:1.7rem;height:2rem;border-radius:6px;background:#0b1014;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:.85rem;color:#3a4a52;transition:all .4s;}
+.hud-key.got{background:rgba(232,181,74,.16);border-color:var(--gold);color:var(--gold);}
+.hud-alert{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-alert-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;transition:color .4s;}
+.hud-alert-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#0b1014;border:1px solid var(--line);overflow:hidden;}
+.hud-alert-fill{display:block;height:100%;width:0;border-radius:99px;background:var(--green);transition:width .6s ease,background .6s ease;}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.15rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--text);min-width:3.2rem;text-align:center;}
+.hud-timer.low{color:#f28b82;}
+@media(max-width:560px){.hud-alert-label{display:none;}.hud-alert-gauge{width:54px;}}
+
+/* barre de progression mission */
+.mission-prog{width:100%;max-width:820px;margin:0 auto 1.2rem;}
+.mp-info{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);font-family:'Orbitron',sans-serif;letter-spacing:.06em;margin-bottom:.35rem;text-transform:uppercase;}
+.mp-bg{background:var(--line);border-radius:99px;height:8px;overflow:hidden;}
+.mp-fill{height:100%;width:0;background:linear-gradient(90deg,var(--day-color),var(--gold));border-radius:99px;transition:width .6s ease;}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.4rem;margin-bottom:1rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:580px;margin:0 auto 1.8rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:#c4d2d8;line-height:1.7;text-align:left;}
+.start-mission b{color:var(--gold);}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#fff;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.3rem);letter-spacing:.06em;padding:1rem 2.4rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.codebar{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.7rem 1.1rem;margin-bottom:1.2rem;}
+.codebar .cb-label{font-family:'Orbitron',sans-serif;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.1rem;width:2rem;height:2.5rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#0b1014;border:1.5px solid var(--line);color:#3a4a52;transition:all .4s;}
+.frag.found{background:rgba(232,181,74,.14);border-color:var(--gold);color:var(--gold);text-shadow:var(--glow-gold);transform:scale(1.06);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.3);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#0b1014;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--gold);letter-spacing:.04em;margin-top:.15rem;}
+.timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.3rem);letter-spacing:.08em;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap;}
+.timer.low{color:#f28b82;}
+.step-body{padding:1.2rem;}
+.intro{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.84rem,2.5vw,.95rem);color:var(--gold);background:#0b1014;border:1px solid var(--gold-d);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+.intro .scr{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(.76rem,2.2vw,.84rem);color:#c4d2d8;margin-top:.4rem;letter-spacing:0;}
+.method{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--day-color);border-radius:var(--radius-sm);padding:.7rem 1rem;margin-bottom:1.1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#b3c4cc;line-height:1.7;}
+.method b{color:var(--day-light);}
+
+/* ordonner (tap pour construire la suite) */
+.order-pool,.order-line{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem;}
+.order-line{min-height:54px;background:#0b1014;border:1.5px dashed var(--line);border-radius:var(--radius-sm);padding:.5rem;align-items:center;}
+.order-line:empty::before{content:"Touche les valeurs dans l\2019ordre croissant\2026";color:var(--muted);font-size:.78rem;}
+.chipv{display:inline-flex;align-items:center;justify-content:center;min-width:54px;height:46px;padding:0 .7rem;border-radius:10px;
+  background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#fff;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.95rem;
+  cursor:pointer;box-shadow:var(--glow);user-select:none;transition:transform .1s;}
+.chipv:active{transform:scale(.95);}
+.chipv.placed{background:#1a232a;color:var(--muted);box-shadow:none;border:1px solid var(--line);}
+.chipv.inline{background:var(--panel2);border:1.5px solid var(--day-color);color:var(--day-light);box-shadow:none;}
+.chipv.inline.ok{border-color:var(--green);color:#9ff0bd;}
+.chipv.inline.ko{border-color:#f28b82;color:#ffb3ad;}
+.order-hint{font-size:.72rem;color:var(--muted);margin-bottom:.6rem;}
+
+/* saisie intervalles */
+.iv-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem;font-family:'JetBrains Mono',monospace;font-size:clamp(.85rem,2.5vw,.98rem);}
+.iv-lbl{color:var(--gold);font-weight:600;}
+.iv-in{width:80px;background:#0b1014;border:2px solid var(--line);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.95rem;text-align:center;padding:.45rem;outline:none;min-height:42px;transition:border-color .2s;}
+.iv-in:focus{border-color:var(--day-color);}
+.iv-in.ok{border-color:var(--green);background:rgba(63,181,106,.12);color:#9ff0bd;}
+.iv-in.ko{border-color:#f28b82;background:rgba(242,139,130,.12);color:#ffb3ad;}
+
+/* droite graduée */
+.numline-wrap{margin:1rem 0 1.2rem;}
+.numline{width:100%;height:120px;position:relative;}
+.tokens{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1rem;}
+.token{display:inline-flex;align-items:center;justify-content:center;min-width:48px;height:46px;padding:0 .5rem;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#1a1208;font-family:'Orbitron',sans-serif;font-weight:900;font-size:.95rem;
+  cursor:pointer;box-shadow:var(--glow-gold);user-select:none;transition:transform .1s,outline .1s;outline:3px solid transparent;outline-offset:2px;}
+.token.sel{outline:3px solid #fff;transform:scale(1.08);}
+.token.placed{background:#1a232a;color:var(--muted);box-shadow:none;border:1px solid var(--line);}
+.token small{font-weight:400;font-size:.66rem;margin-left:.15rem;}
+.tap-help{text-align:center;font-size:.74rem;color:var(--muted);margin:.2rem 0 .8rem;}
+.placed-pt{position:absolute;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold-d),var(--gold));
+  color:#1a1208;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:.9rem;box-shadow:var(--glow-gold);cursor:pointer;z-index:3;}
+.placed-pt.ok{background:linear-gradient(135deg,var(--green),#2f8a50);color:#062;}
+.placed-pt.ko{background:linear-gradient(135deg,#7a1f1f,#f28b82);color:#fff;}
+
+/* tableau planètes + qcm */
+.ptable{width:100%;border-collapse:collapse;margin-bottom:1rem;font-family:'JetBrains Mono',monospace;font-size:clamp(.78rem,2.3vw,.88rem);}
+.ptable th,.ptable td{border:1px solid var(--line);padding:.45rem .6rem;text-align:center;}
+.ptable th{background:#0b1014;color:var(--day-light);font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:.05em;}
+.ptable td.neg{color:#9dd4e8;}.ptable td.pos{color:var(--gold);}
+.qcm{margin:1rem 0;}
+.qcm-q{font-size:clamp(.84rem,2.5vw,.94rem);margin-bottom:.55rem;line-height:1.5;color:var(--day-light);}
+.opts{display:flex;flex-direction:column;gap:.45rem;}
+.opt{display:flex;align-items:flex-start;gap:.7rem;text-align:left;width:100%;background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  padding:.65rem .95rem;cursor:pointer;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:clamp(.8rem,2.3vw,.9rem);font-weight:600;min-height:44px;line-height:1.45;transition:border-color .15s,background .15s;}
+.opt:hover:not(.locked){border-color:var(--gold);background:#16222a;}
+.opt.sel{border-color:var(--gold);background:rgba(232,181,74,.12);}
+.opt.locked{cursor:default;}
+.opt.good{border-color:var(--green);background:rgba(63,181,106,.14);color:#9ff0bd;}
+.opt.bad{border-color:#f28b82;background:rgba(242,139,130,.14);color:#ffb3ad;}
+.opt .k{font-family:'Orbitron',sans-serif;font-weight:900;color:var(--gold);width:1.4rem;text-align:center;flex-shrink:0;}
+.opt.good .k{color:var(--green);}.opt.bad .k{color:#f28b82;}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#fff;box-shadow:var(--glow);}
+.btn-retry{background:linear-gradient(135deg,#7a1f1f,#f28b82);color:#fff;}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--gold);color:var(--text);}
+.btn-reset-line{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.hint{margin-top:.8rem;background:#1c2409;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#d8c08a;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(63,181,106,.12);border:1.5px solid var(--green);color:#9ff0bd;}
+.fb.ko{background:rgba(242,139,130,.12);border:1.5px solid #f28b82;color:#ffb3ad;}
+.fb.warn{background:rgba(232,181,74,.1);border:1.5px solid var(--gold-d);color:#e8c98a;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.4rem .55rem;min-height:42px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+.cctv-overlay{position:fixed;inset:0;z-index:16;pointer-events:none;background:repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 1px, transparent 1px 3px),radial-gradient(circle at 50% 50%, transparent 58%, rgba(0,0,0,.45) 100%);mix-blend-mode:multiply;opacity:.45;animation:cctv-flicker 5s infinite;}
+@keyframes cctv-flicker{0%,100%{opacity:.45;}49%{opacity:.55;}50%{opacity:.4;}}
+.alarm-flash{position:fixed;inset:0;z-index:17;pointer-events:none;background:rgba(242,139,130,.28);opacity:0;}
+.alarm-flash.on{animation:alarm-blink .9s ease-in-out infinite;}
+@keyframes alarm-blink{0%,100%{opacity:0;}50%{opacity:1;}}
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(11,16,20,.96);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.8vw,1.1rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:radial-gradient(circle at 50% 45%, rgba(16,40,50,.96), rgba(6,9,11,.98));}
+.finale.show{display:flex;animation:finale-in .5s ease;}
+@keyframes finale-in{from{opacity:0;}to{opacity:1;}}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(58,181,216,.32) 0%, rgba(58,181,216,.08) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:480px;animation:finale-pop .6s cubic-bezier(.18,.89,.32,1.4);}
+@keyframes finale-pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+.finale-ico{font-size:4.6rem;filter:drop-shadow(0 0 24px rgba(58,181,216,.9));animation:finale-shake .5s ease;}
+@keyframes finale-shake{0%,100%{transform:rotate(0);}20%{transform:rotate(-10deg) scale(1.1);}60%{transform:rotate(8deg) scale(1.05);}}
+.finale-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.5rem,6.5vw,2.6rem);color:var(--day-color);text-shadow:0 0 30px rgba(58,181,216,.8);letter-spacing:.03em;margin:.4rem 0 .6rem;}
+.finale-code{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.4rem);letter-spacing:.3em;color:#fff;text-shadow:0 0 18px rgba(255,255,255,.4);margin-bottom:1rem;}
+.finale-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--green);margin-bottom:.6rem;}
+.finale-grade{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.3rem);color:#fff;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.05em;}
+.finale-sub{color:var(--muted);font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.6rem;line-height:1.6;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#fff;box-shadow:var(--glow);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.05em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="cctv-overlay"></div>
+<div class="alarm-flash" id="alarm-flash"></div>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128268;</span>
+  <div class="hud-keys">
+    <span class="hud-key" id="hud-key-0">?</span>
+    <span class="hud-key" id="hud-key-1">?</span>
+    <span class="hud-key" id="hud-key-2">?</span>
+    <span class="hud-key" id="hud-key-3">?</span>
+  </div>
+  <div class="hud-alert" id="hud-alert" title="Niveau d'alerte">
+    <span class="hud-alert-label" id="hud-alert-label">Stabilit&eacute;&nbsp;: critique</span>
+    <span class="hud-alert-gauge"><span class="hud-alert-fill" id="hud-alert-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer">--:--</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#128268;</div>
+    <div class="finale-title">BASE RESTAUR&Eacute;E</div>
+    <div class="finale-code" id="finale-code">? ? ? ?</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub" id="finale-sub">Donn&eacute;es restaur&eacute;es. Le laboratoire autorise l&rsquo;acc&egrave;s &agrave; la mission finale.</div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; Nouvelle mission</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5e
+    </div>
+    <div class="week">Semaine 1 — Jour 4</div>
+    <div class="title">Laboratoire de <span class="hl">donn&eacute;es</span> &#128268;</div>
+    <div class="subtitle">Comparer et ordonner les nombres relatifs</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#128268;</div>
+    <div class="start-mission"><b>&#129514; Objectif&nbsp;:</b> le laboratoire a re&ccedil;u un grand volume de donn&eacute;es, mais une panne a m&eacute;lang&eacute; les r&eacute;sultats. R&eacute;organise les informations pour restaurer la base de donn&eacute;es du laboratoire. Chaque &eacute;tape r&eacute;ussie permet de r&eacute;cup&eacute;rer un fragment du code. Le chrono d&eacute;marre d&egrave;s le lancement&nbsp;!</div>
+    <button class="btn-start" onclick="beginHeist()">&#129514; Lancer la restauration</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="mission-prog">
+      <div class="mp-info"><span>Restauration de la base</span><span id="mp-pct">0&nbsp;%</span></div>
+      <div class="mp-bg"><div class="mp-fill" id="mp-fill"></div></div>
+    </div>
+    <div class="codebar">
+      <span class="cb-label">Code&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+    </div>
+    <div id="steps"></div>
+    <div style="text-align:center;"><button class="btn-restart" onclick="restartAll()">&#8635; Recommencer la mission</button></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* SON */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function sUnlock(){if(!soundOn)return;beep(523,0,0.1,"triangle",0.24);beep(784,0.08,0.12,"triangle",0.24);beep(1047,0.18,0.16,"triangle",0.26);beep(1568,0.3,0.22,"triangle",0.24);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.2);beep(140,0.1,0.22,"square",0.2);}
+function sTime(){if(!soundOn)return;beep(220,0,0.3,"sawtooth",0.18);beep(160,0.28,0.4,"sawtooth",0.18);}
+function sAlarm(){if(!soundOn)return;beep(990,0,0.1,"square",0.18);beep(740,0.12,0.12,"square",0.18);}
+function sKeyIn(){if(!soundOn)return;beep(440,0,0.05,"square",0.12);beep(880,0.05,0.1,"triangle",0.16);}
+function sSnap(){if(!soundOn)return;beep(660,0,0.05,"triangle",0.12);}
+function sWin(){if(!soundOn)return;[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,i*0.13,0.26,"triangle",0.24);});}
+var heartInt=null;
+function sHeart(strong){if(!soundOn)return;var v=strong?0.16:0.11;beep(70,0,0.12,"sine",v);beep(55,0.14,0.16,"sine",v);}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+var amTimer=null;
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(function(){el.classList.remove("show");},3200);}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+
+/* ===== DONNÉES (valeurs imposées) ===== */
+var XMIN=-3, XMAX=4;
+// Étape 1 : ranger croissant
+var STEP1_VALUES=[-4,0,4,-5874,19,7,2315,-2316];
+var STEP1_SORTED=[-5874,-2316,-4,0,4,7,19,2315];
+// Étape 2 : compléter par un entier (réponses acceptées = intervalle d'entiers)
+var STEP2=[
+  {expr:"1,6 < \u2026 < 3,4", min:2, max:3},      // 2 ou 3
+  {expr:"\u22122 < \u2026 < 1", min:-1, max:0},    // -1 ou 0
+  {expr:"\u221212 < \u2026 < \u22126", min:-11, max:-7},
+  {expr:"\u22125,2 < \u2026 < \u22124,1", min:-5, max:-5},
+  {expr:"\u22120,4 < \u2026 < 0,2", min:0, max:0},
+  {expr:"\u22121,021 > \u2026 > \u22122,358", min:-2, max:-2}
+];
+// Étape 3 : placer points puis ordre donné par placement
+var STEP3_PLACE=[
+  {lbl:"A", val:1.3, sub:"(1,3)"},
+  {lbl:"B", val:-2.5, sub:"(\u22122,5)"},
+  {lbl:"C", val:-2.2, sub:"(\u22122,2)"},
+  {lbl:"D", val:3.1, sub:"(3,1)"},
+  {lbl:"E", val:0.5, sub:"(0,5)"},
+  {lbl:"F", val:-2, sub:"(\u22122)"}
+];
+var STEP3_ORDER=["B","C","F","E","A","D"]; // ordre croissant des abscisses
+// Étape 4 : planètes (distance croissante au Soleil)
+var PLANETS=[
+  {n:"Mercure", t:167}, {n:"V\u00e9nus", t:464}, {n:"Terre", t:15}, {n:"Mars", t:-65},
+  {n:"Jupiter", t:-110}, {n:"Saturne", t:-140}, {n:"Uranus", t:-195}, {n:"Neptune", t:-200}
+];
+var PLANETS_SORTED=["Neptune","Uranus","Saturne","Jupiter","Mars","Terre","Mercure","V\u00e9nus"];
+
+var STEPS=[
+  {ico:"&#128202;", step:"\u00c9tape 1", codename:"Tri", name:"R\u00e9organiser les donn\u00e9es", comp:"Ordonner des entiers relatifs",
+   time:150, key:"5", type:"order", values:STEP1_VALUES, sorted:STEP1_SORTED,
+   intro:"&#128202; R\u00e9organisation des donn\u00e9es<br><span class='scr'>Le syst\u00e8me affiche une liste de valeurs compl\u00e8tement m\u00e9lang\u00e9es. Le laboratoire a besoin d\u2019un classement imm\u00e9diat.</span>",
+   success:"&#9989; Donn\u00e9es r\u00e9organis\u00e9es",
+   method:"<b>D\u00e9marche\u00a0:</b> range dans l\u2019ordre croissant (du plus petit au plus grand). Souviens-toi\u00a0: un nombre n\u00e9gatif est d\u2019autant plus petit que sa partie apr\u00e8s le signe est grande (\u22125\u202f874 est plus petit que \u22122\u202f316).",
+   hint:"Place d\u2019abord les n\u00e9gatifs (le plus \u00e9loign\u00e9 de 0 est le plus petit), puis 0, puis les positifs du plus petit au plus grand."},
+  {ico:"&#128290;", step:"\u00c9tape 2", codename:"Compl\u00e9tion", name:"Compl\u00e9ter les intervalles", comp:"Encadrer par un entier",
+   time:150, key:"7", type:"interval", data:STEP2,
+   intro:"&#128290; Rapports incomplets<br><span class='scr'>Certaines valeurs ont disparu des rapports du laboratoire. Compl\u00e8te chaque encadrement par un nombre entier.</span>",
+   success:"&#9989; Intervalles restaur\u00e9s",
+   method:"<b>D\u00e9marche\u00a0:</b> trouve un nombre <b>entier</b> compris entre les deux bornes. Attention au sens des in\u00e9galit\u00e9s et aux nombres n\u00e9gatifs.",
+   hint:"Un entier n\u2019a pas de virgule. Cherche un entier qui se situe strictement entre les deux valeurs donn\u00e9es."},
+  {ico:"&#128205;", step:"\u00c9tape 3", codename:"Cartographie", name:"Reclasser les balises", comp:"Placer et ordonner des d\u00e9cimaux relatifs",
+   time:180, key:"4", type:"place", place:STEP3_PLACE, grad:0.1,
+   intro:"&#128205; Carte des positions<br><span class='scr'>Les balises de rep\u00e9rage ont perdu leur ordre. Place d\u2019abord chaque balise sur la droite gradu\u00e9e, puis range les abscisses dans l\u2019ordre croissant.</span>",
+   success:"&#9989; Carte reconstitu\u00e9e",
+   method:"<b>D\u00e9marche\u00a0:</b> place chaque balise sur la graduation de son abscisse (vers la droite si positif, vers la gauche si n\u00e9gatif, une graduation = 0,1). Une fois les balises localis\u00e9es, range leurs abscisses du plus petit au plus grand.",
+   hint:"B(\u22122,5) et C(\u22122,2) sont tr\u00e8s proches\u00a0: \u22122,5 est plus \u00e0 gauche que \u22122,2. F(\u22122) est pile sur \u22122."},
+  {ico:"&#127777;&#65039;", step:"\u00c9tape 4", codename:"Analyse", name:"Analyser les temp\u00e9ratures", comp:"Comparer des relatifs \u2014 esprit critique",
+   time:180, key:"2", type:"analyse",
+   intro:"&#127777;&#65039; Hypoth\u00e8se \u00e0 v\u00e9rifier<br><span class='scr'>Un scientifique pense que \u00ab plus on s\u2019\u00e9loigne du Soleil, plus la temp\u00e9rature baisse \u00bb. Un autre pense le contraire. \u00c0 toi de trancher\u00a0: classe les temp\u00e9ratures, puis conclus.</span>",
+   success:"&#9989; Analyse valid\u00e9e",
+   method:"<b>D\u00e9marche\u00a0:</b> classe les plan\u00e8tes de la plus froide \u00e0 la plus chaude, observe l\u2019ordre des plan\u00e8tes par distance au Soleil, puis choisis la conclusion correcte avec sa justification.",
+   hint:"Compare bien Mercure et V\u00e9nus\u00a0: laquelle est la plus proche du Soleil, et laquelle est la plus chaude\u00a0?"}
+];
+
+var solved=[false,false,false,false];
+var active=0;
+var tInt=null,tLeft=0,tExpired=[false,false,false,false];
+var totalSec=0,totalInt=null;
+var orderState={};   // suite construite (étape order)
+var placedState={};  // points placés (étape place)
+var orderState3=[];  // ordre des balises (étape 3, après placement)
+var phase3=1;        // 1 = placement, 2 = rangement
+var selToken={};
+var qcmSel=null;
+
+function build(){
+  var host=$("steps");host.innerHTML="";
+  STEPS.forEach(function(S,si){
+    var card=document.createElement("div");
+    card.className="step-card"+(si===active||solved[si]?"":" locked-step")+(solved[si]?" solved":"");
+    card.id="step-"+si;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+si+'">'+S.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+S.step+' &middot; <span style="color:var(--gold)">'+S.codename+'</span></div><div class="step-name">'+S.name+'</div><div class="step-comp">&#129514; '+S.comp+'</div></div>'
+      +'<span class="timer" id="timer-'+si+'">'+fmt(S.time)+'</span>'
+      +'</div><div class="step-body" id="body-'+si+'">';
+    if(si===active||solved[si]){
+      h+='<div class="intro">'+S.intro+'</div><div class="method">'+S.method+'</div><div id="zone-'+si+'"></div>'
+        +'<div class="tools">'
+        +'<button class="btn btn-hint" id="hint-btn-'+si+'" onclick="toggleHint('+si+')">? Indice</button>'
+        +'<button class="btn btn-try" id="try-'+si+'" onclick="tryStep('+si+')">&#9989; Valider</button>'
+        +'<button class="btn btn-retry" id="retry-'+si+'" onclick="retryStep('+si+')" style="display:none;">&#8635; R\u00e9essayer</button>'
+        +'</div>'
+        +'<div class="hint" id="hint-'+si+'">'+S.hint+'</div>'
+        +'<div class="fb" id="fb-'+si+'"><span id="fbi-'+si+'"></span><div id="fbm-'+si+'"></div></div>';
+    }else{
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine l\u2019\u00e9tape pr\u00e9c\u00e9dente pour d\u00e9bloquer ce module.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(si===active||solved[si]) renderZone(si);
+  });
+  updateCode();updateMissionProg();
+}
+
+function renderZone(si){
+  var S=STEPS[si], z=$("zone-"+si); if(!z) return; z.innerHTML="";
+  if(S.type==="order") renderOrder(si,z,S);
+  else if(S.type==="interval") renderInterval(si,z,S);
+  else if(S.type==="place") renderPlace(si,z,S);
+  else if(S.type==="analyse") renderAnalyse(si,z,S);
+}
+
+/* ---- Étape 1 : ordonner par tap ---- */
+function renderOrder(si,z,S){
+  if(!orderState[si]) orderState[si]=[];
+  var help=document.createElement("div");help.className="order-hint";help.textContent="Touche les valeurs dans l\u2019ordre croissant. Touche une valeur de la ligne pour la retirer.";z.appendChild(help);
+  var line=document.createElement("div");line.className="order-line";line.id="line-"+si;z.appendChild(line);
+  var pool=document.createElement("div");pool.className="order-pool";pool.id="pool-"+si;z.appendChild(pool);
+  S.values.forEach(function(v,idx){
+    var c=document.createElement("div");c.className="chipv";c.id="cv-"+si+"-"+idx;c.dataset.val=v;c.dataset.idx=idx;
+    c.textContent=(v>0?"+":"")+v;
+    c.onclick=function(){toggleOrder(si,idx,v);};
+    pool.appendChild(c);
+  });
+  // restaurer
+  if(solved[si]){ lockOrder(si); }
+}
+function toggleOrder(si,idx,v){
+  if(solved[si]||tExpired[si])return;
+  var pos=orderState[si].indexOf(idx);
+  var chip=$("cv-"+si+"-"+idx);
+  if(pos===-1){ orderState[si].push(idx); chip.classList.add("placed"); }
+  else { orderState[si].splice(pos,1); chip.classList.remove("placed"); }
+  sSnap();redrawLine(si);
+}
+function redrawLine(si){
+  var line=$("line-"+si);line.innerHTML="";
+  orderState[si].forEach(function(idx){
+    var v=STEPS[si].values[idx];
+    var c=document.createElement("div");c.className="chipv inline";c.textContent=(v>0?"+":"")+v;
+    c.onclick=function(){toggleOrder(si,idx,v);};
+    line.appendChild(c);
+  });
+}
+function lockOrder(si){
+  redrawLine(si);
+  var line=$("line-"+si);
+  Array.prototype.forEach.call(line.children,function(c,i){
+    var ok=STEPS[si].values[orderState[si][i]]===STEPS[si].sorted[i];
+    c.classList.add(ok?"ok":"ko");
+  });
+}
+
+/* ---- Étape 2 : intervalles ---- */
+function renderInterval(si,z,S){
+  S.data.forEach(function(it,i){
+    var row=document.createElement("div");row.className="iv-row";
+    row.innerHTML='<span class="iv-lbl">'+String.fromCharCode(97+i)+')</span> '
+      +it.expr.replace("\u2026",'<input class="iv-in" id="iv-'+si+'-'+i+'" type="text" inputmode="numeric" placeholder="?" autocomplete="off">');
+    z.appendChild(row);
+  });
+}
+
+/* ---- Étape 3 : phase 1 placer, phase 2 ranger les abscisses ---- */
+function renderPlace(si,z,S){
+  if(!placedState[si]) placedState[si]={};
+  // --- phase 1 : placement ---
+  var ph1=document.createElement("div");ph1.id="phase1-"+si;
+  var tok=document.createElement("div");tok.className="tokens";tok.id="tokens-"+si;
+  S.place.forEach(function(p){
+    var t=document.createElement("div");t.className="token";t.id="tok-"+si+"-"+p.lbl;t.dataset.lbl=p.lbl;
+    t.innerHTML=p.lbl+(p.sub?'<small>'+p.sub+'</small>':'');
+    t.onclick=function(){selectToken(si,p.lbl);};
+    tok.appendChild(t);
+  });
+  ph1.appendChild(tok);
+  var help=document.createElement("div");help.className="tap-help";help.id="help-"+si;help.textContent="Touche une balise, puis touche la graduation o\u00f9 la placer.";ph1.appendChild(help);
+  z.appendChild(ph1);
+  buildNumline(si,ph1,S);
+  // --- phase 2 : rangement (cachée au départ) ---
+  var ph2=document.createElement("div");ph2.id="phase2-"+si;ph2.style.display=(phase3===2||solved[si])?"block":"none";
+  ph2.innerHTML='<div class="intro" style="margin-top:1rem;">&#128202; Analyse compl&eacute;mentaire<span class="scr">Le laboratoire doit maintenant &eacute;tablir l\u2019ordre exact des donn&eacute;es. Range les abscisses des balises dans l\u2019ordre croissant.</span></div>'
+    +'<div class="order-hint">Touche les balises dans l\u2019ordre croissant de leur abscisse. Touche une balise de la ligne pour la retirer.</div>';
+  var line=document.createElement("div");line.className="order-line";line.id="line3-"+si;ph2.appendChild(line);
+  var pool=document.createElement("div");pool.className="order-pool";pool.id="pool3-"+si;ph2.appendChild(pool);
+  S.place.forEach(function(p){
+    var c=document.createElement("div");c.className="chipv";c.id="cv3-"+si+"-"+p.lbl;c.dataset.lbl=p.lbl;
+    c.innerHTML=p.lbl+'<small>'+p.sub+'</small>';
+    c.onclick=function(){toggleOrder3(si,p.lbl);};
+    pool.appendChild(c);
+  });
+  z.appendChild(ph2);
+  if(solved[si]){ lockOrder3(si); }
+  else if(phase3===2){ redrawLine3(si); }
+}
+function toggleOrder3(si,lbl){
+  if(solved[si]||tExpired[si])return;
+  var pos=orderState3.indexOf(lbl),chip=$("cv3-"+si+"-"+lbl);
+  if(pos===-1){orderState3.push(lbl);chip.classList.add("placed");}
+  else{orderState3.splice(pos,1);chip.classList.remove("placed");}
+  sSnap();redrawLine3(si);
+}
+function redrawLine3(si){
+  var line=$("line3-"+si);if(!line)return;line.innerHTML="";
+  orderState3.forEach(function(lbl){
+    var p=STEPS[si].place.filter(function(x){return x.lbl===lbl;})[0];
+    var c=document.createElement("div");c.className="chipv inline";c.innerHTML=lbl+'<small>'+p.sub+'</small>';
+    c.onclick=function(){toggleOrder3(si,lbl);};
+    line.appendChild(c);
+  });
+}
+function lockOrder3(si){
+  redrawLine3(si);
+  var line=$("line3-"+si);if(!line)return;
+  Array.prototype.forEach.call(line.children,function(c,i){c.classList.add(orderState3[i]===STEP3_ORDER[i]?"ok":"ko");});
+}
+function buildNumline(si,z,S){
+  var ns="http://www.w3.org/2000/svg",W=700,H=120,padX=30,y=70,step=S.grad;
+  var wrap=document.createElement("div");wrap.className="numline-wrap";
+  var svg=document.createElementNS(ns,"svg");svg.setAttribute("viewBox","0 0 "+W+" "+H);svg.setAttribute("class","numline");svg.id="svg-"+si;
+  function xOf(v){return padX+(v-XMIN)/(XMAX-XMIN)*(W-2*padX);}
+  var axis=document.createElementNS(ns,"line");axis.setAttribute("x1",padX);axis.setAttribute("y1",y);axis.setAttribute("x2",W-padX+10);axis.setAttribute("y2",y);axis.setAttribute("stroke","#9dd4e8");axis.setAttribute("stroke-width","2.5");svg.appendChild(axis);
+  var ar=document.createElementNS(ns,"path");ar.setAttribute("d","M"+(W-padX+10)+" "+y+" l-10 -5 l0 10 z");ar.setAttribute("fill","#9dd4e8");svg.appendChild(ar);
+  var v=XMIN;
+  while(v<=XMAX+1e-9){
+    var x=xOf(v),isInt=Math.abs(v-Math.round(v))<1e-9;
+    var tick=document.createElementNS(ns,"line");tick.setAttribute("x1",x);tick.setAttribute("x2",x);tick.setAttribute("y1",y-(isInt?12:6));tick.setAttribute("y2",y+(isInt?12:6));tick.setAttribute("stroke",isInt?"#9dd4e8":"#3a5a66");tick.setAttribute("stroke-width",isInt?"2":"1");svg.appendChild(tick);
+    if(isInt){var lab=document.createElementNS(ns,"text");lab.setAttribute("x",x);lab.setAttribute("y",y+30);lab.setAttribute("text-anchor","middle");lab.setAttribute("fill","#9dd4e8");lab.setAttribute("font-size","15");lab.setAttribute("font-family","'JetBrains Mono',monospace");lab.textContent=Math.round(v);svg.appendChild(lab);}
+    v+=step;
+  }
+  // une seule grande zone cliquable : on aimante au pas le plus proche
+  if(!solved[si]){
+    var band=document.createElementNS(ns,"rect");
+    band.setAttribute("x",padX-6);band.setAttribute("y",y-28);band.setAttribute("width",(W-2*padX)+12);band.setAttribute("height",56);
+    band.setAttribute("fill","transparent");band.style.cursor="pointer";
+    band.addEventListener("click",function(e){
+      var r=svg.getBoundingClientRect();
+      var px=(e.clientX-r.left)/r.width*W;            // position en unités viewBox
+      var val=XMIN+(px-padX)/(W-2*padX)*(XMAX-XMIN);  // valeur brute
+      var snapped=Math.round(val/step)*step;          // aimantation au pas
+      if(snapped<XMIN)snapped=XMIN; if(snapped>XMAX)snapped=XMAX;
+      snapped=Math.round(snapped*10)/10;              // nettoie l'arrondi flottant
+      tapGraduation(si,snapped,xOf,y);
+    });
+    svg.appendChild(band);
+  }
+  wrap.appendChild(svg);z.appendChild(wrap);
+  Object.keys(placedState[si]).forEach(function(lbl){placePoint(si,lbl,placedState[si][lbl],xOf,y);});
+}
+function selectToken(si,lbl){
+  if(solved[si]||tExpired[si])return;
+  selToken[si]=lbl;
+  var box=$("tokens-"+si);if(box)box.querySelectorAll(".token").forEach(function(t){t.classList.toggle("sel",t.id==="tok-"+si+"-"+lbl);});
+  var h=$("help-"+si);if(h)h.textContent="\u00ab "+lbl+" \u00bb s\u00e9lectionn\u00e9e. Touche la graduation o\u00f9 la placer.";
+}
+function tapGraduation(si,val,xOf,y){
+  if(solved[si]||tExpired[si])return;
+  var lbl=selToken[si];
+  if(!lbl){var h=$("help-"+si);if(h)h.textContent="Touche d\u2019abord une balise.";return;}
+  placePoint(si,lbl,val,xOf,y);sSnap();selToken[si]=null;
+  var box=$("tokens-"+si);if(box)box.querySelectorAll(".token").forEach(function(t){t.classList.remove("sel");});
+  var h=$("help-"+si);if(h)h.textContent="Touche une balise, puis touche la graduation o\u00f9 la placer.";
+}
+function placePoint(si,lbl,val,xOf,y){
+  placedState[si][lbl]=val;
+  var t=$("tok-"+si+"-"+lbl);if(t){t.classList.add("placed");t.classList.remove("sel");}
+  var svg=$("svg-"+si),wrap=svg.parentNode,id="pt-"+si+"-"+lbl,pt=$(id),W=700,padX=30;
+  var leftPct=(padX+(val-XMIN)/(XMAX-XMIN)*(W-2*padX))/W*100;
+  if(!pt){pt=document.createElement("div");pt.className="placed-pt";pt.id=id;pt.textContent=lbl;pt.onclick=function(){repick(si,lbl);};wrap.appendChild(pt);}
+  pt.style.left=leftPct+"%";pt.style.top=(svg.offsetTop+(y/120)*svg.clientHeight)+"px";
+}
+function repick(si,lbl){
+  if(solved[si]||tExpired[si])return;
+  var pt=$("pt-"+si+"-"+lbl);if(pt)pt.remove();
+  var t=$("tok-"+si+"-"+lbl);if(t)t.classList.remove("placed");
+  delete placedState[si][lbl];selectToken(si,lbl);
+}
+
+/* ---- Étape 4 : tableau + classement + QCM justifié ---- */
+function renderAnalyse(si,z,S){
+  // tableau
+  var tbl=document.createElement("table");tbl.className="ptable";
+  var head="<tr><th>Plan\u00e8te (du Soleil vers l\u2019ext\u00e9rieur)</th><th>Temp\u00e9rature</th></tr>";
+  var body="";
+  PLANETS.forEach(function(p){body+="<tr><td>"+p.n+"</td><td class='"+(p.t<0?"neg":"pos")+"'>"+(p.t>0?"+":"")+p.t+"&nbsp;\u00b0C</td></tr>";});
+  tbl.innerHTML=head+body;z.appendChild(tbl);
+  // classement croissant par température (tap)
+  var lblc=document.createElement("div");lblc.className="qcm-q";lblc.innerHTML="1) Classe les plan\u00e8tes de la plus <b>froide</b> \u00e0 la plus <b>chaude</b> (touche dans l\u2019ordre)\u00a0:";z.appendChild(lblc);
+  if(!orderState[si]) orderState[si]=[];
+  var line=document.createElement("div");line.className="order-line";line.id="line-"+si;z.appendChild(line);
+  var pool=document.createElement("div");pool.className="order-pool";pool.id="pool-"+si;z.appendChild(pool);
+  PLANETS.forEach(function(p,idx){
+    var c=document.createElement("div");c.className="chipv";c.id="cv-"+si+"-"+idx;c.dataset.idx=idx;
+    c.style.minWidth="auto";c.style.fontSize=".8rem";c.textContent=p.n;
+    c.onclick=function(){togglePlanet(si,idx);};
+    pool.appendChild(c);
+  });
+  // QCM conclusion
+  var q=document.createElement("div");q.className="qcm";
+  q.innerHTML="<div class='qcm-q'>2) Quelle est la bonne conclusion sur l\u2019hypoth\u00e8se \u00ab plus on s\u2019\u00e9loigne du Soleil, plus la temp\u00e9rature baisse \u00bb\u00a0?</div><div class='opts' id='opts-"+si+"'></div>";
+  z.appendChild(q);
+  var opts=[
+    {t:"<b>Fausse</b>\u00a0: V\u00e9nus est plus \u00e9loign\u00e9e du Soleil que Mercure, mais elle est plus chaude (+464\u00a0\u00b0C contre +167\u00a0\u00b0C).", ok:true},
+    {t:"<b>Vraie</b>\u00a0: les plan\u00e8tes les plus lointaines sont toujours les plus froides.", ok:false},
+    {t:"<b>Fausse</b>\u00a0: la Terre est la plan\u00e8te la plus chaude du syst\u00e8me.", ok:false},
+    {t:"<b>Vraie</b>\u00a0: Neptune est la plus froide, donc la r\u00e8gle est toujours respect\u00e9e.", ok:false}
+  ];
+  var order=opts.map(function(_,i){return i;});
+  for(var s=order.length-1;s>0;s--){var r=Math.floor(Math.random()*(s+1));var tt=order[s];order[s]=order[r];order[r]=tt;}
+  S._qorder=order;S._qopts=opts;
+  var box=q.querySelector(".opts");var KEYS=["A","B","C","D"];
+  order.forEach(function(orig,pos){
+    var b=document.createElement("button");b.className="opt";b.type="button";
+    b.innerHTML='<span class="k">'+KEYS[pos]+'</span><span>'+opts[orig].t+'</span>';
+    if(!solved[si]) b.onclick=function(){qcmSel=orig;box.querySelectorAll(".opt").forEach(function(x){x.classList.remove("sel");});this.classList.add("sel");};
+    box.appendChild(b);
+  });
+}
+function togglePlanet(si,idx){
+  if(solved[si]||tExpired[si])return;
+  var pos=orderState[si].indexOf(idx),chip=$("cv-"+si+"-"+idx);
+  if(pos===-1){orderState[si].push(idx);chip.classList.add("placed");}
+  else{orderState[si].splice(pos,1);chip.classList.remove("placed");}
+  sSnap();
+  var line=$("line-"+si);line.innerHTML="";
+  orderState[si].forEach(function(i){var c=document.createElement("div");c.className="chipv inline";c.style.minWidth="auto";c.style.fontSize=".8rem";c.textContent=PLANETS[i].n;c.onclick=function(){togglePlanet(si,i);};line.appendChild(c);});
+}
+
+function toggleHint(si){if(solved[si]||tExpired[si])return;$("hint-"+si).classList.toggle("show");}
+
+/* ===== validation ===== */
+function tryStep(si){
+  if(solved[si]||tExpired[si])return;
+  var S=STEPS[si],ok=true,filled=true;
+  if(S.type==="order"){
+    if(orderState[si].length<S.values.length){filled=false;}
+    else{ for(var i=0;i<S.sorted.length;i++){ if(S.values[orderState[si][i]]!==S.sorted[i]){ok=false;break;} } }
+  }else if(S.type==="interval"){
+    S.data.forEach(function(it,i){
+      var el=$("iv-"+si+"-"+i);var v=el?el.value.trim():"";it._v=v;
+      if(v===""){filled=false;}
+      var n=parseInt(v.replace(/\u2212/g,"-"),10);
+      var good=(/^-?\d+$/.test(v.replace(/\u2212/g,"-"))) && n>=it.min && n<=it.max;
+      if(el){el.classList.toggle("ok",good);el.classList.toggle("ko",v!==""&&!good);}
+      if(!good)ok=false;
+    });
+  }else if(S.type==="place"){
+    if(phase3===1){
+      var allPlaced=true,placeOk=true;
+      S.place.forEach(function(p){
+        if(placedState[si][p.lbl]===undefined){allPlaced=false;}
+        else{var g=Math.abs(placedState[si][p.lbl]-p.val)<1e-9;markPt(si,p.lbl,g);if(!g)placeOk=false;}
+      });
+      if(!allPlaced){var fbw=$("fb-"+si);fbw.className="fb show warn";$("fbi-"+si).textContent="\u26A0";$("fbm-"+si).textContent="Place toutes les balises avant de valider.";return;}
+      if(placeOk){
+        phase3=2;sUnlock();
+        var fbo=$("fb-"+si);fbo.className="fb show ok";$("fbi-"+si).textContent="\u2705";
+        $("fbm-"+si).innerHTML="<b style='color:var(--green)'>Balises localis\u00e9es.</b><br>&#128225; Les positions ont \u00e9t\u00e9 retrouv\u00e9es. Le laboratoire doit maintenant \u00e9tablir l\u2019ordre exact des donn\u00e9es.";
+        var p2=$("phase2-"+si);if(p2){p2.style.display="block";p2.scrollIntoView({behavior:"smooth",block:"center"});}
+      }else{
+        sBad();$("step-"+si).classList.add("shake");setTimeout(function(){$("step-"+si).classList.remove("shake");},400);
+        var fbk=$("fb-"+si);fbk.className="fb show ko";$("fbi-"+si).textContent="\u274C";
+        $("fbm-"+si).textContent="Certaines balises ne sont pas au bon endroit. Corrige celles en rouge et r\u00e9essaie.";
+      }
+      return;
+    }else{
+      if(orderState3.length<STEP3_ORDER.length){filled=false;}
+      else{ for(var k=0;k<STEP3_ORDER.length;k++){ if(orderState3[k]!==STEP3_ORDER[k]){ok=false;break;} } }
+    }
+  }else if(S.type==="analyse"){
+    // classement
+    if(orderState[si].length<PLANETS.length){filled=false;}
+    else{ for(var j=0;j<PLANETS_SORTED.length;j++){ if(PLANETS[orderState[si][j]].n!==PLANETS_SORTED[j]){ok=false;break;} } }
+    // qcm
+    if(qcmSel===null){filled=false;}
+    else if(!S._qopts[qcmSel].ok){ok=false;}
+  }
+  if(!filled){var fb=$("fb-"+si);fb.className="fb show warn";$("fbi-"+si).textContent="\u26A0";$("fbm-"+si).textContent="Compl\u00e8te toute l\u2019\u00e9tape avant de valider.";return;}
+  if(ok){ stepSuccess(si); }
+  else{
+    sBad();$("step-"+si).classList.add("shake");setTimeout(function(){$("step-"+si).classList.remove("shake");},400);
+    if(S.type==="order")lockOrderColors(si);
+    if(S.type==="place"&&phase3===2)lockOrder3(si);
+    if(S.type==="analyse")markQcm(si);
+    var fb=$("fb-"+si);fb.className="fb show ko";$("fbi-"+si).textContent="\u274C";
+    $("fbm-"+si).textContent="Les donn\u00e9es ne sont pas encore coh\u00e9rentes. Corrige ce qui est en rouge et r\u00e9essaie.";
+  }
+}
+function lockOrderColors(si){
+  var line=$("line-"+si);if(!line)return;
+  Array.prototype.forEach.call(line.children,function(c,i){
+    var idx=orderState[si][i];var ok=STEPS[si].values[idx]===STEPS[si].sorted[i];
+    c.classList.remove("ok","ko");c.classList.add(ok?"ok":"ko");
+  });
+}
+function markPt(si,lbl,good){var pt=$("pt-"+si+"-"+lbl);if(pt){pt.classList.toggle("ok",good);pt.classList.toggle("ko",!good);}}
+function markQcm(si){
+  var box=$("opts-"+si);if(!box)return;var S=STEPS[si];
+  Array.prototype.forEach.call(box.children,function(b,pos){
+    var orig=S._qorder[pos];
+    if(S._qopts[orig].ok)b.classList.add("good");
+    if(orig===qcmSel&&!S._qopts[orig].ok)b.classList.add("bad");
+    b.classList.add("locked");
+  });
+}
+
+function stepSuccess(si){
+  solved[si]=true;stopTimer();sUnlock();
+  $("step-"+si).classList.add("solved");
+  var tb=$("try-"+si);if(tb){tb.disabled=true;tb.style.display="none";}
+  var hb=$("hint-btn-"+si);if(hb)hb.disabled=true;
+  $("hint-"+si).classList.remove("show");
+  if(STEPS[si].type==="order")lockOrder(si);
+  if(STEPS[si].type==="place")lockOrder3(si);
+  if(STEPS[si].type==="analyse")markQcm(si);
+  if(STEPS[si].type==="interval"){var z=$("zone-"+si);if(z)z.querySelectorAll("input").forEach(function(el){el.disabled=true;});}
+  var fb=$("fb-"+si);fb.className="fb show ok";$("fbi-"+si).textContent="\u2705";
+  $("fbm-"+si).innerHTML="<b style='color:var(--green)'>"+STEPS[si].success+"</b><br>Fragment r\u00e9cup\u00e9r\u00e9\u00a0: <b style='color:var(--gold);font-size:1.2rem'>"+STEPS[si].key+"</b>";
+  updateCode();updateMissionProg();
+  var LABMSG=[
+    "&#129514; Message du laboratoire&nbsp;:<br>Premi\u00e8re s\u00e9rie de donn\u00e9es restaur\u00e9e. De nouvelles anomalies ont \u00e9t\u00e9 d\u00e9tect\u00e9es.",
+    "&#129514; Message du laboratoire&nbsp;:<br>Les rapports sont \u00e0 nouveau exploitables. Poursuis la restauration des donn\u00e9es.",
+    "&#129514; Message du laboratoire&nbsp;:<br>Les positions ont \u00e9t\u00e9 retrouv\u00e9es. La derni\u00e8re analyse peut commencer."
+  ];
+  if(active<STEPS.length-1){
+    sKeyIn();
+    if(LABMSG[si])showAgent(LABMSG[si]);
+    active++;
+    setTimeout(function(){build();var el=$("step-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(function(){startTimer(active);},2000);},1000);
+  }else{
+    showAgent("&#129514; Toutes les donn\u00e9es ont \u00e9t\u00e9 restaur\u00e9es.<br>&#128268; Acc\u00e8s \u00e0 la mission finale autoris\u00e9\u2026");
+    setTimeout(openFinale,2400);
+  }
+}
+
+/* ===== chrono ===== */
+function startTimer(si){
+  clearInterval(tInt);clearInterval(heartInt);tLeft=STEPS[si].time;showTimer(si);
+  var af=$("alarm-flash");if(af)af.classList.remove("on");
+  scheduleHeart(si);
+  tInt=setInterval(function(){
+    tLeft--;showTimer(si);scheduleHeart(si);
+    if(tLeft<=5&&tLeft>0){sAlarm();$("alarm-flash").classList.add("on");var c=$("step-"+si);if(c){c.classList.add("shake");setTimeout(function(){c.classList.remove("shake");},300);}}
+    if(tLeft<=0){clearInterval(tInt);clearInterval(heartInt);$("alarm-flash").classList.remove("on");timeOut(si);}
+  },1000);
+}
+function showTimer(si){var el=$("timer-"+si);if(el){el.textContent=fmt(Math.max(tLeft,0));el.classList.toggle("low",tLeft<=10);}var h=$("hud-timer");if(h){h.textContent=fmt(Math.max(tLeft,0));h.classList.toggle("low",tLeft<=10);}}
+function stopTimer(){clearInterval(tInt);clearInterval(heartInt);var af=$("alarm-flash");if(af)af.classList.remove("on");}
+function scheduleHeart(si){clearInterval(heartInt);if(solved[si]||tExpired[si]||tLeft<=0)return;var period=tLeft>60?1800:tLeft>30?1100:tLeft>10?700:450;sHeart(tLeft<=30);heartInt=setInterval(function(){if(solved[si]||tExpired[si]||tLeft<=0){clearInterval(heartInt);return;}sHeart(tLeft<=30);},period);}
+function timeOut(si){
+  if(solved[si])return;
+  tExpired[si]=true;sTime();
+  $("step-"+si).classList.add("shake");setTimeout(function(){$("step-"+si).classList.remove("shake");},400);
+  var tb=$("try-"+si);if(tb){tb.disabled=true;tb.style.display="none";}
+  var hb=$("hint-btn-"+si);if(hb)hb.disabled=true;
+  $("hint-"+si).classList.remove("show");
+  var rb=$("retry-"+si);if(rb)rb.style.display="inline-flex";
+  var fb=$("fb-"+si);fb.className="fb show warn";$("fbi-"+si).textContent="\u23F1";
+  $("fbm-"+si).textContent="Temps \u00e9coul\u00e9\u00a0! Connexion au laboratoire interrompue. Appuie sur R\u00e9essayer pour relancer le chrono.";
+}
+function retryStep(si){
+  tExpired[si]=false;
+  orderState[si]=[];placedState[si]={};qcmSel=null;
+  if(STEPS[si].type==="place"){phase3=1;orderState3=[];}
+  if(STEPS[si].type==="interval")STEPS[si].data.forEach(function(it){delete it._v;});
+  var tb=$("try-"+si);if(tb){tb.disabled=false;tb.style.display="inline-flex";}
+  var hb=$("hint-btn-"+si);if(hb)hb.disabled=false;
+  var rb=$("retry-"+si);if(rb)rb.style.display="none";
+  $("fb-"+si).className="fb";
+  renderZone(si);startTimer(si);
+}
+
+/* ===== code + alerte + progression ===== */
+function updateCode(){
+  var got=0;
+  STEPS.forEach(function(S,si){
+    var f=$("frag-"+si),hk=$("hud-key-"+si);
+    if(solved[si]){if(f){f.textContent=S.key;f.classList.add("found");}if(hk){hk.textContent=S.key;hk.classList.add("got");}got++;}
+    else{if(f){f.textContent="?";f.classList.remove("found");}if(hk){hk.textContent="?";hk.classList.remove("got");}}
+  });
+  setAlert(got);
+}
+function setAlert(got){
+  // plus on restaure, plus la stabilité monte (et l'alerte baisse)
+  var paliers=[
+    {t:"Stabilit\u00e9\u00a0: critique",c:"#f28b82",w:12},
+    {t:"Stabilit\u00e9\u00a0: faible",c:"#f5a623",w:38},
+    {t:"Stabilit\u00e9\u00a0: moyenne",c:"#e8b54a",w:62},
+    {t:"Stabilit\u00e9\u00a0: bonne",c:"#8dc63f",w:84},
+    {t:"Stabilit\u00e9\u00a0: optimale",c:"#3fb56a",w:100}
+  ];
+  var p=paliers[Math.min(got,4)];
+  var lab=$("hud-alert-label"),fill=$("hud-alert-fill");
+  if(lab){lab.textContent=p.t;lab.style.color=p.c;}
+  if(fill){fill.style.width=p.w+"%";fill.style.background=p.c;}
+}
+function updateMissionProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/STEPS.length*100);
+  var f=$("mp-fill"),p=$("mp-pct");
+  if(f)f.style.width=pct+"%";
+  if(p)p.textContent=pct+"\u00a0%";
+}
+
+/* ===== final ===== */
+function openFinale(){
+  clearInterval(totalInt);stopTimer();
+  var code=STEPS.map(function(S){return S.key;}).join(" ");
+  var temps=fmt(totalSec);
+  $("hud-dial").innerHTML="&#9989;";$("hud-timer").textContent="\u2713";
+  var grade,gsub;
+  if(totalSec<=300){grade="\u2B50 CHERCHEUR D\u2019\u00c9LITE";gsub="Base restaur\u00e9e en un temps record\u00a0! Donn\u00e9es parfaitement coh\u00e9rentes.";}
+  else if(totalSec<=480){grade="\uD83C\uDFC5 ANALYSTE EXPERT";gsub="Beau travail, chercheur. La base est de nouveau fiable.";}
+  else if(totalSec<=720){grade="\uD83D\uDD2C TECHNICIEN CONFIRM\u00c9";gsub="Mission r\u00e9ussie. Le laboratoire est op\u00e9rationnel.";}
+  else{grade="\uD83E\uDDEA ASSISTANT DE LABO";gsub="Base restaur\u00e9e\u00a0! Avec un peu d\u2019entra\u00eenement, tu iras plus vite.";}
+  setTimeout(function(){
+    $("finale-code").textContent=code;
+    $("finale-time").innerHTML="&#9201; Restauration termin\u00e9e en "+temps;
+    $("finale-grade").innerHTML=grade;
+    $("finale-sub").innerHTML=gsub+"<br><br>&#128268; Toutes les donn\u00e9es ont \u00e9t\u00e9 restaur\u00e9es. Le laboratoire autorise l\u2019acc\u00e8s \u00e0 la mission finale.";
+    $("finale").classList.add("show");
+    sWin();
+  },300);
+}
+
+function beginHeist(){
+  var c=ac(); if(c && c.state==="suspended") c.resume();
+  $("start-screen").style.display="none";
+  $("game").style.display="";
+  $("hud-bar").classList.add("show");
+  totalSec=0;clearInterval(totalInt);totalInt=setInterval(function(){totalSec++;},1000);
+  showAgent("&#128268; Connexion au laboratoire\u2026<br>Restauration de la base de donn\u00e9es en cours.");
+  build();
+  setTimeout(function(){startTimer(0);},1200);
+}
+function restartAll(){
+  stopTimer();clearInterval(totalInt);totalSec=0;
+  solved=[false,false,false,false];tExpired=[false,false,false,false];active=0;
+  orderState={};placedState={};selToken={};qcmSel=null;phase3=1;orderState3=[];
+  STEPS.forEach(function(S){if(S.data)S.data.forEach(function(it){delete it._v;});});
+  $("finale").classList.remove("show");
+  $("hud-bar").classList.remove("show");
+  $("game").style.display="none";
+  $("start-screen").style.display="";
+  $("hud-timer").textContent="--:--";$("hud-dial").innerHTML="&#128268;";
+  for(var i=0;i<4;i++){var hk=$("hud-key-"+i);if(hk){hk.textContent="?";hk.classList.remove("got");}}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+build();
+</script>
+</body>
+</html>
