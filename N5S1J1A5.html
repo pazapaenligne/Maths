@@ -50,18 +50,9 @@ header{text-align:center;margin-bottom:1.2rem;}
 .hud-prog-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
 .hud-prog-gauge{display:block;width:80px;height:7px;border-radius:99px;background:#121119;border:1px solid var(--line);overflow:hidden;}
 .hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--ink),var(--day-color));transition:width .6s ease;}
-.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
-  background:#121119;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(245,166,35,.2);transition:color .3s,border-color .3s;}
-.hud-timer.low{color:#f5a623;border-color:#f5a623;animation:tick 1s ease-in-out infinite;}
-.hud-timer.crit{color:#f28b82;border-color:#f28b82;animation:tick .5s ease-in-out infinite;}
-@keyframes tick{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-.timeup-overlay{position:fixed;inset:0;z-index:38;display:none;align-items:center;justify-content:center;background:rgba(16,16,24,.88);padding:1.2rem;}
-.timeup-overlay.show{display:flex;animation:fadeIn .3s ease;}
-.timeup-box{text-align:center;max-width:420px;background:var(--panel);border:1.5px solid #f28b82;border-radius:var(--radius);padding:1.8rem 1.6rem;box-shadow:0 0 30px rgba(242,139,130,.4);animation:pop .4s cubic-bezier(.18,.89,.32,1.4);}
-.timeup-ico{font-size:3.4rem;margin-bottom:.6rem;}
-.timeup-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.2rem,5vw,1.7rem);color:#f28b82;margin-bottom:.7rem;letter-spacing:.03em;}
-.timeup-text{color:#d4d0de;font-size:clamp(.85rem,2.5vw,.95rem);line-height:1.6;margin-bottom:1.4rem;}
-@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:50px;}.hud-bar{gap:.55rem;padding:.45rem .55rem;}.hud-frag{width:1.55rem;height:1.8rem;font-size:.82rem;}.hud-dial{font-size:1.05rem;}.hud-timer{font-size:.8rem;padding:.2rem .4rem;}}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.8rem;letter-spacing:.04em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#121119;border:1.5px solid var(--day-border);border-radius:8px;padding:.28rem .6rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(245,166,35,.2);}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:46px;}.hud-bar{gap:.5rem;padding:.45rem .5rem;}.hud-frag{width:1.5rem;height:1.75rem;font-size:.8rem;}.hud-dial{font-size:1rem;}.hud-timer{font-size:.68rem;padding:.25rem .4rem;}.hud-timer .lab{display:none;}}
 
 .start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
@@ -221,15 +212,6 @@ header{text-align:center;margin-bottom:1.2rem;}
 <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
 <div class="agent-msg" id="agent-msg"></div>
 
-<div class="timeup-overlay" id="timeup-overlay">
-  <div class="timeup-box">
-    <div class="timeup-ico">&#9200;</div>
-    <div class="timeup-title">Temps &eacute;coul&eacute;&#8201;!</div>
-    <div class="timeup-text">L&rsquo;enqu&ecirc;te n&rsquo;est pas termin&eacute;e. Tu peux continuer pour retrouver tous les indices.</div>
-    <button class="btn-start" style="font-size:1rem;padding:.8rem 1.8rem;" onclick="closeTimeUp()">&#10145;&#65039; Continuer l&rsquo;enqu&ecirc;te</button>
-  </div>
-</div>
-
 <div class="scan-overlay" id="scan-overlay">
   <div class="scan-box">
     <div class="scan-spinner"></div>
@@ -251,7 +233,7 @@ header{text-align:center;margin-bottom:1.2rem;}
     <span class="hud-prog-label" id="hud-prog-label">Enqu&ecirc;te&nbsp;: 0&nbsp;%</span>
     <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
   </div>
-  <span class="hud-timer" id="hud-timer">&#8987; 10:00</span>
+  <span class="hud-timer" id="hud-timer"><span class="lab">&#128269; Enqu&ecirc;te en cours &middot; </span>&#9201; 00:00</span>
 </div>
 
 <div class="finale" id="finale">
@@ -395,7 +377,6 @@ var MISSIONS=[
 var solved=[false,false,false,false];
 var active=0;
 var totalSec=0,totalInt=null;
-var countLeft=600,timeUpShown=false;
 var qcmSel={};
 
 function build(){
@@ -651,34 +632,18 @@ function updateProg(){
 
 function openFinale(){
   clearInterval(totalInt);
-  $("hud-dial").innerHTML="&#9989;";
+  $("hud-dial").innerHTML="&#127941;";
   var cr=$("finale-crest");cr.innerHTML="";
   MISSIONS.forEach(function(M,i){var d=document.createElement("div");d.className="fc";d.style.animationDelay=(i*0.15)+"s";d.innerHTML=M.frag;cr.appendChild(d);});
-  var depasse=(countLeft<=0);
-  var timeLine, grade, gsub;
-  if(!depasse){
-    timeLine="&#8987; Temps restant&nbsp;: "+fmt(countLeft);
-    if(countLeft>=300){grade="\u2B50 D\u00c9TECTIVE EN CHEF";gsub="Enqu\u00eate men\u00e9e avec brio&#8201;! Aucune erreur ne t\u2019\u00e9chappe.";}
-    else if(countLeft>=120){grade="\uD83C\uDFC5 ENQU\u00caTEUR EXPERT";gsub="Beau travail&#8201;! Les feuilles n\u2019ont plus de secret.";}
-    else{grade="\uD83D\uDD0D ENQU\u00caTEUR RAPIDE";gsub="Termin\u00e9 juste \u00e0 temps&#8201;! Belle ma\u00eetrise.";}
-  }else{
-    timeLine="&#9200; Temps \u00e9coul\u00e9";
-    grade="\uD83C\uDFC5 ENQU\u00caTE R\u00c9SOLUE";gsub="Mission accomplie malgr\u00e9 le d\u00e9passement du temps. Bravo d\u2019\u00eatre all\u00e9 au bout&#8201;!";
-  }
+  var mn=Math.floor(totalSec/60),sc=totalSec%60;
+  var used=mn+" min "+(sc<10?"0":"")+sc+" s";
   setTimeout(function(){
-    $("finale-time").innerHTML=timeLine;
-    $("finale-grade").innerHTML=grade;
-    $("finale-sub").innerHTML="Tu as v\u00e9rifi\u00e9 toutes les feuilles de calcul et r\u00e9uni les quatre indices. L\u2019enqu\u00eate peut maintenant continuer&#8201;!";
+    $("finale-time").innerHTML="&#9201; Temps utilis\u00e9&nbsp;: "+used;
+    $("finale-grade").innerHTML="&#127941; Mission accomplie";
+    $("finale-sub").innerHTML="Bravo&#8201;! Tu as termin\u00e9 l\u2019enqu\u00eate. Le temps affich\u00e9 est simplement indicatif\u00a0: l\u2019important est d\u2019avoir r\u00e9ussi les d\u00e9fis et compris les m\u00e9thodes utilis\u00e9es.";
     $("finale").classList.add("show");sWin();
   },300);
 }
-
-function showTimeUp(){
-  if(timeUpShown)return;timeUpShown=true;
-  sBad();
-  var ov=$("timeup-overlay");if(ov)ov.classList.add("show");
-}
-function closeTimeUp(){var ov=$("timeup-overlay");if(ov)ov.classList.remove("show");}
 
 function beginGame(){
   var c=ac();if(c&&c.state==="suspended")c.resume();
@@ -686,31 +651,24 @@ function beginGame(){
   $("game").style.display="";
   $("hud-bar").classList.add("show");
   totalSec=0;clearInterval(totalInt);
-  countLeft=600;timeUpShown=false;
-  var ht=$("hud-timer");if(ht){ht.classList.remove("low","crit");ht.innerHTML="&#8987; 10:00";}
+  var ht=$("hud-timer");if(ht){ht.innerHTML="<span class=\"lab\">&#128269; Enqu&ecirc;te en cours &middot; </span>&#9201; 00:00";}
   totalInt=setInterval(function(){
-    countLeft--;totalSec++;
-    var h=$("hud-timer");
-    if(h){h.innerHTML="&#8987; "+fmt(Math.max(countLeft,0));
-      h.classList.toggle("low",countLeft<=60&&countLeft>20);
-      h.classList.toggle("crit",countLeft<=20);}
-    if(countLeft===60){showAgent("&#9888;&#65039; Attention&#8201;!<br>Il ne reste plus qu\u2019une minute pour terminer l\u2019enqu\u00eate.");}
-    if(countLeft<=0){clearInterval(totalInt);countLeft=0;if(h)h.innerHTML="&#8987; 00:00";showTimeUp();}
+    totalSec++;
+    var h=$("hud-timer");if(h)h.innerHTML="<span class=\"lab\">&#128269; Enqu&ecirc;te en cours &middot; </span>&#9201; "+fmt(totalSec);
   },1000);
   showAgent("&#128269; Le professeur&nbsp;:<br>L\u2019enqu\u00eate commence. Examinons la premi\u00e8re feuille&#8201;!");
   setTimeout(function(){runScan(0,function(){build();showAgent("&#128269; Le professeur&nbsp;:<br>Premi\u00e8re feuille pr\u00eate. V\u00e9rifie chaque calcul&#8201;!");});},1400);
 }
 function restartAll(){
-  clearInterval(totalInt);totalSec=0;countLeft=600;timeUpShown=false;
+  clearInterval(totalInt);totalSec=0;
   solved=[false,false,false,false];active=0;qcmSel={};
   $("finale").classList.remove("show");
-  var tu=$("timeup-overlay");if(tu)tu.classList.remove("show");
   var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
   $("hud-bar").classList.remove("show");
   $("game").style.display="none";
   $("start-screen").style.display="";
   $("hud-dial").innerHTML="&#128269;";
-  var ht=$("hud-timer");if(ht){ht.classList.remove("low","crit");ht.innerHTML="&#8987; 10:00";}
+  var ht=$("hud-timer");if(ht){ht.innerHTML="<span class=\"lab\">&#128269; Enqu&ecirc;te en cours &middot; </span>&#9201; 00:00";}
   for(var i=0;i<4;i++){var hf=$("hud-frag-"+i);if(hf)hf.classList.remove("got");}
   window.scrollTo({top:0,behavior:"smooth"});
 }
