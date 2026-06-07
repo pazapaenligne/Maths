@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – Le tournoi du club – S1 J5</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#f5c518; --day-dark:#8a6000; --day-light:#fffbeb; --day-border:#f5e08a;
+  --gold:#f5c518; --gold-d:#b88a00;
+  --bg:#1c2230; --panel:#252c3c; --panel2:#2d3548;
+  --line:#3a4357; --text:#f4f6fb; --muted:#9aa3b8;
+  --green:#5bc46a; --grass:#3a8a4a;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 16px rgba(245,197,24,.45), 0 0 40px rgba(245,197,24,.18);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#222a3a 0%, #1c2230 55%, #1a2438 100%);color:var(--text);
+  font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+/* lignes de terrain discrètes en fond */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;
+  background:repeating-linear-gradient(90deg,transparent 0 78px,#fff 78px 80px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#1a1208;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.1;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.12;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#f5c518;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#3a8a4a;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#3ab5d8;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#8dc63f;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(28,34,48,.94);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.35rem;}
+.hud-frag{width:1.9rem;height:2rem;border-radius:6px;background:#1a2030;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:#4a5468;transition:all .4s;}
+.hud-frag.got{background:rgba(245,197,24,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#1a2030;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--grass),var(--day-color));transition:width .6s ease;}
+@media(max-width:560px){.hud-prog-label{display:none;}.hud-prog-gauge{width:54px;}}
+@media(max-width:600px){
+  .hud-bar{gap:.6rem;padding:.45rem .6rem;}
+  .hud-frag{width:1.6rem;height:1.8rem;font-size:.85rem;}
+  .hud-dial{font-size:1.1rem;}
+  /* association : empiler l'expression et le menu */
+  .match-row{flex-direction:column;gap:.35rem;}
+  .match-expr,.match-sel{min-width:0;width:100%;}
+  /* saisies pleine largeur pour le pouce */
+  .num-in{width:100%;max-width:200px;}
+  .num-row{width:100%;}
+  .step-body{padding:1rem;}
+  .step-head{padding:.8rem .9rem;gap:.6rem;}
+  .opt{padding:.6rem .7rem;}
+}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:600px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:#cfd6e6;line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-mission .q{display:block;margin-top:.6rem;color:var(--text);font-weight:600;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--grass),#4aa85e);color:#fff;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:0 0 18px rgba(58,138,74,.5);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+/* écusson de fragments */
+.crest{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:'Orbitron',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#1a2030;border:1.5px solid var(--line);font-size:1.2rem;color:#3a4357;transition:all .5s;}
+.frag.found{background:rgba(245,197,24,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#1a2030;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#1a2030;border:1px solid var(--gold-d);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+.intro .scr{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(.76rem,2.2vw,.84rem);color:#cfd6e6;margin-top:.4rem;letter-spacing:0;}
+.statement{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--grass);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1.1rem;font-size:clamp(.8rem,2.3vw,.9rem);color:#dbe1ee;line-height:1.7;}
+.statement b{color:var(--day-light);}
+.statement ul{margin:.4rem 0 0 1.1rem;}
+
+.q-block{margin-bottom:1.1rem;}
+.fiche{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:var(--radius-sm);
+  padding:.75rem 1rem;margin:.4rem 0 1.1rem;color:#5a4a10;font-size:clamp(.8rem,2.3vw,.88rem);line-height:1.6;animation:pop .4s ease both;}
+.fiche b{color:var(--day-dark);font-family:'Orbitron',sans-serif;font-size:.9em;letter-spacing:.03em;}
+.q-block:last-of-type{margin-bottom:0;}
+.q-label{font-size:clamp(.82rem,2.4vw,.92rem);margin-bottom:.55rem;line-height:1.5;color:var(--day-light);}
+.q-label .qn{font-family:'Orbitron',sans-serif;font-weight:900;color:var(--day-color);margin-right:.4rem;}
+.opts{display:flex;flex-direction:column;gap:.45rem;}
+.opt{display:flex;align-items:flex-start;gap:.7rem;text-align:left;width:100%;background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  padding:.6rem .9rem;cursor:pointer;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:clamp(.8rem,2.3vw,.9rem);font-weight:600;min-height:44px;line-height:1.45;transition:border-color .15s,background .15s;}
+.opt:hover:not(.locked){border-color:var(--day-color);background:#2a3346;}
+.opt.sel{border-color:var(--day-color);background:rgba(245,197,24,.12);}
+.opt.locked{cursor:default;}
+.opt.good{border-color:var(--green);background:rgba(91,196,106,.14);color:#bff0c6;}
+.opt.bad{border-color:#e8806f;background:rgba(232,128,111,.14);color:#ffc4b8;}
+.opt .k{font-family:'Orbitron',sans-serif;font-weight:900;color:var(--day-color);width:1.4rem;text-align:center;flex-shrink:0;}
+.opt span:last-child{overflow-wrap:anywhere;}
+.opt.good .k{color:var(--green);}.opt.bad .k{color:#e8806f;}
+
+.num-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.num-in{width:130px;background:#1a2030;border:2px solid var(--line);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.98rem;text-align:center;padding:.5rem;outline:none;min-height:46px;transition:border-color .2s;}
+.num-in:focus{border-color:var(--day-color);}
+.num-in.ok{border-color:var(--green);background:rgba(91,196,106,.12);color:#bff0c6;}
+.num-in.ko{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+.num-unit{color:var(--muted);font-size:.85rem;}
+
+/* associer (mission 3 q1) */
+.match-row{display:flex;align-items:stretch;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap;}
+.match-expr{flex:1;min-width:150px;background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:.55rem .8rem;font-size:.84rem;font-weight:600;display:flex;align-items:center;}
+.match-sel{flex:1;min-width:150px;}
+.match-sel select{width:100%;min-height:46px;background:#1a2030;border:2px solid var(--line);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;padding:.4rem;outline:none;}
+.match-sel select:focus{border-color:var(--day-color);}
+.match-row.ok .match-expr{border-color:var(--green);}
+.match-row.ko .match-expr{border-color:#e8806f;}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--grass),#4aa85e);color:#fff;box-shadow:0 0 14px rgba(58,138,74,.45);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#2a2410;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#e8d8a0;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(91,196,106,.12);border:1.5px solid var(--green);color:#bff0c6;}
+.fb.ko{background:rgba(232,128,111,.12);border:1.5px solid #e8806f;color:#ffc4b8;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#e8d18a;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.4rem .55rem;min-height:42px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(28,34,48,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+
+/* écran final */
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:radial-gradient(circle at 50% 40%, rgba(58,138,74,.5), rgba(20,26,40,.98));}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(245,197,24,.3) 0%, rgba(245,197,24,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(245,197,24,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.5rem;margin:.8rem 0;}
+.finale-crest .fc{width:2.6rem;height:2.6rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(245,197,24,.16);border:1.5px solid var(--day-color);font-size:1.3rem;animation:pop .5s both;}
+.finale-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.4rem);color:var(--day-color);text-shadow:0 0 30px rgba(245,197,24,.8);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#bff0c6;margin-bottom:.6rem;}
+.finale-grade{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#1a1208;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:#cfd6e6;font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-enigma{background:var(--panel);border:1.5px solid var(--gold-d);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.4vw,.9rem);color:#dbe1ee;line-height:1.7;}
+.finale-enigma b{color:var(--day-color);}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#1a1208;box-shadow:var(--glow);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#9917;</span>
+  <div class="hud-frags">
+    <span class="hud-frag" id="hud-frag-0">&#9917;</span>
+    <span class="hud-frag" id="hud-frag-1">&#9917;</span>
+    <span class="hud-frag" id="hud-frag-2">&#9917;</span>
+    <span class="hud-frag" id="hud-frag-3">&#9917;</span>
+  </div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Pr&eacute;paratifs&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#127942;</div>
+    <div class="finale-crest" id="finale-crest"></div>
+    <div class="finale-title">PR&Eacute;PARATIFS TERMIN&Eacute;S&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub" id="finale-sub">Gr&acirc;ce &agrave; ton aide, toutes les v&eacute;rifications du tournoi sont termin&eacute;es&nbsp;!</div>
+    <div class="finale-enigma">
+      <b>&#9917; &Eacute;nigme finale du club&nbsp;:</b><br>
+      Le club dispose de <b>500&nbsp;&euro;</b> pour pr&eacute;parer un tournoi. Il ach&egrave;te <b>8 ballons</b> &agrave; 25&nbsp;&euro; chacun, re&ccedil;oit une aide de <b>150&nbsp;&euro;</b> de la mairie, puis ach&egrave;te <b>12 gourdes</b> &agrave; 10&nbsp;&euro; chacune.<br>
+      <b>Combien d&rsquo;argent reste-t-il au club&nbsp;?</b><br>
+      <span style="color:var(--muted)">Construis l&rsquo;expression unique, respecte les priorit&eacute;s, puis calcule.</span>
+    </div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; Rejouer le parcours</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5e
+    </div>
+    <div class="week">Semaine 1 — Jour 5</div>
+    <div class="title">Le tournoi du <span class="hl">club</span> &#9917;</div>
+    <div class="subtitle">R&eacute;solution de probl&egrave;mes &middot; priorit&eacute;s et rep&eacute;rage</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#9917;</div>
+    <div class="start-mission">
+      <b>&#127942; Ta mission&nbsp;:</b> le club de football du coll&egrave;ge dispose de <b>500&nbsp;&euro;</b> pour pr&eacute;parer un tournoi. Avant de valider le budget, le pr&eacute;sident du club te confie plusieurs v&eacute;rifications. &Agrave; chaque mission r&eacute;ussie, tu r&eacute;cup&egrave;res un fragment de l&rsquo;&eacute;cusson et tu te rapproches de l&rsquo;&eacute;nigme finale.
+      <span class="q">Suis le parcours du jour&nbsp;: tu r&eacute;soudras l&rsquo;&eacute;nigme du budget tout &agrave; la fin&nbsp;!</span>
+    </div>
+    <button class="btn-start" onclick="beginGame()">&#9917; Aider le club</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">&Eacute;cusson&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+    </div>
+    <div id="steps"></div>
+    <div style="text-align:center;"><button class="btn-restart" onclick="restartAll()">&#8635; Recommencer le parcours</button></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* SON */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function sOk(){if(!soundOn)return;beep(523,0,0.1,"triangle",0.22);beep(784,0.08,0.12,"triangle",0.22);beep(1047,0.18,0.18,"triangle",0.24);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.18);beep(150,0.1,0.2,"square",0.18);}
+function sFrag(){if(!soundOn)return;beep(660,0,0.06,"triangle",0.16);beep(990,0.07,0.14,"triangle",0.2);}
+function sWhistle(){if(!soundOn)return;beep(1800,0,0.18,"square",0.12);beep(2100,0.05,0.2,"square",0.12);}
+function sWin(){if(!soundOn)return;[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,i*0.13,0.26,"triangle",0.22);});}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+var amTimer=null;
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(function(){el.classList.remove("show");},3400);}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+
+/* ===== MISSIONS (valeurs vérifiées) ===== */
+/* type "multi" : liste de sous-questions, chacune qcm ou num ou match */
+var MISSIONS=[
+  {ico:"&#128290;", step:"Mission 1", codename:"D\u00e9coder", name:"D\u00e9coder un calcul", comp:"Traduire une phrase en expression",
+   frag:"&#9917;",
+   intro:"&#128290; Un calcul \u00e0 traduire<br><span class='scr'>Le responsable du club re\u00e7oit un calcul r\u00e9dig\u00e9 sous forme de phrase. Avant de poursuivre les pr\u00e9paratifs, il faut le traduire correctement.</span>",
+   statement:"\u00ab La somme du quotient de 30&#8201;176 par 92 et du produit de 532 par 174 \u00bb",
+   success:"&#9989; Calcul d\u00e9cod\u00e9",
+   msg:"&#9917; Message du pr\u00e9sident&nbsp;:<br>Excellent&#8201;! Nous pouvons maintenant v\u00e9rifier d\u2019autres informations importantes pour le tournoi.",
+   hint:"\u00ab Quotient de a par b \u00bb = a&nbsp;:&nbsp;b. \u00ab Produit de a par b \u00bb = a&nbsp;\u00d7&nbsp;b. \u00ab La somme de \u2026 et de \u2026 \u00bb relie les deux par une addition.",
+   qs:[
+     {kind:"qcm", q:"\u00c9cris l\u2019expression qui traduit la phrase.",
+      opts:[{t:"30&#8201;176 : 92 + 532 \u00d7 174", ok:true},{t:"(30&#8201;176 + 92) \u00d7 (532 + 174)", ok:false},{t:"30&#8201;176 \u00d7 92 + 532 : 174", ok:false},{t:"30&#8201;176 : 92 \u00d7 532 + 174", ok:false}]},
+     {kind:"qcm", q:"Quel est le meilleur ordre de grandeur du r\u00e9sultat&nbsp;?",
+      opts:[{t:"Environ 900", ok:false},{t:"Environ 9&#8201;000", ok:false},{t:"Environ 93&#8201;000", ok:true},{t:"Environ 900&#8201;000", ok:false}]},
+     {kind:"qcm", q:"La calculatrice est-elle n\u00e9cessaire pour le produit 532 \u00d7 174&nbsp;?",
+      opts:[{t:"Oui", ok:true},{t:"Non", ok:false}]},
+     {kind:"num", q:"Effectue le calcul. R\u00e9sultat final&nbsp;:", answer:92896, unit:"", accept:[92896]}
+   ]},
+  {ico:"&#128101;", step:"Mission 2", codename:"Relier", name:"Relier les informations", comp:"Mettre en \u00e9quation un probl\u00e8me",
+   frag:"&#128737;&#65039;",
+   intro:"&#128101; Inscriptions \u00e0 v\u00e9rifier<br><span class='scr'>Le club v\u00e9rifie les informations avant l\u2019inscription des participants. On note x l\u2019\u00e2ge de Manon.</span>",
+   statement:"<b>On note x l\u2019\u00e2ge de Manon.</b><ul><li>Pierre a 8 ans de moins que Manon.</li><li>\u00c9milia a le tiers de l\u2019\u00e2ge de Manon.</li><li>Pierre et \u00c9milia ont le m\u00eame \u00e2ge.</li></ul>",
+   success:"&#9989; Informations v\u00e9rifi\u00e9es",
+   msg:"&#9917; Message du pr\u00e9sident&nbsp;:<br>Les informations sont correctes. Passons maintenant aux calculs concernant le mat\u00e9riel.",
+   hint:"\u00ab 8 ans de moins \u00bb se traduit par x \u2212 8. \u00ab Le tiers \u00bb se traduit par x : 3. \u00ab Le m\u00eame \u00e2ge \u00bb donne une \u00e9galit\u00e9 entre les deux.",
+   qs:[
+     {kind:"qcm", q:"Comment s\u2019\u00e9crit l\u2019\u00e2ge de Pierre&nbsp;?",
+      opts:[{t:"x \u2212 8", ok:true},{t:"x + 8", ok:false},{t:"8 \u2212 x", ok:false},{t:"8x", ok:false}]},
+     {kind:"qcm", q:"Comment s\u2019\u00e9crit l\u2019\u00e2ge d\u2019\u00c9milia&nbsp;?",
+      opts:[{t:"x : 3", ok:true},{t:"3x", ok:false},{t:"x \u2212 3", ok:false},{t:"3 : x", ok:false}]},
+     {kind:"qcm", q:"Quelle \u00e9galit\u00e9 traduit la situation&nbsp;?",
+      opts:[{t:"x \u2212 8 = x : 3", ok:true},{t:"x + 8 = 3x", ok:false},{t:"x \u2212 8 = 3x", ok:false},{t:"x : 3 = x + 8", ok:false}]},
+     {kind:"num", q:"\u00c2ge de Manon&nbsp;:", answer:12, unit:"ans", accept:[12],
+      divider:"<b>&#128203; Fiche d\u2019inscription n&deg;2</b><br>Certaines informations semblent incoh\u00e9rentes. V\u00e9rifie les donn\u00e9es avant la validation du tournoi."},
+     {kind:"num", q:"\u00c2ge de Pierre&nbsp;:", answer:4, unit:"ans", accept:[4]},
+     {kind:"num", q:"\u00c2ge d\u2019\u00c9milia&nbsp;:", answer:4, unit:"ans", accept:[4]}
+   ]},
+  {ico:"&#128722;", step:"Mission 3", codename:"Contr\u00f4ler", name:"Contr\u00f4ler les achats", comp:"Comprendre et construire une expression",
+   frag:"&#9889;",
+   intro:"&#128722; Commandes \u00e0 contr\u00f4ler<br><span class='scr'>Le responsable du mat\u00e9riel veut v\u00e9rifier que les calculs ont du sens avant de finaliser la commande.</span>",
+   statement:"Deux coffrets co\u00fbtent <b>21,80&nbsp;&euro;</b> chacun. On ach\u00e8te aussi <b>5 n\u00e9cessaires \u00e0 tracer</b>. On paie avec un billet de <b>100&nbsp;&euro;</b> et la monnaie rendue est de <b>5,85&nbsp;&euro;</b>.",
+   success:"&#9989; Achats contr\u00f4l\u00e9s",
+   msg:"&#9917; Message du pr\u00e9sident&nbsp;:<br>Tr\u00e8s bien&#8201;! Il ne reste plus qu\u2019une derni\u00e8re v\u00e9rification avant de finaliser les pr\u00e9paratifs.",
+   hint:"Le total pay\u00e9 = 100 \u2212 5,85. Enl\u00e8ve le prix des 2 coffrets (2 \u00d7 21,80), puis partage en 5 parts \u00e9gales.",
+   qs:[
+     {kind:"match", q:"Associe chaque expression \u00e0 sa signification&nbsp;:",
+      pairs:[
+        {expr:"2 \u00d7 21,80", good:"Prix des deux coffrets"},
+        {expr:"100 \u2212 5,85", good:"Total r\u00e9ellement pay\u00e9"},
+        {expr:"( 100 \u2212 5,85 \u2212 2 \u00d7 21,80 ) : 5", good:"Prix d\u2019un n\u00e9cessaire \u00e0 tracer"}
+      ],
+      choices:["Prix des deux coffrets","Total r\u00e9ellement pay\u00e9","Prix d\u2019un n\u00e9cessaire \u00e0 tracer"]},
+     {kind:"qcm", q:"Quel calcul faut-il effectuer pour trouver le prix d\u2019un n\u00e9cessaire&nbsp;?",
+      opts:[{t:"( 100 \u2212 5,85 \u2212 2 \u00d7 21,80 ) : 5", ok:true},{t:"( 100 \u2212 5,85 ) : 5 \u2212 21,80", ok:false},{t:"100 \u2212 5,85 \u2212 2 \u00d7 21,80 : 5", ok:false},{t:"( 100 \u2212 2 \u00d7 21,80 ) : 5", ok:false}]},
+     {kind:"num", q:"Prix d\u2019un n\u00e9cessaire \u00e0 tracer&nbsp;:", answer:10.11, unit:"\u20ac", accept:[10.11]}
+   ]},
+  {ico:"&#128652;", step:"Mission 4", codename:"D\u00e9placement", name:"Organiser le d\u00e9placement", comp:"\u00c9crire des expressions \u00e9quivalentes",
+   frag:"&#127937;",
+   intro:"&#128652; Le d\u00e9placement des \u00e9quipes<br><span class='scr'>Le club organise le transport. Des voyageurs montent et descendent du car. Il faut v\u00e9rifier les calculs.</span>",
+   statement:"Un autocar quitte Djeddah avec <b>62 passagers</b>.<ul><li>\u00c0 Mekkah&nbsp;: 15 descendent, 21 montent.</li><li>\u00c0 M\u00e9dine&nbsp;: 23 descendent, 18 montent.</li></ul>",
+   success:"&#9989; D\u00e9placement valid\u00e9",
+   msg:"&#9917; Message du pr\u00e9sident&nbsp;:<br>Parfait&#8201;! Toutes les v\u00e9rifications sont termin\u00e9es. Pr\u00e9pare-toi pour l\u2019\u00e9nigme finale&#8201;!",
+   hint:"On part de 62, on enl\u00e8ve ceux qui descendent et on ajoute ceux qui montent, \u00e0 chaque arr\u00eat. \u00c0 Mekkah il y a 62 \u2212 15 + 21 passagers.",
+   qs:[
+     {kind:"qcm", q:"Quelle expression donne le nombre de passagers au d\u00e9part de M\u00e9dine&nbsp;?",
+      opts:[{t:"62 \u2212 15 + 21 \u2212 23 + 18", ok:true},{t:"62 + 15 \u2212 21 + 23 \u2212 18", ok:false},{t:"62 \u2212 15 \u2212 21 \u2212 23 \u2212 18", ok:false},{t:"62 \u2212 ( 15 + 21 ) \u2212 ( 23 + 18 )", ok:false}]},
+     {kind:"qcm", q:"Quelle autre expression donne le m\u00eame r\u00e9sultat&nbsp;?",
+      opts:[{t:"62 + ( 21 + 18 ) \u2212 ( 15 + 23 )", ok:true},{t:"62 \u2212 ( 21 + 18 ) + ( 15 + 23 )", ok:false},{t:"62 + 15 + 23 \u2212 21 \u2212 18", ok:false},{t:"( 62 + 21 + 18 ) : ( 15 + 23 )", ok:false}]},
+     {kind:"num", q:"Nombre de passagers au d\u00e9part de M\u00e9dine&nbsp;:", answer:63, unit:"passagers", accept:[63]},
+     {kind:"qcm", q:"Y a-t-il plus de voyageurs qu\u2019\u00e0 l\u2019arriv\u00e9e \u00e0 Mekkah (68)&nbsp;?",
+      opts:[{t:"Non, il y en a moins (63 < 68)", ok:true},{t:"Oui, il y en a plus", ok:false},{t:"Il y en a autant", ok:false}]}
+   ]}
+];
+
+var solved=[false,false,false,false];
+var active=0;
+var totalSec=0,totalInt=null;
+var qcmSel={};      // sélection qcm par "mi-qi"
+var matchSel={};    // sélections d'association par mission
+
+function build(){
+  var host=$("steps");host.innerHTML="";
+  MISSIONS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.step+' &middot; <span style="color:var(--day-color)">'+M.codename+'</span></div><div class="step-name">'+M.name+'</div><div class="step-comp">&#9917; '+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro">'+M.intro+'</div><div class="statement">'+M.statement+'</div><div id="zone-'+mi+'"></div>'
+        +'<div class="tools">'
+        +'<button class="btn btn-hint" id="hint-btn-'+mi+'" onclick="toggleHint('+mi+')">? Indice</button>'
+        +'<button class="btn btn-try" id="try-'+mi+'" onclick="tryStep('+mi+')">&#9989; Valider la mission</button>'
+        +'</div>'
+        +'<div class="hint" id="hint-'+mi+'">'+M.hint+'</div>'
+        +'<div class="fb" id="fb-'+mi+'"><span id="fbi-'+mi+'"></span><div id="fbm-'+mi+'"></div></div>';
+    }else{
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine la mission pr\u00e9c\u00e9dente pour la d\u00e9bloquer.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(mi===active||solved[mi]) renderZone(mi);
+  });
+  updateCrest();updateProg();
+}
+
+function renderZone(mi){
+  var M=MISSIONS[mi],z=$("zone-"+mi);if(!z)return;z.innerHTML="";
+  M.qs.forEach(function(Q,qi){
+    if(Q.divider){
+      var dv=document.createElement("div");dv.className="fiche";
+      dv.innerHTML=Q.divider;
+      z.appendChild(dv);
+    }
+    var blk=document.createElement("div");blk.className="q-block";
+    var qn=(qi+1);
+    var lab='<div class="q-label"><span class="qn">'+qn+'.</span>'+Q.q+'</div>';
+    if(Q.kind==="qcm"){
+      blk.innerHTML=lab+'<div class="opts" id="opts-'+mi+'-'+qi+'"></div>';
+      z.appendChild(blk);
+      buildQcm(mi,qi,Q);
+    }else if(Q.kind==="num"){
+      blk.innerHTML=lab+'<div class="num-row"><input class="num-in" id="num-'+mi+'-'+qi+'" type="text" inputmode="decimal" placeholder="?" autocomplete="off"><span class="num-unit">'+(Q.unit||"")+'</span></div>';
+      z.appendChild(blk);
+    }else if(Q.kind==="match"){
+      blk.innerHTML=lab+'<div id="match-'+mi+'-'+qi+'"></div>';
+      z.appendChild(blk);
+      buildMatch(mi,qi,Q);
+    }
+  });
+  if(solved[mi]) lockZone(mi);
+}
+
+function buildQcm(mi,qi,Q){
+  var box=$("opts-"+mi+"-"+qi);if(!box)return;
+  var order=Q.opts.map(function(_,i){return i;});
+  for(var s=order.length-1;s>0;s--){var r=Math.floor(Math.random()*(s+1));var t=order[s];order[s]=order[r];order[r]=t;}
+  Q._order=order;
+  var KEYS=["A","B","C","D"];
+  order.forEach(function(orig,pos){
+    var b=document.createElement("button");b.className="opt";b.type="button";
+    b.innerHTML='<span class="k">'+KEYS[pos]+'</span><span>'+Q.opts[orig].t+'</span>';
+    b.onclick=function(){
+      if(solved[mi])return;
+      qcmSel[mi+"-"+qi]=orig;
+      box.querySelectorAll(".opt").forEach(function(x){x.classList.remove("sel");});
+      this.classList.add("sel");
+    };
+    box.appendChild(b);
+  });
+}
+
+function buildMatch(mi,qi,Q){
+  var host=$("match-"+mi+"-"+qi);if(!host)return;
+  Q.pairs.forEach(function(p,pi){
+    var row=document.createElement("div");row.className="match-row";row.id="mrow-"+mi+"-"+qi+"-"+pi;
+    var opts='<option value="">— choisir —</option>';
+    Q.choices.forEach(function(c){opts+='<option value="'+c+'">'+c+'</option>';});
+    row.innerHTML='<div class="match-expr">'+p.expr+'</div><div class="match-sel"><select id="msel-'+mi+'-'+qi+'-'+pi+'">'+opts+'</select></div>';
+    host.appendChild(row);
+  });
+}
+
+function toggleHint(mi){if(solved[mi])return;$("hint-"+mi).classList.toggle("show");}
+
+function tryStep(mi){
+  if(solved[mi])return;
+  var M=MISSIONS[mi],ok=true,filled=true;
+  M.qs.forEach(function(Q,qi){
+    if(Q.kind==="qcm"){
+      var sel=qcmSel[mi+"-"+qi];
+      if(sel===undefined){filled=false;}
+      else if(!Q.opts[sel].ok){ok=false;}
+    }else if(Q.kind==="num"){
+      var el=$("num-"+mi+"-"+qi);var v=el?el.value.trim():"";
+      if(v===""){filled=false;}
+      var val=parseFloat(v.replace(",",".").replace(/\u2212/g,"-").replace(/\s/g,""));
+      var good=Q.accept.some(function(a){return Math.abs(val-a)<1e-6;});
+      if(el){el.classList.toggle("ok",good);el.classList.toggle("ko",v!==""&&!good);}
+      if(!good)ok=false;
+    }else if(Q.kind==="match"){
+      Q.pairs.forEach(function(p,pi){
+        var sel=$("msel-"+mi+"-"+qi+"-"+pi);var v=sel?sel.value:"";
+        if(v===""){filled=false;}
+        var good=(v===p.good);
+        var row=$("mrow-"+mi+"-"+qi+"-"+pi);
+        if(row){row.classList.toggle("ok",good&&v!=="");row.classList.toggle("ko",v!==""&&!good);}
+        if(!good)ok=false;
+      });
+    }
+  });
+  if(!filled){var fb=$("fb-"+mi);fb.className="fb show warn";$("fbi-"+mi).textContent="\u26A0";$("fbm-"+mi).textContent="R\u00e9ponds \u00e0 toutes les questions de la mission avant de valider.";return;}
+  if(ok){ stepSuccess(mi); }
+  else{
+    sBad();$("step-"+mi).classList.add("shake");setTimeout(function(){$("step-"+mi).classList.remove("shake");},400);
+    markErrors(mi);
+    var fb=$("fb-"+mi);fb.className="fb show ko";$("fbi-"+mi).textContent="\u274C";
+    $("fbm-"+mi).textContent="Certaines r\u00e9ponses ne sont pas correctes. Regarde ce qui est en rouge, corrige et r\u00e9essaie.";
+  }
+}
+
+function markErrors(mi){
+  var M=MISSIONS[mi];
+  M.qs.forEach(function(Q,qi){
+    if(Q.kind==="qcm"){
+      var box=$("opts-"+mi+"-"+qi);if(!box)return;
+      var sel=qcmSel[mi+"-"+qi];
+      Array.prototype.forEach.call(box.children,function(b,pos){
+        var orig=Q._order[pos];
+        if(orig===sel && !Q.opts[orig].ok) b.classList.add("bad");
+      });
+    }
+  });
+}
+
+function lockZone(mi){
+  var M=MISSIONS[mi];
+  M.qs.forEach(function(Q,qi){
+    if(Q.kind==="qcm"){
+      var box=$("opts-"+mi+"-"+qi);if(!box)return;
+      Array.prototype.forEach.call(box.children,function(b,pos){
+        var orig=Q._order[pos];
+        if(Q.opts[orig].ok)b.classList.add("good");
+        b.classList.add("locked");
+      });
+    }else if(Q.kind==="num"){
+      var el=$("num-"+mi+"-"+qi);if(el){el.disabled=true;el.classList.add("ok");}
+    }else if(Q.kind==="match"){
+      Q.pairs.forEach(function(p,pi){var sel=$("msel-"+mi+"-"+qi+"-"+pi);if(sel)sel.disabled=true;var row=$("mrow-"+mi+"-"+qi+"-"+pi);if(row)row.classList.add("ok");});
+    }
+  });
+}
+
+function stepSuccess(mi){
+  solved[mi]=true;sOk();sFrag();
+  $("step-"+mi).classList.add("solved");
+  var tb=$("try-"+mi);if(tb){tb.disabled=true;tb.style.display="none";}
+  var hb=$("hint-btn-"+mi);if(hb)hb.disabled=true;
+  $("hint-"+mi).classList.remove("show");
+  lockZone(mi);
+  var fb=$("fb-"+mi);fb.className="fb show ok";$("fbi-"+mi).textContent="\u2705";
+  $("fbm-"+mi).innerHTML="<b style='color:var(--green)'>"+MISSIONS[mi].success+"</b><br>&#128225; Fragment de l\u2019\u00e9cusson r\u00e9cup\u00e9r\u00e9&nbsp;: <b style='color:var(--day-color);font-size:1.2rem'>"+MISSIONS[mi].frag+"</b>";
+  updateCrest();updateProg();
+  if(active<MISSIONS.length-1){
+    showAgent(MISSIONS[mi].msg);
+    active++;
+    setTimeout(function(){build();var el=$("step-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},1100);
+  }else{
+    showAgent(MISSIONS[mi].msg);
+    setTimeout(openFinale,2400);
+  }
+}
+
+function updateCrest(){
+  var got=0;
+  MISSIONS.forEach(function(M,mi){
+    var f=$("frag-"+mi),hf=$("hud-frag-"+mi);
+    if(solved[mi]){if(f){f.innerHTML=M.frag;f.classList.add("found");}if(hf){hf.classList.add("got");}got++;}
+    else{if(f){f.textContent="?";f.classList.remove("found");}if(hf){hf.classList.remove("got");}}
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/MISSIONS.length*100);
+  var lab=$("hud-prog-label"),fill=$("hud-prog-fill");
+  if(lab)lab.innerHTML="Pr\u00e9paratifs&nbsp;: "+pct+"&#8201;%";
+  if(fill)fill.style.width=pct+"%";
+}
+
+function openFinale(){
+  clearInterval(totalInt);
+  var temps=fmt(totalSec);
+  $("hud-dial").innerHTML="&#127942;";
+  // écusson reconstitué
+  var cr=$("finale-crest");cr.innerHTML="";
+  MISSIONS.forEach(function(M,i){var d=document.createElement("div");d.className="fc";d.style.animationDelay=(i*0.15)+"s";d.innerHTML=M.frag;cr.appendChild(d);});
+  var grade,gsub;
+  if(totalSec<=240){grade="\u2B50 CAPITAINE D\u2019\u00c9QUIPE";gsub="Pr\u00e9paratifs men\u00e9s tambour battant&#8201;! Le club est fin pr\u00eat.";}
+  else if(totalSec<=420){grade="\uD83C\uDFC5 ORGANISATEUR EXPERT";gsub="Beau travail&#8201;! Toutes les v\u00e9rifications sont impeccables.";}
+  else if(totalSec<=600){grade="\u26BD MEMBRE CONFIRM\u00c9";gsub="Mission accomplie. Le tournoi peut commencer.";}
+  else{grade="\uD83E\uDD45 APPRENTI ORGANISATEUR";gsub="Pr\u00e9paratifs termin\u00e9s&#8201;! Avec un peu d\u2019entra\u00eenement, tu iras plus vite.";}
+  setTimeout(function(){
+    $("finale-time").innerHTML="&#9201; Pr\u00e9paratifs termin\u00e9s en "+temps;
+    $("finale-grade").innerHTML=grade;
+    $("finale-sub").innerHTML=gsub+"<br><br>Tu sais maintenant&nbsp;: traduire une situation par une expression, choisir les bonnes op\u00e9rations et respecter les priorit\u00e9s. Tu es pr\u00eat pour l\u2019\u00e9nigme principale du club&#8201;!";
+    $("finale").classList.add("show");
+    sWin();
+  },300);
+}
+
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  $("start-screen").style.display="none";
+  $("game").style.display="";
+  $("hud-bar").classList.add("show");
+  totalSec=0;clearInterval(totalInt);totalInt=setInterval(function(){totalSec++;},1000);
+  sWhistle();
+  showAgent("&#9917; Le pr\u00e9sident du club&nbsp;:<br>Bienvenue&#8201;! Aide-nous \u00e0 v\u00e9rifier tous les pr\u00e9paratifs du tournoi.");
+  build();
+}
+function restartAll(){
+  clearInterval(totalInt);totalSec=0;
+  solved=[false,false,false,false];active=0;qcmSel={};matchSel={};
+  $("finale").classList.remove("show");
+  $("hud-bar").classList.remove("show");
+  $("game").style.display="none";
+  $("start-screen").style.display="";
+  $("hud-dial").innerHTML="&#9917;";
+  for(var i=0;i<4;i++){var hf=$("hud-frag-"+i);if(hf)hf.classList.remove("got");}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+build();
+</script>
+</body>
+</html>
