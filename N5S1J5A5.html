@@ -51,7 +51,9 @@ header{text-align:center;margin-bottom:1.2rem;}
 .hud-prog-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
 .hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#1a2030;border:1px solid var(--line);overflow:hidden;}
 .hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--grass),var(--day-color));transition:width .6s ease;}
-@media(max-width:560px){.hud-prog-label{display:none;}.hud-prog-gauge{width:54px;}}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.8rem;letter-spacing:.04em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#1a2030;border:1.5px solid var(--day-border);border-radius:8px;padding:.28rem .6rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(245,197,24,.2);}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:46px;}.hud-bar{gap:.5rem;padding:.45rem .5rem;}.hud-frag{width:1.5rem;height:1.75rem;font-size:.8rem;}.hud-dial{font-size:1rem;}.hud-timer{font-size:.68rem;padding:.25rem .4rem;}.hud-timer .lab{display:none;}}
 @media(max-width:600px){
   .hud-bar{gap:.6rem;padding:.45rem .6rem;}
   .hud-frag{width:1.6rem;height:1.8rem;font-size:.85rem;}
@@ -196,6 +198,7 @@ header{text-align:center;margin-bottom:1.2rem;}
     <span class="hud-prog-label" id="hud-prog-label">Pr&eacute;paratifs&nbsp;: 0&nbsp;%</span>
     <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
   </div>
+  <span class="hud-timer" id="hud-timer"><span class="lab">&#9917; Pr&eacute;paration du tournoi &middot; </span>&#9201; 00:00</span>
 </div>
 
 <div class="finale" id="finale">
@@ -268,7 +271,7 @@ function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn
 
 var amTimer=null;
 function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(function(){el.classList.remove("show");},3400);}
-function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return (m<10?"0":"")+m+":"+(r<10?"0":"")+r;}
 
 /* ===== MISSIONS (valeurs vérifiées) ===== */
 /* type "multi" : liste de sous-questions, chacune qcm ou num ou match */
@@ -289,29 +292,24 @@ var MISSIONS=[
       opts:[{t:"Oui", ok:true},{t:"Non", ok:false}]},
      {kind:"num", q:"Effectue le calcul. R\u00e9sultat final&nbsp;:", answer:92896, unit:"", accept:[92896]}
    ]},
-  {ico:"&#128101;", step:"Mission 2", codename:"Relier", name:"Relier les informations", comp:"Mettre en \u00e9quation un probl\u00e8me",
+  {ico:"&#127942;", step:"Mission 2", codename:"Les &eacute;quipes", name:"Compter les &eacute;quipes", comp:"R&eacute;soudre un probl&egrave;me avec priorit&eacute;s",
    frag:"&#128737;&#65039;",
-   intro:"&#128101; Inscriptions \u00e0 v\u00e9rifier<br><span class='scr'>Le club v\u00e9rifie les informations avant l\u2019inscription des participants. On note x l\u2019\u00e2ge de Manon.</span>",
-   statement:"<b>On note x l\u2019\u00e2ge de Manon.</b><ul><li>Pierre a 8 ans de moins que Manon.</li><li>\u00c9milia a le tiers de l\u2019\u00e2ge de Manon.</li><li>Pierre et \u00c9milia ont le m\u00eame \u00e2ge.</li></ul>",
-   success:"&#9989; Informations v\u00e9rifi\u00e9es",
-   msg:"&#9917; Message du pr\u00e9sident&nbsp;:<br>Les informations sont correctes. Passons maintenant aux calculs concernant le mat\u00e9riel.",
-   hint:"\u00ab 8 ans de moins \u00bb se traduit par x \u2212 8. \u00ab Le tiers \u00bb se traduit par x : 3. \u00ab Le m\u00eame \u00e2ge \u00bb donne une \u00e9galit\u00e9 entre les deux.",
+   intro:"&#127942; Suivi du tournoi<br><span class='scr'>Le club suit l\u2019&eacute;volution du nombre d\u2019&eacute;quipes au fil des tours. Aide le responsable &agrave; faire le compte&#8201;!</span>",
+   statement:"Le tournoi commence avec <b>24 &eacute;quipes</b>.<br>Apr&egrave;s le premier tour, <b>la moiti&eacute;</b> des &eacute;quipes est &eacute;limin&eacute;e.<br>Puis <b>3 &eacute;quipes</b> sont rep&ecirc;ch&eacute;es.",
+   success:"&#9989; &Eacute;quipes compt&eacute;es",
+   msg:"&#9917; Message du pr&eacute;sident&nbsp;:<br>Parfait, le compte est bon&#8201;! Passons maintenant aux calculs concernant le mat&eacute;riel.",
+   hint:"\u00ab La moiti&eacute; de 24 \u00bb se calcule par 24 : 2. Calcule d\u2019abord ce qui reste apr&egrave;s le premier tour, puis ajoute les 3 &eacute;quipes rep&ecirc;ch&eacute;es.",
    qs:[
-     {kind:"qcm", q:"Comment s\u2019\u00e9crit l\u2019\u00e2ge de Pierre&nbsp;?",
-      opts:[{t:"x \u2212 8", ok:true},{t:"x + 8", ok:false},{t:"8 \u2212 x", ok:false},{t:"8x", ok:false}]},
-     {kind:"qcm", q:"Comment s\u2019\u00e9crit l\u2019\u00e2ge d\u2019\u00c9milia&nbsp;?",
-      opts:[{t:"x : 3", ok:true},{t:"3x", ok:false},{t:"x \u2212 3", ok:false},{t:"3 : x", ok:false}]},
-     {kind:"qcm", q:"Quelle \u00e9galit\u00e9 traduit la situation&nbsp;?",
-      opts:[{t:"x \u2212 8 = x : 3", ok:true},{t:"x + 8 = 3x", ok:false},{t:"x \u2212 8 = 3x", ok:false},{t:"x : 3 = x + 8", ok:false}]},
-     {kind:"num", q:"\u00c2ge de Manon&nbsp;:", answer:12, unit:"ans", accept:[12],
-      divider:"<b>&#128203; Fiche d\u2019inscription n&deg;2</b><br>Certaines informations semblent incoh\u00e9rentes. V\u00e9rifie les donn\u00e9es avant la validation du tournoi."},
-     {kind:"num", q:"\u00c2ge de Pierre&nbsp;:", answer:4, unit:"ans", accept:[4]},
-     {kind:"num", q:"\u00c2ge d\u2019\u00c9milia&nbsp;:", answer:4, unit:"ans", accept:[4]}
+     {kind:"qcm", q:"Combien d\u2019&eacute;quipes restent apr&egrave;s le premier tour&nbsp;?",
+      opts:[{t:"24 : 2 = 12", ok:true},{t:"24 \u2212 2 = 22", ok:false},{t:"24 \u00d7 2 = 48", ok:false},{t:"24 + 2 = 26", ok:false}]},
+     {kind:"qcm", q:"Quelle expression unique permet de trouver les &eacute;quipes du tour suivant&nbsp;?",
+      opts:[{t:"24 : 2 + 3", ok:true},{t:"24 : (2 + 3)", ok:false},{t:"(24 + 3) : 2", ok:false},{t:"24 \u2212 2 + 3", ok:false}]},
+     {kind:"num", q:"Combien d\u2019&eacute;quipes participent au tour suivant&nbsp;?", answer:15, unit:"&eacute;quipes", accept:[15]}
    ]},
   {ico:"&#128722;", step:"Mission 3", codename:"Contr\u00f4ler", name:"Contr\u00f4ler les achats", comp:"Comprendre et construire une expression",
    frag:"&#9889;",
    intro:"&#128722; Commandes \u00e0 contr\u00f4ler<br><span class='scr'>Le responsable du mat\u00e9riel veut v\u00e9rifier que les calculs ont du sens avant de finaliser la commande.</span>",
-   statement:"Deux coffrets co\u00fbtent <b>21,80&nbsp;&euro;</b> chacun. On ach\u00e8te aussi <b>5 n\u00e9cessaires \u00e0 tracer</b>. On paie avec un billet de <b>100&nbsp;&euro;</b> et la monnaie rendue est de <b>5,85&nbsp;&euro;</b>.",
+   statement:"Deux coffrets co\u00fbtent <b>21,80&nbsp;&euro;</b> chacun. On ach\u00e8te aussi <b>5 maillots</b>. On paie avec un billet de <b>100&nbsp;&euro;</b> et la monnaie rendue est de <b>5,85&nbsp;&euro;</b>.",
    success:"&#9989; Achats contr\u00f4l\u00e9s",
    msg:"&#9917; Message du pr\u00e9sident&nbsp;:<br>Tr\u00e8s bien&#8201;! Il ne reste plus qu\u2019une derni\u00e8re v\u00e9rification avant de finaliser les pr\u00e9paratifs.",
    hint:"Le total pay\u00e9 = 100 \u2212 5,85. Enl\u00e8ve le prix des 2 coffrets (2 \u00d7 21,80), puis partage en 5 parts \u00e9gales.",
@@ -320,27 +318,27 @@ var MISSIONS=[
       pairs:[
         {expr:"2 \u00d7 21,80", good:"Prix des deux coffrets"},
         {expr:"100 \u2212 5,85", good:"Total r\u00e9ellement pay\u00e9"},
-        {expr:"( 100 \u2212 5,85 \u2212 2 \u00d7 21,80 ) : 5", good:"Prix d\u2019un n\u00e9cessaire \u00e0 tracer"}
+        {expr:"( 100 \u2212 5,85 \u2212 2 \u00d7 21,80 ) : 5", good:"Prix d\u2019un maillot"}
       ],
-      choices:["Prix des deux coffrets","Total r\u00e9ellement pay\u00e9","Prix d\u2019un n\u00e9cessaire \u00e0 tracer"]},
-     {kind:"qcm", q:"Quel calcul faut-il effectuer pour trouver le prix d\u2019un n\u00e9cessaire&nbsp;?",
+      choices:["Prix des deux coffrets","Total r\u00e9ellement pay\u00e9","Prix d\u2019un maillot"]},
+     {kind:"qcm", q:"Quel calcul faut-il effectuer pour trouver le prix d\u2019un maillot&nbsp;?",
       opts:[{t:"( 100 \u2212 5,85 \u2212 2 \u00d7 21,80 ) : 5", ok:true},{t:"( 100 \u2212 5,85 ) : 5 \u2212 21,80", ok:false},{t:"100 \u2212 5,85 \u2212 2 \u00d7 21,80 : 5", ok:false},{t:"( 100 \u2212 2 \u00d7 21,80 ) : 5", ok:false}]},
-     {kind:"num", q:"Prix d\u2019un n\u00e9cessaire \u00e0 tracer&nbsp;:", answer:10.11, unit:"\u20ac", accept:[10.11]}
+     {kind:"num", q:"Prix d\u2019un maillot&nbsp;:", answer:10.11, unit:"\u20ac", accept:[10.11]}
    ]},
   {ico:"&#128652;", step:"Mission 4", codename:"D\u00e9placement", name:"Organiser le d\u00e9placement", comp:"\u00c9crire des expressions \u00e9quivalentes",
    frag:"&#127937;",
    intro:"&#128652; Le d\u00e9placement des \u00e9quipes<br><span class='scr'>Le club organise le transport. Des voyageurs montent et descendent du car. Il faut v\u00e9rifier les calculs.</span>",
-   statement:"Un autocar quitte Djeddah avec <b>62 passagers</b>.<ul><li>\u00c0 Mekkah&nbsp;: 15 descendent, 21 montent.</li><li>\u00c0 M\u00e9dine&nbsp;: 23 descendent, 18 montent.</li></ul>",
+   statement:"Un autocar quitte Lyon avec <b>62 passagers</b>.<ul><li>\u00c0 Valence&nbsp;: 15 descendent, 21 montent.</li><li>\u00c0 Marseille&nbsp;: 23 descendent, 18 montent.</li></ul>",
    success:"&#9989; D\u00e9placement valid\u00e9",
    msg:"&#9917; Message du pr\u00e9sident&nbsp;:<br>Parfait&#8201;! Toutes les v\u00e9rifications sont termin\u00e9es. Pr\u00e9pare-toi pour l\u2019\u00e9nigme finale&#8201;!",
-   hint:"On part de 62, on enl\u00e8ve ceux qui descendent et on ajoute ceux qui montent, \u00e0 chaque arr\u00eat. \u00c0 Mekkah il y a 62 \u2212 15 + 21 passagers.",
+   hint:"On part de 62, on enl\u00e8ve ceux qui descendent et on ajoute ceux qui montent, \u00e0 chaque arr\u00eat. \u00c0 Valence il y a 62 \u2212 15 + 21 passagers.",
    qs:[
-     {kind:"qcm", q:"Quelle expression donne le nombre de passagers au d\u00e9part de M\u00e9dine&nbsp;?",
+     {kind:"qcm", q:"Quelle expression donne le nombre de passagers au d\u00e9part de Marseille&nbsp;?",
       opts:[{t:"62 \u2212 15 + 21 \u2212 23 + 18", ok:true},{t:"62 + 15 \u2212 21 + 23 \u2212 18", ok:false},{t:"62 \u2212 15 \u2212 21 \u2212 23 \u2212 18", ok:false},{t:"62 \u2212 ( 15 + 21 ) \u2212 ( 23 + 18 )", ok:false}]},
      {kind:"qcm", q:"Quelle autre expression donne le m\u00eame r\u00e9sultat&nbsp;?",
       opts:[{t:"62 + ( 21 + 18 ) \u2212 ( 15 + 23 )", ok:true},{t:"62 \u2212 ( 21 + 18 ) + ( 15 + 23 )", ok:false},{t:"62 + 15 + 23 \u2212 21 \u2212 18", ok:false},{t:"( 62 + 21 + 18 ) : ( 15 + 23 )", ok:false}]},
-     {kind:"num", q:"Nombre de passagers au d\u00e9part de M\u00e9dine&nbsp;:", answer:63, unit:"passagers", accept:[63]},
-     {kind:"qcm", q:"Y a-t-il plus de voyageurs qu\u2019\u00e0 l\u2019arriv\u00e9e \u00e0 Mekkah (68)&nbsp;?",
+     {kind:"num", q:"Nombre de passagers au d\u00e9part de Marseille&nbsp;:", answer:63, unit:"passagers", accept:[63]},
+     {kind:"qcm", q:"Y a-t-il plus de voyageurs qu\u2019\u00e0 l\u2019arriv\u00e9e \u00e0 Valence (68)&nbsp;?",
       opts:[{t:"Non, il y en a moins (63 < 68)", ok:true},{t:"Oui, il y en a plus", ok:false},{t:"Il y en a autant", ok:false}]}
    ]}
 ];
@@ -544,20 +542,15 @@ function updateProg(){
 
 function openFinale(){
   clearInterval(totalInt);
-  var temps=fmt(totalSec);
   $("hud-dial").innerHTML="&#127942;";
-  // écusson reconstitué
   var cr=$("finale-crest");cr.innerHTML="";
   MISSIONS.forEach(function(M,i){var d=document.createElement("div");d.className="fc";d.style.animationDelay=(i*0.15)+"s";d.innerHTML=M.frag;cr.appendChild(d);});
-  var grade,gsub;
-  if(totalSec<=240){grade="\u2B50 CAPITAINE D\u2019\u00c9QUIPE";gsub="Pr\u00e9paratifs men\u00e9s tambour battant&#8201;! Le club est fin pr\u00eat.";}
-  else if(totalSec<=420){grade="\uD83C\uDFC5 ORGANISATEUR EXPERT";gsub="Beau travail&#8201;! Toutes les v\u00e9rifications sont impeccables.";}
-  else if(totalSec<=600){grade="\u26BD MEMBRE CONFIRM\u00c9";gsub="Mission accomplie. Le tournoi peut commencer.";}
-  else{grade="\uD83E\uDD45 APPRENTI ORGANISATEUR";gsub="Pr\u00e9paratifs termin\u00e9s&#8201;! Avec un peu d\u2019entra\u00eenement, tu iras plus vite.";}
+  var mn=Math.floor(totalSec/60),sc=totalSec%60;
+  var used=mn+" min "+(sc<10?"0":"")+sc+" s";
   setTimeout(function(){
-    $("finale-time").innerHTML="&#9201; Pr\u00e9paratifs termin\u00e9s en "+temps;
-    $("finale-grade").innerHTML=grade;
-    $("finale-sub").innerHTML=gsub+"<br><br>Tu sais maintenant&nbsp;: traduire une situation par une expression, choisir les bonnes op\u00e9rations et respecter les priorit\u00e9s. Tu es pr\u00eat pour l\u2019\u00e9nigme principale du club&#8201;!";
+    $("finale-time").innerHTML="&#9201; Temps utilis\u00e9&nbsp;: "+used;
+    $("finale-grade").innerHTML="&#127941; Mission accomplie";
+    $("finale-sub").innerHTML="Bravo&#8201;! Tu as termin\u00e9 la mission. Le temps affich\u00e9 est simplement indicatif\u00a0: l\u2019important est d\u2019avoir r\u00e9ussi les d\u00e9fis et compris les m\u00e9thodes. Tu es pr\u00eat pour l\u2019\u00e9nigme principale du club&#8201;!";
     $("finale").classList.add("show");
     sWin();
   },300);
@@ -568,7 +561,9 @@ function beginGame(){
   $("start-screen").style.display="none";
   $("game").style.display="";
   $("hud-bar").classList.add("show");
-  totalSec=0;clearInterval(totalInt);totalInt=setInterval(function(){totalSec++;},1000);
+  totalSec=0;clearInterval(totalInt);
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lab">&#9917; Pr&eacute;paration du tournoi &middot; </span>&#9201; 00:00';
+  totalInt=setInterval(function(){totalSec++;var h=$("hud-timer");if(h)h.innerHTML='<span class="lab">&#9917; Pr&eacute;paration du tournoi &middot; </span>&#9201; '+fmt(totalSec);},1000);
   sWhistle();
   showAgent("&#9917; Le pr\u00e9sident du club&nbsp;:<br>Bienvenue&#8201;! Aide-nous \u00e0 v\u00e9rifier tous les pr\u00e9paratifs du tournoi.");
   build();
@@ -581,6 +576,7 @@ function restartAll(){
   $("game").style.display="none";
   $("start-screen").style.display="";
   $("hud-dial").innerHTML="&#9917;";
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lab">&#9917; Pr&eacute;paration du tournoi &middot; </span>&#9201; 00:00';
   for(var i=0;i<4;i++){var hf=$("hud-frag-"+i);if(hf)hf.classList.remove("got");}
   window.scrollTo({top:0,behavior:"smooth"});
 }
