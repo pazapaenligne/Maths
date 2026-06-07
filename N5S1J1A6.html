@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Qui a raison ?</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — LUNDI (J1) ORANGE ═══ */
+    :root{
+      --day-color:#f5a623; --day-dark:#a85f00; --day-light:#fff5e0;
+      --day-border:#f5d080; --day-glow:rgba(245,166,35,.3);
+    }
+    /* ═══ CHARTE PAZAPA — NE PAS TOUCHER ═══ */
+    :root{
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+      --err-bg:#fce4e4; --err-border:#8e1b13; --err-text:#8e1b13;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+      letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;
+      font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.25rem,5vw,1.8rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .stage{width:100%;max-width:680px;position:relative;z-index:1;}
+
+    .hud{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;align-items:center;margin-bottom:1.1rem;}
+    .hud-chip{display:flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:99px;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;
+      border:2px solid var(--border);background:var(--surface);}
+    .hud-chip.act{background:var(--day-light);border-color:var(--day-border);color:var(--day-dark);}
+
+    .start-overlay{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .start-overlay h2{font-size:1.1rem;color:var(--day-dark);margin-bottom:.5rem;}
+    .start-overlay p{font-size:clamp(.9rem,2.6vw,1rem);line-height:1.9;margin-bottom:1.1rem;}
+    .start-overlay strong{color:var(--day-dark);}
+
+    .screen{display:none;}
+    .screen.show{display:block;animation:fadeUp .35s ease both;}
+
+    .progress-wrap{margin-bottom:1.2rem;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));
+      border-radius:99px;transition:width .4s ease;}
+
+    /* énoncé du problème (rappelé en haut de chaque question) */
+    .enonce{background:var(--day-light);border:2px solid var(--day-border);border-left:5px solid var(--day-color);
+      border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
+    .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+    .enonce .ex-quest{color:var(--day-dark);font-weight:700;margin-top:.3rem;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink));}
+    .q-tag{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-text{font-size:clamp(.95rem,2.9vw,1.1rem);font-weight:700;line-height:1.8;margin-bottom:1rem;color:var(--text);}
+
+    .options{display:flex;flex-direction:column;gap:.6rem;}
+    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
+      border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;
+      font-size:clamp(.9rem,2.7vw,1rem);line-height:1.6;transition:border-color .15s,background .15s;text-align:left;}
+    .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.4rem;text-align:center;}
+    .opt:hover:not(.locked){border-color:var(--day-color);}
+    .opt.locked{cursor:default;}
+    .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
+    .opt.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .opt.reveal-correct{border-color:var(--green);background:#f0faeb;}
+
+    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.92rem);
+      display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback .fi{font-size:1.3rem;flex-shrink:0;}
+
+    .actions{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.3rem;}
+    .hint-row{margin-top:.9rem;}
+    .btn-hint{background:transparent;color:var(--day-dark);border:2px dashed var(--day-border);
+      padding:.45rem 1rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;
+      font-size:.85rem;cursor:pointer;min-height:40px;}
+    .btn-hint:hover{background:var(--day-light);}
+    .hint-box{display:none;margin-top:.6rem;padding:.75rem 1rem;border-radius:10px;
+      background:var(--day-light);border:1.5px solid var(--day-border);color:var(--text);
+      font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.8;}
+    .hint-box.show{display:block;animation:fadeUp .25s ease both;}
+    .hint-box::before{content:"💡 ";}
+    .exres-sol{text-align:left;margin:.4rem auto 1rem;max-width:520px;}
+    .exres-sol .sol-item{background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;padding:.6rem .9rem;margin-bottom:.5rem;font-size:clamp(.82rem,2.4vw,.9rem);
+      line-height:1.8;color:var(--text);}
+    .exres-sol .sol-item b{color:var(--day-dark);}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;
+      border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.6vw,.95rem);font-weight:700;
+      cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.4;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#000;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+
+    /* bilan d'exercice + final */
+    .res{display:none;text-align:center;}
+    .res.show{display:block;animation:fadeUp .4s ease both;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .res-answer{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;
+      padding:.9rem 1.1rem;font-weight:800;color:var(--day-dark);font-size:clamp(1rem,3vw,1.2rem);
+      margin:.8rem 0 1rem;line-height:1.7;}
+    .res-score{font-size:clamp(1.6rem,7vw,2.4rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
+    .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
+    .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
+    .skills-text{font-size:clamp(.82rem,2.4vw,.9rem);color:var(--muted);line-height:1.9;margin-bottom:1.3rem;}
+    .res-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:1.4rem;line-height:1.9;}
+    .res-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      body{padding:1.4rem .75rem 3rem;}
+      .actions{justify-content:stretch;} .actions .btn{flex:1;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5ème
+    </div>
+    <div class="week-label">Semaine 1 &ndash; Jour 1</div>
+    <h1>⚖️ Qui a <span class="hl">raison&nbsp;?</span></h1>
+    <p class="subtitle">enchaîner des opérations sans parenthèses &middot; à toi de trancher</p>
+  </header>
+
+  <div class="stage">
+
+    <!-- Départ -->
+    <div class="start-overlay" id="start-overlay">
+      <h2>À toi de trancher&nbsp;!</h2>
+      <p>⚖️ Deux élèves ne sont pas d&rsquo;accord sur l&rsquo;ordre des calculs.<br/>
+         À toi de dire <strong>qui a raison</strong> et surtout <strong>pourquoi</strong>.<br/>
+         <span style="color:var(--muted);font-size:.85rem;">Tu as révisé les règles, montre que tu les maîtrises&nbsp;!</span></p>
+      <button class="btn btn-primary" onclick="startGame()">▶️ Commencer&nbsp;!</button>
+    </div>
+
+    <!-- Plateau questions -->
+    <div class="screen" id="board">
+      <div class="hud">
+        <div class="hud-chip act"><span id="act-label">Problème 1</span></div>
+        <div class="hud-chip"><span id="score-live">0</span> bonnes réponses</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-info">
+          <span id="prog-label">Question 1</span>
+          <span id="prog-pct">0&nbsp;%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="enonce" id="enonce"></div>
+
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="q-tag" id="q-tag">Question 1</div>
+        <div class="q-text" id="q-text"></div>
+        <div class="options" id="options"></div>
+
+        <div class="hint-row">
+          <button class="btn btn-hint" id="btn-hint" onclick="toggleHint()">💡 Indice</button>
+        </div>
+        <div class="hint-box" id="hint-box"></div>
+
+        <div class="feedback" id="feedback">
+          <span class="fi" id="fb-ic"></span>
+          <div id="fb-msg"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Suivant &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bilan d'un exercice -->
+    <div class="res" id="exres">
+      <div class="res-card">
+        <div class="logo-badge" style="margin-bottom:.5rem">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#3ab5d8"></span>
+          <span id="exres-badge">Bilan — Problème 1</span>
+        </div>
+        <div class="res-score"><span id="exres-num">0</span></div>
+        <div class="stars" id="exres-stars"></div>
+        <div class="res-answer" id="exres-answer"></div>
+        <div class="exres-sol" id="exres-sol"></div>
+        <div class="res-msg" id="exres-msg"></div>
+        <div class="res-btns">
+          <button class="btn btn-primary" id="exres-btn" onclick="nextExercise()">Problème suivant &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bilan final -->
+    <div class="res" id="final">
+      <div class="res-card">
+        <div class="logo-badge" style="margin-bottom:.5rem">
+          <span class="logo-dot" style="background:#f5c518"></span>
+          <span class="logo-dot" style="background:#8dc63f"></span>
+          <span class="logo-dot" style="background:#3ab5d8"></span>
+          Bravo !
+        </div>
+        <div class="res-score"><span id="final-num">0</span></div>
+        <div class="stars" id="final-stars"></div>
+        <div class="skills-text">Tu sais maintenant identifier ce qu&rsquo;on cherche, choisir la bonne opération, respecter les priorités opératoires et résoudre un problème en plusieurs étapes.</div>
+        <div class="res-detail" id="final-detail"></div>
+        <div class="res-btns">
+          <button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   ★ CONTENU — 2 PARTIES
+   Partie 1 « Partage et mesure » : 2 sous-problèmes (citernes, route)
+   Partie 2 « Du Fahrenheit au Celsius » : 1 problème
+   Chaque sous-problème : enonce + question + reponse + qs (QCM).
+   Une partie enchaîne tous les sous-problèmes puis affiche UN bilan.
+   ans = index de la bonne option. apostrophe -> \u2019
+═══════════════════════════════════════════════════════ */
+var PARTIES = [
+  {
+    titre:"⚖️ Qui a raison ?",
+    sous:[
+      {
+        titre:"Marie ou Benoît ?",
+        enonce:"Pour calculer 125 \u2212 5 + 20 : Marie dit qu\u2019il faut d\u2019abord effectuer la soustraction. Benoît dit qu\u2019il faut d\u2019abord effectuer l\u2019opération située à gauche.",
+        question:"Qui a raison, et pourquoi ?",
+        reponse:"Benoît a raison : 125 \u2212 5 + 20 = 140 (de gauche à droite).",
+        sol:"Avec seulement + et \u2212, on calcule de gauche à droite : 125 \u2212 5 = 120, puis 120 + 20 = <b>140</b>.",
+        qs:[
+          { q:"Qui a raison ?", hint:"Dans 125 \u2212 5 + 20, il n\u2019y a ni \u00d7 ni \u00f7. Que reste-t-il comme règle ?", opts:["Marie","Benoît"], ans:1 },
+          { q:"Pourquoi ?",
+            opts:["Lorsqu\u2019il n\u2019y a que des additions et des soustractions, on calcule de gauche à droite.",
+                  "On effectue toujours les soustractions avant les additions.",
+                  "On commence toujours par le plus grand nombre."], ans:0 }
+        ]
+      }
+    ]
+  }
+];
+
+/* ═══ MOTEUR ═══ */
+var $ = function(id){ return document.getElementById(id); };
+var part = 0;        // index de la partie
+var sp = 0;          // index du sous-problème dans la partie
+var idx = 0;         // index de la question dans le sous-problème
+var chosen = [];     // réponses du sous-problème courant
+var okPart = [];     // bonnes réponses cumulées par PARTIE
+var qPart = [];      // nombre total de questions par PARTIE
+var optOrder = [];   // ordre mélangé des options de la question courante
+
+function shuffleArr(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function curSP(){ return PARTIES[part].sous[sp]; }
+function partQuestionCount(p){ return PARTIES[p].sous.reduce(function(s,x){return s+x.qs.length;},0); }
+function partQuestionDoneIndex(){ // numéro global de la question dans la partie (pour la barre)
+  var n=0; for(var i=0;i<sp;i++) n+=PARTIES[part].sous[i].qs.length; return n+idx;
+}
+
+function startGame(){
+  $("start-overlay").style.display="none";
+  $("exres").classList.remove("show");
+  $("final").classList.remove("show");
+  $("board").classList.add("show");
+  part=0;
+  okPart=new Array(PARTIES.length).fill(0);
+  qPart=PARTIES.map(function(_,i){return partQuestionCount(i);});
+  startPart();
+}
+
+function startPart(){
+  sp=0; idx=0;
+  okPart[part]=0;
+  chosen=new Array(curSP().qs.length).fill(null);
+  $("board").classList.add("show");
+  optOrder=[];
+  render();
+}
+
+function buildOrder(){
+  var opts=curSP().qs[idx].opts;
+  optOrder=shuffleArr(opts.map(function(_,i){return i;}));
+}
+
+function render(){
+  var P=PARTIES[part];
+  var S=curSP();
+  var qObj=S.qs[idx];
+  if(chosen[idx]===null || optOrder.length!==qObj.opts.length) buildOrder();
+  $("act-label").textContent=P.titre;
+  $("enonce").innerHTML="<div class='ex-titre'>"+S.titre+"</div>"+S.enonce
+    +"<div class='ex-quest'>👉 "+S.question+"</div>";
+  $("q-tag").textContent="Question "+(idx+1)+" / "+S.qs.length;
+  $("q-text").textContent=qObj.q;
+  buildOptions();
+  // réinitialiser l'indice à chaque question
+  var hb=$("hint-box"); if(hb){ hb.classList.remove("show"); hb.innerHTML=""; }
+  var bh=$("btn-hint");
+  if(bh){
+    if(qObj.hint){ bh.style.display=""; bh.textContent="💡 Indice"; }
+    else { bh.style.display="none"; }
+  }
+  var fb=$("feedback");
+  if(chosen[idx]!==null){
+    var correct=chosen[idx]===qObj.ans;
+    fb.className="feedback show "+(correct?"ok":"ko");
+    $("fb-ic").textContent=correct?"\u2705":"\u274C";
+    $("fb-msg").innerHTML = correct ? "<strong>Bonne réponse\u00a0!</strong>"
+      : "<strong>Pas tout à fait.</strong> Regarde la réponse correcte.";
+    $("btn-next").disabled=false;
+  } else { fb.className="feedback"; $("btn-next").disabled=true; }
+  // libellé du bouton : dernière question du dernier sous-problème de la partie -> bilan
+  var lastQ = (idx===S.qs.length-1);
+  var lastSP = (sp===P.sous.length-1);
+  $("btn-next").textContent = (lastQ && lastSP) ? "Voir le bilan \u2192"
+    : (lastQ ? "Problème suivant \u2192" : "Suivant \u2192");
+  updateProgress();
+}
+
+function buildOptions(){
+  var qObj=curSP().qs[idx];
+  var box=$("options"); box.innerHTML="";
+  var locked = chosen[idx]!==null;
+  optOrder.forEach(function(realIdx){
+    var div=document.createElement("div");
+    div.className="opt"+(locked?" locked":"");
+    div.innerHTML="<span class='opt-key'>"+(locked?"":"\u25CB")+"</span><span>"+qObj.opts[realIdx]+"</span>";
+    if(!locked){ div.onclick=function(){ choose(realIdx); }; }
+    else {
+      var pick=chosen[idx];
+      if(realIdx===qObj.ans){ div.className += (realIdx===pick)?" chosen-correct":" reveal-correct"; div.querySelector(".opt-key").textContent="\u2705"; }
+      else if(realIdx===pick){ div.className += " chosen-wrong"; div.querySelector(".opt-key").textContent="\u274C"; }
+    }
+    box.appendChild(div);
+  });
+}
+
+function choose(realIdx){ if(chosen[idx]!==null) return; chosen[idx]=realIdx; render(); }
+
+function toggleHint(){
+  var qObj=curSP().qs[idx];
+  if(!qObj.hint) return;
+  var hb=$("hint-box"), bh=$("btn-hint");
+  var open=hb.classList.toggle("show");
+  if(open){ hb.innerHTML=qObj.hint; bh.textContent="Cacher l\u2019indice"; }
+  else { bh.textContent="💡 Indice"; }
+}
+
+function scoreSP(){ return chosen.filter(function(c,i){return c!==null && c===curSP().qs[i].ans;}).length; }
+
+function updateProgress(){
+  var total=partQuestionCount(part);
+  var doneGlobal=partQuestionDoneIndex()+(chosen[idx]!==null?1:0);
+  var pct=Math.round((doneGlobal/total)*100);
+  $("progress-bar").style.width=pct+"%";
+  $("prog-label").textContent=curSP().titre.replace(/^[^A-Za-zÀ-ÿ0-9]+/,"").trim()+" — Q"+(idx+1);
+  $("prog-pct").textContent=pct+"\u00a0%";
+  // score live cumulé sur la partie
+  $("score-live").textContent= okPart[part] + scoreSP();
+}
+
+function nextQ(){
+  if($("btn-next").disabled) return;
+  var P=PARTIES[part];
+  var S=curSP();
+  if(idx<S.qs.length-1){ idx++; optOrder=[]; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  // fin du sous-problème : on cumule son score dans la partie
+  okPart[part]+= scoreSP();
+  if(sp<P.sous.length-1){ sp++; idx=0; chosen=new Array(curSP().qs.length).fill(null); optOrder=[]; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else showPartRes();
+}
+
+function starsFrac(ok,total){
+  var r=ok/total;
+  return r>=1?5:r>=0.8?4:r>=0.6?3:r>=0.4?2:1;
+}
+
+function showPartRes(){
+  var P=PARTIES[part];
+  var ok=okPart[part], total=partQuestionCount(part);
+  $("board").classList.remove("show");
+  $("exres").classList.add("show");
+  $("exres-badge").textContent="Bilan — "+P.titre;
+  $("exres-num").textContent=ok+" / "+total;
+  var st=starsFrac(ok,total);
+  $("exres-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  // réponses des sous-problèmes de la partie
+  var ans="";
+  P.sous.forEach(function(s){ ans += "🏆 "+s.reponse+"<br/>"; });
+  $("exres-answer").innerHTML=ans;
+  // explication détaillée (solution) de chaque sous-problème
+  var solBox=$("exres-sol");
+  if(solBox){
+    var sol="";
+    P.sous.forEach(function(s){ if(s.sol) sol += "<div class='sol-item'>"+s.sol+"</div>"; });
+    solBox.innerHTML=sol;
+  }
+  var msg;
+  if(ok===total) msg="Parfait\u00a0! Toutes les étapes sont justes.";
+  else if(ok>=Math.ceil(total*0.8)) msg="Très bien\u00a0! Juste une étape à revoir.";
+  else if(ok>=Math.ceil(total*0.6)) msg="Bien\u00a0! Reprends les étapes manquées, puis réessaie.";
+  else msg="À retravailler\u00a0: refais les étapes une à une, tu vas y arriver.";
+  $("exres-msg").textContent=msg;
+  if(PARTIES.length===1){
+    $("exres-btn").textContent="🔄 Recommencer";
+    $("exres-btn").setAttribute("onclick","restart()");
+  } else {
+    $("exres-btn").textContent = (part===PARTIES.length-1) ? "Voir le bilan final \u2192" : "Bloc suivant \u2192";
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function nextExercise(){
+  if(part<PARTIES.length-1){ part++; $("exres").classList.remove("show"); startPart(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else showFinal();
+}
+
+function showFinal(){
+  $("exres").classList.remove("show");
+  $("board").classList.remove("show");
+  $("final").classList.add("show");
+  var totalQ=PARTIES.reduce(function(s,_,i){return s+partQuestionCount(i);},0);
+  var totalOk=okPart.reduce(function(s,n){return s+n;},0);
+  $("final-num").textContent=totalOk+" / "+totalQ;
+  var st=starsFrac(totalOk,totalQ);
+  $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  var detail="";
+  PARTIES.forEach(function(p,i){ detail += p.titre+" : "+okPart[i]+" / "+partQuestionCount(i)+"<br/>"; });
+  $("final-detail").innerHTML=detail;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){ startGame(); }
+</script>
+</body>
+</html>
