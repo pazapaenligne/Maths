@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Vrai ou faux ?</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — VENDREDI (J5) JAUNE ═══ */
+    :root{
+      --day-color:#f5c518; --day-dark:#8a6000; --day-light:#fffbeb;
+      --day-border:#f5e08a; --day-glow:rgba(245,197,24,.3);
+    }
+    /* ═══ CHARTE PAZAPA — NE PAS TOUCHER ═══ */
+    :root{
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+      --err-bg:#fce4e4; --err-border:#8e1b13; --err-text:#8e1b13;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+      letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;
+      font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.25rem,5vw,1.8rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .niveau-badge{display:inline-flex;align-items:center;gap:.5rem;margin-top:.6rem;
+      background:var(--day-light);border:2px solid var(--day-color);color:var(--day-dark);
+      font-weight:800;font-size:clamp(.9rem,2.8vw,1.05rem);padding:.35rem 1.1rem;border-radius:99px;}
+    .niveau-badge .nb-dot{width:12px;height:12px;border-radius:50%;background:var(--day-color);display:inline-block;}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .stage{width:100%;max-width:680px;position:relative;z-index:1;}
+
+    .hud{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;align-items:center;margin-bottom:1.1rem;}
+    .hud-chip{display:flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:99px;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;
+      border:2px solid var(--border);background:var(--surface);}
+    .hud-chip.act{background:var(--day-light);border-color:var(--day-border);color:var(--day-dark);}
+
+    .start-overlay{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .start-overlay h2{font-size:1.1rem;color:var(--day-dark);margin-bottom:.5rem;}
+    .start-overlay p{font-size:clamp(.9rem,2.6vw,1rem);line-height:1.9;margin-bottom:1.1rem;}
+    .start-overlay strong{color:var(--day-dark);}
+
+    .screen{display:none;}
+    .screen.show{display:block;animation:fadeUp .35s ease both;}
+
+    .progress-wrap{margin-bottom:1.2rem;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));
+      border-radius:99px;transition:width .4s ease;}
+
+    .enonce{background:var(--day-light);border:2px solid var(--day-border);border-left:5px solid var(--day-color);
+      border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
+    .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+    .enonce .ex-quest{color:var(--day-dark);font-weight:700;margin-top:.3rem;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink));}
+    .q-tag{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-text{font-size:clamp(.95rem,2.9vw,1.1rem);font-weight:700;line-height:1.8;margin-bottom:1rem;color:var(--text);}
+    .expr-mono{font-family:'JetBrains Mono',monospace;font-weight:600;}
+
+    .options{display:flex;flex-direction:column;gap:.6rem;}
+    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
+      border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;
+      font-size:clamp(.9rem,2.7vw,1rem);line-height:1.8;transition:border-color .15s,background .15s;text-align:left;}
+    .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.5rem;text-align:center;
+      font-family:'JetBrains Mono',monospace;}
+    .opt .opt-txt{font-family:'JetBrains Mono',monospace;font-weight:600;}
+    .opt:hover:not(.locked){border-color:var(--day-color);}
+    .opt.locked{cursor:default;}
+    .opt.sel{border-color:var(--day-color);background:var(--day-light);}
+    .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
+    .opt.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .opt.reveal-correct{border-color:var(--green);background:#f0faeb;}
+    .opt.miss{border-color:var(--green);background:#f0faeb;border-style:dashed;}
+
+    .vf-row{display:flex;gap:.7rem;}
+    .vf-btn{flex:1;padding:.85rem 1rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--bg);cursor:pointer;min-height:48px;font-family:Arial,sans-serif;
+      font-weight:700;font-size:clamp(.95rem,2.8vw,1.05rem);transition:border-color .15s,background .15s;}
+    .vf-btn:hover:not(.locked){border-color:var(--day-color);}
+    .vf-btn.sel{border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn.locked{cursor:default;}
+    .vf-btn.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .vf-btn.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .vf-btn.reveal-correct{border-color:var(--green);background:#f0faeb;}
+
+    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.92rem);
+      display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback .fi{font-size:1.3rem;flex-shrink:0;}
+
+    .actions{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.3rem;}
+    .hint-row{margin-top:.9rem;}
+    .btn-hint{background:transparent;color:var(--day-dark);border:2px dashed var(--day-border);
+      padding:.45rem 1rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;
+      font-size:.85rem;cursor:pointer;min-height:40px;}
+    .btn-hint:hover{background:var(--day-light);}
+    .hint-box{display:none;margin-top:.6rem;padding:.75rem 1rem;border-radius:10px;
+      background:var(--day-light);border:1.5px solid var(--day-border);color:var(--text);
+      font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.8;}
+    .hint-box.show{display:block;animation:fadeUp .25s ease both;}
+    .hint-box::before{content:"💡 ";}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;
+      border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.6vw,.95rem);font-weight:700;
+      cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.4;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#000;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+
+    .res{display:none;text-align:center;}
+    .res.show{display:block;animation:fadeUp .4s ease both;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .trophee{font-size:3rem;line-height:1;margin-bottom:.3rem;}
+    .res-score{font-size:clamp(1.8rem,8vw,3rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
+    .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
+    .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
+    .recap-list{display:flex;flex-direction:column;gap:.5rem;margin:.8rem auto 1.3rem;max-width:500px;}
+    .recap-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.6rem .9rem;
+      border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.8;text-align:left;}
+    .recap-row .rk{flex:1;min-width:8rem;font-weight:600;font-family:'JetBrains Mono',monospace;}
+    .recap-row.ok{background:#f0faeb;border:1.5px solid #8dc63f;color:#3d7a10;}
+    .recap-row.ko{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
+    .recap-row b{font-weight:800;}
+    .skills-text{color:var(--day-dark);line-height:1.8;background:var(--day-light);
+      border:2px solid var(--day-border);border-radius:12px;padding:.9rem 1.1rem;
+      margin:0 auto 1.3rem;max-width:460px;text-align:left;}
+    .skills-text .skills-title{font-weight:800;font-size:clamp(.84rem,2.4vw,.92rem);margin-bottom:.5rem;}
+    .skills-text .skill-line{display:flex;gap:.6rem;font-size:clamp(.86rem,2.5vw,.94rem);
+      line-height:1.8;margin-bottom:.5rem;font-weight:600;}
+    .skills-text .skill-line:last-child{margin-bottom:0;}
+    .skills-text .arr{color:var(--day-color);font-weight:800;flex-shrink:0;}
+    .res-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      body{padding:1.4rem .75rem 3rem;}
+      .actions{justify-content:stretch;} .actions .btn{flex:1;}
+      .vf-row{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5ème
+    </div>
+    <div class="week-label">Semaine 2 &ndash; Jour 5</div>
+    <h1>Les <span class="hl">priorités opératoires</span></h1>
+    <p class="subtitle">6 égalités &rarr; vrai ou faux en respectant les priorités</p>
+    <div class="niveau-badge"><span class="nb-dot"></span>Niveau 3</div>
+  </header>
+
+  <div class="stage">
+    <!-- écran de départ -->
+    <div class="screen show" id="start">
+      <div class="start-overlay">
+        <h2>C&rsquo;est parti, on s&rsquo;entraîne&nbsp;!</h2>
+        <p>🎯 Pour chaque égalité, dis si elle est <strong>vraie</strong> ou <strong>fausse</strong>.<br/>Calcule en respectant les <strong>priorités opératoires</strong>.<br/><span style="color:var(--muted);font-size:.85rem;">Prends ton temps, vérifie chaque calcul.</span></p>
+        <button class="btn btn-primary" onclick="startGame()">Commencer &rarr;</button>
+      </div>
+    </div>
+
+    <!-- écran de jeu -->
+    <div class="screen" id="board">
+      <div class="hud">
+        <div class="hud-chip act"><span id="act-label">Niveau 1</span></div>
+        <div class="hud-chip"><span id="score-live">0</span> <span id="score-suffix">bonnes réponses</span></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-info"><span id="prog-label">Question 1</span><span id="prog-pct">0&nbsp;%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
+      </div>
+
+      <div class="enonce" id="enonce"></div>
+
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="q-tag" id="q-tag">Question</div>
+        <div class="q-text" id="q-text"></div>
+        <div id="answer-zone"></div>
+        <div class="hint-row" id="hint-row" style="display:none;">
+          <button class="btn-hint" id="btn-hint" onclick="toggleHint()">Voir un indice</button>
+          <div class="hint-box" id="hint-box"></div>
+        </div>
+        <div class="feedback" id="feedback"><span class="fi" id="fb-ic"></span><div><span id="fb-msg"></span></div></div>
+        <div class="actions">
+          <button class="btn btn-primary" id="btn-validate" onclick="validate()" disabled>Valider</button>
+          <button class="btn btn-primary" id="btn-next" onclick="nextStep()" style="display:none;">Suivant &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- bilan de niveau -->
+    <div class="res" id="exres">
+      <div class="res-card">
+        <div class="trophee">🏆</div>
+        <div class="res-score"><span id="exres-num">0</span></div>
+        <div class="stars" id="exres-stars"></div>
+        <div class="res-msg" id="exres-msg"></div>
+        <div class="recap-list" id="exres-recap"></div>
+        <button class="btn btn-primary" id="exres-btn" onclick="nextLevel()">Niveau suivant &rarr;</button>
+      </div>
+    </div>
+
+    <!-- bilan final -->
+    <div class="res" id="final">
+      <div class="res-card">
+        <div class="trophee">🏆</div>
+        <div class="res-score"><span id="final-num">0</span></div>
+        <div class="stars" id="final-stars"></div>
+        <div class="res-msg" id="final-msg"></div>
+        <div class="skills-text">
+          <div class="skills-title">Après ces 3 niveaux, tu sais :</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Calculer d&rsquo;abord les parenthèses</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Faire les multiplications et divisions avant les additions</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Calculer de gauche à droite à priorité égale</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Reconnaître plusieurs écritures d&rsquo;un même nombre</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Repérer et déjouer les pièges de priorités</div>
+        </div>
+        <div class="recap-list" id="final-recap"></div>
+        <div class="res-btns">
+          <button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+function shuffleArr(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+
+/* ═══ DONNÉES ═══ */
+var NIVEAUX = [
+  {type:"vf",
+    titre:"Niveau 3 \u2014 Vrai ou faux ?",
+    enonce:"Calcule chaque expression en respectant les priorités opératoires.",
+    question:"Cette égalité est-elle vraie ou fausse&nbsp;?",
+    defis:[
+      { txt:"48 \u00f7 (3 + 3) = 8", ans:true,  sol:"3 + 3 = 6, puis 48 \u00f7 6 = 8. L\u2019égalité est correcte." },
+      { txt:"3 \u00d7 3 + 10 \u00d7 2 = 23", ans:false, sol:"3 \u00d7 3 = 9 et 10 \u00d7 2 = 20, puis 9 + 20 = 29 (et non 23)." },
+      { txt:"11 + 9 \u00d7 8 = 83", ans:true,  sol:"9 \u00d7 8 = 72, puis 11 + 72 = 83. L\u2019égalité est correcte." },
+      { txt:"6 \u00d7 (36 \u00f7 9 + 2) = 24", ans:false, sol:"36 \u00f7 9 = 4, puis 4 + 2 = 6, puis 6 \u00d7 6 = 36 (et non 24)." },
+      { txt:"15 \u00d7 4 \u00f7 5 = 12", ans:true,  sol:"De gauche à droite : 15 \u00d7 4 = 60, puis 60 \u00f7 5 = 12. L\u2019égalité est correcte." },
+      { txt:"(62 \u2212 30) \u00f7 8 = 4", ans:true,  sol:"62 \u2212 30 = 32, puis 32 \u00f7 8 = 4. L\u2019égalité est correcte." }
+    ]
+  }
+];
+
+/* ═══ ÉTAT ═══ */
+var lvl=0;        // index du niveau
+var step=0;       // index du défi (niveau 3) ou 0 sinon
+var selMulti=[];  // indices cochés (niveau 1)
+var selSingle=null; // index choisi (niveau 2)
+var selVF=null;   // choix vrai/faux courant (niveau 3)
+var locked=false; // question validée
+var hintOpen=false;
+var levelScore=0; // score du niveau courant
+var levelMax=0;   // score max du niveau
+var vfResults=[]; // résultats par défi (niveau 3)
+var scores=[0,0,0]; // score par niveau (0 ou 1 pour n1/n2, n/6 pour n3... on stocke en étoiles plus bas)
+var n1pass=false, n2pass=false; // réussite niveaux 1 et 2
+
+function startGame(){
+  $("start").classList.remove("show");
+  $("exres").classList.remove("show");
+  $("final").classList.remove("show");
+  lvl=0; n1pass=false; n2pass=false; vfResults=[];
+  // mélange des questions à chaque partie (le score lit ok/ans, pas l'ordre)
+  NIVEAUX.forEach(function(N){
+    if(N.items) shuffleArr(N.items);
+    if(N.opts) shuffleArr(N.opts);
+    if(N.defis) shuffleArr(N.defis);
+  });
+  startLevel();
+}
+
+function startLevel(){
+  step=0; selMulti=[]; selSingle=null; selVF=null; locked=false; hintOpen=false;
+  levelScore=0;
+  $("board").classList.add("show");
+  $("exres").classList.remove("show");
+  $("final").classList.remove("show");
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function render(){
+  var N=NIVEAUX[lvl];
+  $("act-label").textContent="Niveau "+(lvl+1);
+  $("enonce").innerHTML="<div class='ex-titre'>"+N.titre+"</div>"+N.enonce
+    +"<div class='ex-quest'>👉 "+(N.type==="vf"?N.question:N.question)+"</div>";
+  $("feedback").className="feedback";
+  $("btn-next").style.display="none";
+  $("btn-validate").style.display="inline-flex";
+  $("btn-validate").disabled=true;
+  locked=false;
+  // indice
+  if(N.hint){ $("hint-row").style.display="block"; $("btn-hint").textContent="Voir un indice"; }
+  else { $("hint-row").style.display="none"; }
+  $("hint-box").classList.remove("show"); hintOpen=false;
+  if(N.hint) $("hint-box").textContent=N.hint;
+
+  var zone=$("answer-zone");
+  if(N.type==="multi"){
+    $("q-tag").textContent="Coche les bonnes réponses";
+    $("q-text").textContent=N.question;
+    zone.innerHTML="<div class='options' id='opts'></div>";
+    var box=$("opts");
+    N.items.forEach(function(it,i){
+      var b=document.createElement("div");
+      b.className="opt";
+      b.innerHTML="<span class='opt-key'>☐</span><span class='opt-txt'>"+it.txt+"</span>";
+      b.onclick=function(){ toggleMulti(i,b); };
+      box.appendChild(b);
+    });
+    $("prog-label").textContent="Niveau 1";
+  } else if(N.type==="single"){
+    $("q-tag").textContent="Choisis une réponse";
+    $("q-text").textContent=N.question;
+    zone.innerHTML="<div class='options' id='opts'></div>";
+    var box2=$("opts");
+    N.opts.forEach(function(op,i){
+      var b=document.createElement("div");
+      b.className="opt";
+      b.innerHTML="<span class='opt-key'>🔘</span><span class='opt-txt'>"+op.txt+"</span>";
+      b.onclick=function(){ chooseSingle(i,b); };
+      box2.appendChild(b);
+    });
+    $("prog-label").textContent="Niveau 2";
+  } else { // vf
+    var d=N.defis[step];
+    $("q-tag").textContent="Défi "+(step+1)+" / "+N.defis.length;
+    $("q-text").innerHTML="<span class='expr-mono'>"+d.txt+"</span>";
+    zone.innerHTML="<div class='vf-row'>"
+      +"<button class='vf-btn' id='vf-true' onclick='chooseVF(true)'>✔ Vrai</button>"
+      +"<button class='vf-btn' id='vf-false' onclick='chooseVF(false)'>✘ Faux</button></div>";
+    $("prog-label").textContent="Défi "+(step+1)+" / "+N.defis.length;
+  }
+  updateHud();
+}
+
+function updateHud(){
+  $("score-live").textContent=levelScore;
+  $("score-suffix").textContent="bonnes réponses";
+  var N=NIVEAUX[lvl];
+  var pct;
+  if(N.type==="vf") pct=Math.round(step/N.defis.length*100);
+  else pct=0;
+  $("progress-bar").style.width=pct+"%";
+  $("prog-pct").textContent=pct+"\u00a0%";
+}
+
+/* ── Niveau 1 : multi ── */
+function toggleMulti(i,el){
+  if(locked) return;
+  var p=selMulti.indexOf(i);
+  if(p===-1){ selMulti.push(i); el.classList.add("sel"); el.querySelector(".opt-key").textContent="☑"; }
+  else { selMulti.splice(p,1); el.classList.remove("sel"); el.querySelector(".opt-key").textContent="☐"; }
+  $("btn-validate").disabled = (selMulti.length===0);
+}
+
+/* ── Niveau 2 : single ── */
+function chooseSingle(i,el){
+  if(locked) return;
+  selSingle=i;
+  var all=$("opts").children;
+  for(var k=0;k<all.length;k++) all[k].classList.remove("sel");
+  el.classList.add("sel");
+  $("btn-validate").disabled=false;
+}
+
+/* ── Niveau 3 : vrai/faux ── */
+function chooseVF(v){
+  if(locked) return;
+  selVF=v;
+  $("vf-true").classList.toggle("sel", v===true);
+  $("vf-false").classList.toggle("sel", v===false);
+  $("btn-validate").disabled=false;
+}
+
+/* ── Validation ── */
+function validate(){
+  if(locked) return;
+  var N=NIVEAUX[lvl];
+  locked=true;
+  $("btn-validate").style.display="none";
+  $("btn-hint").disabled=true;
+
+  if(N.type==="multi"){
+    var all=$("opts").children;
+    var allGood=true;
+    N.items.forEach(function(it,i){
+      var el=all[i];
+      el.classList.add("locked");
+      var checked=selMulti.indexOf(i)!==-1;
+      if(it.ok && checked){ el.classList.add("chosen-correct"); }
+      else if(it.ok && !checked){ el.classList.add("miss"); allGood=false; }
+      else if(!it.ok && checked){ el.classList.add("chosen-wrong"); allGood=false; }
+    });
+    n1pass=allGood;
+    levelScore=allGood?1:0; levelMax=1;
+    showFb(allGood, allGood?"Bravo&nbsp;! Tu as coché les 2 expressions qui valent 20."
+      :"Pas tout à fait. Les bonnes réponses sont surlignées en vert.");
+  } else if(N.type==="single"){
+    var all2=$("opts").children;
+    var good=false;
+    N.opts.forEach(function(op,i){
+      var el=all2[i];
+      el.classList.add("locked");
+      if(op.ok){ el.classList.add(selSingle===i?"chosen-correct":"reveal-correct"); if(selSingle===i) good=true; }
+      else if(selSingle===i){ el.classList.add("chosen-wrong"); }
+    });
+    n2pass=good;
+    levelScore=good?1:0; levelMax=1;
+    showFb(good, good?"Exact&nbsp;! 31 \u2212 7 \u00d7 4 + 4 = 31 \u2212 28 + 4 = 7."
+      :"Pas tout à fait. La bonne réponse est surlignée en vert.");
+  } else { // vf
+    var d=N.defis[step];
+    var correct=(selVF===d.ans);
+    $("vf-true").classList.add("locked"); $("vf-false").classList.add("locked");
+    var goodBtn = d.ans ? $("vf-true") : $("vf-false");
+    var selBtn = selVF ? $("vf-true") : $("vf-false");
+    goodBtn.classList.add(correct?"chosen-correct":"reveal-correct");
+    if(!correct) selBtn.classList.add("chosen-wrong");
+    if(correct) levelScore++;
+    vfResults.push({txt:d.txt, ans:d.ans, correct:correct});
+    showFb(correct, (correct?"Bonne réponse&nbsp;! ":"Pas tout à fait. ")+d.sol);
+  }
+
+  $("btn-next").style.display="inline-flex";
+  $("btn-next").textContent = lastStep() ? "Voir le bilan \u2192" : "Suivant \u2192";
+  updateHud();
+}
+
+function lastStep(){
+  var N=NIVEAUX[lvl];
+  if(N.type==="vf") return step===N.defis.length-1;
+  return true;
+}
+
+function showFb(ok,msg){
+  var fb=$("feedback");
+  fb.className="feedback show "+(ok?"ok":"ko");
+  $("fb-ic").textContent=ok?"\u2705":"\u274C";
+  $("fb-msg").innerHTML=msg;
+}
+
+function toggleHint(){
+  hintOpen=!hintOpen;
+  $("hint-box").classList.toggle("show",hintOpen);
+  $("btn-hint").textContent=hintOpen?"Cacher l\u2019indice":"Voir un indice";
+}
+
+function nextStep(){
+  var N=NIVEAUX[lvl];
+  if(N.type==="vf" && step<N.defis.length-1){
+    step++; selVF=null; locked=false;
+    $("btn-hint").disabled=false;
+    render(); window.scrollTo({top:0,behavior:"smooth"});
+    return;
+  }
+  showLevelRes();
+}
+
+/* ── Étoiles ── */
+function starsN1N2(pass){ return pass?5:1; }
+function starsN3(n){ return n>=6?5:n>=5?4:n>=4?3:n>=2?2:1; }
+
+function showLevelRes(){
+  var N=NIVEAUX[lvl];
+  $("board").classList.remove("show");
+  $("exres").classList.add("show");
+  var st, msg, recap="";
+  if(N.type==="multi"){
+    st=starsN1N2(n1pass);
+    $("exres-num").textContent = n1pass?"Réussi !":"À revoir";
+    msg = n1pass ? "Parfait&nbsp;! Les 2 expressions qui valent 20 sont trouvées."
+                 : "Reprends : seules (3 + 2) \u00d7 (9 \u2212 5) et (9 \u2212 5) \u00d7 (3 + 2) valent 20.";
+    N.items.forEach(function(it){
+      var checked = false; // récap montre la valeur de chaque expression
+      recap += "<div class='recap-row "+(it.ok?"ok":"ko")+"'>"
+        +"<span>"+(it.ok?"\u2714":"\u2718")+"</span>"
+        +"<span class='rk'>"+it.txt+"</span>"
+        +"<span><b>= "+it.val+"</b></span></div>";
+    });
+  } else if(N.type==="single"){
+    st=starsN1N2(n2pass);
+    $("exres-num").textContent = n2pass?"Réussi !":"À revoir";
+    msg = n2pass ? "Bravo&nbsp;! Tu as déjoué le piège des priorités."
+                 : "Reprends : seule 31 \u2212 7 \u00d7 4 + 4 vaut 7.";
+    N.opts.forEach(function(op){
+      recap += "<div class='recap-row "+(op.ok?"ok":"ko")+"'>"
+        +"<span>"+(op.ok?"\u2714":"\u2718")+"</span>"
+        +"<span class='rk'>"+op.txt+"</span>"
+        +"<span><b>= "+op.val+"</b></span></div>";
+    });
+  } else {
+    st=starsN3(levelScore);
+    $("exres-num").textContent = levelScore+" / "+N.defis.length;
+    if(levelScore>=6) msg="Parfait&nbsp;! Toutes les égalités sont bien jugées.";
+    else if(levelScore>=5) msg="Très bien&nbsp;! Juste une à revoir.";
+    else if(levelScore>=3) msg="Bien&nbsp;! Reprends les priorités sur les défis manqués.";
+    else msg="À retravailler : multiplications et divisions avant additions.";
+    vfResults.forEach(function(r){
+      recap += "<div class='recap-row "+(r.correct?"ok":"ko")+"'>"
+        +"<span>"+(r.correct?"\u2714":"\u2718")+"</span>"
+        +"<span class='rk'>"+r.txt+"</span>"
+        +"<span><b>"+(r.ans?"Vrai":"Faux")+"</b></span></div>";
+    });
+  }
+  $("exres-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  $("exres-msg").innerHTML=msg;
+  $("exres-recap").innerHTML=recap;
+  if(NIVEAUX.length===1){ $("exres-btn").textContent="🔄 Recommencer"; $("exres-btn").setAttribute("onclick","restart()"); }
+  else { $("exres-btn").textContent=(lvl===NIVEAUX.length-1)?"Voir le bilan final \u2192":"Niveau suivant \u2192"; $("exres-btn").setAttribute("onclick",(lvl===NIVEAUX.length-1)?"showFinal()":"nextLevel()"); }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function nextLevel(){
+  lvl++;
+  $("exres").classList.remove("show");
+  startLevel();
+}
+
+function showFinal(){
+  $("exres").classList.remove("show");
+  $("board").classList.remove("show");
+  $("final").classList.add("show");
+  // total : niveau1 (1) + niveau2 (1) + niveau3 (/6) ramené en réussites de niveaux
+  var lvlPass = (n1pass?1:0)+(n2pass?1:0)+(vfResults.filter(function(r){return r.correct;}).length>=5?1:0);
+  var n3ok = vfResults.filter(function(r){return r.correct;}).length;
+  $("final-num").textContent = lvlPass+" / 3 niveaux";
+  var totalStars = Math.round((starsN1N2(n1pass)+starsN1N2(n2pass)+starsN3(n3ok))/3);
+  $("final-stars").textContent="\u2B50".repeat(totalStars)+"\u2606".repeat(5-totalStars);
+  var msg;
+  if(lvlPass===3 && n3ok===6) msg="Parfait&nbsp;! Tu maîtrises les priorités opératoires.";
+  else if(lvlPass>=2) msg="Très bien&nbsp;! Encore un petit entraînement et ce sera parfait.";
+  else msg="Bon début&nbsp;! Reprends les niveaux où tu as buté, tu vas progresser.";
+  $("final-msg").innerHTML=msg;
+  var recap="";
+  recap += "<div class='recap-row "+(n1pass?"ok":"ko")+"'><span>"+(n1pass?"\u2714":"\u2718")+"</span><span class='rk' style=\"font-family:Arial\">Niveau 1 \u2014 Les expressions secrètes</span></div>";
+  recap += "<div class='recap-row "+(n2pass?"ok":"ko")+"'><span>"+(n2pass?"\u2714":"\u2718")+"</span><span class='rk' style=\"font-family:Arial\">Niveau 2 \u2014 Le piège des priorités</span></div>";
+  recap += "<div class='recap-row "+(n3ok>=5?"ok":"ko")+"'><span>"+(n3ok>=5?"\u2714":"\u2718")+"</span><span class='rk' style=\"font-family:Arial\">Niveau 3 \u2014 Vrai ou faux</span><span><b>"+n3ok+" / 6</b></span></div>";
+  $("final-recap").innerHTML=recap;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){ startGame(); }
+</script>
+</body>
+</html>
