@@ -86,7 +86,7 @@
     .options{display:flex;flex-direction:column;gap:.6rem;}
     .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
       border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;
-      font-size:clamp(.9rem,2.7vw,1rem);line-height:1.6;transition:border-color .15s,background .15s;text-align:left;}
+      font-size:clamp(.9rem,2.7vw,1rem);line-height:1.8;transition:border-color .15s,background .15s;text-align:left;}
     .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.4rem;text-align:center;}
     .opt:hover:not(.locked){border-color:var(--day-color);}
     .opt.locked{cursor:default;}
@@ -130,9 +130,13 @@
     .res.show{display:block;animation:fadeUp .4s ease both;}
     .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
       padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
-    .res-answer{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;
-      padding:.9rem 1.1rem;font-weight:800;color:var(--day-dark);font-size:clamp(1rem,3vw,1.2rem);
-      margin:.8rem 0 1rem;line-height:1.7;}
+    .res-answer{display:flex;flex-direction:column;gap:.5rem;margin:.8rem auto 1.2rem;max-width:480px;}
+    .recap-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.6rem .9rem;
+      border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.8;text-align:left;}
+    .recap-row .rk{flex:1;min-width:8rem;font-weight:600;}
+    .recap-row.ok{background:#f0faeb;border:1.5px solid #8dc63f;color:#3d7a10;}
+    .recap-row.ko{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
+    .recap-row b{font-weight:800;}
     .res-score{font-size:clamp(1.6rem,7vw,2.4rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
     .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
     .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
@@ -160,7 +164,7 @@
     </div>
     <div class="week-label">Semaine 2 &ndash; Jour 4</div>
     <h1>⚖️ Qui a <span class="hl">raison&nbsp;?</span></h1>
-    <p class="subtitle">le signe d&rsquo;un produit &middot; à toi de trancher</p>
+    <p class="subtitle">le signe d&rsquo;un produit &rarr; à toi de trancher</p>
   </header>
 
   <div class="stage">
@@ -289,6 +293,7 @@ var sp = 0;          // index du sous-problème dans la partie
 var idx = 0;         // index de la question dans le sous-problème
 var chosen = [];     // réponses du sous-problème courant
 var okPart = [];     // bonnes réponses cumulées par PARTIE
+var spOk = {};       // réussite par sous-problème : clé "part-sp"
 var qPart = [];      // nombre total de questions par PARTIE
 var optOrder = [];   // ordre mélangé des options de la question courante
 
@@ -306,6 +311,7 @@ function startGame(){
   $("board").classList.add("show");
   part=0;
   okPart=new Array(PARTIES.length).fill(0);
+  spOk={};
   qPart=PARTIES.map(function(_,i){return partQuestionCount(i);});
   startPart();
 }
@@ -395,7 +401,7 @@ function updateProgress(){
   var doneGlobal=partQuestionDoneIndex()+(chosen[idx]!==null?1:0);
   var pct=Math.round((doneGlobal/total)*100);
   $("progress-bar").style.width=pct+"%";
-  $("prog-label").textContent=curSP().titre.replace(/^[^A-Za-zÀ-ÿ0-9]+/,"").trim()+" — Q"+(idx+1);
+  $("prog-label").textContent="Question "+(idx+1)+" / "+curSP().qs.length;
   $("prog-pct").textContent=pct+"\u00a0%";
   // score live cumulé sur la partie
   $("score-live").textContent= okPart[part] + scoreSP();
@@ -407,7 +413,9 @@ function nextQ(){
   var S=curSP();
   if(idx<S.qs.length-1){ idx++; optOrder=[]; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
   // fin du sous-problème : on cumule son score dans la partie
-  okPart[part]+= scoreSP();
+  var spScore = scoreSP();
+  okPart[part]+= spScore;
+  spOk[part+"-"+sp] = (spScore === S.qs.length);
   if(sp<P.sous.length-1){ sp++; idx=0; chosen=new Array(curSP().qs.length).fill(null); optOrder=[]; render(); window.scrollTo({top:0,behavior:"smooth"}); }
   else showPartRes();
 }
@@ -422,13 +430,19 @@ function showPartRes(){
   var ok=okPart[part], total=partQuestionCount(part);
   $("board").classList.remove("show");
   $("exres").classList.add("show");
-  $("exres-badge").textContent="Bilan — "+P.titre;
+  var _t=P.titre.split("—"); $("exres-badge").textContent="Bilan · "+(_t.length>1?_t.slice(1).join("—").trim():P.titre.replace(/^[^A-Za-zÀ-ÿ0-9]+/,"").trim());
   $("exres-num").textContent=ok+" / "+total;
   var st=starsFrac(ok,total);
   $("exres-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
-  // réponses des sous-problèmes de la partie
+  // récap par sous-problème : ✔ si entièrement juste, ✘ sinon
   var ans="";
-  P.sous.forEach(function(s){ ans += "🏆 "+s.reponse+"<br/>"; });
+  P.sous.forEach(function(s,si){
+    var reussi = spOk[part+"-"+si]===true;
+    ans += "<div class='recap-row "+(reussi?"ok":"ko")+"'>"
+        + "<span>"+(reussi?"\u2714":"\u2718")+"</span>"
+        + "<span class='rk'>"+s.titre+"</span>"
+        + "<span><b>"+s.reponse+"</b></span></div>";
+  });
   $("exres-answer").innerHTML=ans;
   // explication détaillée (solution) de chaque sous-problème
   var solBox=$("exres-sol");
