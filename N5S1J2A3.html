@@ -53,6 +53,20 @@
     .method-box{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:8px;padding:.75rem 1rem;margin-bottom:1.1rem;font-size:clamp(.78rem,2.4vw,.84rem);font-family:'JetBrains Mono',monospace;color:var(--day-dark);line-height:1.8;word-break:break-word;}
     .method-box strong{color:var(--day-dark);}
 
+    /* aide dépliable "Comment réussir ?" */
+    .help-toggle{display:inline-flex;align-items:center;gap:.4rem;background:transparent;border:2px dashed var(--day-border);color:var(--day-dark);
+      font-family:Arial,sans-serif;font-weight:700;font-size:.85rem;padding:.5rem 1rem;border-radius:10px;cursor:pointer;min-height:40px;margin-bottom:1rem;}
+    .help-toggle:hover{background:var(--day-light);}
+    .help-box{display:none;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1.1rem;
+      font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.9;}
+    .help-box.show{display:block;animation:fadeUp .25s ease both;}
+    .help-box h4{color:var(--day-dark);font-size:.92rem;margin:.6rem 0 .2rem;}
+    .help-box h4:first-child{margin-top:0;}
+    .help-box code{font-family:'JetBrains Mono',monospace;background:var(--surface);border:1px solid var(--day-border);
+      border-radius:5px;padding:.1rem .4rem;font-weight:700;color:var(--day-dark);}
+    .help-box ol{margin:.2rem 0 .2rem 1.2rem;} .help-box ul{margin:.2rem 0 .2rem 1.2rem;}
+    .help-box .retenir{margin-top:.7rem;padding:.6rem .9rem;background:var(--surface);border:1.5px solid var(--day-border);border-radius:8px;font-weight:700;color:var(--day-dark);}
+
     .item-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.9rem;padding-bottom:.8rem;border-bottom:1px solid var(--border);position:relative;z-index:2;}
     .item-lbl{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(.86rem,2.5vw,1rem);min-width:5.4rem;color:var(--muted);}
     .item-eq{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(.95rem,2.7vw,1.1rem);color:var(--text);flex:1 1 auto;min-width:8rem;}
@@ -71,6 +85,8 @@
     .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
     .btn-hint{background:var(--orange);color:#fff;}
     .btn-solution{background:var(--day-dark);color:#fff;}
+    .btn-retry{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+    .btn-retry:hover:not(:disabled){background:var(--day-light);}
     .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
     .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
 
@@ -137,12 +153,30 @@
   </div>
 
 <script>
+var HELP_PARENTHESES =
+  '<h4>Étape 1 — Observer</h4>' +
+  'Je lis l\u2019expression et le résultat à obtenir. Exemple : <code>8 − 3 × 6 + 4 = 50</code>. Je cherche comment obtenir 50.' +
+  '<h4>Étape 2 — Repérer les opérations</h4>' +
+  'Je regarde les opérations présentes (addition, soustraction, multiplication, division). Sans parenthèses, <code>×</code> et <code>:</code> se calculent avant <code>+</code> et <code>−</code>.' +
+  '<h4>Étape 3 — Tester l\u2019effet des parenthèses</h4>' +
+  'Je cherche quelles opérations doivent être faites en premier, je place des parenthèses, puis je vérifie. Exemple : <code>(8 − 3) × (6 + 4) = 5 × 10 = 50</code>.' +
+  '<h4>Étape 4 — Vérifier</h4>' +
+  '<ul><li>J\u2019ai utilisé tous les nombres.</li><li>Je n\u2019ai changé aucun signe.</li><li>Mon calcul donne bien le résultat demandé.</li></ul>' +
+  '<div class="retenir">Astuce : cherche d\u2019abord quel calcul donne le résultat, puis place les parenthèses pour l\u2019obliger à être fait en premier.</div>';
+
+var HELP_CALC =
+  '<h4>Étape 1</h4>Je calcule d\u2019abord ce qui est entre parenthèses.' +
+  '<h4>Étape 2</h4>Je fais les multiplications et les divisions.' +
+  '<h4>Étape 3</h4>Je termine par les additions et les soustractions.' +
+  '<div class="retenir">À retenir : 1. Parenthèses — 2. Multiplications et divisions — 3. Additions et soustractions.</div>';
+
 var ACTS = [
   {
     type:"parentheses",
     title:"Activité 1 · Je place les parenthèses",
     consigne:"Place les parenthèses au bon endroit pour que l\u2019égalité soit vraie, puis écris l\u2019expression complète. Attention aux parenthèses inutiles !",
     method:"<strong>Méthode :</strong> les parenthèses se calculent en premier. Essaie de regrouper les nombres pour obtenir le résultat voulu, puis vérifie en calculant ton expression.",
+    help:HELP_PARENTHESES,
     items:[
       { lbl:"Exercice 1", base:"4 × 3 − 5 + 2", target:5,  nums:[4,3,5,2],   ops:["×","−","+"], sol:"4 × 3 − (5 + 2)" },
       { lbl:"Exercice 2", base:"8 − 3 × 6 + 4", target:50, nums:[8,3,6,4],   ops:["−","×","+"], sol:"(8 − 3) × (6 + 4)" },
@@ -156,6 +190,7 @@ var ACTS = [
     title:"Activité 2 · Je calcule pas à pas",
     consigne:"Calcule chaque expression en respectant les priorités, puis écris le résultat.",
     method:"<strong>Méthode :</strong> on calcule d\u2019abord ce qui est entre parenthèses, puis les multiplications et divisions, et enfin les additions et soustractions, de gauche à droite.",
+    help:HELP_CALC,
     items:[
       { lbl:"Calcul A", expr:"A = (6 + 4) × 25 − 5 × 2", val:240, steps:"A = (6 + 4) × 25 − 5 × 2<br>A = 10 × 25 − 5 × 2<br>A = 250 − 10<br>A = 240" },
       { lbl:"Calcul B", expr:"B = 60 : (5 − 2) × 10 : 5", val:40, steps:"B = 60 : (5 − 2) × 10 : 5<br>B = 60 : 3 × 10 : 5<br>B = 20 × 10 : 5<br>B = 200 : 5<br>B = 40" },
@@ -170,22 +205,21 @@ var TOTAL_ITEMS = ACTS.reduce(function(s,a){ return s + a.items.length; }, 0); /
 var $ = function(id){ return document.getElementById(id); };
 
 var state = ACTS.map(function(a){
-  return { done:false, vals:new Array(a.items.length).fill(""), results:new Array(a.items.length).fill(false), solution:false };
+  return { done:false, attempts:0, vals:new Array(a.items.length).fill(""), results:new Array(a.items.length).fill(false), solution:false };
 });
 
 /* ── évaluateur sûr : nombres, + - × : et parenthèses uniquement ── */
 function safeEval(expr){
   var s = String(expr).replace(/×/g,"*").replace(/x/gi,"*").replace(/÷/g,"/").replace(/:/g,"/").replace(/−/g,"-").replace(/\s/g,"");
-  if(!/^[0-9+\-*/().]+$/.test(s)) return null;       // caractères autorisés seulement
-  if(/[+\-*/]{2,}/.test(s.replace(/\(-/g,"("))) { /* on tolère un - après ( */ }
+  if(!/^[0-9+\-*/().]+$/.test(s)) return null;
   try{
-    // Function plutôt que eval direct, sur une chaîne déjà filtrée
     var v = Function('"use strict";return (' + s + ')')();
     if(typeof v === "number" && isFinite(v)) return v;
     return null;
   }catch(e){ return null; }
 }
 function digitsOf(s){ return (String(s).match(/\d+/g) || []).join(","); }
+function countParen(s){ return (String(s).match(/\(/g)||[]).length; }
 
 function buildAll(){
   var root = $("exos"); root.innerHTML = "";
@@ -198,10 +232,13 @@ function buildAll(){
       '<div class="theme-badge">Priorités opératoires</div>' +
       '<div class="consigne">' + act.consigne + '</div>' +
       '<div class="method-box">' + act.method + '</div>' +
+      '<button class="help-toggle" id="helpbtn-' + ai + '">💡 Comment réussir&nbsp;?</button>' +
+      '<div class="help-box" id="help-' + ai + '">' + act.help + '</div>' +
       '<div id="zone-' + ai + '"></div>' +
       '<div class="btn-row">' +
         '<button class="btn btn-primary" id="check-' + ai + '">&#10003; Vérifier</button>' +
         '<button class="btn btn-hint" id="hintbtn-' + ai + '">? Indice</button>' +
+        '<button class="btn btn-retry" id="retrybtn-' + ai + '" style="display:none;">&#8635; Réessayer</button>' +
         '<button class="btn btn-solution" id="solbtn-' + ai + '" style="display:none;">&#128161; Solution</button>' +
       '</div>' +
       '<div class="hint-box" id="hint-' + ai + '"></div>' +
@@ -214,9 +251,17 @@ function buildAll(){
     $("check-" + ai).onclick = (function(i){ return function(){ checkAct(i); }; })(ai);
     $("hintbtn-" + ai).onclick = (function(i){ return function(){ toggleHint(i); }; })(ai);
     $("solbtn-" + ai).onclick = (function(i){ return function(){ showSolution(i); }; })(ai);
+    $("retrybtn-" + ai).onclick = (function(i){ return function(){ retryAct(i); }; })(ai);
+    $("helpbtn-" + ai).onclick = (function(i){ return function(){ toggleHelp(i); }; })(ai);
     renderZone(ai);
   });
   updateGlobal();
+}
+
+function toggleHelp(ai){
+  var h = $("help-"+ai), b = $("helpbtn-"+ai);
+  if(h.classList.contains("show")){ h.classList.remove("show"); b.innerHTML="💡 Comment réussir&nbsp;?"; }
+  else { h.classList.add("show"); b.innerHTML="✕ Masquer l\u2019aide"; }
 }
 
 function renderZone(ai){
@@ -276,17 +321,26 @@ function applyState(ai){
   });
 }
 
+/* renvoie un diagnostic pédagogique du type d'erreur pour un item parenthèses */
+function diagParen(it, raw){
+  var v = safeEval(raw);
+  var sameDigits = digitsOf(raw) === it.nums.join(",");
+  if(v === null) return "calcul";          // expression non valide
+  if(!sameDigits) return "nombres";        // a changé/réordonné les nombres
+  if(countParen(raw) === 0) return "ordre";// pas de parenthèses → mauvais ordre
+  if(Math.abs(v - it.target) >= 1e-9) return "place"; // parenthèses mal placées
+  return "ok";
+}
+
 function checkAct(ai){
   var act = ACTS[ai], st = state[ai];
-  if(st.done) return;                              // garde anti double-clic
-  // garde-fou : au moins une réponse
+  if(st.done) return;
   if(!st.vals.some(function(v){ return (v||"").trim().length > 0; })){ warnEmpty(ai); return; }
 
   act.items.forEach(function(it, i){
     var raw = (st.vals[i]||"").trim();
     if(raw === ""){ st.results[i] = false; return; }
     if(act.type === "parentheses"){
-      // doit utiliser les mêmes chiffres dans le même ordre ET donner la cible
       var v = safeEval(raw);
       var sameDigits = digitsOf(raw) === it.nums.join(",");
       st.results[i] = (v !== null && Math.abs(v - it.target) < 1e-9 && sameDigits);
@@ -295,6 +349,7 @@ function checkAct(ai){
       st.results[i] = (v2 !== null && Math.abs(v2 - it.val) < 1e-9);
     }
   });
+  st.attempts++;
   st.done = true;
   finishAct(ai);
 }
@@ -317,16 +372,20 @@ function finishAct(ai){
   fb.className = "feedback show " + (ratio>=1 ? "ok" : (ok===0 ? "ko" : "partial"));
   $("fbi-"+ai).textContent = ratio>=1 ? "\u2705" : (ok===0 ? "\u274C" : "\u26A0");
   var msg;
-  if(ratio>=1) msg = "Parfait ! Tout est correct.";
-  else if(ratio>=0.5) msg = "Bien, mais quelques erreurs.";
+  if(ratio>=1) msg = "Bravo ! Tu as bien respecté les priorités opératoires.";
+  else if(ratio>=0.5) msg = "Quelques erreurs subsistent.";
   else if(ok>0) msg = "À retravailler.";
-  else msg = "Rien de correct cette fois.";
+  else msg = "Reprends la méthode, puis réessaie.";
   $("fbm-"+ai).innerHTML = "<strong>" + ok + " / " + tot + "</strong> &mdash; " + msg;
-  $("fbd-"+ai).innerHTML = (ratio>=1) ? "" : buildCorr(ai);
+  $("fbd-"+ai).innerHTML = (ratio>=1) ? "Tu as calculé dans le bon ordre : parenthèses, puis × et :, puis + et −." : buildCorr(ai);
 
   $("check-"+ai).disabled = true;
   $("check-"+ai).style.display = "none";
   $("hintbtn-"+ai).disabled = true;
+  if(ratio < 1){
+    // laisser une nouvelle tentative avant de montrer la solution
+    $("retrybtn-"+ai).style.display = "inline-flex";
+  }
   $("solbtn-"+ai).style.display = "inline-flex";
   updateGlobal();
 }
@@ -337,21 +396,40 @@ function buildCorr(ai){
   act.items.forEach(function(it, i){
     if(st.results[i]) return;
     var raw = (st.vals[i]||"").trim();
-    if(raw === ""){ L.push(it.lbl + " : tu n\u2019as pas répondu."); return; }
+    if(raw === ""){ L.push("<strong>"+it.lbl + "</strong> : ton calcul semble incomplet — tu n\u2019as pas répondu. Relis l\u2019expression et traite chaque étape."); return; }
     if(act.type === "parentheses"){
-      L.push(it.lbl + " : ton expression ne donne pas le bon résultat (place les parenthèses autour des opérations à faire en premier).");
+      var d = diagParen(it, raw);
+      if(d === "nombres") L.push("<strong>"+it.lbl+"</strong> : garde les mêmes nombres dans le même ordre, ne change aucun signe. Place seulement des parenthèses.");
+      else if(d === "ordre") L.push("<strong>"+it.lbl+"</strong> : sans parenthèses, × et : passent avant + et −. Ajoute des parenthèses pour changer l\u2019ordre.");
+      else if(d === "calcul") L.push("<strong>"+it.lbl+"</strong> : ton expression n\u2019est pas valide. Vérifie les parenthèses (autant d\u2019ouvrantes que de fermantes).");
+      else L.push("<strong>"+it.lbl+"</strong> : pense à regarder quelles opérations doivent être faites en premier. Les parenthèses servent à modifier l\u2019ordre des calculs ; vérifie leur emplacement.");
     } else {
-      L.push(it.lbl + " : résultat incorrect (calcule les parenthèses, puis les × et :, puis les + et −).");
+      L.push("<strong>"+it.lbl+"</strong> : respecte l\u2019ordre — parenthèses d\u2019abord, puis × et :, puis + et −. Refais le calcul étape par étape.");
     }
   });
   if(L.length === 0) return "";
-  return "À revoir :<br>" + L.join("<br>") + "<br><span style='color:var(--muted)'>Clique sur « Solution » pour voir les bonnes réponses.</span>";
+  return L.join("<br>") + "<br><span style='color:var(--muted)'>Corrige ta réponse et clique sur « Réessayer », ou affiche la « Solution ».</span>";
+}
+
+function retryAct(ai){
+  var st = state[ai];
+  st.done = false;
+  st.results = new Array(ACTS[ai].items.length).fill(false);
+  // on garde st.vals pour que l'élève corrige sans tout retaper
+  $("check-"+ai).disabled = false;
+  $("check-"+ai).style.display = "inline-flex";
+  $("hintbtn-"+ai).disabled = false;
+  $("retrybtn-"+ai).style.display = "none";
+  $("solbtn-"+ai).style.display = "none";
+  $("fb-"+ai).className = "feedback";
+  renderZone(ai);
+  updateGlobal();
+  window.scrollTo({top:$("card-"+ai).offsetTop-20,behavior:"smooth"});
 }
 
 function showSolution(ai){
   var act = ACTS[ai], st = state[ai];
-  if(!st.done) return;
-  st.solution = true;
+  st.done = true; st.solution = true;
   act.items.forEach(function(it, i){
     var inp = $("in-" + ai + "-" + i);
     if(!inp) return;
@@ -363,14 +441,20 @@ function showSolution(ai){
   var fb = $("fb-"+ai);
   fb.className = "feedback show ok";
   $("fbi-"+ai).textContent = "\u2705";
-  $("fbm-"+ai).innerHTML = "<strong>Solution affichée.</strong>";
+  $("fbm-"+ai).innerHTML = "<strong>Solution &amp; explication.</strong>";
+  var expl = "<strong>💡 Explication</strong><br>Pour chaque expression : 1. on calcule les parenthèses ; 2. les × et : ; 3. les + et −. C\u2019est le respect de cet ordre qui donne le bon résultat.";
   if(act.type === "calc"){
     var L = act.items.map(function(it){ return it.steps; });
-    $("fbd-"+ai).innerHTML = L.join("<br><br>");
+    $("fbd-"+ai).innerHTML = expl + "<br><br>" + L.join("<br><br>");
   } else {
-    $("fbd-"+ai).textContent = "Voici une écriture correcte pour chaque item.";
+    var L2 = act.items.map(function(it){ return it.lbl + " : <strong>" + it.sol + " = " + it.target + "</strong>"; });
+    $("fbd-"+ai).innerHTML = expl + "<br><br>" + L2.join("<br>");
   }
+  $("check-"+ai).disabled = true; $("check-"+ai).style.display="none";
+  $("hintbtn-"+ai).disabled = true;
+  $("retrybtn-"+ai).style.display = "none";
   $("solbtn-"+ai).disabled = true;
+  updateGlobal();
 }
 
 function toggleHint(ai){
@@ -391,7 +475,7 @@ function updateGlobal(){
     if(st.done) answeredItems += ACTS[ai].items.length;
   });
   $("sb-ok").textContent = okTotal;
-  $("sb-ko").textContent = answeredItems - okTotal;
+  $("sb-ko").textContent = Math.max(0, answeredItems - okTotal);
   $("sb-label").textContent = okTotal + " / " + TOTAL_ITEMS + " items réussis";
   $("sb-fill").style.width = Math.round(answeredItems / TOTAL_ITEMS * 100) + "%";
   $("g-num").textContent = okTotal;
@@ -414,7 +498,7 @@ function updateGlobal(){
 
 function restartAll(){
   state = ACTS.map(function(a){
-    return { done:false, vals:new Array(a.items.length).fill(""), results:new Array(a.items.length).fill(false), solution:false };
+    return { done:false, attempts:0, vals:new Array(a.items.length).fill(""), results:new Array(a.items.length).fill(false), solution:false };
   });
   buildAll();
   window.scrollTo({top:0,behavior:"smooth"});
