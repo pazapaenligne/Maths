@@ -1,491 +1,566 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pazapa Maths — Qui a raison ?</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-  <style>
-    /* ═══ COULEUR DU JOUR — JEUDI (J4) BLEU ═══ */
-    :root{
-      --day-color:#3ab5d8; --day-dark:#1a6e88; --day-light:#e8f6fb;
-      --day-border:#9dd4e8; --day-glow:rgba(58,181,216,.3);
-    }
-    /* ═══ CHARTE PAZAPA — NE PAS TOUCHER ═══ */
-    :root{
-      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
-      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
-      --pink:#f28b82; --orange:#f5a623;
-      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
-      --err-bg:#fce4e4; --err-border:#8e1b13; --err-text:#8e1b13;
-    }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
-      min-height:100vh;display:flex;flex-direction:column;align-items:center;
-      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
-      letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
-    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
-      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
-    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
-      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
-    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
-      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
-    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
-      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – L'ascenseur en panne – S2 J2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#3ab5d8; --day-dark:#15677e; --day-light:#dcf3fb; --day-border:#6fcfe6;
+  --gold:#f5c518; --gold-d:#b88a00;
+  --bg:#101b22; --panel:#16242d; --panel2:#1d2f3a;
+  --line:#2c4350; --text:#eef7fb; --muted:#8fb0bd;
+  --green:#5bc46a; --neon:#46d0e8;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 16px rgba(58,181,216,.45), 0 0 40px rgba(58,181,216,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#13212a 0%, #101b22 55%, #122029 100%);color:var(--text);
+  font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#fff 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#fff 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#06222b;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.1;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
 
-    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
-    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;
-      font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
-    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
-    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
-    h1{font-size:clamp(1.25rem,5vw,1.8rem);font-weight:800;line-height:1.3;word-break:break-word;}
-    h1 .hl{color:var(--day-dark);}
-    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;
-      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.13;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#3ab5d8;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#46d0e8;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#2f8fb0;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#5ac2da;bottom:10%;right:-40px;}
 
-    .stage{width:100%;max-width:680px;position:relative;z-index:1;}
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(16,27,34,.94);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.35rem;}
+.hud-frag{width:1.9rem;height:2rem;border-radius:6px;background:#0c161c;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:#3a5662;transition:all .4s;}
+.hud-frag.got{background:rgba(58,181,216,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#0c161c;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#0c161c;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(58,181,216,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}.screens{gap:.6rem;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:54px;}.hud-bar{gap:.6rem;padding:.45rem .6rem;}.hud-frag{width:1.6rem;height:1.8rem;font-size:.85rem;}.hud-dial{font-size:1.1rem;}.hud-timer{font-size:.82rem;padding:.2rem .4rem;}}
 
-    .hud{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;align-items:center;margin-bottom:1.1rem;}
-    .hud-chip{display:flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:99px;
-      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;
-      border:2px solid var(--border);background:var(--surface);}
-    .hud-chip.act{background:var(--day-light);border-color:var(--day-border);color:var(--day-dark);}
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:600px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:#cfe6ef;line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#06222b;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
 
-    .start-overlay{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);
-      padding:1.6rem 1.4rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
-    .start-overlay h2{font-size:1.1rem;color:var(--day-dark);margin-bottom:.5rem;}
-    .start-overlay p{font-size:clamp(.9rem,2.6vw,1rem);line-height:1.9;margin-bottom:1.1rem;}
-    .start-overlay strong{color:var(--day-dark);}
+.crest{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:'Orbitron',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#0c161c;border:1.5px solid var(--line);font-size:1.2rem;color:#2c4350;transition:all .5s;}
+.frag.found{background:rgba(58,181,216,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
 
-    .screen{display:none;}
-    .screen.show{display:block;animation:fadeUp .35s ease both;}
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#0c161c;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#0c161c;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+.intro .scr{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(.76rem,2.2vw,.84rem);color:#cfe6ef;margin-top:.4rem;letter-spacing:0;}
 
-    .progress-wrap{margin-bottom:1.2rem;}
-    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
-      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
-    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
-    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));
-      border-radius:99px;transition:width .4s ease;}
+/* bloc exercice */
+.ex{background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.9rem;transition:border-color .2s,box-shadow .3s;}
+.ex.ok{border-color:var(--green);box-shadow:0 0 14px rgba(91,196,106,.25);}
+.ex.ko{border-color:#e8806f;}
+.ex-tag{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+.ex-q{font-size:clamp(.86rem,2.5vw,.96rem);color:var(--day-light);margin-bottom:.7rem;line-height:1.6;}
 
-    /* énoncé du problème (rappelé en haut de chaque question) */
-    .enonce{background:var(--day-light);border:2px solid var(--day-border);border-left:5px solid var(--day-color);
-      border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
-    .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
-    .enonce .ex-quest{color:var(--day-dark);font-weight:700;margin-top:.3rem;}
+/* ascenseur visuel */
+.lift{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;background:#0c161c;border:1.5px solid var(--line);border-radius:10px;padding:.9rem;margin-bottom:.8rem;}
+.lift-cell{text-align:center;}
+.lift-lab{font-size:.6rem;color:var(--muted);font-family:'Orbitron',sans-serif;letter-spacing:.06em;margin-bottom:.25rem;text-transform:uppercase;}
+.lift-val{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);}
+.lift-move{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.9rem,3vw,1.1rem);color:var(--neon);}
+.lift-arrow{font-size:1.3rem;}
+.lift-q{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.4rem;color:var(--gold);}
 
-    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
-      padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
-    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
-      background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink));}
-    .q-tag{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
-      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
-    .q-text{font-size:clamp(.95rem,2.9vw,1.1rem);font-weight:700;line-height:1.8;margin-bottom:1rem;color:var(--text);}
+/* saisie numérique */
+.num-row{display:flex;align-items:center;gap:.6rem;justify-content:center;flex-wrap:wrap;}
+.num-in{width:140px;max-width:100%;background:#0c161c;border:2px solid var(--line);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:16px;text-align:center;padding:.6rem;outline:none;min-height:48px;transition:border-color .2s;}
+.num-in:focus{border-color:var(--day-color);}
+.num-in.ok{border-color:var(--green);background:rgba(91,196,106,.12);color:#bff0c6;}
+.num-in.ko{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+.num-unit{color:var(--muted);font-size:.85rem;}
 
-    .options{display:flex;flex-direction:column;gap:.6rem;}
-    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
-      border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;
-      font-size:clamp(.9rem,2.7vw,1rem);line-height:1.8;transition:border-color .15s,background .15s;text-align:left;}
-    .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.4rem;text-align:center;}
-    .opt:hover:not(.locked){border-color:var(--day-color);}
-    .opt.locked{cursor:default;}
-    .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
-    .opt.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
-    .opt.reveal-correct{border-color:var(--green);background:#f0faeb;}
+/* QCM */
+.choices{display:flex;flex-direction:column;gap:.55rem;}
+.choice{display:flex;align-items:center;gap:.8rem;cursor:pointer;border:1.5px solid var(--line);border-radius:10px;padding:.7rem 1rem;background:#0c161c;transition:all .18s;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(.86rem,2.6vw,.98rem);color:var(--text);min-height:46px;}
+.choice:hover{border-color:var(--day-color);}
+.choice .rb{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);flex-shrink:0;transition:all .18s;}
+.choice.sel .rb{border-color:var(--day-color);background:var(--day-color);box-shadow:0 0 8px var(--day-color);}
+.choice.ok{border-color:var(--green);background:rgba(91,196,106,.1);}
+.choice.ko{border-color:#e8806f;background:rgba(232,128,111,.1);}
 
-    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.92rem);
-      display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
-    .feedback.show{display:flex;}
-    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
-    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
-    .feedback .fi{font-size:1.3rem;flex-shrink:0;}
+/* écrans mission 4 */
+.screens{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;}
+@media(max-width:520px){.screens{grid-template-columns:1fr;}}
+@media(max-width:380px){.lift{flex-direction:column;}}
+.screen{cursor:pointer;border:1.5px solid var(--line);border-radius:12px;background:#0c161c;padding:1rem .6rem;text-align:center;transition:all .18s;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;}
+.screen:hover{border-color:var(--day-color);transform:translateY(-2px);}
+.screen-lab{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
+.screen-val{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.3rem,5vw,1.8rem);color:var(--day-light);}
+.screen.sel{border-color:var(--day-color);background:rgba(58,181,216,.12);box-shadow:var(--glow);}
+.screen.ok{border-color:var(--green);background:rgba(91,196,106,.14);}
+.screen.ok .screen-val{color:#bff0c6;}
+.screen.ko{border-color:#e8806f;background:rgba(232,128,111,.12);}
+.screen.ko .screen-val{color:#ffc4b8;}
 
-    .actions{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.3rem;}
-    .hint-row{margin-top:.9rem;}
-    .btn-hint{background:transparent;color:var(--day-dark);border:2px dashed var(--day-border);
-      padding:.45rem 1rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;
-      font-size:.85rem;cursor:pointer;min-height:40px;}
-    .btn-hint:hover{background:var(--day-light);}
-    .hint-box{display:none;margin-top:.6rem;padding:.75rem 1rem;border-radius:10px;
-      background:var(--day-light);border:1.5px solid var(--day-border);color:var(--text);
-      font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.8;}
-    .hint-box.show{display:block;animation:fadeUp .25s ease both;}
-    .hint-box::before{content:"💡 ";}
-    .exres-sol{text-align:left;margin:.4rem auto 1rem;max-width:520px;}
-    .exres-sol .sol-item{background:var(--day-light);border:1.5px solid var(--day-border);
-      border-radius:10px;padding:.6rem .9rem;margin-bottom:.5rem;font-size:clamp(.82rem,2.4vw,.9rem);
-      line-height:1.8;color:var(--text);}
-    .exres-sol .sol-item b{color:var(--day-dark);}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;
-      border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.6vw,.95rem);font-weight:700;
-      cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
-    .btn:active{transform:scale(.96);}
-    .btn:disabled{opacity:.4;cursor:default;}
-    .btn-primary{background:var(--day-color);color:#000;box-shadow:0 3px 10px var(--day-glow);}
-    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#06222b;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#13261a;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#e8d8a0;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(91,196,106,.12);border:1.5px solid var(--green);color:#bff0c6;}
+.fb.ko{background:rgba(232,128,111,.12);border:1.5px solid #e8806f;color:#ffc4b8;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#e8d18a;}
 
-    /* bilan d'exercice + final */
-    .res{display:none;text-align:center;}
-    .res.show{display:block;animation:fadeUp .4s ease both;}
-    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
-      padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
-    .res-answer{display:flex;flex-direction:column;gap:.5rem;margin:.8rem auto 1.2rem;max-width:480px;}
-    .recap-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.6rem .9rem;
-      border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.8;text-align:left;}
-    .recap-row .rk{flex:1;min-width:8rem;font-weight:600;}
-    .recap-row.ok{background:#f0faeb;border:1.5px solid #8dc63f;color:#3d7a10;}
-    .recap-row.ko{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
-    .recap-row b{font-weight:800;}
-    .res-score{font-size:clamp(1.6rem,7vw,2.4rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
-    .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
-    .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
-    .skills-text{font-size:clamp(.82rem,2.4vw,.9rem);color:var(--muted);line-height:1.9;margin-bottom:1.3rem;}
-    .res-detail{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:1.4rem;line-height:1.9;}
-    .res-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
 
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-    @media(max-width:480px){
-      body{padding:1.4rem .75rem 3rem;}
-      .actions{justify-content:stretch;} .actions .btn{flex:1;}
-    }
-  </style>
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(16,27,34,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(16,27,34,.96), rgba(10,18,23,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#0c161c;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:radial-gradient(circle at 50% 40%, rgba(58,181,216,.4), rgba(12,20,26,.98));}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(58,181,216,.3) 0%, rgba(58,181,216,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(58,181,216,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.5rem;margin:.8rem 0;}
+.finale-crest .fc{width:2.6rem;height:2.6rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(58,181,216,.16);border:1.5px solid var(--day-color);font-size:1.3rem;animation:pop .5s both;}
+.finale-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.2rem);color:var(--day-color);text-shadow:0 0 30px rgba(58,181,216,.8);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#bff0c6;margin-bottom:.6rem;}
+.finale-grade{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#06222b;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:#cfe6ef;font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1rem;line-height:1.7;}
+.finale-skills{background:#0c161c;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:#cfe6ef;line-height:1.9;}
+.finale-skills b{color:var(--day-color);font-family:'Orbitron',sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#06222b;box-shadow:var(--glow);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+</style>
 </head>
 <body>
-  <div class="bubble1"></div>
-  <div class="bubble2"></div>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg"></div>
 
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Diagnostic en cours&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Lecture du système de guidage</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#127970;</span>
+  <div class="hud-frags">
+    <span class="hud-frag" id="hud-frag-0">&#128295;</span>
+    <span class="hud-frag" id="hud-frag-1">&#128295;</span>
+    <span class="hud-frag" id="hud-frag-2">&#128295;</span>
+    <span class="hud-frag" id="hud-frag-3">&#128295;</span>
+  </div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Syst&egrave;me&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer">&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#127970;</div>
+    <div class="finale-crest" id="finale-crest"></div>
+    <div class="finale-title">MISSION ACCOMPLIE&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub">&#127970; Ascenseur opérationnel &middot; &#128225; Système rétabli<br>Bravo&#8201;! Tu as remis le système en service.</div>
+    <div class="finale-skills">
+      <b>Tu sais maintenant</b>
+      &bull; soustraire deux nombres relatifs<br>
+      &bull; transformer une soustraction en addition<br>
+      &bull; retrouver une valeur manquante<br>
+      &bull; vérifier un résultat
+    </div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<div class="wrap">
   <header>
     <div class="logo-badge">
       <span class="logo-dot" style="background:#f5c518"></span>
       <span class="logo-dot" style="background:#8dc63f"></span>
       <span class="logo-dot" style="background:#3ab5d8"></span>
-      Pazapa &middot; Maths &middot; 5ème
+      Pazapa &middot; Maths &middot; 5e
     </div>
-    <div class="week-label">Semaine 2 &ndash; Jour 4</div>
-    <h1>⚖️ Qui a <span class="hl">raison&nbsp;?</span></h1>
-    <p class="subtitle">le signe d&rsquo;un produit &rarr; à toi de trancher</p>
+    <div class="week">Semaine 2 — Jour 2</div>
+    <div class="title">L&rsquo;ascenseur en <span class="hl">panne</span> &#127970;</div>
+    <div class="subtitle">Soustraire deux nombres relatifs</div>
   </header>
 
-  <div class="stage">
-
-    <!-- Départ -->
-    <div class="start-overlay" id="start-overlay">
-      <h2>À toi de trancher&nbsp;!</h2>
-      <p>⚖️ Deux élèves ne sont pas d&rsquo;accord sur le signe d&rsquo;un produit.<br/>
-         À toi de dire <strong>qui a raison</strong> et surtout <strong>pourquoi</strong>.<br/>
-         <span style="color:var(--muted);font-size:.85rem;">Tu connais la règle, montre que tu la maîtrises&nbsp;!</span></p>
-      <button class="btn btn-primary" onclick="startGame()">▶️ Commencer&nbsp;!</button>
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#127970;</div>
+    <div class="start-mission">
+      <b>&#127970; Intervention&nbsp;:</b> une panne perturbe le syst&egrave;me de guidage de l&rsquo;ascenseur. Plusieurs d&eacute;placements ont &eacute;t&eacute; enregistr&eacute;s&#8201;: certaines donn&eacute;es semblent incorrectes, d&rsquo;autres ont disparu. Le technicien a besoin d&rsquo;aide pour remettre le syst&egrave;me en service.
+      <div class="start-rule"><span>&#11014;&#65039; Monter = +</span><span>&#11015;&#65039; Descendre = &minus;</span><span>&#128295; 4 modules &agrave; r&eacute;parer</span></div>
     </div>
-
-    <!-- Plateau questions -->
-    <div class="screen" id="board">
-      <div class="hud">
-        <div class="hud-chip act"><span id="act-label">Problème 1</span></div>
-        <div class="hud-chip"><span id="score-live">0</span> bonnes réponses</div>
-      </div>
-
-      <div class="progress-wrap">
-        <div class="progress-info">
-          <span id="prog-label">Question 1</span>
-          <span id="prog-pct">0&nbsp;%</span>
-        </div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
-      </div>
-
-      <div class="enonce" id="enonce"></div>
-
-      <div class="card">
-        <div class="card-stripe"></div>
-        <div class="q-tag" id="q-tag">Question 1</div>
-        <div class="q-text" id="q-text"></div>
-        <div class="options" id="options"></div>
-
-        <div class="hint-row">
-          <button class="btn btn-hint" id="btn-hint" onclick="toggleHint()">💡 Indice</button>
-        </div>
-        <div class="hint-box" id="hint-box"></div>
-
-        <div class="feedback" id="feedback">
-          <span class="fi" id="fb-ic"></span>
-          <div id="fb-msg"></div>
-        </div>
-
-        <div class="actions">
-          <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Suivant &rarr;</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bilan d'un exercice -->
-    <div class="res" id="exres">
-      <div class="res-card">
-        <div class="logo-badge" style="margin-bottom:.5rem">
-          <span class="logo-dot" style="background:#f5c518"></span>
-          <span class="logo-dot" style="background:#8dc63f"></span>
-          <span class="logo-dot" style="background:#3ab5d8"></span>
-          <span id="exres-badge">Bilan — Problème 1</span>
-        </div>
-        <div class="res-score"><span id="exres-num">0</span></div>
-        <div class="stars" id="exres-stars"></div>
-        <div class="res-answer" id="exres-answer"></div>
-        <div class="exres-sol" id="exres-sol"></div>
-        <div class="res-msg" id="exres-msg"></div>
-        <div class="res-btns">
-          <button class="btn btn-primary" id="exres-btn" onclick="nextExercise()">Problème suivant &rarr;</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bilan final -->
-    <div class="res" id="final">
-      <div class="res-card">
-        <div class="logo-badge" style="margin-bottom:.5rem">
-          <span class="logo-dot" style="background:#f5c518"></span>
-          <span class="logo-dot" style="background:#8dc63f"></span>
-          <span class="logo-dot" style="background:#3ab5d8"></span>
-          Bravo !
-        </div>
-        <div class="res-score"><span id="final-num">0</span></div>
-        <div class="stars" id="final-stars"></div>
-        <div class="skills-text">Tu sais maintenant identifier ce qu&rsquo;on cherche, choisir la bonne opération, respecter les priorités opératoires et résoudre un problème en plusieurs étapes.</div>
-        <div class="res-detail" id="final-detail"></div>
-        <div class="res-btns">
-          <button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button>
-        </div>
-      </div>
-    </div>
-
+    <button class="btn-start" onclick="beginGame()">&#127970; D&eacute;marrer l&rsquo;intervention</button>
   </div>
 
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">Modules r&eacute;par&eacute;s&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+    </div>
+    <div id="steps"></div>
+    <div style="text-align:center;"><button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button></div>
+  </div>
+</div>
+
 <script>
-/* ═══════════════════════════════════════════════════════
-   ★ CONTENU — 2 PARTIES
-   Partie 1 « Partage et mesure » : 2 sous-problèmes (citernes, route)
-   Partie 2 « Du Fahrenheit au Celsius » : 1 problème
-   Chaque sous-problème : enonce + question + reponse + qs (QCM).
-   Une partie enchaîne tous les sous-problèmes puis affiche UN bilan.
-   ans = index de la bonne option. apostrophe -> \u2019
-═══════════════════════════════════════════════════════ */
-var PARTIES = [
-  {
-    titre:"\u2696\ufe0f Qui a raison ?",
-    sous:[
-      {
-        titre:"Yanis ou Moussa ?",
-        enonce:"Yanis dit : d\u00e8s qu\u2019il y a un nombre n\u00e9gatif dans un produit, le r\u00e9sultat est n\u00e9gatif. Moussa dit : il faut compter le nombre de facteurs n\u00e9gatifs.",
-        question:"Qui a raison, et pourquoi ?",
-        reponse:"Moussa a raison : le signe d\u00e9pend du nombre de facteurs n\u00e9gatifs.",
-        sol:"C\u2019est le <b>nombre</b> de facteurs n\u00e9gatifs qui compte : un nombre <b>pair</b> donne un produit <b>positif</b>, un nombre <b>impair</b> un produit <b>n\u00e9gatif</b>.",
-        qs:[
-          { q:"Qui a raison ?", hint:"Pense \u00e0 (\u22122) \u00d7 (\u22123) : deux n\u00e9gatifs, et pourtant le r\u00e9sultat est positif.", opts:["Yanis","Moussa"], ans:1 },
-          { q:"Pourquoi ?", opts:["Un nombre pair de facteurs n\u00e9gatifs donne un produit positif.","Tous les produits contenant un nombre n\u00e9gatif sont n\u00e9gatifs.","Il faut toujours multiplier les nombres positifs en premier."], ans:0 }
-        ]
-      }
-    ]
-  }
+function $(id){return document.getElementById(id);}
+
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function sOk(){if(!soundOn)return;beep(523,0,0.1,"square",0.2);beep(784,0.08,0.12,"square",0.2);beep(1047,0.18,0.18,"triangle",0.22);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.18);beep(150,0.1,0.2,"square",0.18);}
+function sFrag(){if(!soundOn)return;beep(660,0,0.06,"square",0.16);beep(990,0.07,0.14,"triangle",0.2);beep(1320,0.16,0.16,"triangle",0.2);}
+function sCoin(){if(!soundOn)return;beep(988,0,0.05,"square",0.14);beep(1319,0.05,0.12,"square",0.16);}
+function sWin(){if(!soundOn)return;[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,i*0.12,0.24,"square",0.2);});}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+var amTimer=null;
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(function(){el.classList.remove("show");},3400);}
+var SCAN_SUB=["Lecture des trajets enregistr\u00e9s","Analyse des commandes suspectes","Recherche des \u00e9tages manquants","V\u00e9rification des \u00e9crans"];
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  if(!ov){done&&done();return;}
+  if(txt)txt.innerHTML="Diagnostic en cours&#8230;";
+  if(sub)sub.textContent=SCAN_SUB[mi]||"Lecture du syst\u00e8me";
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");
+  sCoin();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*16+8;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");done&&done();},350);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },110);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+
+/* ===== 4 MISSIONS · 2 exercices chacune ===== */
+var MISSIONS=[
+  {ico:"&#11014;&#65039;", step:"Mission 1", codename:"Trajets enregistr\u00e9s", name:"Trajets enregistr\u00e9s", comp:"Soustraire deux relatifs",
+   frag:"&#128295;",
+   intro:"&#127970; Module n&deg;1<br><span class='scr'>L\u2019ascenseur a enregistr\u00e9 des d\u00e9placements. Retrouve l\u2019\u00e9tage d\u2019arriv\u00e9e.</span>",
+   hint:"Descendre, c\u2019est ajouter un nombre n\u00e9gatif. Pars de l\u2019\u00e9tage de d\u00e9part et applique le d\u00e9placement.",
+   exos:[
+     {kind:"lift", start:3, moveLabel:"\u2b07\ufe0f descend de 7 \u00e9tages", calc:"3 \u2212 7", ans:-4},
+     {kind:"lift", start:-2, moveLabel:"\u2b07\ufe0f descend de 5 \u00e9tages", calc:"\u22122 \u2212 5", ans:-7}
+   ]},
+  {ico:"&#128290;", step:"Mission 2", codename:"Commandes suspectes", name:"Commandes suspectes", comp:"Transformer une soustraction",
+   frag:"&#128295;",
+   intro:"&#127970; Module n&deg;2<br><span class='scr'>Certaines commandes ont \u00e9t\u00e9 mal enregistr\u00e9es. Retrouve la bonne \u00e9criture, puis calcule.</span>",
+   hint:"Observe attentivement les signes pr\u00e9sents dans l\u2019expression avant de calculer.",
+   exos:[
+     {kind:"qcm", q:"Quelle transformation est correcte pour <b>(\u22124) \u2212 (\u22126)</b>&#8201;?",
+      opts:["\u22124 \u2212 6","\u22124 + 6","4 \u2212 6","4 + 6"], correct:1},
+     {kind:"num", q:"Calcule&#8201;: <b>(+3) \u2212 (\u22128)</b>", calc:"", ans:11}
+   ]},
+  {ico:"&#10067;", step:"Mission 3", codename:"\u00c9tage manquant", name:"\u00c9tage manquant", comp:"Trouver une valeur inconnue",
+   frag:"&#128295;",
+   intro:"&#127970; Module n&deg;3<br><span class='scr'>Une panne a effac\u00e9 certaines informations. Retrouve la valeur manquante.</span>",
+   hint:"Demande-toi quel nombre il faut enlever (ou ajouter) pour passer de l\u2019\u00e9tage de d\u00e9part \u00e0 l\u2019\u00e9tage d\u2019arriv\u00e9e.",
+   exos:[
+     {kind:"hole", q:"L\u2019ascenseur part de l\u2019\u00e9tage <b>5</b> et arrive \u00e0 <b>\u22122</b>.<br>Quel d\u00e9placement a-t-il effectu\u00e9&#8201;?",
+      prefix:"d\u00e9placement =", ans:-7, unit:"\u00e9tages"},
+     {kind:"hole", q:"Compl\u00e8te&#8201;: <b>\u22123 \u2212 (\u2026) = \u22128</b>.<br>Quelle est la valeur manquante&#8201;?",
+      prefix:"\u2026 =", ans:5, unit:""}
+   ]},
+  {ico:"&#128421;&#65039;", step:"Mission 4", codename:"Quel \u00e9cran dit vrai\u00a0?", name:"Quel \u00e9cran dit vrai\u00a0?", comp:"V\u00e9rifier un r\u00e9sultat",
+   frag:"&#128295;",
+   intro:"&#127970; Module n&deg;4<br><span class='scr'>Trois \u00e9crans affichent des r\u00e9sultats diff\u00e9rents. Un seul affiche le bon \u00e9tage. Identifie-le pour relancer le syst\u00e8me.</span>",
+   hint:"Calcule toi-m\u00eame le r\u00e9sultat, puis compare avec les trois \u00e9crans.",
+   exos:[
+     {kind:"screen", q:"Calcul affich\u00e9&#8201;: <b>2 \u2212 9</b>",
+      screens:["\u22127","7","\u221211"], correct:0},
+     {kind:"screen", q:"Calcul affich\u00e9&#8201;: <b>(\u22126) \u2212 (\u22124)</b>",
+      screens:["\u221210","2","\u22122"], correct:2}
+   ]}
 ];
 
-/* ═══ MOTEUR ═══ */
-var $ = function(id){ return document.getElementById(id); };
-var part = 0;        // index de la partie
-var sp = 0;          // index du sous-problème dans la partie
-var idx = 0;         // index de la question dans le sous-problème
-var chosen = [];     // réponses du sous-problème courant
-var okPart = [];     // bonnes réponses cumulées par PARTIE
-var spOk = {};       // réussite par sous-problème : clé "part-sp"
-var qPart = [];      // nombre total de questions par PARTIE
-var optOrder = [];   // ordre mélangé des options de la question courante
+var solved=[false,false,false,false];
+var active=0;
+var totalSec=0,totalInt=null;
+var sel={};   // sel["mi-ei"] = index choisi pour qcm/screen
 
-function shuffleArr(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
-function curSP(){ return PARTIES[part].sous[sp]; }
-function partQuestionCount(p){ return PARTIES[p].sous.reduce(function(s,x){return s+x.qs.length;},0); }
-function partQuestionDoneIndex(){ // numéro global de la question dans la partie (pour la barre)
-  var n=0; for(var i=0;i<sp;i++) n+=PARTIES[part].sous[i].qs.length; return n+idx;
-}
-
-function startGame(){
-  $("start-overlay").style.display="none";
-  $("exres").classList.remove("show");
-  $("final").classList.remove("show");
-  $("board").classList.add("show");
-  part=0;
-  okPart=new Array(PARTIES.length).fill(0);
-  spOk={};
-  qPart=PARTIES.map(function(_,i){return partQuestionCount(i);});
-  startPart();
-}
-
-function startPart(){
-  sp=0; idx=0;
-  okPart[part]=0;
-  chosen=new Array(curSP().qs.length).fill(null);
-  $("board").classList.add("show");
-  optOrder=[];
-  render();
-}
-
-function buildOrder(){
-  var opts=curSP().qs[idx].opts;
-  optOrder=shuffleArr(opts.map(function(_,i){return i;}));
-}
-
-function render(){
-  var P=PARTIES[part];
-  var S=curSP();
-  var qObj=S.qs[idx];
-  if(chosen[idx]===null || optOrder.length!==qObj.opts.length) buildOrder();
-  $("act-label").textContent=P.titre;
-  $("enonce").innerHTML="<div class='ex-titre'>"+S.titre+"</div>"+S.enonce
-    +"<div class='ex-quest'>👉 "+S.question+"</div>";
-  $("q-tag").textContent="Question "+(idx+1)+" / "+S.qs.length;
-  $("q-text").textContent=qObj.q;
-  buildOptions();
-  // réinitialiser l'indice à chaque question
-  var hb=$("hint-box"); if(hb){ hb.classList.remove("show"); hb.innerHTML=""; }
-  var bh=$("btn-hint");
-  if(bh){
-    if(qObj.hint){ bh.style.display=""; bh.textContent="💡 Indice"; }
-    else { bh.style.display="none"; }
-  }
-  var fb=$("feedback");
-  if(chosen[idx]!==null){
-    var correct=chosen[idx]===qObj.ans;
-    fb.className="feedback show "+(correct?"ok":"ko");
-    $("fb-ic").textContent=correct?"\u2705":"\u274C";
-    $("fb-msg").innerHTML = correct ? "<strong>Bonne réponse\u00a0!</strong>"
-      : "<strong>Pas tout à fait.</strong> Regarde la réponse correcte.";
-    $("btn-next").disabled=false;
-  } else { fb.className="feedback"; $("btn-next").disabled=true; }
-  // libellé du bouton : dernière question du dernier sous-problème de la partie -> bilan
-  var lastQ = (idx===S.qs.length-1);
-  var lastSP = (sp===P.sous.length-1);
-  $("btn-next").textContent = (lastQ && lastSP) ? "Voir le bilan \u2192"
-    : (lastQ ? "Problème suivant \u2192" : "Suivant \u2192");
-  updateProgress();
-}
-
-function buildOptions(){
-  var qObj=curSP().qs[idx];
-  var box=$("options"); box.innerHTML="";
-  var locked = chosen[idx]!==null;
-  optOrder.forEach(function(realIdx){
-    var div=document.createElement("div");
-    div.className="opt"+(locked?" locked":"");
-    div.innerHTML="<span class='opt-key'>"+(locked?"":"\u25CB")+"</span><span>"+qObj.opts[realIdx]+"</span>";
-    if(!locked){ div.onclick=function(){ choose(realIdx); }; }
-    else {
-      var pick=chosen[idx];
-      if(realIdx===qObj.ans){ div.className += (realIdx===pick)?" chosen-correct":" reveal-correct"; div.querySelector(".opt-key").textContent="\u2705"; }
-      else if(realIdx===pick){ div.className += " chosen-wrong"; div.querySelector(".opt-key").textContent="\u274C"; }
+function build(){
+  var host=$("steps");host.innerHTML="";
+  MISSIONS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.step+' &middot; <span style="color:var(--day-color)">'+M.codename+'</span></div><div class="step-name">'+M.name+'</div><div class="step-comp">&#127970; '+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro">'+M.intro+'</div><div id="zone-'+mi+'"></div>'
+        +'<div class="tools">'
+        +'<button class="btn btn-hint" id="hint-btn-'+mi+'" onclick="toggleHint('+mi+')">? Indice</button>'
+        +'<button class="btn btn-try" id="try-'+mi+'" onclick="tryStep('+mi+')">&#9989; Valider le module</button>'
+        +'</div>'
+        +'<div class="hint" id="hint-'+mi+'">'+M.hint+'</div>'
+        +'<div class="fb" id="fb-'+mi+'"><span id="fbi-'+mi+'"></span><div id="fbm-'+mi+'"></div></div>';
+    }else{
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; R\u00e9pare le module pr\u00e9c\u00e9dent pour d\u00e9bloquer celui-ci.</div>';
     }
-    box.appendChild(div);
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(mi===active||solved[mi]) renderZone(mi);
+  });
+  updateCrest();updateProg();
+}
+
+function renderZone(mi){
+  var M=MISSIONS[mi],z=$("zone-"+mi);if(!z)return;z.innerHTML="";
+  M.exos.forEach(function(E,ei){
+    var ex=document.createElement("div");ex.className="ex";ex.id="ex-"+mi+"-"+ei;
+    var inner='<div class="ex-tag">Exercice '+(ei+1)+'</div>';
+    if(E.kind==="lift"){
+      inner+='<div class="lift">'
+        +'<div class="lift-cell"><div class="lift-lab">D\u00e9part</div><div class="lift-val">'+E.start+'</div></div>'
+        +'<div class="lift-cell"><div class="lift-arrow">'+E.moveLabel+'</div></div>'
+        +'<div class="lift-cell"><div class="lift-lab">Arriv\u00e9e</div><div class="lift-q">?</div></div>'
+        +'</div>'
+        +'<div class="ex-q" style="text-align:center">Calcul&#8201;: <b>'+E.calc+'</b></div>'
+        +'<div class="num-row"><span class="num-unit">\u00c9tage d\u2019arriv\u00e9e&#8201;:</span><input class="num-in" id="in-'+mi+'-'+ei+'" type="text" inputmode="numeric" placeholder="?" autocomplete="off"></div>';
+    }else if(E.kind==="num"){
+      inner+='<div class="ex-q">'+E.q+'</div>'
+        +'<div class="num-row"><span class="num-unit">R\u00e9sultat&#8201;:</span><input class="num-in" id="in-'+mi+'-'+ei+'" type="text" inputmode="numeric" placeholder="?" autocomplete="off"></div>';
+    }else if(E.kind==="hole"){
+      inner+='<div class="ex-q">'+E.q+'</div>'
+        +'<div class="num-row"><span class="num-unit">'+E.prefix+'</span><input class="num-in" id="in-'+mi+'-'+ei+'" type="text" inputmode="numeric" placeholder="?" autocomplete="off">'+(E.unit?'<span class="num-unit">'+E.unit+'</span>':'')+'</div>';
+    }else if(E.kind==="qcm"){
+      inner+='<div class="ex-q">'+E.q+'</div><div class="choices" id="ch-'+mi+'-'+ei+'">';
+      E.opts.forEach(function(o,oi){
+        inner+='<div class="choice" id="c-'+mi+'-'+ei+'-'+oi+'" onclick="pick('+mi+','+ei+','+oi+')"><span class="rb"></span><span>'+o+'</span></div>';
+      });
+      inner+='</div>';
+    }else if(E.kind==="screen"){
+      inner+='<div class="ex-q">'+E.q+'</div><div class="screens" id="ch-'+mi+'-'+ei+'">';
+      var labs=["A","B","C"];
+      E.screens.forEach(function(o,oi){
+        inner+='<div class="screen" id="c-'+mi+'-'+ei+'-'+oi+'" onclick="pick('+mi+','+ei+','+oi+')"><div class="screen-lab">\u00c9cran '+labs[oi]+'</div><div class="screen-val">'+o+'</div></div>';
+      });
+      inner+='</div>';
+    }
+    ex.innerHTML=inner;z.appendChild(ex);
+  });
+  if(solved[mi]) lockZone(mi);
+}
+
+function pick(mi,ei,oi){
+  if(solved[mi])return;
+  sel[mi+"-"+ei]=oi;
+  var box=$("ch-"+mi+"-"+ei);if(!box)return;
+  for(var k=0;k<box.children.length;k++){box.children[k].classList.remove("sel","ok","ko");}
+  var el=$("c-"+mi+"-"+ei+"-"+oi);if(el)el.classList.add("sel");
+  sCoin();
+}
+
+function toggleHint(mi){if(solved[mi])return;$("hint-"+mi).classList.toggle("show");}
+
+function parseNum(v){return parseInt(String(v).replace(/\u2212/g,"-").replace(/\s/g,"").replace(/^\+/,""),10);}
+
+function tryStep(mi){
+  if(solved[mi])return;
+  var M=MISSIONS[mi],ok=true,filled=true;
+  M.exos.forEach(function(E,ei){
+    if(E.kind==="lift"||E.kind==="num"||E.kind==="hole"){
+      var el=$("in-"+mi+"-"+ei);var v=el?el.value.trim():"";
+      if(v===""){filled=false;}
+      var good=v!==""&&!isNaN(parseNum(v))&&parseNum(v)===E.ans;
+      if(el){el.classList.toggle("ok",good);el.classList.toggle("ko",v!==""&&!good);}
+      var ex=$("ex-"+mi+"-"+ei);if(ex){ex.classList.toggle("ok",good);ex.classList.toggle("ko",v!==""&&!good);}
+      if(!good)ok=false;
+    }else{ // qcm / screen
+      var chosen=sel[mi+"-"+ei];
+      if(chosen===undefined){filled=false;ok=false;return;}
+      var good=(chosen===E.correct);
+      var box=$("ch-"+mi+"-"+ei);
+      if(box){for(var k=0;k<box.children.length;k++){box.children[k].classList.remove("ok","ko");}}
+      var el=$("c-"+mi+"-"+ei+"-"+chosen);if(el){el.classList.toggle("ok",good);el.classList.toggle("ko",!good);}
+      var ex=$("ex-"+mi+"-"+ei);if(ex){ex.classList.toggle("ok",good);ex.classList.toggle("ko",!good);}
+      if(!good)ok=false;
+    }
+  });
+  if(!filled){var fb=$("fb-"+mi);fb.className="fb show warn";$("fbi-"+mi).textContent="\u26A0";$("fbm-"+mi).textContent="Compl\u00e8te les deux exercices avant de valider le module.";return;}
+  if(ok){ stepSuccess(mi); }
+  else{
+    sBad();$("step-"+mi).classList.add("shake");setTimeout(function(){$("step-"+mi).classList.remove("shake");},400);
+    var fb=$("fb-"+mi);fb.className="fb show ko";$("fbi-"+mi).textContent="\u26A0\uFE0F";
+    var msgs=["V\u00e9rifie les signes des nombres relatifs.","Observe attentivement les signes pr\u00e9sents dans l\u2019expression avant de calculer.","V\u00e9rifie les signes des nombres relatifs.","V\u00e9rifie les signes des nombres relatifs."];
+    $("fbm-"+mi).textContent=msgs[mi]||msgs[0];
+  }
+}
+
+function lockZone(mi){
+  var M=MISSIONS[mi];
+  M.exos.forEach(function(E,ei){
+    var el=$("in-"+mi+"-"+ei);if(el)el.disabled=true;
+    var box=$("ch-"+mi+"-"+ei);if(box){for(var k=0;k<box.children.length;k++){box.children[k].style.pointerEvents="none";}}
   });
 }
 
-function choose(realIdx){ if(chosen[idx]!==null) return; chosen[idx]=realIdx; render(); }
-
-function toggleHint(){
-  var qObj=curSP().qs[idx];
-  if(!qObj.hint) return;
-  var hb=$("hint-box"), bh=$("btn-hint");
-  var open=hb.classList.toggle("show");
-  if(open){ hb.innerHTML=qObj.hint; bh.textContent="Cacher l\u2019indice"; }
-  else { bh.textContent="💡 Indice"; }
+function stepSuccess(mi){
+  solved[mi]=true;sOk();sFrag();
+  $("step-"+mi).classList.add("solved");
+  var tb=$("try-"+mi);if(tb){tb.disabled=true;tb.style.display="none";}
+  var hb=$("hint-btn-"+mi);if(hb)hb.disabled=true;
+  $("hint-"+mi).classList.remove("show");
+  lockZone(mi);
+  var fb=$("fb-"+mi);fb.className="fb show ok";$("fbi-"+mi).textContent="\u2705";
+  $("fbm-"+mi).innerHTML="<b style='color:var(--green)'>Bravo&#8201;! Le calcul est correct.</b><br>&#128295; Module r\u00e9par\u00e9 &middot; &#128225; Donn\u00e9e r\u00e9cup\u00e9r\u00e9e";
+  var CHEER=["&#128295; Le technicien&nbsp;:<br>Module r\u00e9par\u00e9&#8201;! L\u2019ascenseur red\u00e9marre.","&#128295; Le technicien&nbsp;:<br>Commandes corrig\u00e9es&#8201;! On avance.","&#128295; Le technicien&nbsp;:<br>\u00c9tages retrouv\u00e9s&#8201;! Presque fini.","&#128295; Le technicien&nbsp;:<br>Dernier module v\u00e9rifi\u00e9&#8201;!"];
+  showAgent(CHEER[mi]||CHEER[0]);
+  updateCrest();updateProg();
+  if(active<MISSIONS.length-1){
+    showAgent("&#128640; Excellent travail.<br>Le syst\u00e8me retrouve progressivement toutes ses fonctions.");
+    active++;
+    setTimeout(function(){
+      runScan(active,function(){
+        build();var el=$("step-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});
+        showAgent("&#128295; Le technicien&nbsp;:<br>Module suivant d\u00e9tect\u00e9. \u00c0 toi de jouer&#8201;!");
+      });
+    },1300);
+  }else{
+    showAgent("&#127970; Le technicien&nbsp;:<br>Tous les modules sont r\u00e9par\u00e9s&#8201;!");
+    setTimeout(openFinale,2200);
+  }
 }
 
-function scoreSP(){ return chosen.filter(function(c,i){return c!==null && c===curSP().qs[i].ans;}).length; }
-
-function updateProgress(){
-  var total=partQuestionCount(part);
-  var doneGlobal=partQuestionDoneIndex()+(chosen[idx]!==null?1:0);
-  var pct=Math.round((doneGlobal/total)*100);
-  $("progress-bar").style.width=pct+"%";
-  $("prog-label").textContent="Question "+(idx+1)+" / "+curSP().qs.length;
-  $("prog-pct").textContent=pct+"\u00a0%";
-  // score live cumulé sur la partie
-  $("score-live").textContent= okPart[part] + scoreSP();
-}
-
-function nextQ(){
-  if($("btn-next").disabled) return;
-  var P=PARTIES[part];
-  var S=curSP();
-  if(idx<S.qs.length-1){ idx++; optOrder=[]; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
-  // fin du sous-problème : on cumule son score dans la partie
-  var spScore = scoreSP();
-  okPart[part]+= spScore;
-  spOk[part+"-"+sp] = (spScore === S.qs.length);
-  if(sp<P.sous.length-1){ sp++; idx=0; chosen=new Array(curSP().qs.length).fill(null); optOrder=[]; render(); window.scrollTo({top:0,behavior:"smooth"}); }
-  else showPartRes();
-}
-
-function starsFrac(ok,total){
-  var r=ok/total;
-  return r>=1?5:r>=0.8?4:r>=0.6?3:r>=0.4?2:1;
-}
-
-function showPartRes(){
-  var P=PARTIES[part];
-  var ok=okPart[part], total=partQuestionCount(part);
-  $("board").classList.remove("show");
-  $("exres").classList.add("show");
-  var _t=P.titre.split("—"); $("exres-badge").textContent="Bilan · "+(_t.length>1?_t.slice(1).join("—").trim():P.titre.replace(/^[^A-Za-zÀ-ÿ0-9]+/,"").trim());
-  $("exres-num").textContent=ok+" / "+total;
-  var st=starsFrac(ok,total);
-  $("exres-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
-  // récap par sous-problème : ✔ si entièrement juste, ✘ sinon
-  var ans="";
-  P.sous.forEach(function(s,si){
-    var reussi = spOk[part+"-"+si]===true;
-    ans += "<div class='recap-row "+(reussi?"ok":"ko")+"'>"
-        + "<span>"+(reussi?"\u2714":"\u2718")+"</span>"
-        + "<span class='rk'>"+s.titre+"</span>"
-        + "<span><b>"+s.reponse+"</b></span></div>";
+function updateCrest(){
+  MISSIONS.forEach(function(M,mi){
+    var f=$("frag-"+mi),hf=$("hud-frag-"+mi);
+    if(solved[mi]){if(f){f.innerHTML=M.frag;f.classList.add("found");}if(hf){hf.classList.add("got");}}
+    else{if(f){f.textContent="?";f.classList.remove("found");}if(hf){hf.classList.remove("got");}}
   });
-  $("exres-answer").innerHTML=ans;
-  // explication détaillée (solution) de chaque sous-problème
-  var solBox=$("exres-sol");
-  if(solBox){
-    var sol="";
-    P.sous.forEach(function(s){ if(s.sol) sol += "<div class='sol-item'>"+s.sol+"</div>"; });
-    solBox.innerHTML=sol;
-  }
-  var msg;
-  if(ok===total) msg="Parfait\u00a0! Toutes les étapes sont justes.";
-  else if(ok>=Math.ceil(total*0.8)) msg="Très bien\u00a0! Juste une étape à revoir.";
-  else if(ok>=Math.ceil(total*0.6)) msg="Bien\u00a0! Reprends les étapes manquées, puis réessaie.";
-  else msg="À retravailler\u00a0: refais les étapes une à une, tu vas y arriver.";
-  $("exres-msg").textContent=msg;
-  if(PARTIES.length===1){
-    $("exres-btn").textContent="🔄 Recommencer";
-    $("exres-btn").setAttribute("onclick","restart()");
-  } else {
-    $("exres-btn").textContent = (part===PARTIES.length-1) ? "Voir le bilan final \u2192" : "Bloc suivant \u2192";
-  }
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/MISSIONS.length*100);
+  var lab=$("hud-prog-label"),fill=$("hud-prog-fill");
+  if(lab)lab.innerHTML="Syst&egrave;me&nbsp;: "+pct+"&#8201;%";
+  if(fill)fill.style.width=pct+"%";
+}
+
+function openFinale(){
+  clearInterval(totalInt);
+  var temps=fmt(totalSec);
+  $("hud-dial").innerHTML="&#127942;";
+  var cr=$("finale-crest");cr.innerHTML="";
+  MISSIONS.forEach(function(M,i){var d=document.createElement("div");d.className="fc";d.style.animationDelay=(i*0.15)+"s";d.innerHTML=M.frag;cr.appendChild(d);});
+  var grade;
+  if(totalSec<=240){grade="\u2B50 TECHNICIEN EN CHEF";}
+  else if(totalSec<=420){grade="\uD83C\uDFC5 EXPERT DU SYST\u00c8ME";}
+  else if(totalSec<=600){grade="\uD83D\uDD27 TECHNICIEN CONFIRM\u00c9";}
+  else{grade="\uD83D\uDEE0\uFE0F ASSISTANT TECHNIQUE";}
+  setTimeout(function(){
+    $("finale-time").innerHTML="&#9201; Temps utilis\u00e9&#8201;: "+temps;
+    $("finale-grade").innerHTML=grade;
+    $("finale").classList.add("show");
+    sWin();
+  },300);
+}
+
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  $("start-screen").style.display="none";
+  $("game").style.display="";
+  $("hud-bar").classList.add("show");
+  totalSec=0;clearInterval(totalInt);
+  var ht=$("hud-timer");if(ht)ht.innerHTML="&#9201;&#65039; 00:00";
+  totalInt=setInterval(function(){totalSec++;var h=$("hud-timer");if(h)h.innerHTML="&#9201;&#65039; "+fmt(totalSec);},1000);
+  sCoin();
+  showAgent("&#128295; Le technicien&nbsp;:<br>Bienvenue&#8201;! Aide-moi \u00e0 remettre l\u2019ascenseur en service.");
+  setTimeout(function(){
+    runScan(0,function(){
+      build();
+      showAgent("&#128295; Le technicien&nbsp;:<br>Premier module d\u00e9tect\u00e9. Retrouve l\u2019\u00e9tage d\u2019arriv\u00e9e&#8201;!");
+    });
+  },1400);
+}
+function restartAll(){
+  clearInterval(totalInt);totalSec=0;
+  solved=[false,false,false,false];active=0;sel={};
+  $("finale").classList.remove("show");
+  var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
+  $("hud-bar").classList.remove("show");
+  $("game").style.display="none";
+  $("start-screen").style.display="";
+  $("hud-dial").innerHTML="&#127970;";
+  var ht=$("hud-timer");if(ht)ht.innerHTML="&#9201;&#65039; 00:00";
+  for(var i=0;i<4;i++){var hf=$("hud-frag-"+i);if(hf)hf.classList.remove("got");}
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-function nextExercise(){
-  if(part<PARTIES.length-1){ part++; $("exres").classList.remove("show"); startPart(); window.scrollTo({top:0,behavior:"smooth"}); }
-  else showFinal();
-}
-
-function showFinal(){
-  $("exres").classList.remove("show");
-  $("board").classList.remove("show");
-  $("final").classList.add("show");
-  var totalQ=PARTIES.reduce(function(s,_,i){return s+partQuestionCount(i);},0);
-  var totalOk=okPart.reduce(function(s,n){return s+n;},0);
-  $("final-num").textContent=totalOk+" / "+totalQ;
-  var st=starsFrac(totalOk,totalQ);
-  $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
-  var detail="";
-  PARTIES.forEach(function(p,i){ detail += p.titre+" : "+okPart[i]+" / "+partQuestionCount(i)+"<br/>"; });
-  $("final-detail").innerHTML=detail;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function restart(){ startGame(); }
+build();
 </script>
 </body>
 </html>
