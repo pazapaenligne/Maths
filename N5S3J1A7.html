@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Le piège des priorités</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — LUNDI (J1) ORANGE ═══ */
+    :root{
+      --day-color:#f5a623; --day-dark:#a85f00; --day-light:#fff5e0;
+      --day-border:#f5d080; --day-glow:rgba(245,166,35,.3);
+    }
+    /* ═══ CHARTE PAZAPA — NE PAS TOUCHER ═══ */
+    :root{
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+      --err-bg:#fce4e4; --err-border:#8e1b13; --err-text:#8e1b13;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+      letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;
+      font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.25rem,5vw,1.8rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .niveau-badge{display:inline-flex;align-items:center;gap:.5rem;margin-top:.6rem;
+      background:var(--day-light);border:2px solid var(--day-color);color:var(--day-dark);
+      font-weight:800;font-size:clamp(.9rem,2.8vw,1.05rem);padding:.35rem 1.1rem;border-radius:99px;}
+    .niveau-badge .nb-dot{width:12px;height:12px;border-radius:50%;background:var(--day-color);display:inline-block;}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .stage{width:100%;max-width:680px;position:relative;z-index:1;}
+
+    .hud{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;align-items:center;margin-bottom:1.1rem;}
+    .hud-chip{display:flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:99px;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;
+      border:2px solid var(--border);background:var(--surface);}
+    .hud-chip.act{background:var(--day-light);border-color:var(--day-border);color:var(--day-dark);}
+
+    .start-overlay{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .start-overlay h2{font-size:1.1rem;color:var(--day-dark);margin-bottom:.5rem;}
+    .start-overlay p{font-size:clamp(.9rem,2.6vw,1rem);line-height:1.9;margin-bottom:1.1rem;}
+    .start-overlay strong{color:var(--day-dark);}
+
+    .screen{display:none;}
+    .screen.show{display:block;animation:fadeUp .35s ease both;}
+
+    .progress-wrap{margin-bottom:1.2rem;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));
+      border-radius:99px;transition:width .4s ease;}
+
+    .enonce{background:var(--day-light);border:2px solid var(--day-border);border-left:5px solid var(--day-color);
+      border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
+    .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+    .enonce .ex-quest{color:var(--day-dark);font-weight:700;margin-top:.3rem;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink));}
+    .q-tag{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-text{font-size:clamp(.95rem,2.9vw,1.1rem);font-weight:700;line-height:1.8;margin-bottom:1rem;color:var(--text);}
+    .expr-mono{font-family:'JetBrains Mono',monospace;font-weight:600;}
+
+    .options{display:flex;flex-direction:column;gap:.6rem;}
+    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
+      border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;
+      font-size:clamp(.9rem,2.7vw,1rem);line-height:1.8;transition:border-color .15s,background .15s;text-align:left;}
+    .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.5rem;text-align:center;
+      font-family:'JetBrains Mono',monospace;}
+    .opt .opt-txt{font-family:'JetBrains Mono',monospace;font-weight:600;}
+    .opt:hover:not(.locked){border-color:var(--day-color);}
+    .opt.locked{cursor:default;}
+    .opt.sel{border-color:var(--day-color);background:var(--day-light);}
+    .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
+    .opt.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .opt.reveal-correct{border-color:var(--green);background:#f0faeb;}
+    .opt.miss{border-color:var(--green);background:#f0faeb;border-style:dashed;}
+
+    .vf-row{display:flex;gap:.7rem;}
+    .vf-btn{flex:1;padding:.85rem 1rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--bg);cursor:pointer;min-height:48px;font-family:Arial,sans-serif;
+      font-weight:700;font-size:clamp(.95rem,2.8vw,1.05rem);transition:border-color .15s,background .15s;}
+    .vf-btn:hover:not(.locked){border-color:var(--day-color);}
+    .vf-btn.sel{border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn.locked{cursor:default;}
+    .vf-btn.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .vf-btn.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .vf-btn.reveal-correct{border-color:var(--green);background:#f0faeb;}
+
+    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.92rem);
+      display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback .fi{font-size:1.3rem;flex-shrink:0;}
+
+    .actions{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.3rem;}
+    .hint-row{margin-top:.9rem;}
+    .btn-hint{background:transparent;color:var(--day-dark);border:2px dashed var(--day-border);
+      padding:.45rem 1rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;
+      font-size:.85rem;cursor:pointer;min-height:40px;}
+    .btn-hint:hover{background:var(--day-light);}
+    .hint-box{display:none;margin-top:.6rem;padding:.75rem 1rem;border-radius:10px;
+      background:var(--day-light);border:1.5px solid var(--day-border);color:var(--text);
+      font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.8;}
+    .hint-box.show{display:block;animation:fadeUp .25s ease both;}
+    .hint-box::before{content:"💡 ";}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;
+      border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.6vw,.95rem);font-weight:700;
+      cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.4;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#000;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+
+    .res{display:none;text-align:center;}
+    .res.show{display:block;animation:fadeUp .4s ease both;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .trophee{font-size:3rem;line-height:1;margin-bottom:.3rem;}
+    .res-score{font-size:clamp(1.8rem,8vw,3rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
+    .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
+    .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
+    .recap-list{display:flex;flex-direction:column;gap:.5rem;margin:.8rem auto 1.3rem;max-width:500px;}
+    .recap-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.6rem .9rem;
+      border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.8;text-align:left;}
+    .recap-row .rk{flex:1;min-width:8rem;font-weight:600;font-family:'JetBrains Mono',monospace;}
+    .recap-row.ok{background:#f0faeb;border:1.5px solid #8dc63f;color:#3d7a10;}
+    .recap-row.ko{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
+    .recap-row b{font-weight:800;}
+    .skills-text{color:var(--day-dark);line-height:1.8;background:var(--day-light);
+      border:2px solid var(--day-border);border-radius:12px;padding:.9rem 1.1rem;
+      margin:0 auto 1.3rem;max-width:460px;text-align:left;}
+    .skills-text .skills-title{font-weight:800;font-size:clamp(.84rem,2.4vw,.92rem);margin-bottom:.5rem;}
+    .skills-text .skill-line{display:flex;gap:.6rem;font-size:clamp(.86rem,2.5vw,.94rem);
+      line-height:1.8;margin-bottom:.5rem;font-weight:600;}
+    .skills-text .skill-line:last-child{margin-bottom:0;}
+    .skills-text .arr{color:var(--day-color);font-weight:800;flex-shrink:0;}
+    .res-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      body{padding:1.4rem .75rem 3rem;}
+      .actions{justify-content:stretch;} .actions .btn{flex:1;}
+      .vf-row{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5ème
+    </div>
+    <div class="week-label">Semaine 3 &ndash; Jour 1</div>
+    <h1>Les experts de la <span class="hl">divisibilité</span></h1>
+    <p class="subtitle">5 questions &rarr; vrai ou faux</p>
+    <div class="niveau-badge"><span class="nb-dot"></span>Niveau 3</div>
+  </header>
+
+  <div class="stage">
+    <div class="screen show" id="start">
+      <div class="start-overlay">
+        <h2>C&rsquo;est parti, on s&rsquo;entraîne&nbsp;!</h2>
+        <p>🎯 Mobilise vite les critères de divisibilité par 2, 3, 5 et 9.<br/>
+           <span style="color:var(--muted);font-size:.85rem;">5 questions, réponds vrai ou faux.</span></p>
+        <button class="btn btn-primary" onclick="startGame()">Commencer &rarr;</button>
+      </div>
+    </div>
+
+    <div class="screen" id="board">
+      <div class="hud">
+        <div class="hud-chip act"><span id="act-label">Question 1</span></div>
+        <div class="hud-chip"><span id="score-live">0</span> <span id="score-suffix">bonnes réponses</span></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-info"><span id="prog-label">Question 1</span><span id="prog-pct">0&nbsp;%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
+      </div>
+      <div class="enonce" id="enonce"></div>
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="q-tag" id="q-tag">Vrai ou faux</div>
+        <div class="q-text" id="q-text"></div>
+        <div id="answer-zone"></div>
+        <div class="feedback" id="feedback"><span class="fi" id="fb-ic"></span><div><span id="fb-msg"></span></div></div>
+        <div class="actions">
+          <button class="btn btn-primary" id="btn-validate" onclick="validate()" disabled>Valider</button>
+          <button class="btn btn-primary" id="btn-next" onclick="nextStep()" style="display:none;">Suivant &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="res" id="final">
+      <div class="res-card">
+        <div class="trophee">🏆</div>
+        <div class="res-score"><span id="final-num">0</span></div>
+        <div class="stars" id="final-stars"></div>
+        <div class="res-msg" id="final-msg"></div>
+        <div class="skills-text">
+          <div class="skills-title">Tu sais maintenant :</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Reconnaître un nombre divisible par 2 ou par 5</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Appliquer les critères de divisibilité par 3 et par 9</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Additionner les chiffres pour conclure vite</div>
+        </div>
+        <div class="recap-list" id="final-recap"></div>
+        <div class="res-btns">
+          <button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+function shuffleArr(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+var WITHCORR = true;
+var DEFIS = [
+  { txt:"5944410 est divisible par 2", ans:true, sol:"Il se termine par 0, donc il est pair : divisible par 2." },
+  { txt:"264455 est divisible par 5", ans:true, sol:"Il se termine par 5 : divisible par 5." },
+  { txt:"92254 est divisible par 3", ans:false, sol:"9+2+2+5+4 = 22. 22 n\u2019est pas divisible par 3." },
+  { txt:"5944410 est divisible par 9", ans:true, sol:"5+9+4+4+4+1+0 = 27. 27 est divisible par 9." },
+  { txt:"388090 est divisible par 3", ans:false, sol:"3+8+8+0+9+0 = 28. 28 n\u2019est pas divisible par 3." },
+  { txt:"32111 est divisible par 2", ans:false, sol:"Il se termine par 1, donc il est impair : pas divisible par 2." }
+];
+var step=0, sel=null, locked=false, score=0, results=[];
+
+function startGame(){
+  $("start").classList.remove("show"); $("final").classList.remove("show");
+  step=0; score=0; results=[];
+  shuffleArr(DEFIS); startQ();
+}
+function startQ(){ sel=null; locked=false; $("board").classList.add("show"); render(); window.scrollTo({top:0,behavior:"smooth"}); }
+function render(){
+  var d=DEFIS[step];
+  $("act-label").textContent="Question "+(step+1);
+  $("enonce").innerHTML="<div class='ex-titre'>Question "+(step+1)+" / "+DEFIS.length+"</div>"
+    +"Utilise les critères de divisibilité, puis réponds.";
+  $("q-tag").textContent="Ton choix";
+  $("q-text").innerHTML="<span class='expr-mono'>"+d.txt+"</span>";
+  $("answer-zone").innerHTML="<div class='vf-row'>"
+    +"<button class='vf-btn' id='vf-true' onclick='chooseVF(true)'>✔ Vrai</button>"
+    +"<button class='vf-btn' id='vf-false' onclick='chooseVF(false)'>✘ Faux</button></div>";
+  $("feedback").className="feedback";
+  $("btn-next").style.display="none";
+  $("btn-validate").style.display="inline-flex"; $("btn-validate").disabled=true;
+  $("prog-label").textContent="Question "+(step+1)+" / "+DEFIS.length;
+  var pct=Math.round(step/DEFIS.length*100);
+  $("progress-bar").style.width=pct+"%"; $("prog-pct").textContent=pct+"\u00a0%";
+  $("score-live").textContent=score;
+}
+function chooseVF(v){ if(locked)return; sel=v; $("vf-true").classList.toggle("sel",v===true); $("vf-false").classList.toggle("sel",v===false); $("btn-validate").disabled=false; }
+function validate(){
+  if(locked)return; var d=DEFIS[step]; locked=true;
+  $("btn-validate").style.display="none";
+  var correct=(sel===d.ans);
+  $("vf-true").classList.add("locked"); $("vf-false").classList.add("locked");
+  var goodBtn=d.ans?$("vf-true"):$("vf-false");
+  var selBtn=sel?$("vf-true"):$("vf-false");
+  goodBtn.classList.add(correct?"chosen-correct":"reveal-correct");
+  if(!correct) selBtn.classList.add("chosen-wrong");
+  if(correct) score++;
+  results.push({txt:d.txt, ans:d.ans, correct:correct});
+  var msg=(correct?"Bonne r\u00e9ponse&nbsp;! ":"Pas tout \u00e0 fait. ");
+  if(WITHCORR && d.sol) msg+=d.sol;
+  else msg+=(d.ans?"C\u2019est vrai.":"C\u2019est faux.");
+  showFb(correct,msg);
+  $("btn-next").style.display="inline-flex";
+  $("btn-next").textContent=(step===DEFIS.length-1)?"Voir le bilan \u2192":"Suivant \u2192";
+  $("score-live").textContent=score;
+}
+function showFb(ok,msg){ var fb=$("feedback"); fb.className="feedback show "+(ok?"ok":"ko"); $("fb-ic").textContent=ok?"\u2705":"\u274C"; $("fb-msg").innerHTML=msg; }
+function nextStep(){ if(step<DEFIS.length-1){ step++; startQ(); } else showFinal(); }
+function starsFrac(ok,total){ var r=ok/total; return r>=1?5:r>=0.8?4:r>=0.6?3:r>=0.4?2:1; }
+function showFinal(){
+  $("board").classList.remove("show"); $("final").classList.add("show");
+  var total=DEFIS.length;
+  $("final-num").textContent=score+" / "+total;
+  var st=starsFrac(score,total);
+  $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  var msg;
+  if(score===total) msg="Parfait&nbsp;! Tu ma\u00eetrises les crit\u00e8res de divisibilit\u00e9.";
+  else if(score>=Math.ceil(total*0.8)) msg="Tr\u00e8s bien&nbsp;! Une question \u00e0 revoir.";
+  else if(score>=Math.ceil(total*0.6)) msg="Bien&nbsp;! Revois les critères de divisibilité.";
+  else msg="\u00c0 retravailler : dernier chiffre pour 2 et 5, somme des chiffres pour 3 et 9.";
+  $("final-msg").innerHTML=msg;
+  var recap="";
+  results.forEach(function(r){ recap+="<div class='recap-row "+(r.correct?"ok":"ko")+"'><span>"+(r.correct?"\u2714":"\u2718")+"</span><span class='rk'>"+r.txt+"</span><span><b>"+(r.ans?"Vrai":"Faux")+"</b></span></div>"; });
+  $("final-recap").innerHTML=recap;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function restart(){ startGame(); }
+</script>
+</body>
+</html>
