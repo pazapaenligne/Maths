@@ -182,13 +182,32 @@ var EXOS = [
     unit:'', ans:0, tol:0.001, sol:'−3 + 6 − 7 + 4 = <b>0</b>.' }
 ];
 var state=[], errCount=0;
-function renderFuel(){ var done=state.filter(function(s){return s.done;}).length, tot=EXOS.length; var pct=tot?Math.round(done/tot*100):0;
+var AUDIO={ctx:null,noise:null};
+function audioCtx(){ try{ if(!AUDIO.ctx){ var C=window.AudioContext||window.webkitAudioContext; if(!C) return null; AUDIO.ctx=new C(); } if(AUDIO.ctx.state==='suspended') AUDIO.ctx.resume(); return AUDIO.ctx; }catch(e){ return null; } }
+function noiseBuf(ctx){ if(AUDIO.noise) return AUDIO.noise; var n=Math.floor(ctx.sampleRate), buf=ctx.createBuffer(1,n,ctx.sampleRate), d=buf.getChannelData(0); for(var i=0;i<n;i++) d[i]=Math.random()*2-1; AUDIO.noise=buf; return buf; }
+function playFill(){ var ctx=audioCtx(); if(!ctx) return; try{ var t=ctx.currentTime;
+  var src=ctx.createBufferSource(); src.buffer=noiseBuf(ctx); src.loop=true;
+  var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=1.3; bp.frequency.setValueAtTime(350,t); bp.frequency.exponentialRampToValueAtTime(1300,t+0.5);
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.15,t+0.05); g.gain.exponentialRampToValueAtTime(0.0001,t+0.55);
+  var osc=ctx.createOscillator(); osc.type='sawtooth'; osc.frequency.setValueAtTime(90,t); var og=ctx.createGain(); og.gain.setValueAtTime(0.05,t); og.gain.exponentialRampToValueAtTime(0.0001,t+0.55);
+  var lfo=ctx.createOscillator(); lfo.frequency.value=11; var lg=ctx.createGain(); lg.gain.value=0.03; lfo.connect(lg); lg.connect(og.gain);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); osc.connect(og); og.connect(ctx.destination);
+  src.start(t); osc.start(t); lfo.start(t); src.stop(t+0.6); osc.stop(t+0.6); lfo.stop(t+0.6);
+ }catch(e){} }
+function playFull(){ var ctx=audioCtx(); if(!ctx) return; try{ var t=ctx.currentTime;
+  var osc=ctx.createOscillator(); osc.type='sawtooth'; osc.frequency.setValueAtTime(120,t); osc.frequency.exponentialRampToValueAtTime(55,t+0.45);
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.08,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+  osc.connect(g); g.connect(ctx.destination); osc.start(t); osc.stop(t+0.5);
+  var s=ctx.createBufferSource(); s.buffer=noiseBuf(ctx); var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=300; var g2=ctx.createGain(); g2.gain.setValueAtTime(0.0001,t+0.44); g2.gain.exponentialRampToValueAtTime(0.2,t+0.47); g2.gain.exponentialRampToValueAtTime(0.0001,t+0.62);
+  s.connect(lp); lp.connect(g2); g2.connect(ctx.destination); s.start(t+0.44); s.stop(t+0.64);
+ }catch(e){} }
+function renderFuel(){ var done=state.filter(function(s){return s.done;}).length, tot=EXOS.length, pct=tot?Math.round(done/tot*100):0;
   var fill=document.getElementById('fuel-fill'); if(fill) fill.style.height=pct+'%';
   var pe=document.getElementById('fuel-pct'); if(pe) pe.textContent=pct+'%';
   var su=document.getElementById('fuel-sub'); if(su) su.textContent=done+' / '+tot+' exercices';
-  var g=document.getElementById('gauge'), msg=document.getElementById('vault-msg');
-  if(done===tot && tot>0){ if(g) g.classList.add('full'); msg.innerHTML='\ud83c\udfc1 <b>Plein fait \u2014 100 % !</b> Le réservoir est plein.'; }
-  else { if(g) g.classList.remove('full'); msg.textContent=(done>0?('Réservoir \u00e0 '+pct+' % \u2014 encore '+(tot-done)+' pour le plein !'):'Réussis un exercice pour ajouter du carburant !'); } }
+  var gg=document.getElementById('gauge'), msg=document.getElementById('vault-msg');
+  if(done===tot && tot>0){ if(gg) gg.classList.add('full'); msg.innerHTML='🏁 <b>Plein fait — 100 % !</b> Le réservoir est plein.'; }
+  else { if(gg) gg.classList.remove('full'); msg.textContent=(done>0?('Réservoir à '+pct+' % — encore '+(tot-done)+' pour le plein !'):'Réussis un exercice pour ajouter du carburant !'); } }
 function genExercises(){ state=EXOS.map(function(){return {done:false,sel:null};}); errCount=0; buildAll(); updateScore(); document.getElementById('results').classList.remove('show'); }
 function buildAll(){
   var box=document.getElementById('exos'); box.innerHTML='';
@@ -230,7 +249,7 @@ function checkExo(idx){
     state[idx].done=true; document.getElementById('card'+idx).classList.add('done');
     document.getElementById('sol'+idx).classList.add('show'); document.getElementById('vbtn'+idx).classList.add('hidden');
     if(ex.kind==='qcm') document.getElementById('ch'+idx+'_'+ex.ans).classList.add('good');
-    flash(idx,true,'✓ Bravo, c\'est juste !');
+    flash(idx,true,'✓ Bravo, c\'est juste !'); var _d=state.filter(function(s){return s.done;}).length; if(_d===EXOS.length) playFull(); else playFill();
   } else {
     errCount++;
     if(ex.kind==='qcm' && state[idx].sel!==null){ var b=document.getElementById('ch'+idx+'_'+state[idx].sel); b.classList.remove('sel'); b.classList.add('bad'); setTimeout(function(){ if(!state[idx].done) b.classList.remove('bad'); },900); }
