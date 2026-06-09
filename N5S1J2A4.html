@@ -75,6 +75,8 @@
     .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
     .btn-hint{background:var(--orange);color:#fff;}
     .btn-solution{background:var(--day-dark);color:#fff;}
+    .btn-retry{background:transparent;color:var(--day-dark);border:2px solid var(--day-border);}
+    .btn-retry:hover:not(:disabled){background:var(--day-light);}
     .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
     .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
 
@@ -148,6 +150,7 @@
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-check" onclick="checkAll()">&#10003; Vérifier</button>
       <button class="btn btn-hint" id="btn-hint" onclick="toggleHint()">? Indice</button>
+      <button class="btn btn-retry" id="btn-retry" onclick="retryAll()" style="display:none;">&#8635; Réessayer</button>
       <button class="btn btn-solution" id="btn-solution" onclick="showSolution()" style="display:none;">&#128161; Solution</button>
     </div>
 
@@ -172,10 +175,19 @@
 var ANSWERS = ["parenthèses","priorités","divisions","soustractions","gauche","droite"];
 /* Banque affichée (bonnes réponses + intrus), ordre mélangé fixe */
 var BANK = ["soustractions","gauche","parenthèses","divisions","droite","priorités","multiplications","additions"];
+/* Explication par trou (feedback pédagogique) */
+var WHY = [
+  "On commence toujours par ce qui est entre parenthèses.",
+  "Après les parenthèses, on applique les priorités opératoires.",
+  "Au même niveau que la multiplication, on a la division.",
+  "Au même niveau que l\u2019addition, on a la soustraction.",
+  "À priorité égale, on lit le calcul depuis la gauche\u2026",
+  "\u2026 et on avance vers la droite."
+];
 
 var $ = function(id){ return document.getElementById(id); };
 var NB = ANSWERS.length;
-var filled = new Array(NB).fill(null);   // mot placé dans chaque trou
+var filled = new Array(NB).fill(null);
 var validated = false;
 
 function buildBank(){
@@ -206,7 +218,6 @@ function clickBlank(i){
   if(validated) return;
   var b = $("blank-" + i);
   if(filled[i]){
-    // vider le trou (remet le mot dispo)
     filled[i] = null;
     b.textContent = "?"; b.className = "blank";
     refreshBankUsage(); updateProg();
@@ -238,7 +249,7 @@ function updateProg(){
 }
 
 function checkAll(){
-  if(validated) return;                       // garde anti double-clic
+  if(validated) return;
   if(filled.every(function(x){ return x === null; })){
     var fb = $("feedback");
     fb.className = "feedback show ko";
@@ -256,13 +267,13 @@ function checkAll(){
     else if(filled[i] !== null){ b.className = "blank locked wrong-blank"; }
     else { b.className = "blank locked"; b.textContent = "?"; }
   }
-  // verrouille la banque
   $("wordbank").querySelectorAll(".word").forEach(function(el){ el.onclick = null; el.style.cursor = "default"; });
 
   showFeedback(ok);
   $("btn-check").disabled = true;
   $("btn-check").style.display = "none";
   $("btn-hint").disabled = true;
+  if(ok < NB) $("btn-retry").style.display = "inline-flex";
   $("btn-solution").style.display = "inline-flex";
   $("btn-restart").style.display = "flex";
   updateGlobal(ok);
@@ -274,34 +285,54 @@ function showFeedback(ok){
   fb.className = "feedback show " + (ratio>=1 ? "ok" : (ok===0 ? "ko" : "partial"));
   $("fb-icon").textContent = ratio>=1 ? "\u2705" : (ok===0 ? "\u274C" : "\u26A0");
   var msg;
-  if(ratio>=1) msg = "Parfait ! Tu connais la méthode.";
-  else if(ratio>=0.5) msg = "Bien, mais quelques mots sont mal placés.";
+  if(ratio>=1) msg = "Bravo ! Tu connais la méthode de calcul.";
+  else if(ratio>=0.5) msg = "Quelques mots sont mal placés.";
   else if(ok>0) msg = "À retravailler.";
-  else msg = "Rien de correct cette fois.";
+  else msg = "Reprends la méthode, puis réessaie.";
   $("fb-msg").innerHTML = "<strong>" + ok + " / " + NB + "</strong> &mdash; " + msg;
-  if(ratio>=1){ $("fb-detail").innerHTML = ""; return; }
-  var L = [];
+  if(ratio>=1){ $("fb-detail").innerHTML = "1. Parenthèses — 2. Multiplications et divisions — 3. Additions et soustractions."; return; }
+  var aCorriger = [];
+  for(var i=0;i<NB;i++){ if(filled[i] !== ANSWERS[i]) aCorriger.push(i+1); }
+  var n = aCorriger.length;
+  $("fb-detail").innerHTML = "Trou" + (n>1?"x":"") + " à corriger : <strong>" + aCorriger.join(", ")
+    + "</strong>.<br><span style='color:var(--muted)'>Corrige puis « Réessayer », ou affiche la « Solution ».</span>";
+}
+
+function retryAll(){
+  // garde les bons, vide les mauvais pour une nouvelle tentative
+  validated = false;
   for(var i=0;i<NB;i++){
-    if(filled[i] === ANSWERS[i]) continue;
-    if(filled[i] === null) L.push("Trou " + (i+1) + " : tu n\u2019as pas répondu.");
-    else L.push("Trou " + (i+1) + " : ce mot n\u2019est pas correct, relis la phrase.");
+    var b = $("blank-"+i);
+    if(filled[i] === ANSWERS[i]){ b.className = "blank filled"; }
+    else { filled[i] = null; b.textContent = "?"; b.className = "blank"; }
+    b.classList.remove("locked");
   }
-  $("fb-detail").innerHTML = "À revoir :<br>" + L.join("<br>") + "<br><span style='color:var(--muted)'>Clique sur « Solution » pour voir les bonnes réponses.</span>";
+  buildBank();           // réactive la banque
+  refreshBankUsage();
+  $("feedback").className = "feedback";
+  $("btn-check").disabled = false; $("btn-check").style.display = "inline-flex";
+  $("btn-hint").disabled = false;
+  $("btn-retry").style.display = "none";
+  $("btn-solution").style.display = "none";
+  $("btn-restart").style.display = "none";
+  updateProg();
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function showSolution(){
-  if(!validated) return;
   for(var i=0;i<NB;i++){
     var b = $("blank-" + i);
     b.textContent = ANSWERS[i];
     b.className = "blank locked correct-blank";
   }
+  validated = true;
   var fb = $("feedback");
   fb.className = "feedback show ok";
   $("fb-icon").textContent = "\u2705";
-  $("fb-msg").innerHTML = "<strong>Solution affichée.</strong>";
-  $("fb-detail").textContent = "Les mots corrects sont affichés dans chaque trou.";
+  $("fb-msg").innerHTML = "<strong>Solution &amp; explication.</strong>";
+  $("fb-detail").innerHTML = "💡 La méthode : 1. on calcule les <strong>parenthèses</strong> ; 2. les <strong>multiplications et divisions</strong> ; 3. les <strong>additions et soustractions</strong> ; à priorité égale, de <strong>gauche</strong> à <strong>droite</strong>.";
   $("btn-solution").disabled = true;
+  $("btn-retry").style.display = "none";
 }
 
 function toggleHint(){
@@ -336,6 +367,7 @@ function restartAll(){
   $("hint-box").classList.remove("show");
   $("btn-check").disabled = false; $("btn-check").style.display = "inline-flex";
   $("btn-hint").disabled = false;
+  $("btn-retry").style.display = "none";
   $("btn-solution").style.display = "none"; $("btn-solution").disabled = false;
   $("btn-restart").style.display = "none";
   $("sb-ok").textContent = "0"; $("sb-ko").textContent = "0";
