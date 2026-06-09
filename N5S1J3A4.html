@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+     <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
@@ -181,7 +182,6 @@
 <script>
 /* ════════════════════════════════════════════════════════════
    Semaine 1 Jour 3 — Découvrir les nombres relatifs (5e)
-   Réponses d'après la correction officielle (Séquence 5 Séance 1).
    Score par item : Ex1 = 7 abscisses + 3 opposés = 10 ;
    Ex2 = 3 (nombre, signe, partie num) ; Ex3 = 6 abscisses + 1 nom = 7.
    Total = 20.
@@ -189,7 +189,6 @@
 
 var $ = function(id){ return document.getElementById(id); };
 
-/* normalise une saisie de nombre : virgule/point, espaces, −, + initial */
 function normNum(s){
   return String(s).trim().replace(/\u00a0/g,"").replace(/\s/g,"")
     .replace(/\u2212/g,"-").replace(",", ".").replace(/^\+/,"");
@@ -203,34 +202,30 @@ function textEq(a, b){
   return String(a).trim().toUpperCase().replace(/\s/g,"") === b.toUpperCase().replace(/\s/g,"");
 }
 
-/* Données Ex1 : points et abscisses (graduation 0,25) */
 var EX1_PTS = [
   { p:"A", x:0 },   { p:"B", x:1 },  { p:"C", x:-1 }, { p:"D", x:-2 },
   { p:"E", x:-1.75 },{ p:"F", x:1.75 }, { p:"G", x:-0.25 }
 ];
-/* Opposés à trouver (point -> point opposé présent sur la droite) */
 var EX1_OPP = [
-  { of:"A", ans:"A" },   // 0 est son propre opposé
-  { of:"B", ans:"C" },   // 1 <-> -1
-  { of:"E", ans:"F" }    // -1,75 <-> 1,75
+  { of:"A", ans:"A" },
+  { of:"B", ans:"C" },
+  { of:"E", ans:"F" }
 ];
 
-/* Données Ex3 : graduation 0,01, droite -0,2 à 0,2 */
+/* Données Ex3 : graduation 0,01 ; droite étendue à -0,3 / 0,3 pour que -0,21 ait un repère */
 var EX3_PTS = [
   { p:"T", x:-0.21 }, { p:"H", x:-0.18 }, { p:"A", x:-0.05 },
   { p:"L", x:0.03 },  { p:"E", x:0.1 },   { p:"S", x:0.14 }
 ];
 
-/* ── état ── */
 var st1, st2, st3;
 function initState(){
   st1 = { done:false, abs:{}, opp:{}, res:{} };
   st2 = { done:false, num:"", signe:"", part:"", res:{} };
-  st3 = { done:false, placed:{}, nom:"", res:{} };  // placed[p] = abscisse posée (ou undefined)
+  st3 = { done:false, placed:{}, nom:"", res:{} };
 }
 initState();
 
-/* ── SVG droite graduée Ex1 : de -2,25 à 2,25, pas 0,25 ── */
 function svgLine1(){
   var W=760, H=120, padL=40, padR=40;
   var xmin=-2.25, xmax=2.25;
@@ -238,17 +233,13 @@ function svgLine1(){
   function X(v){ return padL + (v - xmin)/span * (W - padL - padR); }
   var y=70;
   var s = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Droite graduée de -2 à 2, graduée tous les 0,25">';
-  // axe
   s += '<line class="axis" x1="'+X(xmin)+'" y1="'+y+'" x2="'+(X(xmax)+10)+'" y2="'+y+'"/>';
   s += '<polygon points="'+(X(xmax)+10)+','+(y-6)+' '+(X(xmax)+22)+','+y+' '+(X(xmax)+10)+','+(y+6)+'" fill="var(--text)"/>';
-  // graduations tous les 0,25
   for(var v=-2; v<=2.0001; v+=0.25){
     var main = Math.abs(v - Math.round(v)) < 1e-9;
     s += '<line class="'+(main?"tick-main":"tick")+'" x1="'+X(v)+'" y1="'+(y-(main?10:6))+'" x2="'+X(v)+'" y2="'+(y+(main?10:6))+'"/>';
   }
-  // nombres entiers -2 .. 2
   [-2,-1,0,1,2].forEach(function(v){ s += '<text class="axis-num" x="'+X(v)+'" y="'+(y+30)+'">'+v+'</text>'; });
-  // points
   EX1_PTS.forEach(function(o){
     s += '<line class="pt-tick" x1="'+X(o.x)+'" y1="'+(y-16)+'" x2="'+X(o.x)+'" y2="'+(y+16)+'"/>';
     s += '<text class="pt-label" x="'+X(o.x)+'" y="'+(y-22)+'">'+o.p+'</text>';
@@ -257,30 +248,29 @@ function svgLine1(){
   return s;
 }
 
-/* Géométrie commune de la droite Ex3 (utilisée par le SVG et le drag&drop) */
-var L3 = { W:760, H:130, padL:30, padR:30, xmin:-0.23, xmax:0.23, y:70 };
+/* Géométrie droite Ex3 : ÉTENDUE de -0,3 à 0,3 (pas 0,01), pour que -0,21 ait un repère clair */
+var L3 = { W:860, H:130, padL:30, padR:30, xmin:-0.32, xmax:0.32, y:70 };
 L3.span = L3.xmax - L3.xmin;
 function X3(v){ return L3.padL + (v - L3.xmin)/L3.span * (L3.W - L3.padL - L3.padR); }
-function val3FromX(px){ // px en coordonnées viewBox -> valeur arrondie au 0,01
+function val3FromX(px){
   var v = (px - L3.padL)/(L3.W - L3.padL - L3.padR) * L3.span + L3.xmin;
   return Math.round(v*100)/100;
 }
 
-/* ── SVG droite graduée Ex3 : VIDE (l'élève place les points) ── */
 function svgLine3(){
   var W=L3.W, y=L3.y;
-  var s = '<svg id="svg3" viewBox="0 0 '+W+' '+L3.H+'" role="img" aria-label="Droite graduée vide de -0,2 à 0,2, graduée tous les 0,01">';
+  var s = '<svg id="svg3" viewBox="0 0 '+W+' '+L3.H+'" role="img" aria-label="Droite graduée vide de -0,3 à 0,3, graduée tous les 0,01">';
   s += '<line class="axis" x1="'+X3(L3.xmin)+'" y1="'+y+'" x2="'+(X3(L3.xmax)+10)+'" y2="'+y+'"/>';
   s += '<polygon points="'+(X3(L3.xmax)+10)+','+(y-6)+' '+(X3(L3.xmax)+22)+','+y+' '+(X3(L3.xmax)+10)+','+(y+6)+'" fill="var(--text)"/>';
-  for(var i=-22; i<=22; i++){
+  for(var i=-31; i<=31; i++){
     var v=i/100;
     var main = (i % 10 === 0);
-    var mid  = (i % 5 === 0) && !main;   // trait moyen tous les 0,05
+    var mid  = (i % 5 === 0) && !main;
     var len = main ? 10 : (mid ? 8 : 5);
     var cls = main ? "tick-main" : (mid ? "tick-mid" : "tick");
     s += '<line class="'+cls+'" x1="'+X3(v)+'" y1="'+(y-len)+'" x2="'+X3(v)+'" y2="'+(y+len)+'"/>';
   }
-  [-0.2,-0.1,0,0.1,0.2].forEach(function(v){
+  [-0.3,-0.2,-0.1,0,0.1,0.2,0.3].forEach(function(v){
     var lab = (v===0)?"0":String(v).replace(".",",");
     s += '<text class="axis-num" x="'+X3(v)+'" y="'+(y+30)+'">'+lab+'</text>';
   });
@@ -300,7 +290,6 @@ function card(id){
   return c;
 }
 
-/* ───────── EX1 ───────── */
 function buildEx1(){
   var c = card("card-1");
   var h = '<div class="card-stripe"></div>'
@@ -324,7 +313,6 @@ function buildEx1(){
   return c;
 }
 
-/* ───────── EX2 ───────── */
 function buildEx2(){
   var c = card("card-2");
   var h = '<div class="card-stripe"></div>'
@@ -340,7 +328,6 @@ function buildEx2(){
   return c;
 }
 
-/* ───────── EX3 ───────── */
 function buildEx3(){
   var c = card("card-3");
   var h = '<div class="card-stripe"></div>'
@@ -378,7 +365,6 @@ var HINTS = {
   3:"Repère d\u2019abord le 0 et les graduations principales (−0,1\u00a0; 0,1). Glisse chaque étiquette en comptant les petits traits depuis 0. Pour le nom, lis les lettres de la plus petite abscisse à la plus grande."
 };
 
-/* ════ Ex3 : glisser-déposer des étiquettes ════ */
 function setupTokens3(){
   var bank = $("tokens3");
   if(!bank) return;
@@ -391,16 +377,15 @@ function setupTokens3(){
     t.addEventListener("click", function(){ onTokenClick(o.p); });
     bank.appendChild(t);
   });
-  // clic sur la zone de la droite pour poser la lettre sélectionnée
   var stage = $("stage3");
   if(stage) stage.addEventListener("click", onLineClick);
 }
 
-var selTok = null;  // lettre actuellement sélectionnée
+var selTok = null;
 
 function onTokenClick(p){
   if(st3.done) return;
-  if(st3.placed[p] !== undefined) return;   // déjà posée : se retire via la liste en bas
+  if(st3.placed[p] !== undefined) return;
   if(selTok === p){ selTok = null; }
   else { selTok = p; }
   refreshSelection();
@@ -408,13 +393,12 @@ function onTokenClick(p){
 
 function onLineClick(ev){
   if(st3.done) return;
-  // ignore si le clic est sur une étiquette (posée) : son propre handler gère le retrait
   if(ev.target.closest && ev.target.closest(".token")) return;
-  if(selTok === null) return;          // aucune lettre choisie : rien à poser
+  if(selTok === null) return;
   var svg = $("svg3"); var sr = svg.getBoundingClientRect();
   var vbX = (ev.clientX - sr.left)/sr.width * L3.W;
-  var v = val3FromX(vbX);              // aimant : arrondi au 0,01
-  if(v < -0.22) v = -0.22; if(v > 0.22) v = 0.22;
+  var v = val3FromX(vbX);
+  if(v < -0.31) v = -0.31; if(v > 0.31) v = 0.31;
   placeToken(selTok, v, false);
   selTok = null;
   refreshSelection();
@@ -429,7 +413,6 @@ function refreshSelection(){
   });
 }
 
-/* place l'étiquette p à l'abscisse v sur la droite */
 function placeToken(p, v, lock){
   var t = $("tok-"+p); if(!t) return;
   st3.placed[p] = v;
@@ -455,11 +438,10 @@ function returnToken(t){
   refreshPlacedList();
 }
 
-/* liste « lettre : abscisse » des étiquettes posées (aide avant validation) */
 function refreshPlacedList(){
   var box = $("placed-list3");
   if(!box) return;
-  if(st3.done){ box.innerHTML = ""; return; }   // masquée après validation
+  if(st3.done){ box.innerHTML = ""; return; }
   box.innerHTML = "";
   EX3_PTS
     .filter(function(o){ return st3.placed[o.p] !== undefined; })
@@ -488,7 +470,6 @@ function bindCard(n, fn){
   $("solbtn-"+n).onclick = function(){ showSolution(n); };
 }
 
-/* ── lecture des saisies ── */
 function readEx1(){
   EX1_PTS.forEach(function(o){ st1.abs[o.p] = $("e1-abs-"+o.p).value; });
   EX1_OPP.forEach(function(o){ st1.opp[o.of] = $("e1-opp-"+o.of).value; });
@@ -502,7 +483,6 @@ function readEx3(){
 
 function anyFilled(vals){ return vals.some(function(v){ return (v||"").trim().length>0; }); }
 
-/* ── vérifications ── */
 function checkEx1(){
   if(st1.done) return;
   readEx1();
@@ -544,7 +524,6 @@ function checkEx3(){
   finish(3);
 }
 
-/* verrouille et colore les étiquettes après validation */
 function lockTokens3(){
   EX3_PTS.forEach(function(o){
     var tk = $("tok-"+o.p);
@@ -694,7 +673,6 @@ function updateGlobal(){
 function restartAll(){
   initState();
   buildAll();
-  // re-bind après reconstruction
   bindCard(1, checkEx1); bindCard(2, checkEx2); bindCard(3, checkEx3);
   setupTokens3();
   $("btn-restart").style.display = "none";
