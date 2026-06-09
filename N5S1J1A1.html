@@ -73,6 +73,14 @@
       border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
     .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
     .enonce .ex-quest{color:var(--day-dark);font-weight:700;margin-top:.3rem;}
+    .enonce .mission-expr{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.05em;}
+    .enonce .mission-goal{margin-top:.4rem;font-weight:600;color:var(--text);}
+    .enonce .mission-calc{margin-top:.6rem;padding:.55rem .8rem;background:var(--surface);
+      border:1.5px dashed var(--day-border);border-radius:10px;}
+    .enonce .mission-calc .mc-lbl{font-size:.78rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+    .enonce .mission-calc .mc-line{font-family:'JetBrains Mono',monospace;font-weight:800;
+      color:var(--day-dark);font-size:1.02em;margin-top:.2rem;}
 
     .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
       padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
@@ -443,15 +451,57 @@ function buildOrder(){
   optOrder=shuffleArr(opts.map(function(_,i){return i;}));
 }
 
+function calculEnCours(S, expr){
+  // Construit la suite du calcul à partir des étapes déjà validées correctement.
+  // Étape 1: opération prioritaire (ex "23 − 9"). Étape 2: expression obtenue (ex "14 + 2"). Étape 3: résultat (ex "16").
+  var lignes=[];
+  // étape 1 validée et correcte -> on connaît l'opération prioritaire ET son résultat (déduit de l'étape 2)
+  var e1ok = chosen[0]!==null && chosen[0]===S.qs[0].ans;
+  if(e1ok){
+    var opPrio = S.qs[0].opts[S.qs[0].ans];        // ex "23 − 9"
+    // le résultat de cette opération apparaît dans l'expression de l'étape 2
+    var expr2 = (S.qs[1] ? S.qs[1].opts[S.qs[1].ans] : "");  // ex "14 + 2"
+    // on calcule la valeur de l'opération prioritaire
+    var val = evalOp(opPrio);
+    lignes.push(opPrio + (val!==null ? " = " + val : ""));
+  }
+  // étape 2 validée -> montrer l'expression obtenue
+  var e2ok = S.qs.length>1 && chosen[1]!==null && chosen[1]===S.qs[1].ans;
+  if(e2ok){
+    var expr2b = S.qs[1].opts[S.qs[1].ans];
+    lignes.push(expr2b);
+  }
+  // étape 3 validée -> résultat final
+  var i3 = S.qs.length-1;
+  var e3ok = chosen[i3]!==null && chosen[i3]===S.qs[i3].ans && i3>=2;
+  if(e3ok){
+    lignes.push("Résultat : " + S.qs[i3].opts[S.qs[i3].ans]);
+  }
+  if(lignes.length===0) return "";
+  var html="<div class='mission-calc'><span class='mc-lbl'>Calcul en cours :</span>";
+  lignes.forEach(function(l){ html += "<div class='mc-line'>"+l+"</div>"; });
+  html+="</div>";
+  return html;
+}
+function evalOp(s){
+  // évalue une opération simple "a op b" avec − × ÷ +
+  var m=s.replace(/\u00d7/g,"*").replace(/\u00f7/g,"/").replace(/\u2212/g,"-");
+  m=m.replace(/[^0-9+\-*/.\s]/g,"").trim();
+  if(!/^\d+(\.\d+)?\s*[+\-*/]\s*\d+(\.\d+)?$/.test(m)) return null;
+  try{ var r=Function('"use strict";return ('+m+')')(); return (typeof r==="number"&&isFinite(r))?r:null; }catch(e){ return null; }
+}
 function render(){
   var P=PARTIES[part];
   var S=curSP();
   var qObj=S.qs[idx];
   if(chosen[idx]===null || optOrder.length!==qObj.opts.length) buildOrder();
   $("act-label").textContent=P.titre;
-  $("enonce").innerHTML="<div class='ex-titre'>"+S.titre+"</div>"+S.enonce
-    +"<div class='ex-quest'>👉 "+S.question+"</div>";
-  $("q-tag").textContent="Question "+(idx+1)+" / "+S.qs.length;
+  var expr = S.enonce.replace(/^Expression\s*:\s*/,"").replace(/\.$/,"");
+  $("enonce").innerHTML="<div class='ex-titre'>🚦 Expression : <span class='mission-expr'>"+expr+"</span></div>"
+    +"<div class='mission-goal'>🎯 Mission : trouve le résultat final en respectant les priorités opératoires.</div>"
+    +calculEnCours(S,expr)
+    +"<div class='ex-quest'>Étape "+(idx+1)+" / "+S.qs.length+"</div>";
+  $("q-tag").textContent="Étape "+(idx+1)+" / "+S.qs.length;
   $("q-text").textContent=qObj.q;
   buildOptions();
   // réinitialiser l'indice à chaque question
@@ -466,8 +516,19 @@ function render(){
     var correct=chosen[idx]===qObj.ans;
     fb.className="feedback show "+(correct?"ok":"ko");
     $("fb-ic").textContent=correct?"\u2705":"\u274C";
-    $("fb-msg").innerHTML = correct ? "<strong>Bonne réponse\u00a0!</strong>"
-      : "<strong>Pas tout à fait.</strong> Regarde la réponse correcte.";
+    var bonneTxt = qObj.opts[qObj.ans];
+    var explic;
+    if(idx===0){
+      var v = evalOp(bonneTxt);
+      explic = "L\u2019op\u00e9ration prioritaire est <b>"+bonneTxt+(v!==null?" = "+v:"")+"</b>.";
+    } else if(idx===S.qs.length-1){
+      explic = "Le r\u00e9sultat final est <b>"+bonneTxt+"</b>.";
+    } else {
+      explic = "On obtient <b>"+bonneTxt+"</b>.";
+    }
+    $("fb-msg").innerHTML = correct
+      ? "<strong>Bonne réponse\u00a0!</strong> "+explic
+      : "<strong>Pas tout à fait.</strong> "+explic;
     $("btn-next").disabled=false;
   } else { fb.className="feedback"; $("btn-next").disabled=true; }
   // libellé du bouton : dernière question du dernier sous-problème de la partie -> bilan
@@ -514,7 +575,7 @@ function updateProgress(){
   var doneGlobal=partQuestionDoneIndex()+(chosen[idx]!==null?1:0);
   var pct=Math.round((doneGlobal/total)*100);
   $("progress-bar").style.width=pct+"%";
-  $("prog-label").textContent="Question "+(idx+1)+" / "+curSP().qs.length;
+  $("prog-label").textContent="Étape "+(idx+1)+" / "+curSP().qs.length;
   $("prog-pct").textContent=pct+"\u00a0%";
   // score live cumulé sur la partie
   $("score-live").textContent= okPart[part] + scoreSP();
