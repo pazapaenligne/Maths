@@ -10,7 +10,7 @@
 <style>
 /* ============================================================
    PAZAPA — JE RELÈVE LE DÉFI
-   3e · Semaine 6 · Jour 2 (MARDI)
+   3e · Semaine 8 · Jour 2 (MARDI)
    Couleur du jour : #f28b82 / #c0392b / #fff0ef / #f9c0bb
    ============================================================ */
 :root{
@@ -384,6 +384,46 @@ body{
   animation: neon-jour 1.4s ease-in-out infinite;
 }
 .btn-rejouer:active{ transform:scale(.97); }
+
+/* ========== BOUTON SCORE FINAL (mode liste) ========== */
+.btn-score-final{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem;
+  letter-spacing:1.5px; padding:16px 32px;
+  border:2px solid var(--jour); border-radius:14px;
+  background:#fff; color:var(--gris);
+  cursor:not-allowed; transition:all .25s;
+  opacity:.55;
+}
+.btn-score-final:not(:disabled){
+  background:linear-gradient(135deg, var(--jour) 0%, #fff8d0 50%, var(--jour) 100%);
+  background-size:200% 100%;
+  color:#3a2c00; cursor:pointer; opacity:1;
+  border-color:var(--jour-fonce);
+  animation: shine-final 2s linear infinite, pulse-final 1.6s ease-in-out infinite;
+  box-shadow:0 6px 20px rgba(242,139,130,.4);
+}
+.btn-score-final:not(:disabled):hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(242,139,130,.5);
+}
+.btn-score-final:not(:disabled):active{
+  transform:translateY(0) scale(.97);
+}
+@keyframes shine-final{
+  0%{ background-position:0% 0; }
+  100%{ background-position:200% 0; }
+}
+@keyframes pulse-final{
+  0%,100%{ box-shadow:0 6px 20px rgba(242,139,130,.4); }
+  50%    { box-shadow:0 8px 28px rgba(242,139,130,.7); }
+}
+.hint-score{
+  font-family:'Orbitron',sans-serif; font-size:.7rem;
+  letter-spacing:1px; color:var(--gris);
+  margin-top:8px; text-transform:uppercase;
+  transition:opacity .3s;
+}
+.hint-score.hidden{ opacity:0; }
 </style>
 </head>
 <body>
@@ -401,9 +441,9 @@ body{
       <span class="dots"><i></i><i></i><i></i></span>
       PAZAPA · MATHS · 3ÈME
     </div>
-    <div class="semaine">Semaine 6 – Jour 2</div>
+    <div class="semaine">Semaine 8 – Jour 2</div>
     <h1 class="titre">🏆 Je relève le <span class="accent">défi</span> !</h1>
-    <div class="sous-titre">🌍 Repérage sur la sphère — latitude, longitude, antipode</div>
+    <div class="sous-titre">🔢 Nombres premiers et décomposition · 6 challenges</div>
     <div class="badge-revision">▶ DÉFI BREVET 3ÈME</div>
   </div>
 
@@ -434,42 +474,18 @@ body{
     </div>
     <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
 
-    <div class="defi-count" id="defi-count">DÉFI 1 / 6</div>
+    <div class="defi-count" id="defi-count">6 DÉFIS À RÉSOUDRE</div>
   </div>
 
-  <!-- ===== CARD EXERCICE ===== -->
-  <div class="card" id="exo-card">
-    <div class="rainbow"></div>
-    <div class="card-body">
-      <div class="card-head">
-        <div class="defi-num" id="card-defi-num">DÉFI 01</div>
-        <div class="type-badge">REPÉRAGE</div>
-      </div>
+  <!-- ===== TOUS LES DÉFIS (générés par JS) ===== -->
+  <div id="defis-container"></div>
 
-      <div class="texte-fable">
-        <div class="ft-titre">🌍 UN POINT ET SON ANTIPODE</div>
-        <div class="ft-expr" id="ft-expr"></div>
-      </div>
-
-      <div class="question-txt" id="question-txt"></div>
-
-      <div class="choix" id="choix"></div>
-
-      <div class="btns">
-        <button class="btn btn-valider" id="btn-valider" disabled>✓ VALIDER</button>
-        <button class="btn btn-indice"  id="btn-indice">? INDICE</button>
-        <button class="btn btn-suivant" id="btn-suivant" disabled>SUIVANT →</button>
-      </div>
-
-      <div class="indice-box" id="indice-box"></div>
-      <div class="feedback"   id="feedback"></div>
-      <div class="correction" id="correction"></div>
-
-      <div class="nav">
-        <button id="btn-retour" disabled>← Retour</button>
-        <button id="btn-nav-suivant" disabled>Suivant →</button>
-      </div>
-    </div>
+  <!-- ===== BOUTON FINAL ===== -->
+  <div style="margin: 24px 0 10px; text-align:center;">
+    <button class="btn-score-final" id="btn-score-final" disabled>
+      🏆 VOIR MON SCORE FINAL
+    </button>
+    <div class="hint-score" id="hint-score">Termine les 6 défis pour débloquer ton score final</div>
   </div>
 
   <!-- ===== ÉCRAN RÉSULTATS ===== -->
@@ -492,297 +508,299 @@ body{
 
 <script>
 /* =========================================================
-   DONNÉES DES 6 DÉFIS — Repérage sur la sphère (Brevet 3e)
-   Inspiré de Hatier "Un point et son antipode".
-   Compétences : vocabulaire latitude/longitude, lire des coordonnées
-   géographiques, calculer l'antipode d'un point.
-   Règle : antipode(lat ; long) = (-lat ; long ± 180°)
+   DONNÉES DES 6 DÉFIS — Nombres premiers & décomposition (Brevet 3e)
+      et "Explorer un labyrinthe de nombres premiers".
+   Compétences : reconnaître un nombre premier, décomposer en
+   facteurs premiers (arbre ou divisions successives), repérer
+   les pièges (91 = 7 × 13, etc.).
    ========================================================= */
 const DEFIS = [
   {
-    titre:"Vocabulaire",
+    titre:"Définition",
     expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
-       + 'Sur le globe terrestre, on repère un point par deux coordonnées :<br>'
-       + '<b>la latitude</b> (du pôle Sud au pôle Nord) et <b>la longitude</b> (autour de la Terre, à partir du méridien de Greenwich).'
+       + '🔢 <b>Rappel :</b> Un nombre premier est un nombre entier supérieur à 1 qui n\'a que <b>2 diviseurs</b> : 1 et lui-même.<br>'
+       + 'Exemples : 2, 3, 5, 7, 11, 13, 17, 19, 23, 29…'
        + '</div>',
-    question:"Quelle coordonnée varie du pôle Sud au pôle Nord et s\'exprime en °N ou °S ?",
+    question:"Le nombre 1 est-il un nombre premier ?",
     choices:[
-      "La longitude",
-      "La latitude",
-      "L\'altitude",
-      "L\'abscisse"
+      "Oui, car il n\'est divisible que par 1",
+      "Non, car il n\'a qu\'UN seul diviseur (1)",
+      "Oui, car c\'est le plus petit entier",
+      "Cela dépend de la définition"
     ],
     correct:1,
-    indice:"Indice : « lat » comme « latéral » → la latitude se lit le long des PARALLÈLES (lignes horizontales). Elle est nulle à l\'équateur et vaut 90° aux pôles.",
-    correction:"La <b>latitude</b> varie de 90° S (pôle Sud) à 90° N (pôle Nord). Elle est repérée sur les parallèles (lignes horizontales). La longitude, elle, varie de 180° O à 180° E (méridiens)."
+    indice:"Relis bien la définition : un nombre premier doit avoir EXACTEMENT 2 diviseurs distincts. Combien 1 a-t-il de diviseurs ?",
+    correction:"Le nombre 1 n\'a qu\'<b>un seul diviseur</b> (lui-même). Il n\'en a donc pas 2, et n\'est donc <b>pas</b> un nombre premier. Le plus petit nombre premier est <b>2</b> (seul nombre premier pair)."
   },
   {
-    titre:"Lire les coordonnées",
-    expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
-       + 'Sur le globe ci-dessous, lis les coordonnées géographiques du point <b>P</b>.<br>(Méridien 0° en bleu vertical, Équateur en rouge horizontal.)'
-       + '</div>'
-       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 260 260" style="background:#fff; max-width:240px;"><circle cx="130" cy="130" r="100" fill="#e3f0fb" stroke="#2c3e50" stroke-width="2"/><ellipse cx="130" cy="216.60254037844385" rx="50.000000000000014" ry="10.000000000000004" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="180.0" rx="86.60254037844388" ry="17.320508075688775" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><line x1="30.0" y1="130.0" x2="230.0" y2="130.0" stroke="#b03030" stroke-width="1.5" stroke-dasharray="4,3"/><text x="234.0" y="134.0" font-size="9" fill="#b03030" font-style="italic">Équateur</text><ellipse cx="130" cy="80.0" rx="86.60254037844388" ry="17.320508075688775" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="43.39745962155614" rx="50.000000000000014" ry="10.000000000000004" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="86.60254037844386" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="49.99999999999999" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><line x1="130" y1="30" x2="130" y2="230" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="4,3"/><text x="134" y="27" font-size="9" fill="#2980b9" font-style="italic">Méridien 0°</text><ellipse cx="130" cy="130" rx="49.99999999999999" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="86.60254037844386" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><circle cx="130" cy="30" r="3" fill="#2c3e50"/><text x="136" y="33" font-size="10" fill="#2c3e50" font-weight="bold">N</text><circle cx="130" cy="230" r="3" fill="#2c3e50"/><text x="136" y="233" font-size="10" fill="#2c3e50" font-weight="bold">S</text><circle cx="196.34139481689385" cy="80.0" r="5" fill="#c0392b" stroke="#fff" stroke-width="1.5"/><text x="204.34139481689385" y="75.0" font-size="14" fill="#c0392b" font-weight="bold">P</text></svg></div>',
-    question:"Quelles sont les coordonnées géographiques du point P ?",
-    choices:[
-      "P(50° N ; 30° E)",
-      "P(30° N ; 50° E)",
-      "P(30° S ; 50° E)",
-      "P(30° N ; 50° O)"
-    ],
-    correct:1,
-    indice:"Convention : on donne TOUJOURS la latitude (N/S) en premier, puis la longitude (E/O). P est dans l\'hémisphère Nord (au-dessus de l\'équateur) et à l\'Est du méridien de Greenwich.",
-    correction:"P est dans l\'hémisphère Nord (au-dessus de l\'équateur) à 30° de latitude → 30° N. Il est à l\'Est du méridien de Greenwich à 50° → 50° E. Donc <b>P(30° N ; 50° E)</b>."
-  },
-  {
-    titre:"Définition de l\'antipode",
+    titre:"Reconnaître un nombre premier",
     expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
-       + 'L\'<b>antipode</b> d\'un point de la Terre est le point diamétralement opposé sur le globe : on traverserait la Terre en ligne droite pour aller de l\'un à l\'autre.'
+       + '🔢 Parmi les quatre nombres ci-dessous, lequel est un nombre premier ?'
        + '</div>',
-    question:"Comment passer d\'un point M(latitude ; longitude) à son antipode M\' ?",
+    question:"Quel est le nombre premier ?",
     choices:[
-      "On change le signe de la latitude uniquement",
-      "On change le signe de la longitude uniquement",
-      "On change le signe de la latitude ET on ajoute (ou retranche) 180° à la longitude",
-      "On garde les mêmes coordonnées"
+      "21 (car 21 = 3 × 7)",
+      "27 (car 27 = 3 × 9)",
+      "29",
+      "33 (car 33 = 3 × 11)"
     ],
     correct:2,
-    indice:"L\'antipode est de l\'AUTRE côté de la Terre : autre hémisphère (N↔S) et de l\'autre côté du globe (E↔O à 180° près).",
-    correction:"L\'antipode de M(lat ; long) est M\'(<b>−lat</b> ; <b>long ± 180°</b>). On change l\'hémisphère (N↔S) ET on prend la longitude opposée à 180° près. Cas particulier : pôle Nord ↔ pôle Sud."
+    indice:"Teste pour chaque nombre s\'il a un diviseur autre que 1 et lui-même. Astuce : pour 29, essaie de le diviser par 2, 3, 5… aucun ne fonctionne.",
+    correction:"21 = 3 × 7 (composé), 27 = 3 × 9 = 3³ (composé), 33 = 3 × 11 (composé). Seul <b>29</b> n\'a pas de diviseur autre que 1 et lui-même : c\'est un nombre <b>premier</b>."
   },
   {
-    titre:"Antipode simple",
+    titre:"Décomposition de 60",
     expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
-       + 'On considère le point <b>M(30° N ; 60° E)</b>.'
+       + '🔢 Voici l\'<b>arbre de décomposition</b> du nombre 60. À chaque étape, on divise par un nombre premier (en vert).'
        + '</div>'
-       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 260 260" style="background:#fff; max-width:240px;"><circle cx="130" cy="130" r="100" fill="#e3f0fb" stroke="#2c3e50" stroke-width="2"/><ellipse cx="130" cy="216.60254037844385" rx="50.000000000000014" ry="10.000000000000004" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="180.0" rx="86.60254037844388" ry="17.320508075688775" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><line x1="30.0" y1="130.0" x2="230.0" y2="130.0" stroke="#b03030" stroke-width="1.5" stroke-dasharray="4,3"/><text x="234.0" y="134.0" font-size="9" fill="#b03030" font-style="italic">Équateur</text><ellipse cx="130" cy="80.0" rx="86.60254037844388" ry="17.320508075688775" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="43.39745962155614" rx="50.000000000000014" ry="10.000000000000004" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="86.60254037844386" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="49.99999999999999" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><line x1="130" y1="30" x2="130" y2="230" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="4,3"/><text x="134" y="27" font-size="9" fill="#2980b9" font-style="italic">Méridien 0°</text><ellipse cx="130" cy="130" rx="49.99999999999999" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="86.60254037844386" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><circle cx="130" cy="30" r="3" fill="#2c3e50"/><text x="136" y="33" font-size="10" fill="#2c3e50" font-weight="bold">N</text><circle cx="130" cy="230" r="3" fill="#2c3e50"/><text x="136" y="233" font-size="10" fill="#2c3e50" font-weight="bold">S</text><circle cx="205.0" cy="80.0" r="5" fill="#c0392b" stroke="#fff" stroke-width="1.5"/><text x="213.0" y="75.0" font-size="14" fill="#c0392b" font-weight="bold">M</text></svg></div>',
-    question:"Quelles sont les coordonnées de son antipode M\' ?",
+       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 280 200" style="background:#fff; max-width:240px;"><rect x="120" y="10" width="40" height="28" rx="6" fill="#fff0ef" stroke="#c0392b" stroke-width="2"/><text x="140" y="29" text-anchor="middle" font-size="14" fill="#c0392b" font-weight="bold">60</text><line x1="140" y1="38" x2="80" y2="60" stroke="#c0392b" stroke-width="1.5"/><line x1="140" y1="38" x2="200" y2="60" stroke="#c0392b" stroke-width="1.5"/><circle cx="80" cy="72" r="14" fill="#27ae60" stroke="#196f3d" stroke-width="2"/><text x="80" y="77" text-anchor="middle" font-size="13" fill="white" font-weight="bold">2</text><rect x="180" y="58" width="40" height="28" rx="6" fill="#fff0ef" stroke="#c0392b" stroke-width="2"/><text x="200" y="77" text-anchor="middle" font-size="13" fill="#c0392b" font-weight="bold">30</text><line x1="200" y1="86" x2="160" y2="110" stroke="#c0392b" stroke-width="1.5"/><line x1="200" y1="86" x2="240" y2="110" stroke="#c0392b" stroke-width="1.5"/><circle cx="160" cy="122" r="14" fill="#27ae60" stroke="#196f3d" stroke-width="2"/><text x="160" y="127" text-anchor="middle" font-size="13" fill="white" font-weight="bold">2</text><rect x="220" y="108" width="40" height="28" rx="6" fill="#fff0ef" stroke="#c0392b" stroke-width="2"/><text x="240" y="127" text-anchor="middle" font-size="13" fill="#c0392b" font-weight="bold">15</text><line x1="240" y1="136" x2="210" y2="158" stroke="#c0392b" stroke-width="1.5"/><line x1="240" y1="136" x2="260" y2="158" stroke="#c0392b" stroke-width="1.5"/><circle cx="210" cy="170" r="14" fill="#27ae60" stroke="#196f3d" stroke-width="2"/><text x="210" y="175" text-anchor="middle" font-size="13" fill="white" font-weight="bold">3</text><circle cx="260" cy="170" r="14" fill="#27ae60" stroke="#196f3d" stroke-width="2"/><text x="260" y="175" text-anchor="middle" font-size="13" fill="white" font-weight="bold">5</text><text x="20" y="190" font-size="10" fill="#196f3d" font-style="italic">cercles verts = nombres premiers</text></svg></div>',
+    question:"Quelle est la décomposition de 60 en produit de facteurs premiers ?",
     choices:[
-      "M\'(30° N ; 60° O)",
-      "M\'(30° S ; 60° E)",
-      "M\'(30° S ; 120° O)",
-      "M\'(30° S ; 240° E)"
+      "60 = 2 × 3 × 10",
+      "60 = 4 × 15",
+      "60 = 2² × 3 × 5",
+      "60 = 6 × 10"
     ],
     correct:2,
-    indice:"Étape 1 : change l\'hémisphère → 30° N devient 30° S. Étape 2 : ajoute 180° à la longitude : 60° + 180° = 240°, mais on garde dans [−180° ; 180°], donc 240° = … °O.",
-    correction:"Étape 1 : 30° N → 30° S (autre hémisphère). Étape 2 : 60° E + 180° = 240°, ce qui dépasse 180°, donc on retranche 360° : 240° − 360° = −120°, soit 120° O. Donc <b>M\'(30° S ; 120° O)</b>."
+    indice:"Lis les feuilles vertes de l\'arbre : ce sont les facteurs premiers (2, 2, 3, 5). Regroupe les deux 2 sous forme de puissance (2²).",
+    correction:"D\'après l\'arbre : 60 = 2 × 2 × 3 × 5 = <b>2² × 3 × 5</b>. (Une décomposition en facteurs premiers utilise UNIQUEMENT des nombres premiers, jamais 4, 6, 10 ou 15 qui sont composés.)"
   },
   {
-    titre:"Antipode avec longitude Ouest",
+    titre:"Décomposition de 72",
     expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
-       + 'On considère le point <b>N(45° S ; 120° O)</b>.<br>'
-       + '<i>(N est sur la face arrière du globe — non visible sur ce schéma.)</i>'
-       + '</div>',
-    question:"Quelles sont les coordonnées de son antipode N\' ?",
-    choices:[
-      "N\'(45° N ; 120° E)",
-      "N\'(45° N ; 60° E)",
-      "N\'(45° S ; 60° E)",
-      "N\'(45° N ; 300° E)"
-    ],
-    correct:1,
-    indice:"Étape 1 : 45° S devient 45° N. Étape 2 : 120° O = −120°. Ajoute 180° : −120° + 180° = 60°. C\'est positif donc 60° E.",
-    correction:"Étape 1 : 45° S → 45° N (autre hémisphère). Étape 2 : 120° O correspond à −120°. On ajoute 180° : −120° + 180° = 60° → 60° E (positif = Est). Donc <b>N\'(45° N ; 60° E)</b>."
-  },
-  {
-    titre:"Cas particulier — équateur",
-    expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
-       + 'Soit le point <b>Q(0° ; 90° E)</b> situé sur l\'<b>équateur</b>.'
+       + '🔢 On peut aussi décomposer en faisant des <b>divisions successives</b> par des nombres premiers.'
        + '</div>'
-       + '<div style="margin-top:6px; text-align:center;"><svg viewBox="0 0 260 260" style="background:#fff; max-width:240px;"><circle cx="130" cy="130" r="100" fill="#e3f0fb" stroke="#2c3e50" stroke-width="2"/><ellipse cx="130" cy="216.60254037844385" rx="50.000000000000014" ry="10.000000000000004" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="180.0" rx="86.60254037844388" ry="17.320508075688775" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><line x1="30.0" y1="130.0" x2="230.0" y2="130.0" stroke="#b03030" stroke-width="1.5" stroke-dasharray="4,3"/><text x="234.0" y="134.0" font-size="9" fill="#b03030" font-style="italic">Équateur</text><ellipse cx="130" cy="80.0" rx="86.60254037844388" ry="17.320508075688775" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="43.39745962155614" rx="50.000000000000014" ry="10.000000000000004" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="86.60254037844386" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="49.99999999999999" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><line x1="130" y1="30" x2="130" y2="230" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="4,3"/><text x="134" y="27" font-size="9" fill="#2980b9" font-style="italic">Méridien 0°</text><ellipse cx="130" cy="130" rx="49.99999999999999" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><ellipse cx="130" cy="130" rx="86.60254037844386" ry="100" fill="none" stroke="#8aa0b8" stroke-width="0.8" stroke-dasharray="2,2"/><circle cx="130" cy="30" r="3" fill="#2c3e50"/><text x="136" y="33" font-size="10" fill="#2c3e50" font-weight="bold">N</text><circle cx="130" cy="230" r="3" fill="#2c3e50"/><text x="136" y="233" font-size="10" fill="#2c3e50" font-weight="bold">S</text><circle cx="230.0" cy="130.0" r="5" fill="#c0392b" stroke="#fff" stroke-width="1.5"/><text x="238.0" y="125.0" font-size="14" fill="#c0392b" font-weight="bold">Q</text></svg></div>',
-    question:"Quelles sont les coordonnées de l\'antipode de Q ?",
+       + '<div style="margin-top:8px;"><table style="border-collapse:collapse; font-family:Courier New,monospace; margin:auto; font-size:1rem;"><tr><td style="border-right:2px solid #c0392b; padding:4px 12px; text-align:right; font-weight:bold;">72</td><td style="padding:4px 12px; color:#196f3d; font-weight:bold;">2</td></tr><tr><td style="border-right:2px solid #c0392b; padding:4px 12px; text-align:right; font-weight:bold;">36</td><td style="padding:4px 12px; color:#196f3d; font-weight:bold;">2</td></tr><tr><td style="border-right:2px solid #c0392b; padding:4px 12px; text-align:right; font-weight:bold;">18</td><td style="padding:4px 12px; color:#196f3d; font-weight:bold;">2</td></tr><tr><td style="border-right:2px solid #c0392b; padding:4px 12px; text-align:right; font-weight:bold;">9</td><td style="padding:4px 12px; color:#196f3d; font-weight:bold;">3</td></tr><tr><td style="border-right:2px solid #c0392b; padding:4px 12px; text-align:right; font-weight:bold;">3</td><td style="padding:4px 12px; color:#196f3d; font-weight:bold;">3</td></tr><tr><td style="border-right:2px solid #c0392b; padding:4px 12px; text-align:right; font-weight:bold; color:#888;">1</td><td></td></tr></table></div>',
+    question:"D\'après ces divisions, quelle est la décomposition de 72 ?",
     choices:[
-      "Q\'(0° ; 90° E) — mêmes coordonnées",
-      "Q\'(0° ; 90° O)",
-      "Q\'(90° N ; 90° O)",
-      "Q\'(180° ; 90° E)"
+      "72 = 2² × 3³",
+      "72 = 2³ × 3²",
+      "72 = 8 × 9",
+      "72 = 2 × 3 × 12"
     ],
     correct:1,
-    indice:"Q est sur l\'équateur (latitude 0°). −0° = 0°, donc la latitude ne change pas. Seule la longitude « bascule » de 180°.",
-    correction:"Latitude : 0° → 0° (l\'équateur reste l\'équateur, l\'antipode d\'un point d\'équateur est aussi sur l\'équateur). Longitude : 90° E + 180° = 270° = −90° = 90° O. Donc <b>Q\'(0° ; 90° O)</b>."
+    indice:"Regarde la colonne de droite des divisions : 2 ; 2 ; 2 ; 3 ; 3. Il y a 3 facteurs « 2 » et 2 facteurs « 3 ».",
+    correction:"Les divisions donnent : 72 = 2 × 2 × 2 × 3 × 3 = <b>2³ × 3²</b>. (8 × 9 est juste mais 8 et 9 ne sont PAS premiers, donc ce n\'est pas une décomposition en facteurs premiers.)"
+  },
+  {
+    titre:"Décomposition de 100",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:6px;">'
+       + '🔢 On cherche la décomposition en produit de facteurs premiers de <b>100</b>.'
+       + '</div>',
+    question:"Quelle est la décomposition correcte ?",
+    choices:[
+      "100 = 10 × 10",
+      "100 = 4 × 25",
+      "100 = 2 × 50",
+      "100 = 2² × 5²"
+    ],
+    correct:3,
+    indice:"Commence par diviser 100 par 2, puis continue avec le quotient. Tu vas trouver que tous les facteurs sont 2 ou 5. Regroupe ensuite sous forme de puissances.",
+    correction:"100 = 2 × 50 = 2 × 2 × 25 = 2 × 2 × 5 × 5 = <b>2² × 5²</b>. (Les autres réponses ne contiennent pas QUE des nombres premiers : 10, 4, 25, 50 sont tous composés.)"
+  },
+  {
+    titre:"Piège des « faux premiers »",
+    expr:'<div style="font-size:.95rem; line-height:1.55; padding:8px;">'
+       + '🔢 <b>Attention :</b> tous les nombres qui n\'ont « pas l\'air » d\'être divisibles ne sont pas forcément premiers !<br>'
+       + 'Quel est le nombre composé (= non premier) parmi ces 4 ?'
+       + '</div>',
+    question:"Lequel n\'est PAS un nombre premier ?",
+    choices:[
+      "37",
+      "41",
+      "91",
+      "43"
+    ],
+    correct:2,
+    indice:"Pour 91, essaie de tester les premiers : 91 / 7 = ? Si ça tombe juste, 91 n\'est pas premier.",
+    correction:"91 = <b>7 × 13</b>, donc 91 est composé. (37, 41 et 43 sont bien premiers — ils n\'ont pas de diviseur autre que 1 et eux-mêmes.) Astuce du brevet : 91 est un piège classique car il « ressemble » à un nombre premier."
   }
 ];
 
 const TOTAL = DEFIS.length;
 
-/* ===================== ÉTAT ===================== */
-let idx = 0;
+/* ===================== ÉTAT (mode liste) ===================== */
+/*
+   Mode "tout sur une page" : on génère 6 cards et chacune a son état propre.
+   etat[i] = { validated:bool, correct:bool, picked:int|null, indiceShown:bool }
+*/
+let etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
 let reussis = 0;
 let erreurs = 0;
-let etat = [];           // {validated, correct, picked} par défi
-let selectedChoice = null;
-
-function resetState(){
-  idx = 0; reussis = 0; erreurs = 0;
-  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null }));
-  selectedChoice = null;
-}
-resetState();
 
 /* ============== RÉFÉRENCES DOM ============== */
 const $ = id => document.getElementById(id);
 const LETTRES = ['A','B','C','D','E','F'];
 
-const btnValider = $('btn-valider'), btnIndice = $('btn-indice'), btnSuivant = $('btn-suivant');
-const btnRetour = $('btn-retour'), btnNavSuivant = $('btn-nav-suivant');
-
-/* ============== INIT ÉTOILES (selon TOTAL) ============== */
+/* ============== INIT ÉTOILES ============== */
 function buildStars(containerId){
-  const c = $(containerId);
+  const c = $(containerId); if(!c) return;
   c.innerHTML = '';
   for(let i=0;i<TOTAL;i++){
     const s = document.createElement('span');
-    s.className = 'star';
-    s.textContent = '★';
+    s.className = 'star'; s.textContent = '★';
     c.appendChild(s);
   }
 }
 buildStars('etoiles');
 
-/* ===================== RENDER ===================== */
-function render(){
-  selectedChoice = null;   // remis à null à chaque rendu
+/* ============== GÉNÉRATION DES 6 CARDS ============== */
+const container = $('defis-container');
+container.innerHTML = '';
 
-  const d = DEFIS[idx];
-  const e = etat[idx];
+DEFIS.forEach((d, idx) => {
+  const card = document.createElement('div');
+  card.className = 'card defi-card';
+  card.id = 'defi-card-' + idx;
+  card.style.marginBottom = '20px';
 
-  // scoreboard
-  $('sc-reussis').textContent  = reussis;
-  $('sc-erreurs').textContent  = erreurs;
-  $('sc-restants').textContent = TOTAL - reussis;
-
-  // étoiles (s'allument selon nb de réussis)
-  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
-    s.classList.toggle('on', i < reussis);
+  let choicesHTML = '';
+  d.choices.forEach((ch, ci) => {
+    choicesHTML += '<button class="choix-btn" data-idx="'+idx+'" data-ci="'+ci+'">'
+                + '<span class="lettre">'+LETTRES[ci]+'</span>'
+                + '<span class="choix-content">'+ch+'</span>'
+                + '</button>';
   });
 
-  // XP
-  const pct = Math.round((reussis / TOTAL) * 100);
-  $('xp-fill').style.width = pct + '%';
-  $('xp-pct').textContent  = pct + ' %';
+  card.innerHTML =
+    '<div class="rainbow"></div>'
+  + '<div class="card-body">'
+  +   '<div class="card-head">'
+  +     '<div class="defi-num">DÉFI ' + String(idx+1).padStart(2,'0') + '</div>'
+  +     '<div class="type-badge">ARITHMÉTIQUE</div>'
+  +   '</div>'
+  +   '<div class="texte-fable">'
+  +     '<div class="ft-titre">🔢 ' + (d.titre ? d.titre.toUpperCase() : 'DÉFI') + '</div>'
+  +     '<div class="ft-expr">' + d.expr + '</div>'
+  +   '</div>'
+  +   '<div class="question-txt">' + d.question + '</div>'
+  +   '<div class="choix" id="choix-'+idx+'">' + choicesHTML + '</div>'
+  +   '<div class="btns">'
+  +     '<button class="btn btn-valider" id="btn-valider-'+idx+'" disabled>✓ VALIDER</button>'
+  +     '<button class="btn btn-indice"  id="btn-indice-'+idx+'">? INDICE</button>'
+  +   '</div>'
+  +   '<div class="indice-box" id="indice-box-'+idx+'"></div>'
+  +   '<div class="feedback"   id="feedback-'+idx+'"></div>'
+  +   '<div class="correction" id="correction-'+idx+'"></div>'
+  + '</div>';
 
-  // compteurs
-  $('defi-count').textContent = 'DÉFI ' + (idx+1) + ' / ' + TOTAL;
-  $('card-defi-num').textContent = 'DÉFI ' + String(idx+1).padStart(2,'0');
-  $('ft-expr').innerHTML = d.expr + '<span class="cursor"></span>';
-  $('question-txt').textContent = d.question;
+  container.appendChild(card);
+});
 
-  // construire les choix
-  const cont = $('choix');
-  cont.innerHTML = '';
-  d.choices.forEach((txt, i)=>{
-    const b = document.createElement('button');
-    b.className = 'choix-btn';
-    b.innerHTML = '<span class="lettre">'+LETTRES[i]+'</span><span>'+txt+'</span>';
-    b.dataset.i = i;
-
-    if(e.validated){
-      b.classList.add('locked');
-      if(i === d.correct) b.classList.add('good');
-      if(i === e.picked && i !== d.correct) b.classList.add('bad');
-    } else {
-      b.addEventListener('click', ()=> pickChoice(i, b));
-    }
-    cont.appendChild(b);
-  });
-
-  // si déjà validé : restaurer la sélection
-  if(e.validated){
-    selectedChoice = e.picked;
+/* ============== ÉVÉNEMENTS sur les choix (délégation) ============== */
+container.addEventListener('click', (e) => {
+  const btn = e.target.closest('.choix-btn');
+  if(btn){
+    const i = parseInt(btn.dataset.idx, 10);
+    const ci = parseInt(btn.dataset.ci, 10);
+    if(etat[i].validated) return;     // figé après validation
+    etat[i].picked = ci;
+    // mise à jour visuelle de la sélection
+    const choixZone = $('choix-'+i);
+    choixZone.querySelectorAll('.choix-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    // activer Valider
+    $('btn-valider-'+i).disabled = false;
+    return;
   }
-
-  // reset zones
-  $('indice-box').className = 'indice-box';
-  $('indice-box').innerHTML = '';
-  $('feedback').className = 'feedback';
-  $('feedback').innerHTML = '';
-  $('correction').className = 'correction';
-  $('correction').innerHTML = '';
-
-  // réafficher feedback + correction si validé
-  if(e.validated){
-    showFeedback(e.correct);
-    showCorrection();
+  // Boutons Valider / Indice (délégation aussi)
+  if(e.target.id && e.target.id.startsWith('btn-valider-')){
+    const i = parseInt(e.target.id.split('-').pop(), 10);
+    valider(i);
+  } else if(e.target.id && e.target.id.startsWith('btn-indice-')){
+    const i = parseInt(e.target.id.split('-').pop(), 10);
+    indice(i);
   }
+});
 
-  refreshButtons();
-  btnRetour.disabled = (idx === 0);
-}
+/* ============== VALIDATION D'UN EXO ============== */
+function valider(i){
+  const e = etat[i];
+  if(e.validated) return;
+  if(e.picked == null) return;
 
-/* ============== SÉLECTION D'UN CHOIX ============== */
-function pickChoice(i, btn){
-  if(etat[idx].validated) return;
-  selectedChoice = i;
-  document.querySelectorAll('#choix .choix-btn').forEach(b=> b.classList.remove('selected'));
-  btn.classList.add('selected');
-  refreshButtons();
-}
-
-/* ============== GESTION DES BOUTONS ============== */
-function refreshButtons(){
-  const e = etat[idx];
-  // Valider : actif si un choix sélectionné ET pas encore validé
-  btnValider.disabled = (selectedChoice === null || e.validated);
-  // Suivant : actif uniquement si validé
-  btnSuivant.disabled = !e.validated;
-  btnNavSuivant.disabled = !e.validated;
-}
-
-/* ============== VALIDATION ============== */
-function valider(){
-  const d = DEFIS[idx];
-  const e = etat[idx];
-  if(e.validated || selectedChoice === null) return;
-
-  const correct = (selectedChoice === d.correct);
   e.validated = true;
-  e.correct = correct;
-  e.picked = selectedChoice;
+  e.correct = (e.picked === DEFIS[i].correct);
+  if(e.correct) reussis++;
+  else erreurs++;
 
-  if(correct){ reussis++; fireXP(); }
-  else { erreurs++; }
+  // figer la zone de choix : surligner bon/mauvais
+  const choixZone = $('choix-'+i);
+  choixZone.querySelectorAll('.choix-btn').forEach((b, ci) => {
+    b.disabled = true;
+    b.classList.add('locked');
+    if(ci === DEFIS[i].correct) b.classList.add('good');
+    else if(ci === e.picked)     b.classList.add('bad');
+  });
 
-  showFeedback(correct);
-  showCorrection();
-  render();   // verrouille les choix, met à jour scoreboard/étoiles/XP
-}
-
-function showFeedback(correct){
-  const fb = $('feedback');
-  if(correct){
+  // feedback + correction
+  const fb = $('feedback-'+i);
+  if(e.correct){
     fb.className = 'feedback ok show';
-    fb.innerHTML = '✅ Bravo ! Bonne réponse.';
+    fb.innerHTML = '✅ Bonne réponse !';
+    fireXP();
   } else {
     fb.className = 'feedback ko show';
-    fb.innerHTML = '❌ Pas tout à fait. Regarde la correction.';
+    fb.innerHTML = '❌ Réponse incorrecte. Regarde la correction.';
+  }
+  const corr = $('correction-'+i);
+  corr.className = 'correction show';
+  corr.innerHTML = '<b>📖 Correction :</b> ' + DEFIS[i].correction;
+
+  // désactiver Valider + Indice
+  $('btn-valider-'+i).disabled = true;
+  $('btn-indice-'+i).disabled = true;
+
+  // mise à jour scoreboard
+  updateScoreboard();
+
+  // si tous validés → activer le bouton final (l'utilisateur cliquera pour voir le bilan)
+  const tousValides = etat.every(s => s.validated);
+  if(tousValides){
+    activerBoutonFinal();
   }
 }
 
-function showCorrection(){
-  const d = DEFIS[idx];
-  const c = $('correction');
-  c.className = 'correction show';
-  c.innerHTML = '<b>Correction :</b> ' + d.correction;
+/* ============== ACTIVATION BOUTON FINAL ============== */
+function activerBoutonFinal(){
+  const btn = $('btn-score-final');
+  btn.disabled = false;
+  btn.textContent = '🏆 VOIR MON SCORE FINAL';
+  $('hint-score').classList.add('hidden');
+  // discret rebond visuel à l'activation
+  btn.style.transform = 'scale(1.1)';
+  setTimeout(()=> btn.style.transform = '', 250);
 }
 
-/* ============== INDICE (jamais la réponse) ============== */
-function indice(){
-  const d = DEFIS[idx];
-  const box = $('indice-box');
+/* ============== INDICE ============== */
+function indice(i){
+  const e = etat[i];
+  if(e.validated) return;
+  const box = $('indice-box-'+i);
   box.className = 'indice-box show';
-  box.innerHTML = '💡 <b>Indice :</b> ' + d.indice;
+  box.innerHTML = '💡 <b>Indice :</b> ' + DEFIS[i].indice;
+  e.indiceShown = true;
+  $('btn-indice-'+i).disabled = true;
 }
 
-/* ============== NAVIGATION ============== */
-function suivant(){
-  if(!etat[idx].validated) return;
-  if(idx < TOTAL - 1){
-    idx++; render(); window.scrollTo({ top:0, behavior:'smooth' });
-  } else {
-    showResults();
-  }
-}
-function retour(){
-  if(idx > 0){ idx--; render(); window.scrollTo({ top:0, behavior:'smooth' }); }
+/* ============== SCOREBOARD ============== */
+function updateScoreboard(){
+  $('sc-reussis').textContent = reussis;
+  $('sc-erreurs').textContent = erreurs;
+  $('sc-restants').textContent = TOTAL - reussis - erreurs;
+
+  // étoiles : 1 étoile par exo réussi
+  const stars = document.querySelectorAll('#etoiles .star');
+  stars.forEach((s, k) => s.classList.toggle('on', k < reussis));
+
+  // XP : % de défis validés (réussis OU erreurs)
+  const finis = etat.filter(s => s.validated).length;
+  const pct = Math.round((finis / TOTAL) * 100);
+  $('xp-fill').style.width = pct + '%';
+  $('xp-pct').textContent = pct + ' %';
+
+  // compteur (info)
+  $('defi-count').textContent = finis + ' / ' + TOTAL + ' DÉFIS VALIDÉS';
 }
 
 /* ============== +25 XP FLOTTANT ============== */
@@ -793,14 +811,12 @@ function fireXP(){
   p.classList.add('go');
 }
 
-/* ============== ÉCRAN RÉSULTATS ============== */
+/* ============== ÉCRAN RÉSULTATS FINAL ============== */
 function showResults(){
-  $('exo-card').style.display = 'none';
   const r = $('results-card');
   r.classList.add('show');
 
   $('res-score').textContent = reussis + ' / ' + TOTAL;
-
   let stars = '';
   for(let i=0;i<TOTAL;i++) stars += (i < reussis) ? '★' : '☆';
   $('res-stars').textContent = stars;
@@ -808,48 +824,70 @@ function showResults(){
   let msg;
   const ratio = reussis / TOTAL;
   if(reussis === TOTAL)        msg = '// PARFAIT — GG, sans-faute ! 🏆';
-  else if(ratio >= 0.75)       msg = '// EXCELLENT — très bonne compréhension !';
-  else if(ratio >= 0.5)        msg = '// BIEN JOUÉ — tu es sur la bonne voie !';
-  else if(reussis > 0)         msg = '// PAS MAL — relis la fable et réessaie !';
-  else                         msg = '// COURAGE — relis attentivement, tu vas y arriver !';
+  else if(ratio >= 0.75)       msg = '// EXCELLENT — beau score !';
+  else if(ratio >= 0.5)        msg = '// BIEN JOUÉ — continue à t\'entraîner !';
+  else if(reussis > 0)         msg = '// PAS MAL — relis le cours et réessaie !';
+  else                         msg = '// COURAGE — révise et relance !';
   $('res-msg').textContent = msg;
 
   let html = '';
-  DEFIS.forEach((d,i)=>{
-    const ok = etat[i].correct;
+  DEFIS.forEach((d, i) => {
     html += '<div class="recap-item">'
-          + '<span class="eq">Défi '+(i+1)+' — '+d.titre+'</span>'
-          + '<span class="st">' + (ok ? '✅' : '❌') + '</span>'
-          + '</div>';
+         + '<span class="eq">' + (d.titre || 'Défi ' + (i+1)) + '</span>'
+         + '<span class="st">' + (etat[i].correct ? '✅' : '❌') + '</span>'
+         + '</div>';
   });
   $('res-recap').innerHTML = html;
 
-  document.querySelectorAll('#etoiles .star').forEach((s,i)=>{
-    s.classList.toggle('on', i < reussis);
-  });
-
+  // remonter en haut de la page pour voir le scoreboard final + le récap
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
 /* ============== REJOUER ============== */
 function rejouer(){
-  resetState();
+  // reset état
+  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
+  reussis = 0;
+  erreurs = 0;
+
+  // cacher écran résultats
   $('results-card').classList.remove('show');
-  $('exo-card').style.display = '';
-  render();
+
+  // reset visuel de chaque card
+  DEFIS.forEach((d, i) => {
+    // choix
+    const choixZone = $('choix-'+i);
+    choixZone.querySelectorAll('.choix-btn').forEach(b => {
+      b.disabled = false;
+      b.classList.remove('selected','good','bad','locked');
+    });
+    // boutons
+    $('btn-valider-'+i).disabled = true;
+    $('btn-indice-'+i).disabled = false;
+    // feedback/correction/indice
+    $('feedback-'+i).className = 'feedback';
+    $('feedback-'+i).innerHTML = '';
+    $('correction-'+i).className = 'correction';
+    $('correction-'+i).innerHTML = '';
+    $('indice-box-'+i).className = 'indice-box';
+    $('indice-box-'+i).innerHTML = '';
+  });
+
+  updateScoreboard();
+
+  // reset bouton final
+  const btnF = $('btn-score-final');
+  btnF.disabled = true;
+  $('hint-score').classList.remove('hidden');
+
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
-/* ============== LISTENERS ============== */
-btnValider.addEventListener('click', valider);
-btnIndice .addEventListener('click', indice);
-btnSuivant.addEventListener('click', suivant);
-btnNavSuivant.addEventListener('click', suivant);
-btnRetour .addEventListener('click', retour);
 $('btn-rejouer').addEventListener('click', rejouer);
+$('btn-score-final').addEventListener('click', showResults);
 
 /* ============== INIT ============== */
-render();
+updateScoreboard();
 </script>
 </body>
 </html>
