@@ -73,6 +73,10 @@
       border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
     .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
     .enonce .ex-quest{color:var(--day-dark);font-weight:700;margin-top:.3rem;}
+    .enonce .mission-expr-line{margin:.3rem 0;font-weight:700;color:var(--day-dark);}
+    .enonce .mission-expr{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.08em;}
+    .enonce .mission-situ{margin-top:.3rem;line-height:1.9;}
+    .feedback .fb-sol{display:block;margin-top:.35rem;font-weight:400;}
 
     .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
       padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
@@ -271,13 +275,13 @@ var PARTIES = [
     titre:"⚖️ Qui a raison ?",
     sous:[
       {
-        titre:"Marie ou Benoît ?",
-        enonce:"Pour calculer 125 \u2212 5 + 20 : Marie dit qu\u2019il faut d\u2019abord effectuer la soustraction. Benoît dit qu\u2019il faut d\u2019abord effectuer l\u2019opération située à gauche.",
+        titre:"Yanis ou Moussa ?",
+        enonce:"Pour calculer 125 \u2212 5 + 20 : Yanis dit qu\u2019il faut d\u2019abord effectuer la soustraction. Moussa dit qu\u2019il faut d\u2019abord effectuer l\u2019opération située à gauche.",
         question:"Qui a raison, et pourquoi ?",
-        reponse:"Benoît a raison : 125 \u2212 5 + 20 = 140 (de gauche à droite).",
+        reponse:"Moussa a raison : 125 \u2212 5 + 20 = 140 (de gauche à droite).",
         sol:"Avec seulement + et \u2212, on calcule de gauche à droite : 125 \u2212 5 = 120, puis 120 + 20 = <b>140</b>.",
         qs:[
-          { q:"Qui a raison ?", hint:"Dans 125 \u2212 5 + 20, il n\u2019y a ni \u00d7 ni \u00f7. Que reste-t-il comme règle ?", opts:["Marie","Benoît"], ans:1 },
+          { q:"Qui a raison ?", hint:"Dans 125 \u2212 5 + 20, il n\u2019y a ni \u00d7 ni \u00f7. Que reste-t-il comme règle ?", opts:["Yanis","Moussa"], ans:1 },
           { q:"Pourquoi ?",
             opts:["Lorsqu\u2019il n\u2019y a que des additions et des soustractions, on calcule de gauche à droite.",
                   "On effectue toujours les soustractions avant les additions.",
@@ -338,9 +342,14 @@ function render(){
   var qObj=S.qs[idx];
   if(chosen[idx]===null || optOrder.length!==qObj.opts.length) buildOrder();
   $("act-label").textContent=P.titre;
-  $("enonce").innerHTML="<div class='ex-titre'>"+S.titre+"</div>"+S.enonce
+  // extraire l'expression de l'énoncé (entre "calculer" et ":")
+  var mExpr = S.enonce.match(/calculer\s+(.+?)\s*:/);
+  var exprHtml = mExpr ? "<div class='mission-expr-line'>🧮 Expression : <span class='mission-expr'>"+mExpr[1]+"</span></div>" : "";
+  $("enonce").innerHTML="<div class='ex-titre'>⚖️ "+S.titre+"</div>"
+    +exprHtml
+    +"<div class='mission-situ'>"+S.enonce+"</div>"
     +"<div class='ex-quest'>👉 "+S.question+"</div>";
-  $("q-tag").textContent="Question "+(idx+1)+" / "+S.qs.length;
+  $("q-tag").textContent="Étape "+(idx+1)+" / "+S.qs.length;
   $("q-text").textContent=qObj.q;
   buildOptions();
   // réinitialiser l'indice à chaque question
@@ -355,8 +364,14 @@ function render(){
     var correct=chosen[idx]===qObj.ans;
     fb.className="feedback show "+(correct?"ok":"ko");
     $("fb-ic").textContent=correct?"\u2705":"\u274C";
-    $("fb-msg").innerHTML = correct ? "<strong>Bonne réponse\u00a0!</strong>"
-      : "<strong>Pas tout à fait.</strong> Regarde la réponse correcte.";
+    var bonneTxt = qObj.opts[qObj.ans];
+    var explic;
+    if(idx===0){
+      explic = "C\u2019est <b>"+bonneTxt+"</b> qui a raison.";
+    } else {
+      explic = "La bonne règle\u00a0: <b>"+bonneTxt+"</b><br/><span class='fb-sol'>"+S.sol+"</span>";
+    }
+    $("fb-msg").innerHTML = (correct ? "<strong>Bonne réponse\u00a0!</strong> " : "<strong>Pas tout à fait.</strong> ")+explic;
     $("btn-next").disabled=false;
   } else { fb.className="feedback"; $("btn-next").disabled=true; }
   // libellé du bouton : dernière question du dernier sous-problème de la partie -> bilan
