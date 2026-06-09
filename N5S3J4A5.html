@@ -181,29 +181,24 @@
       Pazapa &middot; Maths &middot; 5ème
     </div>
     <div class="week-label">Semaine 3 &ndash; Jour 4</div>
-    <h1>Les <span class="hl">fractions égales</span></h1>
-    <p class="subtitle">4 questions &rarr; reconnaître des fractions égales</p>
-    <div class="niveau-badge"><span class="nb-dot"></span>Niveau 2</div>
+    <h1>Simplifier le <span class="hl">plus possible</span></h1>
+    <p class="subtitle">5 exercices &rarr; choisis la forme simplifiée</p>
+    <div class="niveau-badge"><span class="nb-dot"></span>Niveau 3</div>
   </header>
   <div class="stage">
     <div class="screen show" id="start"><div class="start-overlay">
       <h2>C&rsquo;est parti, on s&rsquo;entraîne&nbsp;!</h2>
-      <p>🎯 Deux fractions sont égales si on multiplie (ou divise) le haut et le bas par le même nombre.<br/>
-        <span style="color:var(--muted);font-size:.85rem;">Plusieurs bonnes réponses possibles.</span></p>
+      <p>🎯 Simplifie chaque fraction jusqu’à sa forme la plus simple.<br/>Choisis la bonne <strong>forme simplifiée</strong>.</p>
       <button class="btn btn-primary" onclick="startGame()">Commencer &rarr;</button>
     </div></div>
     <div class="screen" id="board">
-      <div class="hud">
-        <div class="hud-chip act"><span id="act-label">Question 1</span></div>
-        <div class="hud-chip"><span id="score-live">0</span> <span id="score-suffix">réussies</span></div>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-info"><span id="prog-label">Question 1</span><span id="prog-pct">0&nbsp;%</span></div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
-      </div>
+      <div class="hud"><div class="hud-chip act"><span id="act-label">Exercice 1</span></div>
+      <div class="hud-chip"><span id="score-live">0</span> <span id="score-suffix">bonnes réponses</span></div></div>
+      <div class="progress-wrap"><div class="progress-info"><span id="prog-label">Exercice 1</span><span id="prog-pct">0&nbsp;%</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div></div>
       <div class="enonce" id="enonce"></div>
       <div class="card"><div class="card-stripe"></div>
-        <div class="q-tag" id="q-tag">Coche les bonnes réponses</div>
+        <div class="q-tag" id="q-tag">Choisis la forme simplifiée</div>
         <div class="q-text" id="q-text"></div>
         <div id="answer-zone"></div>
         <div class="feedback" id="feedback"><span class="fi" id="fb-ic"></span><div><span id="fb-msg"></span></div></div>
@@ -218,6 +213,12 @@
       <div class="res-score"><span id="final-num">0</span></div>
       <div class="stars" id="final-stars"></div>
       <div class="res-msg" id="final-msg"></div>
+        <div class="skills-text">
+          <div class="skills-title">Tu sais maintenant :</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Trouver le plus grand diviseur commun</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Simplifier une fraction au maximum</div>
+          <div class="skill-line"><span class="arr">&rarr;</span> Reconnaître une forme irréductible</div>
+        </div>
       <div class="recap-list" id="final-recap"></div>
       <div class="res-btns"><button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button></div>
     </div></div>
@@ -226,94 +227,40 @@
 "use strict";
 var $=function(id){return document.getElementById(id);};
 function shuffleArr(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-
-var QUESTIONS=[
-  { cible:"5/6", items:[
-    { txt:"50/60", ok:true, sol:"50/60 = 5/6 (\u00f710)" },
-    { txt:"15/18", ok:true, sol:"15/18 = 5/6 (\u00f73)" },
-    { txt:"54/64", ok:false, sol:"54/64 = 27/32 \u2260 5/6" },
-    { txt:"(5+4)/(6+4)", ok:false, sol:"(5+4)/(6+4) = 9/10 (on multiplie, on n\u2019ajoute pas)" }
-  ]},
-  { cible:"2/3", items:[
-    { txt:"4/6", ok:true, sol:"4/6 = 2/3 (\u00f72)" },
-    { txt:"10/15", ok:true, sol:"10/15 = 2/3 (\u00f75)" },
-    { txt:"6/8", ok:false, sol:"6/8 = 3/4 \u2260 2/3" },
-    { txt:"(2+1)/(3+1)", ok:false, sol:"(2+1)/(3+1) = 3/4 (on multiplie, on n\u2019ajoute pas)" }
-  ]},
-  { cible:"3/4", items:[
-    { txt:"6/8", ok:true, sol:"6/8 = 3/4 (\u00f72)" },
-    { txt:"9/12", ok:true, sol:"9/12 = 3/4 (\u00f73)" },
-    { txt:"8/12", ok:false, sol:"8/12 = 2/3 \u2260 3/4" },
-    { txt:"3/5", ok:false, sol:"3/5 \u2260 3/4" }
-  ]},
-  { cible:"1/2", items:[
-    { txt:"4/8", ok:true, sol:"4/8 = 1/2 (\u00f74)" },
-    { txt:"7/14", ok:true, sol:"7/14 = 1/2 (\u00f77)" },
-    { txt:"5/9", ok:false, sol:"5/9 \u2260 1/2" },
-    { txt:"2/5", ok:false, sol:"2/5 \u2260 1/2" }
-  ]}
+var EXOS=[
+  { expr:"12/24", opts:["1/2","6/12","3/4"], ok:0, sol:"12/24 = 1/2 (on divise par 12)" },
+  { expr:"11/55", opts:["1/5","5/11","11/5"], ok:0, sol:"11/55 = 1/5 (on divise par 11)" },
+  { expr:"36/54", opts:["2/3","3/2","6/9"], ok:0, sol:"36/54 = 2/3 (on divise par 18)" },
+  { expr:"8/80", opts:["1/10","10/1","4/40"], ok:0, sol:"8/80 = 1/10 (on divise par 8)" },
+  { expr:"70/14", opts:["5","1/5","14/70"], ok:0, sol:"70/14 = 5 (on divise par 14)" }
 ];
-
-var step=0, sel=[], locked=false, passed=[];
-
-function startGame(){
-  $("start").classList.remove("show"); $("final").classList.remove("show");
-  step=0; passed=[];
-  QUESTIONS.forEach(function(q){ shuffleArr(q.items); });
-  shuffleArr(QUESTIONS);
-  startQ();
-}
-function startQ(){ sel=[]; locked=false; $("board").classList.add("show"); render(); window.scrollTo({top:0,behavior:"smooth"}); }
-function render(){
-  var q=QUESTIONS[step];
-  $("act-label").textContent="Question "+(step+1);
-  $("enonce").innerHTML="<div class='ex-titre'>Question "+(step+1)+" / "+QUESTIONS.length+"</div>Coche toutes celles qui sont \u00e9gales \u00e0 <b>"+q.cible+"</b>.";
-  $("q-tag").textContent="Coche les bonnes r\u00e9ponses";
-  $("q-text").innerHTML=""; $("q-text").style.display="none";
-  var zone=$("answer-zone"); zone.innerHTML="<div class='options' id='opts'></div>"; var box=$("opts");
-  q.items.forEach(function(it,i){ var b=document.createElement("div"); b.className="opt";
-    b.innerHTML="<span class='opt-key'>\u2610</span><span class='opt-txt'>"+it.txt+"</span>"; b.onclick=function(){toggle(i,b);}; box.appendChild(b); });
-  $("feedback").className="feedback"; $("btn-next").style.display="none";
-  $("btn-validate").style.display="inline-flex"; $("btn-validate").disabled=true;
-  if($("prog-label")){ $("prog-label").textContent="Question "+(step+1)+" / "+QUESTIONS.length; }
-  if($("prog-pct")){ var pct=Math.round(step/QUESTIONS.length*100); if($("progress-bar"))$("progress-bar").style.width=pct+"%"; $("prog-pct").textContent=pct+"\u00a0%"; }
-  if($("score-live")) $("score-live").textContent=passed.filter(Boolean).length;
-}
-function toggle(i,el){ if(locked)return; var p=sel.indexOf(i); if(p===-1){sel.push(i);el.classList.add("sel");el.querySelector(".opt-key").textContent="\u2611";}else{sel.splice(p,1);el.classList.remove("sel");el.querySelector(".opt-key").textContent="\u2610";} $("btn-validate").disabled=(sel.length===0); }
-function validate(){
-  if(locked)return; var q=QUESTIONS[step]; locked=true; $("btn-validate").style.display="none";
-  var all=$("opts").children, allGood=true;
-  q.items.forEach(function(it,i){ var el=all[i]; el.classList.add("locked"); var checked=sel.indexOf(i)!==-1;
-    if(it.ok&&checked){el.classList.add("chosen-correct");}else if(it.ok&&!checked){el.classList.add("miss");allGood=false;}else if(!it.ok&&checked){el.classList.add("chosen-wrong");allGood=false;} });
-  passed[step]=allGood;
-  var nb=q.items.filter(function(it){return it.ok;}).length;
-  var expl=""; q.items.forEach(function(it){ expl+="<div style='margin-top:.35rem;'>"+(it.ok?"\u2705":"\u274C")+" "+it.sol+"</div>"; });
-  var head=allGood?("Bravo&nbsp;! Tu as coch\u00e9 les "+nb+" fractions \u00e9gales \u00e0 "+q.cible+"."):"Pas tout \u00e0 fait. Voici le d\u00e9tail\u00a0:";
-  showFb(allGood, head+expl);
-  $("btn-next").style.display="inline-flex";
-  $("btn-next").textContent=(step===QUESTIONS.length-1)?"Voir le bilan \u2192":"Suivant \u2192";
-  if($("score-live")) $("score-live").textContent=passed.filter(Boolean).length;
-}
-function showFb(ok,msg){ var fb=$("feedback"); fb.className="feedback show "+(ok?"ok":"ko"); $("fb-ic").textContent=ok?"\u2705":"\u274C"; $("fb-msg").innerHTML=msg; }
-function nextStep(){ if(step<QUESTIONS.length-1){ step++; startQ(); } else showFinal(); }
-function starsFrac(ok,total){ var r=ok/total; return r>=1?5:r>=0.8?4:r>=0.6?3:r>=0.4?2:1; }
-function showFinal(){
-  $("board").classList.remove("show"); $("final").classList.add("show");
-  var ok=passed.filter(Boolean).length, total=QUESTIONS.length;
-  $("final-num").textContent=ok+" / "+total;
-  var st=starsFrac(ok,total); $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
-  var msg;
-  if(ok===total) msg="Parfait&nbsp;! Tu reconnais les fractions \u00e9gales.";
-  else if(ok>=3) msg="Tr\u00e8s bien&nbsp;! Une question \u00e0 revoir.";
-  else if(ok>=2) msg="Bien&nbsp;! Multiplie le haut et le bas par le m\u00eame nombre.";
-  else msg="\u00c0 retravailler : deux fractions \u00e9gales s\u2019obtiennent en multipliant haut et bas par le m\u00eame nombre.";
-  $("final-msg").innerHTML=msg;
-  var recap=""; QUESTIONS.forEach(function(q,i){ var r=passed[i]===true;
-    var bonnes=q.items.filter(function(it){return it.ok;}).map(function(it){return it.txt;}).join("  ;  ");
-    recap+="<div class='recap-row "+(r?"ok":"ko")+"'><span>"+(r?"\u2714":"\u2718")+"</span><span class='rk'>\u00e9gales \u00e0 "+q.cible+"</span><span><b>"+bonnes+"</b></span></div>"; });
-  $("final-recap").innerHTML=recap;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-function restart(){ startGame(); }
+var step=0,sel=null,locked=false,passed=[];
+function startGame(){$("start").classList.remove("show");$("final").classList.remove("show");step=0;passed=[];
+  EXOS.forEach(function(e){e._opts=e.opts.map(function(t,i){return {t:t,ok:(i===e.ok)};});shuffleArr(e._opts);});shuffleArr(EXOS);startExo();}
+function startExo(){sel=null;locked=false;$("board").classList.add("show");render();window.scrollTo({top:0,behavior:"smooth"});}
+function render(){var e=EXOS[step];
+  $("act-label").textContent="Exercice "+(step+1);
+  $("enonce").innerHTML="<div class='ex-titre'>Exercice "+(step+1)+" / "+EXOS.length+"</div>Simplifie cette fraction au maximum.";
+  $("q-tag").textContent="Choisis la forme simplifiée";
+  $("q-text").innerHTML="<span class='expr-mono' style='font-size:1.3rem'>"+e.expr+"</span>";
+  var zone=$("answer-zone");zone.innerHTML="<div class='options' id='opts'></div>";var box=$("opts");
+  e._opts.forEach(function(op,i){var b=document.createElement("div");b.className="opt";
+    b.innerHTML="<span class='opt-key'>🔘</span><span class='opt-txt'>"+op.t+"</span>";b.onclick=function(){choose(i,b);};box.appendChild(b);});
+  $("feedback").className="feedback";$("btn-next").style.display="none";$("btn-validate").style.display="inline-flex";$("btn-validate").disabled=true;
+  $("prog-label").textContent="Exercice "+(step+1)+" / "+EXOS.length;var pct=Math.round(step/EXOS.length*100);$("progress-bar").style.width=pct+"%";$("prog-pct").textContent=pct+"\u00a0%";$("score-live").textContent=passed.filter(Boolean).length;}
+function choose(i,el){if(locked)return;sel=i;var all=$("opts").children;for(var k=0;k<all.length;k++)all[k].classList.remove("sel");el.classList.add("sel");$("btn-validate").disabled=false;}
+function validate(){if(locked)return;var e=EXOS[step];locked=true;$("btn-validate").style.display="none";var all=$("opts").children,good=false;
+  e._opts.forEach(function(op,i){var el=all[i];el.classList.add("locked");
+    if(op.ok){el.classList.add(sel===i?"chosen-correct":"reveal-correct");if(sel===i)good=true;}else if(sel===i){el.classList.add("chosen-wrong");}});
+  passed[step]=good;showFb(good,(good?"Bonne r\u00e9ponse&nbsp;! ":"Pas tout \u00e0 fait. ")+e.sol);
+  $("btn-next").style.display="inline-flex";$("btn-next").textContent=(step===EXOS.length-1)?"Voir le bilan \u2192":"Suivant \u2192";$("score-live").textContent=passed.filter(Boolean).length;}
+function showFb(ok,msg){var fb=$("feedback");fb.className="feedback show "+(ok?"ok":"ko");$("fb-ic").textContent=ok?"\u2705":"\u274C";$("fb-msg").innerHTML=msg;}
+function nextStep(){if(step<EXOS.length-1){step++;startExo();}else showFinal();}
+function starsFrac(ok,total){var r=ok/total;return r>=1?5:r>=0.8?4:r>=0.6?3:r>=0.4?2:1;}
+function showFinal(){$("board").classList.remove("show");$("final").classList.add("show");var ok=passed.filter(Boolean).length,total=EXOS.length;$("final-num").textContent=ok+" / "+total;
+  var st=starsFrac(ok,total);$("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  var msg;if(ok===total)msg="Parfait&nbsp;! Tes fractions sont bien r\u00e9duites.";else if(ok>=4)msg="Tr\u00e8s bien&nbsp;! Une \u00e0 revoir.";else if(ok>=3)msg="Bien&nbsp;! Cherche le plus grand diviseur commun.";else msg="\u00c0 retravailler\u00a0: divise en haut et en bas par le m\u00eame nombre.";
+  $("final-msg").innerHTML=msg;var recap="";EXOS.forEach(function(e,i){var r=passed[i]===true;var bonne=e._opts.filter(function(o){return o.ok;})[0].t;recap+="<div class='recap-row "+(r?"ok":"ko")+"'><span>"+(r?"\u2714":"\u2718")+"</span><span class='rk'>"+e.expr+"</span><span><b>"+bonne+"</b></span></div>";});$("final-recap").innerHTML=recap;window.scrollTo({top:0,behavior:"smooth"});}
+function restart(){startGame();}
 </script>
 </body></html>
