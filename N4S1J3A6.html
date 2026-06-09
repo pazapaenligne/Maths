@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PAZAPA Maths — S1J3 · Produit nul et premier degré</title>
+<title>PAZAPA Maths — S1J3 · Équation produit nul</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 /* ───────── CHARTE J3 VERT ───────── */
@@ -16,6 +16,7 @@
   --badge-txt:#234d06;   /* texte badge */
   --vert:#8dc63f; --vert-fonce:#3d7a10; --vert-soft:#f0faeb;
   --rouge:#e74c3c; --rouge-soft:#fdedec; --rouge-fonce:#c0392b;
+  --tuile:#36c0ed; --case-mauve:#e7c7f5;
   --texte:#23262d; --gris:#8a8f9a; --bord:#ece8dd;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -121,60 +122,49 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 .q-label{font-size:.74rem;color:var(--gris);text-transform:uppercase;letter-spacing:.12em;
   font-weight:700;margin-bottom:.8rem;}
-.q-consigne{font-size:.9rem;font-weight:700;color:var(--jour-fonce);text-align:center;
-  margin-bottom:.8rem;line-height:1.8;}
-.eq-bloc{
+.consigne-q{
   background:var(--jour-soft);border:2px solid var(--jour-accent);border-radius:14px;
-  padding:1.1rem .8rem;text-align:center;margin-bottom:1.1rem;
+  padding:.7rem .9rem;text-align:center;margin-bottom:1.1rem;
+  font-size:.9rem;font-weight:700;color:var(--jour-fonce);line-height:1.8;
 }
-.eq-ligne{font-size:clamp(1.3rem,4.4vw,1.8rem);font-weight:800;color:var(--texte);
-  line-height:1.9;}
-.eq-ligne i, .saisie-ligne i, .feedback i, .recap-item i, .choix i, .q-consigne i{font-style:italic;}
-
-/* — bloc SAISIE — */
-.saisie-bloc{display:none;}
-.saisie-bloc.show{display:block;}
-.saisie-ligne{
-  display:flex;align-items:center;justify-content:center;gap:.55rem;flex-wrap:wrap;
-  margin-bottom:.5rem;font-size:1.25rem;font-weight:800;
+.consigne-q i, .zone-case i, .tuile i, .feedback i, .recap-item i{font-style:italic;}
+.zones{display:flex;flex-direction:column;gap:.8rem;margin-bottom:1.2rem;}
+.zone{
+  display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+  border:2px solid var(--bord);border-radius:14px;padding:.6rem .8rem;
 }
-.saisie-ligne input{
-  font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;
-  width:11rem;max-width:60vw;padding:.55rem .7rem;border-radius:11px;
-  border:2.5px solid var(--jour);background:#fff;color:var(--texte);text-align:center;
+.zone-titre{
+  flex:0 0 7.2rem;font-size:.82rem;font-weight:800;color:var(--jour-fonce);
+  text-transform:uppercase;letter-spacing:.06em;
 }
-.saisie-ligne input:focus{outline:3px solid var(--jour-accent);}
-.aide-saisie{font-size:.8rem;color:var(--gris);text-align:center;margin-bottom:1rem;line-height:1.8;}
-.warn-saisie{
-  display:none;text-align:center;color:var(--rouge-fonce);background:var(--rouge-soft);
-  border:1.5px solid var(--rouge);border-radius:10px;padding:.45rem .7rem;
-  font-size:.82rem;margin-bottom:.9rem;line-height:1.7;
+.zone-cases{display:flex;gap:.6rem;flex-wrap:wrap;flex:1;}
+.zone-case{
+  min-width:9.5rem;min-height:2.7rem;border-radius:10px;padding:.35rem .6rem;
+  background:var(--case-mauve);border:2.5px dashed #b87fd4;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.98rem;color:#5e2a78;cursor:pointer;
+  transition:transform .12s, box-shadow .15s, outline .1s;
 }
-.warn-saisie.show{display:block;animation:fadeUp .25s ease both;}
+.zone-case.pleine{border-style:solid;background:#f3e1fb;box-shadow:0 2px 8px rgba(184,127,212,.35);}
+.zone-case.pleine:hover{transform:scale(1.04);}
+.zone-case.cible{outline:3px solid var(--tuile);outline-offset:2px;}
+.aide-cases{font-size:.82rem;color:var(--gris);text-align:center;margin-bottom:.9rem;line-height:1.8;}
+.tuiles{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem;}
+.tuile{
+  background:var(--tuile);color:#fff;font-family:'JetBrains Mono',monospace;
+  font-size:1rem;font-weight:800;border:none;border-radius:11px;
+  min-height:2.9rem;padding:.45rem .9rem;cursor:pointer;
+  box-shadow:0 3px 10px rgba(54,192,237,.4);transition:transform .12s, opacity .2s, outline .1s;
+}
+.tuile:hover:not(:disabled){transform:translateY(-2px);}
+.tuile.choisie{outline:3.5px solid var(--jour-fonce);outline-offset:2px;transform:translateY(-2px);}
+.tuile.utilisee{opacity:.22;pointer-events:none;box-shadow:none;}
 .actions{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
 .btn-valider{background:var(--jour);color:#fff;font-size:1rem;padding:.7rem 1.8rem;
   box-shadow:0 3px 12px rgba(141,198,63,.5);}
-
-/* — bloc QCM — */
-.qcm-bloc{display:none;}
-.qcm-bloc.show{display:block;}
-.choix-grille{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;max-width:26rem;margin:0 auto;}
-.choix{
-  font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:800;
-  background:#fff;color:var(--texte);border:2.5px solid var(--jour);
-  border-radius:12px;min-height:3rem;padding:.5rem .8rem;cursor:pointer;
-  transition:transform .12s, box-shadow .15s, background .15s;
-}
-.choix:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 4px 12px rgba(141,198,63,.4);}
-.choix:disabled{cursor:default;}
-.choix.bonne{background:var(--vert-soft);border-color:var(--vert);color:var(--vert-fonce);}
-.choix.mauvaise{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);opacity:.8;}
-
-/* fraction empilée */
-.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;
-  margin:0 .15em;line-height:1.15;}
-.frac .num{border-bottom:2.5px solid currentColor;padding:0 .3em;}
-.frac .den{padding:0 .3em;}
+.btn-enlever{background:#fff;color:var(--gris);border:2px solid var(--bord);
+  font-size:.92rem;padding:.7rem 1.2rem;}
+.btn-enlever:hover:not(:disabled){border-color:var(--jour);color:var(--texte);}
 
 /* ───────── FEEDBACK ───────── */
 .feedback{display:none;margin-top:1.1rem;border-radius:12px;padding:.85rem 1rem;
@@ -220,10 +210,10 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 /* ───────── MOBILE ───────── */
 @media(max-width:430px){
   body{padding:1.1rem .7rem 3rem;}
-  .eq-ligne{font-size:1.2rem;}
-  .saisie-ligne{font-size:1.05rem;}
-  .saisie-ligne input{font-size:1rem;width:9rem;}
-  .choix{font-size:1rem;min-height:2.7rem;}
+  .zone{flex-direction:column;align-items:flex-start;gap:.45rem;}
+  .zone-titre{flex:none;}
+  .zone-case{min-width:8rem;font-size:.88rem;}
+  .tuile{font-size:.88rem;min-height:2.6rem;}
   .pastille{width:1.8rem;height:1.8rem;font-size:.8rem;}
   .chrono{font-size:.9rem;min-width:4rem;}
   .topbar{padding:.5rem .6rem .6rem;}
@@ -238,22 +228,19 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 <header class="hero">
   <div class="badge-semaine">Semaine 1 · Jour 3</div>
   <h1>✏️ Résoudre les exercices 1</h1>
-  <p class="sous-titre">Équations : produit nul et premier degré (a<i>x</i> + b = 0, a<i>x</i> + b = c)</p>
-  <div class="consigne">⚡ Je travaille mes automatismes : 15 à 20&nbsp;s par question, réponds vite&nbsp;!</div>
+  <p class="sous-titre">Équation produit nul : classer équation, facteurs et solutions</p>
+  <div class="consigne">⚡ Je travaille mes automatismes : 45&nbsp;s par question, place chaque étiquette dans la bonne catégorie&nbsp;!</div>
 </header>
 
 <section class="startgate" id="startgate">
-  <h2>⏱️ Défi flash : 3 types de questions</h2>
-  <p>Tu vas répondre à <strong>5 questions</strong>&nbsp;:</p>
-  <p>🎯 <strong>2 QCM</strong> (15&nbsp;s)&nbsp;: calculer le <strong>produit des solutions</strong> d&rsquo;une équation produit nul.<br>
-  ✍️ <strong>3 équations à résoudre</strong> (20&nbsp;s)&nbsp;: du type <strong>a<i>x</i> + b = 0</strong> ou <strong>a<i>x</i> + b = c</strong>. Si la solution n&rsquo;est pas entière, réponds en <strong>fraction</strong> (ex.&nbsp;3/7) ou en <strong>décimal exact</strong> (ex.&nbsp;0,75).</p>
+  <h2>⏱️ Défi flash : 45 s par question</h2>
+  <p>Tu vas classer les étiquettes de <strong>5 équations produit nul</strong>. Pour chaque équation, place&nbsp;: l&rsquo;<strong>équation</strong> (1 étiquette), les <strong>facteurs</strong> (2 étiquettes) et les <strong>solutions</strong> (2 étiquettes).</p>
+  <p>👆 Clique sur une étiquette pour la choisir, puis clique sur une case pour la poser. Clique sur une case remplie pour la vider.</p>
   <p>Tu peux rejouer à l&rsquo;infini&nbsp;: à chaque partie, <strong>de nouvelles équations</strong> sont tirées au hasard.</p>
   <div class="memo">
-    💡 <strong>Mémo méthode :</strong><br>
-    👉 (<i>x</i> + 4)(<i>x</i> − 6) = 0&nbsp;: les solutions sont <i>x</i> = −4 et <i>x</i> = 6 (le signe change&nbsp;!).<br>
-    &nbsp;&nbsp;&nbsp;&nbsp;Leur <strong>produit</strong>&nbsp;: (−4) × 6 = <strong>−24</strong>. Attention à la règle des signes&nbsp;!<br>
-    👉 <strong>5<i>x</i> + 4 = 0</strong>&nbsp;: j&rsquo;enlève 4 → 5<i>x</i> = −4, puis je divise par 5 → <i>x</i> = −4/5.<br>
-    👉 <strong>5<i>x</i> + 4 = 19</strong>&nbsp;: j&rsquo;enlève 4 → 5<i>x</i> = 15, puis je divise par 5 → <i>x</i> = 3.
+    💡 <strong>Mémo méthode :</strong> un produit est nul si et seulement si <strong>l&rsquo;un de ses facteurs est nul</strong>.<br>
+    👉 (<i>x</i> + 4)(<i>x</i> − 6) = 0 signifie <i>x</i> + 4 = 0 <strong>ou</strong> <i>x</i> − 6 = 0.<br>
+    👉 Donc <i>x</i> = <strong>−4</strong> ou <i>x</i> = <strong>6</strong>&nbsp;: attention, le signe <strong>change</strong> entre le facteur et la solution&nbsp;!
   </div>
   <button class="btn btn-start" id="btnStart">▶️ Démarrer le défi</button>
 </section>
@@ -261,7 +248,7 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 <div class="topbar hidden" id="topbar">
   <div class="topbar-row">
     <div class="pastilles" id="pastilles"></div>
-    <div class="chrono" id="chrono">⏱️ 15</div>
+    <div class="chrono" id="chrono">⏱️ 45</div>
     <button class="btn-son" id="btnSon" aria-label="Activer ou couper le son">🔊</button>
   </div>
   <div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div>
@@ -270,25 +257,14 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 <main class="gamearea hidden" id="gamearea">
   <div class="carte" id="carte">
     <div class="q-label" id="qLabel">Question 1 / 5</div>
-    <div class="q-consigne" id="qConsigne"></div>
-    <div class="eq-bloc">
-      <div class="eq-ligne" id="eqLigne"></div>
+    <div class="consigne-q">🧩 Classe chaque étiquette&nbsp;: équation, facteurs, solutions.</div>
+    <div class="zones" id="zones"></div>
+    <div class="aide-cases">👆 Clique sur une étiquette, puis sur une case. Clique sur une case remplie pour la vider.</div>
+    <div class="tuiles" id="tuiles"></div>
+    <div class="actions">
+      <button class="btn btn-enlever" id="btnClear">🗑️ Tout enlever</button>
+      <button class="btn btn-valider" id="btnValidate" disabled>✅ Valider</button>
     </div>
-
-    <div class="qcm-bloc" id="qcmBloc">
-      <div class="choix-grille" id="choixGrille"></div>
-    </div>
-
-    <div class="saisie-bloc" id="saisieBloc">
-      <div class="saisie-ligne">
-        <span><i>x</i>&nbsp;=</span>
-        <input type="text" id="reponse" autocomplete="off" spellcheck="false" placeholder="ex : 3/4 · 0,75 · −2"/>
-        <button class="btn btn-valider" id="btnValidate">✅ Valider</button>
-      </div>
-      <div class="aide-saisie">Écris un entier (−2), une fraction (3/7) ou un décimal exact (0,75). Virgule ou point, comme tu veux.</div>
-      <div class="warn-saisie" id="warnSaisie">⚠️ Écriture non reconnue. Exemples valides&nbsp;: <strong>3/4</strong> · <strong>0,75</strong> · <strong>−2</strong></div>
-    </div>
-
     <div class="feedback" id="feedback"></div>
   </div>
 </main>
@@ -308,179 +284,65 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 "use strict";
 /* ═══════════ OUTILS ═══════════ */
 var $ = function(id){ return document.getElementById(id); };
-var QTOTAL = 5, TIME_QCM = 15, TIME_SAISIE = 20, WARN_AT = 5;
+var QTOTAL = 5, QTIME = 45, WARN_AT = 8;
 
 function rnd(n){ return Math.floor(Math.random()*n); }
 function shuffle(a){
   for(var i=a.length-1;i>0;i--){ var j=rnd(i+1); var t=a[i]; a[i]=a[j]; a[j]=t; }
   return a;
 }
-function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
-function makeFrac(n,d){
-  if(d<0){ n=-n; d=-d; }
-  var g = gcd(n,d) || 1;
-  return { n:n/g, d:d/g };
-}
-function sameFrac(f,g){ return f.n*g.d === g.n*f.d; }
-function sgn(p){ return Math.random() < p ? -1 : 1; }
 
 /* ═══════════ GÉNÉRATEUR ALÉATOIRE ═══════════
-   P : QCM — produit des solutions de (x+a)(x+b)=0 → (−a)(−b) = a·b
-   Z : ax + b = 0 → x = −b/a
-   C : ax + b = c → x = (c−b)/a
-   Arithmétique rationnelle exacte (fractions réduites).            */
-function genQ(type, prevKey){
-  var a,b,c,sol,key,choices,guard=0;
+   (x + b1)(x + b2) = 0  →  facteurs x+b1, x+b2 ; solutions x = −b1, x = −b2
+   b1, b2 relatifs non nuls, b1 ≠ b2.                                        */
+function genQ(prevKey){
+  var b1, b2, key, guard = 0;
   do{
-    if(type === "P"){
-      do{
-        a = (1+rnd(9)) * sgn(0.5);
-        do{ b = (1+rnd(9)) * sgn(0.5); }while(b === a);
-      }while(a + b === 0); /* évite des distracteurs confondus */
-      var correct = a*b;
-      /* distracteurs : erreur de signe, somme des solutions, opposé de la somme */
-      var pool = [-a*b, -(a+b), a+b, a*b + (2+rnd(4))*sgn(0.5), -a*b + (2+rnd(4))*sgn(0.5)];
-      choices = [correct];
-      for(var pi=0; pi<pool.length && choices.length<4; pi++){
-        if(choices.indexOf(pool[pi]) === -1){ choices.push(pool[pi]); }
-      }
-      choices = shuffle(choices);
-      sol = makeFrac(correct, 1);
-      key = "P|"+a+"|"+b;
-    }else if(type === "Z"){
-      a = 2 + rnd(8);
-      if(Math.random() < 0.45){ b = a * (1+rnd(9)) * sgn(0.5); }
-      else { do{ b = (1+rnd(12)) * sgn(0.5); }while(b % a === 0); }
-      sol = makeFrac(-b, a);
-      key = "Z|"+a+"|"+b;
-    }else{ /* C */
-      a = 2 + rnd(8);
-      b = (1+rnd(12)) * sgn(0.5);
-      var m;
-      if(Math.random() < 0.5){ m = a * (1+rnd(9)) * sgn(0.4); }
-      else { do{ m = (1+rnd(30)) * sgn(0.4); }while(m % a === 0); }
-      c = b + m;
-      sol = makeFrac(m, a);
-      key = "C|"+a+"|"+b+"|"+c;
-    }
+    b1 = (1+rnd(9)) * (Math.random()<0.5 ? -1 : 1);
+    do{ b2 = (1+rnd(9)) * (Math.random()<0.5 ? -1 : 1); }while(b2 === b1);
+    key = b1 + "|" + b2;
     guard++;
   }while(key === prevKey && guard < 60);
-  return { type:type, a:a, b:b, c:c, sol:sol, choices:choices, key:key };
+  var tiles = shuffle([
+    { kind:"eq" },
+    { kind:"f", v:b1 },
+    { kind:"f", v:b2 },
+    { kind:"s", v:-b1 },
+    { kind:"s", v:-b2 }
+  ]);
+  return { b1:b1, b2:b2, tiles:tiles, key:key };
 }
-/* une partie, fidèle au SCORM (3 exercices × 2) :
-   Q1 = P · Q2 = Z · Q3 = C · Q4 = P · Q5 = Z ou C ;
-   parmi les saisies : au moins 1 solution entière et 1 fractionnaire. */
 function genGame(){
-  var qs = [];
-  for(var t=0;t<400;t++){
-    var types = ["P","Z","C","P", Math.random()<0.5 ? "Z" : "C"];
-    qs = []; var prev = "", ents = 0, fracs = 0;
-    for(var i=0;i<QTOTAL;i++){
-      var q = genQ(types[i], prev);
-      prev = q.key; qs.push(q);
-      if(q.type !== "P"){
-        if(q.sol.d === 1){ ents++; } else { fracs++; }
-      }
-    }
-    if(ents >= 1 && fracs >= 1){ return qs; }
+  var qs = [], prev = "";
+  for(var i=0;i<QTOTAL;i++){
+    var q = genQ(prev);
+    prev = q.key;
+    qs.push(q);
   }
   return qs;
 }
 
 /* ═══════════ AFFICHAGE ═══════════ */
-function numHTML(v){ return v < 0 ? "\u2212" + (-v) : "" + v; }
-function pmHTML(v){ return (v < 0) ? "\u00a0\u2212\u00a0" + (-v) : "\u00a0+\u00a0" + v; }
-function pmTexte(v){ return (v < 0) ? " \u2212 " + (-v) : " + " + v; }
-function facteurHTML(v){ return "<i>x</i>" + pmHTML(v); }
+function facteurHTML(b){ return "<i>x</i>" + (b<0 ? "\u00a0\u2212\u00a0"+(-b) : "\u00a0+\u00a0"+b); }
+function facteurTexte(b){ return "x " + (b<0 ? "\u2212 "+(-b) : "+ "+b); }
+function solHTML(v){ return "<i>x</i>\u00a0=\u00a0" + (v<0 ? "\u2212"+(-v) : v); }
+function solTexte(v){ return "x = " + (v<0 ? "\u2212"+(-v) : v); }
 function eqHTML(q){
-  if(q.type === "P"){
-    return "(" + facteurHTML(q.a) + ")(" + facteurHTML(q.b) + ")\u00a0=\u00a00";
-  }
-  if(q.type === "Z"){ return q.a + "<i>x</i>" + pmHTML(q.b) + "\u00a0=\u00a00"; }
-  return q.a + "<i>x</i>" + pmHTML(q.b) + "\u00a0=\u00a0" + numHTML(q.c);
+  return "(" + facteurHTML(q.b1) + ")(" + facteurHTML(q.b2) + ")\u00a0=\u00a00";
 }
 function eqTexte(q){
-  if(q.type === "P"){
-    return "(x" + pmTexte(q.a) + ")(x" + pmTexte(q.b) + ") = 0";
-  }
-  if(q.type === "Z"){ return q.a + "x" + pmTexte(q.b) + " = 0"; }
-  return q.a + "x" + pmTexte(q.b) + " = " + (q.c<0 ? "\u2212"+(-q.c) : q.c);
+  return "(" + facteurTexte(q.b1) + ")(" + facteurTexte(q.b2) + ") = 0";
 }
-function solHTML(sol){
-  if(sol.d === 1){ return "<strong>" + numHTML(sol.n) + "</strong>"; }
-  var sg = sol.n < 0 ? "\u2212" : "";
-  var h = "<strong>" + sg + "<span class='frac'><span class='num'>" + Math.abs(sol.n)
-        + "</span><span class='den'>" + sol.d + "</span></span></strong>";
-  var dec = decimalExact(sol);
-  if(dec !== null){ h += " (= <strong>" + dec + "</strong>)"; }
-  return h;
-}
-function solTexte(sol){
-  if(sol.d === 1){ return (sol.n < 0 ? "\u2212" + (-sol.n) : "" + sol.n); }
-  return (sol.n < 0 ? "\u2212" : "") + Math.abs(sol.n) + "/" + sol.d;
-}
-function decimalExact(sol){
-  if((sol.n * 1000) % sol.d !== 0){ return null; }
-  var v = sol.n / sol.d;
-  var s = String(Math.round(Math.abs(v) * 1000) / 1000).replace(".", ",");
-  return (v < 0 ? "\u2212" : "") + s;
+function tuileHTML(t, q){
+  if(t.kind === "eq"){ return eqHTML(q); }
+  if(t.kind === "f"){ return facteurHTML(t.v); }
+  return solHTML(t.v);
 }
 function methodeHTML(q){
-  var h = "";
-  if(q.type === "P"){
-    var s1 = -q.a, s2 = -q.b;
-    h = "Un produit est nul si et seulement si l\u2019un de ses facteurs est nul\u00a0:<br>"
-      + "les solutions sont <i>x</i> = " + numHTML(s1) + " et <i>x</i> = " + numHTML(s2)
-      + " (le signe change\u00a0!).<br>"
-      + "Leur produit\u00a0: " + (s1<0 ? "("+numHTML(s1)+")" : numHTML(s1))
-      + " \u00d7 " + (s2<0 ? "("+numHTML(s2)+")" : numHTML(s2))
-      + " = <strong>" + numHTML(q.a*q.b) + "</strong>.";
-  }else if(q.type === "Z"){
-    if(q.b > 0){
-      h = "On enl\u00e8ve " + q.b + " des deux c\u00f4t\u00e9s\u00a0: "
-        + q.a + "<i>x</i> = " + numHTML(-q.b) + ".<br>";
-    }else{
-      h = "On ajoute " + (-q.b) + " des deux c\u00f4t\u00e9s\u00a0: "
-        + q.a + "<i>x</i> = " + numHTML(-q.b) + ".<br>";
-    }
-    h += "Puis on divise par " + q.a + "\u00a0: <i>x</i> = " + numHTML(-q.b) + " \u00f7 " + q.a
-       + " = " + solHTML(q.sol) + ".";
-  }else{
-    var r = q.c - q.b;
-    if(q.b > 0){
-      h = "On enl\u00e8ve " + q.b + " des deux c\u00f4t\u00e9s\u00a0: "
-        + q.a + "<i>x</i> = " + numHTML(q.c) + " \u2212 " + q.b + " = " + numHTML(r) + ".<br>";
-    }else{
-      h = "On ajoute " + (-q.b) + " des deux c\u00f4t\u00e9s\u00a0: "
-        + q.a + "<i>x</i> = " + numHTML(q.c) + " + " + (-q.b) + " = " + numHTML(r) + ".<br>";
-    }
-    h += "Puis on divise par " + q.a + "\u00a0: <i>x</i> = " + numHTML(r) + " \u00f7 " + q.a
-       + " = " + solHTML(q.sol) + ".";
-  }
-  return h;
-}
-
-/* ═══════════ PARSEUR DE RÉPONSE (robuste) ═══════════ */
-function parseInput(raw){
-  var s = String(raw).replace(/\s+/g, "").replace(/\u2212/g, "-").replace(/,/g, ".").toLowerCase();
-  s = s.replace(/^x=/, "");
-  if(s === ""){ return null; }
-  var m;
-  m = s.match(/^([+-]?\d+)\/([+-]?\d+)$/);
-  if(m){
-    var n1 = parseInt(m[1], 10), d1 = parseInt(m[2], 10);
-    if(d1 === 0){ return null; }
-    return makeFrac(n1, d1);
-  }
-  m = s.match(/^([+-]?)(\d+)(?:\.(\d+))?$/);
-  if(m){
-    var sg2 = (m[1] === "-") ? -1 : 1;
-    var dec = m[3] || "";
-    if(dec.length > 9){ return null; }
-    var n2 = parseInt(m[2] + dec, 10) * sg2;
-    return makeFrac(n2, Math.pow(10, dec.length));
-  }
-  return null;
+  return "Un produit est nul si et seulement si <strong>l\u2019un de ses facteurs est nul</strong>.<br>"
+    + eqHTML(q) + " \u27f9 " + facteurHTML(q.b1) + " = 0 <strong>ou</strong> " + facteurHTML(q.b2) + " = 0<br>"
+    + "\u27f9 " + solHTML(-q.b1) + " <strong>ou</strong> " + solHTML(-q.b2)
+    + " (le signe change entre facteur et solution\u00a0!)";
 }
 
 /* ═══════════ SONS — WEB AUDIO UNIQUEMENT ═══════════ */
@@ -509,6 +371,7 @@ function sndCdBip(){ beep(440, 0.16, "sine", 0.2); }
 function sndCdGo(){ beep(880, 0.32, "sine", 0.24); }
 function sndGood(){ beep(660, 0.13, "sine", 0.2); beep(880, 0.22, "sine", 0.2, 0.12); }
 function sndBad(){ beep(220, 0.3, "sawtooth", 0.14); }
+function sndPlace(){ beep(520, 0.06, "triangle", 0.12); }
 function sndFanfare(){
   beep(523, 0.16, "sine", 0.2, 0);
   beep(659, 0.16, "sine", 0.2, 0.15);
@@ -516,15 +379,25 @@ function sndFanfare(){
   beep(1047, 0.4, "sine", 0.22, 0.45);
 }
 
-/* ═══════════ ÉTAT DU JEU ═══════════ */
+/* ═══════════ ÉTAT DU JEU ═══════════
+   5 cases : 0 = Équation · 1-2 = Facteurs · 3-4 = Solutions               */
+var ZONES = [
+  { titre:"\u00c9quation",  emoji:"\u2696\uFE0F", slots:[0] },
+  { titre:"Facteurs",  emoji:"\u2702\uFE0F", slots:[1,2] },
+  { titre:"Solutions", emoji:"\uD83C\uDFAF", slots:[3,4] }
+];
+function slotKind(j){ return j===0 ? "eq" : (j<=2 ? "f" : "s"); }
+
 var game = {
   qIndex: 0, score: 0, results: [], qs: [], q: null,
-  timeLeft: TIME_QCM, timer: null, locked: false
+  timeLeft: QTIME, timer: null,
+  slots: [null,null,null,null,null],   /* index de tuile placé, ou null */
+  selected: null,                       /* index de tuile choisie */
+  locked: false
 };
 window.__game = game;
 window.__genQ = genQ;
 window.__genGame = genGame;
-window.__parseInput = parseInput;
 
 /* ═══════════ TOPBAR ═══════════ */
 function buildPastilles(){
@@ -574,36 +447,105 @@ function runCountdown(cb){
 /* ═══════════ QUESTION ═══════════ */
 function newQuestion(){
   game.q = game.qs[game.qIndex];
+  game.slots = [null,null,null,null,null];
+  game.selected = null;
   game.locked = false;
-  game.timeLeft = (game.q.type === "P") ? TIME_QCM : TIME_SAISIE;
-  $("eqLigne").innerHTML = eqHTML(game.q);
+  game.timeLeft = QTIME;
+  renderZones();
+  renderTuiles();
   var fb = $("feedback"); fb.className = "feedback"; fb.innerHTML = "";
-  if(game.q.type === "P"){
-    $("qConsigne").innerHTML = "\uD83C\uDFAF Calcule le <strong>produit des solutions</strong> de cette \u00e9quation\u00a0:";
-    $("qcmBloc").classList.add("show");
-    $("saisieBloc").classList.remove("show");
-    var g = $("choixGrille"); g.innerHTML = "";
-    game.q.choices.forEach(function(v, i){
-      var b = document.createElement("button");
-      b.className = "choix"; b.id = "choix"+i;
-      b.textContent = (v < 0 ? "\u2212" + (-v) : "" + v);
-      b.addEventListener("click", function(){ answerQCM(v, b); });
-      g.appendChild(b);
-    });
-  }else{
-    $("qConsigne").innerHTML = "\u270D\uFE0F R\u00e9sous cette \u00e9quation\u00a0:";
-    $("saisieBloc").classList.add("show");
-    $("qcmBloc").classList.remove("show");
-    $("reponse").value = "";
-    $("reponse").disabled = false;
-    $("btnValidate").disabled = false;
-    $("warnSaisie").classList.remove("show");
-  }
+  updateButtons();
   updateChrono();
   setPastille(game.qIndex, "active");
   $("qLabel").textContent = "Question " + (game.qIndex+1) + " / " + QTOTAL;
   startTimer();
-  if(game.q.type !== "P"){ $("reponse").focus(); }
+}
+function renderZones(){
+  var z = $("zones"); z.innerHTML = "";
+  ZONES.forEach(function(zone){
+    var div = document.createElement("div");
+    div.className = "zone";
+    var titre = document.createElement("div");
+    titre.className = "zone-titre";
+    titre.textContent = zone.emoji + " " + zone.titre;
+    div.appendChild(titre);
+    var cases = document.createElement("div");
+    cases.className = "zone-cases";
+    zone.slots.forEach(function(j){
+      var c = document.createElement("div");
+      c.className = "zone-case"; c.id = "slot"+j;
+      c.addEventListener("click", function(){ clickSlot(j); });
+      cases.appendChild(c);
+    });
+    div.appendChild(cases);
+    z.appendChild(div);
+  });
+  refreshSlots();
+}
+function renderTuiles(){
+  var tl = $("tuiles"); tl.innerHTML = "";
+  game.q.tiles.forEach(function(t, i){
+    var b = document.createElement("button");
+    b.className = "tuile"; b.id = "tuile"+i;
+    b.innerHTML = tuileHTML(t, game.q);
+    b.addEventListener("click", function(){ clickTuile(i); });
+    tl.appendChild(b);
+  });
+  refreshTuiles();
+}
+function refreshSlots(){
+  for(var j=0;j<5;j++){
+    var el = $("slot"+j); if(!el) continue;
+    var ti = game.slots[j];
+    if(ti === null){
+      el.className = "zone-case" + (game.selected !== null ? " cible" : "");
+      el.textContent = "?";
+    }else{
+      el.className = "zone-case pleine";
+      el.innerHTML = tuileHTML(game.q.tiles[ti], game.q);
+    }
+  }
+}
+function refreshTuiles(){
+  for(var i=0;i<5;i++){
+    var el = $("tuile"+i); if(!el) continue;
+    el.classList.toggle("utilisee", game.slots.indexOf(i) !== -1);
+    el.classList.toggle("choisie", game.selected === i);
+  }
+}
+function clickTuile(i){
+  if(game.locked || game.slots.indexOf(i) !== -1) return;
+  game.selected = (game.selected === i) ? null : i;
+  refreshTuiles();
+  refreshSlots();
+}
+function clickSlot(j){
+  if(game.locked) return;
+  if(game.selected !== null){
+    /* la case visée se libère si occupée, puis reçoit la tuile choisie */
+    game.slots[j] = game.selected;
+    game.selected = null;
+    sndPlace();
+  }else if(game.slots[j] !== null){
+    game.slots[j] = null;  /* vider la case */
+  }
+  refreshTuiles();
+  refreshSlots();
+  updateButtons();
+}
+function clearAll(){
+  if(game.locked) return;
+  game.slots = [null,null,null,null,null];
+  game.selected = null;
+  refreshTuiles();
+  refreshSlots();
+  updateButtons();
+}
+function updateButtons(){
+  var full = game.slots.indexOf(null) === -1;
+  var empty = game.slots.every(function(s){ return s === null; });
+  $("btnValidate").disabled = game.locked || !full;
+  $("btnClear").disabled = game.locked || empty;
 }
 
 /* ═══════════ CHRONO ═══════════ */
@@ -620,43 +562,28 @@ function stopTimer(){
   if(game.timer){ clearInterval(game.timer); game.timer = null; }
 }
 
-/* ═══════════ VALIDATION ═══════════ */
-function answerQCM(v, btn){
-  if(game.locked) return;
-  game.locked = true;
-  stopTimer();
-  var correct = game.q.a * game.q.b;
-  var ok = (v === correct);
-  /* colorer la bonne réponse, griser le reste */
-  var btns = document.querySelectorAll(".choix");
-  btns.forEach(function(b){
-    b.disabled = true;
-    var val = b.textContent.replace(/\u2212/g, "-");
-    if(parseInt(val, 10) === correct){ b.classList.add("bonne"); }
-    else if(b === btn){ b.classList.add("mauvaise"); }
-  });
-  finishQuestion(ok, false);
-}
+/* ═══════════ VALIDATION (vérification PAR CALCUL) ═══════════ */
+function produit(q, x){ return (x + q.b1) * (x + q.b2); }
 function validate(){
-  if(game.locked) return;
-  var val = parseInput($("reponse").value);
-  if(val === null){
-    $("warnSaisie").classList.add("show");
-    sndBad();
-    return; /* le chrono continue, l'élève corrige son écriture */
-  }
-  $("warnSaisie").classList.remove("show");
+  if(game.locked || game.slots.indexOf(null) !== -1) return;
   game.locked = true;
   stopTimer();
-  finishQuestion(sameFrac(val, game.q.sol), false);
+  var q = game.q, ok = true;
+  for(var j=0;j<5;j++){
+    var t = q.tiles[game.slots[j]], kind = slotKind(j);
+    if(t.kind !== kind){ ok = false; break; }
+    /* toute disposition mathématiquement valide est acceptée :
+       facteurs interchangeables, solutions interchangeables,
+       et chaque solution doit annuler le produit                  */
+    if(kind === "s" && produit(q, t.v) !== 0){ ok = false; break; }
+    if(kind === "f" && t.v !== q.b1 && t.v !== q.b2){ ok = false; break; }
+  }
+  finishQuestion(ok, false);
 }
 function onTimeout(){
   if(game.locked) return;
   game.locked = true;
   stopTimer();
-  if(game.q.type === "P"){
-    document.querySelectorAll(".choix").forEach(function(b){ b.disabled = true; });
-  }
   finishQuestion(false, true);
 }
 function finishQuestion(ok, timedOut){
@@ -665,10 +592,7 @@ function finishQuestion(ok, timedOut){
   if(ok){ game.score++; }
   setPastille(game.qIndex, ok ? "ok" : "ko");
   updateProgress();
-  if(q.type !== "P"){
-    $("reponse").disabled = true;
-    $("btnValidate").disabled = true;
-  }
+  updateButtons();
   var fb = $("feedback");
   if(ok){
     sndGood();
@@ -678,10 +602,7 @@ function finishQuestion(ok, timedOut){
     sndBad();
     fb.className = "feedback show ko";
     var intro = timedOut ? "\u2718 Temps \u00e9coul\u00e9\u00a0!" : "\u2718 Pas grave, regarde la m\u00e9thode\u00a0:";
-    var reponse = (q.type === "P")
-      ? "La bonne r\u00e9ponse\u00a0: <strong>" + numHTML(q.a*q.b) + "</strong><br>"
-      : "La solution\u00a0: <i>x</i> = " + solHTML(q.sol) + "<br>";
-    fb.innerHTML = "<div class='fb-titre'>" + intro + "</div>" + reponse + methodeHTML(q);
+    fb.innerHTML = "<div class='fb-titre'>" + intro + "</div>" + methodeHTML(q);
   }
   setTimeout(nextQuestion, ok ? 2400 : 2700);
 }
@@ -701,7 +622,7 @@ function showResults(){
   var stars = (game.score===5) ? 3 : (game.score>=3 ? 2 : 1);
   $("etoiles").textContent = "\u2b50".repeat(stars) + "\u2606".repeat(3-stars);
   var msg;
-  if(game.score===5){ msg = "Parfait\u00a0! \u00c9quations et produits de solutions, tout est ma\u00eetris\u00e9\u00a0! \uD83C\uDF89"; }
+  if(game.score===5){ msg = "Parfait\u00a0! Les \u00e9quations produit nul n\u2019ont plus de secret pour toi\u00a0! \uD83C\uDF89"; }
   else if(game.score>=3){ msg = "Bien jou\u00e9\u00a0! Encore un petit entra\u00eenement et ce sera parfait\u00a0!"; }
   else { msg = "C\u2019est un bon d\u00e9but\u00a0! Rejoue pour t\u2019entra\u00eener, tu vas y arriver\u00a0! \uD83D\uDCAA"; }
   $("msgFinal").textContent = msg;
@@ -709,14 +630,9 @@ function showResults(){
   game.results.forEach(function(res){
     var div = document.createElement("div");
     div.className = "recap-item " + (res.ok ? "ok" : "ko");
-    var q = res.q, droite;
-    if(q.type === "P"){
-      droite = "produit des solutions = <strong>" + numHTML(q.a*q.b) + "</strong>";
-    }else{
-      droite = "<i>x</i> = <strong>" + solTexte(q.sol) + "</strong>";
-    }
     div.innerHTML = "<span>" + (res.ok ? "\u2714" : "\u2718") + "</span>"
-      + "<span>" + eqTexte(q).replace(/x/g, "<i>x</i>") + " \u2192 " + droite + "</span>";
+      + "<span>" + eqHTML(res.q) + " \u2192 " + solHTML(-res.q.b1)
+      + " ou " + solHTML(-res.q.b2) + "</span>";
     rec.appendChild(div);
   });
   if(game.score===5){ sndFanfare(); } else { sndGood(); }
@@ -741,9 +657,7 @@ document.addEventListener("DOMContentLoaded", function(){
   $("btnStart").addEventListener("click", startGame);
   $("btnRejouer").addEventListener("click", startGame);
   $("btnValidate").addEventListener("click", validate);
-  $("reponse").addEventListener("keydown", function(e){
-    if(e.key === "Enter"){ validate(); }
-  });
+  $("btnClear").addEventListener("click", clearAll);
   $("btnSon").addEventListener("click", function(){
     soundOn = !soundOn;
     $("btnSon").textContent = soundOn ? "\uD83D\uDD0A" : "\uD83D\uDD07";
