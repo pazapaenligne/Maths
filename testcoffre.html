@@ -139,6 +139,27 @@ body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--
   .qcard{ padding:24px 26px 26px; }
   .opts{ grid-template-columns:1fr 1fr; }
 }
+
+/* ════ CALCULATRICE ════ */
+.calc-toggle{ display:none;position:fixed;right:18px;bottom:18px;z-index:60;width:74px;height:74px;flex-direction:column;gap:2px;border-radius:16px;border:3px solid var(--jour);background:var(--dark);color:#fff;cursor:pointer;box-shadow:0 6px 20px var(--day-glow);transition:transform .15s; }
+.calc-toggle.show{ display:flex;align-items:center;justify-content:center;animation:calcpulse 1.6s ease-in-out infinite; }
+.calc-toggle:hover{ transform:scale(1.08);animation:none; }
+@keyframes calcpulse{ 0%,100%{ transform:scale(1);box-shadow:0 6px 18px var(--day-glow); } 50%{ transform:scale(1.09);box-shadow:0 0 26px rgba(58,181,216,.9); } }
+.calc-lab{ font-family:'Orbitron',sans-serif;font-size:.56rem;font-weight:700;letter-spacing:1px;color:var(--jour-pale); }
+.calc-panel{ display:none;position:fixed;right:18px;bottom:86px;z-index:60;width:248px;background:var(--dark);border:2px solid var(--jour);border-radius:16px;padding:12px;box-shadow:0 12px 36px rgba(0,0,0,.45); }
+.calc-panel.open{ display:block;animation:fadeUp .25s ease; }
+.calc-head{ display:flex;justify-content:space-between;align-items:center;font-family:'Orbitron',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:1px;color:var(--jour-pale);margin-bottom:8px;padding:0 2px; }
+.calc-close{ background:none;border:none;color:#eaf2fb;font-size:1rem;cursor:pointer;line-height:1; }
+.calc-screen{ background:#08120a;border:1px solid var(--jour-fonce);border-radius:10px;padding:10px 12px;margin-bottom:10px;text-align:right;min-height:62px; }
+.calc-expr{ font-family:'JetBrains Mono',monospace;font-size:.74rem;color:#6f95a6;min-height:16px;word-break:break-all; }
+.calc-now{ font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--or);word-break:break-all; }
+.calc-keys{ display:grid;grid-template-columns:repeat(4,1fr);gap:7px; }
+.ck{ font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:600;min-height:44px;border:none;border-radius:9px;background:#26475c;color:#eaf2fb;cursor:pointer;transition:filter .12s; }
+.ck:hover{ filter:brightness(1.18); }
+.ck:active{ transform:scale(.95); }
+.ck-fn{ background:#1d3a4a;color:var(--jour-pale);font-size:.92rem; }
+.ck-op{ background:var(--jour-fonce);color:#fff; }
+.ck-eq{ background:var(--jour);color:#062430;font-weight:800; }
 </style>
 </head>
 <body>
@@ -202,6 +223,58 @@ body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--
     </section>
   </div>
 
+  <!-- CALCULATRICE -->
+  <button class="calc-toggle" id="calc-toggle" onclick="toggleCalc()" title="Calculatrice" aria-label="Ouvrir la calculatrice">
+    <svg viewBox="0 0 40 48" width="40" height="46" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="3" y="2" width="34" height="44" rx="5" fill="#1d3a4a" stroke="#9dd4e8" stroke-width="2"/>
+      <rect x="7" y="6" width="26" height="9" rx="2" fill="#08120a"/>
+      <rect x="9.5" y="8.5" width="14" height="4" rx="1" fill="#5ce0b0"/>
+      <g fill="#3ab5d8">
+        <rect x="7" y="19" width="6" height="5" rx="1.2"/>
+        <rect x="17" y="19" width="6" height="5" rx="1.2"/>
+        <rect x="27" y="19" width="6" height="5" rx="1.2"/>
+        <rect x="7" y="27" width="6" height="5" rx="1.2"/>
+        <rect x="17" y="27" width="6" height="5" rx="1.2"/>
+        <rect x="27" y="27" width="6" height="5" rx="1.2"/>
+        <rect x="7" y="35" width="6" height="5" rx="1.2"/>
+        <rect x="17" y="35" width="6" height="5" rx="1.2"/>
+      </g>
+      <rect x="27" y="35" width="6" height="5" rx="1.2" fill="#f3d98c"/>
+    </svg>
+    <span class="calc-lab">CALC</span>
+  </button>
+  <div class="calc-panel" id="calc-panel" role="dialog" aria-label="Calculatrice">
+    <div class="calc-head">
+      <span>Calculatrice</span>
+      <button class="calc-close" onclick="toggleCalc()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="calc-screen">
+      <div class="calc-expr" id="calc-expr"></div>
+      <div class="calc-now" id="calc-result">0</div>
+    </div>
+    <div class="calc-keys">
+      <button class="ck ck-fn" onclick="calcAC()">AC</button>
+      <button class="ck ck-fn" onclick="calcDel()">⌫</button>
+      <button class="ck ck-fn" onclick="calcPlusMinus()">±</button>
+      <button class="ck ck-op" onclick="calcOp('÷')">÷</button>
+      <button class="ck" onclick="calcNum('7')">7</button>
+      <button class="ck" onclick="calcNum('8')">8</button>
+      <button class="ck" onclick="calcNum('9')">9</button>
+      <button class="ck ck-op" onclick="calcOp('×')">×</button>
+      <button class="ck" onclick="calcNum('4')">4</button>
+      <button class="ck" onclick="calcNum('5')">5</button>
+      <button class="ck" onclick="calcNum('6')">6</button>
+      <button class="ck ck-op" onclick="calcOp('-')">−</button>
+      <button class="ck" onclick="calcNum('1')">1</button>
+      <button class="ck" onclick="calcNum('2')">2</button>
+      <button class="ck" onclick="calcNum('3')">3</button>
+      <button class="ck ck-op" onclick="calcOp('+')">+</button>
+      <button class="ck" onclick="calcNum('0')">0</button>
+      <button class="ck" onclick="calcDot()">,</button>
+      <button class="ck ck-eq" onclick="calcEqual()" style="grid-column:span 2;">=</button>
+    </div>
+  </div>
+
 </div>
 
 <!-- FIN -->
@@ -230,7 +303,7 @@ body{ font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--
    ════════════════════════════════════════ */
 const questions = [
   {
-    extrait:"Indice\u00a0: pour savoir si un nombre est premier, cherche un diviseur autre que 1 et lui-m\u00eame. Teste par exemple 7, 11, 13, 23\u2026",
+    extrait:"Rappel\u00a0: un nombre premier a exactement deux diviseurs, 1 et lui-m\u00eame. \u00c0 toi de tester s'il en a d'autres.",
     question:"Le nombre 14 812 est-il premier\u00a0?",
     options:["Il est premier.","Il n'est pas premier."],
     answer:1,
@@ -238,7 +311,7 @@ const questions = [
     sol:"14 812 est divisible par 23, donc il n'est pas premier."
   },
   {
-    extrait:"Indice\u00a0: regarde le chiffre des unit\u00e9s. Un nombre qui se termine par 0 ou 5 est divisible par 5\u2026",
+    extrait:"Rappel\u00a0: un nombre premier a exactement deux diviseurs, 1 et lui-m\u00eame. \u00c0 toi de tester s'il en a d'autres.",
     question:"Le nombre 814 975 est-il premier\u00a0?",
     options:["Il est premier.","Il n'est pas premier."],
     answer:1,
@@ -246,7 +319,7 @@ const questions = [
     sol:"814 975 se termine par 5, donc il est divisible par 5. Il n'est pas premier."
   },
   {
-    extrait:"Indice\u00a0: additionne les chiffres du nombre. Si cette somme est dans la table de 3, le nombre est divisible par 3\u2026",
+    extrait:"Rappel\u00a0: un nombre premier a exactement deux diviseurs, 1 et lui-m\u00eame. \u00c0 toi de tester s'il en a d'autres.",
     question:"Le nombre 8 127 est-il premier\u00a0?",
     options:["Il est premier.","Il n'est pas premier."],
     answer:1,
@@ -254,7 +327,7 @@ const questions = [
     sol:"8 127 est divisible par 3 (somme des chiffres = 18). Il n'est pas premier."
   },
   {
-    extrait:"Indice\u00a0: pense aux critères de divisibilité par 2, par 3 et par 5 avant de conclure\u2026",
+    extrait:"Rappel\u00a0: un nombre premier a exactement deux diviseurs, 1 et lui-m\u00eame. \u00c0 toi de tester s'il en a d'autres.",
     question:"Le nombre 537 est-il premier\u00a0?",
     options:["Il est premier.","Il n'est pas premier."],
     answer:1,
@@ -264,16 +337,16 @@ const questions = [
   {
     extrait:"Liste\u00a0: 58 \u00b7 355 \u00b7 1521 \u00b7 613 \u00b7 77.",
     question:"Parmi ces nombres, lequel EST premier\u00a0?",
-    options:["58","355","613","77"],
-    answer:2,
+    options:["58","355","1521","613","77"],
+    answer:3,
     fb:"613 n'a aucun diviseur autre que 1 et lui-m\u00eame. Il est premier. (58 = 2 \u00d7 29 ; 355 = 5 \u00d7 71 ; 1521 = 39\u00b2 ; 77 = 7 \u00d7 11.)",
     sol:"Le seul premier est 613. Les autres sont compos\u00e9s : 58 = 2 \u00d7 29 ; 355 = 5 \u00d7 71 ; 1521 = 39\u00b2 ; 77 = 7 \u00d7 11."
   },
   {
     extrait:"Liste\u00a0: 777 \u00b7 245 \u00b7 3 658 \u00b7 288 \u00b7 1 259.",
     question:"Parmi ces nombres, lequel EST premier\u00a0?",
-    options:["777","245","288","1 259"],
-    answer:3,
+    options:["777","245","3 658","288","1 259"],
+    answer:4,
     fb:"1 259 n'a aucun diviseur autre que 1 et lui-m\u00eame. Il est premier. (777 = 3 \u00d7 259 ; 245 = 5 \u00d7 49 ; 3 658 = 2 \u00d7 1 829 ; 288 = 2\u2075 \u00d7 3\u00b2.)",
     sol:"Le seul premier est 1 259. Les autres sont compos\u00e9s : 777 = 3 \u00d7 259 ; 245 = 5 \u00d7 49 ; 3 658 = 2 \u00d7 1 829 ; 288 = 2\u2075 \u00d7 3\u00b2."
   },
@@ -348,7 +421,7 @@ function loadQuestion(){
   const opts=$('opts'); opts.innerHTML='';
   q.options.forEach((txt,idx)=>{
     const b=document.createElement('button'); b.className='opt';
-    b.innerHTML='<span class="lettre">'+['A','B','C','D'][idx]+'</span><span>'+txt+'</span>';
+    b.innerHTML='<span class="lettre">'+['A','B','C','D','E'][idx]+'</span><span>'+txt+'</span>';
     b.addEventListener('click',()=>answer(idx,b));
     opts.appendChild(b);
   });
@@ -412,7 +485,7 @@ function toggleSolution(){
 function commencer(){
   $('phase1').style.display='none';
   $('phase2').classList.add('active');
-  opened=0; errCount=0; buildVault(); renderState(); loadQuestion(); initA();
+  opened=0; errCount=0; buildVault(); renderState(); loadQuestion(); initA(); showCalcOnGame();
 }
 
 function rejouer(){
@@ -421,6 +494,7 @@ function rejouer(){
   $('solution').classList.remove('show'); $('btnSol').textContent='📖 Voir la solution';
   $('phase2').classList.remove('active');
   $('phase1').style.display='block';
+  hideCalc(); calcAC();
   buildVault(); renderState();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -441,6 +515,91 @@ function playClick(){
   }catch(e){}
 }
 $('soundBtn').addEventListener('click',()=>{ son=!son; $('soundBtn').textContent=son?'🔊':'🔇'; });
+
+/* ══ CALCULATRICE ════════════════════════════ */
+var calcExpr='',calcCurrent='0',calcJustEvaled=false,calcOpen=false;
+function showCalcOnGame(){ var t=$('calc-toggle'); if(t) t.classList.add('show'); }
+function hideCalc(){
+  var p=$('calc-panel');
+  if(p){
+    p.classList.remove('open');
+  }
+  var t=$('calc-toggle'); if(t) t.classList.remove('show');
+  calcOpen=false;
+}
+function toggleCalc(){
+  calcOpen=!calcOpen;
+  $('calc-panel').classList.toggle('open',calcOpen);
+}
+function updateCalcScreen(){
+  $('calc-expr').textContent=calcExpr;
+  $('calc-result').textContent=calcCurrent||'0';
+}
+function calcNum(n){
+  if(calcJustEvaled){
+    calcCurrent='';
+    calcExpr='';
+    calcJustEvaled=false;
+  }
+  if(calcCurrent==='0')
+    calcCurrent=n;
+  else
+    calcCurrent+=n;
+  updateCalcScreen();
+}
+function calcDot(){
+  if(calcJustEvaled){
+    calcCurrent='0';
+    calcJustEvaled=false;
+  }
+  if(calcCurrent.indexOf('.')===-1)
+    calcCurrent+='.';
+  updateCalcScreen();
+}
+function isOp(c){
+  return ['+','-','×','÷','%'].indexOf(c)!==-1;
+}
+function calcOp(op){
+  calcJustEvaled=false;
+  if(calcExpr && !isOp(calcExpr[calcExpr.length-1])){
+    calcExpr+=calcCurrent+' '+op+' ';
+  }
+  else if(!calcExpr){
+    calcExpr=calcCurrent+' '+op+' ';
+  }
+  else{
+    calcExpr=calcExpr.slice(0,-3)+' '+op+' ';
+  }
+  calcCurrent='0';
+  updateCalcScreen();
+}
+function calcEqual(){
+  if(!calcExpr) return;
+  var full = calcExpr + calcCurrent;
+  try{
+    var expr = full.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/%/g,'/100');
+    var res = Function('"use strict"; return (' + expr + ')')();
+    res = Math.round(res * 1e10) / 1e10;
+    calcExpr = full + ' =';
+    calcCurrent = String(res);
+    calcJustEvaled = true;
+  }catch(e){
+    calcCurrent='Erreur'; calcExpr=''; calcJustEvaled=true;
+  }
+  updateCalcScreen();
+}
+function calcAC(){ calcCurrent='0'; calcExpr=''; calcJustEvaled=false; updateCalcScreen(); }
+function calcDel(){
+  if(calcJustEvaled){ calcAC(); return; }
+  if(calcCurrent.length>1) calcCurrent=calcCurrent.slice(0,-1); else calcCurrent='0';
+  updateCalcScreen();
+}
+function calcPlusMinus(){
+  if(calcCurrent!=='0' && calcCurrent!=='Erreur'){
+    calcCurrent = calcCurrent[0]==='-' ? calcCurrent.slice(1) : '-'+calcCurrent;
+    updateCalcScreen();
+  }
+}
 
 /* INIT */
 buildVault(); renderState();
