@@ -181,24 +181,29 @@
       Pazapa &middot; Maths &middot; 5ème
     </div>
     <div class="week-label">Semaine 3 &ndash; Jour 4</div>
-    <h1>Peut-on <span class="hl">simplifier</span>?</h1>
-    <p class="subtitle">4 questions &rarr; oui ou non</p>
-    <div class="niveau-badge"><span class="nb-dot"></span>Niveau 1</div>
+    <h1>Les <span class="hl">fractions égales</span></h1>
+    <p class="subtitle">Lesquelles valent la même chose&nbsp;?</p>
+    <div class="niveau-badge"><span class="nb-dot"></span>Niveau 2</div>
   </header>
   <div class="stage">
     <div class="screen show" id="start"><div class="start-overlay">
       <h2>C&rsquo;est parti, on s&rsquo;entraîne&nbsp;!</h2>
-      <p>🎯 Une fraction se simplifie si le numérateur ET le dénominateur ont un diviseur commun.<br/>Dis si chaque fraction peut être simplifiée par le nombre donné.<br/><span style="color:var(--muted);font-size:.85rem;">4 questions, réponds oui ou non.</span></p>
+      <p>🎯 Deux fractions sont égales si on multiplie (ou divise) le haut et le bas par le même nombre.<br/>
+        <span style="color:var(--muted);font-size:.85rem;">Plusieurs bonnes réponses possibles.</span></p>
       <button class="btn btn-primary" onclick="startGame()">Commencer &rarr;</button>
     </div></div>
     <div class="screen" id="board">
-      <div class="hud"><div class="hud-chip act"><span id="act-label">Question 1</span></div>
-      <div class="hud-chip"><span id="score-live">0</span> <span id="score-suffix">bonnes réponses</span></div></div>
-      <div class="progress-wrap"><div class="progress-info"><span id="prog-label">Question 1</span><span id="prog-pct">0&nbsp;%</span></div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div></div>
+      <div class="hud">
+        <div class="hud-chip act"><span id="act-label">Question 1</span></div>
+        <div class="hud-chip"><span id="score-live">0</span> <span id="score-suffix">réussies</span></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-info"><span id="prog-label">Question 1</span><span id="prog-pct">0&nbsp;%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
+      </div>
       <div class="enonce" id="enonce"></div>
       <div class="card"><div class="card-stripe"></div>
-        <div class="q-tag" id="q-tag">Ton choix</div>
+        <div class="q-tag" id="q-tag">Coche les bonnes réponses</div>
         <div class="q-text" id="q-text"></div>
         <div id="answer-zone"></div>
         <div class="feedback" id="feedback"><span class="fi" id="fb-ic"></span><div><span id="fb-msg"></span></div></div>
@@ -221,37 +226,94 @@
 "use strict";
 var $=function(id){return document.getElementById(id);};
 function shuffleArr(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-var DEFIS=[
-  { txt:"14/56 peut être simplifiée par 2", ans:true, sol:"14 et 56 sont pairs : on peut diviser par 2." },
-  { txt:"36/75 peut être simplifiée par 3", ans:true, sol:"36 = 3×12 et 75 = 3×25 : on peut diviser par 3." },
-  { txt:"25/15 peut être simplifiée par 5", ans:true, sol:"25 = 5×5 et 15 = 5×3 : on peut diviser par 5." },
-  { txt:"5/6 peut être simplifiée par 4", ans:false, sol:"5 n’est pas divisible par 4 : impossible." }
+
+var QUESTIONS=[
+  { cible:"5/6", items:[
+    { txt:"50/60", ok:true, sol:"50/60 = 5/6 (\u00f710)" },
+    { txt:"15/18", ok:true, sol:"15/18 = 5/6 (\u00f73)" },
+    { txt:"54/64", ok:false, sol:"54/64 = 27/32 \u2260 5/6" },
+    { txt:"(5+4)/(6+4)", ok:false, sol:"(5+4)/(6+4) = 9/10 (on multiplie, on n\u2019ajoute pas)" }
+  ]},
+  { cible:"2/3", items:[
+    { txt:"4/6", ok:true, sol:"4/6 = 2/3 (\u00f72)" },
+    { txt:"10/15", ok:true, sol:"10/15 = 2/3 (\u00f75)" },
+    { txt:"6/8", ok:false, sol:"6/8 = 3/4 \u2260 2/3" },
+    { txt:"(2+1)/(3+1)", ok:false, sol:"(2+1)/(3+1) = 3/4 (on multiplie, on n\u2019ajoute pas)" }
+  ]},
+  { cible:"3/4", items:[
+    { txt:"6/8", ok:true, sol:"6/8 = 3/4 (\u00f72)" },
+    { txt:"9/12", ok:true, sol:"9/12 = 3/4 (\u00f73)" },
+    { txt:"8/12", ok:false, sol:"8/12 = 2/3 \u2260 3/4" },
+    { txt:"3/5", ok:false, sol:"3/5 \u2260 3/4" }
+  ]},
+  { cible:"1/2", items:[
+    { txt:"4/8", ok:true, sol:"4/8 = 1/2 (\u00f74)" },
+    { txt:"7/14", ok:true, sol:"7/14 = 1/2 (\u00f77)" },
+    { txt:"5/9", ok:false, sol:"5/9 \u2260 1/2" },
+    { txt:"2/5", ok:false, sol:"2/5 \u2260 1/2" }
+  ]}
 ];
-var step=0,sel=null,locked=false,score=0,results=[];
-function startGame(){$("start").classList.remove("show");$("final").classList.remove("show");step=0;score=0;results=[];shuffleArr(DEFIS);startQ();}
-function startQ(){sel=null;locked=false;$("board").classList.add("show");render();window.scrollTo({top:0,behavior:"smooth"});}
-function render(){var d=DEFIS[step];
+
+var step=0, sel=[], locked=false, passed=[];
+
+function startGame(){
+  $("start").classList.remove("show"); $("final").classList.remove("show");
+  step=0; passed=[];
+  QUESTIONS.forEach(function(q){ shuffleArr(q.items); });
+  shuffleArr(QUESTIONS);
+  startQ();
+}
+function startQ(){ sel=[]; locked=false; $("board").classList.add("show"); render(); window.scrollTo({top:0,behavior:"smooth"}); }
+function render(){
+  var q=QUESTIONS[step];
   $("act-label").textContent="Question "+(step+1);
-  $("enonce").innerHTML="<div class='ex-titre'>Question "+(step+1)+" / "+DEFIS.length+"</div>Cette fraction peut-elle être simplifiée ?";
-  $("q-tag").textContent="Ton choix";$("q-text").innerHTML="<span class='expr-mono'>"+d.txt+"</span>";
-  $("answer-zone").innerHTML="<div class='vf-row'><button class='vf-btn' id='vf-true' onclick='chooseVF(true)'>✔ Oui</button><button class='vf-btn' id='vf-false' onclick='chooseVF(false)'>✘ Non</button></div>";
-  $("feedback").className="feedback";$("btn-next").style.display="none";$("btn-validate").style.display="inline-flex";$("btn-validate").disabled=true;
-  $("prog-label").textContent="Question "+(step+1)+" / "+DEFIS.length;var pct=Math.round(step/DEFIS.length*100);$("progress-bar").style.width=pct+"%";$("prog-pct").textContent=pct+"\u00a0%";$("score-live").textContent=score;}
-function chooseVF(v){if(locked)return;sel=v;$("vf-true").classList.toggle("sel",v===true);$("vf-false").classList.toggle("sel",v===false);$("btn-validate").disabled=false;}
-function validate(){if(locked)return;var d=DEFIS[step];locked=true;$("btn-validate").style.display="none";
-  var correct=(sel===d.ans);$("vf-true").classList.add("locked");$("vf-false").classList.add("locked");
-  var goodBtn=d.ans?$("vf-true"):$("vf-false");var selBtn=sel?$("vf-true"):$("vf-false");
-  goodBtn.classList.add(correct?"chosen-correct":"reveal-correct");if(!correct)selBtn.classList.add("chosen-wrong");
-  if(correct)score++;results.push({txt:d.txt,ans:d.ans,correct:correct});
-  showFb(correct,(correct?"Bonne r\u00e9ponse&nbsp;! ":"Pas tout \u00e0 fait. ")+d.sol);
-  $("btn-next").style.display="inline-flex";$("btn-next").textContent=(step===DEFIS.length-1)?"Voir le bilan \u2192":"Suivant \u2192";$("score-live").textContent=score;}
-function showFb(ok,msg){var fb=$("feedback");fb.className="feedback show "+(ok?"ok":"ko");$("fb-ic").textContent=ok?"\u2705":"\u274C";$("fb-msg").innerHTML=msg;}
-function nextStep(){if(step<DEFIS.length-1){step++;startQ();}else showFinal();}
-function starsFrac(ok,total){var r=ok/total;return r>=1?5:r>=0.8?4:r>=0.6?3:r>=0.4?2:1;}
-function showFinal(){$("board").classList.remove("show");$("final").classList.add("show");var total=DEFIS.length;$("final-num").textContent=score+" / "+total;
-  var st=starsFrac(score,total);$("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
-  var msg;if(score===total)msg="Parfait&nbsp;! Tu rep\u00e8res vite les simplifications.";else if(score>=Math.ceil(total*0.8))msg="Tr\u00e8s bien&nbsp;! Une \u00e0 revoir.";else if(score>=Math.ceil(total*0.6))msg="Bien&nbsp;! Cherche un diviseur commun.";else msg="\u00c0 retravailler : un diviseur commun simplifie la fraction.";
-  $("final-msg").innerHTML=msg;var recap="";results.forEach(function(r){recap+="<div class='recap-row "+(r.correct?"ok":"ko")+"'><span>"+(r.correct?"\u2714":"\u2718")+"</span><span class='rk'>"+r.txt+"</span><span><b>"+(r.ans?"Oui":"Non")+"</b></span></div>";});$("final-recap").innerHTML=recap;window.scrollTo({top:0,behavior:"smooth"});}
-function restart(){startGame();}
+  $("enonce").innerHTML="<div class='ex-titre'>Question "+(step+1)+" / "+QUESTIONS.length+"</div>Coche toutes celles qui sont \u00e9gales \u00e0 <b>"+q.cible+"</b>.";
+  $("q-tag").textContent="Coche les bonnes r\u00e9ponses";
+  $("q-text").innerHTML=""; $("q-text").style.display="none";
+  var zone=$("answer-zone"); zone.innerHTML="<div class='options' id='opts'></div>"; var box=$("opts");
+  q.items.forEach(function(it,i){ var b=document.createElement("div"); b.className="opt";
+    b.innerHTML="<span class='opt-key'>\u2610</span><span class='opt-txt'>"+it.txt+"</span>"; b.onclick=function(){toggle(i,b);}; box.appendChild(b); });
+  $("feedback").className="feedback"; $("btn-next").style.display="none";
+  $("btn-validate").style.display="inline-flex"; $("btn-validate").disabled=true;
+  if($("prog-label")){ $("prog-label").textContent="Question "+(step+1)+" / "+QUESTIONS.length; }
+  if($("prog-pct")){ var pct=Math.round(step/QUESTIONS.length*100); if($("progress-bar"))$("progress-bar").style.width=pct+"%"; $("prog-pct").textContent=pct+"\u00a0%"; }
+  if($("score-live")) $("score-live").textContent=passed.filter(Boolean).length;
+}
+function toggle(i,el){ if(locked)return; var p=sel.indexOf(i); if(p===-1){sel.push(i);el.classList.add("sel");el.querySelector(".opt-key").textContent="\u2611";}else{sel.splice(p,1);el.classList.remove("sel");el.querySelector(".opt-key").textContent="\u2610";} $("btn-validate").disabled=(sel.length===0); }
+function validate(){
+  if(locked)return; var q=QUESTIONS[step]; locked=true; $("btn-validate").style.display="none";
+  var all=$("opts").children, allGood=true;
+  q.items.forEach(function(it,i){ var el=all[i]; el.classList.add("locked"); var checked=sel.indexOf(i)!==-1;
+    if(it.ok&&checked){el.classList.add("chosen-correct");}else if(it.ok&&!checked){el.classList.add("miss");allGood=false;}else if(!it.ok&&checked){el.classList.add("chosen-wrong");allGood=false;} });
+  passed[step]=allGood;
+  var nb=q.items.filter(function(it){return it.ok;}).length;
+  var expl=""; q.items.forEach(function(it){ expl+="<div style='margin-top:.35rem;'>"+(it.ok?"\u2705":"\u274C")+" "+it.sol+"</div>"; });
+  var head=allGood?("Bravo&nbsp;! Tu as coch\u00e9 les "+nb+" fractions \u00e9gales \u00e0 "+q.cible+"."):"Pas tout \u00e0 fait. Voici le d\u00e9tail\u00a0:";
+  showFb(allGood, head+expl);
+  $("btn-next").style.display="inline-flex";
+  $("btn-next").textContent=(step===QUESTIONS.length-1)?"Voir le bilan \u2192":"Suivant \u2192";
+  if($("score-live")) $("score-live").textContent=passed.filter(Boolean).length;
+}
+function showFb(ok,msg){ var fb=$("feedback"); fb.className="feedback show "+(ok?"ok":"ko"); $("fb-ic").textContent=ok?"\u2705":"\u274C"; $("fb-msg").innerHTML=msg; }
+function nextStep(){ if(step<QUESTIONS.length-1){ step++; startQ(); } else showFinal(); }
+function starsFrac(ok,total){ var r=ok/total; return r>=1?5:r>=0.8?4:r>=0.6?3:r>=0.4?2:1; }
+function showFinal(){
+  $("board").classList.remove("show"); $("final").classList.add("show");
+  var ok=passed.filter(Boolean).length, total=QUESTIONS.length;
+  $("final-num").textContent=ok+" / "+total;
+  var st=starsFrac(ok,total); $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  var msg;
+  if(ok===total) msg="Parfait&nbsp;! Tu reconnais les fractions \u00e9gales.";
+  else if(ok>=3) msg="Tr\u00e8s bien&nbsp;! Une question \u00e0 revoir.";
+  else if(ok>=2) msg="Bien&nbsp;! Multiplie le haut et le bas par le m\u00eame nombre.";
+  else msg="\u00c0 retravailler : deux fractions \u00e9gales s\u2019obtiennent en multipliant haut et bas par le m\u00eame nombre.";
+  $("final-msg").innerHTML=msg;
+  var recap=""; QUESTIONS.forEach(function(q,i){ var r=passed[i]===true;
+    var bonnes=q.items.filter(function(it){return it.ok;}).map(function(it){return it.txt;}).join("  ;  ");
+    recap+="<div class='recap-row "+(r?"ok":"ko")+"'><span>"+(r?"\u2714":"\u2718")+"</span><span class='rk'>\u00e9gales \u00e0 "+q.cible+"</span><span><b>"+bonnes+"</b></span></div>"; });
+  $("final-recap").innerHTML=recap;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function restart(){ startGame(); }
 </script>
 </body></html>
