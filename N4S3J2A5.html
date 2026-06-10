@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths – [TITRE]</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══════════════════════════════════════════════════
+       ★ SEULE ZONE À MODIFIER : COULEUR DU JOUR
+       ═══════════════════════════════════════════════════
+       Lundi    → #f5a623 / #c47a10 / #fff5e0 / #f5d080 / rgba(245,166,35,.3)
+       Mardi    → #f28b82 / #c0392b / #fff0ef / #f9c0bb / rgba(242,139,130,.3)
+       Mercredi → #8dc63f / #3d7a10 / #f0faeb / #b5e08a / rgba(141,198,63,.3)
+       Jeudi    → #3ab5d8 / #1a6e88 / #e8f6fb / #9dd4e8 / rgba(58,181,216,.3)
+       Vendredi → #f5c518 / #8a6000 / #fffbeb / #f5e08a / rgba(245,197,24,.3)
+    ═══════════════════════════════════════════════════ */
+    :root {
+      --day-color:  #b94040;              /* couleur principale */
+      --day-dark:   #7a1f1f;              /* texte sur fond clair */
+      --day-light:  #f7eded;              /* fond des blocs */
+      --day-border: #e3b3b3;              /* bordures */
+      --day-glow:   rgba(185,64,64,.3);  /* ombre boutons */
+    }
+
+    /* ═══════════════════════════════════════════════════
+       CHARTE PAZAPA — NE PAS TOUCHER
+    ═══════════════════════════════════════════════════ */
+    :root {
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:var(--bg); color:var(--text);
+      font-family:Arial,sans-serif;
+      min-height:100vh; display:flex; flex-direction:column;
+      align-items:center; padding:2rem 1rem 4rem;
+      position:relative; overflow-x:hidden;
+      letter-spacing:.02em; word-spacing:.06em;
+    }
+
+    /* Fond décoratif — identique tous les jours */
+    body::before{
+      content:''; position:fixed; border-radius:50%; z-index:0;
+      opacity:.13; width:340px; height:340px;
+      background:var(--yellow); top:-80px; right:-80px;
+      pointer-events:none;
+    }
+    body::after{
+      content:''; position:fixed; border-radius:50%; z-index:0;
+      opacity:.13; width:260px; height:260px;
+      background:var(--blue); bottom:-60px; left:-60px;
+      pointer-events:none;
+    }
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:180px;height:180px;background:var(--blue);
+      bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+      width:120px;height:120px;background:var(--yellow);
+      top:200px;left:-30px;pointer-events:none;}
+
+    /* Header */
+    header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+    .logo-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:var(--yellow);color:#000;
+      font-size:.78rem;font-weight:700;letter-spacing:.08em;
+      text-transform:uppercase;padding:.3rem .9rem;
+      border-radius:99px;margin-bottom:.5rem;
+    }
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{
+      font-family:'JetBrains Mono',monospace;
+      font-size:.82rem;color:var(--muted);margin-bottom:.5rem;
+    }
+    h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;}
+    h1 .hl{color:var(--day-color);}
+    .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;
+      font-family:'JetBrains Mono',monospace;}
+
+    /* Progression */
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;
+      position:relative;z-index:1;}
+    .progress-info{display:flex;justify-content:space-between;
+      font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;
+      height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+
+    /* Chips */
+    .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;
+      flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+    .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;
+      border-radius:99px;font-size:.8rem;
+      font-family:'JetBrains Mono',monospace;
+      border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+    .chip .dot{width:8px;height:8px;border-radius:50%;}
+    .chip.correct .dot{background:var(--green);}
+    .chip.wrong   .dot{background:var(--pink);}
+    .chip.remaining .dot{background:var(--muted);}
+
+    /* Card */
+    .card{width:100%;max-width:680px;background:var(--surface);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem 2rem 1.6rem;position:relative;z-index:1;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);
+      animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+
+    .q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);margin-bottom:.5rem;
+      text-transform:uppercase;letter-spacing:.1em;}
+    .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;
+      padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;
+      letter-spacing:.08em;margin-bottom:.7rem;
+      background:var(--day-light);color:var(--day-dark);
+      border:1.5px solid var(--day-border);}
+
+    /* Équation */
+    .eq-box{background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:12px;padding:.9rem 1.2rem;margin-bottom:1rem;
+      font-family:'JetBrains Mono',monospace;
+      font-size:clamp(1.2rem,3vw,1.8rem);
+      font-weight:700;color:var(--day-dark);text-align:center;}
+
+    .q-text{font-size:.9rem;color:var(--muted);
+      margin-bottom:.8rem;line-height:1.8;}
+
+    /* Méthode */
+    .method-box{display:none;background:var(--day-light);
+      border:1.5px solid var(--day-border);
+      border-left:4px solid var(--day-color);
+      border-radius:8px;padding:.75rem 1rem;margin-bottom:1.2rem;
+      font-size:.84rem;font-family:'JetBrains Mono',monospace;
+      color:var(--day-dark);line-height:1.8;}
+    .method-box strong{color:var(--day-color);}
+    .method-box.reveal{display:block;}
+
+    /* Input */
+    .input-row{display:flex;align-items:center;gap:.7rem;
+      flex-wrap:wrap;position:relative;z-index:2;margin-bottom:.8rem;}
+    .input-label{font-family:'JetBrains Mono',monospace;
+      font-size:1rem;font-weight:700;}
+    .answer-input{width:240px;background:var(--bg);
+      border:2px solid var(--border);border-radius:10px;
+      color:var(--text);font-family:'JetBrains Mono',monospace;
+      font-size:1.05rem;padding:.5rem .85rem;outline:none;
+      transition:border-color .2s;position:relative;z-index:2;height:2.6rem;}
+    .answer-input:focus{border-color:var(--day-color);}
+    .answer-input.correct-input{border-color:var(--green);background:#f0faeb;}
+    .answer-input.wrong-input  {border-color:var(--pink); background:#fff0ef;}
+
+    /* Boutons */
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;
+      position:relative;z-index:2;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;
+      padding:.6rem 1.3rem;border-radius:10px;
+      font-family:Arial,sans-serif;font-size:.92rem;
+      font-weight:700;cursor:pointer;border:none;
+      transition:transform .12s,box-shadow .15s;
+      position:relative;z-index:2;min-height:2.6rem;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;
+      box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);
+      box-shadow:0 5px 16px var(--day-glow);}
+    .btn-hint{background:var(--orange);color:#fff;}
+    .btn-ghost{background:transparent;color:var(--muted);
+      border:2px solid var(--border);}
+    .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+    /* Indice */
+    .hint-box{margin-top:.9rem;background:#fffbeb;
+      border:1.5px dashed var(--yellow);border-radius:10px;
+      padding:.75rem 1rem;font-size:.85rem;color:#7a6010;
+      display:none;line-height:1.8;
+      font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
+
+    /* Feedback */
+    .feedback{margin-top:1.2rem;padding:.8rem 1rem;border-radius:10px;
+      font-size:.9rem;display:none;align-items:flex-start;
+      gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink); color:#c0392b;}
+    .feedback-icon{font-size:1.4rem;flex-shrink:0;}
+    .feedback-detail{color:var(--text);font-family:'JetBrains Mono',monospace;
+      font-size:.82rem;margin-top:.3rem;line-height:1.8;}
+
+    /* Nav */
+    .nav-row{display:flex;justify-content:space-between;
+      margin-top:1.4rem;gap:.7rem;position:relative;z-index:2;}
+
+    /* Résultats */
+    .results{width:100%;max-width:680px;text-align:center;
+      display:none;position:relative;z-index:1;}
+    .results.show{display:block;}
+    .results-card{background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:2.5rem 2rem;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;
+      line-height:1;margin:.8rem 0 .4rem;}
+    .results-score .s-num{color:var(--day-color);}
+    .stars{font-size:2rem;margin:.4rem 0 1rem;}
+    .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:2rem;}
+    .recap-list{text-align:left;display:flex;flex-direction:column;
+      gap:.5rem;margin-bottom:2rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.8rem;
+      padding:.65rem 1rem;background:var(--bg);
+      border:1.5px solid var(--border);border-radius:10px;
+      font-family:'JetBrains Mono',monospace;
+      font-size:.82rem;line-height:1.6;}
+    .recap-item .eq{color:var(--day-color);flex:1;}
+    .recap-item.ok-item{border-color:#b5e08a;}
+    .recap-item.ko-item{border-color:#f9c0bb;}
+
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(16px);}
+      to  {opacity:1;transform:translateY(0);}
+    }
+    .card,.results{animation:fadeUp .4s ease both;}
+    @media(max-width:480px){
+      .card{padding:1.4rem;}
+      .btn{font-size:.85rem;padding:.55rem 1rem;}
+    }
+  
+    /* layout page unique + carte header + boutons niveau + carte stats */
+    #cards{width:100%;max-width:680px;}
+    #cards .card{margin:0 auto 1.5rem;padding:1.8rem 1.7rem 1.5rem;}
+    .btn-hint{background:var(--orange);color:#fff;}
+    .head-card{width:100%;max-width:680px;background:var(--day-light);border:2px solid var(--day-border);border-radius:var(--radius);padding:1.9rem 1.5rem 1.6rem;text-align:center;position:relative;z-index:1;margin-bottom:1.3rem;}
+    .head-card .logo-badge{background:var(--day-color);color:#fff;font-size:14px;letter-spacing:.09em;}
+    .head-card .week-label{color:var(--day-dark);font-size:.95rem;margin:.5rem 0;}
+    .head-card h1{line-height:1.25;margin:.2rem 0;}
+    .head-card h1 .hl{color:var(--day-color);font-size:clamp(1.45rem,4.6vw,1.95rem);font-weight:800;display:inline-block;}
+    .head-card h1 .lvl{color:var(--text);font-size:clamp(1.55rem,5.2vw,2.2rem);font-weight:900;display:inline-block;margin-top:.15rem;}
+    .head-card .subtitle{color:var(--muted);font-size:1.02rem;margin-top:.5rem;}
+    .level-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;}
+    .level-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.92rem;letter-spacing:.06em;text-transform:uppercase;padding:.6rem 1.15rem;border-radius:12px;border:2px solid var(--day-border);background:var(--surface);color:var(--day-dark);text-decoration:none;min-height:2.9rem;display:inline-flex;align-items:center;transition:transform .12s;}
+    .level-btn:hover{transform:translateY(-1px);}
+    .level-btn.active{background:var(--day-color);color:#fff;border-color:var(--day-color);box-shadow:0 3px 10px var(--day-glow);}
+    .stats-card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.1rem;margin-bottom:1.7rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.05);}
+    .stats-row{display:flex;gap:.8rem;}
+    .stat-box{flex:1;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;padding:.9rem .5rem;text-align:center;}
+    .stat-num{font-size:1.7rem;font-weight:800;color:var(--day-dark);font-family:'JetBrains Mono',monospace;line-height:1.1;}
+    .stat-label{font-size:.86rem;color:var(--muted);margin-top:.25rem;}
+    .prog-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:1rem;}
+    .prog-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;}
+    .prog-text{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--muted);margin-top:.6rem;}
+    /* lisibilite dys */
+    body{letter-spacing:.03em;word-spacing:.08em;line-height:1.6;}
+    .theme-badge{font-size:.82rem!important;padding:.2rem .7rem!important;}
+    .q-num{font-size:.8rem!important;letter-spacing:.08em!important;}
+    .eq-box{font-size:clamp(1.05rem,2.6vw,1.35rem)!important;line-height:1.6!important;padding:1rem 1.1rem!important;overflow-x:auto;max-width:100%;}
+    .q-text{font-size:.98rem!important;color:var(--day-dark)!important;font-weight:600!important;line-height:1.7!important;margin-bottom:.55rem!important;}
+    .input-label{font-size:1.2rem!important;}
+    .answer-input{font-size:1.25rem!important;height:3.1rem!important;width:min(260px,100%)!important;}
+    .btn{font-size:clamp(1rem,2.8vw,1.12rem)!important;font-weight:800!important;min-height:3.1rem!important;padding:.7rem 1.45rem!important;}
+    .method-box{font-size:1rem!important;line-height:1.85!important;padding:.95rem 1.15rem!important;}
+    .hint-box{font-size:1rem!important;line-height:1.8!important;}
+    .feedback{font-size:clamp(1rem,2.6vw,1.1rem)!important;line-height:1.8!important;}
+    .feedback-icon{font-size:1.7rem!important;}
+    .results-score{font-size:clamp(3rem,11vw,4.8rem)!important;}
+    .stars{font-size:2.2rem!important;}
+    .results-msg{font-size:clamp(1.02rem,2.6vw,1.12rem)!important;line-height:1.7!important;}
+    .recap-item{font-size:.94rem!important;line-height:1.7!important;}
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+  <div class="head-card">
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:rgba(255,255,255,.55)"></span>
+      <span class="logo-dot" style="background:#fff"></span>
+      PAZAPA &middot; MATHS &middot; 4&Egrave;ME
+    </div>
+    <div class="week-label">Semaine 3 — Jour 2</div>
+    <h1><span class="hl">&#9999;&#65039; S&eacute;rie d&rsquo;exercices</span><br><span class="lvl">Niveau 3</span></h1>
+    <p class="subtitle">Distributivité et développement</p>
+    <div class="level-row"><a class="level-btn" href="N4S3J2_N1_Distributivite.html">Niveau 1</a><a class="level-btn" href="N4S3J2_N2_Distributivite.html">Niveau 2</a><a class="level-btn active" href="N4S3J2_N3_Distributivite.html">Niveau 3</a></div>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="st-ok">0</div><div class="stat-label">R&eacute;ussies</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-rem">12</div><div class="stat-label">Restantes</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-err">0</div><div class="stat-label">Erreurs</div></div>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+    <div class="prog-text" id="prog-text">0 / 12</div>
+  </div>
+
+  <div id="cards"></div>
+
+  <section class="results" id="results">
+    <div class="results-card">
+      <div class="q-num">R&eacute;sultats</div>
+      <div class="results-score"><span class="s-num" id="res-score">0 / 12</span></div>
+      <div class="stars" id="stars"></div>
+      <p class="results-msg" id="res-msg"></p>
+      <div class="recap-list" id="recap"></div>
+      <button class="btn btn-primary" onclick="restart()">&#8635; Recommencer</button>
+    </div>
+  </section>
+
+  <script>
+  var EXERCISES = [
+  { eq:"Développe et réduis : A = ((9/2)x − 6)((9/2)x + 6)", label:"Réponse =", answers:["81/4x^2-36","20.25x^2-36","81x^2/4-36"], show:"81/4 x² − 36", theme:"Identité (a−b)(a+b)",
+    method:"((9/2)x)² − 6² = 81/4 x² − 36", hint:"Identité a² − b² ; ici a = (9/2)x. Pense à élever la fraction au carré." },
+  { eq:"Développe et réduis : B = ((7/3)x − 4)((7/3)x + 4)", label:"Réponse =", answers:["49/9x^2-16","49x^2/9-16"], show:"49/9 x² − 16", theme:"Identité (a−b)(a+b)",
+    method:"((7/3)x)² − 4² = 49/9 x² − 16", hint:"Même identité a² − b² avec une fraction comme coefficient." },
+  { eq:"Développe et réduis : C = ((7/5)a − 4)((7/5)a + 4)", label:"Réponse =", answers:["49/25a^2-16","1.96a^2-16","49a^2/25-16"], show:"49/25 a² − 16", theme:"Identité (a−b)(a+b)",
+    method:"((7/5)a)² − 4² = 49/25 a² − 16", hint:"a² − b², avec la lettre a et un coefficient fractionnaire." },
+  { eq:"Développe et réduis : A = (−6a − 6)(−7a − 4)", label:"Réponse =", answers:["42a^2+66a+24"], show:"42a² + 66a + 24", theme:"Double distributivité",
+    method:"(−6a)(−7a) + (−6a)(−4) + (−6)(−7a) + (−6)(−4) = 42a² + 66a + 24", hint:"Le produit de deux nombres négatifs est positif." },
+  { eq:"Développe et réduis : B = (−x − 4)(−5x − 6)", label:"Réponse =", answers:["5x^2+26x+24"], show:"5x² + 26x + 24", theme:"Double distributivité",
+    method:"5x² + 6x + 20x + 24 = 5x² + 26x + 24", hint:"Quatre produits, attention aux signes." },
+  { eq:"Développe et réduis : C = (−4b − 4)(−5b − 5)", label:"Réponse =", answers:["20b^2+40b+20"], show:"20b² + 40b + 20", theme:"Double distributivité",
+    method:"20b² + 20b + 20b + 20 = 20b² + 40b + 20", hint:"Tous les facteurs sont négatifs au départ." },
+  { eq:"Développe et réduis : A = (x + 7)(x + 2)", label:"Réponse =", answers:["x^2+9x+14"], show:"x² + 9x + 14", theme:"Table de distributivité",
+    method:"x² + 2x + 7x + 14 = x² + 9x + 14", hint:"Complète la table, puis regroupe les termes semblables." },
+  { eq:"Développe et réduis : B = (5x − 4)(6x − 3)", label:"Réponse =", answers:["30x^2-39x+12"], show:"30x² − 39x + 12", theme:"Table de distributivité",
+    method:"30x² − 15x − 24x + 12 = 30x² − 39x + 12", hint:"Quatre produits, soigne les signes." },
+  { eq:"Développe et réduis : C = (3x + 8)(4x + 9)", label:"Réponse =", answers:["12x^2+59x+72"], show:"12x² + 59x + 72", theme:"Table de distributivité",
+    method:"12x² + 27x + 32x + 72 = 12x² + 59x + 72", hint:"Multiplie chaque terme, puis réduis." },
+  { eq:"Rose multiplicative — développe : a = (8x + 7)(4x + 5)", label:"Réponse =", answers:["32x^2+68x+35"], show:"32x² + 68x + 35", theme:"Rose multiplicative",
+    method:"(8x+7)(4x+5) = 32x² + 40x + 28x + 35 = 32x² + 68x + 35", hint:"Multiplie les deux expressions (double distributivité)." },
+  { eq:"Rose multiplicative — développe : b = (4x + 5)(x + 5)", label:"Réponse =", answers:["4x^2+25x+25"], show:"4x² + 25x + 25", theme:"Rose multiplicative",
+    method:"(4x+5)(x+5) = 4x² + 20x + 5x + 25 = 4x² + 25x + 25", hint:"Quatre produits, puis regroupe les termes en x." },
+  { eq:"Rose multiplicative — développe : c = (8x + 7)(x + 5)", label:"Réponse =", answers:["8x^2+47x+35"], show:"8x² + 47x + 35", theme:"Rose multiplicative",
+    method:"(8x+7)(x+5) = 8x² + 40x + 7x + 35 = 8x² + 47x + 35", hint:"Double distributivité, attention aux termes en x." }
+];
+  var TOTAL = EXERCISES.length;
+  var state;
+  function $(id){return document.getElementById(id);}
+  function norm(s){return String(s).toLowerCase().replace(/\s+/g,"").replace(/\u2212/g,"-").replace(/\u00b2/g,"^2").replace(/\u00b3/g,"^3").replace(/[\u00d7\u00b7*]/g,"");}
+  function isCorrect(v,ex){if(v===null||v===undefined)return false;if(ex.answers){var n=norm(v);return ex.answers.some(function(a){return norm(a)===n;});}return parseFloat(v)===ex.ans;}
+  function buildCards(){
+    state = EXERCISES.map(function(){return{done:false,ok:false};});
+    var html="";
+    for(var i=0;i<TOTAL;i++){var ex=EXERCISES[i];
+      var _p=ex.eq.split(" : ");
+      var _cons=_p.length>1?(_p[0]+"\u00a0:"):"";
+      var _expr=(_p.length>1?_p.slice(1).join(" : "):ex.eq).replace(/ /g,"\u00a0");
+      html+='<div class="card" id="card'+i+'"><div class="card-stripe"></div>'
+        +'<div class="q-num">Question '+(i+1)+' / '+TOTAL+'</div>'
+        +'<div class="theme-badge">'+ex.theme+'</div>'
+        +(_cons?('<div class="q-text">'+_cons+'</div>'):'')+'<div class="eq-box">'+_expr+'</div>'
+        +'<div class="method-box" id="method'+i+'">'+ex.method+'</div>'
+        +'<div class="input-row"><span class="input-label">'+ex.label+'</span>'
+        +'<input type="text" class="answer-input" id="in'+i+'" placeholder="?" autocomplete="off" autocapitalize="off" spellcheck="false"/></div>'
+        +'<div class="btn-row"><button class="btn btn-primary" id="vb'+i+'" onclick="checkOne('+i+')">&#10003; V\u00e9rifier</button>'
+        +'<button class="btn btn-hint" id="hb'+i+'" onclick="toggleHint('+i+')">? Indice</button></div>'
+        +'<div class="hint-box" id="hint'+i+'">'+ex.hint+'</div>'
+        +'<div class="feedback" id="fb'+i+'"><span class="feedback-icon" id="fbi'+i+'"></span><div><span id="fbt'+i+'"></span></div></div></div>';}
+    $("cards").innerHTML=html;
+    for(var j=0;j<TOTAL;j++){(function(k){$("in"+k).addEventListener("keydown",function(e){if(e.key==="Enter")checkOne(k);});})(j);}
+  }
+  function checkOne(i){
+    if(state[i].done)return;
+    var raw=$("in"+i).value.trim(); if(raw===""){$("in"+i).focus();return;}
+    var ex=EXERCISES[i], ok=isCorrect(raw,ex);
+    state[i].done=true; state[i].ok=ok;
+    $("in"+i).disabled=true; $("vb"+i).disabled=true;
+    $("in"+i).className="answer-input "+(ok?"correct-input":"wrong-input");
+    $("method"+i).className="method-box reveal";
+    $("fb"+i).className="feedback show "+(ok?"ok":"ko");
+    $("fbi"+i).textContent=ok?"\u2713":"\u2717";
+    $("fbt"+i).innerHTML=ok?"Bravo, c\u2019est juste\u00a0!":("Pas tout \u00e0 fait. La bonne r\u00e9ponse \u00e9tait <strong>"+ex.show+"</strong>.");
+    update();
+  }
+  function toggleHint(i){var hb=$("hint"+i);hb.className="hint-box"+(hb.className.indexOf("show")<0?" show":"");}
+  function update(){
+    var done=0,ok=0; for(var i=0;i<TOTAL;i++){if(state[i].done){done++;if(state[i].ok)ok++;}}
+    $("st-ok").textContent=ok; $("st-err").textContent=done-ok; $("st-rem").textContent=TOTAL-done;
+    $("pfill").style.width=Math.round(done/TOTAL*100)+"%";
+    $("prog-text").textContent=done+" / "+TOTAL;
+    if(done===TOTAL)showResults(ok);
+  }
+  function showResults(ok){
+    $("res-score").textContent=ok+" / "+TOTAL;
+    var ratio=ok/TOTAL, stars=(ok===TOTAL)?5:Math.max(1,Math.round(ratio*5));
+    var st=""; for(var s=0;s<5;s++)st+=(s<stars?"\u2b50":"\u2606"); $("stars").textContent=st;
+    var err=TOTAL-ok,msg;
+    if(err===0)msg="Parfait, sans-faute\u00a0! Tu ma\u00eetrises la le\u00e7on.";
+    else if(err<=2)msg="Tr\u00e8s bien\u00a0! Tu as su corriger tes erreurs.";
+    else if(err<=4)msg="Bien jou\u00e9. Encore un peu d\u2019entra\u00eenement pour le sans-faute.";
+    else msg="\u00c0 retravailler\u00a0: recommence tranquillement, tu vas y arriver.";
+    $("res-msg").textContent=msg;
+    var rc=""; for(var i=0;i<TOTAL;i++){var ex=EXERCISES[i];rc+='<div class="recap-item '+(state[i].ok?"ok-item":"ko-item")+'"><span>'+(state[i].ok?"\u2713":"\u2717")+'</span><span class="eq">'+ex.show+'</span></div>';}
+    $("recap").innerHTML=rc; $("results").className="results show"; $("results").scrollIntoView({behavior:"smooth"});
+  }
+  function restart(){buildCards();$("results").className="results";update();window.scrollTo({top:0,behavior:"smooth"});}
+  buildCards();update();
+  </script>
+</body>
+</html>
