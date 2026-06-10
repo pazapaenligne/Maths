@@ -142,8 +142,10 @@
       border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.8;text-align:left;}
     .recap-row .rk{flex:1;min-width:8rem;font-weight:600;}
     .recap-row.ok{background:#f0faeb;border:1.5px solid #8dc63f;color:#3d7a10;}
+    .recap-row.mid{background:#fff5e0;border:1.5px solid #f5a623;color:#a85f00;}
     .recap-row.ko{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
     .recap-row b{font-weight:800;}
+    .recap-row .rscore{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82em;opacity:.85;}
     .res-score{font-size:clamp(1.6rem,7vw,2.4rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
     .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
     .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
@@ -267,11 +269,11 @@
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   ★ CONTENU — 2 PARTIES
-   Partie 1 « Partage et mesure » : 2 sous-problèmes (citernes, route)
-   Partie 2 « Du Fahrenheit au Celsius » : 1 problème
+   ★ CONTENU — 2 EXERCICES
+   Exercice 1 : repérer l'opération prioritaire (4 sous-problèmes a–d)
+   Exercice 2 : appliquer les priorités (6 sous-problèmes a–f)
    Chaque sous-problème : enonce + question + reponse + qs (QCM).
-   Une partie enchaîne tous les sous-problèmes puis affiche UN bilan.
+   Un exercice enchaîne tous ses sous-problèmes puis affiche UN bilan.
    ans = index de la bonne option. apostrophe -> \u2019
 ═══════════════════════════════════════════════════════ */
 var PARTIES = [
@@ -350,7 +352,7 @@ var PARTIES = [
         reponse:"2 + 4 \u2212 3 + 9 = 12",
         sol:"Que des + et − : de gauche à droite. 2 + 4 = 6, 6 − 3 = 3, 3 + 9 = <b>12</b>.",
         qs:[
-          { q:"Quelle règle faut-il appliquer ?", hint:"La multiplication et la division passent avant l’addition et la soustraction.", opts:["Multiplication ou division prioritaire","Calcul de gauche à droite"], ans:1 },
+          { q:"Quelle règle faut-il appliquer ?", hint:"Regarde quelles opérations sont présentes. S’il n’y a ni × ni ÷, on calcule dans l’ordre, de gauche à droite.", opts:["Multiplication ou division prioritaire","Calcul de gauche à droite"], ans:1 },
           { q:"Quelle opération effectues-tu en premier ?", hint:"Repère la multiplication ou la division ; s’il n’y en a pas, commence par la gauche.", opts:["2 + 4","4 \u2212 3"], ans:0 },
           { q:"Quel est le résultat ?", opts:["12","10","18"], ans:0 }
         ]
@@ -414,7 +416,7 @@ var sp = 0;          // index du sous-problème dans la partie
 var idx = 0;         // index de la question dans le sous-problème
 var chosen = [];     // réponses du sous-problème courant
 var okPart = [];     // bonnes réponses cumulées par PARTIE
-var spOk = {};       // réussite par sous-problème : clé "part-sp"
+var spScoreMap = {}; // score (nb de bonnes réponses) par sous-problème : clé "part-sp"
 var qPart = [];      // nombre total de questions par PARTIE
 var optOrder = [];   // ordre mélangé des options de la question courante
 
@@ -432,7 +434,7 @@ function startGame(){
   $("board").classList.add("show");
   part=0;
   okPart=new Array(PARTIES.length).fill(0);
-  spOk={};
+  spScoreMap={};
   qPart=PARTIES.map(function(_,i){return partQuestionCount(i);});
   startPart();
 }
@@ -455,23 +457,17 @@ function calculEnCours(S, expr){
   // Construit la suite du calcul à partir des étapes déjà validées correctement.
   // Étape 1: opération prioritaire (ex "23 − 9"). Étape 2: expression obtenue (ex "14 + 2"). Étape 3: résultat (ex "16").
   var lignes=[];
-  // étape 1 validée et correcte -> on connaît l'opération prioritaire ET son résultat (déduit de l'étape 2)
   var e1ok = chosen[0]!==null && chosen[0]===S.qs[0].ans;
   if(e1ok){
-    var opPrio = S.qs[0].opts[S.qs[0].ans];        // ex "23 − 9"
-    // le résultat de cette opération apparaît dans l'expression de l'étape 2
-    var expr2 = (S.qs[1] ? S.qs[1].opts[S.qs[1].ans] : "");  // ex "14 + 2"
-    // on calcule la valeur de l'opération prioritaire
+    var opPrio = S.qs[0].opts[S.qs[0].ans];
     var val = evalOp(opPrio);
     lignes.push(opPrio + (val!==null ? " = " + val : ""));
   }
-  // étape 2 validée -> montrer l'expression obtenue
   var e2ok = S.qs.length>1 && chosen[1]!==null && chosen[1]===S.qs[1].ans;
   if(e2ok){
     var expr2b = S.qs[1].opts[S.qs[1].ans];
     lignes.push(expr2b);
   }
-  // étape 3 validée -> résultat final
   var i3 = S.qs.length-1;
   var e3ok = chosen[i3]!==null && chosen[i3]===S.qs[i3].ans && i3>=2;
   if(e3ok){
@@ -484,7 +480,6 @@ function calculEnCours(S, expr){
   return html;
 }
 function evalOp(s){
-  // évalue une opération simple "a op b" avec − × ÷ +
   var m=s.replace(/\u00d7/g,"*").replace(/\u00f7/g,"/").replace(/\u2212/g,"-");
   m=m.replace(/[^0-9+\-*/.\s]/g,"").trim();
   if(!/^\d+(\.\d+)?\s*[+\-*/]\s*\d+(\.\d+)?$/.test(m)) return null;
@@ -504,7 +499,6 @@ function render(){
   $("q-tag").textContent="Étape "+(idx+1)+" / "+S.qs.length;
   $("q-text").textContent=qObj.q;
   buildOptions();
-  // réinitialiser l'indice à chaque question
   var hb=$("hint-box"); if(hb){ hb.classList.remove("show"); hb.innerHTML=""; }
   var bh=$("btn-hint");
   if(bh){
@@ -531,7 +525,6 @@ function render(){
       : "<strong>Pas tout à fait.</strong> "+explic;
     $("btn-next").disabled=false;
   } else { fb.className="feedback"; $("btn-next").disabled=true; }
-  // libellé du bouton : dernière question du dernier sous-problème de la partie -> bilan
   var lastQ = (idx===S.qs.length-1);
   var lastSP = (sp===P.sous.length-1);
   $("btn-next").textContent = (lastQ && lastSP) ? "Voir le bilan \u2192"
@@ -577,7 +570,6 @@ function updateProgress(){
   $("progress-bar").style.width=pct+"%";
   $("prog-label").textContent="Étape "+(idx+1)+" / "+curSP().qs.length;
   $("prog-pct").textContent=pct+"\u00a0%";
-  // score live cumulé sur la partie
   $("score-live").textContent= okPart[part] + scoreSP();
 }
 
@@ -589,7 +581,7 @@ function nextQ(){
   // fin du sous-problème : on cumule son score dans la partie
   var spScore = scoreSP();
   okPart[part]+= spScore;
-  spOk[part+"-"+sp] = (spScore === S.qs.length);
+  spScoreMap[part+"-"+sp] = spScore;   // on stocke le score réel (et non plus un booléen)
   if(sp<P.sous.length-1){ sp++; idx=0; chosen=new Array(curSP().qs.length).fill(null); optOrder=[]; render(); window.scrollTo({top:0,behavior:"smooth"}); }
   else showPartRes();
 }
@@ -608,17 +600,22 @@ function showPartRes(){
   $("exres-num").textContent=ok+" / "+total;
   var st=starsFrac(ok,total);
   $("exres-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
-  // récap par sous-problème : ✔ si entièrement juste, ✘ sinon
+  // récap par sous-problème : 3 états — tout juste (vert) / partiel (orange) / nul (rouge)
   var ans="";
   P.sous.forEach(function(s,si){
-    var reussi = spOk[part+"-"+si]===true;
-    ans += "<div class='recap-row "+(reussi?"ok":"ko")+"'>"
-        + "<span>"+(reussi?"\u2714":"\u2718")+"</span>"
+    var sc = spScoreMap[part+"-"+si]; if(sc===undefined) sc=0;
+    var nb = s.qs.length;
+    var cls, ico;
+    if(sc===nb){ cls="ok"; ico="\u2714"; }            // ✔ tout juste
+    else if(sc>0){ cls="mid"; ico="\u25D0"; }          // ◐ partiel
+    else { cls="ko"; ico="\u2718"; }                   // ✘ nul
+    ans += "<div class='recap-row "+cls+"'>"
+        + "<span>"+ico+"</span>"
         + "<span class='rk'>"+s.titre+"</span>"
+        + "<span class='rscore'>"+sc+"/"+nb+"</span>"
         + "<span><b>"+s.reponse+"</b></span></div>";
   });
   $("exres-answer").innerHTML=ans;
-  // explication détaillée (solution) de chaque sous-problème
   var solBox=$("exres-sol");
   if(solBox){
     var sol="";
