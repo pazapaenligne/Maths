@@ -545,6 +545,17 @@ body{
 
 <div class="particles" id="particles"></div>
 
+<!-- Bouton son/mute (flottant) -->
+<button id="soundBtn" title="Activer/couper le son" style="
+  position:fixed; top:14px; right:14px; z-index:300;
+  width:44px; height:44px; border-radius:50%; border:2px solid var(--cuivre);
+  background:linear-gradient(135deg, #3a2410, #5a3a1a);
+  color:var(--or); font-size:1.2rem; cursor:pointer;
+  box-shadow:0 3px 10px rgba(0,0,0,.4);
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .15s, box-shadow .2s;
+">🔇</button>
+
 <div class="wrap">
 
   <div class="header">
@@ -618,6 +629,227 @@ body{
     <button class="btn-rejouer" onclick="restartGame()">🔄 Rejouer la mission</button>
   </div>
 </div>
+
+<script>
+/* ============================================================
+   SYSTÈME AUDIO (Web Audio API - synthèse sans fichiers externes)
+   ============================================================ */
+let audioCtx = null;
+let audioEnabled = false;
+let ambianceNodes = []; // pour pouvoir arrêter l'ambiance proprement
+let crackleInterval = null;
+
+function initAudio(){
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch(e){
+    audioCtx = null;
+  }
+}
+
+/* ---- AMBIANCE : drone grave + souffle aérien ---- */
+function startAmbiance(){
+  if (!audioCtx) return;
+  stopAmbiance();
+
+  // Drone basse fréquence ~55 Hz
+  const drone = audioCtx.createOscillator();
+  drone.type = 'sine';
+  drone.frequency.value = 55;
+  const droneGain = audioCtx.createGain();
+  droneGain.gain.value = 0.04;
+  drone.connect(droneGain).connect(audioCtx.destination);
+  drone.start();
+
+  // Souffle (bruit blanc filtré) - vent léger
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++){
+    data[i] = (Math.random() * 2 - 1) * 0.5;
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'lowpass';
+  noiseFilter.frequency.value = 200;
+  noiseFilter.Q.value = 0.5;
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.value = 0.025;
+
+  noise.connect(noiseFilter).connect(noiseGain).connect(audioCtx.destination);
+  noise.start();
+
+  ambianceNodes.push(drone, droneGain, noise, noiseFilter, noiseGain);
+
+  // Craquements de bois aléatoires toutes les 8-18 secondes
+  scheduleCrackle();
+}
+
+function scheduleCrackle(){
+  if (crackleInterval) clearTimeout(crackleInterval);
+  const delay = 8000 + Math.random() * 10000;
+  crackleInterval = setTimeout(function(){
+    if (audioEnabled && audioCtx){
+      playCrackle();
+      scheduleCrackle();
+    }
+  }, delay);
+}
+
+function playCrackle(){
+  if (!audioCtx) return;
+  // Craquement = bruit court avec enveloppe rapide
+  const now = audioCtx.currentTime;
+  const bufferSize = audioCtx.sampleRate * 0.3;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++){
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.15));
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 800 + Math.random() * 400;
+  filter.Q.value = 2;
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.08;
+  src.connect(filter).connect(gain).connect(audioCtx.destination);
+  src.start(now);
+}
+
+function stopAmbiance(){
+  ambianceNodes.forEach(function(n){
+    try { n.stop && n.stop(); n.disconnect && n.disconnect(); } catch(e){}
+  });
+  ambianceNodes = [];
+  if (crackleInterval){ clearTimeout(crackleInterval); crackleInterval = null; }
+}
+
+/* ---- EFFETS SONORES ---- */
+
+// Petit clic discret (sélection)
+function sndClick(){
+  if (!audioCtx || !audioEnabled) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(800, now);
+  osc.frequency.exponentialRampToValueAtTime(600, now + 0.04);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.001, now);
+  g.gain.exponentialRampToValueAtTime(0.08, now + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+  osc.connect(g).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.06);
+}
+
+// Ouverture cadenas : clic métallique + cascade descendante
+function sndUnlock(){
+  if (!audioCtx || !audioEnabled) return;
+  const now = audioCtx.currentTime;
+
+  // Clic métallique sec
+  const clk = audioCtx.createOscillator();
+  clk.type = 'triangle';
+  clk.frequency.setValueAtTime(1200, now);
+  const cg = audioCtx.createGain();
+  cg.gain.setValueAtTime(0.001, now);
+  cg.gain.exponentialRampToValueAtTime(0.2, now + 0.005);
+  cg.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+  clk.connect(cg).connect(audioCtx.destination);
+  clk.start(now); clk.stop(now + 0.1);
+
+  // Cascade harmonique ascendante (cadenas qui s'ouvre)
+  const notes = [523, 659, 784, 1046]; // do, mi, sol, do (Do majeur)
+  notes.forEach(function(freq, i){
+    const t = now + 0.12 + i * 0.08;
+    const o = audioCtx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t + 0.3);
+  });
+}
+
+// Buzz d'erreur (descendant)
+function sndError(){
+  if (!audioCtx || !audioEnabled) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(220, now);
+  osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.001, now);
+  g.gain.exponentialRampToValueAtTime(0.1, now + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+  osc.connect(g).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.4);
+}
+
+// Fanfare victoire (arpège majeur ascendant + accord final)
+function sndVictory(){
+  if (!audioCtx || !audioEnabled) return;
+  const now = audioCtx.currentTime;
+  // Arpège
+  const arp = [523, 659, 784, 1046, 1318]; // do mi sol do mi (deux octaves)
+  arp.forEach(function(freq, i){
+    const t = now + i * 0.1;
+    const o = audioCtx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.value = freq;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.exponentialRampToValueAtTime(0.15, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t + 0.35);
+  });
+  // Accord final (do majeur)
+  const chord = [261, 329, 392, 523];
+  chord.forEach(function(freq){
+    const t = now + 0.6;
+    const o = audioCtx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.exponentialRampToValueAtTime(0.1, t + 0.05);
+    g.gain.linearRampToValueAtTime(0.05, t + 0.8);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t + 1.6);
+  });
+}
+
+/* ---- BOUTON SON ---- */
+const soundBtn = document.getElementById('soundBtn');
+function setSoundState(on){
+  audioEnabled = on;
+  soundBtn.textContent = on ? '🔊' : '🔇';
+  soundBtn.title = on ? 'Couper le son' : 'Activer le son';
+  if (on){
+    initAudio();
+    if (audioCtx && audioCtx.state === 'suspended'){
+      audioCtx.resume();
+    }
+    startAmbiance();
+  } else {
+    stopAmbiance();
+  }
+}
+soundBtn.onclick = function(){ setSoundState(!audioEnabled); };
+</script>
 
 <script>
 const ENIGMES = [
@@ -847,6 +1079,7 @@ function selectChoix(i){
   if (currentIdx < 0) return;
   if (etat[currentIdx].validated) return;
   etat[currentIdx].selected = i;
+  sndClick();
   const btns = document.querySelectorAll('#choixCont .choix-btn');
   for (let j = 0; j < btns.length; j++){
     if (j === i) btns[j].classList.add('selected');
@@ -892,6 +1125,7 @@ function validerChoix(){
   if (isOk){
     st.open = true;
     cadenasOpen += 1;
+    sndUnlock();
     setTimeout(function(){
       closeModal();
       renderGrid();
@@ -900,6 +1134,7 @@ function validerChoix(){
       }
     }, 1600);
   } else {
+    sndError();
     setTimeout(function(){
       const btnsDiv = document.querySelector('#modalBody .btns');
       if (btnsDiv && !document.getElementById('btnRetry')) {
@@ -938,6 +1173,7 @@ function showVictory(){
   document.getElementById('vStars').textContent = stars;
   document.getElementById('vMessage').innerHTML = msg;
   document.getElementById('victory').classList.add('show');
+  sndVictory();
   launchConfetti();
 }
 
