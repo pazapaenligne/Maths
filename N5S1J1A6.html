@@ -76,6 +76,8 @@
     .enonce .mission-expr-line{margin:.3rem 0;font-weight:700;color:var(--day-dark);}
     .enonce .mission-expr{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.08em;}
     .enonce .mission-situ{margin-top:.3rem;line-height:1.9;}
+    .enonce .prop-line{margin:.35rem 0;padding:.45rem .7rem;background:var(--surface);
+      border:1.5px solid var(--day-border);border-radius:8px;font-size:.96em;}
     .feedback .fb-sol{display:block;margin-top:.35rem;font-weight:400;}
 
     .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
@@ -87,10 +89,11 @@
     .q-text{font-size:clamp(.95rem,2.9vw,1.1rem);font-weight:700;line-height:1.8;margin-bottom:1rem;color:var(--text);}
 
     .options{display:flex;flex-direction:column;gap:.6rem;}
-    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
+    .opt{display:flex;align-items:flex-start;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
       border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;
       font-size:clamp(.9rem,2.7vw,1rem);line-height:1.8;transition:border-color .15s,background .15s;text-align:left;}
-    .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.4rem;text-align:center;}
+    .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.4rem;text-align:center;line-height:1.8;}
+    .opt>span:last-child{flex:1;min-width:0;overflow-wrap:break-word;}
     .opt:hover:not(.locked){border-color:var(--day-color);}
     .opt.locked{cursor:default;}
     .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
@@ -138,7 +141,9 @@
       border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.8;text-align:left;}
     .recap-row .rk{flex:1;min-width:8rem;font-weight:600;}
     .recap-row.ok{background:#f0faeb;border:1.5px solid #8dc63f;color:#3d7a10;}
+    .recap-row.mid{background:#fff5e0;border:1.5px solid #f5a623;color:#a85f00;}
     .recap-row.ko{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
+    .recap-row .rscore{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82em;opacity:.85;}
     .recap-row b{font-weight:800;}
     .res-score{font-size:clamp(1.6rem,7vw,2.4rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
     .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
@@ -167,7 +172,7 @@
     </div>
     <div class="week-label">Semaine 1 &ndash; Jour 1</div>
     <h1>⚖️ Qui a <span class="hl">raison&nbsp;?</span></h1>
-    <p class="subtitle">enchaîner des opérations sans parenthèses &rarr; à toi de trancher</p>
+    <p class="subtitle">Deux élèves ne sont pas d&rsquo;accord : qui a raison&nbsp;?</p>
   </header>
 
   <div class="stage">
@@ -263,11 +268,9 @@
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   ★ CONTENU — 2 PARTIES
-   Partie 1 « Partage et mesure » : 2 sous-problèmes (citernes, route)
-   Partie 2 « Du Fahrenheit au Celsius » : 1 problème
-   Chaque sous-problème : enonce + question + reponse + qs (QCM).
-   Une partie enchaîne tous les sous-problèmes puis affiche UN bilan.
+   ★ CONTENU — « Qui a raison ? » (3 situations, 1 bilan global)
+   Chaque situation : titre + expr + props (2 propositions d'élèves)
+   + 2 questions (Qui ? / Pourquoi ?) + reponse + sol.
    ans = index de la bonne option. apostrophe -> \u2019
 ═══════════════════════════════════════════════════════ */
 var PARTIES = [
@@ -275,17 +278,48 @@ var PARTIES = [
     titre:"⚖️ Qui a raison ?",
     sous:[
       {
-        titre:"Yanis ou Moussa ?",
-        enonce:"Pour calculer 125 \u2212 5 + 20 : Yanis dit qu\u2019il faut d\u2019abord effectuer la soustraction. Moussa dit qu\u2019il faut d\u2019abord effectuer l\u2019opération située à gauche.",
+        titre:"Situation 1 \u00b7 18 + 4 \u00d7 3",
+        expr:"18 + 4 \u00d7 3",
+        props:["Youssef dit : (18 + 4) \u00d7 3 = 66","Adam dit : 18 + (4 \u00d7 3) = 30"],
         question:"Qui a raison, et pourquoi ?",
-        reponse:"Moussa a raison : 125 \u2212 5 + 20 = 140 (de gauche à droite).",
-        sol:"Avec seulement + et \u2212, on calcule de gauche à droite : 125 \u2212 5 = 120, puis 120 + 20 = <b>140</b>.",
+        reponse:"Adam a raison : 18 + 4 \u00d7 3 = 30.",
+        sol:"La multiplication est prioritaire : 4 \u00d7 3 = 12, puis 18 + 12 = <b>30</b>.",
         qs:[
-          { q:"Qui a raison ?", hint:"Dans 125 \u2212 5 + 20, il n\u2019y a ni \u00d7 ni \u00f7. Que reste-t-il comme règle ?", opts:["Yanis","Moussa"], ans:1 },
+          { q:"Qui a raison ?", hint:"Quelle opération est prioritaire entre une addition et une multiplication ?", opts:["Youssef","Adam"], ans:1 },
           { q:"Pourquoi ?",
-            opts:["Lorsqu\u2019il n\u2019y a que des additions et des soustractions, on calcule de gauche à droite.",
+            opts:["La multiplication est prioritaire sur l\u2019addition.",
+                  "On calcule toujours de gauche à droite.",
+                  "On commence par le plus grand nombre."], ans:0 }
+        ]
+      },
+      {
+        titre:"Situation 2 \u00b7 36 \u00f7 6 \u00d7 2",
+        expr:"36 \u00f7 6 \u00d7 2",
+        props:["Anas dit : 36 \u00f7 6 = 6 puis 6 \u00d7 2 = 12","Omar dit : 36 \u00f7 (6 \u00d7 2) = 3"],
+        question:"Qui a raison, et pourquoi ?",
+        reponse:"Anas a raison : 36 \u00f7 6 \u00d7 2 = 12.",
+        sol:"Avec seulement \u00d7 et \u00f7, on calcule de gauche à droite : 36 \u00f7 6 = 6, puis 6 \u00d7 2 = <b>12</b>.",
+        qs:[
+          { q:"Qui a raison ?", hint:"Quand une division est suivie d\u2019une multiplication, dans quel ordre calcule-t-on ?", opts:["Anas","Omar"], ans:0 },
+          { q:"Pourquoi ?",
+            opts:["Lorsqu\u2019il y a seulement des multiplications et des divisions, on calcule de gauche à droite.",
+                  "La multiplication est toujours prioritaire sur la division.",
+                  "On commence toujours par la dernière opération."], ans:0 }
+        ]
+      },
+      {
+        titre:"Situation 3 \u00b7 24 \u2212 8 + 5",
+        expr:"24 \u2212 8 + 5",
+        props:["Yanis dit : 24 \u2212 8 + 5 = 21","Moussa dit : 24 \u2212 (8 + 5) = 11"],
+        question:"Qui a raison, et pourquoi ?",
+        reponse:"Yanis a raison : 24 \u2212 8 + 5 = 21.",
+        sol:"Avec seulement + et \u2212, on calcule de gauche à droite : 24 \u2212 8 = 16, puis 16 + 5 = <b>21</b>.",
+        qs:[
+          { q:"Qui a raison ?", hint:"Y a-t-il une multiplication ou une division dans cette expression ?", opts:["Yanis","Moussa"], ans:0 },
+          { q:"Pourquoi ?",
+            opts:["Lorsqu\u2019il y a seulement des additions et des soustractions, on calcule de gauche à droite.",
                   "On effectue toujours les soustractions avant les additions.",
-                  "On commence toujours par le plus grand nombre."], ans:0 }
+                  "On commence toujours par le plus petit nombre."], ans:0 }
         ]
       }
     ]
@@ -299,7 +333,7 @@ var sp = 0;          // index du sous-problème dans la partie
 var idx = 0;         // index de la question dans le sous-problème
 var chosen = [];     // réponses du sous-problème courant
 var okPart = [];     // bonnes réponses cumulées par PARTIE
-var spOk = {};       // réussite par sous-problème : clé "part-sp"
+var spScoreMap = {}; // score réel par sous-problème : clé "part-sp"
 var qPart = [];      // nombre total de questions par PARTIE
 var optOrder = [];   // ordre mélangé des options de la question courante
 
@@ -317,7 +351,7 @@ function startGame(){
   $("board").classList.add("show");
   part=0;
   okPart=new Array(PARTIES.length).fill(0);
-  spOk={};
+  spScoreMap={};
   qPart=PARTIES.map(function(_,i){return partQuestionCount(i);});
   startPart();
 }
@@ -342,12 +376,17 @@ function render(){
   var qObj=S.qs[idx];
   if(chosen[idx]===null || optOrder.length!==qObj.opts.length) buildOrder();
   $("act-label").textContent=P.titre;
-  // extraire l'expression de l'énoncé (entre "calculer" et ":")
-  var mExpr = S.enonce.match(/calculer\s+(.+?)\s*:/);
-  var exprHtml = mExpr ? "<div class='mission-expr-line'>🧮 Expression : <span class='mission-expr'>"+mExpr[1]+"</span></div>" : "";
+  // afficher l'expression + les deux propositions d'élèves
+  var exprHtml = S.expr ? "<div class='mission-expr-line'>🧮 Expression : <span class='mission-expr'>"+S.expr+"</span></div>" : "";
+  var propsHtml = "";
+  if(S.props && S.props.length){
+    propsHtml = "<div class='mission-situ'>";
+    S.props.forEach(function(p){ propsHtml += "<div class='prop-line'>💬 "+p+"</div>"; });
+    propsHtml += "</div>";
+  }
   $("enonce").innerHTML="<div class='ex-titre'>⚖️ "+S.titre+"</div>"
     +exprHtml
-    +"<div class='mission-situ'>"+S.enonce+"</div>"
+    +propsHtml
     +"<div class='ex-quest'>👉 "+S.question+"</div>";
   $("q-tag").textContent="Étape "+(idx+1)+" / "+S.qs.length;
   $("q-text").textContent=qObj.q;
@@ -432,7 +471,7 @@ function nextQ(){
   // fin du sous-problème : on cumule son score dans la partie
   var spScore = scoreSP();
   okPart[part]+= spScore;
-  spOk[part+"-"+sp] = (spScore === S.qs.length);
+  spScoreMap[part+"-"+sp] = spScore;
   if(sp<P.sous.length-1){ sp++; idx=0; chosen=new Array(curSP().qs.length).fill(null); optOrder=[]; render(); window.scrollTo({top:0,behavior:"smooth"}); }
   else showPartRes();
 }
@@ -451,13 +490,19 @@ function showPartRes(){
   $("exres-num").textContent=ok+" / "+total;
   var st=starsFrac(ok,total);
   $("exres-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
-  // récap par sous-problème : ✔ si entièrement juste, ✘ sinon
+  // récap par situation : 3 états — tout juste (vert) / partiel (orange) / nul (rouge)
   var ans="";
   P.sous.forEach(function(s,si){
-    var reussi = spOk[part+"-"+si]===true;
-    ans += "<div class='recap-row "+(reussi?"ok":"ko")+"'>"
-        + "<span>"+(reussi?"\u2714":"\u2718")+"</span>"
+    var sc = spScoreMap[part+"-"+si]; if(sc===undefined) sc=0;
+    var nb = s.qs.length;
+    var cls, ico;
+    if(sc===nb){ cls="ok"; ico="\u2714"; }
+    else if(sc>0){ cls="mid"; ico="\u25D0"; }
+    else { cls="ko"; ico="\u2718"; }
+    ans += "<div class='recap-row "+cls+"'>"
+        + "<span>"+ico+"</span>"
         + "<span class='rk'>"+s.titre+"</span>"
+        + "<span class='rscore'>"+sc+"/"+nb+"</span>"
         + "<span><b>"+s.reponse+"</b></span></div>";
   });
   $("exres-answer").innerHTML=ans;
@@ -469,10 +514,10 @@ function showPartRes(){
     solBox.innerHTML=sol;
   }
   var msg;
-  if(ok===total) msg="Parfait\u00a0! Toutes les étapes sont justes.";
-  else if(ok>=Math.ceil(total*0.8)) msg="Très bien\u00a0! Juste une étape à revoir.";
-  else if(ok>=Math.ceil(total*0.6)) msg="Bien\u00a0! Reprends les étapes manquées, puis réessaie.";
-  else msg="À retravailler\u00a0: refais les étapes une à une, tu vas y arriver.";
+  if(ok===total) msg="🟢 Parfait\u00a0! Tu maîtrises les règles de priorité opératoire.";
+  else if(ok>=total-2) msg="🟡 Très bien\u00a0! Une règle reste à consolider.";
+  else if(ok>=Math.ceil(total/2)) msg="🟠 Tu progresses. Reprends les situations pour renforcer tes automatismes.";
+  else msg="🔴 Relis les règles de priorité puis réessaie.";
   $("exres-msg").textContent=msg;
   if(PARTIES.length===1){
     $("exres-btn").textContent="🔄 Recommencer";
