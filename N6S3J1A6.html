@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – Les caisses du port – 6e</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#3d7fc4; --day-dark:#1d4e85; --day-light:#dcebfb; --day-border:#7fb0e0;
+  --day-light:#d9e9fb;
+  --gold:#f5c518; --gold-d:#b88a00;
+  --bg:#0f1c2b; --panel:#152838; --panel2:#1b3346;
+  --line:#2a4760; --text:#e9f1fa; --muted:#92aac4;
+  --green:#5bc46a; --neon:#5fb0ff;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 16px rgba(61,127,196,.42), 0 0 40px rgba(61,127,196,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#122436 0%, #0f1c2b 55%, #102134 100%);color:var(--text);
+  font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#fff 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#fff 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#04162b;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.1;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.13;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#3d7fc4;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#5fb0ff;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#27598f;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#4f93d8;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(15,28,43,.94);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.35rem;}
+.hud-frag{width:1.9rem;height:2rem;border-radius:6px;background:#0a1521;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:#385571;transition:all .4s;}
+.hud-frag.got{background:rgba(61,127,196,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#0a1521;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#0a1521;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(61,127,196,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:54px;}.hud-bar{gap:.6rem;padding:.45rem .6rem;}.hud-frag{width:1.6rem;height:1.8rem;font-size:.85rem;}.hud-dial{display:none;}.hud-timer{font-size:.82rem;padding:.2rem .4rem;}.hud-timer .lbl{display:none;}}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:620px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:#cfe0f2;line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-port{margin:.9rem 0 .2rem;background:#0a1521;border:1.5px dashed var(--day-border);border-radius:10px;padding:.8rem;text-align:center;}
+.start-port .big{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(1rem,3.2vw,1.25rem);color:var(--day-light);}
+.start-port .qs{margin-top:.5rem;font-size:.84rem;color:#bcd3ec;text-align:left;}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#04162b;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.crest{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:'Orbitron',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#0a1521;border:1.5px solid var(--line);font-size:1.2rem;color:#2a4760;transition:all .5s;}
+.frag.found{background:rgba(61,127,196,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#0a1521;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#0a1521;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+.intro .scr{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(.76rem,2.2vw,.84rem);color:#cfe0f2;margin-top:.4rem;letter-spacing:0;}
+
+.exo{background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.9rem;transition:border-color .2s,box-shadow .3s;}
+.exo.ok{border-color:var(--green);box-shadow:0 0 14px rgba(91,196,106,.25);}
+.exo.ko{border-color:#e8806f;}
+.exo-tag{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+.exo-q{font-size:clamp(.82rem,2.4vw,.9rem);color:#cfe0f2;margin-bottom:.7rem;line-height:1.6;}
+.exo-q b{color:var(--day-light);}
+.exo-eq{text-align:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-light);margin:.3rem 0 .8rem;letter-spacing:.05em;}
+
+/* QCM vocabulaire (M1) */
+.qcm-q{text-align:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(1rem,3.6vw,1.3rem);color:var(--day-light);margin-bottom:.6rem;}
+.opts{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+.opt{flex:1;min-width:92px;cursor:pointer;text-align:center;background:#0a1521;border:1.5px solid var(--line);border-radius:10px;padding:.6rem .4rem;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.7rem,2.3vw,.8rem);color:var(--muted);transition:all .18s;min-height:46px;display:flex;align-items:center;justify-content:center;}
+.opt:hover{border-color:var(--day-color);color:var(--text);}
+.opt.sel{background:rgba(61,127,196,.16);border-color:var(--day-color);color:var(--day-color);}
+.opt.ok{border-color:var(--green);background:rgba(91,196,106,.14);color:#bff0c6;}
+.opt.ko{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+
+/* division : potence (présentation posée) */
+.potence{display:flex;justify-content:center;margin:.4rem 0 .2rem;}
+.pot{display:inline-grid;grid-template-columns:auto auto;align-items:start;font-family:'JetBrains Mono',monospace;}
+.pot-divid{grid-column:1;grid-row:2;padding:.3rem .8rem .3rem .2rem;font-size:clamp(1.1rem,4vw,1.5rem);font-weight:600;color:var(--day-light);text-align:right;border-right:2.5px solid var(--day-border);}
+.pot-right{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-start;padding-left:.7rem;}
+.pot-divis{font-size:clamp(1.1rem,4vw,1.5rem);font-weight:600;color:var(--day-light);border-bottom:2.5px solid var(--day-border);padding:.3rem 1.1rem .3rem .2rem;min-width:90px;}
+.pot-quolab{font-size:.66rem;color:var(--muted);font-family:'Orbitron',sans-serif;letter-spacing:.04em;margin:.3rem 0 .15rem;}
+.pot-rrow{display:flex;align-items:center;gap:.4rem;margin-top:.5rem;}
+.pot-rrow .rlab{font-size:.66rem;color:var(--muted);font-family:'Orbitron',sans-serif;letter-spacing:.04em;}
+.div-in{width:96px;background:#0a1521;border:2px solid var(--line);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:16px;text-align:center;padding:.5rem;outline:none;min-height:46px;}
+.div-in.q{margin-bottom:.2rem;}
+.div-in:focus{border-color:var(--day-color);}
+.exo.ok .div-in{border-color:var(--green);background:rgba(91,196,106,.12);color:#bff0c6;}
+.exo.ko .div-in{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+.div-check{margin-top:.7rem;text-align:center;font-size:.78rem;color:var(--muted);}
+.div-check code{color:var(--day-light);}
+.correction{margin-top:.8rem;background:#0a1521;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.9rem 1rem;}
+.correction-t{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--day-color);margin-bottom:.6rem;}
+.pose-wrap{display:flex;justify-content:center;overflow-x:auto;margin:.2rem 0 .4rem;}
+.posetbl{border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:clamp(1rem,3.6vw,1.35rem);color:var(--day-light);}
+.posetbl td{width:1.55rem;height:1.7rem;text-align:center;vertical-align:middle;padding:0 2px;position:relative;}
+.posetbl tr.psub td{color:#ff9e8f;}
+.posetbl tr.pres td{color:#bff0c6;}
+.posetbl td.pbar{border-top:2px solid #5a7896;}
+.posetbl .pminus{margin-right:1px;}
+.posetbl td.pright{border-left:2.5px solid var(--day-border);padding-left:.6rem;text-align:left;vertical-align:top;width:auto;}
+.pb-divisor{display:block;color:var(--day-light);font-weight:600;}
+.pb-line{display:block;border-top:2.5px solid var(--day-border);margin:.15rem 0;width:100%;min-width:1.6rem;}
+.pb-quotient{display:block;color:var(--neon);font-weight:700;}
+.correction-eq{margin-top:.6rem;font-family:'JetBrains Mono',monospace;font-size:clamp(.82rem,2.6vw,.95rem);color:#bff0c6;text-align:center;}
+.correction-qr{margin-top:.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;font-size:.84rem;color:#bff0c6;}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#04162b;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#2a2410;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#e8d8a0;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(91,196,106,.12);border:1.5px solid var(--green);color:#bff0c6;}
+.fb.ko{background:rgba(232,128,111,.12);border:1.5px solid #e8806f;color:#ffc4b8;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#e8d18a;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+body.playing .sound-btn{top:58px;}
+@media(max-width:600px){body.playing .sound-btn{top:54px;}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(15,28,43,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(15,28,43,.96), rgba(8,16,26,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#0a1521;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:radial-gradient(circle at 50% 40%, rgba(61,127,196,.4), rgba(8,16,26,.98));}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(61,127,196,.3) 0%, rgba(61,127,196,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(61,127,196,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.5rem;margin:.8rem 0;}
+.finale-crest .fc{width:2.6rem;height:2.6rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(61,127,196,.16);border:1.5px solid var(--day-color);font-size:1.3rem;animation:pop .5s both;}
+.finale-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.2rem);color:var(--day-color);text-shadow:0 1px 0 rgba(29,78,133,.25);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#bff0c6;margin-bottom:.6rem;}
+.finale-grade{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#04162b;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:#cfe0f2;font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-reveal{background:#0a1521;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:#d6e6f6;line-height:1.7;}
+.finale-reveal b{color:var(--day-color);font-family:'Orbitron',sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#04162b;box-shadow:var(--glow);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Inventaire du port&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Comptage des caisses</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128674;</span>
+  <div class="hud-frags">
+    <span class="hud-frag" id="hud-frag-0">&#128230;</span>
+    <span class="hud-frag" id="hud-frag-1">&#128230;</span>
+    <span class="hud-frag" id="hud-frag-2">&#128230;</span>
+    <span class="hud-frag" id="hud-frag-3">&#128230;</span>
+  </div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Enqu&ecirc;te&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">&#128674; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#127942;</div>
+    <div class="finale-crest" id="finale-crest"></div>
+    <div class="finale-title">ENQU&Ecirc;TE BOUCL&Eacute;E&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub">&#128674; Tu disposes maintenant de tous les outils n&eacute;cessaires pour r&eacute;soudre les probl&egrave;mes de chargement.<br>Bravo&#8201;!</div>
+    <div class="finale-reveal">
+      <b>&#128674; Retour au probl&egrave;me du port</b>
+      Tu connais maintenant la m&eacute;thode.<br><br>
+      Le <b style="display:inline;color:var(--day-light)">quotient</b> donne le nombre de conteneurs complets. Le <b style="display:inline;color:var(--day-light)">reste</b> donne le nombre de caisses en trop.<br><br>
+      Retour au probl&egrave;me du port&#8201;: <b style="display:inline;color:var(--day-light)">247 caisses</b> dans des conteneurs de <b style="display:inline;color:var(--day-light)">12</b>.<br><br>
+      &#128161; &Agrave; toi de r&eacute;pondre &agrave; la question du d&eacute;part&#8201;!
+    </div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 6e
+    </div>
+    <div class="week">D&eacute;fi &Eacute;t&eacute;</div>
+    <div class="title">Les caisses du <span class="hl">port</span> &#128674;</div>
+    <div class="subtitle">La division euclidienne&#8201;: quotient et reste</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#128674;</div>
+    <div class="start-mission">
+      <b>&#128674; Les caisses du port&nbsp;:</b> au port, les organisateurs ont des caisses et des conteneurs pouvant contenir 12 caisses chacun. Ils veulent remplir le plus de conteneurs complets possible.
+      <div class="start-port">
+        <div class="big">247 caisses &middot; conteneurs de 12</div>
+        <div class="qs">&#10067; Combien de conteneurs complets peut-on remplir&#8201;?<br>&#10067; Combien de caisses restera-t-il en trop&#8201;?</div>
+      </div>
+      &#127919; <b>Ta mission&nbsp;:</b> mener l&rsquo;enqu&ecirc;te pour d&eacute;couvrir comment la division euclidienne permet de trouver le nombre de groupes complets et le reste.
+      <div class="start-rule"><span>&#128202; Quotient &amp; reste</span><span>&#10006; Diviseur &times; quotient + reste</span></div>
+    </div>
+    <button class="btn-start" onclick="beginGame()">&#128674; Lancer l&rsquo;enquête</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">Caisses rangées&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+    </div>
+    <div id="steps"></div>
+    <div style="text-align:center;"><button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function sOk(){if(!soundOn)return;beep(523,0,0.1,"square",0.2);beep(784,0.08,0.12,"square",0.2);beep(1047,0.18,0.18,"triangle",0.22);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.18);beep(150,0.1,0.2,"square",0.18);}
+function sFrag(){if(!soundOn)return;beep(660,0,0.06,"square",0.16);beep(990,0.07,0.14,"triangle",0.2);beep(1320,0.16,0.16,"triangle",0.2);}
+function sCoin(){if(!soundOn)return;beep(988,0,0.05,"square",0.14);beep(1319,0.05,0.12,"square",0.16);}
+function sWin(){if(!soundOn)return;[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,i*0.12,0.24,"square",0.2);});}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,4500);}
+document.addEventListener("click",function(){hideAgent();},true);
+var SCAN_SUB=["Lecture des \u00e9tiquettes","Premiers chargements","Caisses de la r\u00e9serve","Grands chargements"];
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  if(!ov){done&&done();return;}
+  if(txt)txt.innerHTML="Inventaire du port&#8230;";
+  if(sub)sub.textContent=SCAN_SUB[mi]||"Analyse en cours";
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");
+  sCoin();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*16+8;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");done&&done();},350);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },110);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+
+/* ===== Missions =====
+   type "voc"  : QCM vocabulaire (4 options) ans = index
+   type "div"  : saisir quotient + reste à partir de dividende/diviseur
+*/
+var VOC=["dividende","diviseur","quotient","reste"];
+var MISSIONS=[
+  {ico:"&#127991;&#65039;", step:"Mission 1", codename:"Les \u00e9tiquettes du port", name:"Les \u00e9tiquettes du port", comp:"Vocabulaire de la division",
+   frag:"&#128230;",
+   intro:"&#128674; Les \u00e9tiquettes<br><span class='scr'>Observe l\u2019\u00e9galit\u00e9&#8201;: <b>50 = 8 &times; 6 + 2</b>. Indique le r\u00f4le de chaque nombre.</span>",
+   hint:"Dans une division euclidienne&#8201;: dividende = diviseur &times; quotient + reste. Le plus grand nombre au d\u00e9part est le dividende&#8201;; le reste est ce qu\u2019il faut ajouter \u00e0 la fin.",
+   type:"voc",
+   exos:[
+     {n:"50", ans:0},
+     {n:"8", ans:1},
+     {n:"6", ans:2},
+     {n:"2", ans:3}
+   ]},
+  {ico:"&#128230;", step:"Mission 2", codename:"Les premiers chargements", name:"Les premiers chargements", comp:"Poser une division",
+   frag:"&#128230;",
+   intro:"&#128674; Premiers chargements<br><span class='scr'>Pose chaque division euclidienne, puis \u00e9cris le quotient et le reste.</span>",
+   hint:"Cherche dans la table du diviseur le plus grand multiple qui ne d\u00e9passe pas le dividende. Le reste = dividende \u2212 (diviseur &times; quotient). Exemple&#8201;: 38 \u00f7 5 \u2192 5&times;7=35, reste 3.",
+   type:"div",
+   exos:[
+     {a:65, b:7},
+     {a:97, b:8}
+   ]},
+  {ico:"&#128218;", step:"Mission 3", codename:"Les caisses de la r\u00e9serve", name:"Les caisses de la r\u00e9serve", comp:"Sens du quotient et du reste",
+   frag:"&#128230;",
+   intro:"&#128674; La r\u00e9serve<br><span class='scr'>Effectue la division, puis donne le nombre de groupes complets (quotient) et ce qui reste.</span>",
+   hint:"Le quotient = nombre de groupes complets. Le reste = ce qui ne rentre pas dans un groupe complet, et il est toujours plus petit que le diviseur.",
+   type:"div",
+   exos:[
+     {a:148, b:6, ctx:"148 livres rang\u00e9s dans des cartons de 6.", qlab:"Cartons complets", rlab:"Livres restants"},
+     {a:210, b:9, ctx:"210 bouteilles rang\u00e9es dans des caisses de 9.", qlab:"Caisses compl\u00e8tes", rlab:"Bouteilles restantes"}
+   ]},
+  {ico:"&#128666;", step:"Mission 4", codename:"Les grands chargements", name:"Les grands chargements", comp:"Divisions plus complexes",
+   frag:"&#128230;",
+   intro:"&#128674; Grands chargements<br><span class='scr'>Pose les divisions, puis donne le quotient et le reste pour chaque chargement.</span>",
+   hint:"V\u00e9rifie toujours&#8201;: diviseur &times; quotient + reste doit redonner le dividende, et le reste doit \u00eatre plus petit que le diviseur.",
+   type:"div",
+   exos:[
+     {a:110, b:8, ctx:"110 colis dans des caisses de 8.", qlab:"Caisses compl\u00e8tes", rlab:"Colis restants"},
+     {a:243, b:7, ctx:"243 bouteilles dans des caisses de 7.", qlab:"Caisses compl\u00e8tes", rlab:"Bouteilles restantes"}
+   ]}
+];
+
+var ENIGMA={
+  intro:"Une autre livraison arrive au port. <b>186 caisses</b> doivent \u00eatre rang\u00e9es dans des conteneurs pouvant contenir <b>15 caisses</b> chacun. Pose la division&#8201;: combien de conteneurs complets, et combien de caisses restantes&#8201;?",
+  a:186, b:15, qlab:"Conteneurs complets", rlab:"Caisses restantes"
+};
+var enigmaOk=false;
+
+var solved=[false,false,false,false];
+var active=0;
+var totalSec=0,totalInt=null;
+var pick={};
+
+function poseDivHTML(a,b){
+  var ds=String(a), Q=Math.floor(a/b), R=a%b, W=ds.length;
+  var rows=[];
+  rows.push({type:'divid', cells:ds.split('')});
+  var value=0, qd="";
+  for(var pos=0; pos<ds.length; pos++){
+    value=value*10+Number(ds[pos]);
+    var d=Math.floor(value/b), prod=d*b, res=value-prod;
+    qd+=d;
+    if(qd.replace(/^0+/,"").length>0){
+      var prodStr=String(prod);
+      var endCol=pos, subStart=endCol-prodStr.length+1;
+      var subCells=new Array(W).fill('');
+      for(var k=0;k<prodStr.length;k++){ subCells[subStart+k]=prodStr[k]; }
+      rows.push({type:'sub', cells:subCells, minusCol:subStart});
+      rows.push({type:'bar', from:subStart, to:endCol});
+      var resStr=String(res), rc=new Array(W).fill('');
+      for(var k2=0;k2<resStr.length;k2++){ rc[endCol-resStr.length+1+k2]=resStr[k2]; }
+      if(pos+1<ds.length){ rc[pos+1]=ds[pos+1]; }
+      rows.push({type:'res', cells:rc});
+    }
+    value=res;
+  }
+  // construire le tableau HTML
+  var html='<table class="posetbl"><tbody>';
+  rows.forEach(function(r,ri){
+    if(r.type==='bar'){
+      html+='<tr class="pose-barrow">';
+      for(var c=0;c<W;c++){
+        var on=(c>=r.from && c<=r.to);
+        html+='<td class="'+(on?'pbar':'')+'"></td>';
+      }
+      if(ri===0) html+='<td class="pdiv"></td>';
+      else html+='<td></td>';
+      html+='</tr>';
+    }else{
+      var cls = r.type==='sub'?'psub':(r.type==='res'?'pres':'pdivid');
+      html+='<tr class="'+cls+'">';
+      for(var c2=0;c2<W;c2++){
+        var val=r.cells[c2]||'';
+        var minus=(r.type==='sub' && r.minusCol===c2)?'<span class="pminus">\u2212</span>':'';
+        html+='<td>'+minus+val+'</td>';
+      }
+      // colonne de droite : diviseur sur 1re ligne, quotient sur 2e
+      if(ri===0) html+='<td class="pright pdivisor" rowspan="'+rows.length+'"><span class="pb-divisor">'+b+'</span><span class="pb-line"></span><span class="pb-quotient">'+Q+'</span></td>';
+      html+='</tr>';
+    }
+  });
+  html+='</tbody></table>';
+  return html;
+}
+
+function correctionHTML(a,b,qlab,rlab){
+  var Q=Math.floor(a/b), R=a%b;
+  return '<div class="correction">'
+    +'<div class="correction-t">&#128221; Correction &middot; division pos\u00e9e</div>'
+    +'<div class="pose-wrap">'+poseDivHTML(a,b)+'</div>'
+    +'<div class="correction-eq">'+a+' = '+b+' &times; '+Q+' + '+R+'</div>'
+    +'<div class="correction-qr"><span>&#9989; '+(qlab||"Quotient")+'&#8201;: <b>'+Q+'</b></span><span>&#9989; '+(rlab||"Reste")+'&#8201;: <b>'+R+'</b></span></div>'
+    +'</div>';
+}
+
+function build(){
+  var host=$("steps");host.innerHTML="";
+  MISSIONS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.step+' &middot; <span style="color:var(--day-color)">'+M.codename+'</span></div><div class="step-name">'+M.name+'</div><div class="step-comp">&#128674; '+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro">'+M.intro+'</div><div id="zone-'+mi+'"></div>'
+        +'<div class="tools">'
+        +'<button class="btn btn-hint" id="hint-btn-'+mi+'" onclick="toggleHint('+mi+')">? Indice</button>'
+        +'<button class="btn btn-try" id="try-'+mi+'" onclick="tryStep('+mi+')">&#9989; Valider</button>'
+        +'</div>'
+        +'<div class="hint" id="hint-'+mi+'">'+M.hint+'</div>'
+        +'<div class="fb" id="fb-'+mi+'"><span id="fbi-'+mi+'"></span><div id="fbm-'+mi+'"></div></div>';
+    }else{
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine l\u2019\u00e9tape pr\u00e9c\u00e9dente pour d\u00e9bloquer celle-ci.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(mi===active||solved[mi]) renderZone(mi);
+  });
+  updateCrest();updateProg();
+}
+
+function divFields(idp,a,b,qlab,rlab){
+  return '<div class="potence"><div class="pot">'
+    +'<div class="pot-divid">'+a+'</div>'
+    +'<div class="pot-right">'
+    +'<div class="pot-divis">'+b+'</div>'
+    +'<div class="pot-quolab">'+(qlab||"Quotient")+'</div>'
+    +'<input class="div-in q" id="q-'+idp+'" type="text" inputmode="numeric" placeholder="?" autocomplete="off" aria-label="quotient">'
+    +'</div>'
+    +'</div></div>'
+    +'<div class="pot-rrow" style="justify-content:center"><span class="rlab">'+(rlab||"Reste")+'&#8201;:</span>'
+    +'<input class="div-in" id="r-'+idp+'" type="text" inputmode="numeric" placeholder="?" autocomplete="off" aria-label="reste"></div>';
+}
+
+function renderZone(mi){
+  var M=MISSIONS[mi],z=$("zone-"+mi);if(!z)return;z.innerHTML="";
+  M.exos.forEach(function(E,ei){
+    var exo=document.createElement("div");exo.className="exo";exo.id="exo-"+mi+"-"+ei;
+    if(M.type==="voc"){
+      // ordre mélangé mémorisé par exercice (ne change pas au re-render)
+      if(!E._order){
+        var idx=[0,1,2,3];
+        for(var s=idx.length-1;s>0;s--){var j=Math.floor(Math.random()*(s+1));var t=idx[s];idx[s]=idx[j];idx[j]=t;}
+        E._order=idx;
+      }
+      exo.innerHTML='<div class="exo-tag">Question '+(ei+1)+'</div>'
+        +'<div class="qcm-q">Dans <b>50 = 8 &times; 6 + 2</b>, le nombre <b>'+E.n+'</b> est le&#8201;:</div>'
+        +'<div class="opts">'
+        + E._order.map(function(vocIdx,slot){return '<div class="opt" id="pk-'+mi+'-'+ei+'-'+slot+'" data-voc="'+vocIdx+'" onclick="pickOpt('+mi+','+ei+','+slot+')">'+VOC[vocIdx]+'</div>';}).join("")
+        +'</div>';
+    }else{
+      var ctx = E.ctx ? '<div class="exo-q">'+E.ctx+'</div>' : '';
+      exo.innerHTML='<div class="exo-tag">Chargement '+(ei+1)+'</div>'
+        + ctx
+        + divFields(mi+"-"+ei, E.a, E.b, E.qlab, E.rlab)
+        +'<div class="div-check">&#128161; V\u00e9rifie&#8201;: <code>'+E.b+' &times; quotient + reste = '+E.a+'</code></div>';
+    }
+    z.appendChild(exo);
+  });
+  if(solved[mi]) lockZone(mi);
+}
+
+function pickOpt(mi,ei,oi){
+  if(solved[mi])return;
+  pick[mi+"-"+ei]=oi;
+  for(var k=0;k<4;k++){var el=$("pk-"+mi+"-"+ei+"-"+k);if(el)el.classList.remove("sel");}
+  var sel=$("pk-"+mi+"-"+ei+"-"+oi);if(sel)sel.classList.add("sel");
+  sCoin();
+}
+
+function toggleHint(mi){if(solved[mi])return;$("hint-"+mi).classList.toggle("show");}
+function parseI(v){return parseInt(String(v).replace(/\s/g,""),10);}
+
+function tryStep(mi){
+  if(solved[mi])return;
+  var M=MISSIONS[mi],ok=true,filled=true;
+  M.exos.forEach(function(E,ei){
+    var exo=$("exo-"+mi+"-"+ei);
+    if(M.type==="voc"){
+      var chosen=pick[mi+"-"+ei];
+      if(chosen===undefined){filled=false;ok=false;return;}
+      var selEl=$("pk-"+mi+"-"+ei+"-"+chosen);
+      var vocIdx=selEl?parseInt(selEl.getAttribute("data-voc"),10):-1;
+      var good=(vocIdx===E.ans);
+      for(var k=0;k<4;k++){var el=$("pk-"+mi+"-"+ei+"-"+k);if(el)el.classList.remove("ok","ko");}
+      if(selEl){selEl.classList.toggle("ok",good);selEl.classList.toggle("ko",!good);}
+      if(exo){exo.classList.toggle("ok",good);exo.classList.toggle("ko",!good);}
+      if(!good)ok=false;
+    }else{
+      var qe=$("q-"+mi+"-"+ei), re=$("r-"+mi+"-"+ei);
+      var qv=qe?qe.value.trim():"", rv=re?re.value.trim():"";
+      if(qv===""||rv===""){filled=false;ok=false;return;}
+      var q=parseI(qv), r=parseI(rv);
+      var Q=Math.floor(E.a/E.b), R=E.a%E.b;
+      var good=(!isNaN(q)&&!isNaN(r)&&q===Q&&r===R);
+      if(exo){exo.classList.toggle("ok",good);exo.classList.toggle("ko",!good);}
+      if(!good)ok=false;
+    }
+  });
+  if(!filled){var fb=$("fb-"+mi);fb.className="fb show warn";$("fbi-"+mi).textContent="\u26A0";$("fbm-"+mi).textContent="R\u00e9ponds \u00e0 tout avant de valider.";return;}
+  if(ok){ stepSuccess(mi); }
+  else{
+    sBad();$("step-"+mi).classList.add("shake");setTimeout(function(){$("step-"+mi).classList.remove("shake");},400);
+    var fb=$("fb-"+mi);fb.className="fb show ko";$("fbi-"+mi).textContent="\u26A0\uFE0F";
+    if(M.type==="voc"){
+      $("fbm-"+mi).innerHTML="Relis l\u2019\u00e9galit\u00e9&#8201;: dividende = diviseur &times; quotient + reste.<br>Essaie encore.";
+    }else{
+      $("fbm-"+mi).innerHTML="V\u00e9rifie ton calcul. Le reste doit toujours \u00eatre plus petit que le diviseur.<br>Essaie encore.";
+    }
+  }
+}
+
+function lockZone(mi){
+  var M=MISSIONS[mi];
+  M.exos.forEach(function(E,ei){
+    if(M.type==="voc"){for(var k=0;k<4;k++){var el=$("pk-"+mi+"-"+ei+"-"+k);if(el)el.style.pointerEvents="none";}}
+    else{var qe=$("q-"+mi+"-"+ei),re=$("r-"+mi+"-"+ei);if(qe)qe.disabled=true;if(re)re.disabled=true;}
+  });
+}
+
+function stepSuccess(mi){
+  solved[mi]=true;sOk();sFrag();
+  $("step-"+mi).classList.add("solved");
+  var tb=$("try-"+mi);if(tb){tb.disabled=true;tb.style.display="none";}
+  var hb=$("hint-btn-"+mi);if(hb)hb.disabled=true;
+  $("hint-"+mi).classList.remove("show");
+  lockZone(mi);
+  // Correction détaillée (division posée) sous chaque exercice de type division
+  if(MISSIONS[mi].type==="div"){
+    MISSIONS[mi].exos.forEach(function(E,ei){
+      var exo=$("exo-"+mi+"-"+ei);
+      if(exo && !exo.querySelector(".correction")){
+        exo.insertAdjacentHTML("beforeend", correctionHTML(E.a,E.b,E.qlab,E.rlab));
+      }
+    });
+  }
+  var fb=$("fb-"+mi);fb.className="fb show ok";$("fbi-"+mi).textContent="\u2705";
+  $("fbm-"+mi).innerHTML="<b style='color:var(--green)'>Bravo&#8201;! Tu progresses dans ton enqu\u00eate.</b><br>&#128230; Caisses rang\u00e9es";
+  var CHEER=["&#128674; Le docker&nbsp;:<br>Vocabulaire ma\u00eetris\u00e9&#8201;! On charge.","&#128674; Le docker&nbsp;:<br>Premiers conteneurs remplis&#8201;!","&#128674; Le docker&nbsp;:<br>R\u00e9serve rang\u00e9e&#8201;! Presque fini.","&#128674; Le docker&nbsp;:<br>Grands chargements termin\u00e9s&#8201;!"];
+  showAgent(CHEER[mi]||CHEER[0]);
+  updateCrest();updateProg();
+  if(MISSIONS[mi].type==="div"){
+    // correction affichée : l'élève lit puis clique pour continuer
+    var body=$("body-"+mi);
+    if(body && !$("next-"+mi)){
+      var lab = (active<MISSIONS.length-1) ? "Mission suivante &#8594;" : "Derni\u00e8re \u00e9nigme &#8594;";
+      body.insertAdjacentHTML("beforeend",'<div style="text-align:center;margin-top:1rem;"><button class="btn btn-try" id="next-'+mi+'" onclick="goNext('+mi+')">'+lab+'</button></div>');
+    }
+  }else{
+    // pas de correction (vocabulaire) : enchaînement automatique
+    setTimeout(function(){goNext(mi);},1600);
+  }
+}
+
+function goNext(mi){
+  var nb=$("next-"+mi);if(nb){nb.disabled=true;nb.style.display="none";}
+  if(active<MISSIONS.length-1){
+    active++;
+    runScan(active,function(){
+      build();var el=$("step-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});
+      showAgent("&#128674; Le docker&nbsp;:<br>Chargement suivant. \u00c0 toi de jouer&#8201;!");
+    });
+  }else{
+    openEnigma();
+  }
+}
+
+function openEnigma(){
+  var host=$("steps");
+  var card=document.createElement("div");card.className="step-card solved";card.id="step-enigma";
+  card.innerHTML='<div class="step-head"><span class="step-ico">&#127919;</span>'
+    +'<div class="step-meta"><div class="step-step">\u00c9nigme finale</div><div class="step-name">La nouvelle livraison</div><div class="step-comp">&#128674; 186 caisses, conteneurs de 15</div></div></div>'
+    +'<div class="step-body">'
+    +'<div class="exo-q" style="margin-bottom:.6rem">'+ENIGMA.intro+'</div>'
+    + divFields("enig", ENIGMA.a, ENIGMA.b, ENIGMA.qlab, ENIGMA.rlab)
+    +'<div class="div-check">&#128161; V\u00e9rifie&#8201;: <code>'+ENIGMA.b+' &times; quotient + reste = '+ENIGMA.a+'</code></div>'
+    +'<div class="tools"><button class="btn btn-try" id="try-enig" onclick="tryEnigma()">&#9989; Valider la livraison</button></div>'
+    +'<div class="fb" id="fb-enig"><span id="fbi-enig"></span><div id="fbm-enig"></div></div></div>';
+  host.appendChild(card);
+  card.scrollIntoView({behavior:"smooth",block:"center"});
+  showAgent("&#127919; Derni\u00e8re livraison&#8201;:<br>combien de conteneurs complets&#8201;?");
+}
+
+function tryEnigma(){
+  if(enigmaOk)return;
+  var qe=$("q-enig"), re=$("r-enig");
+  var qv=qe?qe.value.trim():"", rv=re?re.value.trim():"";
+  if(qv===""||rv===""){var fb=$("fb-enig");fb.className="fb show warn";$("fbi-enig").textContent="\u26A0";$("fbm-enig").textContent="Indique le quotient et le reste avant de valider.";return;}
+  var q=parseI(qv), r=parseI(rv);
+  var Q=Math.floor(ENIGMA.a/ENIGMA.b), R=ENIGMA.a%ENIGMA.b;
+  var good=(!isNaN(q)&&!isNaN(r)&&q===Q&&r===R);
+  if(good){
+    enigmaOk=true;
+    if(qe)qe.disabled=true;if(re)re.disabled=true;
+    var ex=$("q-enig").closest(".exo");
+    var tb=$("try-enig");if(tb){tb.disabled=true;tb.style.display="none";}
+    var fb=$("fb-enig");fb.className="fb show ok";$("fbi-enig").textContent="\u2705";
+    $("fbm-enig").innerHTML="<b style='color:var(--green)'>Bravo&#8201;! La livraison est correctement r\u00e9partie.</b>";
+    var ecard=$("step-enigma");
+    if(ecard){var eb=ecard.querySelector(".step-body");if(eb && !eb.querySelector(".correction")){fb.insertAdjacentHTML("afterend", correctionHTML(ENIGMA.a,ENIGMA.b,ENIGMA.qlab,ENIGMA.rlab));if(!$("next-enig"))eb.insertAdjacentHTML("beforeend",'<div style="text-align:center;margin-top:1rem;"><button class="btn btn-try" id="next-enig" onclick="openFinale()">Voir le r\u00e9sultat &#8594;</button></div>');}}
+    sOk();sFrag();
+  }else{
+    sBad();
+    var fb=$("fb-enig");fb.className="fb show ko";$("fbi-enig").textContent="\u26A0\uFE0F";
+    $("fbm-enig").innerHTML="V\u00e9rifie ton calcul. Le reste doit toujours \u00eatre plus petit que le diviseur.<br>Essaie encore.";
+  }
+}
+
+function updateCrest(){
+  MISSIONS.forEach(function(M,mi){
+    var f=$("frag-"+mi),hf=$("hud-frag-"+mi);
+    if(solved[mi]){if(f){f.innerHTML=M.frag;f.classList.add("found");}if(hf){hf.classList.add("got");}}
+    else{if(f){f.textContent="?";f.classList.remove("found");}if(hf){hf.classList.remove("got");}}
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/MISSIONS.length*100);
+  var lab=$("hud-prog-label"),fill=$("hud-prog-fill");
+  if(lab)lab.innerHTML="Enqu&ecirc;te&nbsp;: "+pct+"&#8201;%";
+  if(fill)fill.style.width=pct+"%";
+}
+
+function openFinale(){
+  clearInterval(totalInt);
+  var temps=fmt(totalSec);
+  $("hud-dial").innerHTML="&#127942;";
+  var cr=$("finale-crest");cr.innerHTML="";
+  MISSIONS.forEach(function(M,i){var d=document.createElement("div");d.className="fc";d.style.animationDelay=(i*0.15)+"s";d.innerHTML=M.frag;cr.appendChild(d);});
+  var grade;
+  if(totalSec<=240){grade="\u2B50 MA\u00ceTRE DOCKER";}
+  else if(totalSec<=420){grade="\uD83C\uDFC5 CHEF DE QUAI";}
+  else if(totalSec<=600){grade="\uD83D\uDEA2 DOCKER CONFIRM\u00c9";}
+  else{grade="\uD83E\uDDED APPRENTI DOCKER";}
+  setTimeout(function(){
+    $("finale-time").innerHTML="&#9201; Temps utilis\u00e9&#8201;: "+temps;
+    $("finale-grade").innerHTML=grade;
+    $("finale").classList.add("show");
+    sWin();
+  },300);
+}
+
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  $("start-screen").style.display="none";
+  $("game").style.display="";
+  $("hud-bar").classList.add("show");
+  document.body.classList.add("playing");
+  totalSec=0;clearInterval(totalInt);
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">&#128674; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00';
+  totalInt=setInterval(function(){totalSec++;var h=$("hud-timer");if(h)h.innerHTML='<span class="lbl">&#128674; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; '+fmt(totalSec);},1000);
+  sCoin();
+  setTimeout(function(){
+    runScan(0,function(){
+      build();
+      showAgent("&#128674; Le docker&nbsp;:<br>Bienvenue au port&#8201;! On commence par le vocabulaire de la division.");
+    });
+  },700);
+}
+function restartAll(){
+  clearInterval(totalInt);totalSec=0;
+  solved=[false,false,false,false];active=0;pick={};
+  enigmaOk=false;
+  var e=$("step-enigma");if(e)e.remove();
+  $("finale").classList.remove("show");
+  var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
+  $("hud-bar").classList.remove("show");
+  document.body.classList.remove("playing");
+  $("game").style.display="none";
+  $("start-screen").style.display="";
+  $("hud-dial").innerHTML="&#128674;";
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">&#128674; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00';
+  for(var i=0;i<4;i++){var hf=$("hud-frag-"+i);if(hf)hf.classList.remove("got");}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+build();
+</script>
+</body>
+</html>
