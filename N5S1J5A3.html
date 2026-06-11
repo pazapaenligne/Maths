@@ -73,6 +73,12 @@
       border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
     .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
     .enonce .ex-quest{color:var(--day-dark);font-weight:700;margin-top:.3rem;}
+    .calc-cours{margin-top:.7rem;padding:.55rem .8rem;background:var(--surface);
+      border:1.5px dashed var(--day-border);border-radius:10px;}
+    .calc-cours .cc-lbl{font-size:.72rem;font-family:'JetBrains Mono',monospace;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+    .calc-cours .cc-line{font-family:'JetBrains Mono',monospace;font-weight:800;
+      color:var(--day-dark);font-size:.98em;margin-top:.25rem;}
 
     .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
       padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
@@ -223,7 +229,7 @@
         <div class="res-score"><span id="final-num">0</span></div>
         <div class="stars" id="final-stars"></div>
         <div class="res-msg" id="final-msg"></div>
-        <div class="skills-text">Tu sais maintenant identifier ce qu&rsquo;on cherche, choisir la bonne opération, respecter les priorités opératoires et résoudre un problème en plusieurs étapes.</div>
+        <div class="skills-text">Tu t&rsquo;entraînes à identifier ce qu&rsquo;on cherche, choisir la bonne opération, respecter les priorités opératoires et résoudre un problème en plusieurs étapes.</div>
         <div class="res-detail" id="final-detail"></div>
         <div class="res-btns">
           <button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button>
@@ -261,6 +267,7 @@ var PARTIES = [
             okFb:"Pour résoudre un problème en plusieurs étapes, on commence par calculer la quantité d\u2019eau dans une citerne.",
             koFb:"Réfléchis à ce que l\u2019on connaît déjà\u00a0: il faut d\u2019abord répartir les 4500 m\u00b3 dans les 9 citernes." },
           { q:"4500 \u00f7 9 =", opts:["500","50","450"], ans:0,
+            recap:"4500 \u00f7 9 = 500 (m\u00b3 par citerne)",
             okFb:"Chaque citerne contient 500 m\u00b3 d\u2019eau.",
             koFb:"Vérifie ton calcul de partage\u00a0: 4500 m\u00b3 répartis dans 9 citernes." },
           { q:"Que faut-il faire ensuite ?",
@@ -268,6 +275,7 @@ var PARTIES = [
             okFb:"Une fois l\u2019eau par citerne connue, il faut la répartir entre les 50 jardins.",
             koFb:"On cherche maintenant la quantité reçue par un seul jardin." },
           { q:"500 \u00f7 50 =", opts:["10","100","50"], ans:0,
+            recap:"500 \u00f7 50 = 10 (m\u00b3 par jardin)",
             okFb:"Chaque jardin reçoit 10 m\u00b3.",
             koFb:"Vérifie le partage des 500 m\u00b3 entre les 50 jardins." }
         ]
@@ -292,6 +300,7 @@ var PARTIES = [
             okFb:"Il faut d\u2019abord connaître la longueur d\u2019une partie.",
             koFb:"Commence par partager les 0,72 km en 9 parties égales." },
           { q:"0,72 \u00f7 9 =", opts:["0,08","0,8","0,008"], ans:0,
+            recap:"0,72 \u00f7 9 = 0,08 (km par partie)",
             okFb:"Une partie mesure 0,08 km.",
             koFb:"Vérifie le partage de 0,72 km en 9 parties." },
           { q:"Que faut-il faire ensuite ?",
@@ -299,6 +308,7 @@ var PARTIES = [
             okFb:"Il faut maintenant prendre 4 parties.",
             koFb:"On connaît la longueur d\u2019une partie\u00a0: il faut déterminer la longueur de 4 parties." },
           { q:"0,08 \u00d7 4 =", opts:["0,32","0,12","3,2"], ans:0,
+            recap:"0,08 \u00d7 4 = 0,32 (km goudronnés)",
             okFb:"La route goudronnée mesure 0,32 km.",
             koFb:"Vérifie la multiplication correspondant aux 4 parties." }
         ]
@@ -355,7 +365,20 @@ function render(){
   var qObj=S.qs[idx];
   if(chosen[idx]===null || optOrder.length!==qObj.opts.length) buildOrder();
   $("act-label").textContent=P.titre;
+  var calcHtml="";
+  var lignes=[];
+  for(var i=0;i<S.qs.length;i++){
+    if(S.qs[i].recap && chosen[i]!==null && chosen[i]===S.qs[i].ans){
+      lignes.push(S.qs[i].recap);
+    }
+  }
+  if(lignes.length){
+    calcHtml="<div class='calc-cours'><span class='cc-lbl'>Calcul en cours :</span>";
+    lignes.forEach(function(l){ calcHtml+="<div class='cc-line'>"+l+"</div>"; });
+    calcHtml+="</div>";
+  }
   $("enonce").innerHTML="<div class='ex-titre'>"+S.titre+"</div>"+S.enonce
+    +calcHtml
     +"<div class='ex-quest'>👉 "+S.question+"</div>";
   $("q-tag").textContent="Question "+(idx+1)+" / "+S.qs.length;
   $("q-text").textContent=qObj.q;
@@ -468,16 +491,26 @@ function showFinal(){
   $("final-num").textContent=totalOk+" / "+totalQ;
   var st=starsFrac(totalOk,totalQ);
   $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
-  var fmsg;
-  if(totalOk===totalQ) fmsg="🟢 Excellent\u00a0! Tu résous les problèmes de partage sans te tromper.";
-  else if(totalOk>=Math.ceil(totalQ*0.8)) fmsg="🟢 Très bien\u00a0! Tu maîtrises presque toutes les étapes.";
-  else if(totalOk>=Math.ceil(totalQ*0.6)) fmsg="🟡 Maîtrise satisfaisante. Tu as compris l\u2019essentiel.";
-  else if(totalOk>=Math.ceil(totalQ*0.5)) fmsg="🟠 Maîtrise fragile. Continue à t\u2019entraîner pour gagner en précision.";
-  else fmsg="🔴 Maîtrise insuffisante. Reprends l\u2019activité puis réessaie.";
+  var fmsg, fskill;
+  if(totalOk===totalQ){
+    fmsg="🟢 Excellent\u00a0! Tu résous les problèmes de partage sans te tromper.";
+    fskill="Tu sais identifier ce que l\u2019on cherche, choisir la bonne opération et enchaîner les étapes nécessaires pour trouver une réponse exacte.";
+  } else if(totalOk>=Math.ceil(totalQ*0.8)){
+    fmsg="🟢 Très bien\u00a0! Tu maîtrises presque toutes les étapes.";
+    fskill="Tu sais généralement identifier ce que l\u2019on cherche et choisir la bonne opération pour résoudre un problème.";
+  } else if(totalOk>=Math.ceil(totalQ*0.6)){
+    fmsg="🟡 Maîtrise satisfaisante. Tu as compris l\u2019essentiel.";
+    fskill="Tu progresses dans la résolution de problèmes. Continue à t\u2019entraîner à repérer les informations utiles et à organiser les étapes du calcul.";
+  } else if(totalOk>=Math.ceil(totalQ*0.5)){
+    fmsg="🟠 Maîtrise fragile. Quelques notions sont encore à consolider.";
+    fskill="Relis la méthode et entraîne-toi à identifier ce que l\u2019on cherche avant de commencer les calculs.";
+  } else {
+    fmsg="🔴 Maîtrise insuffisante. Ne baisse pas les bras\u00a0!";
+    fskill="Reprends les exemples du parcours et essaie à nouveau. Chaque étape du raisonnement t\u2019aidera à progresser.";
+  }
   if($("final-msg")) $("final-msg").textContent=fmsg;
-  // le bilan "Tu sais maintenant..." ne s'affiche que si la maîtrise est au moins satisfaisante (🟢/🟡)
   var skills=document.querySelector("#final .skills-text");
-  if(skills){ skills.style.display = (totalOk>=Math.ceil(totalQ*0.6)) ? "" : "none"; }
+  if(skills){ skills.textContent=fskill; skills.style.display=""; }
   var detail="";
   PARTIES.forEach(function(p,i){ detail += p.titre+" : "+okPart[i]+" / "+partQuestionCount(i)+"<br/>"; });
   $("final-detail").innerHTML=detail;
