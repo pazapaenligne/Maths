@@ -222,6 +222,7 @@
         </div>
         <div class="res-score"><span id="final-num">0</span></div>
         <div class="stars" id="final-stars"></div>
+        <div class="res-msg" id="final-msg"></div>
         <div class="skills-text">Tu sais maintenant identifier ce qu&rsquo;on cherche, choisir la bonne opération, respecter les priorités opératoires et résoudre un problème en plusieurs étapes.</div>
         <div class="res-detail" id="final-detail"></div>
         <div class="res-btns">
@@ -252,13 +253,23 @@ var PARTIES = [
         reponse:"Chaque jardin reçoit 10 m\u00b3 d\u2019eau.",
         qs:[
           { q:"Que cherche-t-on à calculer ?",
-            opts:["La quantité d\u2019eau dans une citerne.","La quantité d\u2019eau reçue par chaque jardin.","Le nombre de jardins."], ans:1 },
+            opts:["La quantité d\u2019eau dans une citerne.","La quantité d\u2019eau reçue par chaque jardin.","Le nombre de jardins."], ans:1,
+            okFb:"Avant de calculer, il faut identifier ce que demande le problème.",
+            koFb:"Relis la question finale du problème\u00a0: on cherche la quantité d\u2019eau reçue par chaque jardin." },
           { q:"Par quoi faut-il commencer ?",
-            opts:["Calculer la quantité d\u2019eau dans une citerne.","Calculer la quantité d\u2019eau dans un jardin.","Calculer le nombre total de jardins."], ans:0 },
-          { q:"4500 \u00f7 9 =", opts:["500","50","450"], ans:0 },
+            opts:["Calculer la quantité d\u2019eau dans une citerne.","Calculer la quantité d\u2019eau dans un jardin.","Calculer le nombre total de jardins."], ans:0,
+            okFb:"Pour résoudre un problème en plusieurs étapes, on commence par calculer la quantité d\u2019eau dans une citerne.",
+            koFb:"Réfléchis à ce que l\u2019on connaît déjà\u00a0: il faut d\u2019abord répartir les 4500 m\u00b3 dans les 9 citernes." },
+          { q:"4500 \u00f7 9 =", opts:["500","50","450"], ans:0,
+            okFb:"Chaque citerne contient 500 m\u00b3 d\u2019eau.",
+            koFb:"Vérifie ton calcul de partage\u00a0: 4500 m\u00b3 répartis dans 9 citernes." },
           { q:"Que faut-il faire ensuite ?",
-            opts:["Diviser 500 par 50.","Multiplier 500 par 50.","Ajouter 500 et 50."], ans:0 },
-          { q:"500 \u00f7 50 =", opts:["10","100","50"], ans:0 }
+            opts:["Diviser 500 par 50.","Multiplier 500 par 50.","Ajouter 500 et 50."], ans:0,
+            okFb:"Une fois l\u2019eau par citerne connue, il faut la répartir entre les 50 jardins.",
+            koFb:"On cherche maintenant la quantité reçue par un seul jardin." },
+          { q:"500 \u00f7 50 =", opts:["10","100","50"], ans:0,
+            okFb:"Chaque jardin reçoit 10 m\u00b3.",
+            koFb:"Vérifie le partage des 500 m\u00b3 entre les 50 jardins." }
         ]
       }
     ]
@@ -273,13 +284,23 @@ var PARTIES = [
         reponse:"La longueur goudronnée est de 0,32 km.",
         qs:[
           { q:"Que cherche-t-on à calculer ?",
-            opts:["La longueur d\u2019une partie.","La longueur totale goudronnée.","Le nombre de parties."], ans:1 },
+            opts:["La longueur d\u2019une partie.","La longueur totale goudronnée.","Le nombre de parties."], ans:1,
+            okFb:"On cherche la longueur totale de route goudronnée.",
+            koFb:"Relis la question finale\u00a0: on cherche une longueur de route." },
           { q:"Par quoi faut-il commencer ?",
-            opts:["Calculer la longueur d\u2019une partie.","Calculer la longueur des 4 parties.","Calculer le nombre de parties."], ans:0 },
-          { q:"0,72 \u00f7 9 =", opts:["0,08","0,8","0,008"], ans:0 },
+            opts:["Calculer la longueur d\u2019une partie.","Calculer la longueur des 4 parties.","Calculer le nombre de parties."], ans:0,
+            okFb:"Il faut d\u2019abord connaître la longueur d\u2019une partie.",
+            koFb:"Commence par partager les 0,72 km en 9 parties égales." },
+          { q:"0,72 \u00f7 9 =", opts:["0,08","0,8","0,008"], ans:0,
+            okFb:"Une partie mesure 0,08 km.",
+            koFb:"Vérifie le partage de 0,72 km en 9 parties." },
           { q:"Que faut-il faire ensuite ?",
-            opts:["Multiplier 0,08 par 4.","Diviser 0,08 par 4.","Ajouter 0,08 et 4."], ans:0 },
-          { q:"0,08 \u00d7 4 =", opts:["0,32","0,12","3,2"], ans:0 }
+            opts:["Multiplier 0,08 par 4.","Diviser 0,08 par 4.","Ajouter 0,08 et 4."], ans:0,
+            okFb:"Il faut maintenant prendre 4 parties.",
+            koFb:"On connaît la longueur d\u2019une partie\u00a0: il faut déterminer la longueur de 4 parties." },
+          { q:"0,08 \u00d7 4 =", opts:["0,32","0,12","3,2"], ans:0,
+            okFb:"La route goudronnée mesure 0,32 km.",
+            koFb:"Vérifie la multiplication correspondant aux 4 parties." }
         ]
       }
     ]
@@ -344,8 +365,13 @@ function render(){
     var correct=chosen[idx]===qObj.ans;
     fb.className="feedback show "+(correct?"ok":"ko");
     $("fb-ic").textContent=correct?"\u2705":"\u274C";
-    $("fb-msg").innerHTML = correct ? "<strong>Bonne réponse\u00a0!</strong>"
-      : "<strong>Pas tout à fait.</strong> Regarde la réponse correcte.";
+    if(correct){
+      $("fb-msg").innerHTML = "<strong>Correct\u00a0!</strong>"+(qObj.okFb?" "+qObj.okFb:"");
+    } else {
+      $("fb-msg").innerHTML = qObj.koFb
+        ? "<strong>Pas tout à fait.</strong> "+qObj.koFb
+        : "<strong>Pas tout à fait.</strong> La bonne réponse est <b>"+qObj.opts[qObj.ans]+"</b>";
+    }
     $("btn-next").disabled=false;
   } else { fb.className="feedback"; $("btn-next").disabled=true; }
   // libellé du bouton : dernière question du dernier sous-problème de la partie -> bilan
@@ -419,9 +445,10 @@ function showPartRes(){
   P.sous.forEach(function(s){ ans += "🏆 "+s.reponse+"<br/>"; });
   $("exres-answer").innerHTML=ans;
   var msg;
-  if(ok===total) msg="Sans faute\u00a0! Toutes les étapes sont justes.";
-  else if(ok>=Math.ceil(total*0.6)) msg="Bien\u00a0! Revois les étapes manquées.";
-  else msg="Reprends les étapes une à une, tu vas y arriver.";
+  if(ok===total) msg="🟢 Excellent\u00a0! Toutes les étapes de ce problème sont justes.";
+  else if(ok===total-1) msg="🟡 Maîtrise satisfaisante. Tu as compris l\u2019essentiel.";
+  else if(ok>=Math.ceil(total*0.5)) msg="🟠 Maîtrise fragile. Continue à t\u2019entraîner pour gagner en précision.";
+  else msg="🔴 Maîtrise insuffisante. Reprends les étapes une à une.";
   $("exres-msg").textContent=msg;
   $("exres-btn").textContent = (part===PARTIES.length-1) ? "Voir le bilan final \u2192" : "Problème suivant \u2192";
   window.scrollTo({top:0,behavior:"smooth"});
@@ -441,6 +468,16 @@ function showFinal(){
   $("final-num").textContent=totalOk+" / "+totalQ;
   var st=starsFrac(totalOk,totalQ);
   $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  var fmsg;
+  if(totalOk===totalQ) fmsg="🟢 Excellent\u00a0! Tu résous les problèmes de partage sans te tromper.";
+  else if(totalOk>=Math.ceil(totalQ*0.8)) fmsg="🟢 Très bien\u00a0! Tu maîtrises presque toutes les étapes.";
+  else if(totalOk>=Math.ceil(totalQ*0.6)) fmsg="🟡 Maîtrise satisfaisante. Tu as compris l\u2019essentiel.";
+  else if(totalOk>=Math.ceil(totalQ*0.5)) fmsg="🟠 Maîtrise fragile. Continue à t\u2019entraîner pour gagner en précision.";
+  else fmsg="🔴 Maîtrise insuffisante. Reprends l\u2019activité puis réessaie.";
+  if($("final-msg")) $("final-msg").textContent=fmsg;
+  // le bilan "Tu sais maintenant..." ne s'affiche que si la maîtrise est au moins satisfaisante (🟢/🟡)
+  var skills=document.querySelector("#final .skills-text");
+  if(skills){ skills.style.display = (totalOk>=Math.ceil(totalQ*0.6)) ? "" : "none"; }
   var detail="";
   PARTIES.forEach(function(p,i){ detail += p.titre+" : "+okPart[i]+" / "+partQuestionCount(i)+"<br/>"; });
   $("final-detail").innerHTML=detail;
