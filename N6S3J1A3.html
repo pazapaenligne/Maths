@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Semaine 3 Jour 1 — La division euclidienne</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — Jour 1 → Orange ═══ */
+    :root{
+      --day-color:#f5a623; --day-dark:#c47a10; --day-light:#fff5e0;
+      --day-border:#f5d080; --day-glow:rgba(245,166,35,.3);
+    }
+    :root{
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+      --err-bg:#fff0ef; --err-border:#c0392b; --err-text:#c0392b;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 3.5rem;
+      position:relative;overflow-x:hidden;letter-spacing:.02em;word-spacing:.06em;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--green);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.3rem,5vw,1.9rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .progress-wrap{position:sticky;top:0;z-index:5;width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:99px;padding:.5rem .9rem;margin-bottom:1.4rem;display:flex;align-items:center;gap:.7rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+    .progress-wrap .pw-label{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:var(--day-dark);white-space:nowrap;}
+    .pw-track{flex:1;min-width:90px;height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+    .pw-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;}
+    .pw-step{font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:700;color:var(--muted);white-space:nowrap;}
+
+    .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.8rem 1.6rem 1.5rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--green),var(--blue),var(--pink));}
+
+    .niveau-badge{display:inline-flex;align-items:center;gap:.45rem;font-size:.7rem;font-weight:700;padding:.25rem .7rem;border-radius:99px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+    .niveau-badge .nb-dot{width:14px;height:14px;border-radius:50%;}
+    .ex-title{font-size:clamp(1.05rem,3vw,1.25rem);font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+    .consigne{font-size:clamp(.85rem,2.5vw,.95rem);color:var(--text);margin-bottom:1.1rem;line-height:1.9;}
+    .q-tag{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+
+    /* égalité / division mises en avant */
+    .math-box{display:flex;align-items:center;justify-content:center;margin:1rem 0 1.3rem;flex-wrap:wrap;gap:.4rem;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1.4rem,5.5vw,2rem);color:var(--day-dark);
+      background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;padding:.8rem 1rem;text-align:center;}
+    .math-box .focus{color:var(--orange);text-decoration:underline;text-underline-offset:4px;}
+    .phrase{font-size:clamp(.95rem,2.8vw,1.1rem);text-align:center;margin:.6rem 0 1.2rem;line-height:1.9;}
+    .phrase .blank{display:inline-block;min-width:90px;border-bottom:2.5px dashed var(--orange);color:var(--orange);font-weight:700;padding:0 .3rem;}
+
+    .options{display:flex;flex-direction:column;gap:.7rem;}
+    .options.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:12px;border:2px solid var(--border);background:var(--surface);cursor:pointer;font-size:clamp(.95rem,2.7vw,1.05rem);font-weight:700;transition:border-color .15s,background .15s,transform .08s;min-height:48px;}
+    .opt:hover:not(.locked){border-color:var(--day-color);transform:translateY(-1px);}
+    .opt .opt-key{width:28px;height:28px;border-radius:7px;background:var(--day-light);color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .opt.selected{border-color:var(--day-color);background:var(--day-light);box-shadow:0 0 0 3px var(--day-glow);}
+    .opt.reveal-correct{border-color:var(--green);background:#f0faeb;}
+    .opt.chosen-correct{border-color:var(--green);background:#f0faeb;}
+    .opt.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);}
+    .opt.locked{cursor:default;}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.7rem 1.5rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.85rem,2.5vw,.95rem);font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.4;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#5a4000;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+    .btn-hint{background:var(--orange);color:#fff;}
+
+    .hint-box{margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.75rem 1rem;font-size:clamp(.82rem,2.4vw,.88rem);color:#7a6010;display:none;line-height:1.9;}
+    .hint-box.show{display:block;}
+
+    .feedback{margin-top:1.1rem;padding:.85rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.95rem);display:none;align-items:flex-start;gap:.7rem;line-height:1.9;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback .fb-ic{font-size:1.3rem;flex-shrink:0;}
+    .feedback .fb-sol{display:block;margin-top:.25rem;color:var(--text);font-weight:400;}
+
+    .screen{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.2rem 1.6rem;text-align:center;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+    .screen .big-ic{font-size:3rem;margin-bottom:.6rem;}
+    .screen h2{font-size:clamp(1.15rem,3.4vw,1.5rem);color:var(--day-dark);margin-bottom:.6rem;}
+    .screen p{color:var(--text);font-size:clamp(.88rem,2.6vw,.98rem);line-height:1.9;margin-bottom:1.3rem;}
+
+    .trophee{font-size:3rem;line-height:1;margin-bottom:.3rem;}
+    .global-score{font-size:clamp(2.4rem,10vw,4rem);font-weight:800;line-height:1;margin:.2rem 0;color:var(--day-dark);}
+    .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
+    .global-msg{color:var(--text);font-size:clamp(.9rem,2.6vw,1rem);margin-bottom:1.3rem;font-weight:600;line-height:1.7;}
+    .recap{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.3rem;}
+    .recap-item{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .9rem;border-radius:10px;font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.7;}
+    .recap-item .ri-ic{flex-shrink:0;font-weight:700;font-size:1.05rem;}
+    .recap-item .ri-msg{font-weight:400;color:var(--text);font-size:.9em;}
+    .recap-item.p-vert{background:#f0faeb;border:1.5px solid var(--green);color:#3d7a10;}
+    .recap-item.p-jaune{background:#fef9e3;border:1.5px solid #e6c200;color:#8a6d00;}
+    .recap-item.p-orange{background:#fff3e6;border:1.5px solid #f5a623;color:#a85d00;}
+    .recap-item.p-rouge{background:#fce4e4;border:1.5px solid #c0392b;color:#8e1b13;}
+    .comp-box{text-align:left;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.3rem;}
+    .comp-box h3{color:var(--day-dark);font-size:.95rem;margin-bottom:.5rem;}
+    .comp-box .comp-line{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.4rem;font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.8;color:var(--text);}
+    .comp-box .comp-line .arr{color:var(--day-dark);font-weight:800;flex-shrink:0;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(min-width:481px) and (max-width:820px){
+      .progress-wrap, .card, .screen{max-width:640px;}
+    }
+    @media(max-width:480px){
+      body{padding:1.2rem .75rem 3rem;}
+      .card,.screen{padding:1.4rem 1.1rem;}
+      .btn-row .btn{flex:1 1 100%;width:100%;}
+      .options.grid2{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 6ème
+    </div>
+    <div class="week-label">Semaine 3 &ndash; Jour 1</div>
+    <h1>La division <span class="hl">euclidienne</span></h1>
+    <p class="subtitle">Je m&rsquo;entraîne pour progresser</p>
+  </header>
+
+  <div class="progress-wrap" id="progress-wrap" style="display:none;">
+    <span class="pw-label" id="pw-label">Score : 0</span>
+    <div class="pw-track"><div class="pw-fill" id="pw-fill"></div></div>
+    <span class="pw-step" id="pw-step">Niveau 1 / 4</span>
+  </div>
+
+  <div id="app"></div>
+
+<script>
+var $ = function(id){ return document.getElementById(id); };
+function shuffleArr(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+var VOC = ["dividende","diviseur","quotient","reste"];
+
+/* ════ NIVEAU 1 — Vocabulaire (50 = 8 × 6 + 2) ════ */
+var N1 = [
+  { val:2,  ans:"reste" },
+  { val:8,  ans:"diviseur" },
+  { val:6,  ans:"quotient" },
+  { val:50, ans:"dividende" }
+];
+/* ════ NIVEAU 2 — Compléter (quotient + reste) ════ */
+var N2 = [
+  { D:78, d:9, kind:"q", ans:8, opts:[7,8,9] },
+  { D:78, d:9, kind:"r", ans:6, opts:[5,6,7] },
+  { D:84, d:6, kind:"q", ans:14, opts:[12,13,14] },
+  { D:84, d:6, kind:"r", ans:0, opts:[0,1,2] }
+];
+/* ════ NIVEAU 3 — Multiple / diviseur / divisible ════ */
+var N3 = [
+  { txt:"24 est ______ par 6.", ans:"divisible" },
+  { txt:"45 est un ______ de 9.", ans:"multiple" },
+  { txt:"2 est un ______ de 12.", ans:"diviseur" },
+  { txt:"12 est un ______ de 36.", ans:"diviseur" },
+  { txt:"12 est ______ par 4.", ans:"divisible" },
+  { txt:"25 a pour ______ 5.", ans:"diviseur" },
+  { txt:"7 a pour ______ 49.", ans:"multiple" }
+];
+var N3_OPTS = ["multiple","diviseur","divisible"];
+/* ════ NIVEAU 4 — Poser (quotient + reste) ════ */
+var N4 = [
+  { D:110, d:8, kind:"q", ans:13, opts:[12,13,14] },
+  { D:110, d:8, kind:"r", ans:6, opts:[5,6,7] },
+  { D:243, d:7, kind:"q", ans:34, opts:[33,34,35] },
+  { D:243, d:7, kind:"r", ans:5, opts:[4,5,6] }
+];
+
+var HINTS = {
+  1:"Dans l\u2019égalité Dividende = Diviseur × Quotient + Reste, repère la place de chaque nombre.",
+  2:"Cherche combien de fois le diviseur entre dans le dividende : c\u2019est le quotient. Ce qui reste est le reste.",
+  3:"« Multiple » = résultat d\u2019une table. « Diviseur » = nombre qui divise sans reste. « Divisible » = la division tombe juste.",
+  4:"Pose la division. Le quotient est le nombre de fois où le diviseur entre dans le dividende ; le reste est toujours plus petit que le diviseur."
+};
+var KO_TEXT = {
+  1:"Relis l\u2019égalité : Dividende = Diviseur × Quotient + Reste.",
+  2:"Vérifie le produit du diviseur par le quotient, puis ajoute le reste.",
+  3:"Relis la définition des mots « multiple », « diviseur » et « divisible » puis réessaie.",
+  4:"Vérifie que Dividende = Diviseur × Quotient + Reste, et que le reste est plus petit que le diviseur."
+};
+
+var SEQ = [];
+function buildSeq(){
+  SEQ = [];
+  N1.forEach(function(q){ SEQ.push({lvl:1, type:"voc", q:q}); });
+  N2.forEach(function(q){ SEQ.push({lvl:2, type:"div", q:q}); });
+  N3.forEach(function(q){ SEQ.push({lvl:3, type:"mdd", q:q}); });
+  N4.forEach(function(q){ SEQ.push({lvl:4, type:"div", q:q}); });
+}
+var TOTAL = 19;
+var idx = 0, chosen = null, res = [];
+var selectedVal = null;
+
+function start(){
+  idx = 0; chosen = null; res = [];
+  buildSeq();
+  $("progress-wrap").style.display = "none";
+  $("app").innerHTML =
+    '<div class="screen"><div class="big-ic">🟢</div>'
+    + '<h2>Prêt à t\u2019entraîner&nbsp;?</h2>'
+    + '<p>Quatre niveaux \u00e0 franchir : le <strong>vocabulaire</strong>, <strong>compléter</strong> une division, les notions de <strong>multiple et diviseur</strong>, puis <strong>poser</strong> une division. \u00c0 la fin, un seul bilan.</p>'
+    + '<div class="btn-row"><button class="btn btn-primary" onclick="begin()">Commencer</button></div></div>';
+}
+
+function begin(){ idx = 0; chosen = null; $("progress-wrap").style.display = "flex"; renderQ(); }
+
+var LVL_INFO = {
+  1:{dot:"#8dc63f", name:"Niveau 1"},
+  2:{dot:"#f5c518", name:"Niveau 2"},
+  3:{dot:"#f5a623", name:"Niveau 3"},
+  4:{dot:"#c0392b", name:"Niveau 4"}
+};
+
+function lvlStep(l){ return "Niveau " + l + " / 4"; }
+
+function renderQ(){
+  var item = SEQ[idx]; chosen = null; selectedVal = null;
+  var info = LVL_INFO[item.lvl];
+  var inner = '<div class="card"><div class="card-stripe"></div>'
+    + '<div class="niveau-badge"><span class="nb-dot" style="background:'+info.dot+'"></span>'+info.name+'</div>';
+
+  if(item.type === "voc"){
+    inner += '<div class="ex-title">Le vocabulaire de la division</div>'
+      + '<div class="q-tag">Question '+(idx+1)+' / '+TOTAL+'</div>'
+      + '<div class="math-box">50 = 8 × 6 + 2</div>'
+      + '<div class="phrase">Dans cette division euclidienne, <strong>'+item.q.val+'</strong> est le <span class="blank">?</span>.</div>'
+      + '<div class="options grid2" id="options"></div>';
+  } else if(item.type === "div"){
+    var label = (item.q.kind==="q") ? "le quotient" : "le reste";
+    inner += '<div class="ex-title">'+(item.lvl===4?"Poser la division":"Compléter la division")+'</div>'
+      + '<div class="q-tag">Question '+(idx+1)+' / '+TOTAL+'</div>'
+      + '<div class="math-box">'+item.q.D+' ÷ '+item.q.d+'</div>'
+      + '<div class="consigne">Quel est <strong>'+label+'</strong> de cette division euclidienne ?</div>'
+      + '<div class="options grid2" id="options"></div>';
+  } else {
+    inner += '<div class="ex-title">Multiple, diviseur ou divisible&nbsp;?</div>'
+      + '<div class="q-tag">Question '+(idx+1)+' / '+TOTAL+'</div>'
+      + '<div class="phrase">'+item.q.txt.replace("______",'<span class="blank">?</span>')+'</div>'
+      + '<div class="options" id="options"></div>';
+  }
+  inner += '<div class="btn-row">'
+    + '<button class="btn btn-hint" id="btn-hint" onclick="toggleHint()">? Indice</button>'
+    + '<button class="btn btn-primary" id="btn-next" disabled onclick="validate()">Valider</button></div>'
+    + '<div class="hint-box" id="hint-box"></div>'
+    + '<div class="feedback" id="feedback"><span class="fb-ic" id="fb-ic"></span><div id="fb-msg"></div></div>'
+    + '</div>';
+  $("app").innerHTML = inner;
+  buildOptions(item);
+  updateProgress();
+}
+
+function buildOptions(item){
+  var box = $("options"); box.innerHTML = "";
+  var opts;
+  if(item.type === "voc") opts = VOC.slice();
+  else if(item.type === "mdd") opts = N3_OPTS.slice();
+  else opts = item.q.opts.slice();
+  opts.forEach(function(v){
+    var div = document.createElement("div");
+    div.className = "opt"; div.setAttribute("data-v", String(v));
+    div.innerHTML = '<span class="opt-key">'+String.fromCharCode(65+box.children.length)+'</span><span>'+v+'</span>';
+    div.onclick = function(){ selectOpt(String(v), div); };
+    box.appendChild(div);
+  });
+}
+
+function correctVal(item){
+  if(item.type === "voc" || item.type === "mdd") return item.q.ans;
+  return String(item.q.ans);
+}
+
+function selectOpt(val, div){
+  if(chosen !== null) return;
+  selectedVal = val;
+  document.querySelectorAll(".opt").forEach(function(o){ o.classList.remove("selected"); });
+  div.classList.add("selected");
+  var bl = document.querySelector(".blank");
+  if(bl) bl.textContent = val;
+  $("btn-next").disabled = false;
+}
+
+function validate(){
+  if(chosen !== null || selectedVal === null) return;
+  chosen = selectedVal;
+  var item = SEQ[idx];
+  var good = (String(selectedVal) === String(correctVal(item)));
+  res[idx] = good;
+  document.querySelectorAll(".opt").forEach(function(o){
+    o.classList.add("locked");
+    o.classList.remove("selected");
+    var ov = o.getAttribute("data-v");
+    if(ov === String(correctVal(item))) o.classList.add(good && ov===String(selectedVal) ? "chosen-correct" : "reveal-correct");
+    else if(ov === String(selectedVal)) o.classList.add("chosen-wrong");
+  });
+  var bl = document.querySelector(".blank");
+  if(bl) bl.textContent = correctVal(item);
+  showFb(good, item);
+}
+
+function solText(item){
+  if(item.type === "voc"){
+    return "Dans 50 = 8 × 6 + 2 : 50 est le dividende, 8 le diviseur, 6 le quotient, 2 le reste.";
+  }
+  if(item.type === "div"){
+    var q=Math.floor(item.q.D/item.q.d), r=item.q.D - item.q.d*q;
+    return item.q.D+" = "+item.q.d+" × "+q+" + "+r+" (quotient "+q+", reste "+r+").";
+  }
+  return "";
+}
+
+function showFb(good, item){
+  var fb = $("feedback");
+  fb.className = "feedback show " + (good ? "ok" : "ko");
+  $("fb-ic").textContent = good ? "\u2705" : "\u26A0\uFE0F";
+  var okMsg = {1:"Bravo\u00a0! Tu reconnais les éléments d\u2019une division euclidienne.",
+               2:"Bien joué\u00a0!",
+               3:"Très bien\u00a0!",
+               4:"Excellent\u00a0! Tu maîtrises la technique de la division euclidienne."}[item.lvl];
+  if(good){
+    var extra = (item.type==="div") ? "<span class='fb-sol'>"+solText(item)+"</span>" : "";
+    $("fb-msg").innerHTML = "<strong>"+okMsg+"</strong>"+extra;
+  } else {
+    $("fb-msg").innerHTML = "<strong>Pas tout à fait.</strong><span class='fb-sol'>"+KO_TEXT[item.lvl]+"</span>";
+  }
+  $("btn-next").disabled = false;
+  $("btn-hint").disabled = true;
+  $("btn-next").setAttribute("onclick","nextQ()");
+  $("btn-next").textContent = (idx === TOTAL-1) ? "Voir le bilan" : "Question suivante";
+  updateProgress();
+}
+
+function toggleHint(){
+  var item = SEQ[idx];
+  var h = $("hint-box");
+  if(h.classList.contains("show")) h.classList.remove("show");
+  else { h.innerHTML = "<strong>💡 Indice :</strong> " + HINTS[item.lvl]; h.classList.add("show"); }
+}
+
+function nextQ(){
+  idx++;
+  if(idx < SEQ.length) renderQ();
+  else showFinal();
+}
+
+function curScore(){ return res.filter(Boolean).length; }
+function updateProgress(){
+  if($("progress-wrap").style.display === "none") return;
+  $("pw-label").textContent = "Score : " + curScore();
+  var answered = idx + (chosen!==null?1:0);
+  $("pw-fill").style.width = Math.round(answered / TOTAL * 100) + "%";
+  $("pw-step").textContent = lvlStep(SEQ[Math.min(idx,SEQ.length-1)].lvl);
+}
+
+function starsFrac(r){ return r>=1?5:r>=.8?4:r>=.6?3:r>=.4?2:1; }
+
+function lvlPalier(ok, tot){
+  var r = ok/tot;
+  if(r>=1) return {cls:"p-vert",  ic:"\u2705", msg:"Parfait\u00a0! Tu maîtrises cette compétence."};
+  if(r>=0.6) return {cls:"p-jaune", ic:"\u26A0\uFE0F", msg:"Presque réussi\u00a0! Une notion reste à consolider."};
+  if(r>0) return {cls:"p-orange",ic:"\uD83D\uDD38", msg:"Quelques difficultés subsistent. Continue à t\u2019entraîner."};
+  return {cls:"p-rouge", ic:"\u274C", msg:"Cette compétence mérite d\u2019être retravaillée."};
+}
+
+function showFinal(){
+  var sc = curScore(), r = sc/TOTAL, st = starsFrac(r);
+
+  var gIc, gTitle, gMsg;
+  if(r>=1){ gIc="\uD83C\uDFC6"; gTitle="Excellent\u00a0!"; gMsg="Tu maîtrises parfaitement la division euclidienne."; }
+  else if(r>=0.8){ gIc="\uD83C\uDF1F"; gTitle="Très bien\u00a0!"; gMsg="Tu maîtrises l\u2019essentiel. Quelques points restent à consolider."; }
+  else if(r>=0.55){ gIc="\uD83D\uDC4D"; gTitle="Bon travail\u00a0!"; gMsg="Tu progresses. Reprends les questions qui t\u2019ont posé difficulté."; }
+  else if(r>=0.3){ gIc="\uD83D\uDCAA"; gTitle="Continue tes efforts\u00a0!"; gMsg="Certaines notions demandent encore de l\u2019entraînement."; }
+  else { gIc="\uD83D\uDCDA"; gTitle="Ne te décourage pas."; gMsg="Relis les indices puis recommence l\u2019activité."; }
+
+  function lvlOk(l){ var ok=0,tot=0; SEQ.forEach(function(it,i){ if(it.lvl===l){ tot++; if(res[i]) ok++; } }); return [ok,tot]; }
+  var names={1:"Niveau 1 — le vocabulaire",2:"Niveau 2 — compléter une division",3:"Niveau 3 — multiple, diviseur, divisible",4:"Niveau 4 — poser une division"};
+  var recap="";
+  [1,2,3,4].forEach(function(l){
+    var s=lvlOk(l), pa=lvlPalier(s[0],s[1]);
+    recap += '<div class="recap-item '+pa.cls+'">'
+      + '<span class="ri-ic">'+pa.ic+'</span>'
+      + '<span><strong>'+names[l]+'\u00a0: '+s[0]+'/'+s[1]+'</strong><br><span class="ri-msg">'+pa.msg+'</span></span>'
+      + '</div>';
+  });
+
+  $("progress-wrap").style.display = "none";
+  $("app").innerHTML =
+    '<div class="screen">'
+    + '<div class="trophee">'+gIc+'</div>'
+    + '<div class="global-score">'+sc+' / '+TOTAL+'</div>'
+    + '<div class="stars">'+ "\u2B50".repeat(st) + "\u2606".repeat(5-st) +'</div>'
+    + '<div class="global-msg"><strong>'+gTitle+'</strong><br>'+gMsg+'</div>'
+    + '<div class="recap">'+recap+'</div>'
+    + '<div class="comp-box"><h3>Tu sais maintenant :</h3>'
+      + '<div class="comp-line"><span class="arr">&rarr;</span><span>reconnaître le dividende, le diviseur, le quotient et le reste ;</span></div>'
+      + '<div class="comp-line"><span class="arr">&rarr;</span><span>compléter une division euclidienne ;</span></div>'
+      + '<div class="comp-line"><span class="arr">&rarr;</span><span>utiliser les notions de multiple et de diviseur ;</span></div>'
+      + '<div class="comp-line"><span class="arr">&rarr;</span><span>effectuer une division euclidienne.</span></div>'
+    + '</div>'
+    + '<div class="btn-row"><button class="btn btn-primary" onclick="start()">Recommencer</button></div>'
+    + '</div>';
+}
+
+document.addEventListener("DOMContentLoaded", start);
+</script>
+</body>
+</html>
