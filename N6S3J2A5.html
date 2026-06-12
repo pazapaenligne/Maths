@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – Les palettes du port – 6e</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#e08a2b; --day-dark:#a05a12; --day-light:#fbe8cf; --day-border:#e6b97f;
+  --gold:#f5c518; --gold-d:#b88a00;
+  --bg:#231708; --panel:#2f2010; --panel2:#3b2a16;
+  --line:#574022; --text:#f8efe2; --muted:#c2a884;
+  --green:#5bc46a; --neon:#ffb454;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 16px rgba(224,138,43,.42), 0 0 40px rgba(224,138,43,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#2a1c0c 0%, #231708 55%, #281a0b 100%);color:var(--text);
+  font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#fff 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#fff 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#2a1604;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.1;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.13;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#e08a2b;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#ffb454;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#b06a18;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#d89640;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(35,23,8,.94);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.35rem;}
+.hud-frag{width:1.9rem;height:2rem;border-radius:6px;background:#1c1206;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:#6b5230;transition:all .4s;}
+.hud-frag.got{background:rgba(224,138,43,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#1c1206;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#1c1206;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(224,138,43,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:54px;}.hud-bar{gap:.6rem;padding:.45rem .6rem;}.hud-frag{width:1.6rem;height:1.8rem;font-size:.85rem;}.hud-dial{display:none;}.hud-timer{font-size:.82rem;padding:.2rem .4rem;}.hud-timer .lbl{display:none;}}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:620px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:#ecdcc6;line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-pal{margin:.9rem 0 .2rem;background:#1c1206;border:1.5px dashed var(--day-border);border-radius:10px;padding:.8rem;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(1rem,3.4vw,1.3rem);color:var(--day-light);letter-spacing:.06em;}
+.start-q{margin-top:.7rem;font-size:.84rem;color:#dcc6a8;}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#2a1604;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.crest{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:'Orbitron',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#1c1206;border:1.5px solid var(--line);font-size:1.2rem;color:#574022;transition:all .5s;}
+.frag.found{background:rgba(224,138,43,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#1c1206;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#1c1206;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+.intro .scr{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(.76rem,2.2vw,.84rem);color:#ecdcc6;margin-top:.4rem;letter-spacing:0;}
+
+.exo{background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.9rem;transition:border-color .2s,box-shadow .3s;}
+.exo.ok{border-color:var(--green);box-shadow:0 0 14px rgba(91,196,106,.25);}
+.exo.ko{border-color:#e8806f;}
+.exo-tag{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+.exo-q{font-size:clamp(.82rem,2.4vw,.9rem);color:#ecdcc6;margin-bottom:.7rem;line-height:1.6;}
+.exo-q b{color:var(--day-light);}
+.exo-num{text-align:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(1.3rem,5vw,1.9rem);color:var(--day-light);letter-spacing:.12em;margin:.3rem 0 .8rem;}
+.exo-num .miss{color:var(--neon);border-bottom:2px solid var(--neon);padding:0 .15rem;}
+
+.opts{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+.opt{flex:1;min-width:100px;cursor:pointer;text-align:center;background:#1c1206;border:1.5px solid var(--line);border-radius:10px;padding:.6rem .5rem;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.74rem,2.4vw,.86rem);color:var(--muted);transition:all .18s;min-height:46px;display:flex;align-items:center;justify-content:center;}
+.opt:hover{border-color:var(--day-color);color:var(--text);}
+.opt.sel{background:rgba(224,138,43,.16);border-color:var(--day-color);color:var(--day-color);}
+.opt.ok{border-color:var(--green);background:rgba(91,196,106,.14);color:#bff0c6;}
+.opt.ko{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+
+/* saisie chiffre (M2) */
+.digit-row{display:flex;align-items:center;gap:.6rem;justify-content:center;flex-wrap:wrap;}
+.digit-lab{font-size:.82rem;color:var(--muted);}
+.digit-in{width:80px;background:#1c1206;border:2px solid var(--line);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:16px;text-align:center;padding:.5rem;outline:none;min-height:46px;}
+.digit-in:focus{border-color:var(--day-color);}
+.exo.ok .digit-in{border-color:var(--green);background:rgba(91,196,106,.12);color:#bff0c6;}
+.exo.ko .digit-in{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+
+/* cases à cocher (M4) */
+.checks{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+.chk{cursor:pointer;min-width:64px;text-align:center;background:#1c1206;border:1.5px solid var(--line);border-radius:10px;padding:.6rem .4rem;font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.85rem,3vw,1.05rem);color:var(--muted);transition:all .18s;min-height:46px;display:flex;align-items:center;justify-content:center;gap:.3rem;}
+.chk:hover{border-color:var(--day-color);color:var(--text);}
+.chk.on{background:rgba(224,138,43,.18);border-color:var(--day-color);color:var(--day-color);}
+.chk .box{font-size:.9rem;}
+
+.correction{margin-top:.8rem;background:#1c1206;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--day-color);margin-bottom:.4rem;}
+.correction-x{font-size:clamp(.8rem,2.4vw,.88rem);color:#dcecd6;line-height:1.6;}
+.correction-x b{color:var(--day-light);}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#2a1604;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#2a2410;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#e8d8a0;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(91,196,106,.12);border:1.5px solid var(--green);color:#bff0c6;}
+.fb.ko{background:rgba(232,128,111,.12);border:1.5px solid #e8806f;color:#ffc4b8;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#e8d18a;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+body.playing .sound-btn{top:58px;}
+@media(max-width:600px){body.playing .sound-btn{top:54px;}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(35,23,8,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(35,23,8,.96), rgba(20,12,4,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#1c1206;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:radial-gradient(circle at 50% 40%, rgba(224,138,43,.4), rgba(20,12,4,.98));}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(224,138,43,.3) 0%, rgba(224,138,43,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(224,138,43,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.5rem;margin:.8rem 0;}
+.finale-crest .fc{width:2.6rem;height:2.6rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(224,138,43,.16);border:1.5px solid var(--day-color);font-size:1.3rem;animation:pop .5s both;}
+.finale-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.2rem);color:var(--day-color);text-shadow:0 1px 0 rgba(160,90,18,.25);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#bff0c6;margin-bottom:.6rem;}
+.finale-grade{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#2a1604;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:#ecdcc6;font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-reveal{background:#1c1206;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:#ecdcc6;line-height:1.7;}
+.finale-reveal b{color:var(--day-color);font-family:'Orbitron',sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#2a1604;box-shadow:var(--glow);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Contr&ocirc;le des palettes&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Lecture des num&eacute;ros</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128230;</span>
+  <div class="hud-frags">
+    <span class="hud-frag" id="hud-frag-0">&#128230;</span>
+    <span class="hud-frag" id="hud-frag-1">&#128230;</span>
+    <span class="hud-frag" id="hud-frag-2">&#128230;</span>
+    <span class="hud-frag" id="hud-frag-3">&#128230;</span>
+  </div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Contr&ocirc;le&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">&#128230; Contr&ocirc;le en cours &middot; </span>&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#127942;</div>
+    <div class="finale-crest" id="finale-crest"></div>
+    <div class="finale-title">CONTR&Ocirc;LE R&Eacute;USSI&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub">&#128230; Toutes les palettes sont tri&eacute;es&#8201;!<br>Bravo, le port est en ordre.</div>
+    <div class="finale-reveal">
+      <b>&#128161; Ce que tu as d&eacute;couvert</b>
+      Pour reconna&icirc;tre rapidement un multiple sans poser de division&#8201;: par <b style="display:inline;color:var(--day-light)">2, 5, 10</b> on regarde le chiffre des unit&eacute;s&#8201;; par <b style="display:inline;color:var(--day-light)">3 et 9</b> on additionne tous les chiffres.<br><br>
+      &#128230; À toi de reconnaître les palettes du début&#8201;: 246, 135, 720, 918, 547.
+    </div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 6e
+    </div>
+    <div class="week">Semaine 3 — Jour 2</div>
+    <div class="title">Les palettes du <span class="hl">port</span> &#128230;</div>
+    <div class="subtitle">Les crit&egrave;res de divisibilit&eacute;</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#128230;</div>
+    <div class="start-mission">
+      <b>&#128230; Les palettes du port&nbsp;:</b> le responsable du port observe plusieurs palettes num&eacute;rot&eacute;es. Il cherche &agrave; reconna&icirc;tre rapidement les nombres qui peuvent &ecirc;tre partag&eacute;s par 2, 3, 5, 9 ou 10.
+      <div class="start-pal">246 &middot; 135 &middot; 720 &middot; 918 &middot; 547</div>
+      <div class="start-q">&#10067; Comment savoir, sans poser de division, par quels nombres une palette peut &ecirc;tre partag&eacute;e&#8201;?</div>
+      <br>
+      &#127919; <b>Ta mission&nbsp;:</b> aider le responsable &agrave; trier les palettes gr&acirc;ce aux crit&egrave;res de divisibilit&eacute;.
+      <div class="start-rule"><span>&#128269; Chiffre des unit&eacute;s</span><span>&#10133; Somme des chiffres</span></div>
+    </div>
+    <button class="btn-start" onclick="beginGame()">&#128230; Lancer le contrôle</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">Palettes triées&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+    </div>
+    <div id="steps"></div>
+    <div style="text-align:center;"><button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function sOk(){if(!soundOn)return;beep(523,0,0.1,"square",0.2);beep(784,0.08,0.12,"square",0.2);beep(1047,0.18,0.18,"triangle",0.22);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.18);beep(150,0.1,0.2,"square",0.18);}
+function sFrag(){if(!soundOn)return;beep(660,0,0.06,"square",0.16);beep(990,0.07,0.14,"triangle",0.2);beep(1320,0.16,0.16,"triangle",0.2);}
+function sCoin(){if(!soundOn)return;beep(988,0,0.05,"square",0.14);beep(1319,0.05,0.12,"square",0.16);}
+function sWin(){if(!soundOn)return;[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,i*0.12,0.24,"square",0.2);});}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,4500);}
+document.addEventListener("click",function(){hideAgent();},true);
+
+var SCAN_SUB=["V\u00e9rification des \u00e9tiquettes","Palettes myst\u00e9rieuses","Possible ou impossible","Contr\u00f4le final"];
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  if(!ov){done&&done();return;}
+  if(txt)txt.innerHTML="Contr\u00f4le des palettes&#8230;";
+  if(sub)sub.textContent=SCAN_SUB[mi]||"Analyse en cours";
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");
+  sCoin();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*16+8;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");done&&done();},350);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },110);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+
+/* ===== Missions =====
+   type "vf"    : vrai/faux (2 options), ans index, correction
+   type "digit" : saisir un chiffre, ans nombre, correction
+   type "yn"    : oui/non (2 options), ans index, correction
+   type "multi" : cocher tous les bons critères parmi 2,3,5,9,10
+*/
+var MISSIONS=[
+  {ico:"&#10004;&#65039;", step:"Mission 1", codename:"Vrai ou Faux", name:"Vrai ou Faux\u00a0?", comp:"V\u00e9rifier des \u00e9tiquettes",
+   frag:"&#128230;",
+   intro:"&#128230; Les \u00e9tiquettes<br><span class='scr'>Le responsable v\u00e9rifie des \u00e9tiquettes. Vrai ou faux\u00a0?</span>",
+   hint:"Pour 2, 5 et 10, regarde uniquement le chiffre des unit\u00e9s (le dernier).",
+   type:"vf", opts:["Vrai","Faux"],
+   fbko:"Observe le chiffre des unit\u00e9s.",
+   exos:[
+     {q:"<b>1 020</b> est divisible par <b>5</b>.", ans:0, corr:"Le chiffre des unit\u00e9s est 0&#8201;: divisible par 5."},
+     {q:"<b>756</b> est un multiple de <b>2</b>.", ans:0, corr:"Le chiffre des unit\u00e9s est 6 (pair)&#8201;: multiple de 2."},
+     {q:"<b>3 807</b> est un multiple de <b>10</b>.", ans:1, corr:"Il se termine par 7&#8201;: un multiple de 10 finit par 0."}
+   ]},
+  {ico:"&#128269;", step:"Mission 2", codename:"Palettes myst\u00e9rieuses", name:"Les palettes myst\u00e9rieuses", comp:"Trouver le chiffre manquant",
+   frag:"&#128230;",
+   intro:"&#128230; Chiffre manquant<br><span class='scr'>Quel chiffre doit-on placer\u00a0? \u00c9cris un seul chiffre (0 \u00e0 9).</span>",
+   hint:"Pour 9, la somme de tous les chiffres doit \u00eatre un multiple de 9. Pour \u00eatre divisible par 2 ET 5, le nombre doit finir par 0.",
+   type:"digit",
+   fbko:"Regarde si tu dois utiliser le dernier chiffre ou la somme des chiffres.",
+   exos:[
+     {q:"<b>6 2 9 6 1 ?</b> &mdash; on veut un nombre divisible par <b>9</b>.", ans:3, corr:"6 + 2 + 9 + 6 + 1 + 3 = 27, et 27 est un multiple de 9."},
+     {q:"<b>1 ?</b> &mdash; on veut un nombre divisible par <b>2</b> et par <b>5</b>.", ans:0, corr:"Un nombre divisible par 2 et par 5 est divisible par 10&#8201;: il finit par 0."}
+   ]},
+  {ico:"&#10067;", step:"Mission 3", codename:"Possible ou impossible", name:"Impossible ou possible\u00a0?", comp:"Raisonner sur les unit\u00e9s",
+   frag:"&#128230;",
+   intro:"&#128230; Possible\u00a0?<br><span class='scr'>Peut-on choisir un chiffre pour le \u00ab\u00a0?\u00a0\u00bb afin que le nombre soit divisible par 10\u00a0?</span>",
+   hint:"Pour \u00eatre divisible par 10, le nombre doit finir par 0. Si le dernier chiffre est d\u00e9j\u00e0 fix\u00e9 et diff\u00e9rent de 0, c\u2019est impossible.",
+   type:"yn", opts:["Oui","Non"],
+   fbko:"Pour la divisibilit\u00e9 par 10, seul le chiffre des unit\u00e9s compte.",
+   exos:[
+     {q:"<b>5 9 ? 3 8</b> &mdash; divisible par <b>10</b>\u00a0?", ans:1, corr:"Le chiffre des unit\u00e9s est d\u00e9j\u00e0 8. Un nombre divisible par 10 doit finir par 0&#8201;: impossible."},
+     {q:"<b>5 6 3 2 ? 9</b> &mdash; divisible par <b>10</b>\u00a0?", ans:1, corr:"Le chiffre des unit\u00e9s est d\u00e9j\u00e0 9&#8201;: impossible d\u2019\u00eatre divisible par 10."}
+   ]},
+  {ico:"&#9989;", step:"Mission 4", codename:"Le contr\u00f4leur du port", name:"Le contr\u00f4leur du port", comp:"Cocher tous les crit\u00e8res",
+   frag:"&#128230;",
+   intro:"&#128230; Contr\u00f4le<br><span class='scr'>Coche tous les nombres par lesquels <b>594</b> est divisible.</span>",
+   hint:"594 est pair (donc par 2). Sa somme 5+9+4 = 18 est divisible par 3 et par 9. Il ne finit ni par 0 ni par 5.",
+   type:"multi",
+   fbko:"V\u00e9rifie chaque crit\u00e8re s\u00e9par\u00e9ment.",
+   exos:[
+     {q:"<b>594</b> est divisible par\u00a0:", crit:[2,3,9], corr:"594 est pair (par 2). 5 + 9 + 4 = 18, divisible par 3 et par 9. Il ne finit ni par 0 ni par 5."}
+   ]}
+];
+
+var ENIGMA={
+  intro:"Parmi ces palettes, laquelle peut \u00eatre r\u00e9partie&#8201;: <b>par 2, par 3, par 9</b>, mais <b>pas par 5 ni par 10</b>\u00a0?",
+  opts:["774","405","240","715"],
+  correct:0,
+  corr:"774 est pair. 7 + 7 + 4 = 18, divisible par 3 et par 9. Il ne se termine ni par 0 ni par 5."
+};
+var enigmaSel=-1, enigmaOk=false;
+
+var solved=[false,false,false,false];
+var active=0;
+var totalSec=0,totalInt=null;
+var pick={};
+var checkState={}; // pour multi : "mi-ei" -> {2:bool,...}
+
+var CRIT=[2,3,5,9,10];
+
+function build(){
+  var host=$("steps");host.innerHTML="";
+  MISSIONS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.step+' &middot; <span style="color:var(--day-color)">'+M.codename+'</span></div><div class="step-name">'+M.name+'</div><div class="step-comp">&#128230; '+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro">'+M.intro+'</div><div id="zone-'+mi+'"></div>'
+        +'<div class="tools">'
+        +'<button class="btn btn-hint" id="hint-btn-'+mi+'" onclick="toggleHint('+mi+')">? Indice</button>'
+        +'<button class="btn btn-try" id="try-'+mi+'" onclick="tryStep('+mi+')">&#9989; Valider</button>'
+        +'</div>'
+        +'<div class="hint" id="hint-'+mi+'">'+M.hint+'</div>'
+        +'<div class="fb" id="fb-'+mi+'"><span id="fbi-'+mi+'"></span><div id="fbm-'+mi+'"></div></div>';
+    }else{
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine l\u2019\u00e9tape pr\u00e9c\u00e9dente pour d\u00e9bloquer celle-ci.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(mi===active||solved[mi]) renderZone(mi);
+  });
+  updateCrest();updateProg();
+}
+
+function renderZone(mi){
+  var M=MISSIONS[mi],z=$("zone-"+mi);if(!z)return;z.innerHTML="";
+  M.exos.forEach(function(E,ei){
+    var exo=document.createElement("div");exo.className="exo";exo.id="exo-"+mi+"-"+ei;
+    var inner='<div class="exo-tag">\u00c9tiquette '+(ei+1)+'</div><div class="exo-q">'+E.q+'</div>';
+    if(M.type==="vf"||M.type==="yn"){
+      inner+='<div class="opts">'
+        +'<div class="opt" id="pk-'+mi+'-'+ei+'-0" onclick="pickOpt('+mi+','+ei+',0)">'+M.opts[0]+'</div>'
+        +'<div class="opt" id="pk-'+mi+'-'+ei+'-1" onclick="pickOpt('+mi+','+ei+',1)">'+M.opts[1]+'</div>'
+        +'</div>';
+    }else if(M.type==="digit"){
+      inner+='<div class="digit-row"><span class="digit-lab">Chiffre&#8201;:</span>'
+        +'<input class="digit-in" id="dg-'+mi+'-'+ei+'" type="text" inputmode="numeric" maxlength="1" placeholder="?" autocomplete="off" aria-label="chiffre"></div>';
+    }else if(M.type==="multi"){
+      checkState[mi+"-"+ei]=checkState[mi+"-"+ei]||{};
+      inner+='<div class="checks">'
+        + CRIT.map(function(c){return '<div class="chk" id="ck-'+mi+'-'+ei+'-'+c+'" onclick="toggleChk('+mi+','+ei+','+c+')"><span class="box">&#9744;</span>'+c+'</div>';}).join("")
+        +'</div>';
+    }
+    inner+='<div class="correction" id="corr-'+mi+'-'+ei+'"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+(E.corr||"")+'</div></div>';
+    exo.innerHTML=inner;z.appendChild(exo);
+  });
+  if(solved[mi]) lockZone(mi);
+}
+
+function pickOpt(mi,ei,oi){
+  if(solved[mi])return;
+  pick[mi+"-"+ei]=oi;
+  for(var k=0;k<2;k++){var el=$("pk-"+mi+"-"+ei+"-"+k);if(el)el.classList.remove("sel");}
+  var sel=$("pk-"+mi+"-"+ei+"-"+oi);if(sel)sel.classList.add("sel");
+  sCoin();
+}
+function toggleChk(mi,ei,c){
+  if(solved[mi])return;
+  var st=checkState[mi+"-"+ei]=checkState[mi+"-"+ei]||{};
+  st[c]=!st[c];
+  var el=$("ck-"+mi+"-"+ei+"-"+c);
+  if(el){el.classList.toggle("on",st[c]);el.querySelector(".box").innerHTML=st[c]?"&#9745;":"&#9744;";}
+  sCoin();
+}
+
+function toggleHint(mi){if(solved[mi])return;$("hint-"+mi).classList.toggle("show");}
+function parseI(v){return parseInt(String(v).replace(/\s/g,""),10);}
+
+function tryStep(mi){
+  if(solved[mi])return;
+  var M=MISSIONS[mi],ok=true,filled=true;
+  M.exos.forEach(function(E,ei){
+    var exo=$("exo-"+mi+"-"+ei);
+    if(M.type==="vf"||M.type==="yn"){
+      var chosen=pick[mi+"-"+ei];
+      if(chosen===undefined){filled=false;ok=false;return;}
+      var good=(chosen===E.ans);
+      for(var k=0;k<2;k++){var el=$("pk-"+mi+"-"+ei+"-"+k);if(el)el.classList.remove("ok","ko");}
+      var sel=$("pk-"+mi+"-"+ei+"-"+chosen);if(sel){sel.classList.toggle("ok",good);sel.classList.toggle("ko",!good);}
+      if(exo){exo.classList.toggle("ok",good);exo.classList.toggle("ko",!good);}
+      if(!good)ok=false;
+    }else if(M.type==="digit"){
+      var inp=$("dg-"+mi+"-"+ei);var v=inp?inp.value.trim():"";
+      if(v===""){filled=false;ok=false;return;}
+      var n=parseI(v);
+      var good=(!isNaN(n)&&n===E.ans);
+      if(exo){exo.classList.toggle("ok",good);exo.classList.toggle("ko",!good);}
+      if(!good)ok=false;
+    }else if(M.type==="multi"){
+      var st=checkState[mi+"-"+ei]||{};
+      var chosen=CRIT.filter(function(c){return st[c];});
+      if(chosen.length===0){filled=false;ok=false;return;}
+      var want=E.crit.slice().sort().join(",");
+      var got=chosen.slice().sort().join(",");
+      var good=(want===got);
+      CRIT.forEach(function(c){var el=$("ck-"+mi+"-"+ei+"-"+c);if(el){el.classList.remove("ok","ko");}});
+      if(exo){exo.classList.toggle("ok",good);exo.classList.toggle("ko",!good);}
+      if(!good)ok=false;
+    }
+  });
+  if(!filled){var fb=$("fb-"+mi);fb.className="fb show warn";$("fbi-"+mi).textContent="\u26A0";$("fbm-"+mi).textContent="R\u00e9ponds \u00e0 tout avant de valider.";return;}
+  if(ok){ stepSuccess(mi); }
+  else{
+    sBad();$("step-"+mi).classList.add("shake");setTimeout(function(){$("step-"+mi).classList.remove("shake");},400);
+    var fb=$("fb-"+mi);fb.className="fb show ko";$("fbi-"+mi).textContent="\u26A0\uFE0F";
+    $("fbm-"+mi).innerHTML=M.fbko+"<br>Essaie encore.";
+  }
+}
+
+function lockZone(mi){
+  var M=MISSIONS[mi];
+  M.exos.forEach(function(E,ei){
+    for(var k=0;k<2;k++){var el=$("pk-"+mi+"-"+ei+"-"+k);if(el)el.style.pointerEvents="none";}
+    var inp=$("dg-"+mi+"-"+ei);if(inp)inp.disabled=true;
+    CRIT.forEach(function(c){var ck=$("ck-"+mi+"-"+ei+"-"+c);if(ck)ck.style.pointerEvents="none";});
+  });
+}
+
+function stepSuccess(mi){
+  solved[mi]=true;sOk();sFrag();
+  $("step-"+mi).classList.add("solved");
+  var tb=$("try-"+mi);if(tb){tb.disabled=true;tb.style.display="none";}
+  var hb=$("hint-btn-"+mi);if(hb)hb.disabled=true;
+  $("hint-"+mi).classList.remove("show");
+  lockZone(mi);
+  // afficher les corrections courtes
+  MISSIONS[mi].exos.forEach(function(E,ei){var c=$("corr-"+mi+"-"+ei);if(c)c.classList.add("show");});
+  var fb=$("fb-"+mi);fb.className="fb show ok";$("fbi-"+mi).textContent="\u2705";
+  $("fbm-"+mi).innerHTML="<b style='color:var(--green)'>Bien jou\u00e9&#8201;! Palette tri\u00e9e.</b>";
+  var CHEER=["&#128230; Le responsable&nbsp;:<br>\u00c9tiquettes v\u00e9rifi\u00e9es&#8201;!","&#128230; Le responsable&nbsp;:<br>Chiffres retrouv\u00e9s&#8201;!","&#128230; Le responsable&nbsp;:<br>Bon raisonnement&#8201;!","&#128230; Le responsable&nbsp;:<br>Contr\u00f4le termin\u00e9&#8201;!"];
+  showAgent(CHEER[mi]||CHEER[0]);
+  updateCrest();updateProg();
+  var body=$("body-"+mi);
+  if(body && !$("next-"+mi)){
+    var lab=(active<MISSIONS.length-1)?"Palette suivante &#8594;":"\u00c9nigme finale &#8594;";
+    body.insertAdjacentHTML("beforeend",'<div style="text-align:center;margin-top:1rem;"><button class="btn btn-try" id="next-'+mi+'" onclick="goNext('+mi+')">'+lab+'</button></div>');
+  }
+}
+
+function goNext(mi){
+  var nb=$("next-"+mi);if(nb){nb.disabled=true;nb.style.display="none";}
+  if(active<MISSIONS.length-1){
+    active++;
+    runScan(active,function(){
+      build();var el=$("step-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});
+      showAgent("&#128230; Le responsable&nbsp;:<br>Palette suivante&#8201;!");
+    });
+  }else{
+    openEnigma();
+  }
+}
+
+function openEnigma(){
+  var host=$("steps");
+  var card=document.createElement("div");card.className="step-card solved";card.id="step-enigma";
+  card.innerHTML='<div class="step-head"><span class="step-ico">&#127919;</span>'
+    +'<div class="step-meta"><div class="step-step">\u00c9nigme finale</div><div class="step-name">La bonne palette</div><div class="step-comp">&#128230; par 2, 3, 9 &middot; pas 5 ni 10</div></div></div>'
+    +'<div class="step-body">'
+    +'<div class="exo-q" style="margin-bottom:.8rem">'+ENIGMA.intro+'</div>'
+    +'<div class="opts" id="enig-opts"></div>'
+    +'<div class="correction" id="corr-enig"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+ENIGMA.corr+'</div></div>'
+    +'<div class="tools"><button class="btn btn-try" id="try-enig" onclick="tryEnigma()">&#9989; Valider</button></div>'
+    +'<div class="fb" id="fb-enig"><span id="fbi-enig"></span><div id="fbm-enig"></div></div></div>';
+  host.appendChild(card);
+  var grid=card.querySelector("#enig-opts");
+  ENIGMA.opts.forEach(function(opt,oi){
+    var d=document.createElement("div");d.className="opt";d.id="enig-"+oi;d.textContent=opt;
+    d.onclick=function(){if(enigmaOk)return;enigmaSel=oi;grid.querySelectorAll(".opt").forEach(function(x){x.classList.remove("sel");});d.classList.add("sel");sCoin();};
+    grid.appendChild(d);
+  });
+  card.scrollIntoView({behavior:"smooth",block:"center"});
+  showAgent("&#127919; Derni\u00e8re palette&#8201;:<br>laquelle est la bonne&#8201;?");
+}
+
+function tryEnigma(){
+  if(enigmaOk)return;
+  if(enigmaSel===-1){var fb=$("fb-enig");fb.className="fb show warn";$("fbi-enig").textContent="\u26A0";$("fbm-enig").textContent="Choisis une palette avant de valider.";return;}
+  var good=(enigmaSel===ENIGMA.correct);
+  for(var oi=0;oi<ENIGMA.opts.length;oi++){var c=$("enig-"+oi);if(c)c.classList.remove("ok","ko");}
+  var sel=$("enig-"+enigmaSel);
+  if(good){
+    if(sel)sel.classList.add("ok");
+    enigmaOk=true;
+    var tb=$("try-enig");if(tb){tb.disabled=true;tb.style.display="none";}
+    var cc=$("corr-enig");if(cc)cc.classList.add("show");
+    var fb=$("fb-enig");fb.className="fb show ok";$("fbi-enig").textContent="\u2705";
+    $("fbm-enig").innerHTML="<b style='color:var(--green)'>Bravo&#8201;! C\u2019est la bonne palette.</b>";
+    sOk();sFrag();
+    var eb=$("step-enigma").querySelector(".step-body");
+    if(eb && !$("next-enig"))eb.insertAdjacentHTML("beforeend",'<div style="text-align:center;margin-top:1rem;"><button class="btn btn-try" id="next-enig" onclick="openFinale()">Voir le r\u00e9sultat &#8594;</button></div>');
+  }else{
+    if(sel)sel.classList.add("ko");
+    sBad();
+    var fb=$("fb-enig");fb.className="fb show ko";$("fbi-enig").textContent="\u26A0\uFE0F";
+    $("fbm-enig").innerHTML="V\u00e9rifie chaque crit\u00e8re&#8201;: par 2, 3, 9, mais pas 5 ni 10.<br>Essaie encore.";
+  }
+}
+
+function updateCrest(){
+  MISSIONS.forEach(function(M,mi){
+    var f=$("frag-"+mi),hf=$("hud-frag-"+mi);
+    if(solved[mi]){if(f){f.innerHTML=M.frag;f.classList.add("found");}if(hf){hf.classList.add("got");}}
+    else{if(f){f.textContent="?";f.classList.remove("found");}if(hf){hf.classList.remove("got");}}
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/MISSIONS.length*100);
+  var lab=$("hud-prog-label"),fill=$("hud-prog-fill");
+  if(lab)lab.innerHTML="Contr&ocirc;le&nbsp;: "+pct+"&#8201;%";
+  if(fill)fill.style.width=pct+"%";
+}
+
+function openFinale(){
+  clearInterval(totalInt);
+  var temps=fmt(totalSec);
+  $("hud-dial").innerHTML="&#127942;";
+  var cr=$("finale-crest");cr.innerHTML="";
+  MISSIONS.forEach(function(M,i){var d=document.createElement("div");d.className="fc";d.style.animationDelay=(i*0.15)+"s";d.innerHTML=M.frag;cr.appendChild(d);});
+  var grade;
+  if(totalSec<=240){grade="\u2B50 EXPERT DIVISIBILIT\u00c9";}
+  else if(totalSec<=420){grade="\uD83C\uDFC5 CONTR\u00d4LEUR EN CHEF";}
+  else if(totalSec<=600){grade="\uD83D\uDCE6 CONTR\u00d4LEUR CONFIRM\u00c9";}
+  else{grade="\uD83E\uDDED APPRENTI CONTR\u00d4LEUR";}
+  setTimeout(function(){
+    $("finale-time").innerHTML="&#9201; Temps utilis\u00e9&#8201;: "+temps;
+    $("finale-grade").innerHTML=grade;
+    $("finale").classList.add("show");
+    sWin();
+  },300);
+}
+
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  $("start-screen").style.display="none";
+  $("game").style.display="";
+  $("hud-bar").classList.add("show");
+  document.body.classList.add("playing");
+  totalSec=0;clearInterval(totalInt);
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">&#128230; Contr&ocirc;le en cours &middot; </span>&#9201;&#65039; 00:00';
+  totalInt=setInterval(function(){totalSec++;var h=$("hud-timer");if(h)h.innerHTML='<span class="lbl">&#128230; Contr&ocirc;le en cours &middot; </span>&#9201;&#65039; '+fmt(totalSec);},1000);
+  sCoin();
+  setTimeout(function(){
+    runScan(0,function(){
+      build();
+      showAgent("&#128230; Le responsable&nbsp;:<br>Bienvenue&#8201;! On trie les palettes par leurs crit\u00e8res.");
+    });
+  },700);
+}
+function restartAll(){
+  clearInterval(totalInt);totalSec=0;
+  solved=[false,false,false,false];active=0;pick={};checkState={};
+  enigmaSel=-1;enigmaOk=false;
+  var e=$("step-enigma");if(e)e.remove();
+  $("finale").classList.remove("show");
+  var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
+  $("hud-bar").classList.remove("show");
+  document.body.classList.remove("playing");
+  $("game").style.display="none";
+  $("start-screen").style.display="";
+  $("hud-dial").innerHTML="&#128230;";
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">&#128230; Contr&ocirc;le en cours &middot; </span>&#9201;&#65039; 00:00';
+  for(var i=0;i<4;i++){var hf=$("hud-frag-"+i);if(hf)hf.classList.remove("got");}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+build();
+</script>
+</body>
+</html>
