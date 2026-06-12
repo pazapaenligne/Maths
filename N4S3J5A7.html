@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 4ème S3 J5 · Hélico de Secours (escape game)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Charte mercredi Pazapa */
+  --jour:        #f5c518;
+  --jour-fonce:  #8a6000;
+  --jour-clair:  #fffbeb;
+  --jour-pale:   #f5e08a;
+
+  --bg:          #fffdf7;
+
+  /* Couleurs intérieur montagne */
+  --pierre:      #6b6157;
+  --pierre-clair:#9b9387;
+  --pierre-fonce:#3d362e;
+  --sapin:       #2d5530;
+  --sapin-clair: #4a7d4a;
+  --ciel:        #b5d4e8;
+  --ciel-sombre: #5a7a8f;
+  --balise-rouge:#d94040;
+  --balise-jaune:#f5c518;
+  --parchemin:   #fff5d8;
+  --boussole:    #c08040;
+
+  --txt:         #2b2010;
+  --gris:        #8b7a60;
+  --vert:        #22c55e;
+  --rouge:       #ef4444;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  padding: 20px 16px 60px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Bulles décoratives Pazapa charte mercredi */
+.bulle{ position:fixed; border-radius:50%; opacity:.30; z-index:0; pointer-events:none; }
+.bulle-1{ width:200px; height:200px; background:var(--jour); top:-60px; right:-50px; }
+.bulle-2{ width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-3{ width:150px; height:150px; background:#ffd84d; top:45%; right:-70px; }
+.bulle-4{ width:120px; height:120px; background:var(--ciel); top:200px; left:-30px; }
+
+.wrap{ position:relative; z-index:1; max-width:1000px; margin:0 auto; }
+
+/* HEADER PAZAPA */
+.header{ text-align:center; margin-bottom:24px; }
+
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--jour);
+  color:#1a3008;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px rgba(245,197,24,.4);
+  margin-bottom:12px;
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#1a3008; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+
+.semaine{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px;
+  color:var(--gris); text-transform:uppercase; margin-bottom:6px;
+}
+.titre{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size:2.3rem; line-height:1.1; color:var(--txt); margin-bottom:6px;
+}
+.titre .accent{ color:var(--jour-fonce); }
+.sous-titre{
+  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px;
+  color:var(--gris); margin-bottom:14px;
+}
+.badge-mission{
+  display:inline-block;
+  background: var(--jour);
+  color:#1a3008;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:9px 22px; border-radius:24px;
+  box-shadow:0 4px 14px rgba(245,197,24,.45);
+}
+
+/* SCENE MONTAGNE (cadre intérieur) */
+.scene{
+  position: relative;
+  background:
+    radial-gradient(ellipse at top, rgba(181,212,232,.4) 0%, transparent 60%),
+    linear-gradient(180deg, var(--ciel) 0%, var(--ciel-sombre) 35%, var(--pierre) 75%, var(--pierre-fonce) 100%);
+  border: 4px solid var(--sapin);
+  border-radius: 20px;
+  padding: 28px 22px 30px;
+  margin-bottom: 24px;
+  box-shadow: 0 14px 40px rgba(45,85,48,.4), inset 0 2px 0 rgba(255,255,255,.15);
+  overflow: hidden;
+}
+
+/* Silhouette de montagnes en SVG fond */
+.scene::before{
+  content:'';
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 120px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 120' preserveAspectRatio='none'><polygon points='0,120 80,40 160,80 240,20 320,60 400,30 480,70 560,15 640,55 720,35 800,75 800,120' fill='%232d5530' opacity='.7'/><polygon points='0,120 60,80 140,100 220,60 300,90 380,50 460,85 540,70 620,95 700,75 800,90 800,120' fill='%231a3008' opacity='.85'/></svg>");
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+
+/* Bannière/enseigne SOS Cimes */
+.enseigne-wrap{ text-align: center; margin-bottom: 20px; position: relative; z-index: 2; }
+.enseigne{
+  display: inline-block;
+  padding: 14px 28px;
+  background: linear-gradient(180deg, #fff8e0, #f5d090);
+  border: 3px solid var(--boussole);
+  border-radius: 14px;
+  position: relative;
+  box-shadow: 0 6px 18px rgba(0,0,0,.4);
+  transform: rotate(-1deg);
+}
+.enseigne-titre{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  font-size: 2.3rem; color: var(--sapin);
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 0 rgba(255,255,255,.5);
+  line-height: 1;
+}
+.enseigne-sous{
+  font-family:'Orbitron', sans-serif;
+  font-size: 1rem; color: var(--pierre-fonce);
+  margin-top: 4px;
+  font-style: italic;
+}
+.enseigne::before, .enseigne::after{
+  content:''; position:absolute; top:-10px;
+  width: 3px; height: 16px;
+  background: var(--boussole);
+}
+.enseigne::before{ left: 20%; }
+.enseigne::after{ right: 20%; }
+
+/* Carte mission (parchemin) */
+.mission-card{
+  background: linear-gradient(135deg, var(--parchemin), #fae8c4);
+  color: var(--txt);
+  border-radius: 12px;
+  padding: 20px 24px;
+  border: 2px solid var(--boussole);
+  box-shadow: 0 4px 14px rgba(0,0,0,.2);
+  margin-bottom: 22px;
+  position: relative;
+  z-index: 2;
+}
+.mission-card h2{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  font-size: 1.7rem;
+  color: var(--sapin);
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.mission-card p{
+  font-size: .96rem; line-height: 1.65; color: var(--pierre-fonce);
+}
+.mission-card p b{ color: var(--balise-rouge); }
+.mission-card .objectif{
+  margin-top: 12px; padding: 10px 14px;
+  background: rgba(245,197,24,.15);
+  border-left: 4px solid var(--jour-fonce);
+  border-radius: 6px;
+  font-size: .9rem;
+  color: var(--pierre-fonce);
+}
+
+/* Étape 1 titre */
+.etape-titre{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size: .95rem; letter-spacing: 2px;
+  color: var(--parchemin);
+  background: linear-gradient(90deg, var(--sapin), var(--jour-fonce));
+  padding: 10px 18px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  display: inline-block;
+  border: 2px solid var(--jour);
+  box-shadow: 0 3px 10px rgba(0,0,0,.3);
+  position: relative;
+  z-index: 2;
+}
+
+/* Grille des 6 zones */
+.zones-grille{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 700px){
+  .zones-grille{ grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+@media (max-width: 500px){
+  .zones-grille{ grid-template-columns: 1fr; gap: 10px; }
+}
+
+.zone-card{
+  background: linear-gradient(135deg, var(--pierre-clair) 0%, var(--pierre) 60%, var(--pierre-fonce) 100%);
+  border: 3px solid var(--sapin);
+  border-radius: 14px;
+  padding: 14px 14px 16px;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .2s;
+  position: relative;
+  box-shadow: 0 5px 14px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.2);
+  overflow: hidden;
+}
+
+/* Drapeau / balise rouge en haut de chaque zone */
+.zone-balise{
+  position: absolute;
+  top: -2px; left: 50%; transform: translateX(-50%);
+  width: 24px; height: 32px;
+  background: var(--balise-rouge);
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
+  box-shadow: 0 2px 4px rgba(0,0,0,.5);
+  z-index: 2;
+}
+
+.zone-icone{
+  text-align: center;
+  font-size: 2.2rem;
+  margin: 18px 0 6px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.6));
+}
+.zone-num{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size: .8rem;
+  color: var(--parchemin);
+  letter-spacing: 1.5px;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6);
+}
+.zone-nom{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  font-size: 1.2rem;
+  color: #fff;
+  text-align: center;
+  margin-top: 4px;
+  line-height: 1.1;
+  text-shadow: 0 1px 3px rgba(0,0,0,.7);
+}
+.zone-statut{
+  text-align: center;
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size: .65rem;
+  letter-spacing: 1.5px;
+  color: var(--balise-jaune);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255,255,255,.3);
+  text-transform: uppercase;
+}
+
+.zone-card:hover:not(.open){
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 7px 18px rgba(245,197,24,.5), inset 0 1px 0 rgba(255,255,255,.3);
+  border-color: var(--jour);
+}
+
+.zone-card.open{
+  background: linear-gradient(135deg, var(--jour-pale) 0%, var(--jour) 60%, var(--jour-fonce) 100%);
+  border-color: var(--jour-fonce);
+  cursor: default;
+}
+.zone-card.open .zone-balise{ background: var(--jour-fonce); }
+.zone-card.open .zone-icone{ animation: openPop .6s ease; }
+.zone-card.open .zone-statut{ color: #fff; }
+.zone-card.open .zone-statut::before{ content: '✓ '; }
+@keyframes openPop{
+  0%{ transform:scale(1); }
+  40%{ transform:scale(1.3) rotate(-10deg); }
+  100%{ transform:scale(1) rotate(0); }
+}
+
+/* Progression */
+.progress-zone{
+  text-align: center;
+  padding: 14px;
+  background: rgba(0,0,0,.3);
+  border: 2px solid var(--boussole);
+  border-radius: 12px;
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 2;
+}
+.progress-text{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size: .95rem;
+  color: var(--parchemin);
+  letter-spacing: 1.5px;
+}
+.progress-text .count{ color: var(--jour); font-size: 1.3rem; }
+.etoiles{ margin-top: 8px; font-size: 1.6rem; letter-spacing: 6px; }
+.etoiles .star{ color: rgba(255,255,255,.2); transition: .3s; display: inline-block; }
+.etoiles .star.on{
+  color: var(--balise-jaune);
+  text-shadow: 0 0 10px var(--balise-jaune);
+  animation: pop .5s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+
+/* MODALE ÉNIGME */
+.modal-backdrop{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(3px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-backdrop.show{ display:flex; animation: fadeIn .25s ease; }
+@keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+
+.modal{
+  background: linear-gradient(135deg, #f0e0c0, #e8d4a8);
+  color: var(--txt);
+  border-radius: 18px;
+  max-width: 620px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 4px solid var(--sapin);
+  box-shadow: 0 20px 50px rgba(0,0,0,.6);
+  animation: modalIn .4s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes modalIn{
+  from{ transform:scale(.7); opacity:0; }
+  to  { transform:scale(1); opacity:1; }
+}
+
+.modal-head{
+  background: linear-gradient(180deg, var(--sapin) 0%, var(--jour-fonce) 100%);
+  color: var(--parchemin);
+  padding: 14px 22px;
+  border-radius: 14px 14px 0 0;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 2px solid var(--pierre-fonce);
+}
+.modal-titre{
+  font-family:'Orbitron', sans-serif; font-weight:700; font-size: 1.3rem;
+  letter-spacing:1px;
+}
+.modal-close{
+  background: rgba(0,0,0,.3);
+  color: var(--parchemin);
+  border: none;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover{ background: rgba(0,0,0,.5); }
+
+.modal-body{ padding: 22px 24px 18px; }
+
+.contexte{
+  background: rgba(245,197,24,.15);
+  border-left: 4px solid var(--jour-fonce);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--sapin);
+  line-height: 1.5;
+}
+.enonce{
+  background: rgba(255,255,255,.5);
+  border-left: 4px solid var(--balise-rouge);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  font-size: .95rem;
+  line-height: 1.6;
+  color: var(--txt);
+}
+.enonce-formule{
+  display: block;
+  text-align: center;
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size: 1.4rem;
+  color: var(--balise-rouge);
+  padding: 10px 0 4px;
+  letter-spacing: 1px;
+}
+
+.question{
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: var(--txt);
+  text-align: center;
+}
+
+.choix{ display:flex; flex-direction:column; gap:9px; margin-bottom:14px; }
+.choix-btn{
+  text-align:left; font-family:'Orbitron',sans-serif; font-size:.95rem; font-weight:700;
+  padding:12px 14px; border:2px solid #c8b890; background:#fffaee;
+  border-radius:10px; cursor:pointer; transition:.15s; color:var(--txt);
+  display:flex; align-items:center; gap:11px;
+}
+.choix-btn .lettre{
+  flex-shrink:0; width:26px; height:26px; border-radius:50%;
+  background:var(--jour-clair); color:var(--jour-fonce);
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.78rem;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--jour-pale);
+}
+.choix-btn:hover:not(.locked){ border-color:var(--jour-fonce); background:var(--jour-clair); }
+.choix-btn.selected{
+  border-color:var(--jour-fonce); background:var(--jour-clair);
+  box-shadow:0 0 0 3px rgba(245,197,24,.3);
+}
+.choix-btn.selected .lettre{ background:var(--jour-fonce); color:#fff; }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{ border-color:var(--vert); background:#e7faec; }
+.choix-btn.good .lettre{ background:var(--vert); color:#fff; }
+.choix-btn.bad{ border-color:var(--rouge); background:#fdeaea; }
+.choix-btn.bad .lettre{ background:var(--rouge); color:#fff; }
+
+.btns{ display:flex; gap:9px; flex-wrap:wrap; }
+.btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.8rem;
+  letter-spacing:1px; padding:10px 16px; border:none; border-radius:10px;
+  cursor:pointer; color:#fff;
+}
+.btn-valider{ background:var(--vert); }
+.btn-indice{ background:#3ab5d8; }
+.btn-suivant{ background:var(--jour-fonce); color:#fff; }
+.btn:disabled{ background:#aaa !important; cursor:not-allowed; }
+
+.indice-box{
+  display:none; margin-top:12px; padding:12px 14px;
+  background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px;
+  font-size:.88rem; color:#1a6e88; line-height:1.5;
+}
+.indice-box.show{ display:block; animation: pop .35s ease; }
+
+.feedback{
+  display:none; margin-top:14px; padding:12px 14px; border-radius:10px;
+  font-weight:bold; font-size:.95rem; text-align:center;
+}
+.feedback.show{ display:block; animation: pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{ background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{ background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+
+.correction{
+  display:none; margin-top:12px; padding:13px 16px;
+  background:#fff8e6; border:1px dashed var(--boussole); border-radius:10px;
+  font-size:.9rem; color:#5a4500; line-height:1.6;
+}
+.correction.show{ display:block; animation: pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+
+/* ===== ÉTAPE 2 - MISSION FINALE ===== */
+.btn-zone{
+  text-align: center;
+  margin: 22px 0 6px;
+  position: relative;
+  z-index: 2;
+}
+.btn-deverrouille{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.95rem;
+  letter-spacing: 1.5px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--boussole), var(--balise-jaune));
+  color: var(--pierre-fonce);
+  border: 2px solid var(--pierre-fonce);
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 5px 18px rgba(0,0,0,.4);
+  transition: transform .15s;
+  animation: pulse-shine 2.5s ease-in-out infinite;
+}
+@keyframes pulse-shine{
+  0%,100%{ box-shadow: 0 5px 18px rgba(0,0,0,.4); }
+  50%    { box-shadow: 0 5px 18px rgba(245,197,24,.7), 0 8px 24px rgba(0,0,0,.5); }
+}
+.btn-deverrouille:hover{ transform: translateY(-2px); }
+.btn-deverrouille:disabled{ background: #888; cursor: not-allowed; animation: none; box-shadow: none; }
+
+.finale-zone{
+  display: none;
+  margin-top: 24px;
+  padding: 24px 22px;
+  background: linear-gradient(180deg, rgba(255,245,200,.1) 0%, rgba(45,85,48,.15) 100%);
+  border-radius: 14px;
+  border: 2px dashed var(--boussole);
+  position: relative;
+  z-index: 2;
+}
+.finale-zone.show{ display: block; animation: revealIn .8s ease; }
+@keyframes revealIn{
+  from{ opacity:0; transform: translateY(20px); }
+  to  { opacity:1; transform: translateY(0); }
+}
+
+.finale-card{
+  background: linear-gradient(135deg, var(--parchemin), #fae8c4);
+  border: 2px solid var(--boussole);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.2);
+}
+.finale-card h3{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  font-size: 1.5rem; color: var(--sapin); margin-bottom: 8px;
+}
+.finale-card p{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--pierre-fonce);
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+/* Fragments */
+.fragments-grille{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 16px 0;
+}
+@media (max-width: 600px){
+  .fragments-grille{ grid-template-columns: 1fr; }
+}
+
+.fragment-card{
+  background: linear-gradient(135deg, #fff5d8, #fae8c4);
+  border: 3px solid var(--boussole);
+  border-radius: 12px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  position: relative;
+  transition: transform .2s, opacity .4s;
+}
+.fragment-card.found{
+  background: linear-gradient(135deg, #e7faec, #cdf5d6);
+  border-color: var(--vert);
+}
+.frag-icone{
+  position: absolute; top: -16px; left: 12px;
+  width: 36px; height: 36px;
+  background: var(--boussole);
+  border: 3px solid var(--pierre-fonce);
+  border-radius: 50%;
+  color: var(--parchemin);
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size: .95rem;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+}
+.fragment-card.found .frag-icone{ background: var(--vert); border-color: #157f3a; }
+.frag-titre{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  font-size: 1.15rem; color: var(--sapin);
+  margin: 4px 0 10px 38px;
+  line-height: 1.2;
+}
+.frag-enigme{
+  background: rgba(255,255,255,.5);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  font-size: .88rem;
+  color: var(--pierre-fonce);
+  text-align: center;
+  line-height: 1.4;
+}
+.frag-enigme .calc{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size: 1.15rem;
+  color: var(--balise-rouge);
+  letter-spacing: 1px;
+  margin: 6px 0;
+  display: block;
+}
+.frag-saisie{
+  display: flex; gap: 8px; align-items: center; justify-content: center;
+  flex-wrap: wrap;
+}
+.frag-saisie input{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size: 1rem; text-align: center;
+  width: 80px; padding: 8px 10px;
+  border: 2px solid var(--boussole);
+  border-radius: 8px; background: #fff;
+  color: var(--pierre-fonce);
+}
+.frag-saisie input:focus{
+  outline: none; border-color: var(--jour);
+  box-shadow: 0 0 0 3px rgba(245,197,24,.3);
+}
+.frag-saisie input.good{ border-color: var(--vert); background: #f0faeb; }
+.frag-saisie input.bad{ border-color: var(--rouge); background: #fff0f0; }
+.frag-saisie input:disabled{ opacity: .85; }
+.frag-saisie button{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size: .75rem; letter-spacing: 1px;
+  padding: 8px 14px;
+  background: var(--vert); color: #fff;
+  border: none; border-radius: 8px;
+  cursor: pointer;
+}
+.frag-saisie button:disabled{ background: #aaa; cursor: not-allowed; }
+.frag-feedback{
+  margin-top: 8px;
+  font-size: .8rem;
+  text-align: center;
+  font-weight: bold;
+  min-height: 18px;
+}
+.frag-feedback.ok{ color: #157f3a; }
+.frag-feedback.ko{ color: #c0392b; }
+
+/* Carte d'état-major reconstituée */
+.carte-zone{
+  background: linear-gradient(135deg, #f5d8a0, #e8c080);
+  border: 3px dashed var(--pierre-fonce);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+  position: relative;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+.carte-titre{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  font-size: 1.5rem;
+  color: var(--sapin);
+  text-align: center;
+  margin-bottom: 12px;
+}
+.carte{
+  background: linear-gradient(135deg, #fff8e0, #f5d8a0);
+  border-radius: 10px;
+  padding: 16px 18px;
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color: var(--pierre-fonce);
+  line-height: 1.8;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 3px 10px rgba(0,0,0,.15);
+  border: 1px solid var(--boussole);
+}
+.carte-fragment{
+  display: inline-block;
+  padding: 4px 10px;
+  margin: 3px 4px;
+  background: rgba(0,0,0,.12);
+  color: var(--pierre-fonce);
+  border-radius: 6px;
+  letter-spacing: 2px;
+  font-size: .95rem;
+  transition: all .6s ease;
+}
+.carte-fragment.revealed{
+  background: rgba(34,197,94,.15);
+  color: var(--balise-rouge);
+  font-size: 1.05rem;
+  letter-spacing: 1px;
+  animation: revealFlash .8s ease;
+}
+@keyframes revealFlash{
+  0%   { transform: scale(.5) rotate(-5deg); opacity: 0; background: rgba(245,197,24,.6); }
+  60%  { transform: scale(1.15) rotate(2deg); opacity: 1; background: rgba(245,197,24,.4); }
+  100% { transform: scale(1) rotate(0); background: rgba(34,197,94,.15); }
+}
+.carte-progress{
+  text-align: center;
+  margin-top: 12px;
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size: .85rem;
+  color: var(--sapin);
+  letter-spacing: 1.5px;
+}
+
+.feedback-finale{
+  display: none; margin-top: 14px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+  line-height: 1.5;
+}
+.feedback-finale.show{ display: block; animation: revealIn .4s ease; }
+.feedback-finale.ok{
+  background: linear-gradient(135deg, #e7faec, #cdf5d6);
+  color: #157f3a; border: 2px solid var(--vert);
+}
+
+/* ÉCRAN VICTOIRE */
+.victory{
+  display:none;
+  position:fixed; inset:0; z-index:200;
+  background: radial-gradient(ellipse at center, rgba(245,197,24,.95) 0%, rgba(45,85,48,.97) 100%);
+  align-items:center; justify-content:center;
+  padding:20px; overflow-y: auto;
+}
+.victory.show{ display:flex; animation: fadeIn .6s ease; }
+
+.victory-card{
+  background: linear-gradient(135deg, var(--parchemin), #fae8c4);
+  border: 6px solid var(--jour-fonce);
+  border-radius: 20px;
+  padding: 30px 28px;
+  max-width: 560px; width: 100%;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+  animation: victoryIn .8s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes victoryIn{
+  from{ transform:scale(.5) rotate(-5deg); opacity:0; }
+  to  { transform:scale(1) rotate(0); opacity:1; }
+}
+.victory-icone{
+  font-size: 4rem;
+  margin-bottom: 10px;
+  animation: bounce 1s ease infinite;
+}
+@keyframes bounce{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-12px); }
+}
+.victory-titre{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  font-size: 2.2rem;
+  color: var(--sapin);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.victory-soustitre{
+  font-family:'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--pierre);
+  margin-bottom: 20px;
+}
+.victory-recette{
+  background: rgba(245,197,24,.2);
+  border: 2px dashed var(--jour-fonce);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+  text-align: left;
+  font-family:'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  color: var(--pierre-fonce);
+  line-height: 1.55;
+}
+.victory-recette b{
+  font-family:'Orbitron',sans-serif;
+  font-size: .9rem; color: var(--balise-rouge);
+}
+.btn-rejouer{
+  display: block;
+  width: 100%;
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  font-size: .95rem;
+  letter-spacing: 1.5px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--jour-fonce), var(--jour));
+  color: var(--pierre-fonce);
+  border: 2px solid var(--pierre-fonce);
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+}
+.btn-rejouer:hover{ transform: translateY(-2px); }
+
+.confetti{
+  position: fixed; top: -10px; width: 8px; height: 14px;
+  z-index: 199; pointer-events: none;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  0%{ transform: translateY(0) rotateZ(0deg); opacity:1; }
+  100%{ transform: translateY(110vh) rotateZ(720deg); opacity:0; }
+}
+
+/* Bouton son */
+#soundBtn{
+  position:fixed; top:14px; right:14px; z-index:300;
+  width:44px; height:44px; border-radius:50%;
+  border:2px solid var(--boussole);
+  background:linear-gradient(135deg, var(--sapin), var(--pierre-fonce));
+  color:var(--balise-jaune); font-size:1.2rem; cursor:pointer;
+  box-shadow:0 3px 10px rgba(0,0,0,.4);
+  display:flex; align-items:center; justify-content:center;
+}
+#soundBtn:hover{ transform: scale(1.08); }
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-1"></div>
+<div class="bulle bulle-2"></div>
+<div class="bulle bulle-3"></div>
+<div class="bulle bulle-4"></div>
+
+<button id="soundBtn" title="Activer/couper le son">🔇</button>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 4ÈME
+    </div>
+    <div class="semaine">Semaine 3 – Jour 5</div>
+    <h1 class="titre">🎮 Simulateur de <span class="accent">Vol</span></h1>
+    <div class="sous-titre">Identités remarquables · simulateur d&apos;entraînement</div>
+    <div class="badge-mission">⚜ CENTRE D&apos;ENTRAÎNEMENT ⚜</div>
+  </div>
+
+  <div class="scene">
+
+    <div class="enseigne-wrap">
+      <div class="enseigne">
+        <div class="enseigne-titre">🎮 Base Sim Alpine 🚁</div>
+        <div class="enseigne-sous">— centre d&apos;entraînement des pilotes secouristes —</div>
+      </div>
+    </div>
+
+    <div class="mission-card">
+      <h2>📜 Carnet d&apos;entraînement</h2>
+      <p>
+        Bienvenue au <b>centre d&apos;entraînement des pilotes secouristes</b>&nbsp;! Avant chaque
+        mission réelle, les pilotes s&apos;entraînent sur le <b>simulateur de vol virtuel</b>
+        pour garder leurs réflexes affûtés.
+      </p>
+      <p style="margin-top:8px;">
+        Aujourd&apos;hui, le simulateur génère <b>6 scénarios fictifs</b> où il faut calculer
+        l&apos;aire d&apos;une zone d&apos;atterrissage carrée à partir d&apos;une <b>identité remarquable</b>&nbsp;:
+        (a + b)², (a − b)², ou (a + b)(a − b). À toi de jouer&nbsp;!
+      </p>
+      <div class="objectif">
+        🎯 <b>Étape 1</b>&nbsp;: termine les 6 scénarios du simulateur en factorisant chaque aire.<br>
+        🎯 <b>Étape 2</b>&nbsp;: passe l&apos;examen final du simulateur pour valider ton brevet de pilote secouriste&nbsp;!
+      </div>
+    </div>
+
+    <!-- Rappel identités remarquables -->
+    <div style="background:linear-gradient(135deg, #fffbeb, #f5e8a0); border:2px solid #c47a10; border-left:6px solid #c47a10; border-radius:12px; padding:16px 20px; margin-bottom:22px; box-shadow:0 3px 12px rgba(245,197,24,.25); position:relative; z-index:2;">
+      <div style="font-family:'Orbitron',sans-serif; font-weight:700; font-size:.85rem; letter-spacing:1.5px; color:#8a6000; margin-bottom:10px;">
+        📌 RAPPEL DES IDENTITÉS REMARQUABLES
+      </div>
+      <div style="font-size:.92rem; line-height:1.7; color:#5a4500;">
+        <div style="text-align:center; margin:8px 0;">
+          <span style="display:inline-block; background:#fff; padding:6px 12px; border-radius:6px; font-family:'Orbitron',sans-serif; font-weight:700; color:#c0392b; border:1px solid #f5e08a; margin:3px;">
+            (a + b)² = a² + 2ab + b²
+          </span>
+          <span style="display:inline-block; background:#fff; padding:6px 12px; border-radius:6px; font-family:'Orbitron',sans-serif; font-weight:700; color:#c0392b; border:1px solid #f5e08a; margin:3px;">
+            (a − b)² = a² − 2ab + b²
+          </span>
+          <span style="display:inline-block; background:#fff; padding:6px 12px; border-radius:6px; font-family:'Orbitron',sans-serif; font-weight:700; color:#c0392b; border:1px solid #f5e08a; margin:3px;">
+            (a + b)(a − b) = a² − b²
+          </span>
+        </div>
+        <b>Pour factoriser&nbsp;:</b> repère la forme développée, identifie <b>a</b> et <b>b</b>, puis écris la forme factorisée correspondante.<br>
+        <b>Exemple&nbsp;:</b> x² + 6x + 9 = x² + 2×x×3 + 3² → forme (a+b)² → <b>(x + 3)²</b>.
+      </div>
+    </div>
+
+    <div class="etape-titre">▶ ÉTAPE 1 — Simulateur : 6 scénarios virtuels</div>
+
+    <div class="zones-grille" id="zonesGrille"></div>
+
+    <div class="progress-zone">
+      <div class="progress-text">
+        <span class="count" id="cntOpen">0</span> / 6 scénarios validés
+      </div>
+      <div class="etoiles" id="etoiles">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+    </div>
+
+    <div class="btn-zone">
+      <button class="btn-deverrouille" id="btnDeverrouille" disabled>🎮 Tous les scénarios validés&nbsp;? Passer à l&apos;examen final&nbsp;!</button>
+    </div>
+
+    <div class="finale-zone" id="finaleZone">
+
+      <div class="etape-titre" style="margin-top:0;">▶ ÉTAPE 2 — Examen final du simulateur</div>
+
+      <div class="finale-card">
+        <h3>🎮 Examen final du simulateur</h3>
+        <p>« Pour valider ton <b>brevet de pilote secouriste</b>, tu dois passer l&apos;examen final&nbsp;: décode les 4 paramètres du simulateur, puis applique l&apos;identité remarquable pour calculer une aire virtuelle. »</p>
+      </div>
+
+      <div class="fragments-grille" id="fragmentsGrille"></div>
+
+      <div class="carte-zone">
+        <div class="carte-titre">🎮 Données du simulateur prêtes</div>
+        <div class="carte" id="carte">
+          <div class="carte-fragment" data-frag="0">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+          <div class="carte-fragment" data-frag="1">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+          <div class="carte-fragment" data-frag="2">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+          <div class="carte-fragment" data-frag="3">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+        </div>
+        <div class="carte-progress" id="carteProgress">0 / 4 fragments retrouvés</div>
+      </div>
+
+      <!-- Zone de saisie de la factorisation d'entraînement -->
+      <div class="finale-card" id="ultimeZone" style="display:none;">
+        <h3>🎯 Examen final — calculer une aire</h3>
+        <p>« Le simulateur affiche le côté virtuel d&apos;un carré&nbsp;: <b>(x + 4)</b>. Calcule l&apos;aire de cette zone en développant le carré du côté. »</p>
+        <div style="text-align:center; padding:14px 0;">
+          <div style="font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.6rem; color:#d94040; letter-spacing:1px; margin-bottom:10px;">
+            (x + 4)² = ?
+          </div>
+          <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; padding:10px;">
+            <input type="text" id="reponseUltime"
+              placeholder="ex : x² + ax + b"
+              autocomplete="off"
+              style="font-family:'Orbitron',sans-serif; font-weight:700; font-size:1.2rem; text-align:center; width:220px; padding:10px 14px; border:2px solid var(--boussole); border-radius:8px; background:#fff; color:var(--pierre-fonce);">
+            <button id="btnValiderUltime"
+              style="font-family:'Orbitron',sans-serif; font-weight:700; font-size:.8rem; letter-spacing:1px; padding:11px 20px; background:var(--vert); color:#fff; border:none; border-radius:8px; cursor:pointer;">
+              ✓ Valider
+            </button>
+          </div>
+        </div>
+
+      <div class="feedback-finale" id="feedbackFinale"></div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modale énigme zones -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="modal-titre" id="modalTitre">Zone</div>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Écran victoire -->
+<div class="victory" id="victory">
+  <div class="victory-card">
+    <div class="victory-icone">🚁</div>
+    <div class="victory-titre">Brevet validé&nbsp;!</div>
+    <div class="victory-soustitre">— Tu es prêt pour les missions de sauvetage —</div>
+
+    <div class="victory-recette">
+      <b>🎯 ENTRAÎNEMENT VALIDÉ</b><br><br>
+      <div style="font-family:'Orbitron', sans-serif; font-size:1.15rem; line-height:1.6;">
+        Tu as développé <b>(x + 4)² = x² + 8x + 16</b>.<br>
+        Tu maîtrises l&apos;<b>identité remarquable dans les deux sens</b>&nbsp;:
+        développer une forme factorisée, et l&apos;inverse (factoriser une forme développée).
+      </div>
+      <i style="display:block; margin-top:14px; font-size:1.05rem;">
+        🚁 Tu as ton <b>brevet de pilote secouriste</b>&nbsp;! Maintenant, en cas de mission
+        réelle, tu sauras appliquer ces identités en toutes situations.
+      </i>
+    </div>
+
+    <button class="btn-rejouer" onclick="restartGame()">🔄 Rejouer la mission</button>
+  </div>
+</div>
+
+<script>
+/* ========== AUDIO Web Audio API ========== */
+let audioCtx = null, audioEnabled = false, ambianceNodes = [], windInterval = null;
+
+function initAudio(){
+  if (audioCtx) return;
+  try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  catch(e){ audioCtx = null; }
+}
+
+function startAmbiance(){
+  if (!audioCtx) return;
+  stopAmbiance();
+  // Vent : bruit blanc filtré
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 400;
+  filter.Q.value = 0.6;
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.035;
+  noise.connect(filter).connect(gain).connect(audioCtx.destination);
+  noise.start();
+  ambianceNodes.push(noise, filter, gain);
+  // Sifflements légers réguliers
+  scheduleWind();
+}
+
+function scheduleWind(){
+  if (windInterval) clearTimeout(windInterval);
+  const delay = 4000 + Math.random() * 5000;
+  windInterval = setTimeout(function(){
+    if (audioEnabled && audioCtx){
+      playWindGust();
+      scheduleWind();
+    }
+  }, delay);
+}
+
+function playWindGust(){
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(150, now);
+  osc.frequency.linearRampToValueAtTime(220, now + 1.2);
+  osc.frequency.linearRampToValueAtTime(100, now + 2.4);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.001, now);
+  g.gain.linearRampToValueAtTime(0.025, now + 0.5);
+  g.gain.linearRampToValueAtTime(0.001, now + 2.4);
+  osc.connect(g).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 2.5);
+}
+
+function stopAmbiance(){
+  ambianceNodes.forEach(function(n){ try { n.stop && n.stop(); n.disconnect && n.disconnect(); } catch(e){} });
+  ambianceNodes = [];
+  if (windInterval){ clearTimeout(windInterval); windInterval = null; }
+}
+
+function sndUnlock(){
+  if (!audioCtx || !audioEnabled) return;
+  const now = audioCtx.currentTime;
+  const notes = [523, 659, 784];
+  notes.forEach(function(freq, i){
+    const t = now + i * 0.08;
+    const o = audioCtx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t + 0.3);
+  });
+}
+
+function sndError(){
+  if (!audioCtx || !audioEnabled) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(220, now);
+  osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.001, now);
+  g.gain.exponentialRampToValueAtTime(0.1, now + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+  osc.connect(g).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.4);
+}
+
+function sndVictory(){
+  if (!audioCtx || !audioEnabled) return;
+  const now = audioCtx.currentTime;
+  const arp = [523, 659, 784, 1046, 1318];
+  arp.forEach(function(freq, i){
+    const t = now + i * 0.1;
+    const o = audioCtx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.value = freq;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.exponentialRampToValueAtTime(0.15, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t + 0.35);
+  });
+}
+
+const soundBtn = document.getElementById('soundBtn');
+function setSoundState(on){
+  audioEnabled = on;
+  soundBtn.textContent = on ? '🔊' : '🔇';
+  soundBtn.title = on ? 'Couper le son' : 'Activer le son';
+  if (on){
+    initAudio();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    startAmbiance();
+  } else stopAmbiance();
+}
+soundBtn.onclick = function(){ setSoundState(!audioEnabled); };
+
+/* ========== DONNÉES DES 6 ZONES ========== */
+const ZONES = [
+  {
+    icone: '🌲',
+    nom: 'Scénario A — Forêt virtuelle',
+    contexte: 'Le simulateur projette une clairière virtuelle entre des sapins. Aire à factoriser pour trouver le côté de la zone.',
+    enonce: 'Factorise (identité remarquable) :',
+    formule: 'x² + 6x + 9',
+    question: 'Quelle est la forme factorisée ?',
+    choices: [
+      '(x + 3)²',
+      '(x + 3)(x − 3)',
+      '(x + 6)²',
+      '(x + 9)²'
+    ],
+    correct: 0,
+    correction: 'On reconnaît a² + 2ab + b² avec a = x et b = 3 (car 2×x×3 = 6x et 3² = 9). Donc <b>x² + 6x + 9 = (x + 3)²</b>.'
+  },
+  {
+    icone: '🌿',
+    nom: 'Scénario B — Prairie simulée',
+    contexte: 'Le simulateur affiche une prairie virtuelle inclinée. Calcule le côté.',
+    enonce: 'Factorise :',
+    formule: 'x² − 10x + 25',
+    question: 'Quelle est la forme factorisée ?',
+    choices: [
+      '(x − 5)(x + 5)',
+      '(x − 5)²',
+      '(x + 5)²',
+      '(x − 10)²'
+    ],
+    correct: 1,
+    correction: 'On reconnaît a² − 2ab + b² avec a = x et b = 5 (car 2×x×5 = 10x et 5² = 25). Donc <b>x² − 10x + 25 = (x − 5)²</b>.'
+  },
+  {
+    icone: '💧',
+    nom: 'Scénario C — Berge fluviale',
+    contexte: 'Scénario fictif : une berge plate au bord d\u2019une rivière simulée. L\u2019aire est une différence de carrés.',
+    enonce: 'Factorise :',
+    formule: 'x² − 16',
+    question: 'Quelle est la forme factorisée ?',
+    choices: [
+      '(x − 4)²',
+      '(x + 4)²',
+      '(x − 4)(x + 4)',
+      '(x² − 4)(x² + 4)'
+    ],
+    correct: 2,
+    correction: 'On reconnaît a² − b² avec a = x et b = 4 (car 4² = 16). Donc <b>x² − 16 = (x − 4)(x + 4)</b>.'
+  },
+  {
+    icone: '🌼',
+    nom: 'Scénario D — Lande virtuelle',
+    contexte: 'Le simulateur génère une lande jaune. Aire à factoriser.',
+    enonce: 'Factorise :',
+    formule: 'x² + 4x + 4',
+    question: 'Quelle est la forme factorisée ?',
+    choices: [
+      '(x + 2)²',
+      '(x + 4)²',
+      '(x − 2)²',
+      '(x + 2)(x − 2)'
+    ],
+    correct: 0,
+    correction: 'a² + 2ab + b² avec a = x et b = 2 (car 2×x×2 = 4x et 2² = 4). Donc <b>x² + 4x + 4 = (x + 2)²</b>.'
+  },
+  {
+    icone: '🪨',
+    nom: 'Scénario E — Plateau simulé',
+    contexte: 'Scénario complexe : un plateau virtuel avec différence de carrés à factoriser.',
+    enonce: 'Factorise :',
+    formule: '4x² − 9',
+    question: 'Quelle est la forme factorisée ?',
+    choices: [
+      '(4x − 3)(x + 3)',
+      '(2x − 3)(2x + 3)',
+      '(2x − 3)²',
+      '(4x − 9)(x + 1)'
+    ],
+    correct: 1,
+    correction: 'a² − b² avec a = 2x (car (2x)² = 4x²) et b = 3 (car 3² = 9). Donc <b>4x² − 9 = (2x − 3)(2x + 3)</b>.'
+  },
+  {
+    icone: '⛺',
+    nom: 'Scénario F — Aire de pose',
+    contexte: 'Dernier scénario virtuel&nbsp;: une aire de pose carrée près d\u2019un poste de simulation.',
+    enonce: 'Factorise :',
+    formule: 'x² − 14x + 49',
+    question: 'Quelle est la forme factorisée ?',
+    choices: [
+      '(x − 7)²',
+      '(x + 7)²',
+      '(x − 7)(x + 7)',
+      '(x − 14)²'
+    ],
+    correct: 0,
+    correction: 'a² − 2ab + b² avec a = x et b = 7 (car 2×x×7 = 14x et 7² = 49). Donc <b>x² − 14x + 49 = (x − 7)²</b>.'
+  }
+];
+
+const TOTAL = ZONES.length;
+const etatZ = ZONES.map(function(){ return { open:false, validated:false, selected:null, tries:0 }; });
+let zonesOpen = 0;
+let currentIdx = -1;
+
+function renderGrid(){
+  const grid = document.getElementById('zonesGrille');
+  grid.innerHTML = '';
+  for (let i = 0; i < ZONES.length; i++){
+    const z = ZONES[i];
+    const div = document.createElement('div');
+    div.className = 'zone-card' + (etatZ[i].open ? ' open' : '');
+    div.innerHTML =
+      '<div class="zone-balise"></div>' +
+      '<div class="zone-icone">' + z.icone + '</div>' +
+      '<div class="zone-num">ZONE N°' + (i+1) + '</div>' +
+      '<div class="zone-nom">' + z.nom + '</div>' +
+      '<div class="zone-statut">' + (etatZ[i].open ? 'dégagée' : 'à dégager') + '</div>';
+    if (!etatZ[i].open){
+      (function(idx){ div.onclick = function(){ openModal(idx); }; })(i);
+    }
+    grid.appendChild(div);
+  }
+  document.getElementById('cntOpen').textContent = zonesOpen;
+  updateStars();
+  document.getElementById('btnDeverrouille').disabled = (zonesOpen < TOTAL);
+}
+
+function updateStars(){
+  const stars = document.querySelectorAll('#etoiles .star');
+  const filled = Math.ceil(zonesOpen * 5 / TOTAL);
+  for (let i = 0; i < stars.length; i++){
+    if (i < filled) stars[i].classList.add('on');
+    else stars[i].classList.remove('on');
+  }
+}
+
+function openModal(idx){
+  currentIdx = idx;
+  const z = ZONES[idx];
+  document.getElementById('modalTitre').textContent = z.icone + ' Zone N°' + (idx+1) + ' — ' + z.nom;
+  const body = document.getElementById('modalBody');
+
+  let choicesHTML = '';
+  const lettres = ['A','B','C','D'];
+  for (let i = 0; i < z.choices.length; i++){
+    choicesHTML += '<button class="choix-btn" onclick="selectChoix(' + i + ')">' +
+                   '<span class="lettre">' + lettres[i] + '</span><span>' + z.choices[i] + '</span></button>';
+  }
+
+  body.innerHTML =
+    '<div class="contexte">' + z.contexte + '</div>' +
+    '<div class="enonce">' + z.enonce + '<span class="enonce-formule">' + z.formule + '</span></div>' +
+    '<div class="question">' + z.question + '</div>' +
+    '<div class="choix" id="choixCont">' + choicesHTML + '</div>' +
+    '<div class="btns">' +
+      '<button class="btn btn-valider" id="btnValider" onclick="validerChoix()" disabled>Valider ✓</button>' +
+    '</div>' +
+    '<div class="feedback" id="feedback"></div>' +
+    '<div class="correction" id="correction"><b>📝 Correction :</b><br>' + z.correction + '</div>';
+
+  document.getElementById('modalBackdrop').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('show');
+  document.body.style.overflow = '';
+  currentIdx = -1;
+}
+
+function selectChoix(i){
+  if (currentIdx < 0) return;
+  if (etatZ[currentIdx].validated) return;
+  etatZ[currentIdx].selected = i;
+  const btns = document.querySelectorAll('#choixCont .choix-btn');
+  for (let j = 0; j < btns.length; j++){
+    if (j === i) btns[j].classList.add('selected');
+    else btns[j].classList.remove('selected');
+  }
+  document.getElementById('btnValider').disabled = false;
+}
+
+function validerChoix(){
+  if (currentIdx < 0) return;
+  const st = etatZ[currentIdx];
+  if (st.validated) return;
+  if (st.selected === null) return;
+
+  st.validated = true;
+  st.tries += 1;
+  const z = ZONES[currentIdx];
+  const isOk = (st.selected === z.correct);
+
+  document.getElementById('btnValider').disabled = true;
+  const btns = document.querySelectorAll('#choixCont .choix-btn');
+  for (let j = 0; j < btns.length; j++){
+    btns[j].classList.add('locked');
+    btns[j].onclick = null;
+    if (j === z.correct) btns[j].classList.add('good');
+    else if (j === st.selected) btns[j].classList.add('bad');
+  }
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show ' + (isOk ? 'ok' : 'ko');
+  fb.innerHTML = isOk
+    ? '🎮 <b>Bravo&nbsp;!</b> Scénario validé, le simulateur passe au suivant !'
+    : '❌ Pas tout à fait. Regarde la correction.';
+
+  document.getElementById('correction').classList.add('show');
+
+  if (isOk){
+    st.open = true;
+    zonesOpen++;
+    sndUnlock();
+    setTimeout(function(){
+      closeModal();
+      renderGrid();
+    }, 1600);
+  } else {
+    sndError();
+    setTimeout(function(){
+      const btnsDiv = document.querySelector('#modalBody .btns');
+      if (btnsDiv && !document.getElementById('btnRetry')){
+        const retry = document.createElement('button');
+        retry.id = 'btnRetry';
+        retry.className = 'btn btn-suivant';
+        retry.textContent = '🔄 Réessayer';
+        retry.onclick = function(){
+          etatZ[currentIdx].validated = false;
+          etatZ[currentIdx].selected = null;
+          openModal(currentIdx);
+        };
+        btnsDiv.appendChild(retry);
+      }
+    }, 200);
+  }
+}
+
+document.getElementById('modalClose').onclick = closeModal;
+document.getElementById('modalBackdrop').onclick = function(e){
+  if (e.target === this) closeModal();
+};
+
+/* ========== ÉTAPE 2 : FRAGMENTS DE CARTE ========== */
+const FRAGMENTS = [
+  {
+    titre: 'Paramètre 1 — Coordonnées',
+    enigme: 'Quel est le PGCD de <b>12 et 18</b> ?',
+    answer: 6,
+    texte: 'Côté d\u2019un carré test :'
+  },
+  {
+    titre: 'Paramètre 2 — Altitude',
+    enigme: 'Quel est le PGCD de <b>15 et 25</b> ?',
+    answer: 5,
+    texte: '(x + 4)'
+  },
+  {
+    titre: 'Paramètre 3 — Météo',
+    enigme: 'Quel est le PGCD de <b>16 et 24</b> ?',
+    answer: 8,
+    texte: 'Développe (x + 4)² pour'
+  },
+  {
+    titre: 'Paramètre 4 — Cap',
+    enigme: 'Quel est le PGCD de <b>14 et 21</b> ?',
+    answer: 7,
+    texte: 'obtenir l\u2019aire de ce carré.'
+  }
+];
+
+const fragEtat = FRAGMENTS.map(function(){ return { found:false }; });
+let fragmentsFound = 0;
+
+function buildFragment(i){
+  const f = FRAGMENTS[i];
+  return '' +
+    '<div class="fragment-card" id="frag' + i + '">' +
+    '  <div class="frag-icone">' + (i+1) + '</div>' +
+    '  <div class="frag-titre">' + f.titre + '</div>' +
+    '  <div class="frag-enigme">' +
+    '    <div>Pour décoder ce fragment, calcule&nbsp;:</div>' +
+    '    <span class="calc">' + f.enigme + '</span>' +
+    '  </div>' +
+    '  <div class="frag-saisie">' +
+    '    <input type="number" id="fragInp' + i + '" placeholder="?" step="any" autocomplete="off">' +
+    '    <button id="fragBtn' + i + '" onclick="validerFragment(' + i + ')">✓</button>' +
+    '  </div>' +
+    '  <div class="frag-feedback" id="fragFb' + i + '"></div>' +
+    '</div>';
+}
+
+document.getElementById('btnDeverrouille').onclick = function(){
+  document.getElementById('finaleZone').classList.add('show');
+  const grille = document.getElementById('fragmentsGrille');
+  if (grille.children.length === 0){
+    let html = '';
+    for (let i = 0; i < FRAGMENTS.length; i++) html += buildFragment(i);
+    grille.innerHTML = html;
+    for (let i = 0; i < FRAGMENTS.length; i++){
+      (function(idx){
+        document.getElementById('fragInp' + idx).addEventListener('keydown', function(e){
+          if (e.key === 'Enter') validerFragment(idx);
+        });
+      })(i);
+    }
+  }
+  sndUnlock();
+  setTimeout(function(){
+    document.getElementById('finaleZone').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+};
+
+function validerFragment(i){
+  if (fragEtat[i].found) return;
+  const inp = document.getElementById('fragInp' + i);
+  const val = parseFloat(inp.value);
+  if (isNaN(val)){ inp.focus(); return; }
+
+  const f = FRAGMENTS[i];
+  const isOk = (val === f.answer);
+  const fb = document.getElementById('fragFb' + i);
+
+  if (isOk){
+    fragEtat[i].found = true;
+    fragmentsFound++;
+    inp.classList.add('good');
+    inp.disabled = true;
+    document.getElementById('fragBtn' + i).disabled = true;
+    fb.className = 'frag-feedback ok';
+    fb.textContent = '✅ Fragment retrouvé !';
+    document.getElementById('frag' + i).classList.add('found');
+
+    const fragSpan = document.querySelector('.carte-fragment[data-frag="' + i + '"]');
+    if (fragSpan){
+      fragSpan.textContent = f.texte;
+      fragSpan.classList.add('revealed');
+    }
+    document.getElementById('carteProgress').textContent = fragmentsFound + ' / 4 fragments retrouvés';
+    sndUnlock();
+
+    if (fragmentsFound === 4){
+      setTimeout(function(){
+        document.getElementById('ultimeZone').style.display = 'block';
+        document.getElementById('feedbackFinale').className = 'feedback-finale show ok';
+        document.getElementById('feedbackFinale').innerHTML =
+          '🎮 <b>Données du simulateur prêtes&nbsp;!</b><br>' +
+          'Une dernière épreuve d\u2019entraînement t\u2019attend ci-dessous avant ton test d\u2019arrivée.';
+        sndUnlock();
+        document.getElementById('ultimeZone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
+    }
+  } else {
+    inp.classList.add('bad');
+    fb.className = 'frag-feedback ko';
+    fb.textContent = '❌ Essaie encore. Pense aux diviseurs communs !';
+    sndError();
+    setTimeout(function(){
+      inp.classList.remove('bad');
+      fb.textContent = '';
+      fb.className = 'frag-feedback';
+    }, 1800);
+  }
+}
+
+function showVictory(){
+  document.getElementById('victory').classList.add('show');
+}
+
+/* ===== ÉPREUVE D'ENTRAÎNEMENT ULTIME : factoriser 8x + 12 ===== */
+let ultimeValidated = false;
+
+function normaliseExpr(s){
+  // Normaliser : supprimer espaces, mettre en minuscule, normaliser symboles
+  return String(s).trim().toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/×/g, '*')
+    .replace(/\u22c5/g, '*')
+    .replace(/−/g, '-');
+}
+
+function checkUltime(input){
+  const norm = normaliseExpr(input);
+  // Accepter le développement (x+4)² = x² + 8x + 16 dans plusieurs ordres
+  const variants = [
+    'x²+8x+16','x2+8x+16','x^2+8x+16','x**2+8x+16',
+    'x²+8*x+16','x2+8*x+16','x^2+8*x+16','x**2+8*x+16',
+    'x²+16+8x','x2+16+8x','x^2+16+8x','x**2+16+8x',
+    '16+8x+x²','16+8x+x2','16+8x+x^2','16+8x+x**2',
+    '8x+x²+16','8x+x2+16','8x+x^2+16','8x+x**2+16'
+  ];
+  for (let i = 0; i < variants.length; i++){
+    if (norm === variants[i]) return true;
+  }
+  return false;
+}
+
+document.getElementById('btnValiderUltime').onclick = function(){
+  if (ultimeValidated) return;
+  const inp = document.getElementById('reponseUltime');
+  const val = inp.value.trim();
+  if (val === ''){ inp.focus(); return; }
+
+  if (checkUltime(val)){
+    ultimeValidated = true;
+    inp.disabled = true;
+    inp.style.borderColor = 'var(--vert)';
+    inp.style.background = '#f0faeb';
+    document.getElementById('btnValiderUltime').disabled = true;
+    document.getElementById('btnValiderUltime').style.background = '#aaa';
+
+    document.getElementById('feedbackFinale').className = 'feedback-finale show ok';
+    document.getElementById('feedbackFinale').innerHTML =
+      '🏆 <b>Parfait&nbsp;!</b> (x + 4)² = <b>x² + 8x + 16</b>. ' +
+      'Tu maîtrises maintenant l\u2019<b>identité remarquable dans les deux sens</b> (développer et factoriser)&nbsp;: ' +
+      'applique la même méthode dans ton <b>test d\u2019arrivée</b> pour aider le pilote\u00a0!';
+    sndVictory();
+    launchConfetti();
+    setTimeout(showVictory, 2400);
+  } else {
+    inp.style.borderColor = 'var(--rouge)';
+    inp.style.background = '#fff0f0';
+    document.getElementById('feedbackFinale').className = 'feedback-finale show';
+    document.getElementById('feedbackFinale').style.background = '#fdeaea';
+    document.getElementById('feedbackFinale').style.color = '#c0392b';
+    document.getElementById('feedbackFinale').style.border = '2px solid var(--rouge)';
+    document.getElementById('feedbackFinale').innerHTML =
+      '❌ Pas tout à fait. Pense à l\u2019identité (a + b)² = a² + 2ab + b². Identifie a et b, puis applique la formule.';
+    sndError();
+    setTimeout(function(){
+      inp.style.borderColor = 'var(--boussole)';
+      inp.style.background = '#fff';
+    }, 1500);
+  }
+};
+
+document.getElementById('reponseUltime').addEventListener('keydown', function(e){
+  if (e.key === 'Enter') document.getElementById('btnValiderUltime').click();
+});
+
+function launchConfetti(){
+  const colors = ['#f5c518','#8dc63f','#3ab5d8','#f28b82','#d94040','#fff'];
+  for (let i = 0; i < 80; i++){
+    (function(idx){
+      setTimeout(function(){
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = (Math.random() * 100) + 'vw';
+        c.style.background = colors[Math.floor(Math.random()*colors.length)];
+        c.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+        c.style.transform = 'rotateZ(' + Math.floor(Math.random()*360) + 'deg)';
+        document.body.appendChild(c);
+        setTimeout(function(){ c.remove(); }, 5000);
+      }, idx * 30);
+    })(i);
+  }
+}
+
+function restartGame(){
+  for (let i = 0; i < TOTAL; i++){
+    etatZ[i] = { open:false, validated:false, selected:null, tries:0 };
+  }
+  zonesOpen = 0;
+  for (let i = 0; i < FRAGMENTS.length; i++){
+    fragEtat[i] = { found:false };
+  }
+  fragmentsFound = 0;
+  document.getElementById('fragmentsGrille').innerHTML = '';
+  document.getElementById('finaleZone').classList.remove('show');
+  document.getElementById('feedbackFinale').className = 'feedback-finale';
+  document.getElementById('feedbackFinale').innerHTML = '';
+  const fragments = document.querySelectorAll('.carte-fragment');
+  const placeholders = ['▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓','▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓','▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓','▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓'];
+  fragments.forEach(function(f, idx){
+    f.textContent = placeholders[idx];
+    f.classList.remove('revealed');
+  });
+  document.getElementById('carteProgress').textContent = '0 / 4 fragments retrouvés';
+  // Reset zone ultime
+  ultimeValidated = false;
+  const inpU = document.getElementById('reponseUltime');
+  if (inpU){
+    inpU.value = '';
+    inpU.disabled = false;
+    inpU.style.borderColor = 'var(--boussole)';
+    inpU.style.background = '#fff';
+  }
+  const btnU = document.getElementById('btnValiderUltime');
+  if (btnU){
+    btnU.disabled = false;
+    btnU.style.background = 'var(--vert)';
+  }
+  document.getElementById('ultimeZone').style.display = 'none';
+  const fbF = document.getElementById('feedbackFinale');
+  fbF.className = 'feedback-finale';
+  fbF.removeAttribute('style');
+  fbF.innerHTML = '';
+  document.getElementById('victory').classList.remove('show');
+  renderGrid();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+renderGrid();
+</script>
+
+</body>
+</html>
