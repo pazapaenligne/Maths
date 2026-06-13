@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – Choisir la division – 6e</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#2f9e6e; --day-dark:#1d7a52; --day-light:#cdf3e0; --day-border:#74d3a8;
+  --gold:#f5c518; --gold-d:#b88a00;
+  --bg:#08251a; --panel:#0f3325; --panel2:#15412f;
+  --line:#27543f; --text:#eafaf2; --muted:#8bbaa3;
+  --green:#5bc46a; --neon:#4fd99a;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 16px rgba(47,158,110,.42), 0 0 40px rgba(47,158,110,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#0a2c1e 0%, #08251a 55%, #0a3122 100%);color:var(--text);
+  font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#fff 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#fff 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#03201d;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.1;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.13;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#2f9e6e;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#4fd99a;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#1d7a52;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#3cb985;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(8,37,26,.94);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.3rem;}
+.hud-frag{width:1.5rem;height:1.7rem;border-radius:5px;background:#072018;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#2f5a48;transition:all .4s;}
+.hud-frag.got{background:rgba(47,158,110,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#072018;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#072018;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(47,158,110,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:48px;}.hud-bar{gap:.5rem;padding:.45rem .5rem;}.hud-frag{width:1.2rem;height:1.5rem;font-size:.65rem;}.hud-dial{display:none;}.hud-timer{font-size:.8rem;padding:.2rem .4rem;}.hud-timer .lbl{display:none;}}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:620px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:#d6f0e3;line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-ship{margin:.9rem 0 .2rem;background:#072018;border:1.5px dashed var(--day-border);border-radius:10px;padding:.8rem;text-align:center;}
+.start-ship .big{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(1rem,3.2vw,1.25rem);color:var(--day-light);}
+.start-ship .qs{margin-top:.5rem;font-size:.84rem;color:#c0e6d3;}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#03201d;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.crest{display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:'Orbitron',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.1rem;height:2.1rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#072018;border:1.5px solid var(--line);font-size:1rem;color:#1f534c;transition:all .5s;}
+.frag.found{background:rgba(47,158,110,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#072018;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#072018;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+.intro .scr{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(.78rem,2.2vw,.88rem);color:#d6f0e3;margin-top:.4rem;letter-spacing:0;}
+
+.exo{background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.9rem;transition:border-color .2s,box-shadow .3s;}
+.exo.ok{border-color:var(--green);box-shadow:0 0 14px rgba(91,196,106,.25);}
+.exo.ko{border-color:#e8806f;}
+.exo-q{font-size:clamp(.86rem,2.6vw,.98rem);color:#e3f5ec;margin-bottom:.8rem;line-height:1.6;text-align:center;}
+.exo-q b{color:var(--day-light);}
+.opts{display:flex;flex-direction:column;gap:.5rem;}
+.opt{cursor:pointer;text-align:left;background:#072018;border:1.5px solid var(--line);border-radius:10px;padding:.7rem .9rem;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(.8rem,2.4vw,.9rem);color:var(--muted);transition:all .18s;min-height:46px;display:flex;align-items:center;gap:.6rem;}
+.opt .lt{font-family:'Orbitron',sans-serif;font-weight:900;color:var(--day-color);flex-shrink:0;}
+.opt:hover{border-color:var(--day-color);color:var(--text);}
+.opt.sel{background:rgba(47,158,110,.16);border-color:var(--day-color);color:var(--day-color);}
+.opt.ok{border-color:var(--green);background:rgba(91,196,106,.14);color:#bff0c6;}
+.opt.ok .lt{color:var(--green);}
+.opt.ko{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+
+.correction{margin-top:.8rem;background:#072018;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--day-color);margin-bottom:.4rem;}
+.correction-x{font-size:clamp(.8rem,2.4vw,.88rem);color:#dcecd6;line-height:1.6;}
+.correction-x b{color:var(--day-light);}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#03201d;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#2a2410;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#e8d8a0;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(91,196,106,.12);border:1.5px solid var(--green);color:#bff0c6;}
+.fb.ko{background:rgba(232,128,111,.12);border:1.5px solid #e8806f;color:#ffc4b8;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#e8d18a;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+body.playing .sound-btn{top:58px;}
+@media(max-width:600px){body.playing .sound-btn{top:54px;}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(8,37,26,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(8,37,26,.96), rgba(5,28,18,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#072018;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:radial-gradient(circle at 50% 40%, rgba(47,158,110,.4), rgba(5,28,18,.98));}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(47,158,110,.3) 0%, rgba(47,158,110,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(47,158,110,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.4rem;margin:.8rem 0;flex-wrap:wrap;}
+.finale-crest .fc{width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(47,158,110,.16);border:1.5px solid var(--day-color);font-size:1.1rem;animation:pop .5s both;}
+.finale-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.2rem);color:var(--day-color);text-shadow:0 1px 0 rgba(29,122,82,.25);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#bff0c6;margin-bottom:.6rem;}
+.finale-grade{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#03201d;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:#d6f0e3;font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-reveal{background:#072018;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:#d6f0e3;line-height:1.7;}
+.finale-reveal b{color:var(--day-color);font-family:'Orbitron',sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.finale-calc{text-align:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(1.2rem,4.5vw,1.7rem);color:var(--neon);margin:.6rem 0;letter-spacing:.04em;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#03201d;box-shadow:var(--glow);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Analyse du chargement&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Lecture du manifeste</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128674;</span>
+  <div class="hud-frags" id="hud-frags"></div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Enqu&ecirc;te&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">&#128674; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#127942;</div>
+    <div class="finale-crest" id="finale-crest"></div>
+    <div class="finale-title">D&Eacute;FI RELEV&Eacute;&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub">&#127942; D&eacute;fi relev&eacute;&#8201;!<br>Le responsable du port poss&egrave;de maintenant tous les indices n&eacute;cessaires.</div>
+    <div class="finale-reveal">
+      <b>&#127919; Tu as d&eacute;couvert que</b>
+      &#8594; certains partages concernent des objets entiers&#8201;;<br>
+      &#8594; d&rsquo;autres concernent des mesures&#8201;;<br>
+      &#8594; les objets entiers conduisent &agrave; une division euclidienne&#8201;;<br>
+      &#8594; les mesures conduisent &agrave; une division d&eacute;cimale&#8201;;<br>
+      &#8594; le quotient et le reste doivent &ecirc;tre interpr&eacute;t&eacute;s selon la situation.<br><br>
+      &#128161; D&eacute;couvre la conclusion de l&rsquo;enqu&ecirc;te &agrave; l&rsquo;arriv&eacute;e&#8201;!
+    </div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 6e
+    </div>
+    <div class="week">Semaine 3 — Jour 5</div>
+    <div class="title">Je rel&egrave;ve le <span class="hl">d&eacute;fi</span> &#128290;</div>
+    <div class="subtitle">Euclidienne ou d&eacute;cimale&#8201;? Choisir la bonne division</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#128674;</div>
+    <div class="start-mission">
+      <b>&#128674; Je rel&egrave;ve le d&eacute;fi&nbsp;:</b> au port, plusieurs marchandises doivent &ecirc;tre r&eacute;parties avant le d&eacute;part du navire. Certaines sont des objets entiers&#8201;; d&rsquo;autres sont des mesures qu&rsquo;on peut partager avec pr&eacute;cision. Le responsable doit choisir la bonne m&eacute;thode pour chaque chargement.
+      <div class="start-ship">
+        <div class="big">Des livres &middot; Du riz &middot; Du jus &middot; Des caisses</div>
+        <div class="qs">&#10067; Comment savoir quelle division utiliser selon la situation&#8201;?</div>
+      </div>
+      &#127919; <b>Ta mission&nbsp;:</b> r&eacute;soudre les 6 indices du responsable du port pour comprendre comment choisir la division adapt&eacute;e &agrave; chaque situation.
+      <div class="start-rule"><span>&#128230; Objets entiers</span><span>&#9878;&#65039; Mesures</span></div>
+    </div>
+    <button class="btn-start" onclick="beginGame()">&#128674; Relever le défi</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">Indices&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+      <div class="frag" id="frag-4">?</div>
+      <div class="frag" id="frag-5">?</div>
+    </div>
+    <div id="steps"></div>
+    <div style="text-align:center;"><button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function sOk(){if(!soundOn)return;beep(523,0,0.1,"square",0.2);beep(784,0.08,0.12,"square",0.2);beep(1047,0.18,0.18,"triangle",0.22);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.18);beep(150,0.1,0.2,"square",0.18);}
+function sFrag(){if(!soundOn)return;beep(660,0,0.06,"square",0.16);beep(990,0.07,0.14,"triangle",0.2);beep(1320,0.16,0.16,"triangle",0.2);}
+function sCoin(){if(!soundOn)return;beep(988,0,0.05,"square",0.14);beep(1319,0.05,0.12,"square",0.16);}
+function sWin(){if(!soundOn)return;[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,i*0.12,0.24,"square",0.2);});}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,3000);}
+document.addEventListener("click",function(){hideAgent();},true);
+
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  if(!ov){done&&done();return;}
+  if(txt)txt.innerHTML="Analyse du chargement&#8230;";
+  if(sub)sub.textContent=(MISSIONS[mi]?MISSIONS[mi].codename:"Analyse en cours");
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");
+  sCoin();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*16+8;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");done&&done();},350);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },110);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+
+/* 6 missions QCM */
+var MISSIONS=[
+  {ico:"&#128218;", step:"Mission 1", codename:"Les livres du quai", name:"Les livres du quai", comp:"Identifier la nature du partage",
+   q:"Le responsable v\u00e9rifie un chargement de livres.<br><b>83 livres</b> doivent \u00eatre rang\u00e9s dans <b>14 cartons</b> identiques.<br>Que partage-t-on&#8201;?",
+   opts:["Des objets entiers","Une masse","Une dur\u00e9e","Une longueur"], ans:0,
+   corr:"Les livres sont des objets entiers&#8201;: ils ne peuvent pas \u00eatre d\u00e9coup\u00e9s pour compl\u00e9ter un carton.",
+   fbko:"R\u00e9fl\u00e9chis \u00e0 la nature de ce que l\u2019on partage.",
+   indice:"les livres sont des objets entiers.",
+   hint:"Observe ce qui est plac\u00e9 dans les cartons&#8201;: peut-on en couper un morceau&#8201;?"},
+  {ico:"&#129518;", step:"Mission 2", codename:"Le choix du responsable", name:"Le choix du responsable", comp:"Choisir la m\u00e9thode",
+   q:"Le responsable conna\u00eet maintenant la nature du chargement. Il doit choisir la m\u00e9thode adapt\u00e9e pour r\u00e9partir les livres.<br>Quelle division convient le mieux&#8201;?",
+   opts:["Division euclidienne","Division d\u00e9cimale"], ans:0,
+   corr:"Lorsqu\u2019on partage des objets entiers, on utilise une division euclidienne.",
+   fbko:"Demande-toi si les livres peuvent \u00eatre d\u00e9coup\u00e9s pour compl\u00e9ter un carton.",
+   indice:"les objets entiers conduisent \u00e0 une division euclidienne.",
+   hint:"Les livres doivent rester entiers&#8201;: on ne peut pas en couper un bout."},
+  {ico:"&#128230;", step:"Mission 3", codename:"Les cartons sont pr\u00eats", name:"Les cartons sont pr\u00eats", comp:"Calculer une division euclidienne",
+   q:"Les <b>83 livres</b> sont r\u00e9partis dans <b>14 cartons</b> identiques.<br>Combien de livres peut-on placer dans chaque carton <b>complet</b>&#8201;?",
+   opts:["5 livres","6 livres","7 livres","8 livres"], ans:0,
+   corr:"83 &divide; 14 = 5 reste 13. Chaque carton complet contient 5 livres. Il reste 13 livres \u00e0 ranger.",
+   fbko:"V\u00e9rifie combien de fois 14 peut \u00eatre contenu dans 83.",
+   indice:"le reste a un sens dans une division euclidienne.",
+   hint:"Cherche le plus grand nombre qui, multipli\u00e9 par 14, reste inf\u00e9rieur ou \u00e9gal \u00e0 83."},
+  {ico:"&#9878;&#65039;", step:"Mission 4", codename:"Le riz du navire", name:"Le riz du navire", comp:"Calculer une division d\u00e9cimale",
+   q:"<b>21,6 kg</b> de riz doivent \u00eatre r\u00e9partis \u00e9quitablement dans <b>8 sacs</b>. Comme il s\u2019agit d\u2019une masse, on peut partager avec pr\u00e9cision.<br>Quelle quantit\u00e9 re\u00e7oit chaque sac&#8201;?",
+   opts:["2,7 kg","2,6 kg","3,7 kg","3,2 kg"], ans:0,
+   corr:"21,6 &divide; 8 = 2,7. Chaque sac re\u00e7oit 2,7 kg.",
+   fbko:"Effectue soigneusement la division d\u00e9cimale 21,6 &divide; 8.",
+   indice:"une mesure peut \u00eatre partag\u00e9e avec pr\u00e9cision.",
+   hint:"Pose la division 21,6 &divide; 8 et place la virgule au quotient."},
+  {ico:"&#129380;", step:"Mission 5", codename:"Les distributeurs du quai", name:"Les distributeurs du quai", comp:"R\u00e9investir une division d\u00e9cimale",
+   q:"<b>18 L</b> de jus doivent \u00eatre r\u00e9partis \u00e9quitablement dans <b>8 distributeurs</b>. Comme il s\u2019agit d\u2019un volume, on peut partager avec pr\u00e9cision.<br>Quelle quantit\u00e9 re\u00e7oit chaque distributeur&#8201;?",
+   opts:["2,25 L","2,5 L","1,25 L","3,25 L"], ans:0,
+   corr:"18 &divide; 8 = 2,25. Chaque distributeur re\u00e7oit 2,25 L.",
+   fbko:"C\u2019est un volume&#8201;: on partage avec pr\u00e9cision. Pose 18 &divide; 8.",
+   indice:"les mesures utilisent une division d\u00e9cimale.",
+   hint:"18 &divide; 8&#8201;: 2 unit\u00e9s, puis on continue apr\u00e8s la virgule."},
+  {ico:"&#128230;", step:"Mission 6", codename:"Les palettes de fruits", name:"Les palettes de fruits", comp:"R\u00e9investir une division euclidienne",
+   q:"<b>163 caisses</b> de fruits doivent \u00eatre charg\u00e9es sur des palettes. Chaque palette peut contenir <b>10 caisses</b>.<br>Combien de palettes <b>compl\u00e8tes</b> peut-on pr\u00e9parer&#8201;?",
+   opts:["16 palettes","15 palettes","17 palettes","18 palettes"], ans:0,
+   corr:"163 &divide; 10 = 16 reste 3. On pr\u00e9pare 16 palettes compl\u00e8tes. Il reste 3 caisses.",
+   fbko:"Une caisse est un objet entier&#8201;: cherche le quotient de 163 par 10.",
+   indice:"les objets entiers utilisent une division euclidienne.",
+   hint:"Combien de paquets de 10 caisses peut-on faire avec 163 caisses&#8201;?"}
+];
+
+
+var N=MISSIONS.length;
+var solved=[];for(var _i=0;_i<N;_i++)solved.push(false);
+var active=0;
+var totalSec=0,totalInt=null;
+var pick={};
+
+function buildHudFrags(){
+  var h=$("hud-frags");if(!h)return;h.innerHTML="";
+  for(var i=0;i<N;i++){var s=document.createElement("span");s.className="hud-frag";s.id="hud-frag-"+i;s.innerHTML="&#128230;";h.appendChild(s);}
+}
+
+function build(){
+  var host=$("steps");host.innerHTML="";
+  MISSIONS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.step+' &middot; <span style="color:var(--day-color)">'+M.codename+'</span></div><div class="step-name">'+M.name+'</div><div class="step-comp">&#128674; '+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro">&#128674; '+M.step+'<span class="scr">'+M.q+'</span></div>'
+        +'<div class="opts" id="opts-'+mi+'"></div>'
+        +'<div class="correction" id="corr-'+mi+'"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+M.corr+'</div></div>'
+        +'<div class="tools">'
+        +'<button class="btn btn-hint" id="hint-btn-'+mi+'" onclick="toggleHint('+mi+')">? Indice</button>'
+        +'<button class="btn btn-try" id="try-'+mi+'" onclick="tryStep('+mi+')">&#9989; Valider</button>'
+        +'</div>'
+        +'<div class="hint" id="hint-'+mi+'">'+M.hint+'</div>'
+        +'<div class="fb" id="fb-'+mi+'"><span id="fbi-'+mi+'"></span><div id="fbm-'+mi+'"></div></div>';
+    }else{
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine l\u2019\u00e9tape pr\u00e9c\u00e9dente pour d\u00e9bloquer celle-ci.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(mi===active||solved[mi]) renderOpts(mi);
+  });
+  updateCrest();updateProg();
+}
+
+var LT=["A","B","C","D"];
+function renderOpts(mi){
+  var M=MISSIONS[mi],z=$("opts-"+mi);if(!z)return;z.innerHTML="";
+  M.opts.forEach(function(o,oi){
+    var d=document.createElement("div");d.className="opt";d.id="pk-"+mi+"-"+oi;
+    d.innerHTML='<span class="lt">'+LT[oi]+'</span><span>'+o+'</span>';
+    d.onclick=function(){pickOpt(mi,oi);};
+    z.appendChild(d);
+  });
+  if(solved[mi]) lockZone(mi);
+}
+
+function pickOpt(mi,oi){
+  if(solved[mi])return;
+  pick[mi]=oi;
+  for(var k=0;k<MISSIONS[mi].opts.length;k++){var el=$("pk-"+mi+"-"+k);if(el)el.classList.remove("sel");}
+  var sel=$("pk-"+mi+"-"+oi);if(sel)sel.classList.add("sel");
+  sCoin();
+}
+function toggleHint(mi){if(solved[mi])return;$("hint-"+mi).classList.toggle("show");}
+
+function tryStep(mi){
+  if(solved[mi])return;
+  var M=MISSIONS[mi];
+  var chosen=pick[mi];
+  if(chosen===undefined){var fb=$("fb-"+mi);fb.className="fb show warn";$("fbi-"+mi).textContent="\u26A0";$("fbm-"+mi).textContent="Choisis une r\u00e9ponse avant de valider.";return;}
+  var good=(chosen===M.ans);
+  for(var k=0;k<M.opts.length;k++){var el=$("pk-"+mi+"-"+k);if(el)el.classList.remove("ok","ko");}
+  var sel=$("pk-"+mi+"-"+chosen);
+  if(good){
+    if(sel)sel.classList.add("ok");
+    stepSuccess(mi);
+  }else{
+    if(sel)sel.classList.add("ko");
+    sBad();$("step-"+mi).classList.add("shake");setTimeout(function(){$("step-"+mi).classList.remove("shake");},400);
+    var fb=$("fb-"+mi);fb.className="fb show ko";$("fbi-"+mi).textContent="\u26A0\uFE0F";
+    $("fbm-"+mi).innerHTML=(MISSIONS[mi].fbko||"V\u00e9rifie la position de la virgule dans le quotient.")+"<br>Essaie encore.";
+  }
+}
+
+function lockZone(mi){
+  var M=MISSIONS[mi];
+  for(var k=0;k<M.opts.length;k++){var el=$("pk-"+mi+"-"+k);if(el)el.style.pointerEvents="none";}
+}
+
+function stepSuccess(mi){
+  solved[mi]=true;sOk();sFrag();
+  $("step-"+mi).classList.add("solved");
+  var tb=$("try-"+mi);if(tb){tb.disabled=true;tb.style.display="none";}
+  var hb=$("hint-btn-"+mi);if(hb)hb.disabled=true;
+  $("hint-"+mi).classList.remove("show");
+  lockZone(mi);
+  var c=$("corr-"+mi);if(c)c.classList.add("show");
+  var fb=$("fb-"+mi);fb.className="fb show ok";$("fbi-"+mi).textContent="\u2705";
+  $("fbm-"+mi).innerHTML="<b style='color:var(--green)'>Bravo&#8201;!</b><br>&#128290; Indice obtenu&#8201;: "+MISSIONS[mi].indice;
+  showAgent("&#128674; Le responsable&nbsp;:<br>Indice n&deg;"+(mi+1)+" obtenu&#8201;!");
+  updateCrest();updateProg();
+  var body=$("body-"+mi);
+  if(body && !$("next-"+mi)){
+    var lab=(active<N-1)?"Indice suivant &#8594;":"Voir la conclusion &#8594;";
+    body.insertAdjacentHTML("beforeend",'<div style="text-align:center;margin-top:1rem;"><button class="btn btn-try" id="next-'+mi+'" onclick="goNext('+mi+')">'+lab+'</button></div>');
+  }
+}
+
+function goNext(mi){
+  var nb=$("next-"+mi);if(nb){nb.disabled=true;nb.style.display="none";}
+  if(active<N-1){
+    active++;
+    runScan(active,function(){
+      build();var el=$("step-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});
+      showAgent("&#128674; Le responsable&nbsp;:<br>Indice suivant&#8201;!");
+    });
+  }else{
+    openFinale();
+  }
+}
+
+function updateCrest(){
+  MISSIONS.forEach(function(M,mi){
+    var f=$("frag-"+mi),hf=$("hud-frag-"+mi);
+    if(solved[mi]){if(f){f.innerHTML="&#128230;";f.classList.add("found");}if(hf){hf.classList.add("got");}}
+    else{if(f){f.textContent="?";f.classList.remove("found");}if(hf){hf.classList.remove("got");}}
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/N*100);
+  var lab=$("hud-prog-label"),fill=$("hud-prog-fill");
+  if(lab)lab.innerHTML="Enqu&ecirc;te&nbsp;: "+pct+"&#8201;%";
+  if(fill)fill.style.width=pct+"%";
+}
+
+function openFinale(){
+  clearInterval(totalInt);
+  var temps=fmt(totalSec);
+  $("hud-dial").innerHTML="&#127942;";
+  var cr=$("finale-crest");cr.innerHTML="";
+  MISSIONS.forEach(function(M,i){var d=document.createElement("div");d.className="fc";d.style.animationDelay=(i*0.12)+"s";d.innerHTML="&#128230;";cr.appendChild(d);});
+  var grade;
+  if(totalSec<=240){grade="\u2B50 EXPERT DU CHARGEMENT";}
+  else if(totalSec<=420){grade="\uD83C\uDFC5 RESPONSABLE EN CHEF";}
+  else if(totalSec<=600){grade="\uD83D\uDEA2 MAGASINIER CONFIRM\u00c9";}
+  else{grade="\uD83E\uDDED APPRENTI MAGASINIER";}
+  setTimeout(function(){
+    $("finale-time").innerHTML="&#9201; Temps utilis\u00e9&#8201;: "+temps;
+    $("finale-grade").innerHTML=grade;
+    $("finale").classList.add("show");
+    sWin();
+  },300);
+}
+
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  $("start-screen").style.display="none";
+  $("game").style.display="";
+  buildHudFrags();
+  $("hud-bar").classList.add("show");
+  document.body.classList.add("playing");
+  totalSec=0;clearInterval(totalInt);
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">&#128674; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00';
+  totalInt=setInterval(function(){totalSec++;var h=$("hud-timer");if(h)h.innerHTML='<span class="lbl">&#128674; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; '+fmt(totalSec);},1000);
+  sCoin();
+  setTimeout(function(){
+    runScan(0,function(){
+      build();
+      showAgent("&#128674; Le responsable&nbsp;:<br>Premier indice&#8201;! Observe ce qu\u2019on partage.");
+    });
+  },700);
+}
+function restartAll(){
+  clearInterval(totalInt);totalSec=0;
+  solved=[];for(var i=0;i<N;i++)solved.push(false);
+  active=0;pick={};
+  $("finale").classList.remove("show");
+  var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
+  $("hud-bar").classList.remove("show");
+  document.body.classList.remove("playing");
+  $("game").style.display="none";
+  $("start-screen").style.display="";
+  $("hud-dial").innerHTML="&#128674;";
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">&#128674; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00';
+  for(var j=0;j<N;j++){var hf=$("hud-frag-"+j);if(hf)hf.classList.remove("got");}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+build();
+</script>
+</body>
+</html>
