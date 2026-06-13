@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — S4J3 · Sélection d'automatismes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --jour:#8dc63f; --jour-fonce:#3d7a10; --jour-soft:#f0faeb; --jour-accent:#b5e08a;
+  --jour-titre:#3d7a10; --badge-txt:#234d06;
+  --vert:#8dc63f; --vert-fonce:#3d7a10; --vert-soft:#f0faeb;
+  --rouge:#e74c3c; --rouge-soft:#fdedec; --rouge-fonce:#c0392b;
+  --texte:#23262d; --gris:#8a8f9a; --bord:#ece8dd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:#fff;color:var(--texte);font-family:'JetBrains Mono',monospace;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 4rem;position:relative;}
+.blob{position:fixed;z-index:0;pointer-events:none;background:var(--jour-accent);filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.30;border-radius:38% 62% 55% 45% / 56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.27;border-radius:62% 38% 44% 56% / 42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.28;border-radius:45% 55% 62% 38% / 55% 45% 58% 42%;}
+
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;}
+.badge-semaine{display:inline-block;background:var(--jour-soft);border:2px solid var(--jour);
+  color:var(--badge-txt);font-weight:800;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.35rem 1rem;border-radius:99px;margin-bottom:.8rem;}
+h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);line-height:1.25;}
+.sous-titre{color:var(--gris);font-size:.92rem;margin-top:.45rem;line-height:1.8;}
+.consigne{margin:1rem auto 0;max-width:560px;border:2px dashed var(--jour);background:var(--jour-soft);
+  color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+
+.startgate{position:relative;z-index:1;width:100%;max-width:640px;background:#fff;border:2px solid var(--bord);
+  border-radius:18px;padding:1.6rem 1.6rem 1.8rem;box-shadow:0 6px 24px rgba(0,0,0,.07);text-align:center;}
+.startgate h2{font-size:1.15rem;color:var(--jour-fonce);margin-bottom:.7rem;}
+.startgate p{font-size:.9rem;color:var(--texte);line-height:1.9;margin-bottom:.6rem;text-align:left;}
+.memo{background:var(--jour-soft);border:1.5px solid var(--jour-accent);border-left:5px solid var(--jour);
+  border-radius:10px;padding:.8rem 1rem;margin:.9rem 0 1.2rem;font-size:.84rem;color:var(--jour-fonce);line-height:1.9;text-align:left;}
+.btn{font-family:'JetBrains Mono',monospace;border:none;cursor:pointer;border-radius:12px;font-weight:800;
+  transition:transform .12s, box-shadow .15s, opacity .15s;min-height:2.9rem;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-start{background:var(--jour);color:#fff;font-size:1.05rem;padding:.85rem 2.2rem;box-shadow:0 4px 14px rgba(141,198,63,.5);}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 7px 20px rgba(141,198,63,.6);}
+
+.topbar{position:sticky;top:0;z-index:5;width:100%;max-width:680px;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(4px);border:2px solid var(--bord);border-radius:16px;padding:.6rem .9rem .7rem;
+  margin-bottom:1.1rem;box-shadow:0 4px 16px rgba(0,0,0,.07);}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;}
+.pastilles{display:flex;gap:.4rem;justify-content:center;flex:1;flex-wrap:wrap;}
+.pastille{width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.85rem;border:2px solid var(--bord);color:var(--gris);background:#fff;transition:all .25s;}
+.pastille.active{background:var(--jour);border-color:var(--jour);color:#fff;transform:scale(1.12);}
+.pastille.ok{background:var(--vert);border-color:var(--vert);color:#fff;}
+.pastille.ko{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+.chrono{display:inline-flex;align-items:center;gap:.3rem;background:var(--jour-soft);border:2px solid var(--jour);
+  color:var(--jour-fonce);font-weight:800;font-size:1rem;padding:.3rem .8rem;border-radius:99px;min-width:4.6rem;justify-content:center;}
+.chrono.warn{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);animation:pulse .55s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+.btn-son{background:#fff;border:2px solid var(--bord);border-radius:50%;width:2.5rem;height:2.5rem;min-height:2.5rem;font-size:1.05rem;cursor:pointer;}
+.progress-bg{background:var(--bord);border-radius:99px;height:8px;overflow:hidden;margin-top:.6rem;}
+.progress-fill{height:100%;width:0%;border-radius:99px;transition:width .5s ease;background:linear-gradient(90deg,var(--jour),#5a9e1d);}
+
+.gamearea{position:relative;z-index:1;width:100%;max-width:680px;}
+.carte{background:#fff;border:2px solid var(--bord);border-radius:18px;padding:1.5rem 1.5rem 1.6rem;
+  box-shadow:0 6px 24px rgba(0,0,0,.07);animation:fadeUp .35s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.q-label{font-size:.74rem;color:var(--gris);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:.5rem;}
+.theme-badge{display:inline-block;background:var(--jour-soft);border:1.5px solid var(--jour-accent);color:var(--jour-fonce);
+  font-weight:700;font-size:.74rem;padding:.2rem .7rem;border-radius:99px;margin-bottom:.8rem;}
+.q-consigne{font-size:.95rem;font-weight:700;color:var(--jour-fonce);text-align:center;margin-bottom:.9rem;line-height:1.8;}
+.eq-bloc{background:var(--jour-soft);border:2px solid var(--jour-accent);border-radius:14px;padding:1.1rem .8rem;text-align:center;margin-bottom:1.1rem;}
+.eq-ligne{font-size:clamp(1.2rem,4vw,1.7rem);font-weight:800;color:var(--texte);line-height:1.5;}
+.eq-ligne .petit{font-size:.95rem;font-weight:600;color:var(--jour-fonce);display:block;margin-top:.4rem;}
+
+.rep-bloc{display:none;}
+.rep-bloc.show{display:block;}
+.choix-grille{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;max-width:30rem;margin:0 auto;}
+.choix{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;background:#fff;color:var(--texte);
+  border:2.5px solid var(--jour);border-radius:12px;min-height:3rem;padding:.6rem .8rem;cursor:pointer;
+  transition:transform .12s, box-shadow .15s, background .15s;}
+.choix:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 4px 12px rgba(141,198,63,.4);}
+.choix:disabled{cursor:default;}
+.choix.bonne{background:var(--vert-soft);border-color:var(--vert);color:var(--vert-fonce);}
+.choix.mauvaise{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);opacity:.85;}
+
+/* cases à cocher (multi) */
+.multi-grille{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-bottom:.6rem;}
+.opt-multi{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:700;background:#fff;color:var(--texte);
+  border:2.5px solid var(--jour);border-radius:12px;min-height:2.9rem;padding:.55rem .9rem;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.5rem;transition:transform .1s, background .15s, box-shadow .15s;}
+.opt-multi .box{width:1.1rem;height:1.1rem;border:2px solid var(--jour);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;}
+.opt-multi.sel{background:var(--jour-soft);box-shadow:0 0 0 3px var(--jour-accent);}
+.opt-multi.sel .box{background:var(--jour);}
+.opt-multi:disabled{cursor:default;}
+.opt-multi.bonne{background:var(--vert-soft);border-color:var(--vert);color:var(--vert-fonce);}
+.opt-multi.bonne .box{background:var(--vert);border-color:var(--vert);}
+.opt-multi.mauvaise{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);}
+.opt-multi.mauvaise .box{background:var(--rouge);border-color:var(--rouge);}
+
+.saisie-ligne{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;font-size:1.15rem;font-weight:800;}
+.saisie-ligne input{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;width:5rem;
+  padding:.55rem .6rem;border-radius:11px;border:2.5px solid var(--jour);background:#fff;color:var(--texte);text-align:center;}
+.saisie-ligne input:focus{outline:3px solid var(--jour-accent);}
+.btn-valider{background:var(--jour);color:#fff;font-size:1rem;padding:.7rem 1.5rem;box-shadow:0 3px 12px rgba(141,198,63,.5);}
+.aide-saisie{font-size:.8rem;color:var(--gris);text-align:center;margin-bottom:1rem;line-height:1.8;}
+.center{text-align:center;}
+.warn-saisie{display:none;text-align:center;color:var(--rouge-fonce);background:var(--rouge-soft);border:1.5px solid var(--rouge);
+  border-radius:10px;padding:.45rem .7rem;font-size:.82rem;margin-bottom:.9rem;line-height:1.7;}
+.warn-saisie.show{display:block;animation:fadeUp .25s ease both;}
+
+.feedback{display:none;margin-top:1.1rem;border-radius:12px;padding:.85rem 1rem;font-size:.9rem;line-height:1.95;}
+.feedback.show{display:block;animation:fadeUp .3s ease both;}
+.feedback.ok{background:var(--vert-soft);border:2px solid var(--vert);color:var(--vert-fonce);}
+.feedback.ko{background:var(--rouge-soft);border:2px solid var(--rouge);color:var(--rouge-fonce);}
+.feedback .fb-titre{font-weight:800;font-size:1rem;margin-bottom:.3rem;}
+
+.countdown{position:fixed;inset:0;z-index:50;background:rgba(240,250,235,.97);display:none;align-items:center;justify-content:center;}
+.countdown.show{display:flex;}
+.cd-num{font-size:clamp(5rem,22vw,9rem);font-weight:800;color:var(--jour-titre);animation:cdPop .8s ease both;}
+@keyframes cdPop{0%{transform:scale(.3);opacity:0;}45%{transform:scale(1.15);opacity:1;}100%{transform:scale(1);opacity:1;}}
+
+.resultats{display:none;position:relative;z-index:1;width:100%;max-width:640px;background:#fff;border:2px solid var(--bord);
+  border-radius:18px;padding:1.8rem 1.6rem;box-shadow:0 6px 24px rgba(0,0,0,.07);text-align:center;}
+.resultats.show{display:block;animation:fadeUp .4s ease both;}
+.trophee{font-size:3.2rem;margin-bottom:.4rem;}
+.score-final{font-size:1.5rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.4rem;}
+.etoiles{font-size:2rem;letter-spacing:.2em;margin-bottom:.6rem;}
+.msg-final{font-size:.95rem;color:var(--texte);line-height:1.9;margin-bottom:1.2rem;}
+.recap{text-align:left;margin-bottom:1.4rem;display:flex;flex-direction:column;gap:.5rem;}
+.recap-item{display:flex;gap:.6rem;align-items:flex-start;border-radius:10px;padding:.55rem .8rem;font-size:.84rem;line-height:1.9;}
+.recap-item.ok{background:var(--vert-soft);border:1.5px solid var(--vert);color:var(--vert-fonce);}
+.recap-item.ko{background:var(--rouge-soft);border:1.5px solid var(--rouge);color:var(--rouge-fonce);}
+.btn-rejouer{background:var(--jour);color:#fff;font-size:1rem;padding:.8rem 1.8rem;box-shadow:0 4px 14px rgba(141,198,63,.5);}
+.hidden{display:none !important;}
+sup{font-size:.7em;}
+
+@media(max-width:430px){
+  body{padding:1.1rem .7rem 3rem;}
+  .eq-ligne{font-size:1.05rem;}
+  .choix{font-size:.95rem;}
+  .pastille{width:1.7rem;height:1.7rem;font-size:.75rem;}
+  .chrono{font-size:.9rem;min-width:4rem;}
+  .topbar{padding:.5rem .6rem .6rem;}
+}
+</style>
+</head>
+<body>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<header class="hero">
+  <div class="badge-semaine">Semaine 4 · Jour 3</div>
+  <h1>✏️ Résoudre les exercices</h1>
+  <p class="sous-titre">Sélection d’automatismes : 5 questions variées</p>
+  <div class="consigne">⚡ Je travaille mes automatismes : 5 questions, réponds vite&nbsp;!</div>
+</header>
+
+<section class="startgate" id="startgate">
+  <h2>⏱️ Défi flash : 5 automatismes</h2>
+  <p>5 questions&nbsp;: un <strong>carré parfait</strong>, des <strong>critères de divisibilité</strong> (cases à cocher), une <strong>expression littérale</strong> (cases à cocher), <strong>développer</strong> et <strong>factoriser</strong>.</p>
+  <p>Tu peux rejouer à l’infini&nbsp;: à chaque partie, <strong>de nouvelles questions</strong> sont tirées au hasard.</p>
+  <div class="memo">
+    💡 <strong>Rappels :</strong><br>
+    👉 divisible par <strong>2</strong> (pair), par <strong>5</strong> (finit par 0 ou 5), par <strong>3</strong> ou <strong>9</strong> (somme des chiffres).<br>
+    👉 <strong>distributivité</strong>&nbsp;: k(a + b) = k×a + k×b.<br>
+    👉 <strong>factoriser</strong>&nbsp;: mettre le facteur commun devant la parenthèse.
+  </div>
+  <button class="btn btn-start" id="btnStart">▶️ Démarrer le défi</button>
+</section>
+
+<div class="topbar hidden" id="topbar">
+  <div class="topbar-row">
+    <div class="pastilles" id="pastilles"></div>
+    <div class="chrono" id="chrono">⏱️ 20</div>
+    <button class="btn-son" id="btnSon" aria-label="Activer ou couper le son">🔊</button>
+  </div>
+  <div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<main class="gamearea hidden" id="gamearea">
+  <div class="carte" id="carte">
+    <div class="q-label" id="qLabel">Question 1 / 5</div>
+    <div style="text-align:center"><span class="theme-badge" id="themeBadge"></span></div>
+    <div class="q-consigne" id="qConsigne"></div>
+    <div class="eq-bloc"><div class="eq-ligne" id="eqLigne"></div></div>
+
+    <div class="rep-bloc" id="blocQcm">
+      <div class="choix-grille" id="choixGrille"></div>
+    </div>
+
+    <div class="rep-bloc" id="blocSaisie">
+      <div class="saisie-ligne">
+        <span id="saiPrefixe"></span>
+        <input type="text" id="reponse" autocomplete="off" spellcheck="false" inputmode="numeric" placeholder="?"/>
+        <span class="suf" id="saiSuffixe"></span>
+        <button class="btn btn-valider" id="btnValSaisie">✅ Valider</button>
+      </div>
+      <div class="aide-saisie" id="aideSaisie"></div>
+    </div>
+
+    <div class="rep-bloc" id="blocMulti">
+      <div class="multi-grille" id="multiGrille"></div>
+      <div class="center"><button class="btn btn-valider" id="btnValMulti">✅ Valider</button></div>
+      <div class="aide-saisie">Coche <strong>toutes</strong> les bonnes réponses, puis valide.</div>
+    </div>
+
+    <div class="warn-saisie" id="warnSaisie">⚠️ Écris un nombre entier.</div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+</main>
+
+<section class="resultats" id="resultats">
+  <div class="trophee">🏆</div>
+  <div class="score-final" id="scoreFinal"></div>
+  <div class="etoiles" id="etoiles"></div>
+  <div class="msg-final" id="msgFinal"></div>
+  <div class="recap" id="recap"></div>
+  <button class="btn btn-rejouer" id="btnRejouer">↻ Rejouer avec de nouvelles questions</button>
+</section>
+
+<div class="countdown" id="countdown"><div class="cd-num" id="cdNum">3</div></div>
+
+<script>
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var QTOTAL = 5, WARN_AT = 6;
+function rnd(n){ return Math.floor(Math.random()*n); }
+function pick(a){ return a[rnd(a.length)]; }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=rnd(i+1); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
+function nz(min,max){ var v; do{ v=min+rnd(max-min+1); }while(v===0); return v; }
+function sameSet(A,B){ if(A.length!==B.length) return false; var s={}; A.forEach(function(i){ s[i]=1; }); return B.every(function(i){ return s[i]; }); }
+
+/* affichage de polynômes */
+function linPoly(A,B){
+  var s=(A===1?"<i>x</i>":A===-1?"\u2212<i>x</i>":(A<0?"\u2212"+(-A):""+A)+"<i>x</i>");
+  if(B!==0){ s+=(B<0?" \u2212 "+(-B):" + "+B); }
+  return s;
+}
+function quadPoly(A,B,C){
+  var s=(A===1?"<i>x</i>\u00b2":A===-1?"\u2212<i>x</i>\u00b2":(A<0?"\u2212"+(-A):""+A)+"<i>x</i>\u00b2");
+  if(B!==0){ s+=(B<0?" \u2212 ":" + ")+(Math.abs(B)===1?"<i>x</i>":Math.abs(B)+"<i>x</i>"); }
+  if(C!==0){ s+=(C<0?" \u2212 ":" + ")+Math.abs(C); }
+  return s;
+}
+function coefVar(co,V){ return (co===1?"":co)+V; }
+function facStr(k,m,V1,s,nn,V2){ return (k===1?"":k)+"("+coefVar(m,V1)+(s<0?" \u2212 ":" + ")+coefVar(nn,V2)+")"; }
+
+/* ═══════════ GÉNÉRATEURS ═══════════ */
+function genCarre(){ var N=2+rnd(14); return { type:"carre", mode:"saisie", N:N, ans:N*N }; }
+function genDivis(){
+  var N=100+rnd(9900), div=[];
+  if(N%2===0)div.push(0); if(N%3===0)div.push(1); if(N%5===0)div.push(2); if(N%9===0)div.push(3);
+  if(div.length===0)div=[4];
+  return { type:"divisibilite", mode:"multi", N:N, opts:["2","3","5","9","aucun de ces nombres"], correctIdx:div };
+}
+function genExprlitt(){
+  var m=pick([2,3]), word=(m===2?"double":"triple");
+  var opts=[m+"<i>b</i>","<i>b</i>"+m,"<i>b</i>\u00b2",m+"\u00d7<i>b</i>","<i>b</i>+<i>b</i>",m+"+<i>b</i>"];
+  var correct=[0,3]; if(m===2){ correct.push(4); }
+  return { type:"exprlitt", mode:"multi", m:m, word:word, opts:opts, correctIdx:correct };
+}
+function genDevelop(){
+  if(Math.random()<0.5){
+    /* A = p + k(x + q)  ->  k x + (p + k q) */
+    var p=nz(-9,9), k=pick([-7,-5,-3,-2,2,3,5,7]), q=nz(-6,6);
+    var B=p+k*q;
+    var ligne=(p<0?"\u2212"+(-p):""+p)+(k<0?" \u2212 ":" + ")+Math.abs(k)+"(<i>x</i> "+(q<0?"\u2212 "+(-q):"+ "+q)+")";
+    var opts=[ {t:linPoly(k,B),ok:true}, {t:linPoly(k,p-k*q),ok:false}, {t:linPoly(k,p+q),ok:false}, {t:linPoly(k,p),ok:false} ];
+    return { type:"developper", mode:"qcm", ligne:ligne, sol:linPoly(k,B), opts:shuffle(opts) };
+  }else{
+    /* B = (k x + a) × m x  ->  k m x² + a m x */
+    var k2=nz(-8,8), a=nz(-6,6), m=pick([2,3,5,7]);
+    if(Math.abs(k2)<2){ k2=(k2<0?-2:2); }
+    var A2=k2*m, B1=a*m;
+    var ligne2="("+linPoly(k2,a)+") \u00d7 "+m+"<i>x</i>";
+    var opts2=[ {t:quadPoly(A2,B1,0),ok:true}, {t:quadPoly(A2,-B1,0),ok:false}, {t:quadPoly(k2,a,0),ok:false}, {t:quadPoly(A2,a,0),ok:false} ];
+    return { type:"developper", mode:"qcm", ligne:ligne2, sol:quadPoly(A2,B1,0), opts:shuffle(opts2) };
+  }
+}
+function genFactor(){
+  var k,m,nn; do{ k=pick([2,3,5,7,11]); m=pick([1,2,3,4,5,7]); nn=pick([1,2,3,4,5,7]); }while(gcd(m,nn)!==1 || (m===1&&nn===1));
+  var pair=shuffle(["a","c","n","y","t"].slice()); var V1=pair[0], V2=pair[1];
+  var s=pick([1,-1]);
+  var ligne=coefVar(k*m,"<i>"+V1+"</i>")+(s<0?" \u2212 ":" + ")+coefVar(k*nn,"<i>"+V2+"</i>");
+  var iV1="<i>"+V1+"</i>", iV2="<i>"+V2+"</i>";
+  var sol=facStr(k,m,iV1,s,nn,iV2);
+  var opts=[ {t:sol,ok:true}, {t:facStr(k,m,iV1,-s,nn,iV2),ok:false},
+             {t:facStr(k+1,m,iV1,s,nn,iV2),ok:false}, {t:facStr(k,m,iV1,s,nn+1,iV2),ok:false} ];
+  return { type:"factoriser", mode:"qcm", ligne:ligne, sol:sol, opts:shuffle(opts) };
+}
+function genGame(){ return [genCarre(), genDivis(), genExprlitt(), genDevelop(), genFactor()]; }
+
+/* ═══════════ AFFICHAGE ═══════════ */
+var THEME={ carre:"Carr\u00e9 parfait", divisibilite:"Divisibilit\u00e9", exprlitt:"Expression litt\u00e9rale", developper:"D\u00e9velopper", factoriser:"Factoriser" };
+var TIME_BY={ carre:12, divisibilite:25, exprlitt:25, developper:30, factoriser:30 };
+function consigne(q){
+  if(q.type==="carre"){ return "\uD83D\uDD22 \u00c9cris le <strong>carr\u00e9</strong> de ce nombre\u00a0:"; }
+  if(q.type==="divisibilite"){ return "\u2705 Coche <strong>tous les diviseurs</strong> de ce nombre\u00a0:"; }
+  if(q.type==="exprlitt"){ return "\u2705 Coche toutes les bonnes \u00e9critures du <strong>"+q.word+" de b</strong>\u00a0:"; }
+  if(q.type==="developper"){ return "\uD83D\uDD0D <strong>D\u00e9veloppe et r\u00e9duis</strong>\u00a0:"; }
+  return "\uD83E\uDDE9 <strong>Factorise</strong> cette expression\u00a0:";
+}
+function eqHTML(q){
+  if(q.type==="carre"){ return "<span style='font-size:1.7rem'>"+q.N+"</span>"; }
+  if(q.type==="divisibilite"){ return "<span style='font-size:1.7rem'>"+q.N+"</span>"; }
+  if(q.type==="exprlitt"){ return "le <strong>"+q.word+"</strong> de <i>b</i>"; }
+  return q.ligne;
+}
+function solTexte(q){
+  if(q.type==="carre"){ return "<strong>"+q.ans+"</strong>"; }
+  if(q.type==="divisibilite" || q.type==="exprlitt"){ return "<strong>"+q.correctIdx.map(function(i){ return q.opts[i]; }).join("\u00a0,\u00a0")+"</strong>"; }
+  return "<strong>"+q.sol+"</strong>";
+}
+function methode(q){
+  if(q.type==="carre"){ return "Le carr\u00e9 de "+q.N+" = "+q.N+" \u00d7 "+q.N+" = <strong>"+q.ans+"</strong>."; }
+  if(q.type==="divisibilite"){
+    var t=[]; if(q.N%2===0)t.push("2 (pair)"); if(q.N%3===0)t.push("3"); if(q.N%5===0)t.push("5"); if(q.N%9===0)t.push("9");
+    return (t.length? q.N+" est divisible par "+t.join(", ")+"." : q.N+" n\u2019est divisible par aucun de ces nombres."); }
+  if(q.type==="exprlitt"){ return "Le "+q.word+" de b, c\u2019est b multipli\u00e9 par "+q.m+"\u00a0: "+solTexte(q)+"."; }
+  if(q.type==="developper"){ return "On distribue, puis on regroupe\u00a0: r\u00e9sultat <strong>"+q.sol+"</strong>."; }
+  return "On met le <strong>facteur commun</strong> devant la parenth\u00e8se\u00a0: <strong>"+q.sol+"</strong>.";
+}
+
+/* ═══════════ SONS ═══════════ */
+var audioCtx=null, soundOn=true;
+function getCtx(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx=null; } } if(audioCtx && audioCtx.state==="suspended"){ audioCtx.resume(); } return audioCtx; }
+function beep(f,d,t,v,dl){ if(!soundOn) return; var c=getCtx(); if(!c) return; var t0=c.currentTime+(dl||0); var o=c.createOscillator(), g=c.createGain(); o.type=t||"sine"; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t0); g.gain.linearRampToValueAtTime(v||0.18,t0+0.015); g.gain.exponentialRampToValueAtTime(0.0001,t0+d); o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d+0.05); }
+function sndTick(){ beep(820,0.07,"square",0.07); }
+function sndCdBip(){ beep(440,0.16,"sine",0.2); }
+function sndCdGo(){ beep(880,0.32,"sine",0.24); }
+function sndGood(){ beep(660,0.13,"sine",0.2); beep(880,0.22,"sine",0.2,0.12); }
+function sndBad(){ beep(220,0.3,"sawtooth",0.14); }
+function sndFanfare(){ beep(523,0.16,"sine",0.2,0); beep(659,0.16,"sine",0.2,0.15); beep(784,0.16,"sine",0.2,0.3); beep(1047,0.4,"sine",0.22,0.45); }
+
+/* ═══════════ ÉTAT ═══════════ */
+var game={ qIndex:0, score:0, results:[], qs:[], q:null, timeLeft:20, timer:null, locked:false };
+window.__game=game; window.__genGame=genGame;
+
+function buildPastilles(){ var p=$("pastilles"); p.innerHTML=""; for(var i=0;i<QTOTAL;i++){ var s=document.createElement("span"); s.className="pastille"; s.id="past"+i; s.textContent=(i+1); p.appendChild(s); } }
+function setPastille(i,st){ var s=$("past"+i); if(!s) return; s.classList.remove("active","ok","ko"); if(st==="active"){ s.classList.add("active"); s.textContent=(i+1); } else if(st==="ok"){ s.classList.add("ok"); s.textContent="\u2713"; } else if(st==="ko"){ s.classList.add("ko"); s.textContent="\u2717"; } }
+function updateProgress(){ $("progressFill").style.width=Math.round(game.results.length/QTOTAL*100)+"%"; }
+function updateChrono(){ var c=$("chrono"); c.textContent="\u23f1\ufe0f "+game.timeLeft; if(game.timeLeft<=WARN_AT){ c.classList.add("warn"); } else { c.classList.remove("warn"); } }
+function runCountdown(cb){ var ov=$("countdown"), num=$("cdNum"); ov.classList.add("show"); var steps=["3","2","1","Partez\u00a0!"], i=0;
+  function step(){ num.textContent=steps[i]; num.style.animation="none"; void num.offsetWidth; num.style.animation=""; if(i<3){ sndCdBip(); } else { sndCdGo(); } i++; if(i<steps.length){ setTimeout(step,800); } else { setTimeout(function(){ ov.classList.remove("show"); cb(); },700); } }
+  step();
+}
+
+function hideBlocs(){ $("blocQcm").classList.remove("show"); $("blocSaisie").classList.remove("show"); $("blocMulti").classList.remove("show"); }
+function newQuestion(){
+  game.q=game.qs[game.qIndex]; game.locked=false;
+  var q=game.q; game.timeLeft=TIME_BY[q.type];
+  $("themeBadge").textContent=THEME[q.type];
+  $("qConsigne").innerHTML=consigne(q);
+  $("eqLigne").innerHTML=eqHTML(q);
+  $("warnSaisie").classList.remove("show");
+  var fb=$("feedback"); fb.className="feedback"; fb.innerHTML="";
+  hideBlocs();
+  if(q.mode==="qcm"){
+    $("blocQcm").classList.add("show");
+    var g=$("choixGrille"); g.innerHTML="";
+    q.opts.forEach(function(opt,idx){ var b=document.createElement("button"); b.className="choix"; b.id="choix"+idx; b.innerHTML=opt.t;
+      b.addEventListener("click", function(){ answerQcm(opt.ok,b); }); g.appendChild(b); });
+  }else if(q.mode==="saisie"){
+    $("blocSaisie").classList.add("show");
+    $("reponse").value=""; $("reponse").disabled=false; $("btnValSaisie").disabled=false;
+    $("saiPrefixe").innerHTML=""; $("saiSuffixe").innerHTML=""; $("aideSaisie").innerHTML="\u00c9cris un nombre entier.";
+    $("reponse").focus();
+  }else{ /* multi */
+    $("blocMulti").classList.add("show");
+    var mg=$("multiGrille"); mg.innerHTML="";
+    q.opts.forEach(function(txt,idx){ var b=document.createElement("button"); b.type="button"; b.className="opt-multi"; b.id="opt"+idx;
+      b.innerHTML="<span class='box'></span><span>"+txt+"</span>";
+      b.addEventListener("click", function(){ if(game.locked) return; b.classList.toggle("sel"); b.querySelector(".box").textContent=b.classList.contains("sel")?"\u2713":""; });
+      mg.appendChild(b); });
+    $("btnValMulti").disabled=false;
+  }
+  updateChrono(); setPastille(game.qIndex,"active");
+  $("qLabel").textContent="Question "+(game.qIndex+1)+" / "+QTOTAL;
+  startTimer();
+}
+function startTimer(){ stopTimer(); game.timer=setInterval(function(){ game.timeLeft--; updateChrono(); if(game.timeLeft<=WARN_AT && game.timeLeft>0){ sndTick(); } if(game.timeLeft<=0){ onTimeout(); } },1000); }
+function stopTimer(){ if(game.timer){ clearInterval(game.timer); game.timer=null; } }
+
+function answerQcm(ok,btn){
+  if(game.locked) return; game.locked=true; stopTimer();
+  document.querySelectorAll(".choix").forEach(function(b,i){ b.disabled=true; if(game.q.opts[i].ok){ b.classList.add("bonne"); } else if(b===btn){ b.classList.add("mauvaise"); } });
+  finishQuestion(ok,false);
+}
+function parseEntier(raw){ var s=String(raw).replace(/\s+/g,"").replace(/\u2212/g,"-"); if(!/^[+-]?\d+$/.test(s)){ return null; } return parseInt(s,10); }
+function validateSaisie(){
+  if(game.locked) return;
+  var v=parseEntier($("reponse").value);
+  if(v===null){ $("warnSaisie").classList.add("show"); sndBad(); return; }
+  $("warnSaisie").classList.remove("show"); game.locked=true; stopTimer();
+  $("reponse").disabled=true; $("btnValSaisie").disabled=true;
+  finishQuestion(v===game.q.ans,false);
+}
+function revealMulti(){
+  document.querySelectorAll(".opt-multi").forEach(function(b,i){
+    b.disabled=true; var isCorrect=game.q.correctIdx.indexOf(i)>=0, isSel=b.classList.contains("sel");
+    if(isCorrect){ b.classList.add("bonne"); b.querySelector(".box").textContent="\u2713"; }
+    else if(isSel){ b.classList.add("mauvaise"); b.querySelector(".box").textContent="\u2717"; }
+  });
+}
+function validateMulti(){
+  if(game.locked) return; game.locked=true; stopTimer();
+  var sel=[]; document.querySelectorAll(".opt-multi").forEach(function(b,i){ if(b.classList.contains("sel")) sel.push(i); });
+  $("btnValMulti").disabled=true; revealMulti();
+  finishQuestion(sameSet(sel, game.q.correctIdx), false);
+}
+function onTimeout(){ if(game.locked) return; game.locked=true; stopTimer();
+  if(game.q.mode==="qcm"){ document.querySelectorAll(".choix").forEach(function(b,i){ b.disabled=true; if(game.q.opts[i].ok){ b.classList.add("bonne"); } }); }
+  else if(game.q.mode==="saisie"){ $("reponse").disabled=true; $("btnValSaisie").disabled=true; }
+  else { $("btnValMulti").disabled=true; revealMulti(); }
+  finishQuestion(false,true);
+}
+function finishQuestion(ok,timedOut){
+  var q=game.q; game.results.push({ q:q, ok:ok }); if(ok){ game.score++; }
+  setPastille(game.qIndex, ok?"ok":"ko"); updateProgress();
+  var fb=$("feedback");
+  if(ok){ sndGood(); fb.className="feedback show ok"; fb.innerHTML="<div class='fb-titre'>\u2714 Bravo\u00a0!</div>"+methode(q); }
+  else { sndBad(); fb.className="feedback show ko";
+    var intro=timedOut ? "\u2718 Temps \u00e9coul\u00e9\u00a0!" : "\u2718 Pas grave, regarde la m\u00e9thode\u00a0:";
+    fb.innerHTML="<div class='fb-titre'>"+intro+"</div>La bonne r\u00e9ponse\u00a0: "+solTexte(q)+"<br>"+methode(q);
+  }
+  setTimeout(nextQuestion, ok?2700:3500);
+}
+function nextQuestion(){ game.qIndex++; if(game.qIndex<QTOTAL){ newQuestion(); } else { showResults(); } }
+
+function showResults(){
+  $("gamearea").classList.add("hidden"); $("topbar").classList.add("hidden");
+  $("resultats").classList.add("show");
+  $("scoreFinal").textContent=game.score+" / "+QTOTAL+" dans le temps\u00a0!";
+  var stars=(game.score===5)?3:(game.score>=3?2:1);
+  $("etoiles").textContent="\u2b50".repeat(stars)+"\u2606".repeat(3-stars);
+  var msg;
+  if(game.score===5){ msg="Parfait\u00a0! Tu ma\u00eetrises tous ces automatismes\u00a0! \uD83C\uDF89"; }
+  else if(game.score>=3){ msg="Bien jou\u00e9\u00a0! Encore un petit entra\u00eenement et ce sera parfait\u00a0!"; }
+  else { msg="C\u2019est un bon d\u00e9but\u00a0! Rejoue pour t\u2019entra\u00eener, tu vas y arriver\u00a0! \uD83D\uDCAA"; }
+  $("msgFinal").textContent=msg;
+  var rec=$("recap"); rec.innerHTML="";
+  game.results.forEach(function(res){ var div=document.createElement("div"); div.className="recap-item "+(res.ok?"ok":"ko");
+    div.innerHTML="<span>"+(res.ok?"\u2714":"\u2718")+"</span><span>"+THEME[res.q.type]+"\u00a0: "+solTexte(res.q)+"</span>"; rec.appendChild(div); });
+  if(game.score===5){ sndFanfare(); } else { sndGood(); }
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+function startGame(){
+  game.qIndex=0; game.score=0; game.results=[]; game.qs=genGame();
+  buildPastilles(); updateProgress();
+  $("startgate").classList.add("hidden"); $("resultats").classList.remove("show");
+  $("topbar").classList.remove("hidden"); $("gamearea").classList.remove("hidden");
+  getCtx(); runCountdown(function(){ newQuestion(); });
+}
+document.addEventListener("DOMContentLoaded", function(){
+  $("btnStart").addEventListener("click", startGame);
+  $("btnRejouer").addEventListener("click", startGame);
+  $("btnValSaisie").addEventListener("click", validateSaisie);
+  $("btnValMulti").addEventListener("click", validateMulti);
+  $("reponse").addEventListener("keydown", function(e){ if(e.key==="Enter"){ validateSaisie(); } });
+  $("btnSon").addEventListener("click", function(){ soundOn=!soundOn; $("btnSon").textContent= soundOn ? "\uD83D\uDD0A" : "\uD83D\uDD07"; });
+});
+</script>
+</body>
+</html>
