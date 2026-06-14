@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Semaine 4 Jour 2 — Fraction et quotient</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — JOUR 2 (Mardi) → Rouge-brique ═══ */
+    :root{
+      --day-color:#b94040; --day-dark:#7a1f1f; --day-light:#f7eded;
+      --day-border:#e3c0c0; --day-glow:rgba(185,64,64,.3);
+    }
+    :root{
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+      --err-bg:#fce4e4; --err-border:#8e1b13; --err-text:#8e1b13;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.25rem,5vw,1.8rem);font-weight:800;line-height:1.3;word-break:break-word;color:var(--day-dark);}
+    h1 .hl{color:var(--day-color);}
+    .niveau-badge{display:inline-flex;align-items:center;gap:.5rem;margin-top:.6rem;background:var(--day-light);border:2px solid var(--day-color);color:var(--day-dark);font-weight:800;font-size:clamp(.9rem,2.8vw,1.05rem);padding:.35rem 1.1rem;border-radius:99px;}
+    .niveau-badge .nb-dot{width:12px;height:12px;border-radius:50%;background:var(--day-color);display:inline-block;}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .stage{width:100%;max-width:680px;position:relative;z-index:1;}
+    .hud{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;align-items:center;margin-bottom:1.1rem;}
+    .hud-chip{display:flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:99px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;border:2px solid var(--border);background:var(--surface);}
+    .hud-chip.act{background:var(--day-light);border-color:var(--day-border);color:var(--day-dark);}
+
+    .start-overlay{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:1.6rem 1.4rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .start-overlay h2{font-size:1.1rem;color:var(--day-dark);margin-bottom:.5rem;}
+    .start-overlay p{font-size:clamp(.9rem,2.6vw,1rem);line-height:1.9;margin-bottom:1.1rem;}
+    .start-overlay strong{color:var(--day-dark);}
+
+    .screen{display:none;}
+    .screen.show{display:block;animation:fadeUp .35s ease both;}
+
+    .progress-wrap{margin-bottom:1.2rem;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));border-radius:99px;transition:width .4s ease;}
+
+    .enonce{background:var(--day-light);border:2px solid var(--day-border);border-left:5px solid var(--day-color);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
+    .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink));}
+    .q-tag{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-text{font-size:clamp(.95rem,2.9vw,1.1rem);font-weight:700;line-height:1.8;margin-bottom:1rem;color:var(--text);}
+
+    .num-box{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(2rem,9vw,3rem);color:var(--day-dark);text-align:center;background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.8rem 1rem;margin-bottom:.3rem;letter-spacing:.05em;}
+    /* coloriage interactif */
+    .frac-target{text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1.6rem,7vw,2.4rem);color:var(--day-dark);margin-bottom:.6rem;}
+    .parts{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap;margin:.4rem auto 1rem;max-width:520px;}
+    .part{flex:1 1 0;min-width:0;aspect-ratio:3/4;border:3px solid var(--day-border);border-radius:8px;background:var(--surface);cursor:pointer;transition:background .15s,border-color .15s,transform .08s;}
+    .part:hover:not(.lk){border-color:var(--day-color);transform:translateY(-2px);}
+    .part.on{background:var(--day-color);border-color:var(--day-dark);}
+    .part.lk{cursor:default;}
+    .part.good{background:var(--green);border-color:#2f6e10;}
+    .part.badon{background:var(--err-border);border-color:var(--err-border);}
+    .color-count{text-align:center;font-size:.85rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    /* glisser-déposer (associer) */
+    .match-wrap{display:flex;flex-direction:column;gap:.7rem;margin:.3rem 0 .5rem;}
+    .match-row{display:flex;align-items:center;gap:.7rem;}
+    .match-frac{flex:0 0 auto;min-width:70px;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1.1rem,4vw,1.4rem);color:var(--day-dark);background:var(--day-light);border:2px solid var(--day-border);border-radius:10px;padding:.5rem .7rem;}
+    .drop{flex:1;min-height:48px;border:2px dashed var(--day-border);border-radius:10px;display:flex;align-items:center;justify-content:center;padding:.4rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--muted);font-size:.85rem;transition:background .15s,border-color .15s;}
+    .drop.over{border-color:var(--day-color);background:var(--day-light);}
+    .drop.filled{border-style:solid;color:var(--text);}
+    .drop.lk{cursor:default;}
+    .drop.ok{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .drop.bad{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .chips{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-top:1rem;padding-top:1rem;border-top:1.5px dashed var(--border);}
+    .chip{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(1rem,3.5vw,1.2rem);color:#fff;background:var(--day-color);border:none;border-radius:10px;padding:.55rem 1rem;cursor:grab;box-shadow:0 2px 6px var(--day-glow);touch-action:none;user-select:none;}
+    .chip:active{cursor:grabbing;}
+    .chip.placed{opacity:.3;pointer-events:none;}
+    .chip.dragging{opacity:.5;}
+    .match-hint{text-align:center;font-size:.82rem;color:var(--muted);font-style:italic;margin-bottom:.5rem;}
+    .q-ask{text-align:center;font-weight:700;color:var(--day-dark);font-size:clamp(.95rem,2.8vw,1.05rem);margin-top:.8rem;}
+    .multi-hint{text-align:center;font-size:.82rem;color:var(--muted);font-style:italic;margin-bottom:.2rem;}
+
+    .options{display:flex;flex-direction:column;gap:.6rem;}
+    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;font-size:clamp(.9rem,2.7vw,1rem);line-height:1.8;transition:border-color .15s,background .15s;text-align:left;}
+    .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.5rem;text-align:center;}
+    .opt .opt-txt{font-weight:600;}
+    .opt:hover:not(.locked){border-color:var(--day-color);}
+    .opt.locked{cursor:default;}
+    .opt.sel{border-color:var(--day-color);background:var(--day-light);}
+    .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
+    .opt.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .opt.reveal-correct{border-color:var(--green);background:#f0faeb;}
+    .opt.miss{border-color:var(--green);border-style:dashed;}
+
+    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.92rem);display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback .fi{font-size:1.3rem;flex-shrink:0;}
+
+    .hint-row{margin-top:.9rem;}
+    .btn-hint{background:transparent;color:var(--day-dark);border:2px dashed var(--day-border);padding:.45rem 1rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;min-height:40px;}
+    .btn-hint:hover{background:var(--day-light);}
+    .hint-box{display:none;margin-top:.6rem;padding:.75rem 1rem;border-radius:10px;background:var(--day-light);border:1.5px solid var(--day-border);color:var(--text);font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.8;}
+    .hint-box.show{display:block;animation:fadeUp .25s ease both;}
+    .hint-box::before{content:"💡 ";}
+
+    .actions{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.3rem;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.6vw,.95rem);font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.4;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+
+    .res{display:none;text-align:center;}
+    .res.show{display:block;animation:fadeUp .4s ease both;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .trophee{font-size:3rem;line-height:1;margin-bottom:.3rem;}
+    .res-score{font-size:clamp(1.8rem,8vw,3rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
+    .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
+    .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
+    .recap-list{display:flex;flex-direction:column;gap:.5rem;margin:.8rem auto 1.3rem;max-width:520px;}
+    .recap-row{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .9rem;border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.7;text-align:left;}
+    .recap-row .ri{flex-shrink:0;font-weight:700;font-size:1.05rem;}
+    .recap-row .rmsg{font-weight:400;font-size:.92em;}
+    .recap-row.p-vert{background:#f0faeb;border:1.5px solid var(--green);color:#3d7a10;}
+    .recap-row.p-jaune{background:#fef9e3;border:1.5px solid #e6c200;color:#8a6d00;}
+    .recap-row.p-orange{background:#fff3e6;border:1.5px solid #f5a623;color:#a85d00;}
+    .recap-row.p-rouge{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
+    .skills-text{color:var(--day-dark);line-height:1.8;background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.9rem 1.1rem;margin:0 auto 1.3rem;max-width:480px;text-align:left;}
+    .skills-text .skills-title{font-weight:800;font-size:clamp(.84rem,2.4vw,.92rem);margin-bottom:.5rem;}
+    .skills-text .skill-line{display:flex;gap:.6rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.8;margin-bottom:.5rem;font-weight:600;}
+    .skills-text .skill-line:last-child{margin-bottom:0;}
+    .skills-text .arr{color:var(--day-color);font-weight:800;flex-shrink:0;}
+    .defi-note{color:var(--day-dark);font-weight:800;margin-bottom:1rem;font-size:clamp(.9rem,2.6vw,1rem);}
+    .res-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+    .trans-badge{display:inline-block;background:var(--day-color);color:#fff;font-weight:800;padding:.35rem 1.2rem;border-radius:99px;font-size:1rem;margin-bottom:.8rem;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){
+      body{padding:1.4rem .75rem 3rem;}
+      .actions{justify-content:stretch;} .actions .btn{flex:1;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div><div class="bubble2"></div>
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 6ème
+    </div>
+    <div class="week-label">Semaine 4 &ndash; Jour 2</div>
+    <h1>Fraction et <span class="hl">quotient</span></h1>
+    <p class="subtitle">Une division… et hop, une fraction&nbsp;!</p>
+    <div class="niveau-badge"><span class="nb-dot"></span><span id="niv-label">Niveau 1</span></div>
+  </header>
+  <div class="stage">
+    <div class="screen show" id="start"><div class="start-overlay">
+      <h2>C&rsquo;est parti&nbsp;!</h2>
+      <p>🎯 Tu vas écrire une division sous forme de fraction, trouver un nombre manquant, donner une écriture décimale, puis associer fractions et décimaux.</p>
+      <button class="btn btn-primary" onclick="startGame()">Commencer &rarr;</button>
+    </div></div>
+
+    <div class="screen" id="trans"><div class="start-overlay">
+      <div class="trans-badge" id="trans-badge">Niveau 2</div>
+      <h2 id="trans-title">Niveau suivant</h2>
+      <p id="trans-msg"></p>
+      <button class="btn btn-primary" id="trans-btn" onclick="startLevel()">Continuer &rarr;</button>
+    </div></div>
+
+    <div class="screen" id="board">
+      <div class="hud">
+        <div class="hud-chip act"><span id="act-label">Niveau 1</span></div>
+        <div class="hud-chip"><span id="score-live">0</span> <span>bonnes réponses</span></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-info"><span id="prog-label">Exercice 1</span><span id="prog-pct">0&nbsp;%</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div></div>
+      <div class="enonce" id="enonce"></div>
+      <div class="card"><div class="card-stripe"></div>
+        <div class="q-tag" id="q-tag"></div>
+        <div class="q-text" id="q-text"></div>
+        <div id="answer-zone"></div>
+        <div class="hint-row"><button class="btn-hint" id="btn-hint" onclick="toggleHint()">? Indice</button>
+          <div class="hint-box" id="hint-box"></div></div>
+        <div class="feedback" id="feedback"><span class="fi" id="fb-ic"></span><div><span id="fb-msg"></span></div></div>
+        <div class="actions">
+          <button class="btn btn-primary" id="btn-validate" onclick="validate()" disabled>Valider</button>
+          <button class="btn btn-primary" id="btn-next" onclick="nextStep()" style="display:none;">Suivant &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="res" id="final"><div class="res-card">
+      <div class="trophee" id="final-ic">🏆</div><div class="res-score"><span id="final-num">0</span></div>
+      <div class="stars" id="final-stars"></div><div class="res-msg" id="final-msg"></div>
+      <div class="recap-list" id="final-recap"></div>
+      <div class="skills-text">
+        <div class="skills-title">Tu sais maintenant :</div>
+        <div class="skill-line"><span class="arr">&rarr;</span> écrire une division sous forme de fraction</div>
+        <div class="skill-line"><span class="arr">&rarr;</span> trouver une fraction à partir d&rsquo;une multiplication</div>
+        <div class="skill-line"><span class="arr">&rarr;</span> donner l&rsquo;écriture décimale d&rsquo;une fraction</div>
+        <div class="skill-line"><span class="arr">&rarr;</span> relier une fraction à son écriture décimale</div>
+      </div>
+      <div class="defi-note">🎯 Tu es prêt à relever le défi&nbsp;!</div>
+      <div class="res-btns"><button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button></div>
+    </div></div>
+  </div>
+
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+function shuffleArr(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+var NIVEAUX=[
+  { nom:"Niveau 1", titre:"Écrire une division en fraction", intro:"Écris chaque division sous forme de fraction.",
+    tag:"Choisis la bonne réponse",
+    hint:"Le trait de fraction remplace le signe de division : a : b s\u2019écrit a/b.",
+    ko:"Le trait de fraction remplace le signe de division : le dividende va au-dessus, le diviseur en dessous.",
+    exos:[
+      { txt:"6 : 2", q:"Écris cette division sous forme de fraction.", opts:["6/2","2/6","8/2"], ok:0, sol:"Le quotient de 6 par 2 peut s\u2019écrire sous la forme 6/2." },
+      { txt:"22 : 17", q:"Écris cette division sous forme de fraction.", opts:["22/17","17/22","39/17"], ok:0, sol:"22 : 17 s\u2019écrit 22/17." },
+      { txt:"22 : 13", q:"Écris cette division sous forme de fraction.", opts:["22/13","13/22","35/13"], ok:0, sol:"22 : 13 s\u2019écrit 22/13." },
+      { txt:"24 : 21", q:"Écris cette division sous forme de fraction.", opts:["24/21","21/24","24/12"], ok:0, sol:"24 : 21 s\u2019écrit 24/21." }
+    ]},
+  { nom:"Niveau 2", titre:"Trouver le nombre manquant", intro:"Complète avec la fraction qui convient.",
+    tag:"Choisis la bonne réponse",
+    hint:"Cherche le nombre qui permet de compléter l\u2019égalité.",
+    ko:"Vérifie quel nombre permet d\u2019obtenir le résultat demandé.",
+    exos:[
+      { txt:"18 × ? = 17", q:"Quelle fraction complète l\u2019égalité&nbsp;?", opts:["17/18","18/17","17/35"], ok:0, sol:"18 × 17/18 = 17. Le nombre qui, multiplié par 18, donne 17 est la fraction 17/18." },
+      { txt:"3 × ? = 2", q:"Quelle fraction complète l\u2019égalité&nbsp;?", opts:["2/3","3/2","2/5"], ok:0, sol:"3 × 2/3 = 2. La fraction est 2/3." },
+      { txt:"21 × ? = 24", q:"Quelle fraction complète l\u2019égalité&nbsp;?", opts:["24/21","21/24","24/45"], ok:0, sol:"21 × 24/21 = 24. La fraction est 24/21." }
+    ]},
+  { nom:"Niveau 3", titre:"Fraction et écriture décimale", intro:"Donne l\u2019écriture décimale de chaque fraction.",
+    tag:"Choisis la bonne réponse",
+    hint:"On effectue la division du numérateur par le dénominateur.",
+    ko:"Pour l\u2019écriture décimale, on divise le numérateur par le dénominateur. Surveille la virgule.",
+    exos:[
+      { frac:"7/2", q:"Quelle est son écriture décimale&nbsp;?", opts:["3,5","35","0,35","2,5"], ok:0, sol:"7 \u00f7 2 = 3,5." },
+      { frac:"4/8", q:"Quelle est son écriture décimale&nbsp;?", opts:["0,5","5","0,05","0,8"], ok:0, sol:"4 \u00f7 8 = 0,5." },
+      { frac:"15/4", q:"Quelle est son écriture décimale&nbsp;?", opts:["3,75","375","0,375","3,25"], ok:0, sol:"15 \u00f7 4 = 3,75." },
+      { frac:"1/25", q:"Quelle est son écriture décimale&nbsp;?", opts:["0,04","0,4","4","0,025"], ok:0, sol:"1 \u00f7 25 = 0,04." }
+    ]},
+  { nom:"Niveau 4", titre:"Associer fractions et décimaux", intro:"Glisse chaque écriture décimale en face de la fraction qui lui correspond.",
+    tag:"Associe chaque fraction",
+    hint:"Pour chaque fraction, divise le numérateur par le dénominateur.",
+    ko:"Pour chaque fraction, divise le numérateur par le dénominateur, puis compare.",
+    exos:[
+      { match:true, pairs:[["3/4","0,75"],["1/5","0,2"],["12/8","1,5"],["17/5","3,4"]], sol:"3/4 = 0,75 ; 1/5 = 0,2 ; 12/8 = 1,5 ; 17/5 = 3,4." }
+    ]}
+];
+
+var lvl=0, step=0, locked=false;
+var selSingle=null, selMulti=[];
+var score=0, totalExos=0, recap=[];
+
+function countTotal(){var n=0;NIVEAUX.forEach(function(N){n+=N.exos.length;});return n;}
+
+function startGame(){
+  $("start").classList.remove("show");$("final").classList.remove("show");$("trans").classList.remove("show");
+  lvl=0;score=0;recap=[];totalExos=countTotal();
+  NIVEAUX.forEach(function(N){ N.exos.forEach(function(e){ if(e.opts){ e._opts=e.opts.map(function(t,i){return {t:t,ok:(i===e.ok)};}); if(e.opts.length>2) shuffleArr(e._opts); } }); });
+  startLevel();
+}
+function startLevel(){$("trans").classList.remove("show");step=0;$("niv-label").textContent=NIVEAUX[lvl].nom;$("board").classList.add("show");startStep();}
+function startStep(){selSingle=null;selMulti=[];locked=false;render();window.scrollTo({top:0,behavior:"smooth"});}
+function nbInLevel(){return NIVEAUX[lvl].exos.length;}
+
+function render(){
+  var N=NIVEAUX[lvl],e=N.exos[step];
+  $("act-label").textContent=N.nom;
+  $("q-tag").textContent=N.tag;
+  $("enonce").innerHTML="<div class='ex-titre'>"+N.titre+" \u2014 Exercice "+(step+1)+" / "+N.exos.length+"</div>"+N.intro;
+
+  if(e.color){
+    // coloriage interactif
+    var qh="<div class='frac-target'>"+e.fracN+"/"+e.fracD+"</div><div class='q-ask'>"+e.q+"</div>";
+    $("q-text").innerHTML=qh;
+    var wrap=document.createElement("div");wrap.id="opts";
+    var row=document.createElement("div");row.className="parts";
+    for(var i=0;i<e.parts;i++){
+      var pp=document.createElement("div");pp.className="part";pp.setAttribute("data-i",i);
+      pp.onclick=(function(el){return function(){togglePart(el);};})(pp);
+      row.appendChild(pp);
+    }
+    wrap.appendChild(row);
+    var cnt=document.createElement("div");cnt.className="color-count";cnt.id="ccount";cnt.textContent="0 part coloriée";
+    wrap.appendChild(cnt);
+    $("answer-zone").innerHTML="";$("answer-zone").appendChild(wrap);
+  } else if(e.showfig){
+    // figure colorée fixe (non interactive) + QCM
+    var fh="<div class='q-ask'>"+e.q+"</div><div class='parts' id='fig'>";
+    for(var k=0;k<e.parts;k++){ fh+="<div class='part lk"+(k<e.filled?" on":"")+"'></div>"; }
+    fh+="</div>";
+    $("q-text").innerHTML=fh;
+    var box=document.createElement("div");box.className="options";box.id="opts";
+    $("answer-zone").innerHTML="";$("answer-zone").appendChild(box);
+    e._opts.forEach(function(op,i){
+      var b=document.createElement("div");b.className="opt";
+      b.innerHTML="<span class='opt-key'>\ud83d\udd18</span><span class='opt-txt'>"+op.t+"</span>";
+      b.onclick=function(){chooseSingle(i,b);};box.appendChild(b);
+    });
+  } else if(e.match){
+    renderMatch(e);
+  } else {
+    // QCM classique (avec une fraction ou une expression affichée si fournie)
+    var top = "";
+    if(e.frac!==undefined) top = "<div class='frac-target'>"+e.frac+"</div>";
+    else if(e.txt!==undefined) top = "<div class='num-box'>"+e.txt+"</div>";
+    else if(e.fracN!==undefined) top = "<div class='frac-target'>"+e.fracN+"/"+e.fracD+"</div>";
+    $("q-text").innerHTML=top+"<div class='q-ask'>"+e.q+"</div>";
+    var box2=document.createElement("div");box2.className="options";box2.id="opts";
+    $("answer-zone").innerHTML="";$("answer-zone").appendChild(box2);
+    e._opts.forEach(function(op,i){
+      var b=document.createElement("div");b.className="opt";
+      b.innerHTML="<span class='opt-key'>\ud83d\udd18</span><span class='opt-txt'>"+op.t+"</span>";
+      b.onclick=function(){chooseSingle(i,b);};box2.appendChild(b);
+    });
+  }
+
+  $("feedback").className="feedback";$("btn-next").style.display="none";
+  $("btn-validate").style.display="inline-flex";$("btn-validate").disabled=true;
+  $("hint-box").className="hint-box";$("hint-box").textContent=N.hint;$("btn-hint").style.display="inline-flex";
+  var done=recap.length,pct=Math.round(done/totalExos*100);
+  $("prog-label").textContent=N.nom+" \u00b7 "+(step+1)+" / "+nbInLevel();
+  $("progress-bar").style.width=pct+"%";$("prog-pct").textContent=pct+"\u00a0%";
+  $("score-live").textContent=score;
+}
+
+function togglePart(el){
+  if(locked)return;
+  el.classList.toggle("on");
+  var n=document.querySelectorAll("#opts .part.on").length;
+  var c=$("ccount"); if(c) c.textContent = n + (n>1?" parts coloriées":" part coloriée");
+  $("btn-validate").disabled=(n===0);
+}
+
+/* ===== Glisser-déposer (associer) ===== */
+var dragChip=null;
+function renderMatch(e){
+  $("q-text").innerHTML="<div class='q-ask'>Associe chaque fraction à son écriture décimale.</div><div class='match-hint'>Glisse une étiquette dans la case en face de la fraction.</div>";
+  var wrap=document.createElement("div");wrap.id="opts";
+  var mw=document.createElement("div");mw.className="match-wrap";
+  e.pairs.forEach(function(pr,i){
+    var row=document.createElement("div");row.className="match-row";
+    row.innerHTML="<div class='match-frac'>"+pr[0]+"</div>";
+    var drop=document.createElement("div");drop.className="drop";drop.setAttribute("data-i",i);drop.textContent="…";
+    drop.ondragover=function(ev){ev.preventDefault();drop.classList.add("over");};
+    drop.ondragleave=function(){drop.classList.remove("over");};
+    drop.ondrop=function(ev){ev.preventDefault();drop.classList.remove("over");dropChip(drop);};
+    row.appendChild(drop);
+    mw.appendChild(row);
+  });
+  wrap.appendChild(mw);
+  var chips=document.createElement("div");chips.className="chips";chips.id="chips";
+  var vals=e.pairs.map(function(pr){return pr[1];});
+  shuffleArr(vals);
+  vals.forEach(function(v){
+    var ch=document.createElement("button");ch.className="chip";ch.textContent=v;ch.setAttribute("draggable","true");
+    ch.ondragstart=function(ev){dragChip=ch;ch.classList.add("dragging");if(ev.dataTransfer)ev.dataTransfer.setData("text",v);};
+    ch.ondragend=function(){ch.classList.remove("dragging");};
+    addTouch(ch);
+    chips.appendChild(ch);
+  });
+  wrap.appendChild(chips);
+  $("answer-zone").innerHTML="";$("answer-zone").appendChild(wrap);
+}
+function dropChip(drop){
+  if(locked||!dragChip)return;
+  // si la case avait déjà une étiquette, la renvoyer aux chips
+  if(drop.classList.contains("filled")){
+    var prev=drop.getAttribute("data-val");
+    var chipsList=$("chips").querySelectorAll(".chip");
+    for(var k=0;k<chipsList.length;k++){ if(chipsList[k].textContent===prev){ chipsList[k].classList.remove("placed"); } }
+  }
+  drop.textContent=dragChip.textContent;drop.classList.add("filled");drop.setAttribute("data-val",dragChip.textContent);
+  dragChip.classList.add("placed");
+  dragChip=null;
+  refreshMatchBtn();
+}
+function refreshMatchBtn(){
+  var drops=$("opts").querySelectorAll(".drop");
+  var all=true; drops.forEach(function(d){ if(!d.classList.contains("filled")) all=false; });
+  $("btn-validate").disabled=!all;
+}
+/* support tactile (tablette/mobile) */
+function addTouch(ch){
+  var ghost=null;
+  ch.addEventListener("touchstart",function(ev){
+    if(locked)return;
+    dragChip=ch;ch.classList.add("dragging");
+    ev.preventDefault();
+  },{passive:false});
+  ch.addEventListener("touchmove",function(ev){
+    if(locked||!dragChip)return;
+    var t=ev.touches[0];
+    var el=document.elementFromPoint(t.clientX,t.clientY);
+    $("opts").querySelectorAll(".drop").forEach(function(d){d.classList.remove("over");});
+    if(el&&el.classList.contains("drop"))el.classList.add("over");
+    ev.preventDefault();
+  },{passive:false});
+  ch.addEventListener("touchend",function(ev){
+    if(locked||!dragChip){return;}
+    var t=ev.changedTouches[0];
+    var el=document.elementFromPoint(t.clientX,t.clientY);
+    $("opts").querySelectorAll(".drop").forEach(function(d){d.classList.remove("over");});
+    ch.classList.remove("dragging");
+    if(el){ var drop = el.classList.contains("drop")?el:el.closest(".drop"); if(drop) dropChip(drop); else dragChip=null; }
+    else dragChip=null;
+  });
+}
+
+
+function chooseSingle(i,el){if(locked)return;selSingle=i;var all=$("opts").children;for(var k=0;k<all.length;k++)all[k].classList.remove("sel");el.classList.add("sel");$("btn-validate").disabled=false;}
+function toggleMulti(i,el){if(locked)return;var p=selMulti.indexOf(i);
+  if(p>-1){selMulti.splice(p,1);el.classList.remove("sel");el.querySelector(".opt-key").textContent="\u2610";}
+  else{selMulti.push(i);el.classList.add("sel");el.querySelector(".opt-key").textContent="\u2611";}
+  $("btn-validate").disabled=(selMulti.length===0);}
+function toggleHint(){$("hint-box").classList.toggle("show");}
+
+function validate(){
+  if(locked)return;var N=NIVEAUX[lvl],e=N.exos[step];
+  if(e.color){ if(document.querySelectorAll("#opts .part.on").length===0)return; }
+  else if(e.match){ var allf=true; $("opts").querySelectorAll(".drop").forEach(function(d){ if(!d.classList.contains("filled")) allf=false; }); if(!allf)return; }
+  else if(N.multi){ if(selMulti.length===0)return; } else { if(selSingle===null)return; }
+  locked=true;
+  $("btn-validate").style.display="none";$("btn-hint").style.display="none";$("hint-box").classList.remove("show");
+  var good=false;
+  if(e.match){
+    good=true;
+    var drops=$("opts").querySelectorAll(".drop");
+    drops.forEach(function(d){
+      var idx=parseInt(d.getAttribute("data-i"),10);
+      var expected=e.pairs[idx][1];
+      d.classList.add("lk");
+      if(d.getAttribute("data-val")===expected){ d.classList.add("ok"); }
+      else { d.classList.add("bad"); good=false; }
+    });
+  } else if(e.color){
+    var parts=document.querySelectorAll("#opts .part");
+    var n=document.querySelectorAll("#opts .part.on").length;
+    good=(n===e.need);
+    for(var pi=0;pi<parts.length;pi++){
+      var pel=parts[pi]; pel.classList.add("lk");
+      if(good){ if(pel.classList.contains("on")) pel.classList.add("good"); }
+      else { if(pel.classList.contains("on")) pel.classList.add("badon"); }
+    }
+    var c=$("ccount"); if(c) c.textContent = good ? (e.need+" / "+e.fracD+" \u2014 c\u2019est correct") : ("Tu as colorié "+n+" part(s). Il en fallait "+e.need+".");
+  } else {
+    var all=$("opts").children;
+    if(N.multi){
+      var oks=e.oks; good=true;
+      for(var i=0;i<all.length;i++){
+        var isOk=oks.indexOf(i)>-1, isSel=selMulti.indexOf(i)>-1, el=all[i];
+        el.classList.add("locked");
+        if(isOk&&isSel) el.classList.add("chosen-correct");
+        else if(isOk&&!isSel){ el.classList.add("miss"); good=false; }
+        else if(!isOk&&isSel){ el.classList.add("chosen-wrong"); good=false; }
+      }
+    } else {
+      e._opts.forEach(function(op,i){var el=all[i];el.classList.add("locked");
+        if(op.ok){el.classList.add(selSingle===i?"chosen-correct":"reveal-correct");if(selSingle===i)good=true;}
+        else if(selSingle===i){el.classList.add("chosen-wrong");}});
+    }
+  }
+  if(good)score++;
+  recap.push({lvl:lvl,ok:good});
+  var msg = good ? ("<strong>Bravo&nbsp;!</strong> "+e.sol)
+                 : ("<strong>Pas tout à fait.</strong> "+(e.ko||N.ko||"Vérifie ta réponse."));
+  showFb(good,msg);
+  $("btn-next").style.display="inline-flex";
+  var last=(step===nbInLevel()-1)&&(lvl===NIVEAUX.length-1);
+  $("btn-next").textContent=last?"Voir le bilan \u2192":"Suivant \u2192";
+  $("score-live").textContent=score;
+}
+function showFb(ok,msg){var fb=$("feedback");fb.className="feedback show "+(ok?"ok":"ko");$("fb-ic").textContent=ok?"\u2705":"\u26A0\uFE0F";$("fb-msg").innerHTML=msg;}
+
+function nextStep(){
+  if(step<nbInLevel()-1){step++;startStep();return;}
+  if(lvl<NIVEAUX.length-1){lvl++;step=0;showTransition();return;}
+  showFinal();
+}
+function showTransition(){$("board").classList.remove("show");var N=NIVEAUX[lvl];$("trans-badge").textContent=N.nom;$("trans-title").textContent=N.titre;$("trans-msg").textContent=N.intro;$("trans").classList.add("show");window.scrollTo({top:0,behavior:"smooth"});}
+function starsFrac(ok,total){var r=ok/total;return r>=1?5:r>=0.8?4:r>=0.6?3:r>=0.4?2:1;}
+function lvlPalier(ok,tot){var r=ok/tot;
+  if(r>=1)return{cls:"p-vert",ic:"\u2705",msg:"Parfait\u00a0! Tu maîtrises cette compétence."};
+  if(r>=0.6)return{cls:"p-jaune",ic:"\u26A0\uFE0F",msg:"Presque réussi\u00a0! Une notion reste à consolider."};
+  if(r>0)return{cls:"p-orange",ic:"\uD83D\uDD38",msg:"Quelques difficultés subsistent. Continue à t\u2019entraîner."};
+  return{cls:"p-rouge",ic:"\u274C",msg:"Cette compétence mérite d\u2019être retravaillée."};
+}
+function showFinal(){
+  $("board").classList.remove("show");$("trans").classList.remove("show");$("final").classList.add("show");
+  $("final-num").textContent=score+" / "+totalExos;
+  var r=score/totalExos,st=starsFrac(score,totalExos);
+  $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  var ic,msg;
+  if(r>=1){ic="\uD83C\uDFC6";msg="<strong>Excellent&nbsp;!</strong> Tu sais relier une fraction, une division et une écriture décimale.";}
+  else if(r>=0.8){ic="\u2B50";msg="<strong>Très bien&nbsp;!</strong> Tu fais bien le lien entre fraction et quotient. Continue à t’entraîner.";}
+  else if(r>=0.6){ic="\uD83D\uDC4D";msg="<strong>Bon travail&nbsp;!</strong> Continue à t’entraîner à passer d’une écriture à une autre.";}
+  else {ic="\uD83D\uDCDA";msg="<strong>Continue tes efforts&nbsp;!</strong> Entraîne-toi à reconnaître les différentes écritures d’un même nombre.";}
+  $("final-ic").textContent=ic;$("final-msg").innerHTML=msg;
+  var names=["Niveau 1 — division en fraction","Niveau 2 — nombre manquant","Niveau 3 — écriture décimale","Niveau 4 — associer"];
+  var html="";
+  for(var L=0;L<NIVEAUX.length;L++){
+    var ok=0,tot=0;recap.forEach(function(rr){if(rr.lvl===L){tot++;if(rr.ok)ok++;}});
+    var pa=lvlPalier(ok,tot);
+    html+="<div class='recap-row "+pa.cls+"'><span class='ri'>"+pa.ic+"</span><span><b>"+names[L]+"\u00a0: "+ok+"/"+tot+"</b><br><span class='rmsg'>"+pa.msg+"</span></span></div>";
+  }
+  $("final-recap").innerHTML=html;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function restart(){startGame();}
+</script>
+</body></html>
