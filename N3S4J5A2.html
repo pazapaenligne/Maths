@@ -1,466 +1,105 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Résoudre les exercices — Scratch et calcul littéral</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — 3e S4J5 · Exercices interactifs</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-  /* ===== Charte du jour : J5 JAUNE ===== */
-  :root{
-    --j5:        #f5c518;
-    --j5-dark:   #8a6000;
-    --j5-title:  #c49a00;   /* titre en jaune foncé */
-    --j5-soft:   #fffbeb;
-    --j5-accent: #f5e08a;
-    --j5-badgetxt:#3a2600;  /* texte foncé sur badge jaune */
-    --ink:       #2c2410;
-    --ink-soft:  #6b5a30;
-    --ok:        #3d8b40;
-    --ok-soft:   #eaf6ea;
-    --err:       #c0392b;
-    --err-soft:  #fdecea;
-    --line:      #efe6c8;
-    --white:     #ffffff;
-    /* couleurs blocs Scratch */
-    --sc-ctrl:   #c49a00;
-    --sc-move:   #3ab5d8;
-    --sc-loop:   #8dc63f;
-  }
-  *{ box-sizing:border-box; margin:0; padding:0; }
-  html,body{ width:100%; overflow-x:hidden; }
-  body{ font-family:'JetBrains Mono', ui-monospace, monospace; color:var(--ink); background:var(--white);
-    line-height:1.55; -webkit-font-smoothing:antialiased; position:relative; min-height:100vh; }
-
-  .blob{ position:fixed; z-index:0; background:var(--j5-accent); opacity:0.30; filter:blur(1px); pointer-events:none; }
-  .blob-1{ top:-160px; right:-150px; width:460px; height:430px; border-radius:62% 38% 46% 54% / 58% 47% 53% 42%; }
-  .blob-2{ top:42%; left:-190px; width:430px; height:470px; border-radius:44% 56% 63% 37% / 49% 38% 62% 51%; opacity:0.27; }
-  .blob-3{ bottom:-180px; left:14%; width:500px; height:420px; border-radius:55% 45% 38% 62% / 42% 60% 40% 58%; opacity:0.28; }
-
-  .wrap{ position:relative; z-index:1; max-width:860px; margin:0 auto; padding:26px 18px 60px; }
-
-  .hero{ text-align:center; padding:14px 6px 22px; }
-  .pill{ display:inline-block; background:var(--j5); border:2px solid var(--j5-accent); color:var(--j5-badgetxt);
-    font-weight:700; font-size:0.82rem; letter-spacing:0.06em; text-transform:uppercase; padding:7px 16px; border-radius:999px; margin-bottom:16px; }
-  .hero h1{ font-size:2.05rem; font-weight:800; color:var(--j5-title); line-height:1.15; margin-bottom:10px; }
-  .hero p.sub{ font-size:1.02rem; color:var(--ink-soft); max-width:580px; margin:0 auto; font-weight:500; }
-  .hero .consigne{ display:inline-block; margin-top:14px; background:var(--white); border:2px dashed var(--j5-accent);
-    border-radius:12px; padding:8px 16px; font-weight:600; color:var(--j5-dark); font-size:0.92rem; }
-
-  .scoreboard{ position:sticky; top:10px; z-index:20; background:var(--white); border:2px solid var(--line); border-radius:16px;
-    box-shadow:0 6px 20px rgba(138,96,0,0.10); padding:14px 16px; margin:10px 0 26px; }
-  .score-stats{ display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; align-items:stretch; }
-  .stat{ flex:1 1 90px; background:var(--j5-soft); border-radius:12px; padding:8px 6px; text-align:center; border:1.5px solid var(--j5-accent); }
-  .stat .num{ font-size:1.5rem; font-weight:800; color:var(--j5-dark); line-height:1.1; }
-  .stat .lbl{ font-size:0.72rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em; }
-  .stat.err{ background:var(--err-soft); border-color:#f3c6c0; } .stat.err .num{ color:var(--err); }
-  .stat.done{ background:var(--ok-soft); border-color:#bfe0c0; } .stat.done .num{ color:var(--ok); }
-  .xp-row{ margin-top:12px; }
-  .xp-top{ display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
-  .xp-track{ height:16px; background:var(--j5-soft); border-radius:999px; overflow:hidden; border:1.5px solid var(--j5-accent); }
-  .xp-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--j5), var(--j5-dark)); border-radius:999px; transition:width 0.5s cubic-bezier(.2,.8,.2,1); }
-
-  .card{ background:var(--white); border:2px solid var(--line); border-radius:18px; padding:20px 18px; margin-bottom:22px;
-    box-shadow:0 4px 14px rgba(44,36,16,0.05); transition:border-color 0.3s, box-shadow 0.3s; }
-  .card.is-correct{ border-color:#bfe0c0; box-shadow:0 6px 18px rgba(61,139,64,0.12); }
-  .card.is-error{ border-color:#f3c6c0; }
-  .card-head{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-  .badge-num{ flex:0 0 auto; width:42px; height:42px; background:var(--j5); color:var(--j5-badgetxt); border-radius:12px;
-    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.25rem; }
-  .card.is-correct .badge-num{ background:var(--ok); color:#fff; }
-  .card-head .ctitle{ font-weight:700; font-size:1.02rem; color:var(--j5-title); }
-  .card.is-correct .ctitle{ color:var(--ok); }
-  .check-mark{ margin-left:auto; font-size:1.5rem; color:var(--ok); opacity:0; transition:opacity 0.3s; }
-  .card.is-correct .check-mark{ opacity:1; }
-
-  .question{ font-size:1rem; margin-bottom:14px; color:var(--ink); }
-  .question b{ color:var(--j5-dark); }
-
-  .figure{ background:var(--j5-soft); border:1.5px solid var(--j5-accent); border-radius:14px; padding:8px; margin:0 auto 16px; max-width:330px; }
-  .figure svg{ width:100%; height:auto; display:block; }
-  .figrow{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
-  .figrow .figure{ flex:1 1 200px; max-width:300px; margin:0 0 16px; }
-  .figcap{ text-align:center; font-size:0.8rem; font-weight:600; color:var(--ink-soft); margin-top:4px; }
-
-  .math-box{ background:var(--j5-soft); border:1.5px solid var(--j5-accent); border-radius:14px; padding:18px 14px;
-    margin:0 auto 16px; text-align:center; font-size:1.5rem; font-weight:800; color:var(--j5-dark); }
-  .math-box .var{ font-style:italic; }
-
-  .answer-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-  .num-input{ font-family:inherit; font-size:1.2rem; font-weight:700; width:130px; padding:12px 14px;
-    border:2.5px solid var(--j5-accent); border-radius:12px; color:var(--ink); text-align:center; background:var(--white); }
-  .num-input.wide{ width:200px; text-align:left; }
-  .num-input:focus{ outline:none; border-color:var(--j5); box-shadow:0 0 0 4px rgba(245,197,24,0.25); }
-  .unit-tag{ font-weight:700; color:var(--ink-soft); font-size:1.05rem; }
-
-  .qcm{ display:flex; gap:10px; flex-wrap:wrap; }
-  .qcm-btn{ font-family:inherit; flex:1 1 120px; font-size:1.05rem; font-weight:700; padding:15px 12px;
-    border:2.5px solid var(--j5-accent); border-radius:14px; background:var(--white); color:var(--j5-dark); cursor:pointer; transition:0.15s; }
-  .qcm-btn:hover{ background:var(--j5-soft); } .qcm-btn:active{ transform:scale(0.97); }
-  .qcm-btn.picked{ background:var(--j5); color:var(--j5-badgetxt); border-color:var(--j5-dark); }
-
-  .btn{ font-family:inherit; font-weight:700; font-size:1.02rem; padding:13px 22px; border:none; border-radius:12px; cursor:pointer; transition:0.12s; }
-  .btn:active{ transform:scale(0.97); }
-  .btn-check{ background:var(--j5); color:var(--j5-badgetxt); box-shadow:0 4px 0 var(--j5-dark); }
-  .btn-check:hover{ background:#e9ba10; box-shadow:0 4px 0 #6e4d00; }
-  .btn-retry{ background:var(--err-soft); color:var(--err); border:2px solid #f3c6c0; }
-  .btn-retry:hover{ background:#fbe0db; }
-  .btn-big{ display:block; width:100%; max-width:340px; margin:18px auto 0; background:var(--j5-dark); color:var(--white);
-    font-size:1.12rem; padding:16px; box-shadow:0 5px 0 #5e4100; }
-  .btn-big:hover{ background:#6e4d00; }
-
-  .feedback{ margin-top:14px; font-weight:600; display:none; }
-  .feedback.show{ display:block; } .feedback.ok{ color:var(--ok); } .feedback.bad{ color:var(--err); }
-  .solution{ margin-top:12px; background:var(--ok-soft); border:1.5px solid #bfe0c0; border-radius:12px; padding:12px 14px; font-size:0.95rem; color:#1f5b22; display:none; }
-  .solution.show{ display:block; } .solution b{ color:var(--ok); }
-  .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; }
-  .locked{ opacity:0.65; pointer-events:none; }
-  .hint{ font-size:0.86rem; color:var(--ink-soft); margin-top:6px; font-style:italic; }
-
-  .results{ display:none; text-align:center; background:var(--white); border:2.5px solid var(--j5-accent); border-radius:20px;
-    padding:34px 22px; margin-bottom:24px; box-shadow:0 10px 30px rgba(138,96,0,0.16); }
-  .results.show{ display:block; animation:pop 0.5s ease; }
-  @keyframes pop{ from{ transform:scale(0.9); opacity:0; } to{ transform:scale(1); opacity:1; } }
-  .results .trophy{ font-size:3.4rem; line-height:1; }
-  .results h2{ color:var(--j5-title); font-size:1.6rem; margin:10px 0 4px; }
-  .results .rscore{ font-size:1.1rem; font-weight:700; color:var(--ink); margin-bottom:8px; }
-  .stars{ font-size:2rem; letter-spacing:6px; margin:6px 0 12px; }
-  .star-on{ color:var(--j5); } .star-off{ color:var(--line); }
-  .results .rmsg{ color:var(--ink-soft); font-weight:500; max-width:440px; margin:0 auto 6px; }
-
-  @media (max-width:430px){
-    .hero h1{ font-size:1.62rem; } .stat .num{ font-size:1.25rem; } .stat .lbl{ font-size:0.64rem; }
-    .num-input{ width:110px; } .num-input.wide{ width:100%; } .wrap{ padding:20px 12px 50px; }
-    .math-box{ font-size:1.3rem; } .qcm-btn{ font-size:0.98rem; } .figrow .figure{ flex:1 1 100%; }
-  }
+:root{--jour:#f5c518;--jour-fonce:#8a6000;--jour-soft:#fffbeb;--jour-accent:#f5e08a;--bord:#ece8dd;--gris:#8a8f9a;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:#fffdf7;color:#23262d;font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 4rem;position:relative;}
+.bubble{position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(1px);}
+.bubble1{width:280px;height:280px;top:-60px;right:-60px;background:#f5e08a;opacity:.35;}
+.bubble2{width:220px;height:220px;bottom:-50px;left:-50px;background:#f5e08a;opacity:.30;}
+.bubble3{width:180px;height:180px;top:35%;right:-60px;background:#b5e08a;opacity:.22;}
+.bubble4{width:160px;height:160px;top:50%;left:-55px;background:#f9c0bb;opacity:.22;}
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.5rem;max-width:720px;}
+.pazapa-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid #e8e0d0;border-radius:99px;padding:.28rem .9rem;margin-bottom:.65rem;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#555;}
+.pazapa-badge .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.dot1{background:#f5a623;}.dot2{background:#8dc63f;}.dot3{background:#3ab5d8;}
+.badge-semaine{display:inline-block;background:var(--jour-soft);border:2px solid var(--jour);color:#3a2600;font-weight:800;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;padding:.35rem 1rem;border-radius:99px;margin-bottom:.9rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--jour-fonce);line-height:1.25;margin-bottom:.5rem;}
+.consigne{max-width:560px;margin:0 auto;border:2px dashed var(--jour);background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+.zone{position:relative;z-index:1;width:100%;max-width:680px;}
+.zone-note{text-align:center;font-size:.8rem;color:var(--gris);margin-top:.5rem;line-height:1.7;}
 </style>
 </head>
 <body>
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-
-  <div class="wrap">
-    <header class="hero">
-      <span class="pill">Semaine 4 · Jour 5</span>
-      <h1>&#9999;&#65039; Résoudre les exercices</h1>
-      <p class="sub">Scratch et calcul littéral : programmer une figure, suivre un script, développer et factoriser.</p>
-      <div class="consigne">&#129504; Résous <u>mentalement</u> et <u>sans calculatrice</u>.</div>
-    </header>
-
-    <section class="scoreboard" aria-label="Tableau de score">
-      <div class="score-stats">
-        <div class="stat done"><div class="num" id="s-ok">0</div><div class="lbl">Réussies</div></div>
-        <div class="stat"><div class="num" id="s-left">4</div><div class="lbl">Restantes</div></div>
-        <div class="stat err"><div class="num" id="s-err">0</div><div class="lbl">Erreurs</div></div>
-      </div>
-      <div class="xp-row">
-        <div class="xp-top"><span>Progression</span><span id="xp-text">0 / 4</span></div>
-        <div class="xp-track"><div class="xp-fill" id="xp-fill"></div></div>
-      </div>
-    </section>
-
-    <div id="results" class="results">
-      <div class="trophy">&#127942;</div>
-      <h2>Tous les exercices terminés&nbsp;!</h2>
-      <div class="rscore" id="r-score"></div>
-      <div class="stars" id="r-stars"></div>
-      <p class="rmsg" id="r-msg"></p>
-      <button class="btn btn-big" onclick="generateAll()">&#8635; Recommencer</button>
-    </div>
-
-    <main id="exoList"></main>
-    <button class="btn btn-big" onclick="generateAll()">&#8635; Recommencer tous les exercices</button>
+<div class="bubble bubble1"></div><div class="bubble bubble2"></div>
+<div class="bubble bubble3"></div><div class="bubble bubble4"></div>
+<header class="hero">
+  <div class="pazapa-badge">
+    <span class="dot dot1"></span><span class="dot dot2"></span><span class="dot dot3"></span>
+    Pazapa &nbsp;·&nbsp; 3e &nbsp;·&nbsp; Mathématiques
   </div>
-
-<script>
-/* ============================================================
-   PAZAPA — N3S4J5 — Scratch et calcul littéral
-   ============================================================ */
-const TOTAL = 4;
-const rint = n => Math.floor(Math.random()*n);
-const pick = a => a[rint(a.length)];
-const coin = () => Math.random() < 0.5;
-function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ [a,b]=[b,a%b]; } return a; }
-
-let exos = [];
-let state = [];
-
-/* ---------- Parsers expressions (repris S4J3) ---------- */
-function parseLinear(str){
-  if(str==null) return null;
-  let s=String(str).toLowerCase().replace(/\s+/g,'').replace(/\*/g,'').replace(/×/g,'');
-  if(s==='') return null;
-  s=s.replace(/-/g,'+-'); if(s[0]==='+') s=s.slice(1);
-  const terms=s.split('+').filter(t=>t!=='');
-  let a=0,b=0;
-  for(let t of terms){
-    if(t.includes('x')){ let c=t.replace('x',''); if(c===''){c='1';} if(c==='-'){c='-1';} if(!/^-?\d+$/.test(c)) return null; a+=parseInt(c,10); }
-    else { if(!/^-?\d+$/.test(t)) return null; b+=parseInt(t,10); }
-  }
-  return {a,b};
-}
-function parseProduct(str){
-  if(str==null) return null;
-  let s=String(str).toLowerCase().replace(/\s+/g,'').replace(/\*/g,'').replace(/×/g,'');
-  let m=s.match(/^(-?\d+)\((.+)\)$/); if(!m) return null;
-  const g=parseInt(m[1],10); const inner=parseLinear(m[2]); if(inner===null) return null;
-  return {g, a:inner.a, b:inner.b};
-}
-function fmtLin(a,b){
-  let xs; if(a===1) xs='x'; else if(a===-1) xs='-x'; else xs=a+'x';
-  if(b===0) return xs; if(b>0) return xs+' + '+b; return xs+' − '+Math.abs(b);
-}
-
-/* ---------- Bloc Scratch stylisé (SVG) ---------- */
-function scratchBlock(x,y,w,h,color,label){
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${color}" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>`+
-         `<text x="${x+14}" y="${y+h/2+5}" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#fff">${label}</text>`;
-}
-/* script "dessiner un polygone" : répéter n { avancer s / tourner de a } ; a peut être '?' */
-function scratchDessin(steps, n, turn, hideTurn){
-  const W=300, blkH=32, gap=6, CTRL='#c49a00', MOVE='#3ab5d8', LOOP='#8dc63f';
-  let y=10, s='';
-  s+=scratchBlock(14,y,196,blkH,CTRL,'⚑ quand cliqué'); y+=blkH+gap;
-  s+=scratchBlock(14,y,196,blkH,MOVE,'aller en x:0 y:0'); y+=blkH+gap;
-  const loopTop=y;
-  s+=scratchBlock(28,y,224,blkH,LOOP,`répéter ${n} fois`); y+=blkH+2;
-  s+=scratchBlock(46,y,188,blkH,MOVE,`avancer de ${steps}`); y+=blkH+4;
-  s+=scratchBlock(46,y,214,blkH,MOVE,`tourner ⟳ de ${hideTurn?'?':turn}°`); y+=blkH+2;
-  s=`<rect x="28" y="${loopTop}" width="14" height="${y-loopTop}" fill="${LOOP}"/>`+s;
-  s+=`<rect x="28" y="${y}" width="120" height="${blkH*0.66}" rx="7" fill="${LOOP}"/>`; y+=blkH;
-  return `<svg viewBox="0 0 ${W} ${y+10}" role="img" aria-label="script Scratch">${s}</svg>`;
-}
-/* script "bloc variable" : mettre total à A ; répéter R { ajouter P à total } */
-function scratchVariable(A, R, P){
-  const W=300, blkH=32, gap=6, CTRL='#c49a00', VARC='#f5a623', LOOP='#8dc63f';
-  let y=10, s='';
-  s+=scratchBlock(14,y,196,blkH,CTRL,'⚑ quand cliqué'); y+=blkH+gap;
-  s+=scratchBlock(14,y,210,blkH,VARC,`mettre total à ${A}`); y+=blkH+gap;
-  const loopTop=y;
-  s+=scratchBlock(28,y,224,blkH,LOOP,`répéter ${R} fois`); y+=blkH+2;
-  s+=scratchBlock(46,y,228,blkH,VARC,`ajouter ${P} à total`); y+=blkH+2;
-  s=`<rect x="28" y="${loopTop}" width="14" height="${y-loopTop}" fill="${LOOP}"/>`+s;
-  s+=`<rect x="28" y="${y}" width="120" height="${blkH*0.66}" rx="7" fill="${LOOP}"/>`; y+=blkH;
-  return `<svg viewBox="0 0 ${W} ${y+10}" role="img" aria-label="script Scratch variable">${s}</svg>`;
-}
-/* aperçu polygone régulier */
-function polyPreview(n){
-  const W=180,H=170,cx=90,cy=88,r=58;
-  // orienter pour que carré/hexagone aient un côté "à plat" en bas
-  const startDeg = -90 - (180/n);
-  let pts=[];
-  for(let i=0;i<n;i++){
-    const ang=(startDeg + i*360/n)*Math.PI/180;
-    pts.push({x:cx+r*Math.cos(ang), y:cy+r*Math.sin(ang)});
-  }
-  const d=pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' ')+' Z';
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="polygone"><path d="${d}" fill="rgba(245,224,138,0.5)" stroke="#8a6000" stroke-width="2.6" stroke-linejoin="round"/></svg>`;
-}
-
-/* ============================================================
-   Générateurs
-   ============================================================ */
-
-const POLYS = [
-  {n:3, nom:'triangle équilatéral'}, {n:4, nom:'carré'}, {n:5, nom:'pentagone régulier'},
-  {n:6, nom:'hexagone régulier'}, {n:8, nom:'octogone régulier'}, {n:9, nom:'ennéagone régulier'},
-  {n:10, nom:'décagone régulier'}, {n:12, nom:'dodécagone régulier'}
-];
-
-/* Ex1 : Scratch dessin — trouver l'angle de rotation OU le nombre de côtés */
-function genScratchDessin(){
-  const poly = pick(POLYS);
-  const n = poly.n, turn = 360/n, steps = pick([60,70,80,90,100]);
-  if(coin()){
-    /* trouver l'angle de rotation (turn = 360/n) */
-    return { type:'input', unit:'°', answer:turn, title:'Scratch — dessiner une figure',
-      question:`Ce script Scratch dessine un <b>${poly.nom}</b> (${n} côtés). La boucle « répéter ${n} fois » est correcte, mais l\u2019angle de rotation a été effacé. Quelle valeur faut-il mettre à la place du <b>?</b> pour que la figure se referme bien&nbsp;?`,
-      figureHtml:`<div class="figrow"><div><div class="figure">${scratchDessin(steps,n,turn,true)}</div><div class="figcap">le script</div></div><div><div class="figure">${polyPreview(n)}</div><div class="figcap">la figure visée</div></div></div>`,
-      hint:'Pour faire un tour complet, le lutin tourne en tout de 360°, réparti sur chaque sommet.',
-      solution:`Pour tracer un polygone régulier à ${n} côtés, le lutin fait un tour complet de 360° en ${n} rotations égales.<br>Angle = 360° ÷ ${n} = <b>${turn}°</b>.` };
-  } else {
-    /* trouver le nombre de côtés / répétitions à partir de l'angle */
-    return { type:'input', unit:'', answer:n, title:'Scratch — dessiner une figure',
-      question:`Dans ce script Scratch, le lutin avance puis tourne de <b>${turn}°</b>, en répétant ce motif. Combien de <b>fois</b> faut-il répéter la boucle pour dessiner un polygone régulier qui se referme&nbsp;?`,
-      figureHtml:`<div class="figure">${scratchDessin(steps,'?',turn,false)}</div>`,
-      hint:'Le lutin doit tourner en tout de 360°. Combien de rotations de ' + turn + '° font 360°&nbsp;?',
-      solution:`Le lutin doit tourner en tout de 360°, par pas de ${turn}°.<br>Nombre de répétitions = 360° ÷ ${turn}° = <b>${n}</b>.<br>(C\u2019est un ${poly.nom}.)` };
-  }
-}
-
-/* Ex2 : Scratch bloc/variable — valeur finale de total */
-function genScratchVariable(){
-  const A = rint(11);        /* 0..10 */
-  const R = 2 + rint(7);     /* 2..8 */
-  const P = 1 + rint(8);     /* 1..8 */
-  const total = A + R*P;
-  return { type:'input', unit:'', answer:total, title:'Scratch — valeur d\u2019une variable',
-    question:`On exécute ce script Scratch. La variable <b>total</b> commence à <b>${A}</b>, puis la boucle ajoute <b>${P}</b> à chaque tour, <b>${R}</b> fois. Quelle est la valeur de <b>total</b> à la fin&nbsp;?`,
-    figureHtml:`<div class="figure">${scratchVariable(A,R,P)}</div>`,
-    hint:'On part de la valeur de départ, puis on ajoute (le pas × le nombre de tours).',
-    solution:`total commence à ${A}. La boucle ajoute ${P} pendant ${R} tours, soit ${R} × ${P} = ${R*P}.<br>total = ${A} + ${R*P} = <b>${total}</b>.` };
-}
-
-/* Ex3 : développer (simple distributivité) */
-function genDevelopper(){
-  const k=2+rint(8), a=2+rint(7), b=1+rint(11);
-  const minus=coin(); const bb=minus?-b:b;
-  const ansA=k*a, ansB=k*bb; const inner=fmtLin(a,bb);
-  return { type:'expr-lin', answerA:ansA, answerB:ansB, title:'Développer',
-    question:`Développe et réduis cette expression. Écris ta réponse sous la forme <b>(nombre)x + (nombre)</b>.`,
-    mathHtml:`${k} × ( ${inner.replace('x','<span class="var">x</span>')} )`,
-    hint:'On multiplie le nombre de devant par chaque terme entre parenthèses.',
-    placeholder:'ex : 6x + 8',
-    solution:`${k} × (${inner}) = ${k}×${a>1?a:''}x ${bb>=0?'+':'−'} ${k}×${Math.abs(bb)}<br>= <b>${fmtLin(ansA,ansB)}</b>.` };
-}
-
-/* Ex4 : factoriser (facteur commun, factorisation unique) */
-function genFactoriser(){
-  let g,p,q,A,B;
-  do{ g=2+rint(5); p=1+rint(6); q=1+rint(9); }while(gcd(p,q)!==1 || g*p>36 || g*q>36);
-  A=g*p; B=g*q;
-  return { type:'expr-prod', gAns:g, aAns:p, bAns:q, A, B, title:'Factoriser',
-    question:`Factorise complètement cette expression (mets en facteur le plus grand nombre commun). Écris ta réponse sous la forme <b>(nombre)(... x + ...)</b>.`,
-    mathHtml:`${A}<span class="var">x</span> + ${B}`,
-    hint:'Cherche le plus grand nombre qui divise les deux nombres.',
-    placeholder:'ex : 2(x + 3)',
-    solution:`Le plus grand diviseur commun de ${A} et ${B} est <b>${g}</b>.<br>${A}x + ${B} = <b>${g}(${fmtLin(p,q)})</b>.` };
-}
-
-const GENERATORS = [genScratchDessin, genScratchVariable, genDevelopper, genFactoriser];
-
-/* ============================================================
-   Rendu
-   ============================================================ */
-function generateAll(){
-  exos = GENERATORS.map(g => g());
-  state = exos.map(()=>({correct:false, errors:0}));
-  document.getElementById('results').classList.remove('show');
-  const root = document.getElementById('exoList');
-  root.innerHTML = '';
-  exos.forEach((ex, i) => root.appendChild(buildCard(ex, i)));
-  updateScore();
-  window.__exos = exos;
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-function buildCard(ex, i){
-  const card = document.createElement('div');
-  card.className='card'; card.id='card-'+i;
-  let body='';
-  const fig = ex.figureHtml ? ex.figureHtml : (ex.mathHtml ? `<div class="math-box">${ex.mathHtml}</div>` : '');
-  if(ex.type==='input'){
-    body=`${fig}
-      <div class="answer-row">
-        <input class="num-input" id="in-${i}" type="number" inputmode="numeric" placeholder="?" aria-label="ta réponse">
-        ${ex.unit ? `<span class="unit-tag">${ex.unit}</span>` : ''}
-      </div>
-      ${ex.hint ? `<div class="hint">&#128161; ${ex.hint}</div>` : ''}
-      <div class="actions" id="act-${i}"><button class="btn btn-check" id="chk-${i}">Vérifier</button></div>`;
-  } else { /* expr-lin / expr-prod */
-    body=`${fig}
-      <div class="answer-row">
-        <input class="num-input wide" id="in-${i}" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${ex.placeholder}" aria-label="ta réponse">
-      </div>
-      ${ex.hint ? `<div class="hint">&#128161; ${ex.hint}</div>` : ''}
-      <div class="actions" id="act-${i}"><button class="btn btn-check" id="chk-${i}">Vérifier</button></div>`;
-  }
-  card.innerHTML=`
-    <div class="card-head">
-      <div class="badge-num">${i+1}</div>
-      <div class="ctitle">${ex.title}</div>
-      <div class="check-mark">&#10004;</div>
+  <div class="badge-semaine">Semaine 4 · Jour 5</div>
+  <h1>✏️ Exercices interactifs</h1>
+  <div class="consigne">👉 Fais les activités directement dans la fenêtre. Clique sur « Vérifier » pour valider tes réponses.</div>
+</header>
+<div class="zone">
+  <div style="width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;overflow:hidden;margin:0 auto 1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;">
+    <div style="width:100%;height:1090px;overflow:hidden;position:relative;">
+      <iframe style="border:0;width:100%;height:1150px;display:block;background:#fff;"
+        title="Exercice interactif"
+        src="https://coopmaths.fr/alea/?uuid=fa2eb&alea=8381&interactif=1&n=1&duration=10&s=false&cd=1&tip=0&i=1&v=eleve&title=&es=011010&recorder=moodle"
+        allowfullscreen="allowfullscreen" loading="lazy"></iframe>
+      <div style="position:absolute;top:0;left:0;right:0;height:105px;background:#fff;z-index:9999;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:25px;background:#fff;z-index:9999;pointer-events:none;"></div>
     </div>
-    <p class="question">${ex.question}</p>
-    ${body}
-    <div class="feedback" id="fb-${i}"></div>
-    <div class="solution" id="sol-${i}">${ex.solution}</div>`;
-  setTimeout(()=>{
-    card.querySelector('#chk-'+i).addEventListener('click', ()=>checkAnswer(i));
-    card.querySelector('#in-'+i).addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(i); });
-  },0);
-  return card;
-}
-
-function checkAnswer(i){
-  if(state[i].correct) return;
-  const ex=exos[i]; const inp=document.getElementById('in-'+i); const raw=inp.value.trim(); const fb=document.getElementById('fb-'+i);
-  if(raw===''){ flash(fb,'bad','Écris d\u2019abord ta réponse.'); return; }
-  if(ex.type==='input'){
-    const val=Number(raw.replace(',','.'));
-    if(Number.isNaN(val)){ flash(fb,'bad','Écris un nombre.'); return; }
-    if(Math.abs(val-ex.answer)<1e-9) markCorrect(i); else markError(i);
-  } else if(ex.type==='expr-lin'){
-    const pp=parseLinear(raw);
-    if(pp===null){ flash(fb,'bad','Écris ta réponse sous la forme  ax + b  (par exemple 6x + 8).'); return; }
-    if(pp.a===ex.answerA && pp.b===ex.answerB) markCorrect(i); else markError(i);
-  } else if(ex.type==='expr-prod'){
-    const pr=parseProduct(raw);
-    if(pr===null){ flash(fb,'bad','Écris ta réponse sous la forme  nombre(...x + ...)  (par exemple 2(x + 3)).'); return; }
-    const devA=pr.g*pr.a, devB=pr.g*pr.b;
-    if(devA===ex.A && devB===ex.B){
-      if(Math.abs(pr.g)===ex.gAns){ markCorrect(i); }
-      else { flash(fb,'bad','C\u2019est presque ça&nbsp;! Mets en facteur le PLUS GRAND nombre commun, puis réessaie.'); registerErrorOnly(i); }
-    } else { markError(i); }
-  }
-}
-
-function markError(i){
-  state[i].errors++;
-  document.getElementById('card-'+i).classList.add('is-error');
-  flash(document.getElementById('fb-'+i),'bad','Pas encore… reprends ton raisonnement, puis réessaie.');
-  addRetry(i); updateScore();
-}
-function registerErrorOnly(i){
-  state[i].errors++; document.getElementById('card-'+i).classList.add('is-error'); addRetry(i); updateScore();
-}
-function addRetry(i){
-  const act=document.getElementById('act-'+i);
-  if(!act.querySelector('.btn-retry')){
-    const r=document.createElement('button'); r.className='btn btn-retry'; r.innerHTML='&#8635; Réessayer';
-    r.addEventListener('click', ()=>retry(i)); act.appendChild(r);
-  }
-}
-function retry(i){
-  const card=document.getElementById('card-'+i); card.classList.remove('is-error');
-  document.getElementById('fb-'+i).classList.remove('show');
-  const inp=document.getElementById('in-'+i); inp.value=''; inp.focus();
-  const r=document.getElementById('act-'+i).querySelector('.btn-retry'); if(r) r.remove();
-}
-function markCorrect(i){
-  state[i].correct=true;
-  const card=document.getElementById('card-'+i); card.classList.remove('is-error'); card.classList.add('is-correct');
-  flash(document.getElementById('fb-'+i),'ok','Bravo, c\u2019est juste&nbsp;!');
-  document.getElementById('sol-'+i).classList.add('show');
-  document.getElementById('act-'+i).classList.add('locked');
-  const inp=document.getElementById('in-'+i); inp.disabled=true; inp.classList.add('locked');
-  updateScore(); checkFinished();
-}
-function flash(el,kind,msg){ el.className='feedback show '+kind; el.innerHTML=msg; }
-function updateScore(){
-  const ok=state.filter(s=>s.correct).length, err=state.reduce((a,s)=>a+s.errors,0);
-  document.getElementById('s-ok').textContent=ok;
-  document.getElementById('s-left').textContent=TOTAL-ok;
-  document.getElementById('s-err').textContent=err;
-  document.getElementById('xp-text').textContent=ok+' / '+TOTAL;
-  document.getElementById('xp-fill').style.width=(100*ok/TOTAL)+'%';
-}
-function checkFinished(){
-  if(state.every(s=>s.correct)){
-    const err=state.reduce((a,s)=>a+s.errors,0);
-    let stars=3; if(err>=1&&err<=2) stars=2; if(err>=3) stars=1;
-    document.getElementById('r-score').textContent=`${TOTAL} / ${TOTAL} réussis · ${err} erreur${err>1?'s':''}`;
-    let sh=''; for(let k=0;k<3;k++) sh+=`<span class="${k<stars?'star-on':'star-off'}">&#9733;</span>`;
-    document.getElementById('r-stars').innerHTML=sh;
-    document.getElementById('r-msg').textContent='Personne ne réussit tout du premier coup — l\u2019important, c\u2019est d\u2019avoir cherché et compris. Tu peux recommencer avec de nouveaux scripts.';
-    const res=document.getElementById('results'); res.classList.add('show');
-    setTimeout(()=>res.scrollIntoView({behavior:'smooth', block:'center'}), 250);
-  }
-}
-generateAll();
-</script>
+  </div>
+  <div style="width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;overflow:hidden;margin:0 auto 1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;">
+    <div style="width:100%;height:1090px;overflow:hidden;position:relative;">
+      <iframe style="border:0;width:100%;height:1150px;display:block;background:#fff;"
+        title="Exercice interactif"
+        src="https://coopmaths.fr/alea/?uuid=95789&alea=41593&interactif=1&i=1&v=eleve&title=&es=011010&recorder=moodle"
+        allowfullscreen="allowfullscreen" loading="lazy"></iframe>
+      <div style="position:absolute;top:0;left:0;right:0;height:105px;background:#fff;z-index:9999;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:25px;background:#fff;z-index:9999;pointer-events:none;"></div>
+    </div>
+  </div>
+  <div style="width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;overflow:hidden;margin:0 auto 1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;">
+    <div style="width:100%;height:1090px;overflow:hidden;position:relative;">
+      <iframe style="border:0;width:100%;height:1150px;display:block;background:#fff;"
+        title="Exercice interactif"
+        src="https://coopmaths.fr/alea/?uuid=db2e0&alea=2652&interactif=1&n=2&duration=10&s=3&s2=2&s3=7&s4=false&cd=1&tip=0&i=1&v=eleve&title=&es=011010&recorder=moodle"
+        allowfullscreen="allowfullscreen" loading="lazy"></iframe>
+      <div style="position:absolute;top:0;left:0;right:0;height:105px;background:#fff;z-index:9999;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:25px;background:#fff;z-index:9999;pointer-events:none;"></div>
+    </div>
+  </div>
+  <div style="width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;overflow:hidden;margin:0 auto 1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;">
+    <div style="width:100%;height:1090px;overflow:hidden;position:relative;">
+      <iframe style="border:0;width:100%;height:1150px;display:block;background:#fff;"
+        title="Exercice interactif"
+        src="https://coopmaths.fr/alea/?uuid=5f5a6&alea=69624&interactif=1&n=1&duration=10&s=4&s3=true&cd=1&tip=0&i=1&v=eleve&title=&es=011010&recorder=moodle"
+        allowfullscreen="allowfullscreen" loading="lazy"></iframe>
+      <div style="position:absolute;top:0;left:0;right:0;height:105px;background:#fff;z-index:9999;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:25px;background:#fff;z-index:9999;pointer-events:none;"></div>
+    </div>
+  </div>
+  <div style="width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;overflow:hidden;margin:0 auto 1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;">
+    <div style="width:100%;height:1090px;overflow:hidden;position:relative;">
+      <iframe style="border:0;width:100%;height:1150px;display:block;background:#fff;"
+        title="Exercice interactif"
+        src="https://coopmaths.fr/alea/?uuid=33c9a&alea=55461&interactif=1&n=1&duration=10&cd=1&tip=0&i=1&v=eleve&title=&es=011010&recorder=moodle"
+        allowfullscreen="allowfullscreen" loading="lazy"></iframe>
+      <div style="position:absolute;top:0;left:0;right:0;height:105px;background:#fff;z-index:9999;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:25px;background:#fff;z-index:9999;pointer-events:none;"></div>
+    </div>
+  </div>
+  <div style="width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;overflow:hidden;margin:0 auto 1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;">
+    <div style="width:100%;height:1090px;overflow:hidden;position:relative;">
+      <iframe style="border:0;width:100%;height:1150px;display:block;background:#fff;"
+        title="Exercice interactif"
+        src="https://coopmaths.fr/alea/?uuid=33d9b&alea=52228&interactif=1&n=1&duration=10&s=true&cd=1&tip=0&i=1&v=eleve&title=&es=011010&recorder=moodle"
+        allowfullscreen="allowfullscreen" loading="lazy"></iframe>
+      <div style="position:absolute;top:0;left:0;right:0;height:105px;background:#fff;z-index:9999;pointer-events:none;"></div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:25px;background:#fff;z-index:9999;pointer-events:none;"></div>
+    </div>
+  </div>
+  <p class="zone-note">Si un exercice ne s'affiche pas, recharge la page ou ouvre-le dans un nouvel onglet.</p>
+</div>
 </body>
 </html>
