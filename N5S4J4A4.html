@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – Les étiquettes impériales – 6e</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#a87dd6; --day-dark:#7a4fb0; --day-light:#e6d6f6; --day-border:#c3a4e6;
+  --gold:#c79ae8; --gold-d:#7a4fb0;
+  --bg:#1c1426; --panel:#271c34; --panel2:#322543;
+  --line:#473459; --text:#f4eefb; --muted:#a995bd;
+  --green:#5bc46a; --neon:#c79ae8;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 16px rgba(168,125,214,.42), 0 0 40px rgba(168,125,214,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#241830 0%, #1c1426 55%, #261a34 100%);color:var(--text);
+  font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#fff 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#fff 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#120c1a;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.1;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.13;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#a87dd6;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#c79ae8;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#7a4fb0;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#9466c4;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(34,26,16,.94);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.3rem;}
+.hud-frag{width:1.6rem;height:1.8rem;border-radius:5px;background:#150f1e;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#56708e;transition:all .4s;}
+.hud-frag.got{background:rgba(168,125,214,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:'Orbitron',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#150f1e;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#150f1e;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(168,125,214,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:48px;}.hud-bar{gap:.5rem;padding:.45rem .5rem;}.hud-frag{width:1.3rem;height:1.6rem;font-size:.7rem;}.hud-dial{display:none;}.hud-timer{font-size:.8rem;padding:.2rem .4rem;}.hud-timer .lbl{display:none;}}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:620px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:#e9def5;line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-note{margin:.9rem 0 .2rem;background:#150f1e;border:1.5px dashed var(--day-border);border-radius:10px;padding:.8rem;text-align:center;font-size:.86rem;color:#e2d2f2;}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#120c1a;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.crest{display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:'Orbitron',sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.1rem;height:2.1rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#150f1e;border:1.5px solid var(--line);font-size:1rem;color:#33445a;transition:all .5s;}
+.frag.found{background:rgba(168,125,214,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#150f1e;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#150f1e;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+.intro .scr{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:clamp(.78rem,2.2vw,.88rem);color:#e9def5;margin-top:.4rem;letter-spacing:0;}
+
+.exo-q{font-size:clamp(.86rem,2.6vw,.98rem);color:#e9def5;margin-bottom:.9rem;line-height:1.6;text-align:center;}
+.exo-q b{color:var(--day-light);}
+
+/* Affiche SVG cliquable */
+.poster-wrap{display:flex;justify-content:center;margin:.4rem 0 1rem;}
+.poster{max-width:300px;width:100%;}
+.part{cursor:pointer;transition:fill .15s;}
+.part:hover{fill:rgba(168,125,214,.35);}
+.part.on{fill:var(--day-color);}
+.poster.locked .part{cursor:default;pointer-events:none;}
+.count-info{text-align:center;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+.count-info b{color:var(--day-light);}
+
+/* QCM */
+.opts{display:flex;flex-direction:column;gap:.5rem;}
+.opt{cursor:pointer;text-align:left;background:#150f1e;border:1.5px solid var(--line);border-radius:10px;padding:.7rem .9rem;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(.82rem,2.5vw,.95rem);color:var(--muted);transition:all .18s;min-height:46px;display:flex;align-items:center;gap:.6rem;}
+.opt .lt{font-family:'Orbitron',sans-serif;font-weight:900;color:var(--day-color);flex-shrink:0;}
+.opt:hover{border-color:var(--day-color);color:var(--text);}
+.opt.sel{background:rgba(168,125,214,.16);border-color:var(--day-color);color:var(--day-color);}
+.opt.ok{border-color:var(--green);background:rgba(91,196,106,.14);color:#bff0c6;}
+.opt.ok .lt{color:var(--green);}
+.opt.ko{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+
+/* saisie énigme : 3 champs */
+.fields3{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.f3{display:flex;flex-direction:column;align-items:center;gap:.3rem;}
+.f3 .flab{font-size:.72rem;color:var(--muted);font-family:'Orbitron',sans-serif;letter-spacing:.04em;text-align:center;}
+.f3 input{width:96px;background:#150f1e;border:2px solid var(--line);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:600;font-size:16px;text-align:center;padding:.5rem;outline:none;min-height:46px;}
+.f3 input:focus{border-color:var(--day-color);}
+.exo-ok .f3 input{border-color:var(--green);background:rgba(91,196,106,.12);color:#bff0c6;}
+.exo-ko .f3 input{border-color:#e8806f;background:rgba(232,128,111,.12);color:#ffc4b8;}
+
+.correction{margin-top:.8rem;background:#150f1e;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--day-color);margin-bottom:.4rem;}
+.correction-x{font-size:clamp(.8rem,2.4vw,.88rem);color:#dcecd6;line-height:1.6;}
+.correction-x b{color:var(--day-light);}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#120c1a;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#1a1228;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#e2d2f2;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(91,196,106,.12);border:1.5px solid var(--green);color:#bff0c6;}
+.fb.ko{background:rgba(232,128,111,.12);border:1.5px solid #e8806f;color:#ffc4b8;}
+.fb.warn{background:rgba(199,154,232,.1);border:1.5px solid var(--gold-d);color:#e2d2f2;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+body.playing .sound-btn{top:58px;}
+@media(max-width:600px){body.playing .sound-btn{top:54px;}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(34,26,16,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(34,26,16,.96), rgba(20,14,6,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#150f1e;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:radial-gradient(circle at 50% 40%, rgba(168,125,214,.4), rgba(20,14,6,.98));}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(168,125,214,.3) 0%, rgba(168,125,214,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(168,125,214,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.4rem;margin:.8rem 0;flex-wrap:wrap;}
+.finale-crest .fc{width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(168,125,214,.16);border:1.5px solid var(--day-color);font-size:1.1rem;animation:pop .5s both;}
+.finale-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,2.2rem);color:var(--day-color);text-shadow:0 1px 0 rgba(122,79,176,.25);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#bff0c6;margin-bottom:.6rem;}
+.finale-grade{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#120c1a;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:#e9def5;font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-card{background:#150f1e;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.2rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:#e9def5;line-height:1.8;}
+.finale-card b{color:var(--day-color);font-family:'Orbitron',sans-serif;display:block;margin-bottom:.5rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.finale-card .row{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line);padding:.25rem 0;}
+.finale-card .row b{display:inline;margin:0;font-family:'JetBrains Mono',monospace;text-transform:none;letter-spacing:0;font-size:1rem;color:var(--day-light);}
+.finale-reveal{background:#150f1e;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:#e9def5;line-height:1.7;}
+.finale-reveal b{color:var(--day-color);font-family:'Orbitron',sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#120c1a;box-shadow:var(--glow);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Ouverture du registre&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Examen des étiquettes</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#127991;&#65039;</span>
+  <div class="hud-frags" id="hud-frags"></div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Indices&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">&#127991;&#65039; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#127942;</div>
+    <div class="finale-crest" id="finale-crest"></div>
+    <div class="finale-title">REGISTRE PR&Ecirc;T&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub">&#127941; Le registre des mosa&iuml;ques du Mus&eacute;e des temps perdus est pr&ecirc;t pour l&rsquo;exposition.</div>
+    <div class="finale-reveal">
+      <b>&#127991;&#65039; Retour au registre</b>
+      Grâce aux indices retrouvés et aux étiquettes examinées, le conservateur dispose désormais de nouvelles pistes pour compléter le registre des mosaïques.<br><br>
+      &#128161; Découvre la conclusion complète de l’énigme à l’arrivée&#8201;!
+    </div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#7fb0e0"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#e0b03a"></span>
+      Pazapa &middot; Maths &middot; 6e
+    </div>
+    <div class="week">Semaine 4 — Jour 4</div>
+    <div class="title">Les &eacute;tiquettes <span class="hl">imp&eacute;riales</span> &#127991;&#65039;</div>
+    <div class="subtitle">Fractions &eacute;gales et simplification</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#127991;&#65039;</div>
+    <div class="start-mission">
+      <b>&#127991;&#65039; Le myst&egrave;re des &eacute;tiquettes&nbsp;:</b> dans l&rsquo;atelier de restauration du Mus&eacute;e des temps perdus, le conservateur examine plusieurs &eacute;tiquettes retrouv&eacute;es sur une mosa&iuml;que ottomane. Certaines portent des fractions diff&eacute;rentes, mais il soup&ccedil;onne qu&rsquo;elles d&eacute;crivent peut-&ecirc;tre les m&ecirc;mes fragments de l&rsquo;&oelig;uvre.
+      <div class="start-note">&#128269; Chaque indice retrouv&eacute; permet de mieux comprendre les &eacute;critures des anciennes mosa&iuml;ques.</div>
+      &#127919; <b>Ta mission&nbsp;:</b> utiliser les indices pour reconstituer le registre des mosa&iuml;ques du mus&eacute;e.
+      <div class="start-rule"><span>&#128206; Agrandir</span><span>&#128206; Simplifier</span></div>
+    </div>
+    <button class="btn-start" onclick="beginGame()">&#127991;&#65039; Examiner les étiquettes</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">Indices&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+      <div class="frag" id="frag-4">?</div>
+      <div class="frag" id="frag-5">?</div>
+    </div>
+    <div id="steps"></div>
+    <div style="text-align:center;"><button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button></div>
+  </div>
+</div>
+<script>
+function $(id){return document.getElementById(id);}
+
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function sOk(){if(!soundOn)return;beep(523,0,0.1,"square",0.2);beep(784,0.08,0.12,"square",0.2);beep(1047,0.18,0.18,"triangle",0.22);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.18);beep(150,0.1,0.2,"square",0.18);}
+function sFrag(){if(!soundOn)return;beep(660,0,0.06,"square",0.16);beep(990,0.07,0.14,"triangle",0.2);beep(1320,0.16,0.16,"triangle",0.2);}
+function sCoin(){if(!soundOn)return;beep(988,0,0.05,"square",0.14);beep(1319,0.05,0.12,"square",0.16);}
+function sWin(){if(!soundOn)return;[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,i*0.12,0.24,"square",0.2);});}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,3000);}
+document.addEventListener("click",function(){hideAgent();},true);
+
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  if(!ov){done&&done();return;}
+  if(txt)txt.innerHTML="Ouverture du registre&#8230;";
+  if(sub)sub.textContent=(STEPS[mi]?STEPS[mi].codename:"Analyse en cours");
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");sCoin();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*16+8;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");done&&done();},350);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },110);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+
+var LT=["A","B","C","D"];
+
+/* ===== Normalisation des réponses ===== */
+function normFrac(s){return String(s).replace(/\s/g,"").replace(/\u2044/g,"/");}
+function normNum(s){return String(s).replace(/\s/g,"").replace(/\./g,",");}
+function checkAns(q,val){
+  if(q.kind==="qcm"){ return val===q.ans; }
+  if(q.kind==="vf"){ return val===q.ans; }
+  var v=val.trim();
+  if(v==="")return false;
+  if(q.kind==="frac"){ return normFrac(v)===q.acc; }
+  if(q.kind==="num"){
+    var n=normNum(v);
+    return q.accList.indexOf(n)>=0;
+  }
+  return false;
+}
+
+/* ===== Les 5 étapes (chaque étape : 2-3 questions) ===== */
+var STEPS=[
+ {ico:"&#128206;", name:"Agrandir les \u00e9tiquettes", codename:"Agrandir les \u00e9tiquettes", comp:"Compl\u00e9ter une \u00e9galit\u00e9 de fractions",
+  intro:"Compl\u00e8te les \u00e9galit\u00e9s en agrandissant chaque \u00e9tiquette.",
+  fb:"Tr\u00e8s bien&#8201;! Tu as agrandi les \u00e9tiquettes.",
+  indice:"une \u00e9tiquette peut changer d\u2019\u00e9criture sans forc\u00e9ment changer la quantit\u00e9 repr\u00e9sent\u00e9e.",
+  qs:[
+   {kind:"num", q:"<b>3/4 = ?/8</b> &#8212; quel est le num\u00e9rateur manquant&#8201;?", accList:["6"], ph:"?"},
+   {kind:"num", q:"<b>2/5 = ?/15</b> &#8212; quel est le num\u00e9rateur manquant&#8201;?", accList:["6"], ph:"?"},
+   {kind:"num", q:"<b>4/7 = ?/21</b> &#8212; quel est le num\u00e9rateur manquant&#8201;?", accList:["12"], ph:"?"}
+  ]},
+ {ico:"&#129529;", name:"Restaurer les fragments", codename:"Restaurer les fragments", comp:"Simplifier une fraction",
+  intro:"Simplifie chaque fraction jusqu\u2019\u00e0 sa forme la plus simple.",
+  fb:"Tr\u00e8s bien&#8201;! Tu as restaur\u00e9 les fragments.",
+  indice:"simplifier une \u00e9criture peut r\u00e9v\u00e9ler sa forme la plus simple.",
+  qs:[
+   {kind:"frac", q:"Simplifie <b>14/28</b>.", acc:"1/2", ph:"?/?"},
+   {kind:"frac", q:"Simplifie <b>25/40</b>.", acc:"5/8", ph:"?/?"},
+   {kind:"frac", q:"Simplifie <b>18/24</b>.", acc:"3/4", ph:"?/?"}
+  ]},
+ {ico:"&#128221;", name:"Fabriquer de nouvelles \u00e9tiquettes", codename:"Fabriquer de nouvelles \u00e9tiquettes", comp:"Construire une fraction \u00e9gale",
+  intro:"Fabrique de nouvelles \u00e9tiquettes qui repr\u00e9sentent la m\u00eame quantit\u00e9.",
+  fb:"Tr\u00e8s bien&#8201;! Tu as fabriqu\u00e9 de nouvelles \u00e9tiquettes.",
+  indice:"pour conserver la m\u00eame valeur, il faut transformer les deux nombres de la m\u00eame mani\u00e8re.",
+  qs:[
+   {kind:"frac", q:"Une fraction \u00e9gale \u00e0 <b>3/7</b> dont le num\u00e9rateur est <b>9</b>. \u00c9cris-la.", acc:"9/21", ph:"?/?"},
+   {kind:"frac", q:"Une fraction \u00e9gale \u00e0 <b>11/8</b> dont le d\u00e9nominateur est <b>40</b>. \u00c9cris-la.", acc:"55/40", ph:"?/?"},
+   {kind:"num", q:"Pour passer de <b>3/7</b> \u00e0 <b>9/21</b>, par combien multiplie-t-on les deux nombres&#8201;?", accList:["3"], ph:"?"}
+  ]},
+ {ico:"&#128209;", name:"Compl\u00e9ter le registre", codename:"Compl\u00e9ter le registre", comp:"Relier des fractions \u00e9gales",
+  intro:"Compl\u00e8te le registre du mus\u00e9e.",
+  fb:"Tr\u00e8s bien&#8201;! Tu as compl\u00e9t\u00e9 le registre.",
+  indice:"plusieurs \u00e9critures diff\u00e9rentes peuvent parfois \u00eatre reli\u00e9es entre elles.",
+  qs:[
+   {kind:"num", q:"<b>3/2 = ?/18</b> &#8212; quel num\u00e9rateur&#8201;?", accList:["27"], ph:"?"},
+   {kind:"num", q:"<b>5/8 = ?/24</b> &#8212; quel num\u00e9rateur&#8201;?", accList:["15"], ph:"?"},
+   {kind:"num", q:"<b>1/15 = 2/?</b> &#8212; quel d\u00e9nominateur&#8201;?", accList:["30"], ph:"?"},
+   {kind:"num", q:"<b>6/5 = 48/?</b> &#8212; quel d\u00e9nominateur&#8201;?", accList:["40"], ph:"?"}
+  ]},
+ {ico:"&#128270;", name:"V\u00e9rifier les \u00e9tiquettes", codename:"V\u00e9rifier les \u00e9tiquettes", comp:"Reconna\u00eetre des fractions \u00e9gales",
+  intro:"Parmi ces \u00e9tiquettes&#8201;: 5/10, 8/12, 10/15, 7/9, 14/21.",
+  fb:"Tr\u00e8s bien&#8201;! Tu as v\u00e9rifi\u00e9 les \u00e9tiquettes.",
+  indice:"certaines \u00e9tiquettes du mus\u00e9e semblent reli\u00e9es par des transformations communes.",
+  qs:[
+   {kind:"qcm", q:"Laquelle de ces fractions n\u2019est <b>pas</b> \u00e9gale \u00e0 <b>2/3</b>&#8201;?", opts:["8/12","10/15","7/9","14/21"], ans:2},
+   {kind:"vf", q:"<b>Vrai ou faux&#8201;?</b> Les fractions 8/12, 10/15 et 14/21 repr\u00e9sentent la m\u00eame quantit\u00e9.", opts:["Vrai","Faux"], ans:0},
+   {kind:"qcm", q:"\u00c0 quelle fraction <b>5/10</b> est-elle \u00e9gale&#8201;?", opts:["1/2","2/3","3/4","1/3"], ans:0}
+  ]},
+ {ico:"&#127919;", name:"Reconstituer les \u00e9tiquettes", codename:"Mission finale", comp:"R\u00e9investir fractions \u00e9gales",
+  intro:"Les &eacute;tiquettes retrouv&eacute;es&#8201;: 5/10, 3/6, 8/12, 10/15, 4/8, 14/21.",
+  fb:"Tr\u00e8s bien&#8201;! Le registre des mosa\u00efques est pr\u00eat.",
+  indice:"des fractions \u00e9gales d\u00e9crivent la m\u00eame mosa\u00efque.",
+  qs:[
+   {kind:"qcm", q:"Quel groupe rassemble des \u00e9tiquettes d\u2019une <b>m\u00eame mosa\u00efque</b> (fractions \u00e9gales)&#8201;?", opts:["5/10, 3/6, 4/8","5/10, 8/12, 14/21","3/6, 10/15, 4/8"], ans:0},
+   {kind:"frac", q:"Simplifie <b>8/12</b> pour retrouver l\u2019\u00e9tiquette d\u2019origine.", acc:"2/3", ph:"?/?"},
+   {kind:"frac", q:"\u00c9cris une fraction \u00e9gale \u00e0 <b>5/10</b> dont le d\u00e9nominateur est <b>20</b>.", acc:"10/20", ph:"?/?"}
+  ]}
+];
+
+var N=STEPS.length;
+var solved=[];for(var _i=0;_i<N;_i++)solved.push(false);
+var active=0;
+var totalSec=0,totalInt=null;
+var pickQ={};   // "mi-qi" -> index choisi (qcm/vf)
+var doneQ={};   // "mi-qi" -> true quand la question est validée juste
+
+function buildHudFrags(){
+  var h=$("hud-frags");if(!h)return;h.innerHTML="";
+  for(var i=0;i<N;i++){var s=document.createElement("span");s.className="hud-frag";s.id="hud-frag-"+i;s.innerHTML="&#129513;";h.appendChild(s);}
+}
+
+function build(){
+  var host=$("steps");host.innerHTML="";
+  STEPS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">&Eacute;tape '+(mi+1)+' / '+N+' &middot; <span style="color:var(--day-color)">'+M.codename+'</span></div><div class="step-name">'+M.name+'</div><div class="step-comp">&#127991;&#65039; '+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro">&#127991;&#65039; Indice&#8201;: '+M.intro+'</div>';
+      h+='<div id="qs-'+mi+'">';
+      M.qs.forEach(function(q,qi){
+        h+=renderQ(mi,qi,q);
+      });
+      h+='</div>';
+      h+='<div class="correction" id="corr-'+mi+'"><div class="correction-t">&#9989; Indice obtenu</div><div class="correction-x">'+M.fb+'</div></div>';
+      h+='<div class="fb" id="fb-'+mi+'"><span id="fbi-'+mi+'"></span><div id="fbm-'+mi+'"></div></div>';
+      if(!solved[mi]){
+        h+='<div class="tools"><button class="btn btn-try" id="try-'+mi+'" onclick="tryStep('+mi+')">&#9989; Valider l\u2019\u00e9tape</button></div>';
+      }
+    }else{
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine l\u2019\u00e9tape pr\u00e9c\u00e9dente pour d\u00e9bloquer celle-ci.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+  });
+  // restaurer sélections QCM/VF affichées
+  updateCrest();updateProg();
+}
+
+function renderQ(mi,qi,q){
+  var key=mi+"-"+qi;
+  var h='<div class="qblock" id="qb-'+key+'" style="background:#150f1e;border:1px solid var(--line);border-radius:11px;padding:.9rem 1rem;margin-bottom:.7rem;">';
+  h+='<div class="exo-q" style="text-align:left;margin-bottom:.7rem;"><b style="color:var(--day-color)">Q'+(qi+1)+'.</b> '+q.q+'</div>';
+  if(q.kind==="qcm"||q.kind==="vf"){
+    h+='<div class="opts" id="opts-'+key+'">';
+    q.opts.forEach(function(o,oi){
+      h+='<div class="opt" id="pk-'+key+'-'+oi+'" onclick="pickOpt('+mi+','+qi+','+oi+')"><span class="lt">'+LT[oi]+'</span><span>'+o+'</span></div>';
+    });
+    h+='</div>';
+  }else{
+    var im=(q.kind==="frac")?"text":"text";
+    h+='<div style="display:flex;justify-content:center;"><input id="in-'+key+'" type="text" inputmode="'+(q.kind==="num"?"numeric":"text")+'" maxlength="7" placeholder="'+q.ph+'" autocomplete="off" '
+      +'style="width:120px;background:#150f1e;border:2px solid var(--line);border-radius:8px;color:var(--text);font-family:JetBrains Mono,monospace;font-weight:600;font-size:16px;text-align:center;padding:.5rem;outline:none;min-height:46px;"></div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function pickOpt(mi,qi,oi){
+  if(solved[mi])return;
+  var key=mi+"-"+qi;
+  pickQ[key]=oi;
+  var q=STEPS[mi].qs[qi];
+  for(var k=0;k<q.opts.length;k++){var el=$("pk-"+key+"-"+k);if(el)el.classList.remove("sel");}
+  var sel=$("pk-"+key+"-"+oi);if(sel)sel.classList.add("sel");
+  sCoin();
+}
+
+function getVal(mi,qi){
+  var q=STEPS[mi].qs[qi],key=mi+"-"+qi;
+  if(q.kind==="qcm"||q.kind==="vf"){ return pickQ[key]; }
+  var inp=$("in-"+key);return inp?inp.value:"";
+}
+
+function tryStep(mi){
+  if(solved[mi])return;
+  var M=STEPS[mi];
+  // vérifier que tout est rempli
+  for(var qi=0;qi<M.qs.length;qi++){
+    var q=M.qs[qi],val=getVal(mi,qi);
+    if((q.kind==="qcm"||q.kind==="vf") && val===undefined){
+      flashWarn(mi,"R&eacute;ponds &agrave; toutes les questions avant de valider.");return;
+    }
+    if((q.kind==="frac"||q.kind==="num") && String(val).trim()===""){
+      flashWarn(mi,"Compl&egrave;te toutes les r&eacute;ponses avant de valider.");return;
+    }
+  }
+  // corriger chaque question
+  var allGood=true;
+  for(var qi2=0;qi2<M.qs.length;qi2++){
+    var q2=M.qs[qi2],v2=getVal(mi,qi2),key=mi+"-"+qi2;
+    var ok=checkAns(q2,v2);
+    if(q2.kind==="qcm"||q2.kind==="vf"){
+      for(var k=0;k<q2.opts.length;k++){var el=$("pk-"+key+"-"+k);if(el)el.classList.remove("ok","ko");}
+      var sel=$("pk-"+key+"-"+v2);if(sel){sel.classList.toggle("ok",ok);sel.classList.toggle("ko",!ok);}
+    }else{
+      var inp=$("in-"+key);if(inp){inp.style.borderColor=ok?"var(--green)":"#e8806f";inp.style.background=ok?"rgba(91,196,106,.12)":"rgba(232,128,111,.12)";}
+    }
+    if(!ok)allGood=false;
+  }
+  if(allGood){ stepSuccess(mi); }
+  else{
+    sBad();$("step-"+mi).classList.add("shake");setTimeout(function(){$("step-"+mi).classList.remove("shake");},400);
+    var fb=$("fb-"+mi);fb.className="fb show ko";$("fbi-"+mi).textContent="\u26A0\uFE0F";
+    $("fbm-"+mi).innerHTML="Certaines r&eacute;ponses sont incorrectes (en rouge). Corrige-les, puis valide \u00e0 nouveau.";
+  }
+}
+
+function flashWarn(mi,msg){
+  var fb=$("fb-"+mi);fb.className="fb show warn";$("fbi-"+mi).textContent="\u26A0";$("fbm-"+mi).innerHTML=msg;
+}
+
+function stepSuccess(mi){
+  solved[mi]=true;sOk();sFrag();
+  $("step-"+mi).classList.add("solved");
+  var tb=$("try-"+mi);if(tb){tb.disabled=true;tb.style.display="none";}
+  // verrouiller les entrées
+  var M=STEPS[mi];
+  for(var qi=0;qi<M.qs.length;qi++){
+    var q=M.qs[qi],key=mi+"-"+qi;
+    if(q.kind==="qcm"||q.kind==="vf"){for(var k=0;k<q.opts.length;k++){var el=$("pk-"+key+"-"+k);if(el)el.style.pointerEvents="none";}}
+    else{var inp=$("in-"+key);if(inp)inp.disabled=true;}
+  }
+  var c=$("corr-"+mi);if(c)c.classList.add("show");
+  var fb=$("fb-"+mi);fb.className="fb show ok";$("fbi-"+mi).textContent="\u2705";
+  $("fbm-"+mi).innerHTML="<b style='color:var(--green)'>Bravo&#8201;!</b><br>&#129513; Indice obtenu&#8201;: "+M.indice;
+  showAgent("&#127991;&#65039; Le conservateur&nbsp;:<br>Indice n&deg;"+(mi+1)+" archiv\u00e9&#8201;!");
+  updateCrest();updateProg();
+  var body=$("body-"+mi);
+  if(body && !$("next-"+mi)){
+    var lab=(active<N-1)?"&Eacute;tape suivante &#8594;":"Voir la conclusion &#8594;";
+    body.insertAdjacentHTML("beforeend",'<div style="text-align:center;margin-top:1rem;"><button class="btn btn-try" id="next-'+mi+'" onclick="goNext('+mi+')">'+lab+'</button></div>');
+  }
+}
+
+function goNext(mi){
+  var nb=$("next-"+mi);if(nb){nb.disabled=true;nb.style.display="none";}
+  if(active<N-1){
+    active++;
+    runScan(active,function(){
+      build();var el=$("step-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});
+      showAgent("&#127991;&#65039; Le conservateur&nbsp;:<br>Indice suivant&#8201;!");
+    });
+  }else{
+    openFinale();
+  }
+}
+
+function updateCrest(){
+  STEPS.forEach(function(M,mi){
+    var f=$("frag-"+mi),hf=$("hud-frag-"+mi);
+    if(solved[mi]){if(f){f.innerHTML="&#129513;";f.classList.add("found");}if(hf){hf.classList.add("got");}}
+    else{if(f){f.textContent="?";f.classList.remove("found");}if(hf){hf.classList.remove("got");}}
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/N*100);
+  var lab=$("hud-prog-label"),fill=$("hud-prog-fill");
+  if(lab)lab.innerHTML="Indices&nbsp;: "+pct+"&#8201;%";
+  if(fill)fill.style.width=pct+"%";
+}
+
+function openFinale(){
+  clearInterval(totalInt);
+  var temps=fmt(totalSec);
+  $("hud-dial").innerHTML="&#127942;";
+  var cr=$("finale-crest");cr.innerHTML="";
+  STEPS.forEach(function(M,i){var d=document.createElement("div");d.className="fc";d.style.animationDelay=(i*0.1)+"s";d.innerHTML="&#129513;";cr.appendChild(d);});
+  var grade;
+  if(totalSec<=210){grade="\u2B50 EXPERT DES \u00c9TIQUETTES";}
+  else if(totalSec<=420){grade="\uD83C\uDFC5 CONSERVATEUR EN CHEF";}
+  else if(totalSec<=600){grade="\uD83D\uDCDC ARCHIVISTE CONFIRM\u00c9";}
+  else{grade="\uD83E\uDDED APPRENTI ARCHIVISTE";}
+  setTimeout(function(){
+    $("finale-time").innerHTML="&#9201; Temps utilis\u00e9&#8201;: "+temps;
+    $("finale-grade").innerHTML=grade;
+    $("finale").classList.add("show");
+    sWin();
+  },300);
+}
+
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  $("start-screen").style.display="none";
+  $("game").style.display="";
+  buildHudFrags();
+  $("hud-bar").classList.add("show");
+  document.body.classList.add("playing");
+  totalSec=0;clearInterval(totalInt);
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">&#127991;&#65039; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00';
+  totalInt=setInterval(function(){totalSec++;var h=$("hud-timer");if(h)h.innerHTML='<span class="lbl">&#127991;&#65039; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; '+fmt(totalSec);},1000);
+  sCoin();
+  setTimeout(function(){
+    runScan(0,function(){
+      build();
+      showAgent("&#127991;&#65039; Le conservateur&nbsp;:<br>Examinons ces &eacute;tiquettes ensemble&#8201;!");
+    });
+  },700);
+}
+function restartAll(){
+  clearInterval(totalInt);totalSec=0;
+  solved=[];for(var i=0;i<N;i++)solved.push(false);
+  active=0;pickQ={};doneQ={};
+  $("finale").classList.remove("show");
+  var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
+  $("hud-bar").classList.remove("show");
+  document.body.classList.remove("playing");
+  $("game").style.display="none";
+  $("start-screen").style.display="";
+  $("hud-dial").innerHTML="&#127991;&#65039;";
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">&#127991;&#65039; Enqu&ecirc;te en cours &middot; </span>&#9201;&#65039; 00:00';
+  for(var j=0;j<N;j++){var hf=$("hud-frag-"+j);if(hf)hf.classList.remove("got");}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+build();
+</script>
+</body>
+</html>
