@@ -178,10 +178,11 @@ body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
 .score-box.retry{background:#fff0ef;border:2px solid var(--pink);color:var(--day-dark);}
 
 /* Correction toggle */
-.btn-sol{background:transparent;border:1.5px solid var(--day-border);color:var(--day-dark);
-  font-size:.78rem;padding:.3rem .75rem;border-radius:8px;cursor:pointer;
-  font-family:'JetBrains Mono',monospace;font-weight:700;margin-top:.5rem;display:inline-block;}
-.btn-sol:hover{background:var(--day-light);}
+.btn-sol{background:var(--day-dark);color:#fff;border:none;
+  font-size:.88rem;padding:.55rem 1.1rem;border-radius:10px;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-weight:800;margin-top:.7rem;
+  display:inline-block;box-shadow:0 2px 8px rgba(192,57,43,.3);}
+.btn-sol:hover{background:#a93226;box-shadow:0 3px 12px rgba(192,57,43,.4);}
 .correction-block{display:none;margin-top:.5rem;padding:.6rem .85rem;
   background:var(--day-light);border:1.5px solid var(--day-border);border-radius:8px;
   font-size:.83rem;color:var(--day-dark);line-height:1.8;font-family:'JetBrains Mono',monospace;}
@@ -201,7 +202,9 @@ body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
   .exo-card{padding:1.3rem 1rem 1.1rem;}
   .btn-row{flex-direction:column;}.btn{width:100%;}
   .answer-input,.dev-inp{width:100%;min-width:0;}
-  .yh-grid{grid-template-columns:1fr 1fr auto;gap:4px;}
+  .yh-grid{grid-template-columns:1fr 1fr auto;gap:4px;overflow:hidden;}
+  .yh-prod{font-size:.68rem;padding:.3rem .4rem;word-break:break-word;}
+  .yh-prod-col{font-size:.68rem;padding:.3rem .4rem;word-break:break-word;}
 }
 </style>
 </head>
@@ -553,12 +556,43 @@ body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
     <button class="fxc-icon" id="fxc-help-btn" type="button">?</button>
     <button class="fxc-icon" id="fxc-close-btn" type="button">&#10005;</button>
   </div>
-  <div class="fxc-help fxc-hidden" id="fxc-help">cos sin tan &middot; &divide;R reste &middot; FACT facteurs &middot; PGCD &middot; PPCM &middot; a/b &middot; &radic; x&sup2; ^</div>
+  <div class="fxc-help fxc-hidden" id="fxc-help">&divide;R reste &middot; FACT facteurs &middot; PGCD &middot; PPCM &middot; a/b &middot; &radic; x&sup2; ^</div>
   <div class="fxc-screen"><div class="fxc-expr" id="fxc-expr"></div><div class="fxc-res" id="fxc-res">0</div></div>
   <div class="fxc-keys" id="fxc-keys"></div>
 </div>
 
 <script>
+/* Parseur arithmétique sécurisé — remplace Function() */
+function calcSafe(str){
+  var s=str.replace(/\s+/g,'');var pos=0;
+  function parseExpr(){
+    var v=parseTerm();
+    while(pos<s.length&&(s[pos]==='+'||s[pos]==='-')){
+      var op=s[pos++];v=op==='+'?v+parseTerm():v-parseTerm();}
+    return v;
+  }
+  function parseTerm(){
+    var v=parsePow();
+    while(pos<s.length&&(s[pos]==='*'||s[pos]==='/')){
+      var op=s[pos++];var d=parsePow();
+      v=op==='/'?(d===0?NaN:v/d):v*d;}
+    return v;
+  }
+  function parsePow(){
+    var b=parsePrimary();
+    if(pos<s.length&&s[pos]==='^'){pos++;return Math.pow(b,parsePow());}
+    return b;
+  }
+  function parsePrimary(){
+    if(pos<s.length&&s[pos]==='('){pos++;var v=parseExpr();if(s[pos]===')') pos++;return v;}
+    if(pos<s.length&&s[pos]==='-'){pos++;return-parsePrimary();}
+    if(pos<s.length&&s[pos]==='+'){pos++;return parsePrimary();}
+    var st=pos;while(pos<s.length&&/[0-9.]/.test(s[pos]))pos++;
+    if(pos===st)return NaN;return parseFloat(s.slice(st,pos));
+  }
+  try{var r=parseExpr();return pos===s.length?r:NaN;}catch(e){return NaN;}
+}
+
 /* ══ SÉCURITÉ ══ */
 function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -580,7 +614,7 @@ function evalAt(expr, varName, val){
     s=s.replace(/V2/g,val+'*'+val);
     /* variable → valeur */
     s=s.replace(new RegExp('(\\d*)'+v,'g'),function(m,c){return(c===''?'1':c)+'*'+val;});
-    return Function('"use strict";return('+s+');')();
+    return calcSafe(s);
   }catch(e){return NaN;}
 }
 
@@ -609,11 +643,12 @@ function isReduced(s, varName){
   return x2<=1 && xterms<=1;
 }
 
-function checkAnswer(studentVal, expected, varName){
+function checkAnswer(studentVal, expected, varName, noParens){
   var s=studentVal.trim();
   if(s==='')return false;
   var v=varName||'x';
-  if(!/^[0-9a-z²+\-*/.()\s^×÷\u2212\u00b2\u00d7\u00f7\u2013\u2014,]+$/i.test(s))return false;
+  if(!/^[0-9a-z²+\-*/.()\s^×÷\u2212\u00b2\u00d7\u00f7\u2213\u2013\u2014,]+$/i.test(s))return false;
+  if(noParens&&/[()]/.test(s))return false;
   if(!isReduced(s,v))return false;
   return polyEqual(s,expected,v);
 }
@@ -665,14 +700,14 @@ var EXO5={
       wids:[['w-yh1-11','w-yh1-12'],['w-yh1-21','w-yh1-22']],
       cells:[['4*x+10','7*x+7'],['5*x+7','9*x+8']],
       fb:'fb-yh1',
-      method:'Case (1,1)&nbsp;: 4x+10 &nbsp;&middot;&nbsp; Case (1,2)&nbsp;: 7x+7<br>Case (2,1)&nbsp;: 5x+7 &nbsp;&middot;&nbsp; Case (2,2)&nbsp;: 9x+8<br>V&eacute;rif. ligne 1&nbsp;: (4x+10)(7x+7) = 28x&sup2;+98x+70 &#10003;<br>V&eacute;rif. ligne 2&nbsp;: (5x+7)(9x+8) = 45x&sup2;+103x+56 &#10003;'
+      method:'Case (1,1)&nbsp;: 4x+10 &nbsp;&middot;&nbsp; Case (1,2)&nbsp;: 7x+7<br>Case (2,1)&nbsp;: 5x+7 &nbsp;&middot;&nbsp; Case (2,2)&nbsp;: 9x+8<br>V&eacute;rif. ligne 1&nbsp;: (4x+10)(7x+7) = 28x&sup2;+98x+70 &#10003;<br>V&eacute;rif. ligne 2&nbsp;: (5x+7)(9x+8) = 45x&sup2;+103x+56 &#10003;<br>V&eacute;rif. col.&nbsp;1&nbsp;: (4x+10)(5x+7) = 20x&sup2;+78x+70 &#10003;<br>V&eacute;rif. col.&nbsp;2&nbsp;: (7x+7)(9x+8) = 63x&sup2;+119x+56 &#10003;'
     },
     {
       ids:[['yh2-11','yh2-12'],['yh2-21','yh2-22']],
       wids:[['w-yh2-11','w-yh2-12'],['w-yh2-21','w-yh2-22']],
       cells:[['3*x+4','6*x+10'],['2*x+4','2*x+8']],
       fb:'fb-yh2',
-      method:'Case (1,1)&nbsp;: 3x+4 &nbsp;&middot;&nbsp; Case (1,2)&nbsp;: 6x+10<br>Case (2,1)&nbsp;: 2x+4 &nbsp;&middot;&nbsp; Case (2,2)&nbsp;: 2x+8<br>V&eacute;rif. ligne 1&nbsp;: (3x+4)(6x+10) = 18x&sup2;+54x+40 &#10003;<br>V&eacute;rif. ligne 2&nbsp;: (2x+4)(2x+8) = 4x&sup2;+24x+32 &#10003;'
+      method:'Case (1,1)&nbsp;: 3x+4 &nbsp;&middot;&nbsp; Case (1,2)&nbsp;: 6x+10<br>Case (2,1)&nbsp;: 2x+4 &nbsp;&middot;&nbsp; Case (2,2)&nbsp;: 2x+8<br>V&eacute;rif. ligne 1&nbsp;: (3x+4)(6x+10) = 18x&sup2;+54x+40 &#10003;<br>V&eacute;rif. ligne 2&nbsp;: (2x+4)(2x+8) = 4x&sup2;+24x+32 &#10003;<br>V&eacute;rif. col.&nbsp;1&nbsp;: (3x+4)(2x+4) = 6x&sup2;+20x+16 &#10003;<br>V&eacute;rif. col.&nbsp;2&nbsp;: (6x+10)(2x+8) = 12x&sup2;+68x+80 &#10003;'
     }
   ]
 };
@@ -881,7 +916,7 @@ function verifierYH(gNum){
     var wrap=document.getElementById(g.wids[r][c]);
     if(!inp)return;
     inp.disabled=true;
-    var correct=checkAnswer(inp.value,g.cells[r][c],'x');
+    var correct=checkAnswer(inp.value,g.cells[r][c],'x',true);
     if(correct){allOk++;wrap.classList.add('ok');}
     else{wrap.classList.add('ko');}
   });
