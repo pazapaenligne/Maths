@@ -321,7 +321,7 @@ body {
       PAZAPA &middot; MATHS &middot; 3ÈME
     </div>
     <div class="semaine">Semaine 1 &ndash; Jour 1</div>
-    <h1 class="titre">★ Je relève le <span class="accent">défi</span>&nbsp;!</h1>
+    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span>&nbsp;!</h1>
     <div class="sous-titre">🧮 Isoler x &mdash; choisir l'opération</div>
     <div class="badge-mission">▶ DÉFI 3ÈME</div>
   </div>
@@ -347,7 +347,7 @@ body {
   <div id="cardsZone"></div>
 
   <div class="btn-final-wrap">
-    <button class="btn-final" id="btnFinal" disabled>★ VOIR MON SCORE FINAL</button>
+    <button class="btn-final" id="btnFinal" disabled>🏆 VOIR MON SCORE FINAL</button>
   </div>
 
 </div>
@@ -609,8 +609,9 @@ function verifier(i) {
     document.getElementById('card' + i).classList.add('done-ok');
     etat[i].checked = false; // permettre re-validation si l'élève change son choix
     updateScore();
+    // Bonne réponse : masquer Réessayer pour préserver la réussite acquise
     var btnRetryOk = document.getElementById('btnRetry' + i);
-    if (btnRetryOk) btnRetryOk.style.display = 'inline-flex';
+    if (btnRetryOk) btnRetryOk.style.display = 'none';
 
   } else {
     // Mauvaise réponse : colorier en rouge, laisser tout modifiable
@@ -686,6 +687,56 @@ function updateScore() {
   document.getElementById('progressBar').style.width = (done / TOTAL * 100) + '%';
   // Bouton final dès que tous les défis sont réussis (même partiellement)
   document.getElementById('btnFinal').disabled = (done < TOTAL);
+}
+
+
+document.getElementById('btnFinal').onclick = function() {
+  var ok = 0;
+  for (var i = 0; i < TOTAL; i++) {
+    if (etat[i].phase === 'done_ok') ok++;
+  }
+  var ratio = ok / TOTAL;
+  document.getElementById('resScore').textContent = ok + ' / ' + TOTAL;
+  var stars, msg;
+  if (ratio === 1) {
+    stars = '★★★★★';
+    msg = '<b>Parfait !</b> Tu maîtrises le choix de l’opération pour isoler x.';
+  } else if (ratio >= .8) {
+    stars = '★★★★☆';
+    msg = '<b>Très bien !</b> Quelques petites erreurs, mais tu es sur la bonne voie.';
+  } else if (ratio >= .6) {
+    stars = '★★★☆☆';
+    msg = '<b>Bien !</b> Relis la correction des questions manquées pour consolider.';
+  } else if (ratio >= .4) {
+    stars = '★★☆☆☆';
+    msg = '<b>Continue !</b> Reprends le rappel et recommence pour progresser.';
+  } else {
+    stars = '★☆☆☆☆';
+    msg = '<b>À retravailler !</b> Relis le rappel sur les opérations inverses et recommence.';
+  }
+  document.getElementById('resStars').textContent = stars;
+  document.getElementById('resMsg').innerHTML = msg;
+  document.getElementById('results').classList.add('show');
+  if (ratio >= .8) launchConfetti();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+function launchConfetti() {
+  var colors = ['#f5a623','#8dc63f','#3ab5d8','#f28b82','#f5c518','#fff'];
+  for (var i = 0; i < 70; i++) {
+    (function(idx) {
+      setTimeout(function() {
+        var c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = (Math.random() * 100) + 'vw';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+        c.style.transform = 'rotateZ(' + Math.floor(Math.random() * 360) + 'deg)';
+        document.body.appendChild(c);
+        setTimeout(function() { c.remove(); }, 5000);
+      }, idx * 30);
+    })(i);
+  }
 }
 
 function restart() {
