@@ -185,7 +185,7 @@
   <div class="logo-badge">
     <span class="logo-dot" style="background:#f5c518"></span>
     <span class="logo-dot" style="background:#8dc63f"></span>
-    <span class="logo-dot" style="background:#f28b82"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
     Pazapa &middot; Maths &middot; 6&egrave;me
   </div>
   <div class="week-label">Semaine 1 &ndash; Jour 4</div>
@@ -204,9 +204,9 @@
 </div>
 
 <div class="score-row">
-  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
-  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
-  <div class="chip remaining"><div class="dot"></div><span id="count-rem">2</span> restantes</div>
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span>&nbsp;<span id="lbl-ok">correcte</span></div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span>&nbsp;<span id="lbl-ko">erreur</span></div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">2</span>&nbsp;<span id="lbl-rem">restantes</span></div>
 </div>
 
 <div class="card" id="ex-card">
@@ -233,7 +233,7 @@
     <div class="logo-badge" style="margin-bottom:.5rem">
       <span class="logo-dot" style="background:#f5c518"></span>
       <span class="logo-dot" style="background:#8dc63f"></span>
-      <span class="logo-dot" style="background:#f28b82"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
       R&eacute;sultats
     </div>
     <div class="results-score"><span class="s-num" id="score-num">0</span>/2</div>
@@ -256,11 +256,10 @@ var QUESTIONS = [
       { txt:"705,03", correct:true },
       { txt:"75,03", correct:false },
       { txt:"705,3", correct:false },
-      { txt:"705 unit\u00e9s et 3 centi\u00e8mes", correct:true },
       { txt:"705 unit\u00e9s et 3 dixi\u00e8mes", correct:false },
       { txt:"(7 \u00d7 100) + (5 \u00d7 1) + (3 \u00d7 1/100)", correct:true }
     ],
-    explication:"3 \u00d7 0,01 vaut 3 centi\u00e8mes, soit 0,03. Le r\u00e9sultat est donc 705,03, ce qui s\u2019\u00e9crit aussi 705 unit\u00e9s et 3 centi\u00e8mes, ou encore (7 \u00d7 100) + (5 \u00d7 1) + (3 \u00d7 1/100)."
+    explication:"3 \u00d7 0,01 = 0,03, soit 3 centi\u00e8mes. Le nombre obtenu est 705,03."
   },
   {
     id:1,
@@ -280,6 +279,15 @@ var validated = false;
 var currentQ = 0;
 var pendingScore = 0;
 var pendingResults = [];
+
+function updateCounters(ok, ko, rem){
+  document.getElementById("count-ok").textContent = ok;
+  document.getElementById("count-ko").textContent = ko;
+  document.getElementById("count-rem").textContent = rem;
+  document.getElementById("lbl-ok").textContent  = "correcte" + (ok>1?"s":"");
+  document.getElementById("lbl-ko").textContent  = "erreur"   + (ko>1?"s":"");
+  document.getElementById("lbl-rem").textContent = "restante" + (rem>1?"s":"");
+}
 
 function buildQuiz(){
   var z = document.getElementById("quiz-zone");
@@ -332,7 +340,6 @@ function showQuestion(qi){
     if(el) el.style.display = (q.id===qi) ? "block" : "none";
   });
   currentQ = qi;
-  // Boutons de navigation
   document.getElementById("btn-prev").style.display = (qi>0) ? "inline-flex" : "none";
   var isLast = (qi === TOTAL-1);
   document.getElementById("btn-next").style.display = isLast ? "none" : "inline-flex";
@@ -403,7 +410,6 @@ function checkAll(){
   if(!anyAnswer) return;
   validated = true;
 
-  // Afficher toutes les questions pour la correction et masquer la navigation
   QUESTIONS.forEach(function(q){
     var el = document.getElementById("question-"+q.id);
     if(el) el.style.display = "block";
@@ -433,9 +439,7 @@ function checkAll(){
   document.getElementById("progress-bar").style.width = "100%";
   document.getElementById("prog-pct").textContent = "100\u00a0%";
   document.getElementById("prog-label").textContent = "Termin\u00e9 \u2014 "+score+" / "+TOTAL;
-  document.getElementById("count-ok").textContent = score;
-  document.getElementById("count-ko").textContent = TOTAL - score;
-  document.getElementById("count-rem").textContent = 0;
+  updateCounters(score, TOTAL - score, TOTAL - score);
   document.getElementById("btn-check").disabled = true;
   document.getElementById("btn-solution").style.display = "inline-flex";
   document.getElementById("btn-results").style.display = "inline-flex";
@@ -479,7 +483,7 @@ function showResults(score,results){
   var rs=document.getElementById("results-screen");
   rs.classList.add("show");
   document.getElementById("score-num").textContent=score;
-  var stars = score===2 ? 5 : score===1 ? 3 : 1;
+  var stars = score===2 ? 5 : score===1 ? 2 : 1;
   document.getElementById("stars-row").textContent="\u2b50".repeat(stars)+"\u2606".repeat(5-stars);
   var msg;
   if(score===2) msg="Parfait\u00a0! Les deux questions sont justes.";
@@ -515,19 +519,22 @@ function restart(){
   document.getElementById("progress-bar").style.width="0%";
   document.getElementById("prog-pct").textContent="0\u00a0%";
   document.getElementById("prog-label").textContent="Question 1 / "+TOTAL;
-  document.getElementById("count-ok").textContent="0";
-  document.getElementById("count-ko").textContent="0";
-  document.getElementById("count-rem").textContent=TOTAL;
+  updateCounters(0, 0, TOTAL);
   buildQuiz();
   showQuestion(0);
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
 if(document.getElementById("quiz-zone")){
+  updateCounters(0, 0, TOTAL);
   buildQuiz();
   showQuestion(0);
 } else {
-  window.addEventListener("load", function(){ buildQuiz(); showQuestion(0); });
+  window.addEventListener("load", function(){ updateCounters(0,0,TOTAL); buildQuiz(); showQuestion(0); });
+}
+</script>
+</body>
+</html>
 }
 </script>
 </body>
