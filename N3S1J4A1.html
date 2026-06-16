@@ -1,96 +1,601 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PAZAPA Maths — 3e S1J4 · Exercices interactifs</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pazapa · 3e · N3S1J4 · Automatismes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
+/* ===================== CHARTE PAZAPA — JEUDI (BLEU) ===================== */
 :root{
-  --jour:#3ab5d8; --jour-fonce:#1a6e88; --jour-soft:#e8f6fb; --jour-accent:#9dd4e8;
-  --jour-titre:#1a6e88; --badge-txt:#0d3d4d;
-  --vert:#8dc63f; --vert-fonce:#3d7a10; --vert-soft:#f0faeb;
-  --rouge:#e74c3c; --rouge-soft:#fdedec; --rouge-fonce:#c0392b;
-  --texte:#23262d; --gris:#8a8f9a; --bord:#ece8dd;
+  --fond:#fffdf7;
+  --principal:#3ab5d8;   /* couleur du jour */
+  --fonce:#1a6e88;
+  --soft:#e8f6fb;
+  --accent:#9dd4e8;
+  --bulle-jaune:#f5c518;
+  --bulle-verte:#8dc63f;
+  --bulle-rose:#f28b82;
+  --ok:#2e8b57;
+  --ok-bg:#eafaf0;
+  --no:#c0392b;
+  --no-bg:#fdeeee;
+  --texte:#1f2630;
+  --gris:#5a6470;
+  --bord:#d8e4ea;
+  /* couleurs Scratch 3.0 */
+  --sc-motion:#4C97FF;
+  --sc-control:#FFAB19;
+  --sc-events:#FFBF00;
+  --sc-sensing:#5CB1D6;
+  --sc-operator:#59C059;
+  --sc-variable:#FF8C1A;
+  --sc-variable-d:#E07A00;
+  --sc-looks:#9966FF;
+  --sc-pen:#0FBD8C;
+  --sc-custom:#FF6680;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{overflow-x:hidden;}
-body{background:#fff;color:var(--texte);font-family:'JetBrains Mono',monospace;
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 4rem;position:relative;}
-.blob{position:fixed;z-index:0;pointer-events:none;background:var(--jour-accent);filter:blur(1px);}
-.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.30;border-radius:38% 62% 55% 45% / 56% 40% 60% 44%;}
-.blob2{width:220px;height:240px;top:42%;left:-90px;opacity:.27;border-radius:62% 38% 44% 56% / 42% 58% 42% 58%;}
-.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.28;border-radius:45% 55% 62% 38% / 55% 45% 58% 42%;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--fond);
+  color:var(--texte);
+  line-height:1.65;
+  min-height:100vh;
+  padding:1.2rem .9rem 3rem;
+  position:relative;
+  overflow-x:hidden;
+}
 
-.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.3rem;max-width:720px;}
-.badge-semaine{display:inline-block;background:var(--jour-soft);border:2px solid var(--jour);
-  color:var(--badge-txt);font-weight:800;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
-  padding:.35rem 1rem;border-radius:99px;margin-bottom:.8rem;}
-h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);line-height:1.25;}
-.sous-titre{color:var(--gris);font-size:.92rem;margin-top:.45rem;line-height:1.8;}
-.consigne{margin:1rem auto 0;max-width:580px;border:2px dashed var(--jour);background:var(--jour-soft);
-  color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+/* ===================== BULLES DÉCORATIVES FIXES ===================== */
+.bulle{position:fixed;border-radius:50%;filter:blur(2px);opacity:.5;z-index:0;pointer-events:none;}
+.b-jaune{width:200px;height:200px;background:var(--bulle-jaune);top:-60px;right:-50px;}
+.b-jour {width:230px;height:230px;background:var(--principal);bottom:-70px;left:-70px;}
+.b-verte{width:130px;height:130px;background:var(--bulle-verte);top:42%;right:-55px;}
+.b-rose {width:120px;height:120px;background:var(--bulle-rose);top:30%;left:-50px;}
 
-.activite{position:relative;z-index:1;width:100%;max-width:820px;background:#fff;border:2px solid var(--bord);
-  border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);}
-.act-tete{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;
-  padding:.9rem 1.1rem;background:var(--jour-soft);border-bottom:2px solid var(--jour-accent);}
-.act-titre{font-weight:800;color:var(--jour-fonce);font-size:1rem;display:flex;align-items:center;gap:.5rem;}
-.act-outils{display:flex;gap:.5rem;flex-wrap:wrap;}
-.mini-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.8rem;cursor:pointer;
-  border:2px solid var(--jour);background:#fff;color:var(--jour-fonce);border-radius:10px;padding:.4rem .8rem;
-  min-height:2.2rem;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem;transition:background .15s, transform .12s;}
-.mini-btn:hover{background:var(--jour);color:#fff;transform:translateY(-1px);}
-.act-consigne{padding:.8rem 1.1rem 0;font-size:.9rem;color:var(--texte);line-height:1.8;font-weight:600;}
-.cadre{width:100%;background:#f5fbfd;}
-.cadre iframe{width:100%;height:70vh;min-height:480px;max-height:820px;border:none;display:block;background:#fff;}
-.cadre-note{padding:.6rem 1.1rem;font-size:.78rem;color:var(--gris);line-height:1.7;text-align:center;}
+.wrap{position:relative;z-index:1;max-width:820px;margin:0 auto;}
 
-@media(max-width:560px){
-  body{padding:1.1rem .7rem 3rem;}
-  .cadre iframe{height:64vh;min-height:400px;}
+/* ===================== HEADER ===================== */
+header{text-align:center;margin-bottom:1.8rem;}
+.logo-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:#fff;border:1.5px solid var(--bord);
+  border-radius:999px;padding:.45rem 1rem;
+  box-shadow:0 3px 12px rgba(0,0,0,.05);
+  margin-bottom:.7rem;
+}
+.logo-badge .dots{letter-spacing:2px;font-size:14px;color:var(--principal);}
+.logo-badge .lab{font-size:13px;font-weight:700;color:var(--fonce);font-family:'JetBrains Mono',monospace;}
+.week-label{
+  display:block;
+  font-size:.88rem;font-weight:800;letter-spacing:1.5px;
+  color:var(--principal);font-family:'JetBrains Mono',monospace;
+  margin-bottom:.6rem;text-transform:uppercase;
+}
+h1{
+  font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;
+  color:var(--fonce);line-height:1.2;margin-bottom:.55rem;
+}
+.consigne{font-size:.9rem;color:var(--gris);max-width:560px;margin:0 auto;}
+
+/* ===================== BARRE DE PROGRESSION ===================== */
+.progress-wrap{
+  display:flex;align-items:center;gap:.6rem;
+  background:#fff;border:1.5px solid var(--bord);border-radius:14px;
+  padding:.7rem 1rem;margin:0 auto 1.6rem;max-width:520px;
+  box-shadow:0 3px 12px rgba(0,0,0,.04);
+}
+.progress-track{flex:1;height:10px;background:var(--soft);border-radius:999px;overflow:hidden;}
+.progress-fill{height:100%;width:0;background:var(--principal);border-radius:999px;transition:width .4s ease;}
+.progress-txt{font-size:.82rem;font-weight:800;color:var(--fonce);font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+
+/* ===================== CARTES QUESTION ===================== */
+.card{
+  background:#fff;border:1.5px solid var(--bord);border-radius:18px;
+  padding:1.3rem 1.2rem;margin-bottom:1.3rem;
+  box-shadow:0 4px 20px rgba(0,0,0,.05);
+  transition:border-color .25s ease;
+}
+.card.done-ok{border-color:var(--ok);}
+.card.done-no{border-color:var(--no);}
+.q-top{display:flex;align-items:center;flex-wrap:wrap;gap:.55rem;margin-bottom:.85rem;}
+.q-num{
+  font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;color:#fff;background:var(--fonce);
+  padding:.28rem .6rem;border-radius:7px;
+}
+.q-badge{
+  font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--fonce);background:var(--soft);border:1px solid var(--accent);
+  padding:.26rem .65rem;border-radius:7px;
+}
+.q-text{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--texte);margin-bottom:.5rem;}
+.q-text sup{font-size:.7em;}
+.q-sub{font-size:.9rem;color:var(--gris);margin-bottom:.9rem;}
+
+/* ---- saisie réponse ---- */
+.answer-row{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:.6rem 0;}
+.answer-row label{font-size:.95rem;font-weight:700;color:var(--fonce);}
+input.ans{
+  font-family:Arial,sans-serif;font-size:clamp(1.05rem,3.2vw,1.2rem);font-weight:700;
+  text-align:center;width:120px;min-height:50px;
+  border:2px solid var(--accent);border-radius:11px;background:var(--soft);
+  color:var(--fonce);padding:.3rem .5rem;
+}
+input.ans:focus{outline:3px solid var(--principal);outline-offset:1px;border-color:var(--principal);}
+input.field-ok{border-color:var(--ok)!important;background:var(--ok-bg)!important;color:var(--ok)!important;}
+input.field-no{border-color:var(--no)!important;background:var(--no-bg)!important;color:var(--no)!important;}
+
+/* ---- options QCM ---- */
+.options{display:grid;gap:.6rem;margin-bottom:.6rem;}
+.opt{
+  display:flex;align-items:center;gap:.7rem;text-align:left;
+  font-size:clamp(.95rem,2.6vw,1.05rem);font-weight:700;color:var(--texte);
+  background:#fff;border:2px solid var(--bord);border-radius:13px;
+  padding:.6rem .85rem;min-height:50px;cursor:pointer;
+  transition:all .15s ease;width:100%;
+}
+.opt:hover{border-color:var(--principal);background:var(--soft);}
+.opt:focus-visible{outline:3px solid var(--principal);outline-offset:2px;}
+.opt .box{
+  flex:0 0 22px;width:22px;height:22px;border:2px solid var(--accent);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;
+}
+.opt.sel{border-color:var(--principal);background:var(--soft);}
+.opt.sel .box{background:var(--principal);border-color:var(--principal);}
+.opt.correct{border-color:var(--ok);background:var(--ok-bg);}
+.opt.correct .box{background:var(--ok);border-color:var(--ok);}
+.opt.wrong{border-color:var(--no);background:var(--no-bg);}
+.opt.wrong .box{background:var(--no);border-color:var(--no);}
+.opt[disabled]{cursor:default;}
+
+/* ===================== BLOCS SCRATCH (recréation CSS) ===================== */
+.sb-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:.2rem 0 .5rem;margin:.4rem 0 1rem;}
+.sb-script{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:min-content;
+  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:.86rem;}
+.sb-block{
+  position:relative;display:inline-flex;align-items:center;gap:.4em;white-space:nowrap;
+  color:#fff;font-weight:700;padding:.5em .75em;min-height:2.1em;border-radius:5px;
+  box-shadow:inset 0 -1px 0 rgba(0,0,0,.18);
+}
+/* encoche connecteur en haut */
+.sb-block::before{content:"";position:absolute;left:13px;top:-2px;width:15px;height:5px;
+  background:var(--c);border-radius:0 0 4px 4px;}
+.sb-hat{border-radius:16px 16px 5px 5px;padding-top:.7em;}
+.sb-hat::before{display:none;}
+
+/* couleurs catégories */
+.sb-motion  {--c:var(--sc-motion);  background:var(--c);}
+.sb-control {--c:var(--sc-control); background:var(--c);}
+.sb-events  {--c:var(--sc-events);  background:var(--c);color:#5c4500;}
+.sb-sensing {--c:var(--sc-sensing); background:var(--c);}
+.sb-variable{--c:var(--sc-variable);background:var(--c);}
+.sb-looks   {--c:var(--sc-looks);   background:var(--c);}
+.sb-pen     {--c:var(--sc-pen);     background:var(--c);}
+.sb-custom  {--c:var(--sc-custom);  background:var(--c);}
+
+/* bloc C (répéter) */
+.sb-c{--c:var(--sc-control);background:var(--c);border-radius:6px;padding-bottom:11px;position:relative;}
+.sb-c::before{content:"";position:absolute;left:13px;top:-2px;width:15px;height:5px;background:var(--c);border-radius:0 0 4px 4px;}
+.sb-clabel{display:inline-flex;align-items:center;gap:.4em;color:#fff;font-weight:700;
+  padding:.5em .75em;white-space:nowrap;}
+.sb-cbody{margin-left:13px;background:#fff;padding:5px 6px 5px 6px;display:inline-flex;
+  flex-direction:column;gap:2px;align-items:flex-start;border-bottom-left-radius:6px;}
+
+/* reporters / encarts */
+.sb-num,.sb-edit{background:#fff;color:#222;border-radius:999px;font-weight:700;
+  padding:.06em .55em;min-width:1.6em;text-align:center;display:inline-block;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);}
+.sb-edit{border:none;font-family:inherit;font-size:1em;width:3.1em;min-height:1.9em;}
+.sb-edit:focus{outline:2px solid #fff;box-shadow:inset 0 0 0 2px var(--principal);}
+.sb-txt{background:#fff;color:#222;border-radius:12px;font-weight:600;padding:.06em .6em;
+  display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);}
+.sb-var{background:var(--sc-variable);color:#fff;border-radius:999px;font-weight:700;
+  padding:.08em .6em;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);}
+.sb-drop{background:var(--sc-variable-d);color:#fff;border-radius:999px;font-weight:700;
+  padding:.08em .55em;display:inline-block;}
+.sb-sens{background:var(--sc-sensing);color:#fff;border-radius:999px;font-weight:700;
+  padding:.08em .6em;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);}
+.sb-op{background:var(--sc-operator);color:#fff;border-radius:999px;font-weight:700;
+  padding:.1em .6em;display:inline-flex;align-items:center;gap:.35em;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);}
+.sb-flag{vertical-align:middle;}
+.sb-pen-ic{vertical-align:middle;margin-right:.1em;}
+
+/* ---- feedback inline ---- */
+.fb{font-size:clamp(.9rem,2.5vw,1rem);font-weight:700;margin:.3rem 0 .2rem;display:none;}
+.fb.ok{color:var(--ok);display:block;}
+.fb.no{color:var(--no);display:block;}
+
+/* ---- boutons action ---- */
+.actions{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.7rem;}
+.btn{
+  font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;
+  min-height:2.8rem;padding:.4rem 1.1rem;border-radius:11px;cursor:pointer;
+  border:2px solid transparent;transition:transform .1s ease,box-shadow .15s ease;
+  display:inline-flex;align-items:center;gap:.4rem;
+}
+.btn:active{transform:translateY(1px);}
+.btn:focus-visible{outline:3px solid var(--fonce);outline-offset:2px;}
+.btn-main{background:var(--principal);color:#fff;box-shadow:0 3px 10px rgba(58,181,216,.4);}
+.btn-main:hover{background:var(--fonce);}
+.btn-ghost{background:#fff;color:var(--fonce);border-color:var(--accent);}
+.btn-ghost:hover{background:var(--soft);}
+.btn:disabled{opacity:.45;cursor:default;box-shadow:none;}
+
+/* ---- indice ---- */
+.hint{
+  display:none;background:#fffbeb;border:1px solid #f5e08a;border-radius:11px;
+  padding:.7rem .9rem;margin-top:.7rem;font-size:.9rem;color:#7a5a00;line-height:1.6;
+}
+.hint.show{display:block;}
+
+/* ===================== CORRECTION ===================== */
+.correction{display:none;margin-top:.9rem;border-radius:14px;overflow:hidden;border:1.5px solid var(--accent);}
+.correction.show{display:block;animation:fade .35s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+.corr-head{
+  background:var(--fonce);color:#fff;font-size:.85rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.6px;padding:.55rem 1rem;
+}
+.corr-body{background:var(--soft);padding:1.1rem 1.3rem;font-size:.9rem;line-height:1.65;color:var(--texte);}
+.corr-body p{margin-bottom:.55rem;}
+.corr-body ul,.corr-body ol{margin:.3rem 0 .6rem 1.2rem;}
+.corr-body li{margin-bottom:.3rem;}
+.corr-body strong{color:var(--fonce);}
+.chain{font-weight:700;color:var(--fonce);font-size:.95rem;letter-spacing:.3px;}
+.res{color:var(--no);font-weight:900;}
+
+/* fraction CSS */
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 .12em;}
+.frac .num{border-bottom:2px solid currentColor;padding:0 .35em .04em;line-height:1.15;}
+.frac .den{padding:.04em .35em 0;line-height:1.15;}
+
+/* ===================== RÉSULTATS ===================== */
+.results{
+  display:none;text-align:center;background:#fff;border:2px solid var(--principal);
+  border-radius:20px;padding:1.8rem 1.3rem;margin-top:1.6rem;
+  box-shadow:0 6px 26px rgba(58,181,216,.18);
+}
+.results.show{display:block;animation:fade .4s ease;}
+.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-weight:900;color:var(--principal);line-height:1;}
+.score-big span{font-size:.4em;color:var(--gris);font-weight:800;}
+.stars{font-size:1.9rem;letter-spacing:.2rem;margin:.4rem 0 .7rem;color:var(--principal);}
+.res-msg{font-size:clamp(.88rem,2.5vw,1rem);color:var(--texte);font-weight:700;line-height:1.8;max-width:440px;margin:0 auto 1rem;}
+
+.bottom-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:.6rem;margin-top:1.4rem;}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
 }
 </style>
 </head>
 <body>
-<div class="blob blob1"></div>
-<div class="blob blob2"></div>
-<div class="blob blob3"></div>
 
-<header class="hero">
-  <div class="badge-semaine">Semaine 1 · Jour 4</div>
-  <h1>📐 Exercices interactifs</h1>
-  <p class="sous-titre">Entraîne-toi sur les équations du premier degré</p>
-  <div class="consigne">👉 Fais l’activité directement dans la fenêtre. Clique sur « Vérifier » pour valider tes réponses.</div>
-</header>
+<!-- bulles décoratives fixes -->
+<div class="bulle b-jaune"></div>
+<div class="bulle b-jour"></div>
+<div class="bulle b-verte"></div>
+<div class="bulle b-rose"></div>
 
-<section class="activite">
-  <div class="act-tete">
-    <div class="act-titre">📝 Exercices interactifs</div>
-    <div class="act-outils">
-      <button class="mini-btn" id="fs">⛶ Plein écran</button>
-      <a class="mini-btn" href="https://coopmaths.fr/alea/?uuid=c6be6&alea=8381&interactif=1&duration=10&s=0-2-0-3-0&s2=false&s3=false&cd=1&tip=0&i=1&v=eleve" target="_blank" rel="noopener">↗ Ouvrir en grand</a>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-badge">
+      <span class="dots">● ● ●</span>
+      <span class="lab">Pazapa · 3e · Mathématiques</span>
+    </div>
+    <span class="week-label">Semaine 1 · Jour 4</span>
+    <h1>Automatismes : puissances, programmation &amp; équations</h1>
+    <p class="consigne">Réponds à chaque question, clique sur <strong>Vérifier</strong>, puis consulte la <strong>correction détaillée</strong>. Un indice est disponible si tu bloques. 👉</p>
+  </header>
+
+  <!-- PROGRESSION -->
+  <div class="progress-wrap">
+    <span class="progress-txt" id="ptxt">0 / 5</span>
+    <div class="progress-track"><div class="progress-fill" id="pfill"></div></div>
+  </div>
+
+  <!-- ================= QUESTION 1 ================= -->
+  <div class="card" data-q="1">
+    <div class="q-top">
+      <span class="q-num">Question 01</span>
+      <span class="q-badge">Puissances de 10</span>
+    </div>
+    <p class="q-text">Donner l'écriture décimale de 9,03 × 10<sup>3</sup>.</p>
+    <div class="answer-row">
+      <label for="r1">Réponse :</label>
+      <input class="ans" type="text" id="r1" inputmode="numeric" autocomplete="off" placeholder="…">
+    </div>
+    <p class="fb" id="fb1"></p>
+    <div class="hint" id="hint1">Multiplier par 10<sup>3</sup> = 1000, c'est décaler la virgule de <strong>3 rangs vers la droite</strong>.</div>
+    <div class="actions">
+      <button class="btn btn-main" onclick="checkInput(1,['9030','9 030'])">Vérifier</button>
+      <button class="btn btn-ghost" onclick="toggleHint(1)">💡 Indice</button>
+      <button class="btn btn-ghost" onclick="showCorr(1)">🔼 Voir la correction</button>
+    </div>
+    <div class="correction" id="corr1">
+      <div class="corr-head">Correction</div>
+      <div class="corr-body">
+        <p>Multiplier par <strong>10<sup>3</sup> = 1000</strong> revient à déplacer la virgule de <strong>3 rangs vers la droite</strong>.</p>
+        <p class="chain">9,03 → 90,3 → 903 → 9 030</p>
+        <p>L'écriture décimale de 9,03 × 10<sup>3</sup> est <span class="res">9 030</span>.</p>
+      </div>
     </div>
   </div>
-  <div class="act-consigne">👉 Fais l’activité directement dans la fenêtre. Clique sur «&nbsp;Vérifier&nbsp;» pour valider tes réponses.</div>
-  <div class="cadre">
-    <iframe id="frame" src="https://coopmaths.fr/alea/?uuid=c6be6&alea=8381&interactif=1&duration=10&s=0-2-0-3-0&s2=false&s3=false&cd=1&tip=0&i=1&v=eleve&title=&es=011010&recorder=moodle&done=1&answers=%7B%22Ex0Q0%22%3A%223%22%2C%22Ex0Q1%22%3A%223%22%7D" title="Course aux nombres" loading="lazy" allowfullscreen></iframe>
+
+  <!-- ================= QUESTION 2 ================= -->
+  <div class="card" data-q="2">
+    <div class="q-top">
+      <span class="q-num">Question 02</span>
+      <span class="q-badge">Programmation</span>
+    </div>
+    <p class="q-text">Une élève souhaite réaliser un programme permettant de dessiner un <strong>hexagone régulier</strong>. Complète les lignes 3 et 5.</p>
+    <div class="sb-scroll">
+      <div class="sb-script">
+        <div class="sb-block sb-hat sb-custom">définir <span class="sb-txt">hexagone régulier</span></div>
+        <div class="sb-block sb-pen">
+          <svg class="sb-pen-ic" viewBox="0 0 24 24" width="14" height="14" fill="#fff"><path d="M3 17.2V21h3.8L17.8 10 14 6.2 3 17.2zM20.7 7a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8L17 7.7 18.9 8.8 20.7 7z"/></svg>
+          stylo en position d'écriture
+        </div>
+        <div class="sb-c">
+          <div class="sb-clabel">répéter <input class="sb-edit" id="r2a" inputmode="numeric" autocomplete="off"> fois</div>
+          <div class="sb-cbody">
+            <div class="sb-block sb-motion">avancer de <span class="sb-num">70</span> pas</div>
+            <div class="sb-block sb-motion">tourner ↻ de <input class="sb-edit" id="r2b" inputmode="numeric" autocomplete="off"> degrés</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="fb" id="fb2"></p>
+    <div class="hint" id="hint2">Un hexagone possède <strong>6 côtés</strong>. Pour l'angle, on calcule 360 ÷ (nombre de côtés).</div>
+    <div class="actions">
+      <button class="btn btn-main" onclick="checkHexa()">Vérifier</button>
+      <button class="btn btn-ghost" onclick="toggleHint(2)">💡 Indice</button>
+      <button class="btn btn-ghost" onclick="showCorr(2)">🔼 Voir la correction</button>
+    </div>
+    <div class="correction" id="corr2">
+      <div class="corr-head">Correction</div>
+      <div class="corr-body">
+        <p>Un hexagone régulier possède <strong>6 côtés</strong>. Le programme doit donc :</p>
+        <ul>
+          <li>répéter l'action <strong>6 fois</strong> ;</li>
+          <li>tourner d'un angle de <span class="frac"><span class="num">360</span><span class="den">6</span></span> = <strong>60°</strong>.</li>
+        </ul>
+        <p>Ligne 3 : <span class="res">6</span> &nbsp;·&nbsp; Ligne 5 : <span class="res">60</span></p>
+      </div>
+    </div>
   </div>
-  <div class="cadre-note">Si l’activité ne s’affiche pas, utilise le bouton «&nbsp;↗ Ouvrir en grand&nbsp;».</div>
-</section>
+
+  <!-- ================= QUESTION 3 ================= -->
+  <div class="card" data-q="3">
+    <div class="q-top">
+      <span class="q-num">Question 03</span>
+      <span class="q-badge">Équation</span>
+    </div>
+    <p class="q-text">Pour résoudre l'équation 7x + 8 = 22, on effectue le calcul :</p>
+    <div class="options" id="opts3"></div>
+    <p class="fb" id="fb3"></p>
+    <div class="hint" id="hint3">On isole d'abord le terme en x : on enlève le + 8, puis on divise par 7.</div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="toggleHint(3)">💡 Indice</button>
+      <button class="btn btn-ghost" onclick="showCorr(3)">🔼 Voir la correction</button>
+    </div>
+    <div class="correction" id="corr3">
+      <div class="corr-head">Correction</div>
+      <div class="corr-body">
+        <p>On commence par <strong>soustraire 8</strong> aux deux membres : 7x = 22 − 8.</p>
+        <p>Puis on <strong>divise les deux membres par 7</strong> : x = <span class="frac"><span class="num">22 − 8</span><span class="den">7</span></span>.</p>
+        <p>Bonne réponse : <span class="res"><span class="frac"><span class="num">22 − 8</span><span class="den">7</span></span></span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= QUESTION 4 ================= -->
+  <div class="card" data-q="4">
+    <div class="q-top">
+      <span class="q-num">Question 04</span>
+      <span class="q-badge">Algorithme</span>
+    </div>
+    <p class="q-text">On considère l'algorithme suivant. Quel résultat obtient-on si l'on choisit <strong>5</strong> comme nombre de départ ?</p>
+    <div class="sb-scroll">
+      <div class="sb-script">
+        <div class="sb-block sb-hat sb-events">quand
+          <svg class="sb-flag" viewBox="0 0 24 24" width="15" height="15"><path d="M5 3v18" stroke="#2f7d20" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M6 3.5h12l-3 4 3 4H6z" fill="#4cbb47" stroke="#2f7d20" stroke-width="1"/></svg>
+          est cliqué</div>
+        <div class="sb-block sb-sensing">demander <span class="sb-txt">Choisir un nombre</span> et attendre</div>
+        <div class="sb-block sb-variable">mettre <span class="sb-drop">variable ▾</span> à <span class="sb-sens">réponse</span></div>
+        <div class="sb-block sb-variable">mettre <span class="sb-drop">resultat ▾</span> à <span class="sb-op"><span class="sb-num">10</span> × <span class="sb-var">variable</span></span></div>
+        <div class="sb-block sb-variable">mettre <span class="sb-drop">resultat ▾</span> à <span class="sb-op"><span class="sb-var">resultat</span> + <span class="sb-num">14</span></span></div>
+        <div class="sb-block sb-variable">mettre <span class="sb-drop">resultat ▾</span> à <span class="sb-op"><span class="sb-var">resultat</span> ÷ <span class="sb-num">2</span></span></div>
+        <div class="sb-block sb-looks">dire <span class="sb-op">regrouper <span class="sb-txt">J'obtiens :</span> <span class="sb-var">resultat</span></span></div>
+      </div>
+    </div>
+    <div class="answer-row">
+      <label for="r4">Résultat :</label>
+      <input class="ans" type="text" id="r4" inputmode="numeric" autocomplete="off" placeholder="…">
+    </div>
+    <p class="fb" id="fb4"></p>
+    <div class="hint" id="hint4">Suis les lignes dans l'ordre avec le nombre 5 : d'abord × 10, puis + 14, puis ÷ 2.</div>
+    <div class="actions">
+      <button class="btn btn-main" onclick="checkInput(4,['32'])">Vérifier</button>
+      <button class="btn btn-ghost" onclick="toggleHint(4)">💡 Indice</button>
+      <button class="btn btn-ghost" onclick="showCorr(4)">🔼 Voir la correction</button>
+    </div>
+    <div class="correction" id="corr4">
+      <div class="corr-head">Correction</div>
+      <div class="corr-body">
+        <p>On applique les instructions dans l'ordre :</p>
+        <ol>
+          <li>Nombre choisi : <strong>5</strong></li>
+          <li>10 × 5 = 50</li>
+          <li>50 + 14 = 64</li>
+          <li>64 ÷ 2 = 32</li>
+        </ol>
+        <p>On obtient donc comme résultat final : <span class="res">32</span>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= QUESTION 5 ================= -->
+  <div class="card" data-q="5">
+    <div class="q-top">
+      <span class="q-num">Question 05</span>
+      <span class="q-badge">Équation avec parenthèses</span>
+    </div>
+    <p class="q-text">Pour résoudre l'équation 7(x + 8) = 22, on effectue le calcul :</p>
+    <div class="options" id="opts5"></div>
+    <p class="fb" id="fb5"></p>
+    <div class="hint" id="hint5">Ici 7 multiplie une <strong>parenthèse entière</strong> : on divise tout par 7 d'abord, puis on enlève le 8.</div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="toggleHint(5)">💡 Indice</button>
+      <button class="btn btn-ghost" onclick="showCorr(5)">🔼 Voir la correction</button>
+    </div>
+    <div class="correction" id="corr5">
+      <div class="corr-head">Correction</div>
+      <div class="corr-body">
+        <p>On commence par <strong>diviser les deux membres par 7</strong> : x + 8 = <span class="frac"><span class="num">22</span><span class="den">7</span></span>.</p>
+        <p>Puis on <strong>soustrait 8</strong> : x = <span class="frac"><span class="num">22</span><span class="den">7</span></span> − 8.</p>
+        <p>Bonne réponse : <span class="res"><span class="frac"><span class="num">22</span><span class="den">7</span></span> − 8</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= RÉSULTATS ================= -->
+  <div class="results" id="results">
+    <div class="score-big" id="scoreBig">0<span> / 5</span></div>
+    <div class="stars" id="stars">★★★★★</div>
+    <p class="res-msg" id="resMsg"></p>
+    <button class="btn btn-main" onclick="resetAll()">↻ Recommencer</button>
+  </div>
+
+  <div class="bottom-actions">
+    <button class="btn btn-ghost" onclick="resetAll()">↻ Tout recommencer</button>
+  </div>
+
+</div>
 
 <script>
-"use strict";
-document.addEventListener("DOMContentLoaded", function(){
-  var fs = document.getElementById("fs");
-  fs.addEventListener("click", function(){
-    var cadre = document.getElementById("frame") ? document.getElementById("frame").parentNode : null;
-    if(!cadre){ return; }
-    if(document.fullscreenElement){ document.exitFullscreen(); return; }
-    if(cadre.requestFullscreen){ cadre.requestFullscreen(); }
-    else if(cadre.webkitRequestFullscreen){ cadre.webkitRequestFullscreen(); }
+/* ---------- état ---------- */
+const total = 5;
+const answered = {};
+const locked   = {};
+
+function frac(n,d){return '<span class="frac"><span class="num">'+n+'</span><span class="den">'+d+'</span></span>';}
+
+/* ---------- QCM ---------- */
+const qcm = {
+  3:{correct:3, opts:['22 × 7 − 8','(22 − 7) − 8',frac('22','7')+' − 8',frac('22 − 8','7')]},
+  5:{correct:1, opts:[frac('22 − 8','7'),frac('22','7')+' − 8','22 × 7 − 8','22 × 7 + 8']}
+};
+function buildQcm(q){
+  const data=qcm[q], box=document.getElementById('opts'+q);
+  data.opts.forEach((html,i)=>{
+    const b=document.createElement('button');
+    b.className='opt'; b.type='button';
+    b.innerHTML='<span class="box"></span><span>'+html+'</span>';
+    b.onclick=()=>pickOption(q,i,b);
+    box.appendChild(b);
   });
-});
+}
+buildQcm(3); buildQcm(5);
+function pickOption(q,i,btn){
+  if(locked[q]) return;
+  const data=qcm[q], all=document.querySelectorAll('#opts'+q+' .opt');
+  all.forEach(o=>o.setAttribute('disabled','disabled'));
+  const ok=(i===data.correct);
+  btn.classList.add(ok?'correct':'wrong');
+  btn.querySelector('.box').textContent=ok?'✓':'✗';
+  if(!ok){all[data.correct].classList.add('correct');all[data.correct].querySelector('.box').textContent='✓';}
+  setFeedback(q,ok,ok?"Bravo, c'est la bonne méthode !":"Ce n'est pas la bonne méthode — regarde la correction.");
+  register(q,ok,ok?'done-ok':'done-no');
+}
+
+/* ---------- saisie texte ---------- */
+function norm(v){return v.toLowerCase().replace(/\s+/g,'').replace(',','.');}
+function checkInput(q,accepted){
+  if(locked[q]) return;
+  const inp=document.getElementById('r'+q), val=norm(inp.value);
+  if(val===''){setFeedback(q,false,"Écris d'abord ta réponse.");inp.focus();return;}
+  const ok=accepted.map(norm).includes(val);
+  inp.classList.add(ok?'field-ok':'field-no'); inp.setAttribute('readonly','readonly');
+  setFeedback(q,ok,ok?'Correct !':'Réponse incorrecte — regarde la correction.');
+  register(q,ok,ok?'done-ok':'done-no');
+}
+
+/* ---------- Q2 hexagone ---------- */
+function checkHexa(){
+  const q=2; if(locked[q]) return;
+  const a=document.getElementById('r2a'), b=document.getElementById('r2b');
+  if(a.value.trim()===''||b.value.trim()===''){setFeedback(q,false,'Complète les deux lignes.');return;}
+  const okA=norm(a.value)==='6', okB=norm(b.value)==='60', ok=okA&&okB;
+  a.classList.add(okA?'field-ok':'field-no'); b.classList.add(okB?'field-ok':'field-no');
+  a.setAttribute('readonly','readonly'); b.setAttribute('readonly','readonly');
+  setFeedback(q,ok,ok?"Parfait, l'hexagone est correct !":'Pas tout à fait — regarde la correction.');
+  register(q,ok,ok?'done-ok':'done-no');
+}
+
+/* ---------- feedback / score ---------- */
+function setFeedback(q,ok,msg){
+  const fb=document.getElementById('fb'+q);
+  fb.textContent=(ok?'✅ ':'')+msg; fb.className='fb '+(ok?'ok':'no');
+}
+function register(q,ok,cls){
+  if(locked[q]) return;
+  locked[q]=true; answered[q]=ok;
+  document.querySelector('.card[data-q="'+q+'"]').classList.add(cls);
+  updateProgress();
+}
+function updateProgress(){
+  const n=Object.keys(locked).length;
+  document.getElementById('ptxt').textContent=n+' / '+total;
+  document.getElementById('pfill').style.width=(n/total*100)+'%';
+  if(n===total) showResults();
+}
+
+/* ---------- correction / indice ---------- */
+function showCorr(q){
+  const c=document.getElementById('corr'+q);
+  c.classList.toggle('show');
+  if(c.classList.contains('show')) c.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function toggleHint(q){document.getElementById('hint'+q).classList.toggle('show');}
+
+/* ---------- résultats ---------- */
+function showResults(){
+  const score=Object.values(answered).filter(Boolean).length, box=document.getElementById('results');
+  document.getElementById('scoreBig').innerHTML=score+'<span> / '+total+'</span>';
+  const full='★', empty='☆';
+  document.getElementById('stars').textContent=full.repeat(score)+empty.repeat(total-score);
+  let msg;
+  if(score===5) msg='Excellent ! Tu maîtrises tous ces automatismes. 👏';
+  else if(score>=3) msg='Bon travail ! Revois les corrections des questions ratées pour progresser.';
+  else msg='Courage ! Relis attentivement chaque correction, puis recommence.';
+  document.getElementById('resMsg').textContent=msg;
+  box.classList.add('show'); box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+/* ---------- reset ---------- */
+function resetAll(){
+  for(const k in answered) delete answered[k];
+  for(const k in locked) delete locked[k];
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('done-ok','done-no'));
+  document.querySelectorAll('.fb').forEach(f=>{f.textContent='';f.className='fb';});
+  document.querySelectorAll('.hint').forEach(h=>h.classList.remove('show'));
+  document.querySelectorAll('.correction').forEach(c=>c.classList.remove('show'));
+  document.querySelectorAll('input').forEach(i=>{i.value='';i.removeAttribute('readonly');i.classList.remove('field-ok','field-no');});
+  document.getElementById('opts3').innerHTML=''; document.getElementById('opts5').innerHTML='';
+  buildQcm(3); buildQcm(5);
+  document.getElementById('results').classList.remove('show');
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+updateProgress();
 </script>
 </body>
 </html>
