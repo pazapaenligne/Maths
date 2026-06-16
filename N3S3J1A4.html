@@ -161,6 +161,7 @@ var TOTAL = 3;
 var answers = [null, null, null];
 var checked = [false, false, false];
 var erreurs = [false, false, false];
+var tentatives = [0, 0, 0];
 
 function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
@@ -332,16 +333,21 @@ function check(i) {
     $("retry-" + i).style.display = "none";
     updateScore();
   } else {
-    /* Comptabiliser l'erreur UNE seule fois par exercice */
-    if (!erreurs[i]) {
-      erreurs[i] = true;
-    }
+    if (!erreurs[i]) { erreurs[i] = true; }
+    tentatives[i]++;
     $("fb-" + i).className = "fb show ko";
     $("fbi-" + i).textContent = "\u274C";
     $("fbm-" + i).textContent = "Pas tout \u00e0 fait\u2026 r\u00e9essaie !";
-    $("fbd-" + i).innerHTML = "Clique <strong>? Indice</strong> pour de l\u2019aide, puis <strong>R\u00e9essayer</strong>.";
+    if (tentatives[i] >= 2) {
+      $("fbd-" + i).innerHTML = "<strong>Correction\u00a0:</strong><br>" + ex.method;
+    } else {
+      $("fbd-" + i).innerHTML = "Clique <strong>? Indice</strong> pour de l\u2019aide, puis <strong>R\u00e9essayer</strong>.";
+    }
     if (ex.kind === "multi") {
-      ex.fields.forEach(function (f, fi) { $("inp-" + i + "-" + fi).className = "answer-input wrong-input"; });
+      ex.fields.forEach(function (f, fi) {
+        var v = $("inp-" + i + "-" + fi).value;
+        $("inp-" + i + "-" + fi).className = "answer-input " + (parseFloat(v) === f.ans ? "correct-input" : "wrong-input");
+      });
     } else {
       $("inp-" + i).className = "answer-input wrong-input";
     }
@@ -411,6 +417,7 @@ function restart() {
   answers = [null, null, null];
   checked = [false, false, false];
   erreurs = [false, false, false];
+  tentatives = [0, 0, 0];
   $("results-screen").classList.remove("show");
   $("btn-restart").style.display = "none";
   buildAll();
