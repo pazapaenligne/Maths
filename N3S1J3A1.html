@@ -134,6 +134,10 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
   .chrono{font-size:.9rem;min-width:4rem;}
   .topbar{padding:.5rem .6rem .6rem;}
 }
+
+.pazapa-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid #e8e0d0;border-radius:99px;padding:.28rem .9rem;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#555;}
+.pazapa-badge .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.dot1{background:#f5a623;}.dot2{background:#8dc63f;}.dot3{background:#3ab5d8;}
 </style>
 </head>
 <body>
@@ -142,6 +146,12 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 <div class="blob blob3"></div>
 
 <header class="hero">
+    <div style="display:block;text-align:center;margin-bottom:.4rem;">
+    <div class="pazapa-badge">
+      <span class="dot dot1"></span><span class="dot dot2"></span><span class="dot dot3"></span>
+      Pazapa &nbsp;·&nbsp; 3e &nbsp;·&nbsp; Mathématiques
+    </div>
+  </div>
   <div class="badge-semaine">Semaine 1 · Jour 3</div>
   <h1>✏️ Résoudre les exercices</h1>
   <p class="sous-titre">Équations et produit nul</p>
@@ -157,7 +167,7 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
     👉 <i>ax</i> + <i>b</i> = 0 → <i>x</i> = <strong>−b ÷ a</strong>.<br>
     👉 <i>ax</i> + <i>b</i> = <i>c</i> → <i>x</i> = <strong>(c − b) ÷ a</strong>.<br>
     👉 (<i>ax</i> + <i>b</i>)(<i>cx</i> + <i>d</i>) = 0 → deux solutions&nbsp;: <i>x</i><sub>1</sub> = −b/a et <i>x</i><sub>2</sub> = −d/c.<br>
-    👉 Produit des solutions = <i>x</i><sub>1</sub> × <i>x</i><sub>2</sub> = <strong>(b × d) ÷ (a × c)</strong>.
+    👉 Produit des solutions = <i>x</i><sub>1</sub> × <i>x</i><sub>2</sub>.
   </div>
   <button class="btn btn-start" id="btnStart">▶️ Démarrer le défi</button>
 </section>
@@ -272,8 +282,9 @@ function genAxc(){
   return { type:"axc", mode:"saisie", a:a, b:b, c:c, sol:sol };
 }
 function genProdNul(){
-  /* (ax+b)(cx+d)=0, produit = (b/a)*(d/c) = bd/(ac) */
-  var a=pick([1,2,3,4,5]),c=pick([1,2,3,5]);
+  /* (ax+b)(cx+d)=0, produit = (-b/a)*(-d/c) = bd/(ac) */
+  var a=pick([-5,-4,-3,-2,-1,1,2,3,4,5]),c=pick([-5,-3,-2,-1,1,2,3,5]);
+  if(a===0) a=1; if(c===0) c=1;
   var b=nz(-12,12),d=nz(-12,12);
   /* produit réduit */
   var pn=b*d, pd=a*c;
@@ -281,9 +292,25 @@ function genProdNul(){
   pn=pn/g; pd=pd/g;
   if(pd<0){pn=-pn;pd=-pd;}
   var prod=makeFrac(pn,pd);
-  /* pool de distracteurs */
-  var pool=[makeFrac(-pn,pd),makeFrac(0,1),makeFrac(pn+4*pd,pd),makeFrac(pn-4*pd,pd),
-            makeFrac(pn*2,pd),makeFrac(pn+pd,pd),makeFrac(pn-pd,pd),makeFrac(-pn-4*pd,pd)];
+  /* garder les valeurs originales pour les distracteurs */
+  var q_a=a,q_b=b,q_c=c,q_d=d;
+  /* pool de distracteurs pédagogiques — vraies erreurs d'élèves */
+  /* somme des solutions : (-b/a)+(-d/c) = -(b*c+a*d)/(a*c) */
+  var sommePn=-(q_b*q_c+q_a*q_d), sommePd=q_a*q_c;
+  /* erreur de signe : -(b*d)/(a*c) */
+  /* erreur de formule : (b+d)/(a*c) */
+  var pool=[
+    makeFrac(-pn,pd),          /* signe inversé : -bd/(ac) */
+    makeFrac(sommePn,sommePd), /* somme au lieu de produit */
+    makeFrac(q_b+q_d,pd),      /* erreur de formule : (b+d)/(ac) */
+    makeFrac(pn+pd,pd),
+    makeFrac(pn-pd,pd),
+    makeFrac(-sommePn,sommePd),
+    makeFrac(-pn-pd,pd),
+    makeFrac(pn+2*pd,pd),      /* fallbacks garantis */
+    makeFrac(pn-2*pd,pd),
+    makeFrac(pn+3*pd,pd)
+  ];
   var corStr=fracStr(prod), used=[corStr], dis=[];
   for(var pi=0;pi<pool.length&&dis.length<3;pi++){
     var ps=fracStr(pool[pi]);
@@ -295,8 +322,8 @@ function genProdNul(){
   return { type:"prod", mode:"qcm", a:a, b:b, c:c, d:d, sol:prod, opts:opts };
 }
 function genGame(){
-  /* ordre calé sur l'énoncé : prod, ax0, axc, prod, axc, ax0 */
-  return [genProdNul(), genAx0(), genAxc(), genProdNul(), genAxc(), genAx0()];
+  /* 2 de chaque type, ordre mélangé */
+  return shuffle([genProdNul(), genAx0(), genAxc(), genProdNul(), genAxc(), genAx0()]);
 }
 
 /* ═══════════ AFFICHAGE ═══════════ */
@@ -322,9 +349,11 @@ function methode(q){
       +".<br>Produit = "+fracStr(x1)+" \u00d7 "+fracStr(x2)+" = <strong>"+fracStr(q.sol)+"</strong>.";
   }
   if(q.type==="ax0"){
-    return "<i>x</i> = \u2212("+q.b+") \u00f7 ("+q.a+") = <strong>"+fracStr(q.sol)+"</strong>.";
+    if(q.b>0) return "On soustrait "+q.b+" des deux c\u00f4t\u00e9s\u00a0: "+xterm(q.a)+" = \u2212"+q.b+"\u00a0\u2192\u00a0<i>x</i> = \u2212"+q.b+" \u00f7 "+q.a+" = <strong>"+fracStr(q.sol)+"</strong>.";
+    return "On ajoute "+Math.abs(q.b)+" des deux c\u00f4t\u00e9s\u00a0: "+xterm(q.a)+" = "+Math.abs(q.b)+"\u00a0\u2192\u00a0<i>x</i> = "+Math.abs(q.b)+" \u00f7 "+q.a+" = <strong>"+fracStr(q.sol)+"</strong>.";
   }
-  return "<i>x</i> = ("+q.c+" \u2212 ("+q.b+")) \u00f7 ("+q.a+") = <strong>"+fracStr(q.sol)+"</strong>.";
+  var step; if(q.b>0) step=q.c+"\u00a0\u2212\u00a0"+q.b; else step=q.c+"\u00a0+\u00a0"+Math.abs(q.b);
+  return "<i>x</i> = ("+step+") \u00f7 "+q.a+" = <strong>"+fracStr(q.sol)+"</strong>.";
 }
 
 /* ═══════════ SONS ═══════════ */
