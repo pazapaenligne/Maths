@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 3ème S1 J4 · Drone Autonome · Escape game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --day-color:  #3ab5d8;
+  --day-dark:   #1a6e88;
+  --day-light:  #e8f6fb;
+  --day-border: #9dd4e8;
+  --day-glow:   rgba(58,181,216,.25);
+  --bg:         #f0f6fa;
+  --surface:    #ffffff;
+  --border:     #c5dde8;
+  --text:       #1a2a35;
+  --muted:      #5a7a8a;
+  --radius:     14px;
+  --ok:         #1d7a40;
+  --ok-bg:      #e6f7ed;
+  --ok-border:  #6dce96;
+  --ko:         #b82020;
+  --ko-bg:      #fdeaea;
+  --ko-border:  #e88080;
+  --warn:       #9a6200;
+  --warn-bg:    #fff3cd;
+  --neon:       #1a6e88;
+  --neon-glow:  rgba(58,181,216,.3);
+  --grid:       rgba(58,181,216,.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height:100vh;
+  padding:20px 16px 80px;
+  position:relative;
+  overflow-x:hidden;
+}
+
+/* Grille tech en fond */
+body::before {
+  content:'';
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 48px 48px; opacity: .6;
+}
+
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:28px;}
+.logo-badge {
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(58,181,216,.15);color:var(--neon);
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;
+  letter-spacing:1.5px;padding:6px 16px;border-radius:999px;
+  border:1px solid var(--neon);
+  box-shadow:0 0 12px var(--neon-glow);margin-bottom:12px;
+}
+.logo-badge .dots{display:inline-flex;gap:3px;}
+.logo-badge .dots i{width:8px;height:8px;border-radius:50%;background:var(--neon);display:block;animation:blink 1.4s ease-in-out infinite;}
+.logo-badge .dots i:nth-child(2){animation-delay:.2s;opacity:.7;}
+.logo-badge .dots i:nth-child(3){animation-delay:.4s;opacity:.4;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.semaine{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:3px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:8px;
+}
+.titre{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:2.3rem;line-height:1.1;color:var(--day-dark);margin-bottom:6px;
+  text-shadow:0 0 8px var(--neon-glow);
+}
+.titre .accent{color:var(--neon);}
+.sous-titre{
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;letter-spacing:2px;
+  color:var(--muted);margin-bottom:14px;
+}
+.badge-mission{
+  display:inline-block;
+  background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(245,158,11,.2));
+  color:var(--warn);
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;
+  letter-spacing:1px;padding:9px 22px;border-radius:24px;
+  border:1px solid var(--warn);
+  box-shadow:0 0 14px rgba(245,158,11,.3);
+  animation:alertPulse 2s ease-in-out infinite;
+}
+@keyframes alertPulse{
+  0%,100%{box-shadow:0 0 14px rgba(245,158,11,.3);}
+  50%{box-shadow:0 0 28px rgba(245,158,11,.6);}
+}
+
+/* BOUTON SON */
+#soundBtn{
+  position:fixed;top:14px;right:14px;z-index:300;
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--neon);
+  background:rgba(0,212,255,.1);
+  color:var(--neon);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 10px var(--neon-glow);
+}
+
+/* BRIEFING */
+.briefing{
+  background:#fff5f5;
+  border:1px solid rgba(239,68,68,.3);
+  border-left:4px solid var(--ko);
+  border-radius:var(--radius);
+  padding:18px 20px;margin-bottom:22px;
+}
+.briefing-titre{
+  font-family:'Orbitron',sans-serif;font-weight:700;
+  font-size:.85rem;letter-spacing:2px;color:var(--ko);
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.briefing-corps{font-size:.94rem;line-height:1.7;color:var(--text);}
+.briefing-corps b{color:var(--neon);}
+
+/* RAPPEL */
+.rappel{
+  background:rgba(0,212,255,.06);
+  border:1px solid rgba(0,212,255,.2);
+  border-left:4px solid var(--neon);
+  border-radius:var(--radius);
+  padding:16px 20px;margin-bottom:22px;
+}
+.rappel-titre{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:.82rem;letter-spacing:1.5px;color:var(--neon);margin-bottom:8px;
+}
+.rappel-corps{font-size:.9rem;line-height:1.75;color:#2a4a5a;}
+.rappel-corps .f{
+  display:inline-block;background:rgba(0,212,255,.1);padding:4px 12px;
+  border-radius:6px;font-family:'JetBrains Mono',monospace;font-weight:700;
+  color:var(--ko);border:1px solid rgba(0,212,255,.2);margin:2px;
+}
+.rappel-corps .warn{color:var(--warn);font-weight:700;}
+
+/* SCOREBOARD */
+.scoreboard{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  background:var(--surface);border:2px solid var(--day-border);
+  border-radius:var(--radius);padding:12px;margin-bottom:18px;
+  box-shadow:0 4px 16px rgba(58,181,216,.1);
+}
+.sc-col{
+  text-align:center;padding:8px 4px;
+  background:#f5fafd;border-radius:10px;border:1.5px solid var(--border);
+}
+.sc-col.ok{border-color:rgba(34,197,94,.3);}
+.sc-col.ok .sc-num{color:var(--ok);}
+.sc-col.rem{border-color:rgba(0,212,255,.2);}
+.sc-col.rem .sc-num{color:var(--neon);}
+.sc-col.err{border-color:rgba(239,68,68,.3);}
+.sc-col.err .sc-num{color:var(--ko);}
+.sc-num{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.8rem;line-height:1;}
+.sc-lbl{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:var(--muted);margin-top:4px;text-transform:uppercase;}
+
+.progress-wrap{background:rgba(255,255,255,.05);border-radius:999px;height:6px;margin-bottom:24px;overflow:hidden;}
+.progress-bar{height:6px;border-radius:999px;background:linear-gradient(90deg,var(--neon),var(--day-color));width:0%;transition:width .4s ease;box-shadow:0 0 8px var(--neon-glow);}
+
+/* SECTION TITRE */
+.section-titre{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:2px;
+  color:var(--neon);padding:8px 16px;
+  background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);
+  border-radius:8px;margin:24px 0 14px;display:inline-block;
+  box-shadow:0 0 10px var(--neon-glow);
+}
+
+/* GRILLE MODULES */
+.modules-grille{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;
+}
+@media(max-width:700px){.modules-grille{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.modules-grille{grid-template-columns:1fr;}}
+
+.module-card{
+  background:#fff;
+  border:1.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;cursor:pointer;
+  transition:border-color .2s,box-shadow .2s;
+  position:relative;overflow:hidden;
+  text-align:center;
+}
+.module-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent,rgba(0,212,255,.03));
+  pointer-events:none;
+}
+.module-card:hover:not(.unlocked){
+  border-color:var(--neon);
+  box-shadow:0 0 20px var(--neon-glow);
+}
+.module-card.unlocked{
+  border-color:var(--ok);
+  background:rgba(34,197,94,.06);
+  cursor:default;
+}
+.module-card.unlocked::after{
+  content:'✓';
+  position:absolute;top:8px;right:10px;
+  font-size:1.1rem;color:var(--ok);font-weight:900;
+}
+.module-icone{font-size:2rem;margin-bottom:8px;filter:drop-shadow(0 0 6px var(--neon-glow));}
+.module-num{
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.7rem;
+  color:var(--neon);letter-spacing:2px;margin-bottom:4px;
+}
+.module-nom{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.85rem;color:var(--text);
+  line-height:1.2;margin-bottom:6px;
+}
+.module-statut{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:1px;
+  color:var(--warn);text-transform:uppercase;
+  padding-top:6px;border-top:1px solid var(--border);
+}
+.module-card.unlocked .module-statut{color:var(--ok);}
+
+/* BARRE DÉVERROUILLAGE */
+.unlock-bar{text-align:center;margin:18px 0 8px;}
+.btn-unlock{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:1.5px;
+  padding:14px 32px;border:none;border-radius:12px;cursor:pointer;color:#0a0e1a;
+  background:linear-gradient(135deg,var(--neon),var(--day-color));
+  box-shadow:0 0 20px var(--neon-glow);
+  transition:transform .15s;animation:pulseFin 2s ease-in-out infinite;
+}
+.btn-unlock:hover{transform:translateY(-2px);}
+.btn-unlock:disabled{background:#1e2d3d;color:var(--muted);cursor:not-allowed;animation:none;box-shadow:none;}
+@keyframes pulseFin{
+  0%,100%{box-shadow:0 0 20px var(--neon-glow);}
+  50%{box-shadow:0 0 35px var(--neon-glow),0 0 60px rgba(0,212,255,.2);}
+}
+
+/* FINALE */
+.finale-zone{display:none;margin-top:24px;}
+.finale-zone.show{display:block;animation:fadeUp .6s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+.finale-card{
+  background:var(--warn-bg);
+  border:1.5px solid rgba(155,98,0,.25);
+  border-left:4px solid var(--warn);
+  border-radius:var(--radius);padding:20px 22px;margin-bottom:18px;
+}
+.finale-card h3{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.1rem;
+  color:var(--warn);margin-bottom:8px;
+}
+.finale-card p{color:var(--text);font-size:.94rem;line-height:1.65;}
+
+/* Fragments */
+.fragments-grille{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:18px 0;}
+@media(max-width:580px){.fragments-grille{grid-template-columns:1fr;}}
+
+.frag-card{
+  background:#fff;border:1.5px solid var(--border);
+  border-radius:10px;padding:16px;position:relative;
+  box-shadow:0 2px 10px rgba(58,181,216,.08);
+}
+.frag-card.found{border-color:var(--ok);background:rgba(34,197,94,.06);}
+.frag-num{
+  position:absolute;top:-12px;left:14px;
+  background:var(--neon);color:#0a0e1a;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:.75rem;
+  padding:2px 10px;border-radius:999px;letter-spacing:1px;
+}
+.frag-card.found .frag-num{background:var(--ok);}
+.frag-titre{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  color:var(--neon);font-size:.82rem;margin:8px 0 10px;
+}
+.frag-enigme{
+  background:var(--day-light);border-radius:8px;padding:10px 12px;border:1px solid var(--day-border);
+  margin-bottom:10px;font-size:.9rem;color:#94a3b8;text-align:center;line-height:1.5;
+}
+.frag-enigme .calc{
+  display:block;font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:1.1rem;color:var(--ko);margin:6px 0;
+}
+.frag-saisie{display:flex;gap:8px;align-items:center;justify-content:center;}
+.frag-saisie input{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:.95rem;text-align:center;width:90px;padding:8px 10px;
+  border:1px solid var(--border);border-radius:8px;
+  background:#fff;color:var(--text);
+}
+.frag-saisie input:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 2px var(--neon-glow);}
+.frag-saisie input.good{border-color:var(--ok);background:rgba(34,197,94,.1);}
+.frag-saisie input.bad{border-color:var(--ko);background:rgba(239,68,68,.1);}
+.frag-saisie input:disabled{opacity:.8;}
+.frag-saisie button{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;
+  padding:8px 14px;background:var(--neon);color:#0a0e1a;
+  border:none;border-radius:8px;cursor:pointer;
+}
+.frag-saisie button:disabled{background:var(--muted);cursor:not-allowed;}
+.frag-fb{margin-top:8px;font-size:.82rem;text-align:center;font-weight:700;min-height:18px;}
+.frag-fb.ok{color:var(--ok);}
+.frag-fb.ko{color:var(--ko);}
+
+/* Zone entraînement final */
+.entrainement{
+  background:var(--day-light);
+  border:1.5px solid var(--day-border);border-left:4px solid var(--neon);
+  border-radius:var(--radius);padding:18px 20px;margin-bottom:18px;
+}
+.entrainement h3{
+  font-family:'Orbitron',sans-serif;font-weight:700;
+  font-size:1rem;color:var(--neon);margin-bottom:8px;
+}
+.entrainement p{color:var(--text);font-size:.9rem;line-height:1.6;margin-bottom:14px;}
+.ineq-display{
+  text-align:center;font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:1.6rem;color:var(--day-dark);padding:14px;
+  background:var(--day-light);border:1px solid var(--day-border);
+  border-radius:10px;margin-bottom:14px;letter-spacing:1px;
+  text-shadow:0 0 10px var(--neon-glow);
+}
+.ineq-saisie{
+  display:flex;align-items:center;justify-content:center;
+  gap:10px;flex-wrap:wrap;padding:12px;
+  background:var(--day-light);border-radius:10px;margin-bottom:12px;border:1px solid var(--day-border);
+}
+.ineq-saisie .prefix{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:1rem;color:var(--text);
+}
+.ineq-saisie input{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:1.1rem;text-align:center;width:200px;padding:10px;
+  border:1px solid var(--border);border-radius:8px;
+  background:#fff;color:var(--text);
+}
+.ineq-saisie input:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 2px var(--neon-glow);}
+.ineq-saisie input.good{border-color:var(--ok);}
+.ineq-saisie input.bad{border-color:var(--ko);}
+.ineq-saisie input:disabled{opacity:.8;}
+
+.btn-ent{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:1px;
+  min-height:44px;padding:0 18px;border:none;border-radius:10px;
+  cursor:pointer;color:#0a0e1a;background:var(--ok);display:inline-flex;align-items:center;gap:6px;
+}
+.btn-ent:disabled{background:var(--muted);cursor:not-allowed;color:#fff;}
+
+.fb-ent{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:8px;
+  font-weight:bold;font-size:.9rem;text-align:center;
+}
+.fb-ent.show{display:block;}
+.fb-ent.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-border);}
+.fb-ent.ko{background:var(--ko-bg);color:var(--ko);border:1px solid var(--ko-border);}
+
+.debrief-zone{display:none;}
+.debrief-zone.show{display:block;animation:fadeUp .5s ease;}
+
+/* MODALE */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  backdrop-filter:blur(4px);z-index:100;
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+.modal-backdrop.show{display:flex;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+.modal{
+  background:#f7fbfd;
+  border:1px solid var(--neon);
+  border-radius:18px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;
+  box-shadow:0 0 40px var(--neon-glow),0 20px 60px rgba(0,0,0,.7);
+  animation:modalIn .4s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes modalIn{from{transform:scale(.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.modal-head{
+  background:linear-gradient(90deg,var(--day-light),#fff);
+  color:var(--neon);padding:14px 22px;
+  border-radius:17px 17px 0 0;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.modal-titre{font-family:'Orbitron',sans-serif;font-weight:700;font-size:1rem;letter-spacing:1px;}
+.modal-close{
+  background:rgba(239,68,68,.15);color:var(--ko);border:none;
+  width:32px;height:32px;border-radius:50%;font-size:1.2rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.modal-body{padding:22px 24px 18px;}
+
+.enigme-contexte{
+  background:rgba(245,158,11,.08);
+  border-left:4px solid var(--warn);border-radius:8px;
+  padding:12px 14px;margin-bottom:14px;
+  font-family:'JetBrains Mono',monospace;font-size:.92rem;
+  font-style:italic;color:var(--warn);line-height:1.5;
+}
+.enigme-ineq{
+  text-align:center;font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:1.5rem;color:var(--day-dark);padding:14px;
+  background:var(--day-light);border:2px solid var(--day-border);
+  border-radius:10px;margin-bottom:14px;letter-spacing:1px;
+  text-shadow:0 0 10px var(--neon-glow);
+}
+.enigme-q{font-weight:bold;font-size:.95rem;color:var(--text);text-align:center;margin-bottom:12px;}
+
+.choix{display:flex;flex-direction:column;gap:9px;margin-bottom:14px;}
+.choix-btn{
+  text-align:left;font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;
+  padding:12px 14px;border:1px solid var(--border);background:#f5fafd;
+  border-radius:10px;cursor:pointer;color:var(--text);
+  transition:.15s;display:flex;align-items:center;gap:11px;
+}
+.choix-btn .ltr{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;
+  background:rgba(0,212,255,.1);color:var(--neon);
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.78rem;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(0,212,255,.2);
+}
+.choix-btn:hover:not(.locked){border-color:var(--neon);background:var(--day-light);}
+.choix-btn.sel{border-color:var(--neon);background:var(--day-light);}
+.choix-btn.sel .ltr{background:var(--neon);color:#0a0e1a;}
+.choix-btn.locked{cursor:default;}
+.choix-btn.good{border-color:var(--ok);background:var(--ok-bg);}
+.choix-btn.good .ltr{background:var(--ok);color:#fff;}
+.choix-btn.bad{border-color:var(--ko);background:var(--ko-bg);}
+.choix-btn.bad .ltr{background:var(--ko);color:#fff;}
+
+.modal-btns{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px;}
+.mbtn{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:1px;
+  min-height:44px;padding:0 16px;border:none;border-radius:10px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+}
+.mbtn:disabled{opacity:.4;cursor:not-allowed;}
+.mbtn-valider{background:var(--ok);color:#fff;}
+.mbtn-indice{background:rgba(0,212,255,.2);color:var(--neon);border:1px solid rgba(0,212,255,.3);}
+.mbtn-retry{background:rgba(245,158,11,.2);color:var(--warn);border:1px solid rgba(245,158,11,.3);}
+
+.indice-box{
+  display:none;padding:10px 14px;border-radius:8px;margin-bottom:10px;
+  background:var(--day-light);border:1.5px solid var(--day-border);
+  font-size:.88rem;color:#2a4a5a;line-height:1.5;
+}
+.indice-box.show{display:block;}
+
+.modal-fb{display:none;margin-bottom:12px;padding:12px 14px;border-radius:8px;font-weight:bold;font-size:.9rem;text-align:center;}
+.modal-fb.show{display:block;}
+.modal-fb.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-border);}
+.modal-fb.ko{background:var(--ko-bg);color:var(--ko);border:1px solid var(--ko-border);}
+.modal-fb.retry{background:var(--warn-bg);color:var(--warn);border:1px solid rgba(245,158,11,.3);}
+
+.correction-detail{
+  display:none;background:var(--day-light);
+  border:1px solid var(--day-border);border-left:4px solid var(--neon);
+  border-radius:10px;padding:16px 18px;font-size:.9rem;color:#94a3b8;line-height:1.7;
+}
+.correction-detail.show{display:block;animation:fadeUp .3s ease;}
+.etape{display:flex;align-items:baseline;gap:10px;padding:5px 0;border-bottom:1px dashed var(--day-border);}
+.etape:last-child{border-bottom:none;}
+.etape-num{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;
+  background:var(--neon);color:#0a0e1a;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:.72rem;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.etape-txt b{color:var(--day-dark);}
+.eq-step{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--ko);font-size:.95rem;}
+.eq-result{
+  display:block;text-align:center;margin-top:8px;padding:8px;
+  background:rgba(34,197,94,.1);border-radius:8px;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ok);
+  border:1px solid rgba(34,197,94,.2);
+}
+
+/* VICTOIRE */
+.victory{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:radial-gradient(ellipse at center,rgba(10,80,120,.97),rgba(5,30,60,.99));
+  align-items:center;justify-content:center;padding:20px;overflow-y:auto;
+}
+.victory.show{display:flex;animation:fadeIn .6s ease;}
+.victory-card{
+  background:#f7fbfd;border:2px solid var(--neon);
+  border-radius:20px;padding:30px 28px;max-width:560px;width:100%;
+  text-align:center;box-shadow:0 0 60px var(--neon-glow),0 20px 80px rgba(0,0,0,.8);
+  animation:pop .8s cubic-bezier(.18,.89,.32,1.6);
+}
+@keyframes pop{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+.victory-icone{font-size:3.5rem;margin-bottom:10px;animation:bounce 1s ease infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.victory-titre{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:1.8rem;color:var(--neon);
+  text-shadow:0 0 20px var(--neon-glow);
+  margin-bottom:4px;
+}
+.victory-sous{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.9rem;margin-bottom:20px;}
+.victory-msg{
+  background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:10px;padding:16px 18px;margin-bottom:22px;
+  text-align:left;font-family:'JetBrains Mono',monospace;font-size:.92rem;
+  color:var(--text);line-height:1.6;
+}
+.victory-msg b{color:var(--day-dark);}
+.btn-rejouer{
+  display:block;width:100%;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.95rem;
+  letter-spacing:1.5px;padding:14px;
+  background:linear-gradient(135deg,var(--neon),var(--day-color));
+  color:#0a0e1a;border:none;border-radius:12px;cursor:pointer;
+}
+
+/* Confettis */
+.confetti{position:fixed;top:-10px;width:8px;height:14px;z-index:199;pointer-events:none;animation:cfFall linear forwards;}
+@keyframes cfFall{0%{transform:translateY(0) rotateZ(0deg);opacity:1;}100%{transform:translateY(110vh) rotateZ(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+
+<button id="soundBtn" title="Son">🔇</button>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA &middot; MATHS &middot; 3ÈME
+    </div>
+    <div class="semaine">Semaine 1 &ndash; Jour 4</div>
+    <h1 class="titre">Drone <span class="accent">Autonome</span></h1>
+    <div class="sous-titre">Inéquations · escape game · centre de recherche</div>
+    <div class="badge-mission">⚠ ALERTE SYSTÈME &mdash; STABILISATION REQUISE ⚠</div>
+  </div>
+
+  <div class="briefing">
+    <div class="briefing-titre">📡 BRIEFING DE MISSION</div>
+    
+  <!-- SVG Drone autonome -->
+  <div style="text-align:center;margin:18px 0 10px;">
+    <svg viewBox="0 0 320 180" width="260" height="147" role="img" aria-label="Drone autonome quadricoptère" style="filter:drop-shadow(0 4px 16px rgba(58,181,216,.35));">
+      <!-- Corps central -->
+      <rect x="120" y="72" width="80" height="36" rx="10" fill="#1a6e88" opacity=".9"/>
+      <rect x="130" y="80" width="60" height="20" rx="6" fill="#3ab5d8" opacity=".7"/>
+      <!-- Voyant clignotant -->
+      <circle cx="160" cy="90" r="5" fill="#00d4ff" opacity=".95">
+        <animate attributeName="opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/>
+      </circle>
+      <!-- 4 bras -->
+      <line x1="120" y1="80" x2="60" y2="50" stroke="#2a8ab0" stroke-width="6" stroke-linecap="round"/>
+      <line x1="200" y1="80" x2="260" y2="50" stroke="#2a8ab0" stroke-width="6" stroke-linecap="round"/>
+      <line x1="120" y1="100" x2="60" y2="130" stroke="#2a8ab0" stroke-width="6" stroke-linecap="round"/>
+      <line x1="200" y1="100" x2="260" y2="130" stroke="#2a8ab0" stroke-width="6" stroke-linecap="round"/>
+      <!-- 4 hélices (ellipses) -->
+      <ellipse cx="60" cy="44" rx="28" ry="7" fill="none" stroke="#3ab5d8" stroke-width="2.5" opacity=".8">
+        <animateTransform attributeName="transform" type="rotate" from="0 60 44" to="360 60 44" dur=".4s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="260" cy="44" rx="28" ry="7" fill="none" stroke="#3ab5d8" stroke-width="2.5" opacity=".8">
+        <animateTransform attributeName="transform" type="rotate" from="360 260 44" to="0 260 44" dur=".35s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="60" cy="136" rx="28" ry="7" fill="none" stroke="#3ab5d8" stroke-width="2.5" opacity=".8">
+        <animateTransform attributeName="transform" type="rotate" from="360 60 136" to="0 60 136" dur=".38s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="260" cy="136" rx="28" ry="7" fill="none" stroke="#3ab5d8" stroke-width="2.5" opacity=".8">
+        <animateTransform attributeName="transform" type="rotate" from="0 260 136" to="360 260 136" dur=".42s" repeatCount="indefinite"/>
+      </ellipse>
+      <!-- Caméra -->
+      <rect x="148" y="108" width="24" height="14" rx="4" fill="#0a3d55"/>
+      <circle cx="160" cy="115" r="5" fill="#1a6e88"/>
+      <circle cx="160" cy="115" r="3" fill="#3ab5d8" opacity=".6"/>
+      <!-- Pieds d'atterrissage -->
+      <line x1="140" y1="122" x2="140" y2="135" stroke="#2a8ab0" stroke-width="3" stroke-linecap="round"/>
+      <line x1="180" y1="122" x2="180" y2="135" stroke="#2a8ab0" stroke-width="3" stroke-linecap="round"/>
+      <line x1="128" y1="135" x2="152" y2="135" stroke="#2a8ab0" stroke-width="3" stroke-linecap="round"/>
+      <line x1="168" y1="135" x2="192" y2="135" stroke="#2a8ab0" stroke-width="3" stroke-linecap="round"/>
+      <!-- Signal WiFi -->
+      <path d="M155 62 Q160 56 165 62" stroke="#00d4ff" stroke-width="2" fill="none" opacity=".7"/>
+      <path d="M150 57 Q160 48 170 57" stroke="#00d4ff" stroke-width="2" fill="none" opacity=".5"/>
+      <circle cx="160" cy="65" r="2" fill="#00d4ff" opacity=".9"/>
+    </svg>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:2px;color:var(--muted);margin-top:6px;text-transform:uppercase;">Drone autonome · Quadricoptère AX-7</div>
+  </div>
+  <div class="briefing-corps">
+      Lors d'un atelier scientifique, tu supervises le lancement d'un <b>drone autonome</b> dans un centre de recherche en aéronautique.
+      Une <b>alerte système</b> vient de bloquer le drone&nbsp;: 6 modules de stabilisation sont en erreur.
+      Pour les débloquer, tu dois choisir la <b>première opération</b> à effectuer sur chaque inéquation de réglage.
+      <br><br>
+      Une fois les 6 modules débloqués, tu accèdes à la <b>mission de calibration finale</b> avant le lancement.
+    </div>
+  </div>
+
+  <div class="rappel">
+    <div class="rappel-titre">◆ RAPPEL &mdash; INÉQUATIONS DU 1ER DEGRÉ</div>
+    <div class="rappel-corps">
+      Même règle que les équations&nbsp;: on applique la même opération sur les deux membres.<br>
+      <span class="f">ax &lt; b &nbsp;→&nbsp; ÷ a (si a &gt; 0)</span>
+      <span class="f">x + a &gt; b &nbsp;→&nbsp; − a</span>
+      <span class="f">x − a ≤ b &nbsp;→&nbsp; + a</span><br>
+      <span class="warn">⚠ RÈGLE IMPORTANTE&nbsp;: si on divise ou multiplie par un nombre <b>négatif</b>, le sens de l'inégalité s'inverse&nbsp;!</span><br>
+      <span class="f">&lt; devient &gt;</span>
+      <span class="f">&gt; devient &lt;</span>
+      <span class="f">≤ devient ≥</span>
+    </div>
+  </div>
+
+  <div class="scoreboard">
+    <div class="sc-col ok"><div class="sc-num" id="cntOk">0</div><div class="sc-lbl">Modules OK</div></div>
+    <div class="sc-col rem"><div class="sc-num" id="cntRem">6</div><div class="sc-lbl">Restants</div></div>
+    <div class="sc-col err"><div class="sc-num" id="cntErr">0</div><div class="sc-lbl">Essais</div></div>
+  </div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div class="section-titre">▶ ÉTAPE 1 — Débloquer les 6 modules</div>
+
+  <div class="modules-grille" id="modulesGrille"></div>
+
+  <div class="unlock-bar">
+    <button class="btn-unlock" id="btnUnlock" disabled>
+      &#9654; Modules débloqués &mdash; Lancer la calibration finale
+    </button>
+  </div>
+
+  <div class="finale-zone" id="finaleZone">
+
+    <div class="section-titre">▶ ÉTAPE 2 — Calibration finale (entraînement)</div>
+
+    <div class="finale-card">
+      <h3>📋 Protocole de calibration</h3>
+      <p>Le simulateur génère une inéquation de test <b>différente du vrai défi de lancement</b>.
+      Tu dois résoudre cette inéquation d'entraînement pour valider tes réflexes avant la mission réelle.</p>
+    </div>
+
+    <div class="section-titre" style="font-size:.82rem;">▷ Fragments du code d'accès à trouver</div>
+
+    <div class="fragments-grille" id="fragmentsGrille"></div>
+
+    <div id="entrainementZone" style="display:none;">
+      <div class="entrainement">
+        <h3>🎯 Inéquation de calibration</h3>
+        <p>Le simulateur affiche l'inéquation de test. <b>Quelle opération supprime d’abord le terme constant pour isoler x ?</b></p>
+        <div class="ineq-display">4x &minus; 8 &lt; 0</div>
+        <div class="choix" id="choixEnt">
+          <button class="choix-btn" onclick="selEnt(0)"><span class="ltr">A</span><span>+ 8</span></button>
+          <button class="choix-btn" onclick="selEnt(1)"><span class="ltr">B</span><span>&minus; 8</span></button>
+          <button class="choix-btn" onclick="selEnt(2)"><span class="ltr">C</span><span>&divide; 4</span></button>
+          <button class="choix-btn" onclick="selEnt(3)"><span class="ltr">D</span><span>&times; 4</span></button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-ent" id="btnEnt" onclick="validerEnt()" disabled>✓ Valider la calibration</button>
+        </div>
+        <div class="fb-ent" id="fbEnt"></div>
+      </div>
+
+      <div class="debrief-zone" id="debriefZone">
+        <div class="victory-msg" style="margin-bottom:14px;">
+          <b>Calibration réussie&nbsp;!</b><br><br>
+          4x &minus; 8 &lt; 0<br>
+          Première opération&nbsp;: <b>+ 8</b> → 4x &lt; 8<br>
+          Puis &divide; 4 → <b>x &lt; 2</b><br><br>
+          Tu es prêt&nbsp;! Applique la même méthode dans ton <b>défi de lancement réel</b>.
+        </div>
+        <button class="btn-rejouer" onclick="showVictory()">&#9654; Lancer le drone !</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modale énigme -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="modal-titre" id="modalTitre">Module</div>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Victoire -->
+<div class="victory" id="victory">
+  <div class="victory-card">
+    <div class="victory-icone">&#9654;</div>
+    <div class="victory-titre">LANCEMENT AUTORISÉ</div>
+    <div class="victory-sous">&mdash; tous les systèmes sont au vert &mdash;</div>
+    <div class="victory-msg">
+      <b>Mission accomplie&nbsp;!</b><br><br>
+      Tu as débloqué les 6 modules de stabilisation et validé la calibration d'entraînement.<br>
+      Tu maîtrises la première étape de résolution des inéquations.<br><br>
+      <b>Prochaine étape&nbsp;:</b> applique ta méthode dans le défi de lancement pour autoriser le vol du drone en toute sécurité.
+    </div>
+    <button class="btn-rejouer" onclick="restartAll()">&#8635; Recommencer la mission</button>
+  </div>
+</div>
+
+<script>
+/* ===================== DONNÉES ===================== */
+var MODULES = [
+  {
+    icone: '\u{1F4BB}',
+    nom: 'Module CPU',
+    num: 'SYS-01',
+    contexte: 'Le processeur de vol impose une contrainte de fréquence. L\u2019inéquation représente le paramètre à stabiliser.',
+    ineq: '3x &lt; 12',
+    question: 'Quelle est la première opération à effectuer pour isoler x\u00a0?',
+    choices: ['\u00d7 3', '\u2212 12', '\u00f7 3', '+ 12'],
+    correct: 2,
+    indice: 'Le coefficient de x est 3 (positif). Quelle opération supprime ce coefficient\u00a0?',
+    etapes: [
+      { n:'1', txt:"L\u2019in\u00e9quation est de la forme <span class='eq-step'>ax &lt; b</span> avec a = 3 (positif)." },
+      { n:'2', txt:"On <b>divise les deux membres par 3</b>\u00a0: <span class='eq-step'>3x \u00f7 3 &lt; 12 \u00f7 3</span>" },
+      { n:'3', txt:"a est positif, donc le sens ne change pas\u00a0: <span class='eq-step'>x &lt; 4</span>" }
+    ],
+    result: 'x &lt; 4'
+  },
+  {
+    icone: '\u{1F4E1}',
+    nom: 'Module GPS',
+    num: 'NAV-02',
+    contexte: 'Le module GPS signale une déviation de trajectoire. Le seuil de correction doit respecter cette inéquation.',
+    ineq: 'x + 5 &gt; 9',
+    question: 'Quelle est la première opération à effectuer pour isoler x\u00a0?',
+    choices: ['+ 5', '\u2212 9', '\u00f7 5', '\u2212 5'],
+    correct: 3,
+    indice: 'Que faut-il faire disparaître pour isoler x\u00a0? Regarde ce qui est ajouté à x.',
+    etapes: [
+      { n:'1', txt:"L\u2019in\u00e9quation est de la forme <span class='eq-step'>x + a &gt; b</span> avec a = 5." },
+      { n:'2', txt:"On <b>soustrait 5 des deux membres</b>\u00a0: <span class='eq-step'>x + 5 \u2212 5 &gt; 9 \u2212 5</span>" },
+      { n:'3', txt:"Simplification\u00a0: <span class='eq-step'>x &gt; 4</span>" }
+    ],
+    result: 'x &gt; 4'
+  },
+  {
+    icone: '\u{1F9ED}',
+    nom: 'Module Gyro',
+    num: 'GYR-03',
+    contexte: 'Le gyroscope détecte une rotation instable. Le paramètre doit rester en dessous d\u2019un seuil.',
+    ineq: 'x \u2212 3 \u2264 7',
+    question: 'Quelle est la première opération à effectuer pour isoler x\u00a0?',
+    choices: ['\u2212 3', '+ 3', '\u00f7 3', '\u00d7 3'],
+    correct: 1,
+    indice: 'Que faut-il faire disparaître pour isoler x\u00a0? Regarde ce qui est soustrait à x.',
+    etapes: [
+      { n:'1', txt:"L\u2019in\u00e9quation est de la forme <span class='eq-step'>x \u2212 a \u2264 b</span> avec a = 3." },
+      { n:'2', txt:"On <b>ajoute 3 aux deux membres</b>\u00a0: <span class='eq-step'>x \u2212 3 + 3 \u2264 7 + 3</span>" },
+      { n:'3', txt:"Simplification\u00a0: <span class='eq-step'>x \u2264 10</span>" }
+    ],
+    result: 'x \u2264 10'
+  },
+  {
+    icone: '\u26a1',
+    nom: 'Module Propulsion',
+    num: 'PWR-04',
+    contexte: 'La puissance des rotors génère une valeur négative. Attention à la règle d\u2019inversion&nbsp;!',
+    ineq: '\u2212x &gt; \u22124',
+    question: 'Quelle est la première opération à effectuer pour isoler x\u00a0?',
+    choices: ['÷ (−1)', '× (−1)', '+ (−1)', '− (−1)'],
+    correct: [0, 1],
+    indice: 'Le coefficient de x est \u22121. Attention\u00a0: diviser par un négatif inverse le sens de l\u2019inégalité.',
+    etapes: [
+      { n:'1', txt:"\u2212x = (\u22121) \u00d7 x. Le coefficient est <b>n\u00e9gatif</b>." },
+      { n:'2', txt:"On <b>multiplie ou divise les deux membres par \u22121</b>\u00a0: <span class='eq-step'>\u2212x \u00f7 (\u22121) &gt; \u22124 \u00f7 (\u22121)</span> ou <span class='eq-step'>\u2212x \u00d7 (\u22121) &gt; \u22124 \u00d7 (\u22121)</span>" },
+      { n:'3', txt:"<b>Le sens s\u2019inverse&nbsp;!</b> &gt; devient &lt;\u00a0: <span class='eq-step'>x &lt; 4</span>" }
+    ],
+    result: 'x &lt; 4 (le sens s\u2019est invers\u00e9)'
+  },
+  {
+    icone: '\u{1F321}',
+    nom: 'Module Thermo',
+    num: 'THM-05',
+    contexte: 'Le capteur thermique impose une plage de température minimale. Deux opérations nécessaires.',
+    ineq: '2x \u2212 6 \u2265 4',
+    question: 'Quelle est la première opération à effectuer pour isoler x\u00a0?',
+    choices: ['\u2212 6', '\u00f7 2', '\u2212 4', '+ 6'],
+    correct: 3,
+    indice: 'Il y a deux opérations sur x\u00a0: une multiplication et une soustraction. Laquelle supprimer en premier\u00a0?',
+    etapes: [
+      { n:'1', txt:"Deux op\u00e9rations. On <b>supprime le terme constant (\u22126)</b> en premier." },
+      { n:'2', txt:"On ajoute 6\u00a0: <span class='eq-step'>2x \u2212 6 + 6 \u2265 4 + 6</span>, soit <span class='eq-step'>2x \u2265 10</span>" },
+      { n:'3', txt:"Puis on divise par 2 (positif, pas d\u2019inversion)\u00a0: <span class='eq-step'>x \u2265 5</span>" }
+    ],
+    result: 'x \u2265 5'
+  },
+  {
+    icone: '\u{1F4F6}',
+    nom: 'Module Radio',
+    num: 'COM-06',
+    contexte: 'La fréquence radio doit rester au-dessous d\u2019un seuil critique. Attention au signe du coefficient&nbsp;!',
+    ineq: '\u22123x + 9 &lt; 0',
+    question: 'Quelle est la première opération à effectuer pour isoler x\u00a0?',
+    choices: ['+ 9', '\u00f7 (\u22123)', '\u2212 9', '\u00d7 (\u22123)'],
+    correct: 2,
+    indice: 'Il y a deux opérations sur x. Commence par supprimer le terme constant (+9).',
+    etapes: [
+      { n:'1', txt:"On <b>soustrait 9 des deux membres</b> d\u2019abord." },
+      { n:'2', txt:"<span class='eq-step'>\u22123x + 9 \u2212 9 &lt; 0 \u2212 9</span>, soit <span class='eq-step'>\u22123x &lt; \u22129</span>" },
+      { n:'3', txt:"Puis \u00f7 (\u22123) avec <b>inversion</b>\u00a0: <span class='eq-step'>x &gt; 3</span>" }
+    ],
+    result: 'x &gt; 3 (inversion car \u00f7 par n\u00e9gatif)'
+  }
+];
+
+var FRAGMENTS = [
+  { titre:'Param. Alpha', enigme:'PGCD de 12 et 18\u00a0?', answer:6, texte:'4x \u2212 8' },
+  { titre:'Param. Beta',  enigme:'PGCD de 15 et 25\u00a0?', answer:5, texte:'< 0' },
+  { titre:'Param. Gamma', enigme:'PGCD de 16 et 24\u00a0?', answer:8, texte:'Premi\u00e8re op\u00e9ration\u00a0:' },
+  { titre:'Param. Delta', enigme:'PGCD de 9 et 21\u00a0?',  answer:3, texte:'+ 8' }
+];
+
+/* ===================== ÉTAT ===================== */
+var modulesOk = 0;
+var moduleEtat = MODULES.map(function(){ return { done:false, tries:0 }; });
+var fragEtat   = FRAGMENTS.map(function(){ return { found:false }; });
+var fragsFound = 0;
+var entSelected = null;
+var entDone = false;
+var currentMod = -1;
+
+/* ===================== AUDIO ===================== */
+var audioCtx = null, audioOn = false, droneNode = null, ambNodes = [];
+
+function initAudio(){
+  if (audioCtx) return;
+  try{ audioCtx = new(window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+}
+
+function startAmbiance(){
+  if (!audioCtx || !audioOn) return;
+  stopAmbiance();
+  // Bourdonnement bas (drone)
+  var osc = audioCtx.createOscillator();
+  osc.type = 'sine'; osc.frequency.value = 55;
+  var g = audioCtx.createGain(); g.gain.value = 0.04;
+  osc.connect(g).connect(audioCtx.destination);
+  osc.start(); ambNodes.push(osc, g);
+  // Harmonique électronique
+  var osc2 = audioCtx.createOscillator();
+  osc2.type = 'square'; osc2.frequency.value = 110;
+  var g2 = audioCtx.createGain(); g2.gain.value = 0.015;
+  osc2.connect(g2).connect(audioCtx.destination);
+  osc2.start(); ambNodes.push(osc2, g2);
+  // Bip périodique
+  scheduleBip();
+}
+
+var bipTimeout;
+function scheduleBip(){
+  if (bipTimeout) clearTimeout(bipTimeout);
+  bipTimeout = setTimeout(function(){
+    if (audioOn && audioCtx) { playBip(880, 0.05, 0.08); scheduleBip(); }
+  }, 3000 + Math.random()*4000);
+}
+
+function stopAmbiance(){
+  ambNodes.forEach(function(n){ try{n.stop && n.stop(); n.disconnect && n.disconnect();}catch(e){} });
+  ambNodes = [];
+  if (bipTimeout){ clearTimeout(bipTimeout); bipTimeout = null; }
+}
+
+function playBip(freq, vol, dur){
+  if (!audioCtx || !audioOn) return;
+  var now = audioCtx.currentTime;
+  var o = audioCtx.createOscillator();
+  o.type = 'sine'; o.frequency.value = freq;
+  var g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.001, now);
+  g.gain.linearRampToValueAtTime(vol, now + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(now); o.stop(now + dur + 0.05);
+}
+
+// Son : déblocage d'un module (3 bips courts montants)
+function sndUnlock(){
+  playBip(1047, 0.10, 0.10);
+  setTimeout(function(){ playBip(1319, 0.10, 0.12); }, 90);
+  setTimeout(function(){ playBip(1568, 0.10, 0.15); }, 190);
+}
+
+// Son : erreur (bip grave descendant)
+function sndError(){ playBip(220, 0.08, 0.28); }
+
+// Son : palier franchi — tous les 6 modules débloqués
+// Arpège 5 bips montants + résonance finale (distinctif, pas musical)
+function sndPalier(){
+  if (!audioCtx || !audioOn) return;
+  var freqs = [523, 659, 784, 1047, 1319];
+  freqs.forEach(function(f, i){
+    setTimeout(function(){ playBip(f, 0.13, 0.18); }, i * 110);
+  });
+  // Résonance grave courte après le dernier bip
+  setTimeout(function(){ playBip(262, 0.06, 0.5); }, 700);
+}
+
+// Son : victoire finale — lancement du drone autorisé
+// Séquence de 3 doubles bips + bip long final
+function sndFinal(){
+  if (!audioCtx || !audioOn) return;
+  // 3 doubles bips
+  [0, 200, 400].forEach(function(t){
+    setTimeout(function(){
+      playBip(880, 0.10, 0.08);
+      setTimeout(function(){ playBip(1108, 0.10, 0.10); }, 80);
+    }, t);
+  });
+  // Bip long solennel
+  setTimeout(function(){ playBip(1568, 0.12, 0.6); }, 700);
+  // Silence puis bip grave de confirmation
+  setTimeout(function(){ playBip(392, 0.08, 0.4); }, 1500);
+}
+
+var soundBtn = document.getElementById('soundBtn');
+soundBtn.onclick = function(){
+  initAudio();
+  audioOn = !audioOn;
+  soundBtn.textContent = audioOn ? '🔊' : '🔇';
+  if (audioOn){ if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); startAmbiance(); }
+  else stopAmbiance();
+};
+
+/* ===================== RENDU MODULES ===================== */
+function renderModules(){
+  var g = document.getElementById('modulesGrille');
+  g.innerHTML = '';
+  MODULES.forEach(function(m, i){
+    var div = document.createElement('div');
+    div.className = 'module-card' + (moduleEtat[i].done ? ' unlocked' : '');
+    div.innerHTML =
+      '<div class="module-icone">' + m.icone + '</div>' +
+      '<div class="module-num">' + m.num + '</div>' +
+      '<div class="module-nom">' + m.nom + '</div>' +
+      '<div class="module-statut">' + (moduleEtat[i].done ? 'DÉBLOQUÉ' : 'BLOQUÉ') + '</div>';
+    if (!moduleEtat[i].done){
+      (function(idx){ div.onclick = function(){ openModal(idx); }; })(i);
+    }
+    g.appendChild(div);
+  });
+  document.getElementById('cntOk').textContent  = modulesOk;
+  document.getElementById('cntRem').textContent = MODULES.length - modulesOk;
+  var essais = 0;
+  moduleEtat.forEach(function(e){ essais += e.tries; });
+  document.getElementById('cntErr').textContent = essais;
+  document.getElementById('progressBar').style.width = (modulesOk / MODULES.length * 100) + '%';
+  document.getElementById('btnUnlock').disabled = (modulesOk < MODULES.length);
+}
+
+/* ===================== MODALE ===================== */
+function openModal(i){
+  currentMod = i;
+  var m = MODULES[i];
+  document.getElementById('modalTitre').textContent = m.icone + ' ' + m.num + ' — ' + m.nom;
+  var lettres = ['A','B','C','D'];
+  var choixHTML = lettres.map(function(l, j){
+    return '<button class="choix-btn" onclick="selMod(' + j + ')"><span class="ltr">' + l + '</span><span>' + m.choices[j] + '</span></button>';
+  }).join('');
+
+  var etapesHTML = m.etapes.map(function(e){
+    return '<div class="etape"><span class="etape-num">' + e.n + '</span><span class="etape-txt">' + e.txt + '</span></div>';
+  }).join('');
+
+  document.getElementById('modalBody').innerHTML =
+    '<div class="enigme-contexte">' + m.contexte + '</div>' +
+    '<div class="enigme-ineq">' + m.ineq + '</div>' +
+    '<div class="enigme-q">' + m.question + '</div>' +
+    '<div class="choix" id="modalChoix">' + choixHTML + '</div>' +
+    '<div class="modal-btns">' +
+    '  <button class="mbtn mbtn-valider" id="mBtnVal" onclick="validerMod()" disabled>✓ Valider</button>' +
+    '  <button class="mbtn mbtn-indice" onclick="voirIndice()">? Indice</button>' +
+    '  <button class="mbtn mbtn-retry" id="mBtnRetry" onclick="retryMod()" style="display:none">↺ Réessayer</button>' +
+    '</div>' +
+    '<div class="indice-box" id="modIndice">' + m.indice + '</div>' +
+    '<div class="modal-fb" id="modFb"></div>' +
+    '<div class="correction-detail" id="modCorr">' +
+    '  <div style="font-family:\'JetBrains Mono\',monospace;font-weight:700;font-size:.82rem;color:var(--neon);margin-bottom:10px;">◆ Correction étape par étape</div>' +
+    etapesHTML +
+    '  <div class="eq-result">→ ' + m.result + '</div>' +
+    '</div>';
+
+  document.getElementById('modalBackdrop').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  playBip(660, 0.06, 0.1);
+}
+
+var modSelected = null, modValidated = false;
+
+function selMod(j){
+  if (modValidated) return;
+  modSelected = j;
+  document.querySelectorAll('#modalChoix .choix-btn').forEach(function(b, k){
+    b.classList.toggle('sel', k === j);
+  });
+  document.getElementById('mBtnVal').disabled = false;
+}
+
+function voirIndice(){
+  document.getElementById('modIndice').classList.toggle('show');
+}
+
+function validerMod(){
+  if (modValidated || modSelected === null) return;
+  var m = MODULES[currentMod];
+  var isOk = Array.isArray(m.correct) ? m.correct.indexOf(modSelected) >= 0 : (modSelected === m.correct);
+  var fb = document.getElementById('modFb');
+  var btns = document.querySelectorAll('#modalChoix .choix-btn');
+
+  if (isOk){
+    modValidated = true;
+    btns[modSelected].classList.remove('sel');
+    btns[modSelected].classList.add('good');
+    btns.forEach(function(b){ b.classList.add('locked'); b.onclick = null; });
+    fb.className = 'modal-fb show ok';
+    fb.innerHTML = '✓ Module débloqué&nbsp;!';
+    document.getElementById('mBtnVal').disabled = true;
+    moduleEtat[currentMod].done = true;
+    modulesOk++;
+    document.getElementById('modCorr').classList.add('show');
+    // Son palier si tous les modules sont débloqués, sinon son simple
+    if (modulesOk >= MODULES.length) {
+      sndPalier();
+    } else {
+      sndUnlock();
+    }
+    setTimeout(function(){
+      closeModal();
+      renderModules();
+    }, 1800);
+  } else {
+    moduleEtat[currentMod].tries++;
+    btns[modSelected].classList.add('bad');
+    btns[modSelected].classList.remove('sel');
+    fb.className = 'modal-fb show retry';
+    fb.innerHTML = '✗ Ce n\u2019est pas la bonne opération. Essaie encore&nbsp;!';
+    document.getElementById('mBtnVal').disabled = true;
+    document.getElementById('mBtnRetry').style.display = 'inline-flex';
+    document.getElementById('modCorr').classList.add('show');
+    sndError();
+  }
+}
+
+function retryMod(){
+  modSelected = null; modValidated = false;
+  var btns = document.querySelectorAll('#modalChoix .choix-btn');
+  btns.forEach(function(b, k){
+    b.classList.remove('sel','good','bad','locked');
+    (function(ki){ b.onclick = function(){ selMod(ki); }; })(k);
+  });
+  document.getElementById('mBtnVal').disabled = true;
+  document.getElementById('mBtnRetry').style.display = 'none';
+  document.getElementById('modFb').className = 'modal-fb';
+  document.getElementById('modFb').innerHTML = '';
+  document.getElementById('modCorr').classList.remove('show');
+}
+
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('show');
+  document.body.style.overflow = '';
+  modSelected = null; modValidated = false; currentMod = -1;
+}
+document.getElementById('modalClose').onclick = closeModal;
+document.getElementById('modalBackdrop').onclick = function(e){ if(e.target===this) closeModal(); };
+
+/* ===================== ÉTAPE 2 : FRAGMENTS ===================== */
+document.getElementById('btnUnlock').onclick = function(){
+  document.getElementById('finaleZone').classList.add('show');
+  buildFragments();
+  sndUnlock();
+  setTimeout(function(){ document.getElementById('finaleZone').scrollIntoView({behavior:'smooth'}); }, 200);
+};
+
+function buildFragments(){
+  var g = document.getElementById('fragmentsGrille');
+  if (g.children.length > 0) return;
+  g.innerHTML = FRAGMENTS.map(function(f, i){
+    return '<div class="frag-card" id="frag' + i + '">' +
+      '<div class="frag-num">' + (i+1) + '</div>' +
+      '<div class="frag-titre">' + f.titre + '</div>' +
+      '<div class="frag-enigme"><div>Calcule&nbsp;:</div><span class="calc">' + f.enigme + '</span></div>' +
+      '<div class="frag-saisie">' +
+      '  <input type="number" id="fragInp' + i + '" placeholder="?" step="1" autocomplete="off">' +
+      '  <button id="fragBtn' + i + '" onclick="validerFrag(' + i + ')">OK</button>' +
+      '</div>' +
+      '<div class="frag-fb" id="fragFb' + i + '"></div>' +
+      '</div>';
+  }).join('');
+  FRAGMENTS.forEach(function(f, i){
+    document.getElementById('fragInp' + i).addEventListener('keydown', function(e){
+      if (e.key === 'Enter') validerFrag(i);
+    });
+  });
+}
+
+function validerFrag(i){
+  if (fragEtat[i].found) return;
+  var val = parseFloat(document.getElementById('fragInp' + i).value);
+  var fb = document.getElementById('fragFb' + i);
+  if (isNaN(val)){ document.getElementById('fragInp' + i).focus(); return; }
+
+  if (val === FRAGMENTS[i].answer){
+    fragEtat[i].found = true; fragsFound++;
+    document.getElementById('fragInp' + i).classList.add('good');
+    document.getElementById('fragInp' + i).disabled = true;
+    document.getElementById('fragBtn' + i).disabled = true;
+    document.getElementById('frag' + i).classList.add('found');
+    fb.className = 'frag-fb ok'; fb.textContent = '✓ Paramètre déchiffré !';
+    sndUnlock();
+    if (fragsFound === FRAGMENTS.length){
+      setTimeout(function(){
+        document.getElementById('entrainementZone').style.display = 'block';
+        document.getElementById('entrainementZone').scrollIntoView({behavior:'smooth'});
+      }, 600);
+    }
+  } else {
+    fb.className = 'frag-fb ko'; fb.textContent = '✗ Recalcule les diviseurs communs.';
+    sndError();
+    setTimeout(function(){
+      fb.textContent = '';
+      document.getElementById('fragInp' + i).value = '';
+    }, 1600);
+  }
+}
+
+/* ===================== ENTRAÎNEMENT FINAL ===================== */
+function selEnt(j){
+  if (entDone) return;
+  entSelected = j;
+  document.querySelectorAll('#choixEnt .choix-btn').forEach(function(b, k){
+    b.classList.remove('sel','bad');
+    b.classList.toggle('sel', k === j);
+  });
+  document.getElementById('btnEnt').disabled = false;
+}
+
+function validerEnt(){
+  if (entDone || entSelected === null) return;
+  var fb = document.getElementById('fbEnt');
+  var btns = document.querySelectorAll('#choixEnt .choix-btn');
+  if (entSelected === 0){
+    entDone = true;
+    btns[0].classList.add('good');
+    btns.forEach(function(b){ b.onclick = null; });
+    document.getElementById('btnEnt').disabled = true;
+    fb.className = 'fb-ent show ok';
+    fb.innerHTML = '✓ Calibration validée&nbsp;! + 8 est la première étape correcte.';
+    sndUnlock();
+    setTimeout(function(){
+      document.getElementById('debriefZone').classList.add('show');
+    }, 1000);
+  } else {
+    btns[entSelected].classList.add('bad');
+    btns[entSelected].classList.remove('sel');
+    entSelected = null;
+    document.getElementById('btnEnt').disabled = true;
+    fb.className = 'fb-ent show ko';
+    fb.innerHTML = '✗ Pas tout à fait. Regarde l\u2019inéquation 4x \u2212 8 &lt; 0\u00a0: que faut-il supprimer en premier\u00a0?';
+    sndError();
+    setTimeout(function(){
+      btns.forEach(function(b, k){ b.classList.remove('bad'); });
+      document.getElementById('btnEnt').disabled = false;
+    }, 1400);
+  }
+}
+
+function showVictory(){
+  document.getElementById('victory').classList.add('show');
+  sndFinal();
+  launchConfetti();
+}
+
+function launchConfetti(){
+  var colors = ['#00d4ff','#3ab5d8','#22c55e','#f59e0b','#ef4444','#fff'];
+  for (var i = 0; i < 80; i++){
+    (function(idx){
+      setTimeout(function(){
+        var c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = (Math.random()*100) + 'vw';
+        c.style.background = colors[Math.floor(Math.random()*colors.length)];
+        c.style.animationDuration = (2 + Math.random()*2.5) + 's';
+        c.style.transform = 'rotateZ(' + Math.floor(Math.random()*360) + 'deg)';
+        document.body.appendChild(c);
+        setTimeout(function(){ c.remove(); }, 5000);
+      }, idx * 30);
+    })(i);
+  }
+}
+
+function restartAll(){
+  modulesOk = 0;
+  moduleEtat = MODULES.map(function(){ return { done:false, tries:0 }; });
+  fragEtat   = FRAGMENTS.map(function(){ return { found:false }; });
+  fragsFound = 0; entSelected = null; entDone = false;
+  document.getElementById('victory').classList.remove('show');
+  document.getElementById('finaleZone').classList.remove('show');
+  document.getElementById('fragmentsGrille').innerHTML = '';
+  document.getElementById('entrainementZone').style.display = 'none';
+  document.getElementById('debriefZone').classList.remove('show');
+  document.getElementById('fbEnt').className = 'fb-ent';
+  document.getElementById('fbEnt').innerHTML = '';
+  document.querySelectorAll('#choixEnt .choix-btn').forEach(function(b, k){
+    b.classList.remove('sel','good','bad');
+    b.onclick = function(){ selEnt(k); };
+  });
+  document.getElementById('btnEnt').disabled = true;
+  renderModules();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ===================== INIT ===================== */
+renderModules();
+</script>
+
+</body>
+</html>
