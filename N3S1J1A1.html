@@ -193,7 +193,6 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 var $ = function(id){ return document.getElementById(id); };
 var QTOTAL = 5, WARN_AT = 8;
 function rnd(n){ return Math.floor(Math.random()*n); }
-function pick(a){ return a[rnd(a.length)]; }
 function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
 function makeFrac(n,d){ if(d<0){ n=-n; d=-d; } var g=gcd(n,d)||1; return { n:n/g, d:d/g }; }
 function sameFrac(f,g){ return f && g && f.n*g.d === g.n*f.d; }
@@ -211,8 +210,8 @@ function nz(min,max){ var v; do{ v=min+rnd(max-min+1); }while(v===0); return v; 
 function lhs(a){ return (a===1?"":a===-1?"\u2212":(a<0?"\u2212"+(-a):""+a))+"<i>x</i>"; }
 function num(n){ return n<0?"\u2212"+(-n):""+n; }
 function genEquation(){
-  var a, b=nz(-9,9), c=rnd(19)-9;          /* c in -9..9 */
-  do{ a=nz(-13,13); }while(Math.abs(a)<2);  /* |a| >= 2 */
+  var a, b=(rnd(5)===0)?0:nz(-9,9), c=rnd(19)-9;  /* b=0 environ 20% */
+  do{ a=nz(-13,13); }while(Math.abs(a)<2);
   var x=makeFrac(c-b, a);
   var bterm=(b<0?" \u2212 "+(-b):" + "+b);
   return { a:a, b:b, c:c, sol:x, ligne:lhs(a)+bterm+" = "+num(c) };
@@ -220,9 +219,25 @@ function genEquation(){
 function genGame(){ var arr=[]; for(var i=0;i<QTOTAL;i++){ arr.push(genEquation()); } return arr; }
 
 function methode(q){
-  return "On enl\u00e8ve "+num(q.b)+" des deux c\u00f4t\u00e9s, puis on divise par "+num(q.a)+"\u00a0:<br>"
-    + lhs(q.a)+" = "+num(q.c)+" \u2212 ("+num(q.b)+") = "+num(q.c-q.b)+"\u00a0\u2192\u00a0<i>x</i> = "+num(q.c-q.b)+" \u00f7 "+num(q.a)
-    + " = <strong>"+fracStr(q.sol)+"</strong>.";
+  var etape1, resultat=q.c-q.b;
+  if(q.b===0){
+    etape1="b est nul\u00a0: on divise directement par "+num(q.a)+"\u00a0:";
+    return etape1+"<br>"
+      +lhs(q.a)+" = "+num(q.c)+"\u00a0\u2192\u00a0<i>x</i> = "+num(q.c)+" \u00f7 "+num(q.a)
+      +" = <strong>"+fracStr(q.sol)+"</strong>.";
+  } else if(q.b>0){
+    etape1="On soustrait "+q.b+" des deux c\u00f4t\u00e9s\u00a0:";
+    return etape1+"<br>"
+      +lhs(q.a)+" = "+num(q.c)+" \u2212 "+q.b+" = "+num(resultat)
+      +"\u00a0\u2192\u00a0<i>x</i> = "+num(resultat)+" \u00f7 "+num(q.a)
+      +" = <strong>"+fracStr(q.sol)+"</strong>.";
+  } else {
+    etape1="On ajoute "+(-q.b)+" des deux c\u00f4t\u00e9s\u00a0:";
+    return etape1+"<br>"
+      +lhs(q.a)+" = "+num(q.c)+" + "+(-q.b)+" = "+num(resultat)
+      +"\u00a0\u2192\u00a0<i>x</i> = "+num(resultat)+" \u00f7 "+num(q.a)
+      +" = <strong>"+fracStr(q.sol)+"</strong>.";
+  }
 }
 
 /* ═══════════ SONS ═══════════ */
