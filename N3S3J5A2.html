@@ -14,7 +14,7 @@
 html,body{overflow-x:hidden;}
 body{
   background:#fffdf7;color:#23262d;font-family:Arial,sans-serif;min-height:100vh;
-  display:flex;flex-direction:column;align-items:center;padding:7rem 1rem 4rem;position:relative;
+  display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 4rem;position:relative;
 }
 .bubble{position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(1px);}
 .bubble1{width:280px;height:280px;top:-60px;right:-60px;background:#f5e08a;opacity:.35;}
@@ -162,13 +162,46 @@ input.rep:focus{border-color:var(--jour);}
   font-size:1.2rem;color:var(--jour-fonce);letter-spacing:.04em;
 }
 .chrono-outer{
-  position:fixed;top:0;left:0;right:0;z-index:99999;
-  display:flex;flex-direction:row;align-items:center;justify-content:center;gap:1rem;
+  position:fixed;top:1rem;right:1rem;z-index:99999;
+  display:flex;flex-direction:column;align-items:center;gap:.3rem;
   background:rgba(255,253,247,.97);backdrop-filter:blur(8px);
-  padding:.8rem 1.5rem;
-  border-bottom:3px solid var(--jour);
-  box-shadow:0 4px 20px rgba(245,197,24,.25);
+  padding:.7rem .9rem .6rem;
+  border:2.5px solid var(--jour);border-radius:18px;
+  box-shadow:0 4px 20px rgba(245,197,24,.35);
+  min-width:110px;
 }
+
+
+/* ── Popup départ ── */
+.popup-overlay{
+  position:fixed;inset:0;z-index:999999;
+  background:rgba(30,20,0,.55);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+}
+.popup-box{
+  background:#fffdf7;border:3px solid var(--jour);border-radius:22px;
+  padding:2rem 2rem 1.6rem;max-width:400px;width:100%;
+  box-shadow:0 8px 40px rgba(245,197,24,.35);
+  text-align:center;
+  animation:popIn .4s ease forwards;
+}
+.popup-icon{font-size:2.8rem;margin-bottom:.6rem;line-height:1;}
+.popup-title{
+  font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:1.35rem;color:var(--jour-fonce);margin-bottom:.9rem;line-height:1.3;
+}
+.popup-text{
+  font-size:1rem;line-height:1.7;color:#444;margin-bottom:1.4rem;font-weight:600;
+}
+.popup-text b{color:var(--jour-fonce);}
+.popup-btn{
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.1rem;
+  background:var(--jour);color:#5a4400;border:none;border-radius:99px;
+  padding:.8rem 2.2rem;min-height:52px;cursor:pointer;
+  box-shadow:0 4px 16px rgba(245,197,24,.45);transition:transform .1s,box-shadow .15s;
+}
+.popup-btn:hover{box-shadow:0 6px 22px rgba(245,197,24,.6);}
+.popup-btn:active{transform:translateY(1px);}
 
 .foot{position:relative;z-index:1;text-align:center;font-size:.78rem;color:var(--gris);font-family:'JetBrains Mono',monospace;margin-top:.5rem;}
 
@@ -180,6 +213,20 @@ input.rep:focus{border-color:var(--jour);}
 </style>
 </head>
 <body>
+
+  <!-- ── Popup départ ── -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-box">
+      <div class="popup-icon">⏱️</div>
+      <div class="popup-title">Prêt pour le défi ?</div>
+      <div class="popup-text">
+        Tu as <b>30 secondes</b> pour répondre à chacune des questions.<br>
+        Lis bien avant de répondre !
+      </div>
+      <button type="button" class="popup-btn" id="popupBtn">C'est parti !</button>
+    </div>
+  </div>
+
 <div class="bubble bubble1"></div><div class="bubble bubble2"></div>
 <div class="bubble bubble3"></div><div class="bubble bubble4"></div>
 
@@ -210,7 +257,7 @@ input.rep:focus{border-color:var(--jour);}
 </header>
 
   <!-- ── Chrono 30 s ── -->
-  <div class="chrono-outer" id="chronoOuter">
+  <div class="chrono-outer" id="chronoOuter" style="display:none;">
     <div class="chrono-wrap">
       <div class="chrono-ring">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -504,7 +551,6 @@ input.rep:focus{border-color:var(--jour);}
     banner.style.display='block';
     banner.className='banner '+(score===5?'banner-full':'banner-part');
     banner.textContent='R\u00e9sultat\u00a0: '+score+' / 5';
-    banner.scrollIntoView({behavior:'smooth',block:'nearest'});
     setTimeout(function(){ playSound(score===5); },200);
   }
 
@@ -545,7 +591,7 @@ input.rep:focus{border-color:var(--jour);}
     if(label) label.textContent = 'Exercice ' + n;
     /* scroll smooth vers la carte */
     var card = document.querySelector('#fb'+n) && document.querySelector('#fb'+n).closest('.card');
-    if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
+    /* pas de scroll auto */
   }
 
   function chronoRender(t){
@@ -633,9 +679,20 @@ input.rep:focus{border-color:var(--jour);}
     chronoStart();
   };
 
-  /* Démarrer */
-  chronoSetExo(1);
-  chronoStart();
+  /* ── Popup départ ── */
+  var popupOverlay = document.getElementById('popupOverlay');
+  var popupBtn     = document.getElementById('popupBtn');
+  var chronoOuter  = document.getElementById('chronoOuter');
+
+  popupBtn.addEventListener('click', function(){
+    /* Fermer le popup */
+    popupOverlay.style.display = 'none';
+    /* Afficher le chrono */
+    chronoOuter.style.display = '';
+    /* Démarrer */
+    chronoSetExo(1);
+    chronoStart();
+  });
 
 })();
 </script>
