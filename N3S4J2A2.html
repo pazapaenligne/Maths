@@ -401,5 +401,205 @@ function initInputs(){
 }
 initInputs();
 </script>
+<!-- ===== CALCULATRICE fx-92 PAZAPA (déplaçable) ===== -->
+<style>
+.fxc-root *{box-sizing:border-box;}
+.fxc-trigger{position:fixed;right:14px;bottom:14px;z-index:9998;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;}
+.fxc-root.fxc-open .fxc-trigger{display:none;}
+.fxc-trigger svg{filter:drop-shadow(0 4px 10px rgba(0,0,0,.28));}
+.fxc-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:800;color:#fff;background:var(--titre,var(--day-dark,#1f6f63));padding:3px 11px;border-radius:99px;letter-spacing:.04em;}
+.fxc-panel{display:none;position:fixed;right:14px;bottom:14px;z-index:9999;width:300px;max-width:94vw;background:#2f343b;border-radius:16px;box-shadow:0 16px 44px rgba(0,0,0,.45);overflow:hidden;font-family:'JetBrains Mono',monospace;}
+.fxc-root.fxc-open .fxc-panel{display:block;}
+.fxc-bar{display:flex;align-items:center;gap:6px;background:#23272d;padding:8px 10px;cursor:move;touch-action:none;user-select:none;}
+.fxc-grip{flex:1;font-size:11.5px;font-weight:700;color:#cdd6df;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fxc-icon{flex:none;width:28px;height:28px;border-radius:8px;border:none;background:#3a4049;color:#fff;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.fxc-icon:hover{background:var(--main,var(--day,#2bb6a3));}
+.fxc-help{display:none;padding:9px 12px;background:#262b31;color:#c7d0d9;font-size:11px;line-height:1.7;border-bottom:1px solid #3a4049;}
+.fxc-help.fxc-show{display:block;}
+.fxc-help b{color:var(--main,var(--day,#7fd3c6));}
+.fxc-screen{background:#d7e3c8;padding:10px 12px;min-height:64px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;}
+.fxc-expr{font-size:13px;color:#4a5340;min-height:16px;word-break:break-all;text-align:right;}
+.fxc-res{font-size:26px;font-weight:800;color:#1d241a;text-align:right;word-break:break-all;line-height:1.1;}
+.fxc-keys{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px;}
+.fxc-k{min-height:46px;border:none;border-radius:10px;background:#444b54;color:#fff;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;}
+.fxc-k:active{transform:translateY(2px);}
+.fxc-k small{font-size:8px;font-weight:700;opacity:.8;margin-top:2px;}
+.fxc-k.fn{background:#39414a;color:var(--main,var(--day,#7fd3c6));font-size:12px;}
+.fxc-k.op{background:#5a626c;}
+.fxc-k.ac{background:#b5483f;color:#fff;font-size:13px;}
+.fxc-k.del{background:#7a6030;color:#fff;font-size:12px;}
+.fxc-k.eq{background:var(--main,var(--day,#3a7bd5));color:#fff;}
+</style>
+<div class="fxc-root" id="fxcRoot">
+  <button class="fxc-trigger" id="fxcTrigger" aria-label="Ouvrir la calculatrice">
+    <svg viewBox="0 0 64 100" width="50" height="78" role="img" aria-label="Calculatrice CASIO fx-92">
+      <defs><linearGradient id="fxcBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcefe8"/><stop offset="1" stop-color="#bcdcd5"/></linearGradient></defs>
+      <rect x="2" y="2" width="60" height="96" rx="10" fill="url(#fxcBody)" stroke="#9ec3ba" stroke-width="1.5"/>
+      <rect x="8" y="7" width="48" height="9" rx="2" fill="#2f343b"/>
+      <text x="11" y="14" font-family="Arial" font-size="6" font-weight="700" fill="#dfe6e2">CASIO</text>
+      <text x="40" y="14" font-family="Arial" font-size="5.5" fill="#9fb8b0">fx-92</text>
+      <rect x="8" y="19" width="48" height="17" rx="2" fill="#c4d3a6" stroke="#8a9b6a" stroke-width="1"/>
+      <text x="52" y="31" font-family="monospace" font-size="7" text-anchor="end" fill="#3c4a26">0.</text>
+      <circle cx="17" cy="51" r="9" fill="#2bb6a3"/><circle cx="17" cy="51" r="3" fill="#1c8377"/>
+      <rect x="32" y="44" width="9" height="6" rx="1.5" fill="#d9534f"/>
+      <g fill="#5b6b66"><rect x="44" y="44" width="9" height="6" rx="1.5"/><rect x="32" y="53" width="9" height="6" rx="1.5"/><rect x="44" y="53" width="9" height="6" rx="1.5"/></g>
+      <g fill="#7b8a85"><rect x="8" y="66" width="9" height="6" rx="1.5"/><rect x="20" y="66" width="9" height="6" rx="1.5"/><rect x="32" y="66" width="9" height="6" rx="1.5"/><rect x="44" y="66" width="9" height="6" rx="1.5"/>
+      <rect x="8" y="75" width="9" height="6" rx="1.5"/><rect x="20" y="75" width="9" height="6" rx="1.5"/><rect x="32" y="75" width="9" height="6" rx="1.5"/><rect x="44" y="75" width="9" height="6" rx="1.5"/>
+      <rect x="8" y="84" width="9" height="6" rx="1.5"/><rect x="20" y="84" width="9" height="6" rx="1.5"/><rect x="32" y="84" width="9" height="6" rx="1.5"/></g>
+      <rect x="44" y="84" width="9" height="6" rx="1.5" fill="#3a7bd5"/>
+    </svg>
+    <span class="fxc-label">Calculatrice</span>
+  </button>
+  <div class="fxc-panel" id="fxcPanel">
+    <div class="fxc-bar" id="fxcBar">
+      <span class="fxc-grip">☰ fx-92 · glisse pour déplacer</span>
+      <button class="fxc-icon" id="fxcHelp" aria-label="Aide">?</button>
+      <button class="fxc-icon" id="fxcClose" aria-label="Fermer">✕</button>
+    </div>
+    <div class="fxc-help" id="fxcHelpBox">
+      <b>÷R</b> division euclidienne (quotient · reste) · <b>FACT(</b> décomposition en facteurs premiers · <b>PGCD( PPCM(</b> séparateur ; · <b>SIMP(</b> fraction irréductible a/b · <b>√ x² ^</b> racine, carré, puissance.
+    </div>
+    <div class="fxc-screen"><div class="fxc-expr" id="fxcExpr"></div><div class="fxc-res" id="fxcRes">0</div></div>
+    <div class="fxc-keys" id="fxcKeys">
+      <button class="fxc-k fn" data-k="FACT(">FACT(</button>
+      <button class="fxc-k fn" data-k="PGCD(">PGCD(</button>
+      <button class="fxc-k fn" data-k="PPCM(">PPCM(</button>
+      <button class="fxc-k fn" data-k="SIMP(">SIMP(<small>a/b</small></button>
+      <button class="fxc-k ac" data-act="ac">AC</button>
+      <button class="fxc-k del" data-act="del">DEL</button>
+      <button class="fxc-k op" data-k="(">(</button>
+      <button class="fxc-k op" data-k=")">)</button>
+      <button class="fxc-k op" data-k=";">;</button>
+      <button class="fxc-k fn" data-k="÷R">÷R</button>
+      <button class="fxc-k" data-k="7">7</button>
+      <button class="fxc-k" data-k="8">8</button>
+      <button class="fxc-k" data-k="9">9</button>
+      <button class="fxc-k op" data-k="÷">÷</button>
+      <button class="fxc-k fn" data-k="√(">√(</button>
+      <button class="fxc-k" data-k="4">4</button>
+      <button class="fxc-k" data-k="5">5</button>
+      <button class="fxc-k" data-k="6">6</button>
+      <button class="fxc-k op" data-k="×">×</button>
+      <button class="fxc-k fn" data-k="²">x²</button>
+      <button class="fxc-k" data-k="1">1</button>
+      <button class="fxc-k" data-k="2">2</button>
+      <button class="fxc-k" data-k="3">3</button>
+      <button class="fxc-k op" data-k="−">−</button>
+      <button class="fxc-k op" data-k="^">^</button>
+      <button class="fxc-k" data-k="0">0</button>
+      <button class="fxc-k" data-k=",">,</button>
+      <button class="fxc-k op" data-k="−">(−)</button>
+      <button class="fxc-k op" data-k="+">+</button>
+      <button class="fxc-k eq" data-act="eq">=</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var root=document.getElementById('fxcRoot'), trigger=document.getElementById('fxcTrigger'),
+      panel=document.getElementById('fxcPanel'), bar=document.getElementById('fxcBar'),
+      exprEl=document.getElementById('fxcExpr'), resEl=document.getElementById('fxcRes'),
+      keys=document.getElementById('fxcKeys'), helpBtn=document.getElementById('fxcHelp'),
+      helpBox=document.getElementById('fxcHelpBox'), closeBtn=document.getElementById('fxcClose');
+  var expr='';
+  var MULTI=['FACT(','PGCD(','PPCM(','SIMP(','÷R','√('];
+
+  /* ---------- moteur (sans eval) ---------- */
+  function sup(e){ var m={'0':'\u2070','1':'\u00b9','2':'\u00b2','3':'\u00b3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079'}; return (''+e).split('').map(function(c){return m[c];}).join(''); }
+  function gcd(a,b){ a=Math.abs(a);b=Math.abs(b); while(b){var t=b;b=a%b;a=t;} return a; }
+  function lcm(a,b){ if(a===0||b===0) return 0; return Math.abs(a/gcd(a,b)*b); }
+  function fmtNum(v){ var r=Math.round(v*1e10)/1e10; if(Object.is(r,-0)) r=0; if(Number.isInteger(r)) return ''+r; return (''+r).replace('.',','); }
+  function arith(s){
+    s=s.replace(/\u00b2/g,'^2').replace(/\u221a/g,'sqrt').replace(/\u00d7/g,'*').replace(/\u00f7/g,'/').replace(/\u2212/g,'-').replace(/,/g,'.').replace(/\s/g,'');
+    var pos=0;
+    function expr0(){ var v=term(); while(s[pos]==='+'||s[pos]==='-'){ var op=s[pos++]; var t=term(); v=(op==='+')?v+t:v-t; } return v; }
+    function term(){ var v=unary(); while(s[pos]==='*'||s[pos]==='/'){ var op=s[pos++]; var u=unary(); if(op==='/'){ if(u===0) throw 0; v=v/u; } else v=v*u; } return v; }
+    function unary(){ if(s[pos]==='-'){ pos++; return -unary(); } if(s[pos]==='+'){ pos++; return unary(); } return power(); }
+    function power(){ var b=atom(); if(s[pos]==='^'){ pos++; var e=unary(); return Math.pow(b,e); } return b; }
+    function atom(){
+      if(s[pos]==='('){ pos++; var v=expr0(); if(s[pos]!==')') throw 0; pos++; return v; }
+      if(s.substr(pos,4)==='sqrt'){ pos+=4; if(s[pos]!=='(') throw 0; pos++; var w=expr0(); if(s[pos]!==')') throw 0; pos++; if(w<0) throw 0; return Math.sqrt(w); }
+      var m=/^[0-9]+(\.[0-9]+)?/.exec(s.slice(pos)); if(!m) throw 0; pos+=m[0].length; return parseFloat(m[0]);
+    }
+    if(s==='') throw 0;
+    var r=expr0(); if(pos!==s.length) throw 0; if(!isFinite(r)) throw 0; return r;
+  }
+  function toInt(s){ var v=arith(s); v=Math.round(v); if(!Number.isInteger(v)) throw 0; return v; }
+  function splitArgs(s){ var p = s.indexOf(';')>=0 ? s.split(';') : s.split(','); if(p.length!==2) throw 0; return p; }
+  function factDisplay(n){
+    if(n<1) throw 0; if(n===1) return '1';
+    var f={},m=n,d=2;
+    while(d*d<=m){ while(m%d===0){ f[d]=(f[d]||0)+1; m=m/d; } d++; }
+    if(m>1) f[m]=(f[m]||0)+1;
+    var ks=Object.keys(f).map(Number).sort(function(a,b){return a-b;});
+    if(ks.length===1 && f[ks[0]]===1) return n+' (premier)';
+    return ks.map(function(p){ return f[p]>1 ? p+sup(f[p]) : ''+p; }).join('\u00d7');
+  }
+  function simpDisplay(a,b){ if(b===0) throw 0; var g=gcd(a,b)||1; var p=a/g,q=b/g; if(q<0){p=-p;q=-q;} return q===1 ? ''+p : p+'/'+q; }
+  function evalExpr(raw){
+    raw=raw.trim(); if(raw==='') return '';
+    var mF=raw.match(/^FACT\((.+)\)$/); if(mF) return factDisplay(toIntPos(mF[1]));
+    var mG=raw.match(/^PGCD\((.+)\)$/); if(mG){ var g=splitArgs(mG[1]); return ''+gcd(toInt(g[0]),toInt(g[1])); }
+    var mP=raw.match(/^PPCM\((.+)\)$/); if(mP){ var p=splitArgs(mP[1]); return ''+lcm(toInt(p[0]),toInt(p[1])); }
+    var mS=raw.match(/^SIMP\((.+)\)$/); if(mS){ var s2=splitArgs(mS[1]); return simpDisplay(toInt(s2[0]),toInt(s2[1])); }
+    if(raw.indexOf('\u00f7R')>=0){
+      var parts=raw.split('\u00f7R'); if(parts.length!==2) throw 0;
+      var a=Math.round(arith(parts[0])), b=Math.round(arith(parts[1]));
+      if(b<=0||a<0||!Number.isInteger(a)||!Number.isInteger(b)) throw 0;
+      var q=Math.floor(a/b), r=a-b*q; return 'quotient '+q+' \u00b7 reste '+r;
+    }
+    return fmtNum(arith(raw));
+  }
+  function toIntPos(s){ var v=toInt(s); if(v<0) throw 0; return v; }
+
+  /* ---------- affichage / clavier ---------- */
+  function render(){ exprEl.textContent=expr; }
+  function press(k){ expr+=k; resEl.textContent=''; render(); }
+  function del(){
+    for(var i=0;i<MULTI.length;i++){ if(expr.slice(-MULTI[i].length)===MULTI[i]){ expr=expr.slice(0,-MULTI[i].length); render(); return; } }
+    expr=expr.slice(0,-1); render();
+  }
+  function clearAll(){ expr=''; resEl.textContent='0'; render(); }
+  function equals(){ try{ var r=evalExpr(expr); resEl.textContent=(r===''?'0':r); }catch(e){ resEl.textContent='Erreur'; } }
+  keys.addEventListener('click',function(ev){
+    var b=ev.target.closest('.fxc-k'); if(!b) return;
+    var act=b.getAttribute('data-act');
+    if(act==='ac') return clearAll();
+    if(act==='del') return del();
+    if(act==='eq') return equals();
+    press(b.getAttribute('data-k'));
+  });
+
+  /* ---------- ouverture / fermeture ---------- */
+  trigger.addEventListener('click',function(){ root.classList.add('fxc-open'); });
+  closeBtn.addEventListener('click',function(){ root.classList.remove('fxc-open'); });
+  helpBtn.addEventListener('click',function(){ helpBox.classList.toggle('fxc-show'); });
+
+  /* ---------- déplacement (Pointer Events) ---------- */
+  var drag=false, sx=0, sy=0, ox=0, oy=0, conv=false;
+  bar.addEventListener('pointerdown',function(e){
+    if(e.target.closest('.fxc-icon')) return;
+    drag=true; conv=false; sx=e.clientX; sy=e.clientY;
+    var r=panel.getBoundingClientRect(); ox=r.left; oy=r.top;
+    bar.setPointerCapture(e.pointerId);
+  });
+  bar.addEventListener('pointermove',function(e){
+    if(!drag) return;
+    if(!conv){ panel.style.right='auto'; panel.style.bottom='auto'; panel.style.left=ox+'px'; panel.style.top=oy+'px'; conv=true; }
+    var nx=ox+(e.clientX-sx), ny=oy+(e.clientY-sy);
+    var w=panel.offsetWidth, h=panel.offsetHeight, M=4;
+    nx=Math.max(M,Math.min(nx,window.innerWidth-w-M));
+    ny=Math.max(M,Math.min(ny,window.innerHeight-h-M));
+    panel.style.left=nx+'px'; panel.style.top=ny+'px';
+  });
+  function endDrag(e){ if(drag){ drag=false; try{ bar.releasePointerCapture(e.pointerId); }catch(_){} } }
+  bar.addEventListener('pointerup',endDrag);
+  bar.addEventListener('pointercancel',endDrag);
+
+  /* exposer le moteur pour tests éventuels */
+  window.__fxcEval=evalExpr;
+})();
+</script>
+<!-- ===== FIN CALCULATRICE ===== -->
 </body>
 </html>
