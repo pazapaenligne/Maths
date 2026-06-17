@@ -364,10 +364,10 @@ var unlocked = 0;   /* index de la prochaine étape jouable (itinéraire ordonn�
 var openIdx = null;
 
 /* ============== CHRONO ============== */
-var startTime = Date.now(), timerInt = null;
+var startTime = Date.now(), timerInt = null, timerStarted = false;
 function fmt(s){ var m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
 function tick(){ $('timer').textContent = fmt(Math.floor((Date.now()-startTime)/1000)); }
-function startTimer(){ if(timerInt) clearInterval(timerInt); startTime=Date.now(); tick(); timerInt=setInterval(tick,1000); }
+function startTimer(){ if(timerInt) clearInterval(timerInt); timerStarted=true; startTime=Date.now(); tick(); timerInt=setInterval(tick,1000); }
 function stopTimer(){ if(timerInt){ clearInterval(timerInt); timerInt=null; } }
 
 /* ============== CONSTRUCTION DE LA CARTE SVG ============== */
@@ -456,6 +456,7 @@ $('carte-box').addEventListener('click', function(e){
   var i = parseInt(g.dataset.i,10);
   if(etat[i].done) return;
   if(i !== unlocked) return;   // itinéraire ordonné : seule l'étape courante est jouable
+  if(!timerStarted) startTimer();   // le chrono démarre au 1er clic, pas avant
   playDigSoft();
   playParchment();
   ouvrirScanPuisMission(i);
@@ -618,7 +619,7 @@ function recommencer(){
   $('prog-fill').style.width='0%';
   $('prog-count').textContent = '0 / '+TOTAL+' FRAGMENTS RETROUVÉS';
   buildCarte();
-  startTimer();
+  stopTimer(); timerStarted = false; $('timer').textContent = '00:00';
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 $('btn-rec-fin').addEventListener('click', recommencer);
@@ -821,7 +822,7 @@ $('sound-btn').addEventListener('click', function(){
 
 /* ============== INIT ============== */
 buildCarte();
-startTimer();
+stopTimer(); timerStarted = false; $('timer').textContent = '00:00';
 updateProgress();
 </script>
 <!-- ===== CALCULATRICE fx-92 PAZAPA (déplaçable, thème ocre/désert) ===== -->
