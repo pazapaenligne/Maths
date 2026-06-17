@@ -3,29 +3,30 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PAZAPA Maths — 3e S2J5 · Exercices interactifs</title>
+<title>Pazapa Maths – 3e · Déterminer les coordonnées d'un point</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --jour:#f5c518; --jour-fonce:#8a6000; --jour-soft:#fffbeb; --jour-accent:#f5e08a;
+  --day-color:#f5c518; --day-dark:#8a6000; --day-light:#fffbeb; --day-border:#f5e08a; --day-glow:rgba(245,197,24,.3);
   --vert:#8dc63f; --vert-fonce:#3d7a10; --vert-soft:#f0faeb;
   --rouge:#e74c3c; --rouge-soft:#fdedec; --rouge-fonce:#c0392b;
-  --texte:#23262d; --gris:#8a8f9a; --bord:#ece8dd;
+  --green:#8dc63f; --pink:#f28b82;
+  --texte:#23262d; --text:#23262d; --gris:#8a8f9a; --muted:#8a8f9a; --bord:#ece8dd; --border:#ece8dd;
+  --bg:#fffdf7; --surface:#fff; --radius:16px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{overflow-x:hidden;}
 body{background:#fffdf7;color:var(--texte);font-family:Arial,sans-serif;
   min-height:100vh;display:flex;flex-direction:column;align-items:center;
-  padding:1.6rem 1rem 4rem;position:relative;}
+  padding:1.6rem 1rem 110px;position:relative;letter-spacing:.02em;line-height:1.6;}
 
-/* bulles décoratives fixes */
 .bubble{position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(1px);}
 .bubble1{width:280px;height:280px;top:-60px;right:-60px;background:#f5e08a;opacity:.35;}
 .bubble2{width:220px;height:220px;bottom:-50px;left:-50px;background:#f5e08a;opacity:.30;}
 .bubble3{width:180px;height:180px;top:35%;right:-60px;background:#b5e08a;opacity:.22;}
 .bubble4{width:160px;height:160px;top:50%;left:-55px;background:#f9c0bb;opacity:.22;}
 
-/* header */
 .hero{text-align:center;position:relative;z-index:1;margin-bottom:1.5rem;max-width:720px;}
 .pazapa-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid #e8e0d0;
   border-radius:99px;padding:.28rem .9rem;margin-bottom:.65rem;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#555;}
@@ -40,9 +41,56 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--jour-fonce);li
 .consigne{max-width:560px;margin:0 auto;border:2px dashed var(--jour);background:var(--jour-soft);
   color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
 
-/* zone exercices */
 .zone{position:relative;z-index:1;width:100%;max-width:680px;}
 .zone-note{text-align:center;font-size:.8rem;color:var(--gris);margin-top:.5rem;line-height:1.7;}
+
+/* cartes exercices */
+.exo-card{background:#fff;border:2px solid var(--bord);border-radius:16px;padding:1.5rem 1.4rem 1.4rem;margin:0 auto 1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;}
+.ex-title{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);font-size:1rem;margin-bottom:.7rem;}
+.exo-consigne{font-size:1rem;line-height:1.7;color:var(--texte);margin-bottom:1rem;}
+.repere-wrap{text-align:center;margin:0 auto 1.3rem;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.repere-svg{width:min(480px,100%);height:auto;display:inline-block;background:#fff;border:1px solid var(--bord);border-radius:10px;}
+.repere-svg .subgrid line{stroke:#ece8dd;stroke-width:.6;}
+.repere-svg .grid line{stroke:#cfc8b6;stroke-width:1;}
+.repere-svg .axe{stroke:#23262d;stroke-width:1.8;}
+.repere-svg .axe-fill{fill:#23262d;}
+.repere-svg .tick{stroke:#23262d;stroke-width:1.3;}
+.repere-svg .grad{font:13px 'JetBrains Mono',monospace;fill:#444;text-anchor:middle;}
+.repere-svg .grad-y{text-anchor:end;}
+.repere-svg .pt-cross{stroke:#e74c3c;stroke-width:2.4;}
+.repere-svg .pt-lbl{font:italic 700 16px Georgia,serif;fill:#23262d;text-anchor:middle;}
+
+.coord-list{display:flex;flex-direction:column;gap:.9rem;margin-bottom:1.1rem;}
+.coord-item{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;color:var(--jour-fonce);display:inline-flex;align-items:center;flex-wrap:wrap;gap:.3rem;}
+.coord-item em{font-style:italic;font-family:Georgia,serif;margin-right:.15rem;}
+.coord-input{width:min(90px,26vw);height:2.8rem;background:var(--bg);border:2px solid var(--bord);border-radius:10px;color:var(--texte);font-family:'JetBrains Mono',monospace;font-size:1.05rem;padding:.4rem .5rem;outline:none;text-align:center;transition:border-color .2s;}
+.coord-input:focus{border-color:var(--jour);}
+.coord-input.ok{border-color:var(--green);background:#f0faeb;}
+.coord-input.ko{border-color:var(--pink);background:#fff0ef;}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.45rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(1rem,2.8vw,1.12rem);font-weight:800;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:3.1rem;}
+.btn:active{transform:scale(.96);}
+.btn-check{background:var(--jour);color:#3a2600;box-shadow:0 3px 10px var(--day-glow);}
+.btn-check:hover{transform:translateY(-1px);}
+.btn-hint{background:#f5a623;color:#fff;}
+.btn-retry{background:transparent;color:var(--gris);border:2px solid var(--bord);}
+.btn-corr{background:transparent;color:var(--jour-fonce);border:2px solid var(--jour);}
+.hint-box{display:none;margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--jour);border-radius:10px;padding:.8rem 1rem;font-size:1rem;color:#7a6010;line-height:1.8;font-family:'JetBrains Mono',monospace;}
+.hint-box.show{display:block;}
+.feedback{display:none;margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(1rem,2.6vw,1.1rem);line-height:1.8;}
+.feedback.show{display:flex;align-items:flex-start;gap:.6rem;}
+.feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.fb-ic{font-size:1.6rem;flex-shrink:0;}
+.correction-box{display:none;margin-top:1rem;border-left:5px solid var(--jour);border-radius:8px 8px 0 0;background:#fff;padding:0 16px 14px;font-size:1rem;line-height:1.85;}
+.correction-box.show{display:block;}
+.correction-box .corr-head{display:inline-block;background:var(--jour);color:#3a2600;font-weight:800;border-radius:8px 8px 0 0;padding:6px 18px;margin:0 0 12px -16px;font-family:'JetBrains Mono',monospace;font-size:.95rem;}
+.correction-box em{font-style:italic;font-family:Georgia,serif;}
+@media(max-width:480px){
+  .exo-card{padding:1.2rem 1rem;}
+  .coord-input{width:min(80px,24vw);}
+}
 </style>
 </head>
 <body>
@@ -57,36 +105,514 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--jour-fonce);li
     Pazapa &nbsp;·&nbsp; 3e &nbsp;·&nbsp; Mathématiques
   </div>
   <div class="badge-semaine">Semaine 2 · Jour 5</div>
-  <h1>✏️ Exercices interactifs</h1>
-  <div class="consigne">👉 Fais l'activité directement dans la fenêtre. Clique sur « Vérifier » pour valider tes réponses.</div>
+  <h1>&#9999;&#65039; Exercices interactifs</h1>
+  <div class="consigne">&#128073; Lis les coordonnées des points dans chaque repère, puis clique sur «&nbsp;Vérifier&nbsp;» pour valider tes réponses.</div>
 </header>
 
 <div class="zone">
-
-  <div style="width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;padding:12px;margin:0 auto 1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;">
-    <div style="font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);margin:2px 0 10px;font-size:.98rem;">Déterminer les coordonnées (relatives) d'un point</div>
-    <div style="width:100%;height:1090px;overflow:hidden;border-radius:12px;background:#fff;position:relative;">
-      <iframe style="border:0;width:100%;height:1150px;display:block;background:#fff;"
-        title="Exercice interactif"
-        src="https://coopmaths.fr/alea/?uuid=ab969&alea=18830&interactif=1&n=1&duration=10&s=3&s2=true&s3=5&s4=true&cd=1&tip=0&i=1&v=eleve&title=&es=011010&recorder=moodle"
-        allowfullscreen="allowfullscreen" loading="lazy"></iframe>
-      <div style="position:absolute;top:0;left:0;right:0;height:105px;background:#fff;z-index:9999;pointer-events:none;"></div>
-      <div style="position:absolute;bottom:0;left:0;right:0;height:25px;background:#fff;z-index:9999;pointer-events:none;"></div>
+  <div class="exo-card">
+    <div class="ex-title">Déterminer les coordonnées (relatives) d'un point</div>
+    <p class="exo-consigne">Lis les coordonnées de chaque point dans le repère, puis complète sous la forme (abscisse ; ordonnée).</p>
+    <div class="repere-wrap"><svg class="repere-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Repère avec points">
+      <g class="subgrid">
+      <line x1="40.0" y1="40" x2="40.0" y2="480"/>
+      <line x1="40" y1="480.0" x2="480" y2="480.0"/>
+      <line x1="51.0" y1="40" x2="51.0" y2="480"/>
+      <line x1="40" y1="469.0" x2="480" y2="469.0"/>
+      <line x1="62.0" y1="40" x2="62.0" y2="480"/>
+      <line x1="40" y1="458.0" x2="480" y2="458.0"/>
+      <line x1="73.0" y1="40" x2="73.0" y2="480"/>
+      <line x1="40" y1="447.0" x2="480" y2="447.0"/>
+      <line x1="84.0" y1="40" x2="84.0" y2="480"/>
+      <line x1="40" y1="436.0" x2="480" y2="436.0"/>
+      <line x1="95.0" y1="40" x2="95.0" y2="480"/>
+      <line x1="40" y1="425.0" x2="480" y2="425.0"/>
+      <line x1="106.0" y1="40" x2="106.0" y2="480"/>
+      <line x1="40" y1="414.0" x2="480" y2="414.0"/>
+      <line x1="117.0" y1="40" x2="117.0" y2="480"/>
+      <line x1="40" y1="403.0" x2="480" y2="403.0"/>
+      <line x1="128.0" y1="40" x2="128.0" y2="480"/>
+      <line x1="40" y1="392.0" x2="480" y2="392.0"/>
+      <line x1="139.0" y1="40" x2="139.0" y2="480"/>
+      <line x1="40" y1="381.0" x2="480" y2="381.0"/>
+      <line x1="150.0" y1="40" x2="150.0" y2="480"/>
+      <line x1="40" y1="370.0" x2="480" y2="370.0"/>
+      <line x1="161.0" y1="40" x2="161.0" y2="480"/>
+      <line x1="40" y1="359.0" x2="480" y2="359.0"/>
+      <line x1="172.0" y1="40" x2="172.0" y2="480"/>
+      <line x1="40" y1="348.0" x2="480" y2="348.0"/>
+      <line x1="183.0" y1="40" x2="183.0" y2="480"/>
+      <line x1="40" y1="337.0" x2="480" y2="337.0"/>
+      <line x1="194.0" y1="40" x2="194.0" y2="480"/>
+      <line x1="40" y1="326.0" x2="480" y2="326.0"/>
+      <line x1="205.0" y1="40" x2="205.0" y2="480"/>
+      <line x1="40" y1="315.0" x2="480" y2="315.0"/>
+      <line x1="216.0" y1="40" x2="216.0" y2="480"/>
+      <line x1="40" y1="304.0" x2="480" y2="304.0"/>
+      <line x1="227.0" y1="40" x2="227.0" y2="480"/>
+      <line x1="40" y1="293.0" x2="480" y2="293.0"/>
+      <line x1="238.0" y1="40" x2="238.0" y2="480"/>
+      <line x1="40" y1="282.0" x2="480" y2="282.0"/>
+      <line x1="249.0" y1="40" x2="249.0" y2="480"/>
+      <line x1="40" y1="271.0" x2="480" y2="271.0"/>
+      <line x1="260.0" y1="40" x2="260.0" y2="480"/>
+      <line x1="40" y1="260.0" x2="480" y2="260.0"/>
+      <line x1="271.0" y1="40" x2="271.0" y2="480"/>
+      <line x1="40" y1="249.0" x2="480" y2="249.0"/>
+      <line x1="282.0" y1="40" x2="282.0" y2="480"/>
+      <line x1="40" y1="238.0" x2="480" y2="238.0"/>
+      <line x1="293.0" y1="40" x2="293.0" y2="480"/>
+      <line x1="40" y1="227.0" x2="480" y2="227.0"/>
+      <line x1="304.0" y1="40" x2="304.0" y2="480"/>
+      <line x1="40" y1="216.0" x2="480" y2="216.0"/>
+      <line x1="315.0" y1="40" x2="315.0" y2="480"/>
+      <line x1="40" y1="205.0" x2="480" y2="205.0"/>
+      <line x1="326.0" y1="40" x2="326.0" y2="480"/>
+      <line x1="40" y1="194.0" x2="480" y2="194.0"/>
+      <line x1="337.0" y1="40" x2="337.0" y2="480"/>
+      <line x1="40" y1="183.0" x2="480" y2="183.0"/>
+      <line x1="348.0" y1="40" x2="348.0" y2="480"/>
+      <line x1="40" y1="172.0" x2="480" y2="172.0"/>
+      <line x1="359.0" y1="40" x2="359.0" y2="480"/>
+      <line x1="40" y1="161.0" x2="480" y2="161.0"/>
+      <line x1="370.0" y1="40" x2="370.0" y2="480"/>
+      <line x1="40" y1="150.0" x2="480" y2="150.0"/>
+      <line x1="381.0" y1="40" x2="381.0" y2="480"/>
+      <line x1="40" y1="139.0" x2="480" y2="139.0"/>
+      <line x1="392.0" y1="40" x2="392.0" y2="480"/>
+      <line x1="40" y1="128.0" x2="480" y2="128.0"/>
+      <line x1="403.0" y1="40" x2="403.0" y2="480"/>
+      <line x1="40" y1="117.0" x2="480" y2="117.0"/>
+      <line x1="414.0" y1="40" x2="414.0" y2="480"/>
+      <line x1="40" y1="106.0" x2="480" y2="106.0"/>
+      <line x1="425.0" y1="40" x2="425.0" y2="480"/>
+      <line x1="40" y1="95.0" x2="480" y2="95.0"/>
+      <line x1="436.0" y1="40" x2="436.0" y2="480"/>
+      <line x1="40" y1="84.0" x2="480" y2="84.0"/>
+      <line x1="447.0" y1="40" x2="447.0" y2="480"/>
+      <line x1="40" y1="73.0" x2="480" y2="73.0"/>
+      <line x1="458.0" y1="40" x2="458.0" y2="480"/>
+      <line x1="40" y1="62.0" x2="480" y2="62.0"/>
+      <line x1="469.0" y1="40" x2="469.0" y2="480"/>
+      <line x1="40" y1="51.0" x2="480" y2="51.0"/>
+      <line x1="480.0" y1="40" x2="480.0" y2="480"/>
+      <line x1="40" y1="40.0" x2="480" y2="40.0"/>
+      </g>
+      <g class="grid">
+      <line x1="40.0" y1="40" x2="40.0" y2="480"/>
+      <line x1="40" y1="480.0" x2="480" y2="480.0"/>
+      <line x1="84.0" y1="40" x2="84.0" y2="480"/>
+      <line x1="40" y1="436.0" x2="480" y2="436.0"/>
+      <line x1="128.0" y1="40" x2="128.0" y2="480"/>
+      <line x1="40" y1="392.0" x2="480" y2="392.0"/>
+      <line x1="172.0" y1="40" x2="172.0" y2="480"/>
+      <line x1="40" y1="348.0" x2="480" y2="348.0"/>
+      <line x1="216.0" y1="40" x2="216.0" y2="480"/>
+      <line x1="40" y1="304.0" x2="480" y2="304.0"/>
+      <line x1="260.0" y1="40" x2="260.0" y2="480"/>
+      <line x1="40" y1="260.0" x2="480" y2="260.0"/>
+      <line x1="304.0" y1="40" x2="304.0" y2="480"/>
+      <line x1="40" y1="216.0" x2="480" y2="216.0"/>
+      <line x1="348.0" y1="40" x2="348.0" y2="480"/>
+      <line x1="40" y1="172.0" x2="480" y2="172.0"/>
+      <line x1="392.0" y1="40" x2="392.0" y2="480"/>
+      <line x1="40" y1="128.0" x2="480" y2="128.0"/>
+      <line x1="436.0" y1="40" x2="436.0" y2="480"/>
+      <line x1="40" y1="84.0" x2="480" y2="84.0"/>
+      <line x1="480.0" y1="40" x2="480.0" y2="480"/>
+      <line x1="40" y1="40.0" x2="480" y2="40.0"/>
+      </g>
+      <line x1="36" y1="260.0" x2="494" y2="260.0" class="axe"/>
+      <line x1="260.0" y1="484" x2="260.0" y2="26" class="axe"/>
+      <polygon points="494,260.0 483,255.5 483,264.5" class="axe-fill"/>
+      <polygon points="260.0,26 255.5,37 264.5,37" class="axe-fill"/>
+      <line x1="40.0" y1="256.0" x2="40.0" y2="264.0" class="tick"/>
+      <text x="40.0" y="278.0" class="grad">-5</text>
+      <line x1="256.0" y1="480.0" x2="264.0" y2="480.0" class="tick"/>
+      <text x="250.0" y="484.0" class="grad grad-y">-5</text>
+      <line x1="84.0" y1="256.0" x2="84.0" y2="264.0" class="tick"/>
+      <text x="84.0" y="278.0" class="grad">-4</text>
+      <line x1="256.0" y1="436.0" x2="264.0" y2="436.0" class="tick"/>
+      <text x="250.0" y="440.0" class="grad grad-y">-4</text>
+      <line x1="128.0" y1="256.0" x2="128.0" y2="264.0" class="tick"/>
+      <text x="128.0" y="278.0" class="grad">-3</text>
+      <line x1="256.0" y1="392.0" x2="264.0" y2="392.0" class="tick"/>
+      <text x="250.0" y="396.0" class="grad grad-y">-3</text>
+      <line x1="172.0" y1="256.0" x2="172.0" y2="264.0" class="tick"/>
+      <text x="172.0" y="278.0" class="grad">-2</text>
+      <line x1="256.0" y1="348.0" x2="264.0" y2="348.0" class="tick"/>
+      <text x="250.0" y="352.0" class="grad grad-y">-2</text>
+      <line x1="216.0" y1="256.0" x2="216.0" y2="264.0" class="tick"/>
+      <text x="216.0" y="278.0" class="grad">-1</text>
+      <line x1="256.0" y1="304.0" x2="264.0" y2="304.0" class="tick"/>
+      <text x="250.0" y="308.0" class="grad grad-y">-1</text>
+      <line x1="304.0" y1="256.0" x2="304.0" y2="264.0" class="tick"/>
+      <text x="304.0" y="278.0" class="grad">1</text>
+      <line x1="256.0" y1="216.0" x2="264.0" y2="216.0" class="tick"/>
+      <text x="250.0" y="220.0" class="grad grad-y">1</text>
+      <line x1="348.0" y1="256.0" x2="348.0" y2="264.0" class="tick"/>
+      <text x="348.0" y="278.0" class="grad">2</text>
+      <line x1="256.0" y1="172.0" x2="264.0" y2="172.0" class="tick"/>
+      <text x="250.0" y="176.0" class="grad grad-y">2</text>
+      <line x1="392.0" y1="256.0" x2="392.0" y2="264.0" class="tick"/>
+      <text x="392.0" y="278.0" class="grad">3</text>
+      <line x1="256.0" y1="128.0" x2="264.0" y2="128.0" class="tick"/>
+      <text x="250.0" y="132.0" class="grad grad-y">3</text>
+      <line x1="436.0" y1="256.0" x2="436.0" y2="264.0" class="tick"/>
+      <text x="436.0" y="278.0" class="grad">4</text>
+      <line x1="256.0" y1="84.0" x2="264.0" y2="84.0" class="tick"/>
+      <text x="250.0" y="88.0" class="grad grad-y">4</text>
+      <line x1="480.0" y1="256.0" x2="480.0" y2="264.0" class="tick"/>
+      <text x="480.0" y="278.0" class="grad">5</text>
+      <line x1="256.0" y1="40.0" x2="264.0" y2="40.0" class="tick"/>
+      <text x="250.0" y="44.0" class="grad grad-y">5</text>
+      <path d="M145.0,90.0 L155.0,100.0 M145.0,100.0 L155.0,90.0" class="pt-cross"/>
+      <text x="146.0" y="83.0" class="pt-lbl">O</text>
+      <path d="M354.0,255.0 L364.0,265.0 M354.0,265.0 L364.0,255.0" class="pt-cross"/>
+      <text x="355.0" y="248.0" class="pt-lbl">M</text>
+      <path d="M255.0,343.0 L265.0,353.0 M255.0,353.0 L265.0,343.0" class="pt-cross"/>
+      <text x="242.0" y="344.0" class="pt-lbl">L</text>
+      <path d="M233.0,244.0 L243.0,254.0 M233.0,254.0 L243.0,244.0" class="pt-cross"/>
+      <text x="234.0" y="237.0" class="pt-lbl">N</text>
+      <path d="M79.0,134.0 L89.0,144.0 M79.0,144.0 L89.0,134.0" class="pt-cross"/>
+      <text x="80.0" y="127.0" class="pt-lbl">P</text>
+      </svg></div>
+    <div class="direct-q" data-type="coord">
+      <div class="coord-list">
+      <span class="coord-item"><em>O</em>(<input aria-label="Abscisse du point O" class="coord-input" data-ans-x="-2.5" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point O" class="coord-input" data-ans-y="3.75" autocomplete="off" type="text" inputmode="text">)</span>
+      <span class="coord-item"><em>M</em>(<input aria-label="Abscisse du point M" class="coord-input" data-ans-x="2.25" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point M" class="coord-input" data-ans-y="0" autocomplete="off" type="text" inputmode="text">)</span>
+      <span class="coord-item"><em>L</em>(<input aria-label="Abscisse du point L" class="coord-input" data-ans-x="0" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point L" class="coord-input" data-ans-y="-2" autocomplete="off" type="text" inputmode="text">)</span>
+      <span class="coord-item"><em>N</em>(<input aria-label="Abscisse du point N" class="coord-input" data-ans-x="-0.5" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point N" class="coord-input" data-ans-y="0.25" autocomplete="off" type="text" inputmode="text">)</span>
+      <span class="coord-item"><em>P</em>(<input aria-label="Abscisse du point P" class="coord-input" data-ans-x="-4" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point P" class="coord-input" data-ans-y="2.75" autocomplete="off" type="text" inputmode="text">)</span>
+      </div>
+      <div class="btn-row"><button class="btn btn-check check-btn" type="button">Vérifier</button><button class="btn btn-hint hint-btn" type="button">💡 Indice</button><button class="btn btn-retry retry-btn" type="button">Recommencer</button><button class="btn btn-corr correction-btn" type="button" style="display:none;">Voir la correction</button></div>
+      <div class="hint-box">Les coordonnées d'un point s'écrivent toujours sous la forme (abscisse ; ordonnée). Les graduations intermédiaires permettent de repérer des valeurs décimales. Attention aux nombres relatifs.</div>
+      <div class="feedback"></div><div class="correction-box"></div>
     </div>
   </div>
-
-  <div style="width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;padding:12px;margin:0 auto 1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;">
-    <div style="font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);margin:2px 0 10px;font-size:.98rem;">Déterminer les coordonnées (relatives) d'un point</div>
-    <div style="width:100%;height:1090px;overflow:hidden;border-radius:12px;background:#fff;position:relative;">
-      <iframe style="border:0;width:100%;height:1150px;display:block;background:#fff;"
-        title="Exercice interactif"
-        src="https://coopmaths.fr/alea/?uuid=ab969&alea=8381&interactif=1&n=1&duration=10&s=2&s2=false&s3=5&s4=true&cd=1&tip=0&i=1&v=eleve&title=&es=011010&recorder=moodle"
-        allowfullscreen="allowfullscreen" loading="lazy"></iframe>
-      <div style="position:absolute;top:0;left:0;right:0;height:105px;background:#fff;z-index:9999;pointer-events:none;"></div>
-      <div style="position:absolute;bottom:0;left:0;right:0;height:25px;background:#fff;z-index:9999;pointer-events:none;"></div>
+  <div class="exo-card">
+    <div class="ex-title">Déterminer les coordonnées (relatives) d'un point</div>
+    <p class="exo-consigne">Lis les coordonnées de chaque point dans le repère, puis complète sous la forme (abscisse ; ordonnée).</p>
+    <div class="repere-wrap"><svg class="repere-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Repère avec points">
+      <g class="subgrid">
+      <line x1="40.0" y1="40" x2="40.0" y2="480"/>
+      <line x1="40" y1="480.0" x2="480" y2="480.0"/>
+      <line x1="62.0" y1="40" x2="62.0" y2="480"/>
+      <line x1="40" y1="458.0" x2="480" y2="458.0"/>
+      <line x1="84.0" y1="40" x2="84.0" y2="480"/>
+      <line x1="40" y1="436.0" x2="480" y2="436.0"/>
+      <line x1="106.0" y1="40" x2="106.0" y2="480"/>
+      <line x1="40" y1="414.0" x2="480" y2="414.0"/>
+      <line x1="128.0" y1="40" x2="128.0" y2="480"/>
+      <line x1="40" y1="392.0" x2="480" y2="392.0"/>
+      <line x1="150.0" y1="40" x2="150.0" y2="480"/>
+      <line x1="40" y1="370.0" x2="480" y2="370.0"/>
+      <line x1="172.0" y1="40" x2="172.0" y2="480"/>
+      <line x1="40" y1="348.0" x2="480" y2="348.0"/>
+      <line x1="194.0" y1="40" x2="194.0" y2="480"/>
+      <line x1="40" y1="326.0" x2="480" y2="326.0"/>
+      <line x1="216.0" y1="40" x2="216.0" y2="480"/>
+      <line x1="40" y1="304.0" x2="480" y2="304.0"/>
+      <line x1="238.0" y1="40" x2="238.0" y2="480"/>
+      <line x1="40" y1="282.0" x2="480" y2="282.0"/>
+      <line x1="260.0" y1="40" x2="260.0" y2="480"/>
+      <line x1="40" y1="260.0" x2="480" y2="260.0"/>
+      <line x1="282.0" y1="40" x2="282.0" y2="480"/>
+      <line x1="40" y1="238.0" x2="480" y2="238.0"/>
+      <line x1="304.0" y1="40" x2="304.0" y2="480"/>
+      <line x1="40" y1="216.0" x2="480" y2="216.0"/>
+      <line x1="326.0" y1="40" x2="326.0" y2="480"/>
+      <line x1="40" y1="194.0" x2="480" y2="194.0"/>
+      <line x1="348.0" y1="40" x2="348.0" y2="480"/>
+      <line x1="40" y1="172.0" x2="480" y2="172.0"/>
+      <line x1="370.0" y1="40" x2="370.0" y2="480"/>
+      <line x1="40" y1="150.0" x2="480" y2="150.0"/>
+      <line x1="392.0" y1="40" x2="392.0" y2="480"/>
+      <line x1="40" y1="128.0" x2="480" y2="128.0"/>
+      <line x1="414.0" y1="40" x2="414.0" y2="480"/>
+      <line x1="40" y1="106.0" x2="480" y2="106.0"/>
+      <line x1="436.0" y1="40" x2="436.0" y2="480"/>
+      <line x1="40" y1="84.0" x2="480" y2="84.0"/>
+      <line x1="458.0" y1="40" x2="458.0" y2="480"/>
+      <line x1="40" y1="62.0" x2="480" y2="62.0"/>
+      <line x1="480.0" y1="40" x2="480.0" y2="480"/>
+      <line x1="40" y1="40.0" x2="480" y2="40.0"/>
+      </g>
+      <g class="grid">
+      <line x1="40.0" y1="40" x2="40.0" y2="480"/>
+      <line x1="40" y1="480.0" x2="480" y2="480.0"/>
+      <line x1="84.0" y1="40" x2="84.0" y2="480"/>
+      <line x1="40" y1="436.0" x2="480" y2="436.0"/>
+      <line x1="128.0" y1="40" x2="128.0" y2="480"/>
+      <line x1="40" y1="392.0" x2="480" y2="392.0"/>
+      <line x1="172.0" y1="40" x2="172.0" y2="480"/>
+      <line x1="40" y1="348.0" x2="480" y2="348.0"/>
+      <line x1="216.0" y1="40" x2="216.0" y2="480"/>
+      <line x1="40" y1="304.0" x2="480" y2="304.0"/>
+      <line x1="260.0" y1="40" x2="260.0" y2="480"/>
+      <line x1="40" y1="260.0" x2="480" y2="260.0"/>
+      <line x1="304.0" y1="40" x2="304.0" y2="480"/>
+      <line x1="40" y1="216.0" x2="480" y2="216.0"/>
+      <line x1="348.0" y1="40" x2="348.0" y2="480"/>
+      <line x1="40" y1="172.0" x2="480" y2="172.0"/>
+      <line x1="392.0" y1="40" x2="392.0" y2="480"/>
+      <line x1="40" y1="128.0" x2="480" y2="128.0"/>
+      <line x1="436.0" y1="40" x2="436.0" y2="480"/>
+      <line x1="40" y1="84.0" x2="480" y2="84.0"/>
+      <line x1="480.0" y1="40" x2="480.0" y2="480"/>
+      <line x1="40" y1="40.0" x2="480" y2="40.0"/>
+      </g>
+      <line x1="36" y1="260.0" x2="494" y2="260.0" class="axe"/>
+      <line x1="260.0" y1="484" x2="260.0" y2="26" class="axe"/>
+      <polygon points="494,260.0 483,255.5 483,264.5" class="axe-fill"/>
+      <polygon points="260.0,26 255.5,37 264.5,37" class="axe-fill"/>
+      <line x1="40.0" y1="256.0" x2="40.0" y2="264.0" class="tick"/>
+      <text x="40.0" y="278.0" class="grad">-5</text>
+      <line x1="256.0" y1="480.0" x2="264.0" y2="480.0" class="tick"/>
+      <text x="250.0" y="484.0" class="grad grad-y">-5</text>
+      <line x1="84.0" y1="256.0" x2="84.0" y2="264.0" class="tick"/>
+      <text x="84.0" y="278.0" class="grad">-4</text>
+      <line x1="256.0" y1="436.0" x2="264.0" y2="436.0" class="tick"/>
+      <text x="250.0" y="440.0" class="grad grad-y">-4</text>
+      <line x1="128.0" y1="256.0" x2="128.0" y2="264.0" class="tick"/>
+      <text x="128.0" y="278.0" class="grad">-3</text>
+      <line x1="256.0" y1="392.0" x2="264.0" y2="392.0" class="tick"/>
+      <text x="250.0" y="396.0" class="grad grad-y">-3</text>
+      <line x1="172.0" y1="256.0" x2="172.0" y2="264.0" class="tick"/>
+      <text x="172.0" y="278.0" class="grad">-2</text>
+      <line x1="256.0" y1="348.0" x2="264.0" y2="348.0" class="tick"/>
+      <text x="250.0" y="352.0" class="grad grad-y">-2</text>
+      <line x1="216.0" y1="256.0" x2="216.0" y2="264.0" class="tick"/>
+      <text x="216.0" y="278.0" class="grad">-1</text>
+      <line x1="256.0" y1="304.0" x2="264.0" y2="304.0" class="tick"/>
+      <text x="250.0" y="308.0" class="grad grad-y">-1</text>
+      <line x1="304.0" y1="256.0" x2="304.0" y2="264.0" class="tick"/>
+      <text x="304.0" y="278.0" class="grad">1</text>
+      <line x1="256.0" y1="216.0" x2="264.0" y2="216.0" class="tick"/>
+      <text x="250.0" y="220.0" class="grad grad-y">1</text>
+      <line x1="348.0" y1="256.0" x2="348.0" y2="264.0" class="tick"/>
+      <text x="348.0" y="278.0" class="grad">2</text>
+      <line x1="256.0" y1="172.0" x2="264.0" y2="172.0" class="tick"/>
+      <text x="250.0" y="176.0" class="grad grad-y">2</text>
+      <line x1="392.0" y1="256.0" x2="392.0" y2="264.0" class="tick"/>
+      <text x="392.0" y="278.0" class="grad">3</text>
+      <line x1="256.0" y1="128.0" x2="264.0" y2="128.0" class="tick"/>
+      <text x="250.0" y="132.0" class="grad grad-y">3</text>
+      <line x1="436.0" y1="256.0" x2="436.0" y2="264.0" class="tick"/>
+      <text x="436.0" y="278.0" class="grad">4</text>
+      <line x1="256.0" y1="84.0" x2="264.0" y2="84.0" class="tick"/>
+      <text x="250.0" y="88.0" class="grad grad-y">4</text>
+      <line x1="480.0" y1="256.0" x2="480.0" y2="264.0" class="tick"/>
+      <text x="480.0" y="278.0" class="grad">5</text>
+      <line x1="256.0" y1="40.0" x2="264.0" y2="40.0" class="tick"/>
+      <text x="250.0" y="44.0" class="grad grad-y">5</text>
+      <path d="M167.0,145.0 L177.0,155.0 M167.0,155.0 L177.0,145.0" class="pt-cross"/>
+      <text x="168.0" y="138.0" class="pt-lbl">H</text>
+      <path d="M233.0,255.0 L243.0,265.0 M233.0,265.0 L243.0,255.0" class="pt-cross"/>
+      <text x="224.0" y="252.0" class="pt-lbl">I</text>
+      <path d="M255.0,145.0 L265.0,155.0 M255.0,155.0 L265.0,145.0" class="pt-cross"/>
+      <text x="262.0" y="140.0" class="pt-lbl">E</text>
+      <path d="M365.0,123.0 L375.0,133.0 M365.0,133.0 L375.0,123.0" class="pt-cross"/>
+      <text x="366.0" y="116.0" class="pt-lbl">G</text>
+      <path d="M387.0,343.0 L397.0,353.0 M387.0,353.0 L397.0,343.0" class="pt-cross"/>
+      <text x="388.0" y="336.0" class="pt-lbl">F</text>
+      </svg></div>
+    <div class="direct-q" data-type="coord">
+      <div class="coord-list">
+      <span class="coord-item"><em>H</em>(<input aria-label="Abscisse du point H" class="coord-input" data-ans-x="-2" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point H" class="coord-input" data-ans-y="2.5" autocomplete="off" type="text" inputmode="text">)</span>
+      <span class="coord-item"><em>I</em>(<input aria-label="Abscisse du point I" class="coord-input" data-ans-x="-0.5" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point I" class="coord-input" data-ans-y="0" autocomplete="off" type="text" inputmode="text">)</span>
+      <span class="coord-item"><em>E</em>(<input aria-label="Abscisse du point E" class="coord-input" data-ans-x="0" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point E" class="coord-input" data-ans-y="2.5" autocomplete="off" type="text" inputmode="text">)</span>
+      <span class="coord-item"><em>G</em>(<input aria-label="Abscisse du point G" class="coord-input" data-ans-x="2.5" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point G" class="coord-input" data-ans-y="3" autocomplete="off" type="text" inputmode="text">)</span>
+      <span class="coord-item"><em>F</em>(<input aria-label="Abscisse du point F" class="coord-input" data-ans-x="3" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point F" class="coord-input" data-ans-y="-2" autocomplete="off" type="text" inputmode="text">)</span>
+      </div>
+      <div class="btn-row"><button class="btn btn-check check-btn" type="button">Vérifier</button><button class="btn btn-hint hint-btn" type="button">💡 Indice</button><button class="btn btn-retry retry-btn" type="button">Recommencer</button><button class="btn btn-corr correction-btn" type="button" style="display:none;">Voir la correction</button></div>
+      <div class="hint-box">Les coordonnées d'un point s'écrivent toujours sous la forme (abscisse ; ordonnée). Les graduations intermédiaires permettent de repérer des valeurs décimales. Attention aux nombres relatifs.</div>
+      <div class="feedback"></div><div class="correction-box"></div>
     </div>
   </div>
-  <p class="zone-note">Si un exercice ne s'affiche pas, recharge la page ou ouvre-le dans un nouvel onglet.</p>
+<script>
+(function(){
+  var corrections=["Les coordonnées respectives des points sont : <em>O</em>(−2,5 ; 3,75), <em>M</em>(2,25 ; 0), <em>L</em>(0 ; −2), <em>N</em>(−0,5 ; 0,25) et <em>P</em>(−4 ; 2,75).","Les coordonnées respectives des points sont : <em>H</em>(−2 ; 2,5), <em>I</em>(−0,5 ; 0), <em>E</em>(0 ; 2,5), <em>G</em>(2,5 ; 3) et <em>F</em>(3 ; −2)."];
+  var okFeedbacks=["Bravo ! Tu as correctement lu toutes les coordonnées.","Bravo ! Tu as correctement lu toutes les coordonnées."];
+  var koFeedbacks=["Certaines coordonnées sont incorrectes. Vérifie la position des points dans le repère et la signification des coordonnées. Attention aux nombres relatifs et aux graduations intermédiaires.","Certaines coordonnées sont incorrectes. Vérifie la position des points dans le repère et la signification des coordonnées. Attention aux nombres relatifs et aux graduations intermédiaires."];
+
+  function normNum(str){
+    var s=String(str||'').trim().replace(/\u2212/g,'-').replace(/\s+/g,'').replace(',', '.');
+    if(s==='')return null;
+    var v=parseFloat(s);
+    if(isNaN(v)||!/^-?\d*\.?\d+$/.test(s))return null;
+    return Math.round(v*1000)/1000;
+  }
+  function sameNum(a,b){var na=normNum(a);if(na===null)return false;return Math.abs(na-parseFloat(b))<1e-6;}
+
+  var qIndex=0;
+  document.querySelectorAll('.direct-q').forEach(function(q){
+    var myIndex=qIndex++;
+    var fb=q.querySelector('.feedback'), corr=q.querySelector('.correction-box'),
+        hint=q.querySelector('.hint-box'), corrBtn=q.querySelector('.correction-btn');
+    q.querySelector('.hint-btn').addEventListener('click',function(){hint.classList.toggle('show');});
+
+    function showOK(){fb.className='feedback show ok';fb.innerHTML='<span class="fb-ic">✅</span><div>'+okFeedbacks[myIndex]+'</div>';corrBtn.style.display='none';corr.classList.remove('show');corr.innerHTML='';}
+    function showKO(){fb.className='feedback show ko';fb.innerHTML='<span class="fb-ic">❌</span><div>'+koFeedbacks[myIndex]+'</div>';corrBtn.style.display='inline-flex';corrBtn.textContent='Voir la correction';corr.classList.remove('show');corr.innerHTML='';}
+    function showEmpty(){fb.className='feedback show ko';fb.innerHTML='<span class="fb-ic">\u26a0\ufe0f</span><div>Complète toutes les réponses avant de vérifier.</div>';corrBtn.style.display='none';corr.classList.remove('show');corr.innerHTML='';}
+
+    q.querySelector('.check-btn').addEventListener('click',function(){
+      var inputs=q.querySelectorAll('.coord-input');
+      var anyEmpty=false;
+      inputs.forEach(function(i){if(!i.value.trim())anyEmpty=true;});
+      if(anyEmpty){
+        inputs.forEach(function(i){i.classList.remove('ok','ko');if(!i.value.trim())i.classList.add('ko');});
+        showEmpty();return;
+      }
+      var allOk=true;
+      inputs.forEach(function(i){
+        var ref=i.dataset.ansX!==undefined?i.dataset.ansX:i.dataset.ansY;
+        var good=sameNum(i.value,ref);
+        i.classList.remove('ok','ko');i.classList.add(good?'ok':'ko');
+        if(!good)allOk=false;
+      });
+      if(allOk)showOK();else showKO();
+    });
+    corrBtn.addEventListener('click',function(){
+      var open=corr.classList.toggle('show');
+      if(open){corr.innerHTML='<div class="corr-head">Correction</div>'+corrections[myIndex];corrBtn.textContent='Cacher la correction';}
+      else{corrBtn.textContent='Voir la correction';}
+    });
+    q.querySelector('.retry-btn').addEventListener('click',function(){
+      q.querySelectorAll('.coord-input').forEach(function(i){i.value='';i.classList.remove('ok','ko');});
+      fb.className='feedback';fb.innerHTML='';
+      corr.classList.remove('show');corr.innerHTML='';corrBtn.style.display='none';corrBtn.textContent='Voir la correction';
+      hint.classList.remove('show');
+    });
+  });
+})();
+</script>
+  <p class="zone-note">Astuce : tu peux écrire les nombres décimaux avec une virgule (par exemple −2,5).</p>
 </div>
+<!-- ===== CALCULATRICE fx-92 PAZAPA (déplaçable) ===== -->
+<style>
+  .fxc-trigger{position:fixed;right:14px;bottom:14px;z-index:9998;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:0;}
+  .fxc-trigger svg{filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));}
+  .fxc-pill{background:var(--day-dark,#444);color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.04em;}
+  .fxc-hidden{display:none!important;}
+  .fxc-panel{position:fixed;right:14px;bottom:14px;z-index:9999;width:312px;max-width:94vw;background:#2f343b;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.45);font-family:'JetBrains Mono',monospace;overflow:hidden;border:2px solid var(--day-color,#3ab5d8);}
+  .fxc-bar{background:#23272d;color:#cfd6de;font-size:12.5px;font-weight:700;padding:9px 10px;cursor:move;touch-action:none;user-select:none;display:flex;align-items:center;gap:6px;}
+  .fxc-bar .fxc-sp{flex:1;}
+  .fxc-icon{background:#3a4049;color:#fff;border:none;width:26px;height:26px;border-radius:7px;font-size:13px;cursor:pointer;line-height:1;}
+  .fxc-icon:hover{background:var(--day-color,#3ab5d8);color:#000;}
+  .fxc-help{background:#23272d;color:#aeb6bf;font-size:11.5px;line-height:1.7;padding:8px 12px;border-top:1px solid #3a4049;}
+  .fxc-screen{background:#d7e3c8;margin:10px;border-radius:8px;padding:8px 10px;min-height:64px;display:flex;flex-direction:column;justify-content:center;border:2px solid #aab79a;position:relative;}
+  .fxc-deg{position:absolute;top:4px;left:8px;font-size:10px;font-weight:700;color:#5a6b4a;letter-spacing:.05em;}
+  .fxc-expr{font-size:13px;color:#4a5340;text-align:right;min-height:16px;word-break:break-all;line-height:1.4;}
+  .fxc-res{font-size:23px;font-weight:800;color:#222;text-align:right;word-break:break-all;line-height:1.2;}
+  .fxc-keys{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:0 10px 12px;}
+  .fxc-k{background:#454c55;color:#fff;border:none;border-radius:9px;padding:10px 0;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;cursor:pointer;min-height:40px;transition:transform .08s;}
+  .fxc-k:active{transform:scale(.94);} .fxc-k:hover{background:#525a64;}
+  .fxc-k.fn{background:#3a4049;font-size:12px;color:var(--day-color,#7fd4ea);}
+  .fxc-k.tg{background:#34506a;font-size:12.5px;color:#bfe0f5;}
+  .fxc-k.op{color:var(--day-color,#7fd4ea);} .fxc-k.eq{background:#3a7bd5;color:#fff;} .fxc-k.blank{background:transparent;cursor:default;}
+</style>
+<button id="fxc-open" class="fxc-trigger" onclick="fxcOpen()" aria-label="Ouvrir la calculatrice">
+  <svg width="62" height="86" viewBox="0 0 62 86" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="fxcBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcefe8"/><stop offset="1" stop-color="#bcdcd5"/></linearGradient></defs>
+    <rect x="1" y="1" width="60" height="84" rx="9" fill="url(#fxcBody)" stroke="#8fb3aa" stroke-width="1.5"/>
+    <text x="9" y="13" font-family="Arial" font-size="7" font-weight="bold" fill="#2f5d52">CASIO</text>
+    <text x="40" y="13" font-family="Arial" font-size="6" font-weight="bold" fill="#2f5d52">fx-92</text>
+    <rect x="8" y="17" width="46" height="6" rx="2" fill="#26323a"/>
+    <rect x="8" y="26" width="46" height="17" rx="2" fill="#c4d3a6" stroke="#9aa985"/>
+    <circle cx="15" cy="54" r="7" fill="#7fb8ac" stroke="#5e948a"/><circle cx="15" cy="54" r="2.5" fill="#3a4f49"/>
+    <g fill="#5a6b66"><rect x="27" y="49" width="7" height="4" rx="1"/><rect x="37" y="49" width="7" height="4" rx="1"/><rect x="47" y="49" width="7" height="4" rx="1"/><rect x="27" y="56" width="7" height="4" rx="1"/><rect x="37" y="56" width="7" height="4" rx="1"/><rect x="47" y="56" width="7" height="4" rx="1"/></g>
+    <g fill="#7a8b86"><rect x="8" y="64" width="7" height="4" rx="1"/><rect x="18" y="64" width="7" height="4" rx="1"/><rect x="28" y="64" width="7" height="4" rx="1"/><rect x="8" y="71" width="7" height="4" rx="1"/><rect x="18" y="71" width="7" height="4" rx="1"/><rect x="28" y="71" width="7" height="4" rx="1"/></g>
+    <rect x="40" y="64" width="14" height="4" rx="1" fill="#c0392b"/><rect x="40" y="71" width="14" height="6" rx="1.5" fill="#3a7bd5"/>
+  </svg>
+  <span class="fxc-pill">Calculatrice</span>
+</button>
+<div id="fxc-panel" class="fxc-panel fxc-hidden">
+  <div class="fxc-bar" id="fxc-bar">&#9776; fx-92 &middot; glisse pour d&eacute;placer<span class="fxc-sp"></span>
+    <button class="fxc-icon" id="fxc-help-btn" type="button">?</button>
+    <button class="fxc-icon" id="fxc-close-btn" type="button">&#10005;</button>
+  </div>
+  <div class="fxc-help fxc-hidden" id="fxc-help">cos sin tan et cos&#8315;&#185; en degr&eacute;s &middot; &divide;R reste &middot; FACT facteurs &middot; PGCD &middot; PPCM &middot; a/b &middot; &radic; x&sup2; ^</div>
+  <div class="fxc-screen"><span class="fxc-deg">DEG</span><div class="fxc-expr" id="fxc-expr"></div><div class="fxc-res" id="fxc-res">0</div></div>
+  <div class="fxc-keys" id="fxc-keys"></div>
+</div>
+<script>
+(function(){
+  var expr="";
+  var E=function(id){return document.getElementById(id);};
+  var KEYS=[
+    ["cos(","tg","cos("],["sin(","tg","sin("],["tan(","tg","tan("],["cos\u207b\u00b9(","tg","cos\u207b\u00b9("],["AC","fn","AC"],
+    ["FACT(","fn","FACT("],["PGCD(","fn","PGCD("],["PPCM(","fn","PPCM("],["a/b","fn","SIMP("],["DEL","fn","DEL"],
+    ["(","op","("],[")","op",")"],[";","op",";"],["\u00f7R","op","\u00f7R"],["\u221a(","op","\u221a("],
+    ["7","","7"],["8","","8"],["9","","9"],["\u00f7","op","\u00f7"],["x\u00b2","op","\u00b2"],
+    ["4","","4"],["5","","5"],["6","","6"],["\u00d7","op","\u00d7"],["^","op","^"],
+    ["1","","1"],["2","","2"],["3","","3"],["\u2212","op","\u2212"],["(\u2212)","op","(\u2212)"],
+    ["0","","0"],[",","",","],["+","op","+"],["=","eq","="],["","blank",""]
+  ];
+  function render(){E("fxc-expr").textContent=expr;}
+  function press(v){
+    if(v==="AC"){expr="";E("fxc-res").textContent="0";render();return;}
+    if(v==="DEL"){del();return;}
+    if(v==="="){E("fxc-res").textContent=evaluate(expr);return;}
+    if(v==="")return;
+    expr+=v;render();
+  }
+  function del(){
+    var toks=["cos\u207b\u00b9(","FACT(","PGCD(","PPCM(","SIMP(","cos(","sin(","tan(","\u221a(","\u00f7R","(\u2212)"];
+    for(var i=0;i<toks.length;i++){if(expr.slice(-toks[i].length)===toks[i]){expr=expr.slice(0,-toks[i].length);render();return;}}
+    expr=expr.slice(0,-1);render();
+  }
+  function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+  function sup(n){var m={"0":"\u2070","1":"\u00b9","2":"\u00b2","3":"\u00b3","4":"\u2074","5":"\u2075","6":"\u2076","7":"\u2077","8":"\u2078","9":"\u2079"};return String(n).split("").map(function(c){return m[c]||c;}).join("");}
+  function factString(n){n=Math.round(n);if(n<1)return"Erreur";if(n===1)return"1";var f=[],d=2,x=n;while(d*d<=x){while(x%d===0){f.push(d);x/=d;}d++;}if(x>1)f.push(x);var out=[],i=0;while(i<f.length){var p=f[i],c=0;while(i<f.length&&f[i]===p){c++;i++;}out.push(c>1?(p+sup(c)):(""+p));}if(f.length===1&&f[0]===n)return n+" (premier)";return out.join("\u00d7");}
+  var RAD=Math.PI/180;
+  function calc(str){
+    var s=str.replace(/cos\u207b\u00b9\(/g,"acos(").replace(/\u00d7/g,"*").replace(/\u00f7/g,"/").replace(/\u00b2/g,"^2").replace(/\u221a/g,"sqrt").replace(/\(\u2212\)/g,"-").replace(/\u2212/g,"-").replace(/,/g,".").replace(/\s+/g,"");
+    s=s.replace(/([0-9.])(cos|sin|tan|acos|sqrt)/g,"$1*$2").replace(/([0-9.)])\(/g,"$1*(");
+    var pos=0;
+    function pk(){return s.charAt(pos);}
+    function ex(){var v=tm();while(pk()==="+"||pk()==="-"){var o=s.charAt(pos++);var t=tm();v=(o==="+")?v+t:v-t;}return v;}
+    function tm(){var v=fc();while(pk()==="*"||pk()==="/"){var o=s.charAt(pos++);var f=fc();if(o==="*")v*=f;else{if(f===0)throw 0;v/=f;}}return v;}
+    function fc(){var b=ba();if(pk()==="^"){pos++;var e=fc();return Math.pow(b,e);}return b;}
+    function fn(name,len){pos+=len;var v=ex();if(s.charAt(pos)!==")")throw 0;pos++;return v;}
+    function ba(){
+      if(pk()==="-"){pos++;return -ba();}
+      if(pk()==="("){pos++;var v=ex();if(s.charAt(pos)!==")")throw 0;pos++;return v;}
+      if(s.substr(pos,5)==="acos("){var v=fn("acos",5);if(v<-1||v>1)throw 0;return Math.acos(v)/RAD;}
+      if(s.substr(pos,4)==="cos("){return Math.cos(fn("cos",4)*RAD);}
+      if(s.substr(pos,4)==="sin("){return Math.sin(fn("sin",4)*RAD);}
+      if(s.substr(pos,4)==="tan("){return Math.tan(fn("tan",4)*RAD);}
+      if(s.substr(pos,5)==="sqrt("){var w=fn("sqrt",5);if(w<0)throw 0;return Math.sqrt(w);}
+      var st=pos;while(pos<s.length&&/[0-9.]/.test(s.charAt(pos)))pos++;if(pos===st)throw 0;return parseFloat(s.substr(st,pos-st));
+    }
+    var r=ex();if(pos!==s.length)throw 0;return r;
+  }
+  function args(inner){return inner.split(/[;,]/);}
+  function evaluate(raw){
+    var s=(raw||"").trim();if(s==="")return"0";
+    try{
+      if(s.indexOf("\u00f7R")>=0){var p=s.split("\u00f7R");if(p.length!==2)throw 0;var a=Math.round(calc(p[0])),b=Math.round(calc(p[1]));if(b===0)throw 0;var q=Math.floor(a/b),r=a-q*b;return"quotient "+q+" \u00b7 reste "+r;}
+      var m;
+      if((m=s.match(/^FACT\((.+)\)$/i)))return factString(calc(m[1]));
+      if((m=s.match(/^PGCD\((.+)\)$/i))){var g=args(m[1]);return""+gcd(Math.round(calc(g[0])),Math.round(calc(g[1])));}
+      if((m=s.match(/^PPCM\((.+)\)$/i))){var l=args(m[1]);var A=Math.round(calc(l[0])),B=Math.round(calc(l[1]));if(A===0||B===0)throw 0;return""+(Math.abs(A*B)/gcd(A,B));}
+      if((m=s.match(/^SIMP\((.+)\)$/i))){var z=args(m[1]);var pp=Math.round(calc(z[0])),qq=Math.round(calc(z[1]));if(qq===0)throw 0;var d=gcd(pp,qq)||1;pp/=d;qq/=d;if(qq<0){pp=-pp;qq=-qq;}return qq===1?(""+pp):(pp+"/"+qq);}
+      var v=calc(s);if(!isFinite(v))throw 0;var rv=Math.round(v*1e9)/1e9;return String(rv).replace(".",",");
+    }catch(e){return"Erreur";}
+  }
+  var kc=E("fxc-keys");
+  KEYS.forEach(function(k){var btn=document.createElement("button");btn.type="button";btn.className="fxc-k "+(k[1]||"");btn.textContent=k[0];if(k[1]!=="blank")btn.addEventListener("click",function(){press(k[2]);});kc.appendChild(btn);});
+  window.fxcOpen=function(){E("fxc-open").classList.add("fxc-hidden");E("fxc-panel").classList.remove("fxc-hidden");};
+  window.fxcClose=function(){E("fxc-panel").classList.add("fxc-hidden");E("fxc-open").classList.remove("fxc-hidden");};
+  window.fxcHelp=function(){E("fxc-help").classList.toggle("fxc-hidden");};
+  E("fxc-close-btn").addEventListener("click",function(e){e.stopPropagation();fxcClose();});
+  E("fxc-help-btn").addEventListener("click",function(e){e.stopPropagation();fxcHelp();});
+  var bar=E("fxc-bar"),panel=E("fxc-panel"),drag=false,sx,sy,ox,oy,conv=false;
+  bar.addEventListener("pointerdown",function(e){if(e.target.classList.contains("fxc-icon"))return;drag=true;conv=false;sx=e.clientX;sy=e.clientY;var r=panel.getBoundingClientRect();ox=r.left;oy=r.top;bar.setPointerCapture(e.pointerId);});
+  bar.addEventListener("pointermove",function(e){if(!drag)return;if(!conv){panel.style.right="auto";panel.style.bottom="auto";panel.style.left=ox+"px";panel.style.top=oy+"px";conv=true;}var nx=ox+(e.clientX-sx),ny=oy+(e.clientY-sy),w=panel.offsetWidth,h=panel.offsetHeight;nx=Math.max(4,Math.min(window.innerWidth-w-4,nx));ny=Math.max(4,Math.min(window.innerHeight-h-4,ny));panel.style.left=nx+"px";panel.style.top=ny+"px";});
+  bar.addEventListener("pointerup",function(e){drag=false;try{bar.releasePointerCapture(e.pointerId);}catch(_){}});
+})();
+</script>
+<!-- ===== FIN CALCULATRICE ===== -->
 </body>
 </html>
