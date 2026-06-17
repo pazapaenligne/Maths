@@ -45,7 +45,7 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--jour-fonce);li
 .card{
   width:100%;background:#fff;border:2px solid var(--bord);border-radius:16px;
   box-shadow:0 4px 20px rgba(0,0,0,.05);padding:1.2rem 1.2rem 1.3rem;margin:0 auto 1.4rem;
-  position:relative;
+  position:relative;border-top:4px solid var(--jour);
 }
 .ex-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;}
 .ex-num{
@@ -60,7 +60,7 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--jour-fonce);li
 .visuel{display:flex;justify-content:center;margin:.4rem 0 1rem;}
 
 /* ---- champs ---- */
-.answer-row{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;font-size:1rem;font-weight:600;}
+.answer-row{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;font-size:1rem;font-weight:600;min-width:0;overflow-wrap:break-word;}
 .answer-row .lab{font-weight:700;color:var(--jour-fonce);}
 input.rep{
   font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:#23262d;
@@ -103,7 +103,7 @@ input.rep:focus{border-color:var(--jour);}
 .s-join{background:#449a3e;border-radius:99px;padding:3px 10px;color:#fff;font-weight:700;display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px;}
 
 /* ---- feedbacks ---- */
-.fb{display:none;margin-top:.9rem;border-radius:10px;padding:.6rem .8rem;font-size:.92rem;font-weight:600;line-height:1.5;}
+.fb{display:none;margin-top:.9rem;border-radius:10px;padding:.6rem .8rem;font-size:.92rem;font-weight:600;line-height:1.6;overflow-wrap:break-word;}
 .fb-ok{background:#eaf6ea;border:1.5px solid #8dc63f;color:#2f6b1f;}
 .fb-no{background:#fff0f0;border:1.5px solid #d93025;color:#8b1a10;}
 .fb-empty{background:#f4f1e8;border:1.5px solid #d8cfb8;color:#7a6f55;}
@@ -440,7 +440,7 @@ input.rep:focus{border-color:var(--jour);}
     void fb.offsetWidth;
     if(vide){ fb.className='fb fb-empty'; fb.textContent='À compléter.'; return; }
     if(exo.ok(val)){
-      fb.className='fb fb-ok'; fb.textContent='✓ Correct !';
+      fb.className='fb fb-ok'; fb.textContent='✅ Bravo !';
       playSound(true); flashCard(exo.id,true);
     } else {
       fb.className='fb fb-no'; fb.textContent='✗ Correction : '+exo.corr;
@@ -451,13 +451,17 @@ input.rep:focus{border-color:var(--jour);}
   /* ── Vérification globale ── */
   function verifier(){
     var score=0;
-    exos.forEach(function(e){ verifierUn(e); if(e.ok(e.get())) score++; });
+    exos.forEach(function(e){
+      verifierUn(e);
+      var val=e.get();
+      if(val!==null&&val!==undefined&&(''+val).trim()!==''&&e.ok(val)) score++;
+    });
     var banner=document.getElementById('banner');
     banner.style.display='block';
     banner.className='banner '+(score===6?'banner-full':'banner-part');
-    banner.textContent='Résultat : '+score+' / 6';
+    banner.textContent='Résultat : '+score+' / 6';
     banner.scrollIntoView({behavior:'smooth',block:'nearest'});
-    playSound(score===6);
+    setTimeout(function(){ playSound(score===6); },200);
   }
 
   /* ── Recommencer ── */
