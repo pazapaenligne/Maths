@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 3ème S4 J2 · Couloir Aérien · Escape game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --day-color:  #f28b82;
+  --day-dark:   #c0392b;
+  --day-light:  #fff0ef;
+  --day-border: #f9c0bb;
+  --day-glow:   rgba(242,139,130,.25);
+  --bg:         #fff8f7;
+  --surface:    #ffffff;
+  --border:     #f0d0cc;
+  --text:       #2e1010;
+  --muted:      #8a5a55;
+  --radius:     14px;
+  --ok:         #1d7a40;
+  --ok-bg:      #e6f7ed;
+  --ok-border:  #6dce96;
+  --ko:         #b82020;
+  --ko-bg:      #fdeaea;
+  --ko-border:  #e88080;
+  --warn:       #7a4a00;
+  --warn-bg:    #fff3e0;
+  --neon:       #c0392b;
+  --neon-glow:  rgba(192,57,43,.2);
+  --grid:       rgba(242,139,130,.06);
+  --mountain:   #6a5020;
+  --sky:        #e8f4ff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px 80px;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:48px 48px;opacity:.5;}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;}
+
+.header{text-align:center;margin-bottom:28px;}
+.logo-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(242,139,130,.18);color:var(--neon);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:1.5px;padding:6px 16px;border-radius:999px;border:1px solid var(--day-color);box-shadow:0 0 12px var(--neon-glow);margin-bottom:12px;}
+.logo-badge .dots{display:inline-flex;gap:3px;}
+.logo-badge .dots i{width:8px;height:8px;border-radius:50%;background:var(--neon);display:block;animation:blink 1.4s ease-in-out infinite;}
+.logo-badge .dots i:nth-child(2){animation-delay:.2s;opacity:.7;}
+.logo-badge .dots i:nth-child(3){animation-delay:.4s;opacity:.4;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.semaine{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:2.1rem;line-height:1.1;color:var(--day-dark);margin-bottom:6px;}
+.titre .accent{color:var(--mountain);}
+.sous-titre{font-family:'JetBrains Mono',monospace;font-size:.82rem;letter-spacing:2px;color:var(--muted);margin-bottom:14px;}
+.badge-mission{display:inline-block;background:rgba(106,80,32,.1);color:var(--mountain);font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:1px;padding:9px 22px;border-radius:24px;border:1px solid var(--mountain);box-shadow:0 0 14px rgba(106,80,32,.15);animation:alertPulse 2s ease-in-out infinite;}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 14px rgba(106,80,32,.15);}50%{box-shadow:0 0 28px rgba(106,80,32,.3);}}
+
+#soundBtn{position:fixed;top:14px;right:14px;z-index:300;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--day-color);background:rgba(242,139,130,.1);color:var(--neon);font-size:.72rem;font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;gap:4px;box-shadow:0 0 10px var(--neon-glow);white-space:nowrap;}
+
+.briefing{background:var(--sky);border:1px solid rgba(100,160,220,.25);border-left:4px solid #4a90d9;border-radius:var(--radius);padding:18px 20px;margin-bottom:22px;}
+.briefing-titre{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:2px;color:#2a60a0;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.briefing-corps{font-size:.94rem;line-height:1.7;color:var(--text);}
+.briefing-corps b{color:#2a60a0;}
+
+.avion-wrap{text-align:center;margin:14px 0 12px;}
+
+.rappel{background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-dark);border-radius:var(--radius);padding:16px 20px;margin-bottom:22px;}
+.rappel-titre{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;letter-spacing:1.5px;color:var(--day-dark);margin-bottom:8px;}
+.rappel-corps{font-size:.9rem;line-height:1.8;color:#5a2020;}
+.rappel-corps .f{display:inline-block;background:#fff;padding:4px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--ko);border:1px solid var(--day-border);margin:2px;}
+
+.scoreboard{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:12px;margin-bottom:18px;box-shadow:0 4px 16px var(--neon-glow);}
+.sc-col{text-align:center;padding:8px 4px;background:#fff8f7;border-radius:10px;border:1.5px solid var(--border);}
+.sc-col.ok{border-color:rgba(29,122,64,.3);} .sc-col.ok .sc-num{color:var(--ok);}
+.sc-col.rem{border-color:rgba(242,139,130,.3);} .sc-col.rem .sc-num{color:var(--neon);}
+.sc-col.err{border-color:rgba(184,32,32,.3);} .sc-col.err .sc-num{color:var(--ko);}
+.sc-num{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.8rem;line-height:1;}
+.sc-lbl{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;letter-spacing:1.5px;color:var(--muted);margin-top:4px;text-transform:uppercase;}
+.progress-wrap{background:rgba(242,139,130,.15);border-radius:999px;height:6px;margin-bottom:24px;overflow:hidden;}
+.progress-bar{height:6px;border-radius:999px;background:linear-gradient(90deg,#4a90d9,var(--day-color));width:0%;transition:width .4s ease;}
+
+.progression{display:flex;align-items:center;gap:6px;margin-bottom:24px;flex-wrap:wrap;background:var(--surface);border:1.5px solid var(--day-border);border-radius:var(--radius);padding:12px 16px;box-shadow:0 2px 10px var(--neon-glow);}
+.prog-step{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);letter-spacing:1px;font-weight:700;}
+.prog-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--day-border);background:#fff;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:.72rem;color:var(--muted);transition:all .3s;flex-shrink:0;}
+.prog-dot.active{border-color:var(--neon);background:var(--neon);color:#fff;box-shadow:0 0 8px var(--neon-glow);}
+.prog-dot.done{border-color:var(--ok);background:var(--ok);color:#fff;}
+.prog-arrow{color:var(--day-border);font-size:.8rem;}
+
+.etape-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:0 3px 14px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.etape-card.done-ok{border-color:var(--ok);}
+.etape-stripe{height:5px;background:linear-gradient(90deg,#4a90d9,var(--day-color));}
+.etape-body{padding:18px 20px;}
+.etape-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.etape-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;color:var(--neon);letter-spacing:1px;}
+.etape-badge{font-family:'JetBrains Mono',monospace;font-size:.62rem;background:var(--day-light);color:var(--neon);padding:4px 10px;border-radius:999px;border:1px solid var(--day-border);letter-spacing:1px;}
+
+.contexte{background:var(--warn-bg);border-left:3px solid var(--day-color);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-style:italic;font-size:.9rem;color:var(--warn);line-height:1.55;}
+
+/* SVG Thalès */
+.thales-zone{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:14px;background:var(--day-light);border:1px solid var(--day-border);border-radius:10px;padding:14px;}
+.thales-data{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--text);line-height:2;}
+.thales-data .label{color:#2a60a0;font-weight:700;}
+.thales-data .unknown{color:var(--ko);font-weight:700;font-size:1.1rem;}
+.thales-data .parallel{color:var(--ok);font-size:.8rem;font-style:italic;}
+
+.saisie{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;background:var(--day-light);border:1px solid var(--day-border);border-radius:10px;padding:12px;margin-bottom:12px;}
+.saisie .prefix{font-family:'Orbitron',sans-serif;font-weight:700;font-size:1rem;color:var(--text);}
+.saisie input{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;text-align:center;width:110px;padding:10px;border:2px solid var(--day-border);border-radius:8px;background:#fff;color:var(--text);}
+.saisie input:focus{outline:none;border-color:var(--day-dark);box-shadow:0 0 0 2px var(--neon-glow);}
+.saisie input.good{border-color:var(--ok);background:var(--ok-bg);}
+.saisie input.bad{border-color:var(--ko);background:var(--ko-bg);}
+.saisie input:disabled{opacity:.8;}
+
+.btn-zone{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px;}
+.btn{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:1px;min-height:44px;padding:0 18px;border:none;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-valider{background:var(--ok);color:#fff;}
+.btn-valider:not(:disabled){animation:pulseV 1.6s ease-in-out infinite;}
+@keyframes pulseV{0%,100%{box-shadow:0 0 5px rgba(29,122,64,.4);}50%{box-shadow:0 0 14px rgba(29,122,64,.8);}}
+.btn-indice{background:rgba(242,139,130,.2);color:var(--neon);border:1px solid var(--day-border);}
+.btn-retry{background:rgba(122,74,0,.1);color:var(--warn);border:1px solid rgba(122,74,0,.2);}
+
+.indice-box{display:none;padding:10px 14px;border-radius:8px;margin-bottom:10px;background:var(--day-light);border:1.5px solid var(--day-border);font-size:.88rem;color:#5a2020;line-height:1.5;}
+.indice-box.show{display:block;}
+.fb{display:none;margin-bottom:10px;padding:11px 14px;border-radius:8px;font-weight:bold;font-size:.92rem;}
+.fb.show{display:block;}
+.fb.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-border);}
+.fb.retry{background:var(--warn-bg);color:var(--warn);border:1px solid rgba(122,74,0,.2);}
+
+.corr-box{display:none;background:var(--day-light);border:1px solid var(--day-border);border-left:4px solid var(--day-dark);border-radius:10px;padding:14px 16px;font-size:.9rem;color:#5a2020;line-height:1.7;}
+.corr-box.show{display:block;animation:fadeUp .3s ease;}
+.corr-box .step{padding:4px 0;border-bottom:1px dashed var(--day-border);}
+.corr-box .step:last-child{border-bottom:none;}
+.corr-box .eq{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--ko);}
+.corr-box .res{display:block;text-align:center;margin-top:8px;padding:8px;background:var(--ok-bg);border-radius:8px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ok);border:1px solid var(--ok-border);}
+
+/* Fragment déverrouillé */
+.fragment-unlock{background:linear-gradient(135deg,var(--day-light),#fff8f0);border:2px solid var(--day-color);border-radius:10px;padding:12px 16px;margin-top:12px;text-align:center;box-shadow:0 0 14px var(--neon-glow);}
+.frag-icon{font-size:1.6rem;margin-bottom:4px;}
+.frag-label{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:2px;color:var(--day-dark);margin-bottom:4px;}
+.frag-value{font-family:'JetBrains Mono',monospace;font-size:1rem;color:#2a60a0;font-weight:700;}
+.frag-value b{color:var(--ko);font-size:1.2rem;}
+
+/* FINALE */
+.finale-zone{display:none;margin-top:24px;background:var(--sky);border:2px solid #4a90d9;border-radius:var(--radius);padding:24px;text-align:center;box-shadow:0 4px 20px rgba(74,144,217,.15);animation:fadeUp .6s ease;}
+.finale-zone.show{display:block;}
+.finale-zone h3{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.2rem;color:#2a60a0;margin-bottom:12px;}
+.finale-zone p{font-size:.94rem;color:var(--text);line-height:1.65;margin-bottom:16px;}
+.eq-finale{text-align:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.2rem;color:#2a60a0;padding:14px;background:#fff;border:2px solid var(--day-border);border-radius:10px;margin:14px 0;line-height:1.8;}
+.saisie-finale{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;background:#fff;border:1.5px solid var(--day-border);border-radius:10px;padding:14px;margin-bottom:14px;}
+.fin-input{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.4rem;text-align:center;width:120px;padding:12px;letter-spacing:2px;border:2px solid var(--day-border);border-radius:8px;background:#fff;color:#2a60a0;}
+.fin-input:focus{outline:none;border-color:#4a90d9;box-shadow:0 0 0 3px rgba(74,144,217,.15);}
+.fin-input.good{border-color:var(--ok);color:var(--ok);}
+.fin-input.bad{border-color:var(--ko);}
+.fin-input:disabled{opacity:.9;}
+.btn-lancer{font-family:'Orbitron',sans-serif;font-weight:700;font-size:1rem;letter-spacing:1.5px;padding:14px 32px;border:none;border-radius:12px;cursor:pointer;background:linear-gradient(135deg,#4a90d9,var(--day-color));color:#fff;box-shadow:0 4px 20px rgba(74,144,217,.25);animation:pulseFin 2s ease-in-out infinite;}
+.btn-lancer:disabled{background:#b0a880;color:#6a6040;cursor:not-allowed;animation:none;box-shadow:none;}
+@keyframes pulseFin{0%,100%{box-shadow:0 4px 20px rgba(74,144,217,.25);}50%{box-shadow:0 4px 30px rgba(74,144,217,.5);}}
+.fb-finale{display:none;margin-top:12px;padding:12px 14px;border-radius:8px;font-weight:bold;font-size:.95rem;text-align:center;}
+.fb-finale.show{display:block;}
+.fb-finale.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-border);}
+.fb-finale.ko{background:var(--ko-bg);color:var(--ko);border:1px solid var(--ko-border);}
+
+.victory{display:none;position:fixed;inset:0;z-index:200;background:radial-gradient(ellipse at center,rgba(10,40,90,.97),rgba(5,15,40,.99));align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.victory.show{display:flex;animation:fadeIn .6s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.victory-card{background:#fff8f7;border:3px solid var(--day-color);border-radius:20px;padding:30px 28px;max-width:560px;width:100%;text-align:center;box-shadow:0 0 60px var(--neon-glow),0 20px 80px rgba(0,0,0,.8);animation:pop .8s cubic-bezier(.18,.89,.32,1.6);}
+@keyframes pop{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+.victory-icone{font-size:3.5rem;margin-bottom:10px;animation:bounce 1s ease infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.victory-titre{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.8rem;color:#2a60a0;margin-bottom:4px;}
+.victory-sous{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:.9rem;margin-bottom:20px;}
+.victory-msg{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:16px 18px;margin-bottom:22px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--text);line-height:1.6;}
+.victory-msg b{color:#2a60a0;}
+.btn-rejouer{display:block;width:100%;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:1.5px;padding:14px;background:linear-gradient(135deg,#4a90d9,var(--day-color));color:#fff;border:none;border-radius:12px;cursor:pointer;}
+.confetti{position:fixed;top:-10px;width:8px;height:14px;z-index:199;pointer-events:none;animation:cfFall linear forwards;}
+@keyframes cfFall{0%{transform:translateY(0) rotateZ(0deg);opacity:1;}100%{transform:translateY(110vh) rotateZ(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+<button id="soundBtn">&#9992; SON OFF</button>
+
+<div class="wrap">
+  <div class="header">
+    <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span>PAZAPA &middot; MATHS &middot; 3&Egrave;ME</div>
+    <div class="semaine">Semaine 4 &ndash; Jour 2</div>
+    <h1 class="titre">Couloir <span class="accent">A&eacute;rien</span></h1>
+    <div class="sous-titre">Th&eacute;or&egrave;me de Thal&egrave;s &middot; escape game &middot; mission humanitaire</div>
+    <div class="badge-mission">&#9992; CARTE INCOMPL&Egrave;TE &mdash; CALCUL URGENT &#9992;</div>
+  </div>
+
+  <div class="briefing">
+    <div class="briefing-titre">&#9992; BRIEFING DE MISSION</div>
+    <div class="avion-wrap">
+      <svg viewBox="0 0 400 220" width="620" height="341" role="img" aria-label="Avion humanitaire survolant une région montagneuse" style="filter:drop-shadow(0 4px 18px rgba(74,144,217,.3));">
+        <!-- Ciel -->
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#b8d8f8"/>
+            <stop offset="100%" stop-color="#e8f4ff"/>
+          </linearGradient>
+          <linearGradient id="mount" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#8a7050"/>
+            <stop offset="100%" stop-color="#5a4020"/>
+          </linearGradient>
+        </defs>
+        <rect width="400" height="220" fill="url(#sky)"/>
+        <!-- Nuages -->
+        <ellipse cx="60" cy="40" rx="35" ry="18" fill="white" opacity=".85"/>
+        <ellipse cx="85" cy="33" rx="25" ry="15" fill="white" opacity=".9"/>
+        <ellipse cx="320" cy="55" rx="30" ry="14" fill="white" opacity=".8"/>
+        <ellipse cx="345" cy="48" rx="22" ry="12" fill="white" opacity=".85"/>
+        <!-- Montagnes -->
+        <polygon points="0,220 60,110 120,165 180,90 240,145 300,75 360,130 400,100 400,220" fill="url(#mount)"/>
+        <polygon points="180,90 240,145 300,75" fill="#7a6040" opacity=".6"/>
+        <!-- Neige sommets -->
+        <polygon points="180,90 195,105 165,105" fill="white" opacity=".9"/>
+        <polygon points="300,75 315,92 285,92" fill="white" opacity=".9"/>
+        <!-- Route aérienne -->
+        <line x1="50" y1="75" x2="340" y2="75" stroke="#f28b82" stroke-width="2" stroke-dasharray="8,5" opacity=".7"/>
+        <text x="180" y="68" font-family="'Orbitron',sans-serif" font-size="9" fill="#c0392b" text-anchor="middle" font-weight="700">COULOIR A&#201;RIEN</text>
+        <!-- Trait Thalès schématique -->
+        <line x1="100" y1="170" x2="300" y2="75" stroke="#4a90d9" stroke-width="2" opacity=".6"/>
+        <line x1="100" y1="170" x2="260" y2="130" stroke="#4a90d9" stroke-width="1.5" stroke-dasharray="4,3" opacity=".5"/>
+        <line x1="170" y1="122" x2="260" y2="130" stroke="#f28b82" stroke-width="1.5" stroke-dasharray="3,2" opacity=".6"/>
+        <line x1="232" y1="101" x2="300" y2="75" stroke="#f28b82" stroke-width="1.5" stroke-dasharray="3,2" opacity=".6"/>
+        <!-- Labels Thalès -->
+        <text x="95" y="168" font-family="monospace" font-size="10" fill="#2a60a0" font-weight="bold">A</text>
+        <text x="165" y="130" font-family="monospace" font-size="10" fill="#2a60a0" font-weight="bold">D</text>
+        <text x="255" y="145" font-family="monospace" font-size="10" fill="#2a60a0" font-weight="bold">E</text>
+        <text x="295" y="72" font-family="monospace" font-size="10" fill="#2a60a0" font-weight="bold">C</text>
+        <text x="225" y="96" font-family="monospace" font-size="10" fill="#c0392b" font-weight="bold">B</text>
+        <!-- Avion -->
+        <g transform="translate(185,68) rotate(-15)">
+          <path d="M0,-7 L4,5 L0,3 L-4,5 Z" fill="#f28b82"/>
+          <path d="M-8,1 L8,1 L6,4 L-6,4 Z" fill="#f28b82" opacity=".8"/>
+          <rect x="-1" y="4" width="2" height="5" fill="#f28b82" opacity=".7"/>
+        </g>
+        <!-- Croix rouge -->
+        <circle cx="190" cy="68" r="0" fill="none"/>
+        <rect x="358" y="55" width="30" height="20" rx="4" fill="white" opacity=".9"/>
+        <rect x="362" y="59" width="22" height="12" rx="2" fill="white"/>
+        <rect x="370" y="60" width="6" height="10" fill="#c0392b"/>
+        <rect x="366" y="64" width="14" height="2" fill="#c0392b"/>
+        <!-- Point d'interrogation AE -->
+        <text x="200" y="140" font-family="'Orbitron',sans-serif" font-size="11" fill="#c0392b" font-weight="900" text-anchor="middle">AE = ?</text>
+        <line x1="100" y1="170" x2="260" y2="130" stroke="#c0392b" stroke-width="2.5" opacity=".8">
+          <animate attributeName="stroke-dashoffset" values="0;-20" dur="1s" repeatCount="indefinite"/>
+        </line>
+      </svg>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:2px;color:var(--muted);margin-top:6px;text-transform:uppercase;">Mission humanitaire &middot; R&eacute;gion montagneuse &middot; Carte incompl&egrave;te</div>
+    </div>
+    <div class="briefing-corps">
+      Apr&egrave;s un s&eacute;isme, un <b>avion humanitaire</b> doit franchir une r&eacute;gion montagneuse. Les cartes sont incompl&egrave;tes&nbsp;: des distances manquent.<br><br>
+      Les enquêteurs ont trouv&eacute; <b>5 mesures de terrain</b> dans les journaux des secouristes. R&eacute;sous chaque probl&egrave;me gr&acirc;ce au <b>th&eacute;or&egrave;me de Thal&egrave;s</b> pour reconstituer les <b>donn&eacute;es manquantes de la carte</b> et calculer finalement la distance AE qui s&eacute;curise le couloir a&eacute;rien.
+    </div>
+  </div>
+
+  <div class="rappel">
+    <div class="rappel-titre">◆ RAPPEL &mdash; THÉORÈME DE THALÈS</div>
+    <div class="rappel-corps">
+      Si (DE) // (BC), alors les trois rapports suivants sont &eacute;gaux&nbsp;:<br>
+      <span class="f">AD/AB = AE/AC = DE/BC</span><br>
+      Pour trouver une longueur inconnue, on &eacute;crit l&apos;&eacute;galit&eacute; des rapports puis on effectue un <b>produit en croix</b>.
+    </div>
+  </div>
+
+  <div class="scoreboard">
+    <div class="sc-col ok"><div class="sc-num" id="cntOk">0</div><div class="sc-lbl">Mesures valid&eacute;es</div></div>
+    <div class="sc-col rem"><div class="sc-num" id="cntRem">5</div><div class="sc-lbl">Restantes</div></div>
+    <div class="sc-col err"><div class="sc-num" id="cntErr">0</div><div class="sc-lbl">Erreurs</div></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div class="progression" id="progBar">
+    <div class="prog-step"><div class="prog-dot active" id="dot0">1</div><span>Secteur A</span></div>
+    <div class="prog-arrow">&#9658;</div>
+    <div class="prog-step"><div class="prog-dot" id="dot1">2</div><span>Secteur B</span></div>
+    <div class="prog-arrow">&#9658;</div>
+    <div class="prog-step"><div class="prog-dot" id="dot2">3</div><span>Secteur C</span></div>
+    <div class="prog-arrow">&#9658;</div>
+    <div class="prog-step"><div class="prog-dot" id="dot3">4</div><span>Secteur D</span></div>
+    <div class="prog-arrow">&#9658;</div>
+    <div class="prog-step"><div class="prog-dot" id="dot4">5</div><span>Secteur E</span></div>
+    <div class="prog-arrow">&#9658;</div>
+    <div class="prog-step"><div class="prog-dot" id="dot5">&#9992;</div><span>Couloir AE</span></div>
+  </div>
+
+  <div id="etapesZone"></div>
+
+  <div class="finale-zone" id="finaleZone">
+    <h3>&#9992; COULOIR A&Eacute;RIEN &mdash; Distance AE</h3>
+    <p>Les deux fragments de carte d&eacute;verrouill&eacute;s r&eacute;v&egrave;lent les donn&eacute;es manquantes&nbsp;:<br>
+    <b>Fragment AC (Mesure 2)&nbsp;: AC = 25 km &mdash; Fragment AB (Mesure 4)&nbsp;: AB = 35 km</b><br>
+    Avec AD = 21 km (donn&eacute;e initiale), calcule AE pour s&eacute;curiser le couloir.</p>
+    <div class="eq-finale">
+      (DE) // (BC) &nbsp;→&nbsp; AD/AB = AE/AC<br>
+      21/35 = AE/25<br>
+      AE = ?
+    </div>
+    <div class="saisie-finale">
+      <span style="font-family:'Orbitron',sans-serif;font-weight:700;font-size:1rem;">AE =</span>
+      <input type="number" class="fin-input" id="inpFinale" placeholder="?" autocomplete="off" step="1">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--muted);">km</span>
+    </div>
+    <button class="btn-lancer" id="btnLancer" onclick="validerFinale()" disabled>&#9992; Valider le couloir a&eacute;rien</button>
+    <div class="fb-finale" id="fbFinale"></div>
+  </div>
+</div>
+
+<div class="victory" id="victory">
+  <div class="victory-card">
+    <div class="victory-icone">&#9992;</div>
+    <div class="victory-titre">COULOIR S&Eacute;CURIS&Eacute; !</div>
+    <div class="victory-sous">&mdash; l&apos;avion humanitaire peut d&eacute;coller &mdash;</div>
+    <div class="victory-msg">
+      <b>Mission accomplie&nbsp;!</b><br><br>
+      Tu as&nbsp;:<br>
+      &#10003; Trouv&eacute; DE (Secteur A) &rarr; <b>4 km</b><br>
+      &#10003; D&eacute;verrouill&eacute; le fragment &rarr; <b>AC = 25 km</b> (Secteur B, via AE = 6 km)<br>
+      &#10003; Trouv&eacute; AB (Secteur C) &rarr; <b>12 km</b><br>
+      &#10003; D&eacute;verrouill&eacute; le fragment &rarr; <b>AB = 35 km</b> (Secteur D, via AD = 9 km)<br>
+      &#10003; Trouv&eacute; BC (Secteur E) &rarr; <b>12 km</b><br>
+      &#10003; Calcul&eacute; le couloir a&eacute;rien&nbsp;: <b>AE = 15 km</b><br><br>
+      <b>Prochaine &eacute;tape&nbsp;:</b> applique le th&eacute;or&egrave;me de Thal&egrave;s dans ton d&eacute;fi du jour&nbsp;!
+    </div>
+    <button class="btn-rejouer" onclick="restartAll()">&#8635; Recommencer la mission</button>
+  </div>
+</div>
+
+<script>
+var ETAPES = [
+  {
+    id:0, titre:'Mesure 1 / 5', badge:'SECTEUR A',
+    contexte:'Le premier secouriste a relev\u00e9 deux segments parall\u00e8les. Il manque DE pour valider la carte du secteur A.',
+    donnees:'AB\u00a0=\u00a06\u00a0km, AD\u00a0=\u00a03\u00a0km, BC\u00a0=\u00a08\u00a0km',
+    cherche:'DE', sol:4,
+    AB:6, AD:3, BC:8, DE:null, AE:null, AC:null,
+    fragment:null,
+    indice:'AD/AB = DE/BC \u2192 3/6 = DE/8 \u2192 DE = (3\u00d78) \u00f7 6. Effectue le produit en croix.',
+    etapes_corr:[
+      {txt:"(DE) // (BC) donc AD/AB = DE/BC"},
+      {txt:"<span class='eq'>3/6 = DE/8</span>"},
+      {txt:"Produit en croix\u00a0: <span class='eq'>DE = 3 \u00d7 8 \u00f7 6 = 24 \u00f7 6 = 4</span>"}
+    ],
+    result:'DE = 4 km'
+  },
+  {
+    id:1, titre:'Mesure 2 / 5', badge:'SECTEUR B \u2014 FRAGMENT AC',
+    contexte:'Le satellite a mesur\u00e9 AB\u00a0=\u00a010\u00a0km, AD\u00a0=\u00a04\u00a0km et AC\u00a0=\u00a015\u00a0km. R\u00e9soudre ce calcul de AE permet de d\u00e9chiffrer un <b>fragment cach\u00e9 r\u00e9v\u00e9lant AC\u00a0=\u00a025\u00a0km</b>, donn\u00e9e n\u00e9cessaire au couloir final.',
+    donnees:'AB\u00a0=\u00a010\u00a0km, AD\u00a0=\u00a04\u00a0km, AC\u00a0=\u00a015\u00a0km',
+    cherche:'AE', sol:6,
+    AB:10, AD:4, AC:15, AE:null,
+    fragment:{label:'Fragment AC — donn\u00e9e couloir', value:'AC\u00a0=\u00a025\u00a0km r\u00e9v\u00e9l\u00e9 !', unit:''},
+    indice:'AD/AB = AE/AC \u2192 4/10 = AE/15. Produit en croix\u00a0: AE = 4 \u00d7 15 \u00f7 10.',
+    etapes_corr:[
+      {txt:"(DE) // (BC) donc AD/AB = AE/AC"},
+      {txt:"<span class='eq'>4/10 = AE/15</span>"},
+      {txt:"Produit en croix\u00a0: <span class='eq'>AE = 4 \u00d7 15 \u00f7 10 = 60 \u00f7 10 = 6</span>"}
+    ],
+    result:'AE = 6 km \u2192 Fragment AC d\u00e9verrouill\u00e9\u00a0!'
+  },
+  {
+    id:2, titre:'Mesure 3 / 5', badge:'SECTEUR C',
+    contexte:'Un ingénieur a retrouv\u00e9 AD\u00a0=\u00a06\u00a0km, DE\u00a0=\u00a04\u00a0km et BC\u00a0=\u00a08\u00a0km. Il manque AB pour calibrer la carte.',
+    donnees:'AD\u00a0=\u00a06\u00a0km, DE\u00a0=\u00a04\u00a0km, BC\u00a0=\u00a08\u00a0km',
+    cherche:'AB', sol:12,
+    AD:6, DE:4, BC:8, AB:null,
+    fragment:null,
+    indice:'AD/AB = DE/BC \u2192 6/AB = 4/8. Produit en croix\u00a0: AB = 6 \u00d7 8 \u00f7 4.',
+    etapes_corr:[
+      {txt:"AD/AB = DE/BC \u2192 <span class='eq'>6/AB = 4/8</span>"},
+      {txt:"Produit en croix\u00a0: <span class='eq'>AB \u00d7 4 = 6 \u00d7 8 = 48</span>"},
+      {txt:"<span class='eq'>AB = 48 \u00f7 4 = 12</span>"}
+    ],
+    result:'AB = 12 km'
+  },
+  {
+    id:3, titre:'Mesure 4 / 5', badge:'SECTEUR D \u2014 FRAGMENT AB',
+    contexte:'Les archives militaires indiquent AB\u00a0=\u00a015\u00a0km, BC\u00a0=\u00a010\u00a0km et DE\u00a0=\u00a06\u00a0km. R\u00e9soudre ce calcul de AD permet de d\u00e9chiffrer un <b>fragment cach\u00e9 r\u00e9v\u00e9lant AB\u00a0=\u00a035\u00a0km</b>, seconde donn\u00e9e du couloir final.',
+    donnees:'AB\u00a0=\u00a015\u00a0km, BC\u00a0=\u00a010\u00a0km, DE\u00a0=\u00a06\u00a0km',
+    cherche:'AD', sol:9,
+    AB:15, BC:10, DE:6, AD:null,
+    fragment:{label:'Fragment AB — donn\u00e9e couloir', value:'AB\u00a0=\u00a035\u00a0km r\u00e9v\u00e9l\u00e9 !', unit:''},
+    indice:'AD/AB = DE/BC \u2192 AD/15 = 6/10. Produit en croix\u00a0: AD = 6 \u00d7 15 \u00f7 10.',
+    etapes_corr:[
+      {txt:"AD/AB = DE/BC \u2192 <span class='eq'>AD/15 = 6/10</span>"},
+      {txt:"Produit en croix\u00a0: <span class='eq'>AD \u00d7 10 = 6 \u00d7 15 = 90</span>"},
+      {txt:"<span class='eq'>AD = 90 \u00f7 10 = 9</span>"}
+    ],
+    result:'AD = 9 km \u2192 Fragment AB d\u00e9verrouill\u00e9\u00a0!'
+  },
+  {
+    id:4, titre:'Mesure 5 / 5 \u2605', badge:'SECTEUR E',
+    contexte:'\u26a0 Derni\u00e8re mesure de terrain\u00a0: AD\u00a0=\u00a06\u00a0km, AB\u00a0=\u00a09\u00a0km, DE\u00a0=\u00a08\u00a0km. Trouve BC pour clore la cartographie.',
+    donnees:'AD\u00a0=\u00a06\u00a0km, AB\u00a0=\u00a09\u00a0km, DE\u00a0=\u00a08\u00a0km',
+    cherche:'BC', sol:12,
+    AD:6, AB:9, DE:8, BC:null,
+    fragment:null,
+    indice:'DE/BC = AD/AB \u2192 8/BC = 6/9. Produit en croix\u00a0: BC = 8 \u00d7 9 \u00f7 6.',
+    etapes_corr:[
+      {txt:"DE/BC = AD/AB \u2192 <span class='eq'>8/BC = 6/9</span>"},
+      {txt:"Produit en croix\u00a0: <span class='eq'>BC \u00d7 6 = 8 \u00d7 9 = 72</span>"},
+      {txt:"<span class='eq'>BC = 72 \u00f7 6 = 12</span>"}
+    ],
+    result:'BC = 12 km'
+  }
+];
+
+var FINAL_SOL = 15;
+var etatEtapes = ETAPES.map(function(){return{done:false,tries:0};});
+var totalErreurs=0, etapeDone=0, finaleDone=false;
+
+/* AUDIO */
+var audioCtx=null,audioOn=false,ambNodes=[],bipTimeout;
+function initAudio(){if(audioCtx)return;try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+function startAmbiance(){if(!audioCtx||!audioOn)return;stopAmbiance();scheduleBip();}
+function scheduleBip(){
+  if(bipTimeout)clearTimeout(bipTimeout);
+  bipTimeout=setTimeout(function(){
+    if(!audioOn||!audioCtx)return;
+    playBip(660,0.04,0.07);
+    if(Math.random()<0.3){setTimeout(function(){playBip(900+Math.random()*200,0.03,0.04);},100);}
+    scheduleBip();
+  },4000+Math.random()*2000);
+}
+function stopAmbiance(){ambNodes.forEach(function(n){try{n.stop&&n.stop();n.disconnect&&n.disconnect();}catch(e){}});ambNodes=[];if(bipTimeout){clearTimeout(bipTimeout);bipTimeout=null;}}
+function playBip(freq,vol,dur){
+  if(!audioCtx||!audioOn)return;
+  var now=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type='sine';o.frequency.value=freq;
+  g.gain.setValueAtTime(0.001,now);g.gain.linearRampToValueAtTime(vol,now+0.01);g.gain.exponentialRampToValueAtTime(0.001,now+dur);
+  o.connect(g).connect(audioCtx.destination);o.start(now);o.stop(now+dur+0.05);
+}
+function sndOk(){playBip(880,0.09,0.10);setTimeout(function(){playBip(1109,0.09,0.12);},90);setTimeout(function(){playBip(1319,0.09,0.15);},190);}
+function sndErr(){playBip(200,0.08,0.28);}
+function sndVictory(){if(!audioCtx||!audioOn)return;[0,200,400].forEach(function(t){setTimeout(function(){playBip(740,0.09,0.08);setTimeout(function(){playBip(988,0.09,0.1);},80);},t);});setTimeout(function(){playBip(1319,0.11,0.6);},700);setTimeout(function(){playBip(330,0.07,0.4);},1500);}
+
+document.getElementById('soundBtn').onclick=function(){
+  initAudio();audioOn=!audioOn;
+  this.textContent=audioOn?'\u2708\uFE0F SON MISSION':'\u2708\uFE0F SON OFF';
+  if(audioOn){if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();playBip(660,0.04,0.07);startAmbiance();}
+  else stopAmbiance();
+};
+
+/* SVG Thalès schématique */
+function thalesSVG(e){
+  var labels = {
+    AB: e.AB!==null ? e.AB : '?',
+    AD: e.AD!==null ? e.AD : '?',
+    AE: e.AE!==null ? e.AE : (e.cherche==='AE'?'?':'-'),
+    AC: e.AC!==null ? e.AC : (e.cherche==='AC'?'?':'-'),
+    DE: e.DE!==null ? e.DE : (e.cherche==='DE'?'?':'-'),
+    BC: e.BC!==null ? e.BC : (e.cherche==='BC'?'?':'-')
+  };
+  function col(k){ return (String(labels[k])==='?'||String(labels[k]).includes('null')) ? '#b82020' : '#2a60a0'; }
+  function lbl(k){ return String(labels[k])==='null'?'-':String(labels[k]); }
+
+  return '<svg viewBox="0 0 200 180" width="170" height="153" role="img" aria-label="Schéma Thalès">'
+    +'<rect width="200" height="180" fill="#f0f6ff" rx="8"/>'
+    // Triangle AOC : A en bas, B et C sur les côtés, D et E intermédiaires
+    // A = (100,160), B=(40,60), C=(160,60)
+    // D = (70,110), E = (130,110) — sur AB et AC
+    +'<line x1="100" y1="160" x2="40" y2="60" stroke="#2a60a0" stroke-width="2"/>'
+    +'<line x1="100" y1="160" x2="160" y2="60" stroke="#2a60a0" stroke-width="2"/>'
+    +'<line x1="40" y1="60" x2="160" y2="60" stroke="#e03020" stroke-width="2"/>'  // BC
+    +'<line x1="70" y1="110" x2="130" y2="110" stroke="#e03020" stroke-width="1.5" stroke-dasharray="4,2"/>'  // DE
+    // Points
+    +'<circle cx="100" cy="160" r="4" fill="#2a60a0"/>'
+    +'<circle cx="40" cy="60" r="4" fill="#2a60a0"/>'
+    +'<circle cx="160" cy="60" r="4" fill="#2a60a0"/>'
+    +'<circle cx="70" cy="110" r="4" fill="#c0392b"/>'
+    +'<circle cx="130" cy="110" r="4" fill="#c0392b"/>'
+    // Labels points
+    +'<text x="100" y="176" font-family="monospace" font-size="12" fill="#2a60a0" text-anchor="middle" font-weight="700">A</text>'
+    +'<text x="28" y="58" font-family="monospace" font-size="12" fill="#2a60a0" text-anchor="middle" font-weight="700">B</text>'
+    +'<text x="172" y="58" font-family="monospace" font-size="12" fill="#2a60a0" text-anchor="middle" font-weight="700">C</text>'
+    +'<text x="60" y="112" font-family="monospace" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="700">D</text>'
+    +'<text x="140" y="112" font-family="monospace" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="700">E</text>'
+    // Labels longueurs
+    +'<text x="28" y="115" font-family="JetBrains Mono,monospace" font-size="9" fill="'+col('AD')+'" text-anchor="middle" font-weight="700">AD='+lbl('AD')+'</text>'
+    +'<text x="172" y="115" font-family="JetBrains Mono,monospace" font-size="9" fill="'+col('AE')+'" text-anchor="middle" font-weight="700">AE='+lbl('AE')+'</text>'
+    +'<text x="20" y="85" font-family="JetBrains Mono,monospace" font-size="9" fill="'+col('AB')+'" text-anchor="middle" font-weight="700">AB='+lbl('AB')+'</text>'
+    +'<text x="182" y="85" font-family="JetBrains Mono,monospace" font-size="9" fill="'+col('AC')+'" text-anchor="middle" font-weight="700">AC='+lbl('AC')+'</text>'
+    +'<text x="100" y="106" font-family="JetBrains Mono,monospace" font-size="9" fill="'+col('DE')+'" text-anchor="middle" font-weight="700">DE='+lbl('DE')+'</text>'
+    +'<text x="100" y="52" font-family="JetBrains Mono,monospace" font-size="9" fill="'+col('BC')+'" text-anchor="middle" font-weight="700">BC='+lbl('BC')+'</text>'
+    // Flèche // 
+    +'<text x="100" y="122" font-family="monospace" font-size="8" fill="#1d7a40" text-anchor="middle">(DE)//(BC)</text>'
+    +'</svg>';
+}
+
+/* BUILD */
+function buildEtape(i){
+  var e=ETAPES[i];
+  var corrHTML=e.etapes_corr.map(function(c){return '<div class="step">'+c.txt+'</div>';}).join('');
+  return '<div class="etape-card" id="ecard'+i+'">'
+    +'<div class="etape-stripe"></div>'
+    +'<div class="etape-body">'
+    +'<div class="etape-head"><div class="etape-num">'+e.titre+'</div><div class="etape-badge">'+e.badge+'</div></div>'
+    +'<div class="contexte">'+e.contexte+'</div>'
+    +'<div class="thales-zone">'+thalesSVG(e)
+    +'<div class="thales-data">'
+    +'<div><span class="parallel">(DE) // (BC)</span></div>'
+    +(function(){
+      var keys=['AB','AD','AE','AC','DE','BC'];
+      return keys.map(function(k){
+        var v=e[k];
+        if(v===null||v===undefined) return '';
+        var isUnk=(k===e.cherche);
+        return '<div>'+(isUnk?'<span class="unknown">':'<span class="label">')+k+' = '+v+' km</span></div>';
+      }).join('');
+    })()
+    +'<div><span class="unknown">'+e.cherche+' = ?</span></div>'
+    +'</div></div>'
+    +'<div class="saisie"><span class="prefix">'+e.cherche+' =</span>'
+    +'<input type="number" id="inp'+i+'" placeholder="?" autocomplete="off" step="0.1">'
+    +'<span style="font-family:\'JetBrains Mono\',monospace;color:var(--muted);font-size:.9rem;">km</span>'
+    +'</div>'
+    +'<div class="btn-zone">'
+    +'  <button class="btn btn-valider" id="btnV'+i+'" onclick="validerEtape('+i+')" disabled>\u2713 Valider</button>'
+    +'  <button class="btn btn-indice" onclick="voirIndice('+i+')">? Indice</button>'
+    +'  <button class="btn btn-retry" id="btnR'+i+'" onclick="retryEtape('+i+')" style="display:none">\u21ba R\u00e9essayer</button>'
+    +'</div>'
+    +'<div class="indice-box" id="ind'+i+'">'+e.indice+'</div>'
+    +'<div class="fb" id="fb'+i+'"></div>'
+    +'<div class="corr-box" id="corr'+i+'">'+corrHTML+'<div class="res">\u2192 '+e.result+'</div></div>'
+    +(e.fragment?'<div class="fragment-unlock" id="frag'+i+'" style="display:none">'
+      +'<div class="frag-icon">\uD83D\uDCCD</div>'
+      +'<div class="frag-label">FRAGMENT D\u00c9VERROUILL\u00c9</div>'
+      +'<div class="frag-value">'+e.fragment.label+'<br><b>'+e.fragment.value+'</b></div>'
+      +'</div>':'')
+    +'</div></div>';
+}
+
+function init(){
+  document.getElementById('etapesZone').innerHTML=buildEtape(0);
+  bindInp(0);updateScore();
+}
+
+function bindInp(i){
+  var inp=document.getElementById('inp'+i);
+  inp.addEventListener('input',function(){document.getElementById('btnV'+i).disabled=(this.value.trim()==='');});
+  inp.addEventListener('keydown',function(ev){if(ev.key==='Enter')validerEtape(i);});
+}
+
+function voirIndice(i){document.getElementById('ind'+i).classList.toggle('show');}
+
+function validerEtape(i){
+  if(etatEtapes[i].done)return;
+  var val=parseFloat(document.getElementById('inp'+i).value);
+  if(isNaN(val)){return;}
+  document.getElementById('btnV'+i).disabled=true;
+  var e=ETAPES[i];
+  var isOk=Math.abs(val-e.sol)<0.05;
+  var fb=document.getElementById('fb'+i);
+
+  if(isOk){
+    if(!etatEtapes[i].done){etatEtapes[i].done=true;etapeDone++;}
+    document.getElementById('inp'+i).classList.add('good');
+    document.getElementById('inp'+i).disabled=true;
+    fb.className='fb show ok';
+    fb.innerHTML='\u2713 Correct\u00a0! '+e.result+'.';
+    document.getElementById('corr'+i).classList.add('show');
+    document.getElementById('ecard'+i).classList.add('done-ok');
+    document.getElementById('dot'+i).classList.remove('active');
+    document.getElementById('dot'+i).classList.add('done');
+    // btnR masqué après réussite — visible sur erreur seulement
+    if(e.fragment){var f=document.getElementById('frag'+i);if(f)f.style.display='block';}
+    sndOk();updateScore();
+    setTimeout(function(){
+      if(i+1<ETAPES.length){
+        document.getElementById('etapesZone').innerHTML+=buildEtape(i+1);
+        bindInp(i+1);
+        document.getElementById('dot'+(i+1)).classList.add('active');
+        document.getElementById('ecard'+(i+1)).scrollIntoView({behavior:'smooth',block:'start'});
+      } else {
+        document.getElementById('dot5').classList.add('active');
+        document.getElementById('finaleZone').classList.add('show');
+        bindFinale();
+        document.getElementById('finaleZone').scrollIntoView({behavior:'smooth'});
+        sndOk();
+      }
+    },1200);
+  } else {
+    etatEtapes[i].tries++;totalErreurs++;
+    document.getElementById('inp'+i).classList.add('bad');
+    fb.className='fb show retry';
+    if(etatEtapes[i].tries>=2){
+      fb.innerHTML='\u2717 Encore une erreur. Consulte la correction ci-dessous.';
+      document.getElementById('corr'+i).classList.add('show');
+    } else {
+      fb.innerHTML='\u2717 Pas tout \u00e0 fait. Relis les donn\u00e9es et applique le produit en croix\u00a0!';
+    }
+    document.getElementById('btnR'+i).style.display='inline-flex';
+    sndErr();updateScore();
+    document.getElementById('btnV'+i).disabled=false;
+  }
+}
+
+function retryEtape(i){
+  var inp=document.getElementById('inp'+i);
+  inp.value='';inp.classList.remove('good','bad');
+  document.getElementById('btnV'+i).disabled=true;
+  document.getElementById('btnR'+i).style.display='none';
+  document.getElementById('fb'+i).className='fb';
+  document.getElementById('fb'+i).innerHTML='';
+  document.getElementById('corr'+i).classList.remove('show');
+  if(etatEtapes[i].done)document.getElementById('ecard'+i).classList.remove('done-ok');
+}
+
+function bindFinale(){
+  var inp=document.getElementById('inpFinale');
+  inp.addEventListener('input',function(){document.getElementById('btnLancer').disabled=(this.value.trim()==='');});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')validerFinale();});
+}
+
+function validerFinale(){
+  if(finaleDone)return;
+  var val=parseFloat(document.getElementById('inpFinale').value);
+  if(isNaN(val))return;
+  var fb=document.getElementById('fbFinale');
+  if(Math.abs(val-FINAL_SOL)<0.05){
+    finaleDone=true;
+    document.getElementById('inpFinale').classList.add('good');
+    document.getElementById('inpFinale').disabled=true;
+    document.getElementById('btnLancer').disabled=true;
+    fb.className='fb-finale show ok';
+    fb.innerHTML='\u2708\uFE0F Couloir s\u00e9curis\u00e9\u00a0! 21/35 = 3/5 et 15/25 = 3/5 \u2192 <b>AE = 15 km</b>. L\u2019avion humanitaire peut d\u00e9coller\u00a0!';
+    document.getElementById('dot5').classList.remove('active');
+    document.getElementById('dot5').classList.add('done');
+    sndVictory();setTimeout(showVictory,1400);
+  } else {
+    totalErreurs++;
+    document.getElementById('inpFinale').classList.add('bad');
+    fb.className='fb-finale show ko';
+    fb.innerHTML='\u2717 Incorrect. V\u00e9rifie\u00a0: 21/35 = AE/25 \u2192 AE = 21\u00d725\u00f735. Recalcule\u00a0!';
+    sndErr();updateScore();
+    setTimeout(function(){
+      document.getElementById('inpFinale').classList.remove('bad');
+      document.getElementById('inpFinale').value='';
+      fb.className='fb-finale';
+    },1800);
+  }
+}
+
+function updateScore(){
+  document.getElementById('cntOk').textContent=etapeDone;
+  document.getElementById('cntRem').textContent=ETAPES.length-etapeDone;
+  document.getElementById('cntErr').textContent=totalErreurs;
+  document.getElementById('progressBar').style.width=(etapeDone/ETAPES.length*100)+'%';
+}
+
+function showVictory(){document.getElementById('victory').classList.add('show');launchConfetti();}
+
+function launchConfetti(){
+  var colors=['#f28b82','#4a90d9','#22c55e','#f5c518','#f5a623','#fff'];
+  for(var i=0;i<80;i++){
+    (function(idx){
+      setTimeout(function(){
+        var c=document.createElement('div');c.className='confetti';
+        c.style.left=(Math.random()*100)+'vw';
+        c.style.background=colors[Math.floor(Math.random()*colors.length)];
+        c.style.animationDuration=(2+Math.random()*2.5)+'s';
+        c.style.transform='rotateZ('+Math.floor(Math.random()*360)+'deg)';
+        document.body.appendChild(c);setTimeout(function(){c.remove();},5000);
+      },idx*30);
+    })(i);
+  }
+}
+
+function restartAll(){
+  etatEtapes=ETAPES.map(function(){return{done:false,tries:0};});
+  totalErreurs=0;etapeDone=0;finaleDone=false;
+  document.getElementById('victory').classList.remove('show');
+  document.getElementById('finaleZone').classList.remove('show');
+  document.getElementById('fbFinale').className='fb-finale';
+  document.getElementById('inpFinale').value='';
+  document.getElementById('inpFinale').classList.remove('good','bad');
+  document.getElementById('inpFinale').disabled=false;
+  document.getElementById('btnLancer').disabled=true;
+  [0,1,2,3,4].forEach(function(i){
+    var d=document.getElementById('dot'+i);
+    if(d){d.classList.remove('active','done');if(i===0)d.classList.add('active');}
+  });
+  document.getElementById('dot5').classList.remove('active','done');
+  init();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+init();
+</script>
+</body>
+</html>
