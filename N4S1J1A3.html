@@ -26,6 +26,7 @@
   .level-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
   .pill{font-weight:800;font-size:.85rem;letter-spacing:.5px;padding:11px 20px;border-radius:14px;border:3px solid var(--border);background:#fff;color:var(--soft);min-width:118px;}
   .pill.active{background:var(--main);color:var(--badgetxt);border-color:var(--titre);box-shadow:0 4px 0 rgba(0,0,0,.12);}
+  .level-pills .pill{cursor:default;}
   .scoreboard{background:#fff;border:3px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:18px;box-shadow:0 4px 14px rgba(0,0,0,.06);}
   .sb-row{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;}
   .sb-item{flex:1;min-width:90px;text-align:center;background:var(--light);border-radius:11px;padding:8px 4px;}
@@ -46,7 +47,7 @@
   .field{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:8px 0;}
   .field label{font-size:.9rem;font-weight:600;flex:1;min-width:160px;}
   .field .unit{font-weight:700;color:var(--soft);}
-  input[type=text]{font-family:inherit;font-size:1.05rem;font-weight:700;width:120px;padding:11px 12px;border:3px solid var(--border);border-radius:11px;text-align:center;color:var(--ink);background:#fff;}
+  input[type=text]{font-family:inherit;font-size:1.05rem;font-weight:700;width:140px;padding:11px 12px;border:3px solid var(--border);border-radius:11px;text-align:center;color:var(--ink);background:#fff;}
   input[type=text]:focus{outline:none;border-color:var(--main);}
   .choices{display:flex;flex-direction:column;gap:9px;}
   .choice{font-family:inherit;text-align:left;font-size:.95rem;font-weight:600;padding:13px 14px;border:3px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;color:var(--ink);transition:.12s;}
@@ -58,6 +59,9 @@
   .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.14);}
   .btn.sec{background:#fff;color:var(--soft);border:3px solid var(--border);box-shadow:none;}
   .btn.retry{background:#ffe2b0;color:var(--badgetxt);}
+  .btn.hint-btn{background:#fff;color:var(--soft);border:3px solid var(--border);box-shadow:none;margin-left:8px;}
+  .hint{display:none;margin-top:10px;background:#fffbeb;border:2px dashed var(--border);border-radius:11px;padding:11px 13px;font-size:.88rem;color:var(--titre);line-height:1.6;}
+  .hint.show{display:block;}
   .fb{margin-top:12px;font-weight:700;font-size:.92rem;padding:10px 12px;border-radius:11px;display:none;}
   .fb.ok{display:block;background:#dff5c6;color:#3a4d00;border:2px solid #8dc63f;}
   .fb.no{display:block;background:#ffe1dd;color:#7a1c14;border:2px solid #f28b82;}
@@ -75,7 +79,6 @@
 </style>
 </head>
 <body>
-
 <div class="hero">
   <div class="brand-pill"><span class="dot d1"></span><span class="dot d2"></span>PAZAPA · MATHS · 4ÈME</div>
   <div class="week-label">SEMAINE 1 — JOUR 1</div>
@@ -83,7 +86,6 @@
   <div class="subtitle">Calcul littéral : produire une expression</div>
   <div class="level-pills"><span class="pill">NIVEAU 1</span><span class="pill active">NIVEAU 2</span><span class="pill">NIVEAU 3</span></div>
 </div>
-
 <div class="scoreboard">
   <div class="sb-row">
     <div class="sb-item"><b id="sb-ok">0</b><small>Réussies</small></div>
@@ -95,19 +97,15 @@
     <div class="xp-txt" id="xp-txt">0 / 0</div>
   </div>
 </div>
-
 <div id="exos"></div>
-
 <div class="results" id="results">
   <h2>🎉 Niveau terminé !</h2>
   <div class="big" id="res-score">0 / 0</div>
   <p id="res-msg"></p>
 </div>
-
 <div class="footer-actions">
   <button class="btn sec" onclick="resetLevel()">↻ Recommencer</button>
 </div>
-
 <script>
 function tableur(cols, rows){
   var th='border:2px solid #b9c2c9;background:#e3e7ea;color:#475259;padding:7px 14px;font-weight:800;';
@@ -146,32 +144,38 @@ var EXOS = [
   { kind:'qcm', title:'Programme de calcul (1)',
     prompt:'Programme : \u00ab choisir un nombre x ; le <b>multiplier par 3</b> ; <b>ajouter 7</b> \u00bb. Quelle expression obtient-on ?',
     choices:['3(x + 7)','3x + 7','x + 21','7x + 3'], ans:1,
+    hint:'Suis l\'ordre des \u00e9tapes : d\'abord la multiplication, ensuite l\'addition. As-tu besoin de parenth\u00e8ses ici ?',
     sol:'On multiplie d\'abord (3x), puis on ajoute 7 : <b>3x + 7</b>.' },
   { kind:'qcm', title:'Programme de calcul (2)',
     prompt:'Programme : \u00ab choisir un nombre x ; <b>ajouter 5</b> ; <b>multiplier le résultat par 2</b> \u00bb. Quelle expression obtient-on ?',
     choices:['2x + 5','2(x + 5)','x + 10','5(x + 2)'], ans:1,
+    hint:'Rep\u00e8re ce qui est fait \u00ab en premier \u00bb. Comme on multiplie ensuite TOUT le r\u00e9sultat, demande-toi o\u00f9 placer les parenth\u00e8ses.',
     sol:'On ajoute d\'abord (x + 5), puis on multiplie <b>tout le résultat</b> par 2 : <b>2(x + 5)</b>.' },
   { kind:'num', title:'Appliquer un programme',
     prompt:'Avec le programme \u00ab multiplier par 3 puis ajouter 7 \u00bb, quel résultat obtient-on en choisissant le nombre <b>8</b> ?',
     unit:'', ans:31, tol:0.001,
+    hint:'Reprends le programme \u00e9tape par \u00e9tape avec le nombre choisi, en respectant l\'ordre des op\u00e9rations (multiplication avant addition).',
     sol:'3 \u00d7 8 + 7 = 24 + 7 = <b>31</b>.' },
   { kind:'qcm', title:'Traduire une expression par une phrase',
     prompt:'Comment traduit-on l\'expression <b>4x \u2212 1</b> ?',
     choices:['Le quadruple de la différence de x et 1','Le quadruple de x, diminué de 1','La somme de 4 et de x, moins 1','x diminué du quadruple de 1'], ans:1,
+    hint:'D\u00e9compose l\'expression : que repr\u00e9sente 4x tout seul ? Que fait ensuite le \u00ab \u2212 1 \u00bb ? Compare avec une version o\u00f9 il y aurait des parenth\u00e8ses.',
     sol:'4x = le quadruple de x, puis \u2212 1 : \u00ab <b>le quadruple de x, diminué de 1</b> \u00bb. (4(x \u2212 1) serait le quadruple de la différence.)' },
   { kind:'multi', title:'Produire une formule depuis un tableau',
     prompt:'Le tableau relie x et y par une formule du type <b>y = a \u00d7 x + b</b>. Trouve a et b.',
     figure: valTable(['x','y'], [['1','2','3','4'],['5','8','11','14']]),
     fields:[ {label:'a =', ans:3, tol:0.001, unit:''},
              {label:'b =', ans:2, tol:0.001, unit:''} ],
+    hint:'Observe de combien y augmente chaque fois que x augmente de 1 : cela donne le coefficient. Ensuite, sers-toi d\'une ligne du tableau pour retrouver le terme ajout\u00e9.',
     sol:'y augmente de <b>3</b> quand x augmente de 1 \u2192 a = 3. Pour x = 1 : 3 + b = 5 \u2192 b = <b>2</b>. Formule : <b>y = 3x + 2</b>.' },
   { kind:'num', title:'Utiliser la formule',
     prompt:'Avec la formule <b>y = 3x + 2</b> trouvée \u00e0 l\'exercice précédent, calcule y pour <b>x = 10</b>.',
     unit:'', ans:32, tol:0.001,
+    hint:'Reprends la formule de l\'exercice pr\u00e9c\u00e9dent et remplace x par sa valeur, sans oublier les priorit\u00e9s op\u00e9ratoires.',
     sol:'y = 3 \u00d7 10 + 2 = <b>32</b>.' }
 ];
 var state=[], errCount=0;
-function genExercises(){ state=EXOS.map(function(){return {done:false,sel:null};}); errCount=0; buildAll(); updateScore(); document.getElementById('results').classList.remove('show'); }
+function genExercises(){ state=EXOS.map(function(){return {done:false,sel:null,wrong:false};}); errCount=0; buildAll(); updateScore(); document.getElementById('results').classList.remove('show'); }
 function buildAll(){
   var box=document.getElementById('exos'); box.innerHTML='';
   EXOS.forEach(function(ex,idx){
@@ -195,7 +199,10 @@ function buildAll(){
         inner+='</div>';
       }
       inner+='<button class="btn" id="vbtn'+idx+'" onclick="checkExo('+idx+')">Valider</button>';
+      if(ex.hint) inner+='<button class="btn hint-btn" id="hbtn'+idx+'" onclick="showHint('+idx+')">\uD83D\uDCA1 Indice</button>';
+      inner+='<button class="btn sec hidden" id="ebtn'+idx+'" onclick="showSol('+idx+')">Voir l\'explication</button>';
       inner+='<div class="fb" id="fb'+idx+'"></div>';
+      if(ex.hint) inner+='<div class="hint" id="hint'+idx+'">'+ex.hint+'</div>';
       inner+='<div class="sol" id="sol'+idx+'"><b>Solution :</b><br>'+ex.sol+'</div>';
     }
     c.innerHTML=inner; box.appendChild(c);
@@ -210,11 +217,12 @@ function checkExo(idx){
   else if(ex.kind==='qcm'){ if(state[idx].sel===null){ flash(idx,false,'Choisis d\'abord une réponse.'); return; } ok=(state[idx].sel===ex.ans); }
   if(ok){
     state[idx].done=true; document.getElementById('card'+idx).classList.add('done');
-    document.getElementById('sol'+idx).classList.add('show'); document.getElementById('vbtn'+idx).classList.add('hidden');
+    document.getElementById('vbtn'+idx).classList.add('hidden');
+    var eb=document.getElementById('ebtn'+idx); if(eb) eb.classList.remove('hidden');
     if(ex.kind==='qcm') document.getElementById('ch'+idx+'_'+ex.ans).classList.add('good');
     flash(idx,true,'✓ Bravo, c\'est juste !');
   } else {
-    errCount++;
+    if(!state[idx].wrong){ state[idx].wrong=true; errCount++; }
     if(ex.kind==='qcm' && state[idx].sel!==null){ var b=document.getElementById('ch'+idx+'_'+state[idx].sel); b.classList.remove('sel'); b.classList.add('bad'); setTimeout(function(){ if(!state[idx].done) b.classList.remove('bad'); },900); }
     flash(idx,false,'✗ Pas encore. Vérifie ton calcul et réessaye.');
     var vb=document.getElementById('vbtn'+idx); vb.textContent='↻ Réessayer'; vb.classList.add('retry');
@@ -222,6 +230,8 @@ function checkExo(idx){
   updateScore();
 }
 function markExtDone(idx){ if(state[idx].done) return; state[idx].done=true; document.getElementById('card'+idx).classList.add('done'); document.getElementById('extbtn'+idx).classList.add('hidden'); flash(idx,true,'✓ Activité validée !'); updateScore(); }
+function showSol(idx){ var s=document.getElementById('sol'+idx); if(!s) return; var b=document.getElementById('ebtn'+idx); var open=s.classList.toggle('show'); if(b) b.textContent= open ? 'Masquer l\'explication' : 'Voir l\'explication'; }
+function showHint(idx){ var hb=document.getElementById('hint'+idx); if(!hb) return; var b=document.getElementById('hbtn'+idx); var open=hb.classList.toggle('show'); if(b) b.innerHTML= open ? '\uD83D\uDCA1 Masquer l\'indice' : '\uD83D\uDCA1 Indice'; }
 function flash(idx,good,msg){ var fb=document.getElementById('fb'+idx); fb.className='fb '+(good?'ok':'no'); fb.textContent=msg; }
 function updateScore(){
   var done=state.filter(function(s){return s.done;}).length, tot=EXOS.length;
