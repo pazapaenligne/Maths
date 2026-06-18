@@ -26,6 +26,7 @@
   .level-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
   .pill{font-weight:800;font-size:.85rem;letter-spacing:.5px;padding:11px 20px;border-radius:14px;border:3px solid var(--border);background:#fff;color:var(--soft);min-width:118px;}
   .pill.active{background:var(--main);color:var(--badgetxt);border-color:var(--titre);box-shadow:0 4px 0 rgba(0,0,0,.12);}
+  .level-pills .pill{cursor:default;}
   .scoreboard{background:#fff;border:3px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:18px;box-shadow:0 4px 14px rgba(0,0,0,.06);}
   .sb-row{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;}
   .sb-item{flex:1;min-width:90px;text-align:center;background:var(--light);border-radius:11px;padding:8px 4px;}
@@ -46,7 +47,7 @@
   .field{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:8px 0;}
   .field label{font-size:.9rem;font-weight:600;flex:1;min-width:160px;}
   .field .unit{font-weight:700;color:var(--soft);}
-  input[type=text]{font-family:inherit;font-size:1.05rem;font-weight:700;width:120px;padding:11px 12px;border:3px solid var(--border);border-radius:11px;text-align:center;color:var(--ink);background:#fff;}
+  input[type=text]{font-family:inherit;font-size:1.05rem;font-weight:700;width:140px;padding:11px 12px;border:3px solid var(--border);border-radius:11px;text-align:center;color:var(--ink);background:#fff;}
   input[type=text]:focus{outline:none;border-color:var(--main);}
   .choices{display:flex;flex-direction:column;gap:9px;}
   .choice{font-family:inherit;text-align:left;font-size:.95rem;font-weight:600;padding:13px 14px;border:3px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;color:var(--ink);transition:.12s;}
@@ -58,6 +59,9 @@
   .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.14);}
   .btn.sec{background:#fff;color:var(--soft);border:3px solid var(--border);box-shadow:none;}
   .btn.retry{background:#ffe2b0;color:var(--badgetxt);}
+  .btn.hint-btn{background:#fff;color:var(--soft);border:3px solid var(--border);box-shadow:none;margin-left:8px;}
+  .hint{display:none;margin-top:10px;background:#fffbeb;border:2px dashed var(--border);border-radius:11px;padding:11px 13px;font-size:.88rem;color:var(--titre);line-height:1.6;}
+  .hint.show{display:block;}
   .fb{margin-top:12px;font-weight:700;font-size:.92rem;padding:10px 12px;border-radius:11px;display:none;}
   .fb.ok{display:block;background:#dff5c6;color:#3a4d00;border:2px solid #8dc63f;}
   .fb.no{display:block;background:#ffe1dd;color:#7a1c14;border:2px solid #f28b82;}
@@ -75,7 +79,6 @@
 </style>
 </head>
 <body>
-
 <div class="hero">
   <div class="brand-pill"><span class="dot d1"></span><span class="dot d2"></span>PAZAPA · MATHS · 4ÈME</div>
   <div class="week-label">SEMAINE 1 — JOUR 1</div>
@@ -83,7 +86,6 @@
   <div class="subtitle">Calcul littéral : produire une expression</div>
   <div class="level-pills"><span class="pill">NIVEAU 1</span><span class="pill">NIVEAU 2</span><span class="pill active">NIVEAU 3</span></div>
 </div>
-
 <div class="scoreboard">
   <div class="sb-row">
     <div class="sb-item"><b id="sb-ok">0</b><small>Réussies</small></div>
@@ -95,19 +97,15 @@
     <div class="xp-txt" id="xp-txt">0 / 0</div>
   </div>
 </div>
-
 <div id="exos"></div>
-
 <div class="results" id="results">
   <h2>🎉 Niveau terminé !</h2>
   <div class="big" id="res-score">0 / 0</div>
   <p id="res-msg"></p>
 </div>
-
 <div class="footer-actions">
   <button class="btn sec" onclick="resetLevel()">↻ Recommencer</button>
 </div>
-
 <script>
 function tableur(cols, rows){
   var th='border:2px solid #b9c2c9;background:#e3e7ea;color:#475259;padding:7px 14px;font-weight:800;';
@@ -149,16 +147,19 @@ var EXOS = [
     fields:[ {label:'a =', ans:4, tol:0.001, unit:''},
              {label:'b =', ans:6, tol:0.001, unit:''},
              {label:'Aire du rectangle pour x = 5 :', ans:40, tol:0.001, unit:''} ],
+    hint:'Le p\u00e9rim\u00e8tre, c\'est le tour : ajoute les quatre c\u00f4t\u00e9s, ou calcule 2 fois (longueur + largeur), puis regroupe les x. Pour l\'aire, multiplie longueur par largeur avant de remplacer x.',
     sol:'P = 2 \u00d7 [x + (x + 3)] = 2 \u00d7 (2x + 3) = <b>4x + 6</b> (a = 4, b = 6).<br>Aire = x \u00d7 (x + 3) ; pour x = 5 : 5 \u00d7 8 = <b>40</b>.' },
   { kind:'qcm', title:'Défi · aire d\'une figure composée',
     prompt:'Une figure est formée d\'un <b>carré de c\u00f4té x</b> et d\'un <b>rectangle de c\u00f4tés x et 5</b> collés l\'un \u00e0 l\'autre. Quelle expression donne l\'<b>aire totale</b> ?',
     choices:['x\u00b2 + 5x','5x\u00b2','x\u00b2 + 5','6x'], ans:0,
+    hint:'Calcule s\u00e9par\u00e9ment l\'aire du carr\u00e9 (c\u00f4t\u00e9 \u00d7 c\u00f4t\u00e9) et celle du rectangle (longueur \u00d7 largeur), puis additionne les deux aires.',
     sol:'Aire du carré = x\u00b2 ; aire du rectangle = 5x. Total : <b>x\u00b2 + 5x</b>.' },
   { kind:'multi', title:'Défi · deux programmes, même résultat ?',
     prompt:'Programme A : \u00ab multiplier par 2 puis ajouter 10 \u00bb. Programme B : \u00ab ajouter 5 puis multiplier par 2 \u00bb. Teste avec le nombre <b>7</b>, puis réponds <b>1</b> (OUI) ou <b>0</b> (NON) \u00e0 la dernière question.',
     fields:[ {label:'Résultat du programme A pour 7 :', ans:24, tol:0.001, unit:''},
              {label:'Résultat du programme B pour 7 :', ans:24, tol:0.001, unit:''},
              {label:'Donnent-ils toujours le même résultat ?', ans:1, tol:0.001, unit:''} ],
+    hint:'Applique chaque programme \u00e9tape par \u00e9tape au nombre choisi, en respectant l\'ordre. Pour la derni\u00e8re question, \u00e9cris l\'expression de chaque programme et compare-les.',
     sol:'A : 2\u00d77 + 10 = <b>24</b>. B : (7 + 5)\u00d72 = <b>24</b>.<br>A donne 2x + 10 et B donne 2(x + 5) = 2x + 10 : ce sont les <b>mêmes expressions</b> \u2192 toujours le même résultat (réponse 1).' },
   { kind:'ext', title:'Produire une expression',
     note:'Entra\u00eenement en ligne : produis des expressions littérales. Termine l\'activité puis clique sur \u00ab J\'ai terminé \u00bb.',
@@ -168,7 +169,7 @@ var EXOS = [
     url:'https://www.hatier-clic.fr/miniliens/mie/9782401082175/C03_ex35_eleve/index.html', height:560 }
 ];
 var state=[], errCount=0;
-function genExercises(){ state=EXOS.map(function(){return {done:false,sel:null};}); errCount=0; buildAll(); updateScore(); document.getElementById('results').classList.remove('show'); }
+function genExercises(){ state=EXOS.map(function(){return {done:false,sel:null,wrong:false};}); errCount=0; buildAll(); updateScore(); document.getElementById('results').classList.remove('show'); }
 function buildAll(){
   var box=document.getElementById('exos'); box.innerHTML='';
   EXOS.forEach(function(ex,idx){
@@ -192,7 +193,10 @@ function buildAll(){
         inner+='</div>';
       }
       inner+='<button class="btn" id="vbtn'+idx+'" onclick="checkExo('+idx+')">Valider</button>';
+      if(ex.hint) inner+='<button class="btn hint-btn" id="hbtn'+idx+'" onclick="showHint('+idx+')">\uD83D\uDCA1 Indice</button>';
+      inner+='<button class="btn sec hidden" id="ebtn'+idx+'" onclick="showSol('+idx+')">Voir l\'explication</button>';
       inner+='<div class="fb" id="fb'+idx+'"></div>';
+      if(ex.hint) inner+='<div class="hint" id="hint'+idx+'">'+ex.hint+'</div>';
       inner+='<div class="sol" id="sol'+idx+'"><b>Solution :</b><br>'+ex.sol+'</div>';
     }
     c.innerHTML=inner; box.appendChild(c);
@@ -207,11 +211,12 @@ function checkExo(idx){
   else if(ex.kind==='qcm'){ if(state[idx].sel===null){ flash(idx,false,'Choisis d\'abord une réponse.'); return; } ok=(state[idx].sel===ex.ans); }
   if(ok){
     state[idx].done=true; document.getElementById('card'+idx).classList.add('done');
-    document.getElementById('sol'+idx).classList.add('show'); document.getElementById('vbtn'+idx).classList.add('hidden');
+    document.getElementById('vbtn'+idx).classList.add('hidden');
+    var eb=document.getElementById('ebtn'+idx); if(eb) eb.classList.remove('hidden');
     if(ex.kind==='qcm') document.getElementById('ch'+idx+'_'+ex.ans).classList.add('good');
     flash(idx,true,'✓ Bravo, c\'est juste !');
   } else {
-    errCount++;
+    if(!state[idx].wrong){ state[idx].wrong=true; errCount++; }
     if(ex.kind==='qcm' && state[idx].sel!==null){ var b=document.getElementById('ch'+idx+'_'+state[idx].sel); b.classList.remove('sel'); b.classList.add('bad'); setTimeout(function(){ if(!state[idx].done) b.classList.remove('bad'); },900); }
     flash(idx,false,'✗ Pas encore. Vérifie ton calcul et réessaye.');
     var vb=document.getElementById('vbtn'+idx); vb.textContent='↻ Réessayer'; vb.classList.add('retry');
@@ -219,6 +224,8 @@ function checkExo(idx){
   updateScore();
 }
 function markExtDone(idx){ if(state[idx].done) return; state[idx].done=true; document.getElementById('card'+idx).classList.add('done'); document.getElementById('extbtn'+idx).classList.add('hidden'); flash(idx,true,'✓ Activité validée !'); updateScore(); }
+function showHint(idx){ var hb=document.getElementById('hint'+idx); if(!hb) return; var b=document.getElementById('hbtn'+idx); var open=hb.classList.toggle('show'); if(b) b.innerHTML= open ? '\uD83D\uDCA1 Masquer l\'indice' : '\uD83D\uDCA1 Indice'; }
+function showSol(idx){ var s=document.getElementById('sol'+idx); if(!s) return; var b=document.getElementById('ebtn'+idx); var open=s.classList.toggle('show'); if(b) b.textContent= open ? 'Masquer l\'explication' : 'Voir l\'explication'; }
 function flash(idx,good,msg){ var fb=document.getElementById('fb'+idx); fb.className='fb '+(good?'ok':'no'); fb.textContent=msg; }
 function updateScore(){
   var done=state.filter(function(s){return s.done;}).length, tot=EXOS.length;
