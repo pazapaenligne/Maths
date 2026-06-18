@@ -26,6 +26,7 @@
   .level-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
   .pill{font-weight:800;font-size:.85rem;letter-spacing:.5px;padding:11px 20px;border-radius:14px;border:3px solid var(--border);background:#fff;color:var(--soft);min-width:118px;}
   .pill.active{background:var(--main);color:var(--badgetxt);border-color:var(--titre);box-shadow:0 4px 0 rgba(0,0,0,.12);}
+  .level-pills .pill{cursor:default;}
   .scoreboard{background:#fff;border:3px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:18px;box-shadow:0 4px 14px rgba(0,0,0,.06);}
   .sb-row{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;}
   .sb-item{flex:1;min-width:90px;text-align:center;background:var(--light);border-radius:11px;padding:8px 4px;}
@@ -58,6 +59,9 @@
   .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.14);}
   .btn.sec{background:#fff;color:var(--soft);border:3px solid var(--border);box-shadow:none;}
   .btn.retry{background:#ffe2b0;color:var(--badgetxt);}
+  .btn.hint-btn{background:#fff;color:var(--soft);border:3px solid var(--border);box-shadow:none;margin-left:8px;}
+  .hint{display:none;margin-top:10px;background:#fffbeb;border:2px dashed var(--border);border-radius:11px;padding:11px 13px;font-size:.88rem;color:var(--titre);line-height:1.6;}
+  .hint.show{display:block;}
   .fb{margin-top:12px;font-weight:700;font-size:.92rem;padding:10px 12px;border-radius:11px;display:none;}
   .fb.ok{display:block;background:#dff5c6;color:#3a4d00;border:2px solid #8dc63f;}
   .fb.no{display:block;background:#ffe1dd;color:#7a1c14;border:2px solid #f28b82;}
@@ -146,24 +150,29 @@ var EXOS = [
   { kind:'qcm', title:'Écrire une expression',
     prompt:'Un cahier co\u00fbte <b>x euros</b>. Quelle expression donne le prix de <b>3 cahiers</b> ?',
     choices:['x + 3','3x','x \u2212 3','x \u00f7 3'], ans:1,
+    hint:'3 cahiers identiques, c\'est 3 fois le prix d\'un seul. Devant une lettre, on n\'\u00e9crit pas le signe \u00d7.',
     sol:'3 cahiers \u00e0 x euros chacun : 3 \u00d7 x, que l\'on écrit <b>3x</b> (on ne met pas le signe \u00d7 devant une lettre).' },
   { kind:'qcm', title:'Traduire une phrase (1)',
     prompt:'Comment s\'écrit \u00ab le <b>double de x</b>, augmenté de 5 \u00bb ?',
     choices:['2(x + 5)','2x + 5','5x + 2','x + 25'], ans:1,
+    hint:'Le double de x, c\'est 2x. \u00ab augment\u00e9 de 5 \u00bb signifie qu\'on ajoute 5 \u00e0 la fin, sans parenth\u00e8ses.',
     sol:'Le double de x = 2x, puis on ajoute 5 : <b>2x + 5</b>. (2(x + 5) serait \u00ab le double de la somme de x et 5 \u00bb.)' },
   { kind:'qcm', title:'Traduire une phrase (2)',
     prompt:'Comment s\'écrit \u00ab le <b>triple de la somme</b> de x et 4 \u00bb ?',
     choices:['3x + 4','3(x + 4)','x + 12','3x \u00d7 4'], ans:1,
+    hint:'\u00ab la somme de x et 4 \u00bb se calcule d\'abord : pense aux parenth\u00e8ses, puis triple le tout.',
     sol:'On fait d\'abord la somme (x + 4), puis on la triple : <b>3(x + 4)</b>. Les parenthèses sont indispensables !' },
   { kind:'num', title:'Tester une expression',
     prompt:'On note <b>p</b> le prix d\'un livre. L\'expression <b>2p + 3</b> donne le prix de 2 livres et d\'un marque-page \u00e0 3 \u20ac. Si <b>p = 7</b>, combien vaut 2p + 3 ?',
     unit:'\u20ac', ans:17, tol:0.001,
+    hint:'Remplace p par 7 dans 2p + 3, en respectant les priorit\u00e9s (la multiplication avant l\'addition).',
     sol:'On remplace p par 7 : 2 \u00d7 7 + 3 = 14 + 3 = <b>17 \u20ac</b>.' },
   { kind:'multi', title:'Remplacer la lettre',
     prompt:'Pour <b>x = 4</b>, calcule la valeur de chaque expression.',
     fields:[ {label:'x + 9 =', ans:13, tol:0.001, unit:''},
              {label:'5x =', ans:20, tol:0.001, unit:''},
              {label:'x\u00b2 =', ans:16, tol:0.001, unit:''} ],
+    hint:'Remplace chaque x par 4. Rappel : 5x = 5 \u00d7 4 et x\u00b2 = x \u00d7 x = 4 \u00d7 4.',
     sol:'x + 9 = 4 + 9 = <b>13</b> ; 5x = 5 \u00d7 4 = <b>20</b> ; x\u00b2 = 4 \u00d7 4 = <b>16</b>.' }
 ];
 var state=[], errCount=0;
@@ -191,7 +200,9 @@ function buildAll(){
         inner+='</div>';
       }
       inner+='<button class="btn" id="vbtn'+idx+'" onclick="checkExo('+idx+')">Valider</button>';
+      if(ex.hint) inner+='<button class="btn hint-btn" id="hbtn'+idx+'" onclick="showHint('+idx+')">\uD83D\uDCA1 Indice</button>';
       inner+='<div class="fb" id="fb'+idx+'"></div>';
+      if(ex.hint) inner+='<div class="hint" id="hint'+idx+'">'+ex.hint+'</div>';
       inner+='<div class="sol" id="sol'+idx+'"><b>Solution :</b><br>'+ex.sol+'</div>';
     }
     c.innerHTML=inner; box.appendChild(c);
@@ -218,6 +229,7 @@ function checkExo(idx){
   updateScore();
 }
 function markExtDone(idx){ if(state[idx].done) return; state[idx].done=true; document.getElementById('card'+idx).classList.add('done'); document.getElementById('extbtn'+idx).classList.add('hidden'); flash(idx,true,'✓ Activité validée !'); updateScore(); }
+function showHint(idx){ var hb=document.getElementById('hint'+idx); if(!hb) return; var b=document.getElementById('hbtn'+idx); var open=hb.classList.toggle('show'); if(b) b.innerHTML= open ? '\uD83D\uDCA1 Masquer l\'indice' : '\uD83D\uDCA1 Indice'; }
 function flash(idx,good,msg){ var fb=document.getElementById('fb'+idx); fb.className='fb '+(good?'ok':'no'); fb.textContent=msg; }
 function updateScore(){
   var done=state.filter(function(s){return s.done;}).length, tot=EXOS.length;
