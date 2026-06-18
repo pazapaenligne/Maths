@@ -3,499 +3,446 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Pazapa Maths – 3e · Déterminer les coordonnées d'un point</title>
+<title>Pazapa Maths – 3e · Course aux nombres 2026 · Chrono 40 s</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 :root{
-  --jour:#f5c518; --jour-fonce:#8a6000; --jour-soft:#fffbeb; --jour-accent:#f5e08a;
   --day-color:#f5c518; --day-dark:#8a6000; --day-light:#fffbeb; --day-border:#f5e08a; --day-glow:rgba(245,197,24,.3);
-  --vert:#8dc63f; --vert-fonce:#3d7a10; --vert-soft:#f0faeb;
-  --rouge:#e74c3c; --rouge-soft:#fdedec; --rouge-fonce:#c0392b;
-  --green:#8dc63f; --pink:#f28b82;
-  --texte:#23262d; --text:#23262d; --gris:#8a8f9a; --muted:#8a8f9a; --bord:#ece8dd; --border:#ece8dd;
-  --bg:#fffdf7; --surface:#fff; --radius:16px;
+  --green:#8dc63f; --green-dark:#3d7a10; --green-soft:#f0faeb;
+  --red:#f28b82; --red-dark:#c0392b; --red-soft:#fff0ef;
+  --orange:#f5a623;
+  --text:#23262d; --muted:#8a8f9a; --border:#ece8dd; --bg:#fffdf7; --surface:#fff; --radius:16px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{overflow-x:hidden;}
-body{background:#fffdf7;color:var(--texte);font-family:Arial,sans-serif;
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;
-  padding:1.6rem 1rem 110px;position:relative;letter-spacing:.02em;line-height:1.6;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+  letter-spacing:.02em;line-height:1.6;padding-bottom:110px;}
 
-.bubble{position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(1px);}
-.bubble1{width:280px;height:280px;top:-60px;right:-60px;background:#f5e08a;opacity:.35;}
-.bubble2{width:220px;height:220px;bottom:-50px;left:-50px;background:#f5e08a;opacity:.30;}
-.bubble3{width:180px;height:180px;top:35%;right:-60px;background:#b5e08a;opacity:.22;}
-.bubble4{width:160px;height:160px;top:50%;left:-55px;background:#f9c0bb;opacity:.22;}
+/* ===== BARRE DE CHRONO HORIZONTALE (haut) ===== */
+.timebar-wrap{position:sticky;top:0;z-index:50;height:34px;background:var(--red);
+  display:flex;align-items:center;overflow:hidden;border-bottom:2px solid #e8e0d0;}
+.timebar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--green);
+  width:100%;transition:width 1s linear;}
+.timebar-fill.warn{background:var(--day-color);}
+.timebar-fill.done{background:var(--red);}
+.timebar-time{position:relative;z-index:2;margin-left:auto;margin-right:14px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1rem;color:#23262d;}
 
-.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.5rem;max-width:720px;}
+/* ===== PASTILLES 1..7 ===== */
+.dots-row{display:flex;justify-content:center;gap:clamp(.6rem,4vw,2.4rem);
+  flex-wrap:wrap;padding:1rem .8rem .4rem;position:relative;z-index:1;}
+.dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.05rem;
+  color:var(--orange);background:transparent;border:none;cursor:default;user-select:none;}
+.dot.active{background:#2f7fb0;color:#fff;box-shadow:0 3px 8px rgba(47,127,176,.4);}
+.dot.done{color:var(--green-dark);}
+.dot.done::after{content:"\2714";font-size:.8rem;margin-left:0;}
+
+/* ===== EN-TÊTE PAZAPA ===== */
+.hero{text-align:center;max-width:720px;margin:.3rem auto 0;padding:0 1rem;position:relative;z-index:1;}
 .pazapa-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid #e8e0d0;
-  border-radius:99px;padding:.28rem .9rem;margin-bottom:.65rem;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#555;}
-.pazapa-badge .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
-.pazapa-badge .dot1{background:#f5a623;}
-.pazapa-badge .dot2{background:#8dc63f;}
-.pazapa-badge .dot3{background:#3ab5d8;}
-.badge-semaine{display:inline-block;background:var(--jour-soft);border:2px solid var(--jour);
-  color:#3a2600;font-weight:800;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
-  font-family:'JetBrains Mono',monospace;padding:.35rem 1rem;border-radius:99px;margin-bottom:.9rem;}
-h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--jour-fonce);line-height:1.25;margin-bottom:.5rem;}
-.consigne{max-width:560px;margin:0 auto;border:2px dashed var(--jour);background:var(--jour-soft);
-  color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+  border-radius:99px;padding:.26rem .85rem;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#555;}
+.pazapa-badge .pd{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.badge-semaine{display:inline-block;background:var(--day-light);border:2px solid var(--day-color);
+  color:#3a2600;font-weight:800;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;padding:.3rem .9rem;border-radius:99px;}
 
-.zone{position:relative;z-index:1;width:100%;max-width:680px;}
-.zone-note{text-align:center;font-size:.8rem;color:var(--gris);margin-top:.5rem;line-height:1.7;}
+/* ===== ZONE QUESTION ===== */
+.stage{max-width:780px;margin:1.2rem auto 0;padding:0 1rem;position:relative;z-index:1;min-height:46vh;
+  display:flex;flex-direction:column;justify-content:center;}
+.q-page{display:none;text-align:center;animation:fade .35s ease both;}
+.q-page.show{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.q-enonce{font-family:Georgia,serif;font-size:clamp(1.5rem,5vw,2.4rem);font-weight:400;
+  color:var(--text);line-height:1.5;margin-bottom:1.6rem;}
+.q-enonce em{font-style:italic;}
+.frac{display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;text-align:center;line-height:1.1;margin:0 .15em;font-size:.78em;}
+.frac sup,.frac sub{display:block;font-size:.95em;padding:0 .4em;}
+.frac sup{border-bottom:2px solid currentColor;padding-bottom:.05em;}
+.frac sub{padding-top:.05em;}
 
-/* cartes exercices */
-.exo-card{background:#fff;border:2px solid var(--bord);border-radius:16px;padding:1.5rem 1.4rem 1.4rem;margin:0 auto 1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;}
-.ex-title{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--jour-fonce);font-size:1rem;margin-bottom:.7rem;}
-.exo-consigne{font-size:1rem;line-height:1.7;color:var(--texte);margin-bottom:1rem;}
-.repere-wrap{text-align:center;margin:0 auto 1.3rem;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.repere-svg{width:min(480px,100%);height:auto;display:inline-block;background:#fff;border:1px solid var(--bord);border-radius:10px;}
-.repere-svg .subgrid line{stroke:#ece8dd;stroke-width:.6;}
-.repere-svg .grid line{stroke:#cfc8b6;stroke-width:1;}
-.repere-svg .axe{stroke:#23262d;stroke-width:1.8;}
-.repere-svg .axe-fill{fill:#23262d;}
-.repere-svg .tick{stroke:#23262d;stroke-width:1.3;}
-.repere-svg .grad{font:13px 'JetBrains Mono',monospace;fill:#444;text-anchor:middle;}
-.repere-svg .grad-y{text-anchor:end;}
-.repere-svg .pt-cross{stroke:#e74c3c;stroke-width:2.4;}
-.repere-svg .pt-lbl{font:italic 700 16px Georgia,serif;fill:#23262d;text-anchor:middle;}
+.answer-zone{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;
+  font-family:Georgia,serif;font-size:clamp(1.4rem,4.5vw,2rem);margin-bottom:.4rem;}
+.big-input{width:min(150px,40vw);height:clamp(64px,12vw,86px);background:var(--surface);
+  border:2.5px solid #2f7fb0;border-radius:14px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:clamp(1.4rem,4.5vw,2rem);font-weight:700;
+  padding:.2rem .5rem;outline:none;text-align:center;transition:border-color .2s,background .2s;}
+.big-input:focus{border-color:var(--day-color);box-shadow:0 0 0 4px var(--day-glow);}
+.big-input.ok{border-color:var(--green);background:var(--green-soft);}
+.big-input.ko{border-color:var(--red);background:var(--red-soft);}
+.big-input:disabled{opacity:1;background:#f4f1ea;cursor:default;}
+.fxy-row{display:inline-flex;align-items:center;gap:.4rem;font-family:Georgia,serif;}
+.fxy-row .fx{font-style:italic;}
 
-.coord-list{display:flex;flex-direction:column;gap:.9rem;margin-bottom:1.1rem;}
-.coord-item{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;color:var(--jour-fonce);display:inline-flex;align-items:center;flex-wrap:wrap;gap:.3rem;}
-.coord-item em{font-style:italic;font-family:Georgia,serif;margin-right:.15rem;}
-.coord-input{width:min(90px,26vw);height:2.8rem;background:var(--bg);border:2px solid var(--bord);border-radius:10px;color:var(--texte);font-family:'JetBrains Mono',monospace;font-size:1.05rem;padding:.4rem .5rem;outline:none;text-align:center;transition:border-color .2s;}
-.coord-input:focus{border-color:var(--jour);}
-.coord-input.ok{border-color:var(--green);background:#f0faeb;}
-.coord-input.ko{border-color:var(--pink);background:#fff0ef;}
+/* message temps écoulé */
+.time-msg{display:none;margin:1rem auto 0;max-width:520px;background:var(--red-soft);
+  border:2px solid var(--red);border-radius:12px;padding:.7rem 1rem;color:var(--red-dark);
+  font-weight:700;font-size:1rem;line-height:1.6;}
+.time-msg.show{display:block;}
 
-.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;}
-.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.45rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(1rem,2.8vw,1.12rem);font-weight:800;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:3.1rem;}
-.btn:active{transform:scale(.96);}
-.btn-check{background:var(--jour);color:#3a2600;box-shadow:0 3px 10px var(--day-glow);}
-.btn-check:hover{transform:translateY(-1px);}
-.btn-hint{background:#f5a623;color:#fff;}
-.btn-retry{background:transparent;color:var(--gris);border:2px solid var(--bord);}
-.btn-corr{background:transparent;color:var(--jour-fonce);border:2px solid var(--jour);}
-.hint-box{display:none;margin-top:.9rem;background:#fffbeb;border:1.5px dashed var(--jour);border-radius:10px;padding:.8rem 1rem;font-size:1rem;color:#7a6010;line-height:1.8;font-family:'JetBrains Mono',monospace;}
-.hint-box.show{display:block;}
-.feedback{display:none;margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(1rem,2.6vw,1.1rem);line-height:1.8;}
-.feedback.show{display:flex;align-items:flex-start;gap:.6rem;}
-.feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
-.feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
-.fb-ic{font-size:1.6rem;flex-shrink:0;}
-.correction-box{display:none;margin-top:1rem;border-left:5px solid var(--jour);border-radius:8px 8px 0 0;background:#fff;padding:0 16px 14px;font-size:1rem;line-height:1.85;}
-.correction-box.show{display:block;}
-.correction-box .corr-head{display:inline-block;background:var(--jour);color:#3a2600;font-weight:800;border-radius:8px 8px 0 0;padding:6px 18px;margin:0 0 12px -16px;font-family:'JetBrains Mono',monospace;font-size:.95rem;}
-.correction-box em{font-style:italic;font-family:Georgia,serif;}
+/* ===== COMPTE À REBOURS 3·2·1 ===== */
+.countdown{position:fixed;inset:0;z-index:200;background:rgba(255,253,247,.96);
+  display:none;align-items:center;justify-content:center;flex-direction:column;}
+.countdown.show{display:flex;}
+.cd-num{font-family:'JetBrains Mono',monospace;font-weight:800;
+  font-size:clamp(5rem,22vw,11rem);color:var(--day-dark);line-height:1;
+  animation:pop .9s ease;}
+.cd-label{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:1rem;margin-top:1rem;letter-spacing:.1em;}
+@keyframes pop{0%{transform:scale(.4);opacity:0;}40%{transform:scale(1.1);opacity:1;}100%{transform:scale(1);opacity:.85;}}
+
+/* ===== NAVIGATION BAS ===== */
+.nav-row{display:flex;align-items:center;justify-content:center;gap:2.4rem;margin:2rem auto 0;position:relative;z-index:1;}
+.nav-arrow{background:none;border:none;cursor:pointer;font-size:2.6rem;line-height:1;
+  font-weight:800;transition:transform .12s;min-width:48px;min-height:48px;}
+.nav-arrow:active{transform:scale(.9);}
+.nav-prev{color:var(--muted);}
+.nav-prev:disabled{opacity:.3;cursor:default;}
+.nav-next{color:var(--orange);}
+.nav-next:disabled{opacity:.3;cursor:default;}
+.btn-finish{position:fixed;right:16px;bottom:16px;z-index:60;background:var(--day-color);color:#3a2600;
+  border:none;border-radius:12px;padding:.8rem 1.3rem;font-weight:800;font-size:1rem;cursor:pointer;
+  box-shadow:0 4px 14px var(--day-glow);font-family:Arial,sans-serif;min-height:48px;}
+.btn-finish:hover{transform:translateY(-1px);}
+.btn-finish:disabled{opacity:.4;cursor:default;}
+
+/* ===== ÉCRAN BILAN ===== */
+.results{display:none;max-width:720px;margin:1.5rem auto 0;padding:0 1rem;position:relative;z-index:1;}
+.results.show{display:block;}
+.results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:2.2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+.results-title{font-weight:900;font-size:clamp(1.3rem,4vw,1.7rem);color:var(--day-dark);margin-bottom:.6rem;}
+.results-score{font-family:'JetBrains Mono',monospace;font-size:clamp(3rem,11vw,4.6rem);font-weight:800;
+  color:var(--day-dark);line-height:1;margin:.3rem 0;}
+.results-score small{font-size:.4em;color:var(--muted);}
+.stars{font-size:2rem;margin:.3rem 0 .8rem;letter-spacing:.15em;}
+.results-msg{color:var(--muted);font-size:1rem;margin-bottom:1.6rem;}
+.recap{display:flex;flex-direction:column;gap:.7rem;text-align:left;margin-bottom:1.6rem;}
+.recap-item{border:1.5px solid var(--border);border-radius:12px;padding:.85rem 1rem;background:var(--bg);}
+.recap-item.ok{border-color:#b5e08a;background:var(--green-soft);}
+.recap-item.ko{border-color:#f9c0bb;background:var(--red-soft);}
+.recap-head{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1rem;margin-bottom:.35rem;}
+.recap-head .ic{font-size:1.2rem;}
+.recap-q{font-family:Georgia,serif;font-size:1rem;color:var(--text);margin-bottom:.4rem;line-height:1.6;}
+.recap-corr{font-size:.95rem;line-height:1.8;color:var(--text);}
+.recap-corr strong{color:var(--day-dark);}
+.recap-corr em{font-style:italic;font-family:Georgia,serif;}
+.recap-your{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--muted);margin-top:.4rem;}
+.btn-restart{background:var(--day-color);color:#3a2600;border:none;border-radius:12px;
+  padding:.85rem 1.6rem;font-weight:800;font-size:1.05rem;cursor:pointer;min-height:3rem;
+  box-shadow:0 3px 10px var(--day-glow);font-family:Arial,sans-serif;}
+.btn-restart:hover{transform:translateY(-1px);}
+
+/* intro */
+.intro{max-width:600px;margin:2rem auto 0;padding:0 1rem;text-align:center;position:relative;z-index:1;}
+.intro.hide{display:none;}
+.intro-card{background:var(--day-light);border:2px solid var(--day-border);border-radius:var(--radius);
+  padding:1.8rem 1.4rem;}
+.intro-card h2{color:var(--day-dark);font-size:clamp(1.2rem,4vw,1.5rem);margin-bottom:.8rem;}
+.intro-card p{font-size:1rem;line-height:1.9;color:var(--text);margin-bottom:.6rem;}
+.intro-rules{text-align:left;max-width:420px;margin:1rem auto;font-size:.95rem;line-height:1.9;color:var(--day-dark);}
+.btn-start{background:var(--day-color);color:#3a2600;border:none;border-radius:12px;
+  padding:.9rem 2rem;font-weight:800;font-size:1.1rem;cursor:pointer;min-height:3.2rem;margin-top:.8rem;
+  box-shadow:0 3px 12px var(--day-glow);font-family:Arial,sans-serif;}
+.btn-start:hover{transform:translateY(-1px);}
+
 @media(max-width:480px){
-  .exo-card{padding:1.2rem 1rem;}
-  .coord-input{width:min(80px,24vw);}
+  .dot{width:32px;height:32px;font-size:.92rem;}
+  .nav-row{gap:1.6rem;}
 }
 </style>
 </head>
 <body>
-<div class="bubble bubble1"></div>
-<div class="bubble bubble2"></div>
-<div class="bubble bubble3"></div>
-<div class="bubble bubble4"></div>
 
+<!-- BARRE CHRONO -->
+<div class="timebar-wrap" id="timebar" style="visibility:hidden;">
+  <div class="timebar-fill" id="timefill"></div>
+  <span class="timebar-time" id="timetext">00:40</span>
+</div>
+
+<!-- PASTILLES -->
+<div class="dots-row" id="dots" style="display:none;"></div>
+
+<!-- EN-TÊTE -->
 <header class="hero">
   <div class="pazapa-badge">
-    <span class="dot dot1"></span><span class="dot dot2"></span><span class="dot dot3"></span>
+    <span class="pd" style="background:#f5a623"></span><span class="pd" style="background:#8dc63f"></span><span class="pd" style="background:#3ab5d8"></span>
     Pazapa &nbsp;·&nbsp; 3e &nbsp;·&nbsp; Mathématiques
-  </div>
-  <div class="badge-semaine">Semaine 2 · Jour 5</div>
-  <h1>&#9999;&#65039; Exercices interactifs</h1>
-  <div class="consigne">&#128073; Lis les coordonnées des points dans chaque repère, puis clique sur «&nbsp;Vérifier&nbsp;» pour valider tes réponses.</div>
+  </div><br>
+  <span class="badge-semaine">Semaine 2 · Jour 5 · Course aux nombres</span>
 </header>
 
-<div class="zone">
-  <div class="exo-card">
-    <div class="ex-title">Déterminer les coordonnées (relatives) d'un point</div>
-    <p class="exo-consigne">Lis les coordonnées de chaque point dans le repère, puis complète sous la forme (abscisse ; ordonnée).</p>
-    <div class="repere-wrap"><svg class="repere-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Repère avec points">
-      <g class="subgrid">
-      <line x1="40.0" y1="40" x2="40.0" y2="480"/>
-      <line x1="40" y1="480.0" x2="480" y2="480.0"/>
-      <line x1="51.0" y1="40" x2="51.0" y2="480"/>
-      <line x1="40" y1="469.0" x2="480" y2="469.0"/>
-      <line x1="62.0" y1="40" x2="62.0" y2="480"/>
-      <line x1="40" y1="458.0" x2="480" y2="458.0"/>
-      <line x1="73.0" y1="40" x2="73.0" y2="480"/>
-      <line x1="40" y1="447.0" x2="480" y2="447.0"/>
-      <line x1="84.0" y1="40" x2="84.0" y2="480"/>
-      <line x1="40" y1="436.0" x2="480" y2="436.0"/>
-      <line x1="95.0" y1="40" x2="95.0" y2="480"/>
-      <line x1="40" y1="425.0" x2="480" y2="425.0"/>
-      <line x1="106.0" y1="40" x2="106.0" y2="480"/>
-      <line x1="40" y1="414.0" x2="480" y2="414.0"/>
-      <line x1="117.0" y1="40" x2="117.0" y2="480"/>
-      <line x1="40" y1="403.0" x2="480" y2="403.0"/>
-      <line x1="128.0" y1="40" x2="128.0" y2="480"/>
-      <line x1="40" y1="392.0" x2="480" y2="392.0"/>
-      <line x1="139.0" y1="40" x2="139.0" y2="480"/>
-      <line x1="40" y1="381.0" x2="480" y2="381.0"/>
-      <line x1="150.0" y1="40" x2="150.0" y2="480"/>
-      <line x1="40" y1="370.0" x2="480" y2="370.0"/>
-      <line x1="161.0" y1="40" x2="161.0" y2="480"/>
-      <line x1="40" y1="359.0" x2="480" y2="359.0"/>
-      <line x1="172.0" y1="40" x2="172.0" y2="480"/>
-      <line x1="40" y1="348.0" x2="480" y2="348.0"/>
-      <line x1="183.0" y1="40" x2="183.0" y2="480"/>
-      <line x1="40" y1="337.0" x2="480" y2="337.0"/>
-      <line x1="194.0" y1="40" x2="194.0" y2="480"/>
-      <line x1="40" y1="326.0" x2="480" y2="326.0"/>
-      <line x1="205.0" y1="40" x2="205.0" y2="480"/>
-      <line x1="40" y1="315.0" x2="480" y2="315.0"/>
-      <line x1="216.0" y1="40" x2="216.0" y2="480"/>
-      <line x1="40" y1="304.0" x2="480" y2="304.0"/>
-      <line x1="227.0" y1="40" x2="227.0" y2="480"/>
-      <line x1="40" y1="293.0" x2="480" y2="293.0"/>
-      <line x1="238.0" y1="40" x2="238.0" y2="480"/>
-      <line x1="40" y1="282.0" x2="480" y2="282.0"/>
-      <line x1="249.0" y1="40" x2="249.0" y2="480"/>
-      <line x1="40" y1="271.0" x2="480" y2="271.0"/>
-      <line x1="260.0" y1="40" x2="260.0" y2="480"/>
-      <line x1="40" y1="260.0" x2="480" y2="260.0"/>
-      <line x1="271.0" y1="40" x2="271.0" y2="480"/>
-      <line x1="40" y1="249.0" x2="480" y2="249.0"/>
-      <line x1="282.0" y1="40" x2="282.0" y2="480"/>
-      <line x1="40" y1="238.0" x2="480" y2="238.0"/>
-      <line x1="293.0" y1="40" x2="293.0" y2="480"/>
-      <line x1="40" y1="227.0" x2="480" y2="227.0"/>
-      <line x1="304.0" y1="40" x2="304.0" y2="480"/>
-      <line x1="40" y1="216.0" x2="480" y2="216.0"/>
-      <line x1="315.0" y1="40" x2="315.0" y2="480"/>
-      <line x1="40" y1="205.0" x2="480" y2="205.0"/>
-      <line x1="326.0" y1="40" x2="326.0" y2="480"/>
-      <line x1="40" y1="194.0" x2="480" y2="194.0"/>
-      <line x1="337.0" y1="40" x2="337.0" y2="480"/>
-      <line x1="40" y1="183.0" x2="480" y2="183.0"/>
-      <line x1="348.0" y1="40" x2="348.0" y2="480"/>
-      <line x1="40" y1="172.0" x2="480" y2="172.0"/>
-      <line x1="359.0" y1="40" x2="359.0" y2="480"/>
-      <line x1="40" y1="161.0" x2="480" y2="161.0"/>
-      <line x1="370.0" y1="40" x2="370.0" y2="480"/>
-      <line x1="40" y1="150.0" x2="480" y2="150.0"/>
-      <line x1="381.0" y1="40" x2="381.0" y2="480"/>
-      <line x1="40" y1="139.0" x2="480" y2="139.0"/>
-      <line x1="392.0" y1="40" x2="392.0" y2="480"/>
-      <line x1="40" y1="128.0" x2="480" y2="128.0"/>
-      <line x1="403.0" y1="40" x2="403.0" y2="480"/>
-      <line x1="40" y1="117.0" x2="480" y2="117.0"/>
-      <line x1="414.0" y1="40" x2="414.0" y2="480"/>
-      <line x1="40" y1="106.0" x2="480" y2="106.0"/>
-      <line x1="425.0" y1="40" x2="425.0" y2="480"/>
-      <line x1="40" y1="95.0" x2="480" y2="95.0"/>
-      <line x1="436.0" y1="40" x2="436.0" y2="480"/>
-      <line x1="40" y1="84.0" x2="480" y2="84.0"/>
-      <line x1="447.0" y1="40" x2="447.0" y2="480"/>
-      <line x1="40" y1="73.0" x2="480" y2="73.0"/>
-      <line x1="458.0" y1="40" x2="458.0" y2="480"/>
-      <line x1="40" y1="62.0" x2="480" y2="62.0"/>
-      <line x1="469.0" y1="40" x2="469.0" y2="480"/>
-      <line x1="40" y1="51.0" x2="480" y2="51.0"/>
-      <line x1="480.0" y1="40" x2="480.0" y2="480"/>
-      <line x1="40" y1="40.0" x2="480" y2="40.0"/>
-      </g>
-      <g class="grid">
-      <line x1="40.0" y1="40" x2="40.0" y2="480"/>
-      <line x1="40" y1="480.0" x2="480" y2="480.0"/>
-      <line x1="84.0" y1="40" x2="84.0" y2="480"/>
-      <line x1="40" y1="436.0" x2="480" y2="436.0"/>
-      <line x1="128.0" y1="40" x2="128.0" y2="480"/>
-      <line x1="40" y1="392.0" x2="480" y2="392.0"/>
-      <line x1="172.0" y1="40" x2="172.0" y2="480"/>
-      <line x1="40" y1="348.0" x2="480" y2="348.0"/>
-      <line x1="216.0" y1="40" x2="216.0" y2="480"/>
-      <line x1="40" y1="304.0" x2="480" y2="304.0"/>
-      <line x1="260.0" y1="40" x2="260.0" y2="480"/>
-      <line x1="40" y1="260.0" x2="480" y2="260.0"/>
-      <line x1="304.0" y1="40" x2="304.0" y2="480"/>
-      <line x1="40" y1="216.0" x2="480" y2="216.0"/>
-      <line x1="348.0" y1="40" x2="348.0" y2="480"/>
-      <line x1="40" y1="172.0" x2="480" y2="172.0"/>
-      <line x1="392.0" y1="40" x2="392.0" y2="480"/>
-      <line x1="40" y1="128.0" x2="480" y2="128.0"/>
-      <line x1="436.0" y1="40" x2="436.0" y2="480"/>
-      <line x1="40" y1="84.0" x2="480" y2="84.0"/>
-      <line x1="480.0" y1="40" x2="480.0" y2="480"/>
-      <line x1="40" y1="40.0" x2="480" y2="40.0"/>
-      </g>
-      <line x1="36" y1="260.0" x2="494" y2="260.0" class="axe"/>
-      <line x1="260.0" y1="484" x2="260.0" y2="26" class="axe"/>
-      <polygon points="494,260.0 483,255.5 483,264.5" class="axe-fill"/>
-      <polygon points="260.0,26 255.5,37 264.5,37" class="axe-fill"/>
-      <line x1="40.0" y1="256.0" x2="40.0" y2="264.0" class="tick"/>
-      <text x="40.0" y="278.0" class="grad">-5</text>
-      <line x1="256.0" y1="480.0" x2="264.0" y2="480.0" class="tick"/>
-      <text x="250.0" y="484.0" class="grad grad-y">-5</text>
-      <line x1="84.0" y1="256.0" x2="84.0" y2="264.0" class="tick"/>
-      <text x="84.0" y="278.0" class="grad">-4</text>
-      <line x1="256.0" y1="436.0" x2="264.0" y2="436.0" class="tick"/>
-      <text x="250.0" y="440.0" class="grad grad-y">-4</text>
-      <line x1="128.0" y1="256.0" x2="128.0" y2="264.0" class="tick"/>
-      <text x="128.0" y="278.0" class="grad">-3</text>
-      <line x1="256.0" y1="392.0" x2="264.0" y2="392.0" class="tick"/>
-      <text x="250.0" y="396.0" class="grad grad-y">-3</text>
-      <line x1="172.0" y1="256.0" x2="172.0" y2="264.0" class="tick"/>
-      <text x="172.0" y="278.0" class="grad">-2</text>
-      <line x1="256.0" y1="348.0" x2="264.0" y2="348.0" class="tick"/>
-      <text x="250.0" y="352.0" class="grad grad-y">-2</text>
-      <line x1="216.0" y1="256.0" x2="216.0" y2="264.0" class="tick"/>
-      <text x="216.0" y="278.0" class="grad">-1</text>
-      <line x1="256.0" y1="304.0" x2="264.0" y2="304.0" class="tick"/>
-      <text x="250.0" y="308.0" class="grad grad-y">-1</text>
-      <line x1="304.0" y1="256.0" x2="304.0" y2="264.0" class="tick"/>
-      <text x="304.0" y="278.0" class="grad">1</text>
-      <line x1="256.0" y1="216.0" x2="264.0" y2="216.0" class="tick"/>
-      <text x="250.0" y="220.0" class="grad grad-y">1</text>
-      <line x1="348.0" y1="256.0" x2="348.0" y2="264.0" class="tick"/>
-      <text x="348.0" y="278.0" class="grad">2</text>
-      <line x1="256.0" y1="172.0" x2="264.0" y2="172.0" class="tick"/>
-      <text x="250.0" y="176.0" class="grad grad-y">2</text>
-      <line x1="392.0" y1="256.0" x2="392.0" y2="264.0" class="tick"/>
-      <text x="392.0" y="278.0" class="grad">3</text>
-      <line x1="256.0" y1="128.0" x2="264.0" y2="128.0" class="tick"/>
-      <text x="250.0" y="132.0" class="grad grad-y">3</text>
-      <line x1="436.0" y1="256.0" x2="436.0" y2="264.0" class="tick"/>
-      <text x="436.0" y="278.0" class="grad">4</text>
-      <line x1="256.0" y1="84.0" x2="264.0" y2="84.0" class="tick"/>
-      <text x="250.0" y="88.0" class="grad grad-y">4</text>
-      <line x1="480.0" y1="256.0" x2="480.0" y2="264.0" class="tick"/>
-      <text x="480.0" y="278.0" class="grad">5</text>
-      <line x1="256.0" y1="40.0" x2="264.0" y2="40.0" class="tick"/>
-      <text x="250.0" y="44.0" class="grad grad-y">5</text>
-      <path d="M145.0,90.0 L155.0,100.0 M145.0,100.0 L155.0,90.0" class="pt-cross"/>
-      <text x="146.0" y="83.0" class="pt-lbl">O</text>
-      <path d="M354.0,255.0 L364.0,265.0 M354.0,265.0 L364.0,255.0" class="pt-cross"/>
-      <text x="355.0" y="248.0" class="pt-lbl">M</text>
-      <path d="M255.0,343.0 L265.0,353.0 M255.0,353.0 L265.0,343.0" class="pt-cross"/>
-      <text x="242.0" y="344.0" class="pt-lbl">L</text>
-      <path d="M233.0,244.0 L243.0,254.0 M233.0,254.0 L243.0,244.0" class="pt-cross"/>
-      <text x="234.0" y="237.0" class="pt-lbl">N</text>
-      <path d="M79.0,134.0 L89.0,144.0 M79.0,144.0 L89.0,134.0" class="pt-cross"/>
-      <text x="80.0" y="127.0" class="pt-lbl">P</text>
-      </svg></div>
-    <div class="direct-q" data-type="coord">
-      <div class="coord-list">
-      <span class="coord-item"><em>O</em>(<input aria-label="Abscisse du point O" class="coord-input" data-ans-x="-2.5" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point O" class="coord-input" data-ans-y="3.75" autocomplete="off" type="text" inputmode="text">)</span>
-      <span class="coord-item"><em>M</em>(<input aria-label="Abscisse du point M" class="coord-input" data-ans-x="2.25" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point M" class="coord-input" data-ans-y="0" autocomplete="off" type="text" inputmode="text">)</span>
-      <span class="coord-item"><em>L</em>(<input aria-label="Abscisse du point L" class="coord-input" data-ans-x="0" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point L" class="coord-input" data-ans-y="-2" autocomplete="off" type="text" inputmode="text">)</span>
-      <span class="coord-item"><em>N</em>(<input aria-label="Abscisse du point N" class="coord-input" data-ans-x="-0.5" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point N" class="coord-input" data-ans-y="0.25" autocomplete="off" type="text" inputmode="text">)</span>
-      <span class="coord-item"><em>P</em>(<input aria-label="Abscisse du point P" class="coord-input" data-ans-x="-4" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point P" class="coord-input" data-ans-y="2.75" autocomplete="off" type="text" inputmode="text">)</span>
-      </div>
-      <div class="btn-row"><button class="btn btn-check check-btn" type="button">Vérifier</button><button class="btn btn-hint hint-btn" type="button">💡 Indice</button><button class="btn btn-retry retry-btn" type="button">Recommencer</button><button class="btn btn-corr correction-btn" type="button" style="display:none;">Voir la correction</button></div>
-      <div class="hint-box">Les coordonnées d'un point s'écrivent toujours sous la forme (abscisse ; ordonnée). Les graduations intermédiaires permettent de repérer des valeurs décimales. Attention aux nombres relatifs.</div>
-      <div class="feedback"></div><div class="correction-box"></div>
+<!-- INTRO -->
+<div class="intro" id="intro">
+  <div class="intro-card">
+    <h2>&#9999;&#65039; La course aux nombres « 2026 »</h2>
+    <p>7 questions de calcul mental et de logique.</p>
+    <div class="intro-rules">
+      &#128073; Tu as <strong>40 secondes</strong> par question.<br>
+      &#128073; Quand le temps est écoulé, le chrono s'arrête : tu cliques sur <strong>Continuer</strong> quand tu es prêt.<br>
+      &#128073; Tu peux passer avant la fin du temps si tu as répondu.<br>
+      &#128073; La <strong>correction complète</strong> s'affiche à la fin.
     </div>
+    <button class="btn-start" id="startBtn" type="button">Commencer</button>
   </div>
-  <div class="exo-card">
-    <div class="ex-title">Déterminer les coordonnées (relatives) d'un point</div>
-    <p class="exo-consigne">Lis les coordonnées de chaque point dans le repère, puis complète sous la forme (abscisse ; ordonnée).</p>
-    <div class="repere-wrap"><svg class="repere-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Repère avec points">
-      <g class="subgrid">
-      <line x1="40.0" y1="40" x2="40.0" y2="480"/>
-      <line x1="40" y1="480.0" x2="480" y2="480.0"/>
-      <line x1="62.0" y1="40" x2="62.0" y2="480"/>
-      <line x1="40" y1="458.0" x2="480" y2="458.0"/>
-      <line x1="84.0" y1="40" x2="84.0" y2="480"/>
-      <line x1="40" y1="436.0" x2="480" y2="436.0"/>
-      <line x1="106.0" y1="40" x2="106.0" y2="480"/>
-      <line x1="40" y1="414.0" x2="480" y2="414.0"/>
-      <line x1="128.0" y1="40" x2="128.0" y2="480"/>
-      <line x1="40" y1="392.0" x2="480" y2="392.0"/>
-      <line x1="150.0" y1="40" x2="150.0" y2="480"/>
-      <line x1="40" y1="370.0" x2="480" y2="370.0"/>
-      <line x1="172.0" y1="40" x2="172.0" y2="480"/>
-      <line x1="40" y1="348.0" x2="480" y2="348.0"/>
-      <line x1="194.0" y1="40" x2="194.0" y2="480"/>
-      <line x1="40" y1="326.0" x2="480" y2="326.0"/>
-      <line x1="216.0" y1="40" x2="216.0" y2="480"/>
-      <line x1="40" y1="304.0" x2="480" y2="304.0"/>
-      <line x1="238.0" y1="40" x2="238.0" y2="480"/>
-      <line x1="40" y1="282.0" x2="480" y2="282.0"/>
-      <line x1="260.0" y1="40" x2="260.0" y2="480"/>
-      <line x1="40" y1="260.0" x2="480" y2="260.0"/>
-      <line x1="282.0" y1="40" x2="282.0" y2="480"/>
-      <line x1="40" y1="238.0" x2="480" y2="238.0"/>
-      <line x1="304.0" y1="40" x2="304.0" y2="480"/>
-      <line x1="40" y1="216.0" x2="480" y2="216.0"/>
-      <line x1="326.0" y1="40" x2="326.0" y2="480"/>
-      <line x1="40" y1="194.0" x2="480" y2="194.0"/>
-      <line x1="348.0" y1="40" x2="348.0" y2="480"/>
-      <line x1="40" y1="172.0" x2="480" y2="172.0"/>
-      <line x1="370.0" y1="40" x2="370.0" y2="480"/>
-      <line x1="40" y1="150.0" x2="480" y2="150.0"/>
-      <line x1="392.0" y1="40" x2="392.0" y2="480"/>
-      <line x1="40" y1="128.0" x2="480" y2="128.0"/>
-      <line x1="414.0" y1="40" x2="414.0" y2="480"/>
-      <line x1="40" y1="106.0" x2="480" y2="106.0"/>
-      <line x1="436.0" y1="40" x2="436.0" y2="480"/>
-      <line x1="40" y1="84.0" x2="480" y2="84.0"/>
-      <line x1="458.0" y1="40" x2="458.0" y2="480"/>
-      <line x1="40" y1="62.0" x2="480" y2="62.0"/>
-      <line x1="480.0" y1="40" x2="480.0" y2="480"/>
-      <line x1="40" y1="40.0" x2="480" y2="40.0"/>
-      </g>
-      <g class="grid">
-      <line x1="40.0" y1="40" x2="40.0" y2="480"/>
-      <line x1="40" y1="480.0" x2="480" y2="480.0"/>
-      <line x1="84.0" y1="40" x2="84.0" y2="480"/>
-      <line x1="40" y1="436.0" x2="480" y2="436.0"/>
-      <line x1="128.0" y1="40" x2="128.0" y2="480"/>
-      <line x1="40" y1="392.0" x2="480" y2="392.0"/>
-      <line x1="172.0" y1="40" x2="172.0" y2="480"/>
-      <line x1="40" y1="348.0" x2="480" y2="348.0"/>
-      <line x1="216.0" y1="40" x2="216.0" y2="480"/>
-      <line x1="40" y1="304.0" x2="480" y2="304.0"/>
-      <line x1="260.0" y1="40" x2="260.0" y2="480"/>
-      <line x1="40" y1="260.0" x2="480" y2="260.0"/>
-      <line x1="304.0" y1="40" x2="304.0" y2="480"/>
-      <line x1="40" y1="216.0" x2="480" y2="216.0"/>
-      <line x1="348.0" y1="40" x2="348.0" y2="480"/>
-      <line x1="40" y1="172.0" x2="480" y2="172.0"/>
-      <line x1="392.0" y1="40" x2="392.0" y2="480"/>
-      <line x1="40" y1="128.0" x2="480" y2="128.0"/>
-      <line x1="436.0" y1="40" x2="436.0" y2="480"/>
-      <line x1="40" y1="84.0" x2="480" y2="84.0"/>
-      <line x1="480.0" y1="40" x2="480.0" y2="480"/>
-      <line x1="40" y1="40.0" x2="480" y2="40.0"/>
-      </g>
-      <line x1="36" y1="260.0" x2="494" y2="260.0" class="axe"/>
-      <line x1="260.0" y1="484" x2="260.0" y2="26" class="axe"/>
-      <polygon points="494,260.0 483,255.5 483,264.5" class="axe-fill"/>
-      <polygon points="260.0,26 255.5,37 264.5,37" class="axe-fill"/>
-      <line x1="40.0" y1="256.0" x2="40.0" y2="264.0" class="tick"/>
-      <text x="40.0" y="278.0" class="grad">-5</text>
-      <line x1="256.0" y1="480.0" x2="264.0" y2="480.0" class="tick"/>
-      <text x="250.0" y="484.0" class="grad grad-y">-5</text>
-      <line x1="84.0" y1="256.0" x2="84.0" y2="264.0" class="tick"/>
-      <text x="84.0" y="278.0" class="grad">-4</text>
-      <line x1="256.0" y1="436.0" x2="264.0" y2="436.0" class="tick"/>
-      <text x="250.0" y="440.0" class="grad grad-y">-4</text>
-      <line x1="128.0" y1="256.0" x2="128.0" y2="264.0" class="tick"/>
-      <text x="128.0" y="278.0" class="grad">-3</text>
-      <line x1="256.0" y1="392.0" x2="264.0" y2="392.0" class="tick"/>
-      <text x="250.0" y="396.0" class="grad grad-y">-3</text>
-      <line x1="172.0" y1="256.0" x2="172.0" y2="264.0" class="tick"/>
-      <text x="172.0" y="278.0" class="grad">-2</text>
-      <line x1="256.0" y1="348.0" x2="264.0" y2="348.0" class="tick"/>
-      <text x="250.0" y="352.0" class="grad grad-y">-2</text>
-      <line x1="216.0" y1="256.0" x2="216.0" y2="264.0" class="tick"/>
-      <text x="216.0" y="278.0" class="grad">-1</text>
-      <line x1="256.0" y1="304.0" x2="264.0" y2="304.0" class="tick"/>
-      <text x="250.0" y="308.0" class="grad grad-y">-1</text>
-      <line x1="304.0" y1="256.0" x2="304.0" y2="264.0" class="tick"/>
-      <text x="304.0" y="278.0" class="grad">1</text>
-      <line x1="256.0" y1="216.0" x2="264.0" y2="216.0" class="tick"/>
-      <text x="250.0" y="220.0" class="grad grad-y">1</text>
-      <line x1="348.0" y1="256.0" x2="348.0" y2="264.0" class="tick"/>
-      <text x="348.0" y="278.0" class="grad">2</text>
-      <line x1="256.0" y1="172.0" x2="264.0" y2="172.0" class="tick"/>
-      <text x="250.0" y="176.0" class="grad grad-y">2</text>
-      <line x1="392.0" y1="256.0" x2="392.0" y2="264.0" class="tick"/>
-      <text x="392.0" y="278.0" class="grad">3</text>
-      <line x1="256.0" y1="128.0" x2="264.0" y2="128.0" class="tick"/>
-      <text x="250.0" y="132.0" class="grad grad-y">3</text>
-      <line x1="436.0" y1="256.0" x2="436.0" y2="264.0" class="tick"/>
-      <text x="436.0" y="278.0" class="grad">4</text>
-      <line x1="256.0" y1="84.0" x2="264.0" y2="84.0" class="tick"/>
-      <text x="250.0" y="88.0" class="grad grad-y">4</text>
-      <line x1="480.0" y1="256.0" x2="480.0" y2="264.0" class="tick"/>
-      <text x="480.0" y="278.0" class="grad">5</text>
-      <line x1="256.0" y1="40.0" x2="264.0" y2="40.0" class="tick"/>
-      <text x="250.0" y="44.0" class="grad grad-y">5</text>
-      <path d="M167.0,145.0 L177.0,155.0 M167.0,155.0 L177.0,145.0" class="pt-cross"/>
-      <text x="168.0" y="138.0" class="pt-lbl">H</text>
-      <path d="M233.0,255.0 L243.0,265.0 M233.0,265.0 L243.0,255.0" class="pt-cross"/>
-      <text x="224.0" y="252.0" class="pt-lbl">I</text>
-      <path d="M255.0,145.0 L265.0,155.0 M255.0,155.0 L265.0,145.0" class="pt-cross"/>
-      <text x="262.0" y="140.0" class="pt-lbl">E</text>
-      <path d="M365.0,123.0 L375.0,133.0 M365.0,133.0 L375.0,123.0" class="pt-cross"/>
-      <text x="366.0" y="116.0" class="pt-lbl">G</text>
-      <path d="M387.0,343.0 L397.0,353.0 M387.0,353.0 L397.0,343.0" class="pt-cross"/>
-      <text x="388.0" y="336.0" class="pt-lbl">F</text>
-      </svg></div>
-    <div class="direct-q" data-type="coord">
-      <div class="coord-list">
-      <span class="coord-item"><em>H</em>(<input aria-label="Abscisse du point H" class="coord-input" data-ans-x="-2" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point H" class="coord-input" data-ans-y="2.5" autocomplete="off" type="text" inputmode="text">)</span>
-      <span class="coord-item"><em>I</em>(<input aria-label="Abscisse du point I" class="coord-input" data-ans-x="-0.5" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point I" class="coord-input" data-ans-y="0" autocomplete="off" type="text" inputmode="text">)</span>
-      <span class="coord-item"><em>E</em>(<input aria-label="Abscisse du point E" class="coord-input" data-ans-x="0" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point E" class="coord-input" data-ans-y="2.5" autocomplete="off" type="text" inputmode="text">)</span>
-      <span class="coord-item"><em>G</em>(<input aria-label="Abscisse du point G" class="coord-input" data-ans-x="2.5" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point G" class="coord-input" data-ans-y="3" autocomplete="off" type="text" inputmode="text">)</span>
-      <span class="coord-item"><em>F</em>(<input aria-label="Abscisse du point F" class="coord-input" data-ans-x="3" autocomplete="off" type="text" inputmode="text"> ; <input aria-label="Ordonnée du point F" class="coord-input" data-ans-y="-2" autocomplete="off" type="text" inputmode="text">)</span>
-      </div>
-      <div class="btn-row"><button class="btn btn-check check-btn" type="button">Vérifier</button><button class="btn btn-hint hint-btn" type="button">💡 Indice</button><button class="btn btn-retry retry-btn" type="button">Recommencer</button><button class="btn btn-corr correction-btn" type="button" style="display:none;">Voir la correction</button></div>
-      <div class="hint-box">Les coordonnées d'un point s'écrivent toujours sous la forme (abscisse ; ordonnée). Les graduations intermédiaires permettent de repérer des valeurs décimales. Attention aux nombres relatifs.</div>
-      <div class="feedback"></div><div class="correction-box"></div>
-    </div>
+</div>
+
+<!-- COMPTE À REBOURS -->
+<div class="countdown" id="countdown">
+  <div class="cd-num" id="cdNum">3</div>
+  <div class="cd-label">Prépare-toi…</div>
+</div>
+
+<!-- STAGE QUESTIONS -->
+<div class="stage" id="stage" style="display:none;"></div>
+
+<!-- NAV -->
+<div class="nav-row" id="navRow" style="display:none;">
+  <button class="nav-arrow nav-prev" id="prevBtn" type="button" aria-label="Question précédente">&#10094;</button>
+  <button class="nav-arrow nav-next" id="nextBtn" type="button" aria-label="Question suivante">&#10095;</button>
+</div>
+
+<button class="btn-finish" id="finishBtn" type="button" style="display:none;">Rendre la copie</button>
+
+<!-- BILAN -->
+<div class="results" id="results">
+  <div class="results-card">
+    <div class="results-title">&#127942; Résultats</div>
+    <div class="results-score" id="scoreNum">0<small>/7</small></div>
+    <div class="stars" id="stars"></div>
+    <div class="results-msg" id="resultsMsg"></div>
+    <div class="recap" id="recap"></div>
+    <button class="btn-restart" id="restartBtn" type="button">&#128260; Recommencer</button>
   </div>
+</div>
+
 <script>
 (function(){
-  var corrections=["Les coordonnées respectives des points sont : <em>O</em>(−2,5 ; 3,75), <em>M</em>(2,25 ; 0), <em>L</em>(0 ; −2), <em>N</em>(−0,5 ; 0,25) et <em>P</em>(−4 ; 2,75).","Les coordonnées respectives des points sont : <em>H</em>(−2 ; 2,5), <em>I</em>(−0,5 ; 0), <em>E</em>(0 ; 2,5), <em>G</em>(2,5 ; 3) et <em>F</em>(3 ; −2)."];
-  var okFeedbacks=["Bravo ! Tu as correctement lu toutes les coordonnées.","Bravo ! Tu as correctement lu toutes les coordonnées."];
-  var koFeedbacks=["Certaines coordonnées sont incorrectes. Vérifie la position des points dans le repère et la signification des coordonnées. Attention aux nombres relatifs et aux graduations intermédiaires.","Certaines coordonnées sont incorrectes. Vérifie la position des points dans le repère et la signification des coordonnées. Attention aux nombres relatifs et aux graduations intermédiaires."];
+  var TIME=40; // secondes par question
+  var QUESTIONS=[
+    {n:1,type:'num',ans:'2028',
+     enonce:"Quel est le plus petit entier multiple de 2 strictement supérieur à 2 026 ?",
+     corr:"Comme 2 026 est lui-même divisible par 2, le plus petit multiple cherché est 2 026 + 2 = <strong>2 028</strong>."},
+    {n:2,type:'num',ans:'12',
+     enonce:"Calculer : 2 × 0 + 2 × 6",
+     corr:"2 × 0 + 2 × 6 = 0 + 12 = <strong>12</strong>."},
+    {n:3,type:'num',ans:'20.26',
+     enonce:"Calculer : 0,25 × 20,26 × 4",
+     corr:"0,25 × 20,26 × 4 = 1 × 20,26 = <strong>20,26</strong>."},
+    {n:4,type:'num',ans:'200.26',
+     enonce:"Écrire sous forme décimale : <span class='frac'><sup>2 000</sup><sub>10</sub></span> + <span class='frac'><sup>26</sup><sub>100</sub></span>",
+     corr:"<span class='frac'><sup>2 000</sup><sub>10</sub></span> + <span class='frac'><sup>26</sup><sub>100</sub></span> = 200 + 0,26 = <strong>200,26</strong>."},
+    {n:5,type:'num',ans:'1580.28',
+     enonce:"Sachant que 78 × 2 026 = 158 028, quelle est la valeur décimale de 7,8 × 202,6 ?",
+     corr:"Comme 7,8 = <span class='frac'><sup>78</sup><sub>10</sub></span> et 202,6 = <span class='frac'><sup>2 026</sup><sub>10</sub></span>, alors 7,8 × 202,6 = <span class='frac'><sup>158 028</sup><sub>100</sub></span>.<br>Donc 7,8 × 202,6 = <strong>1 580,28</strong>."},
+    {n:6,type:'fxy',ansx:'2025',ansy:'2026',
+     enonce:"2 025 est un antécédent de 2 026 par la fonction <em>f</em>. Compléter l'égalité.",
+     corr:"2 025 est un antécédent de 2 026 : son image par <em>f</em> est 2 026.<br>Donc <strong>f(2 025) = 2 026</strong>."},
+    {n:7,type:'num',ans:'18',
+     enonce:"Je pense à un nombre. Je le multiplie par 100, puis j'ajoute 226 et j'obtiens 2 026. Quel est ce nombre ?",
+     corr:"Pour obtenir 2 026, on a ajouté 226 à 1 800 : 2 026 − 226 = 1 800.<br>Le nombre cherché est 1 800 ÷ 100 = <strong>18</strong>."}
+  ];
 
   function normNum(str){
-    var s=String(str||'').trim().replace(/\u2212/g,'-').replace(/\s+/g,'').replace(',', '.');
+    var s=String(str||'').trim().replace(/\u2212/g,'-').replace(/\s+/g,'').replace(/,/g,'.');
     if(s==='')return null;
-    var v=parseFloat(s);
-    if(isNaN(v)||!/^-?\d*\.?\d+$/.test(s))return null;
+    if(!/^-?\d*\.?\d+$/.test(s))return null;
+    var v=parseFloat(s);if(isNaN(v))return null;
     return Math.round(v*1000)/1000;
   }
   function sameNum(a,b){var na=normNum(a);if(na===null)return false;return Math.abs(na-parseFloat(b))<1e-6;}
 
-  var qIndex=0;
-  document.querySelectorAll('.direct-q').forEach(function(q){
-    var myIndex=qIndex++;
-    var fb=q.querySelector('.feedback'), corr=q.querySelector('.correction-box'),
-        hint=q.querySelector('.hint-box'), corrBtn=q.querySelector('.correction-btn');
-    q.querySelector('.hint-btn').addEventListener('click',function(){hint.classList.toggle('show');});
+  var E=function(id){return document.getElementById(id);};
+  var stage=E('stage'),dots=E('dots'),timebar=E('timebar'),timefill=E('timefill'),timetext=E('timetext');
+  var cur=0, answers=[], timer=null, remaining=TIME, expired=[];
 
-    function showOK(){fb.className='feedback show ok';fb.innerHTML='<span class="fb-ic">✅</span><div>'+okFeedbacks[myIndex]+'</div>';corrBtn.style.display='none';corr.classList.remove('show');corr.innerHTML='';}
-    function showKO(){fb.className='feedback show ko';fb.innerHTML='<span class="fb-ic">❌</span><div>'+koFeedbacks[myIndex]+'</div>';corrBtn.style.display='inline-flex';corrBtn.textContent='Voir la correction';corr.classList.remove('show');corr.innerHTML='';}
-    function showEmpty(){fb.className='feedback show ko';fb.innerHTML='<span class="fb-ic">\u26a0\ufe0f</span><div>Complète toutes les réponses avant de vérifier.</div>';corrBtn.style.display='none';corr.classList.remove('show');corr.innerHTML='';}
+  // build dots
+  QUESTIONS.forEach(function(q,i){
+    var d=document.createElement('span');d.className='dot';d.textContent=q.n;d.id='dot'+i;
+    dots.appendChild(d);
+  });
 
-    q.querySelector('.check-btn').addEventListener('click',function(){
-      var inputs=q.querySelectorAll('.coord-input');
-      var anyEmpty=false;
-      inputs.forEach(function(i){if(!i.value.trim())anyEmpty=true;});
-      if(anyEmpty){
-        inputs.forEach(function(i){i.classList.remove('ok','ko');if(!i.value.trim())i.classList.add('ko');});
-        showEmpty();return;
+  // build pages
+  QUESTIONS.forEach(function(q,i){
+    var p=document.createElement('div');p.className='q-page';p.id='page'+i;
+    var inner='<div class="q-enonce">'+q.enonce+'</div>';
+    if(q.type==='fxy'){
+      inner+='<div class="answer-zone"><span class="fxy-row"><span class="fx">f</span>(<input class="big-input" id="inx'+i+'" autocomplete="off" type="text" inputmode="text" aria-label="Antécédent"> ) = <input class="big-input" id="iny'+i+'" autocomplete="off" type="text" inputmode="text" aria-label="Image"></span></div>';
+    } else {
+      inner+='<div class="answer-zone"><input class="big-input" id="in'+i+'" autocomplete="off" type="text" inputmode="text" aria-label="Ta réponse"></div>';
+    }
+    inner+='<div class="time-msg" id="tmsg'+i+'">\u23f0 Temps écoulé ! Tu peux passer à la question suivante.</div>';
+    p.innerHTML=inner;
+    stage.appendChild(p);
+  });
+
+  function fmt(s){var m=Math.floor(s/60),sec=s%60;return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;}
+
+  function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
+
+  function startTimer(){
+    stopTimer();
+    remaining=TIME;
+    timefill.classList.remove('warn','done');
+    timefill.style.width='100%';
+    timetext.textContent=fmt(remaining);
+    E('tmsg'+cur).classList.remove('show');
+    timer=setInterval(function(){
+      remaining--;
+      if(remaining<=0){
+        remaining=0;
+        timefill.style.width='0%';
+        timefill.classList.remove('warn');timefill.classList.add('done');
+        timetext.textContent='00:00';
+        E('tmsg'+cur).classList.add('show');
+        expired[cur]=true;
+        stopTimer();
+      } else {
+        var pct=remaining/TIME*100;
+        timefill.style.width=pct+'%';
+        if(remaining<=10)timefill.classList.add('warn');
+        timetext.textContent=fmt(remaining);
       }
-      var allOk=true;
-      inputs.forEach(function(i){
-        var ref=i.dataset.ansX!==undefined?i.dataset.ansX:i.dataset.ansY;
-        var good=sameNum(i.value,ref);
-        i.classList.remove('ok','ko');i.classList.add(good?'ok':'ko');
-        if(!good)allOk=false;
-      });
-      if(allOk)showOK();else showKO();
+    },1000);
+  }
+
+  function showCountdown(cb){
+    var cd=E('countdown'),num=E('cdNum'),k=3;
+    num.textContent=k;cd.classList.add('show');
+    var iv=setInterval(function(){
+      k--;
+      if(k<=0){clearInterval(iv);cd.classList.remove('show');cb();return;}
+      num.textContent=k;
+      num.style.animation='none';void num.offsetWidth;num.style.animation='';
+    },900);
+  }
+
+  function saveCurrent(){
+    var q=QUESTIONS[cur];
+    if(q.type==='fxy'){
+      answers[cur]={x:E('inx'+cur).value,y:E('iny'+cur).value};
+    } else {
+      answers[cur]={v:E('in'+cur).value};
+    }
+  }
+
+  function showPage(i){
+    document.querySelectorAll('.q-page').forEach(function(p){p.classList.remove('show');});
+    E('page'+i).classList.add('show');
+    document.querySelectorAll('.dot').forEach(function(d,j){
+      d.classList.remove('active');
+      if(j===i)d.classList.add('active');
     });
-    corrBtn.addEventListener('click',function(){
-      var open=corr.classList.toggle('show');
-      if(open){corr.innerHTML='<div class="corr-head">Correction</div>'+corrections[myIndex];corrBtn.textContent='Cacher la correction';}
-      else{corrBtn.textContent='Voir la correction';}
+    E('prevBtn').disabled=(i===0);
+    cur=i;
+    // restaurer réponse
+    var q=QUESTIONS[i],a=answers[i];
+    if(a){
+      if(q.type==='fxy'){E('inx'+i).value=a.x||'';E('iny'+i).value=a.y||'';}
+      else{E('in'+i).value=a.v||'';}
+    }
+    // si la question a déjà expiré, on garde le message + chrono à 0 ; sinon on relance
+    if(expired[i]){
+      stopTimer();timefill.style.width='0%';timefill.classList.add('done');timefill.classList.remove('warn');
+      timetext.textContent='00:00';E('tmsg'+i).classList.add('show');
+    } else {
+      startTimer();
+    }
+    var first=E('in'+i)||E('inx'+i);if(first)first.focus();
+  }
+
+  E('startBtn').addEventListener('click',function(){
+    E('intro').classList.add('hide');
+    showCountdown(function(){
+      timebar.style.visibility='visible';
+      dots.style.display='flex';
+      stage.style.display='flex';
+      E('navRow').style.display='flex';
+      E('finishBtn').style.display='block';
+      showPage(0);
     });
-    q.querySelector('.retry-btn').addEventListener('click',function(){
-      q.querySelectorAll('.coord-input').forEach(function(i){i.value='';i.classList.remove('ok','ko');});
-      fb.className='feedback';fb.innerHTML='';
-      corr.classList.remove('show');corr.innerHTML='';corrBtn.style.display='none';corrBtn.textContent='Voir la correction';
-      hint.classList.remove('show');
+  });
+
+  E('nextBtn').addEventListener('click',function(){
+    saveCurrent();
+    if(cur<QUESTIONS.length-1){
+      var ni=cur+1;
+      // compte à rebours seulement si la question n'a jamais été vue
+      if(!expired[ni] && !answers[ni]){
+        showCountdown(function(){showPage(ni);});
+      } else {
+        showPage(ni);
+      }
+    }
+  });
+  E('prevBtn').addEventListener('click',function(){
+    saveCurrent();
+    if(cur>0)showPage(cur-1);
+  });
+
+  E('finishBtn').addEventListener('click',function(){finish();});
+
+  function finish(){
+    saveCurrent();stopTimer();
+    var score=0,recapHtml='';
+    QUESTIONS.forEach(function(q,i){
+      var a=answers[i]||{},good;
+      var your='';
+      if(q.type==='fxy'){
+        good=sameNum(a.x,q.ansx)&&sameNum(a.y,q.ansy);
+        your='f('+(a.x||'—')+') = '+(a.y||'—');
+      } else {
+        good=sameNum(a.v,q.ans);
+        your=(a.v&&a.v.trim())?a.v:'— (pas de réponse)';
+      }
+      if(good)score++;
+      recapHtml+='<div class="recap-item '+(good?'ok':'ko')+'">'+
+        '<div class="recap-head"><span class="ic">'+(good?'\u2705':'\u274c')+'</span> Question '+q.n+'</div>'+
+        '<div class="recap-q">'+q.enonce+'</div>'+
+        '<div class="recap-corr">'+q.corr+'</div>'+
+        '<div class="recap-your">Ta réponse : '+your+'</div>'+
+        '</div>';
     });
+    E('scoreNum').innerHTML=score+'<small>/7</small>';
+    // étoiles : minimum 1, jamais 0
+    var ratio=score/7, nb;
+    if(ratio>=0.9)nb=5;else if(ratio>=0.7)nb=4;else if(ratio>=0.5)nb=3;else if(ratio>=0.3)nb=2;else nb=1;
+    var st='';for(var s=0;s<5;s++)st+=(s<nb?'\u2b50':'\u2606');
+    E('stars').textContent=st;
+    var msg;
+    if(ratio>=0.9)msg='Excellent ! Tu maîtrises parfaitement ces calculs.';
+    else if(ratio>=0.7)msg='Très bien ! Encore un petit effort sur quelques questions.';
+    else if(ratio>=0.5)msg='Maîtrise satisfaisante. Revois les questions en rouge.';
+    else if(ratio>=0.3)msg='Maîtrise fragile. Reprends les corrections tranquillement.';
+    else msg='Continue à t\'entraîner : relis bien chaque correction.';
+    E('resultsMsg').textContent=msg;
+    E('recap').innerHTML=recapHtml;
+    timebar.style.visibility='hidden';dots.style.display='none';
+    stage.style.display='none';E('navRow').style.display='none';E('finishBtn').style.display='none';
+    E('results').classList.add('show');
+    window.scrollTo(0,0);
+  }
+
+  E('restartBtn').addEventListener('click',function(){
+    answers=[];expired=[];cur=0;
+    QUESTIONS.forEach(function(q,i){
+      if(q.type==='fxy'){E('inx'+i).value='';E('iny'+i).value='';E('inx'+i).className='big-input';E('iny'+i).className='big-input';}
+      else{E('in'+i).value='';E('in'+i).className='big-input';}
+      E('tmsg'+i).classList.remove('show');
+    });
+    E('results').classList.remove('show');
+    E('intro').classList.remove('hide');
+    window.scrollTo(0,0);
   });
 })();
 </script>
-  <p class="zone-note">Astuce : tu peux écrire les nombres décimaux avec une virgule (par exemple −2,5).</p>
-</div>
+
 <!-- ===== CALCULATRICE fx-92 PAZAPA (déplaçable) ===== -->
 <style>
-  .fxc-trigger{position:fixed;right:14px;bottom:14px;z-index:9998;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:0;}
+  .fxc-trigger{position:fixed;right:14px;bottom:74px;z-index:9998;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:0;}
   .fxc-trigger svg{filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));}
   .fxc-pill{background:var(--day-dark,#444);color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.04em;}
   .fxc-hidden{display:none!important;}
-  .fxc-panel{position:fixed;right:14px;bottom:14px;z-index:9999;width:312px;max-width:94vw;background:#2f343b;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.45);font-family:'JetBrains Mono',monospace;overflow:hidden;border:2px solid var(--day-color,#3ab5d8);}
+  .fxc-panel{position:fixed;right:14px;bottom:74px;z-index:9999;width:312px;max-width:94vw;background:#2f343b;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.45);font-family:'JetBrains Mono',monospace;overflow:hidden;border:2px solid var(--day-color,#3ab5d8);}
   .fxc-bar{background:#23272d;color:#cfd6de;font-size:12.5px;font-weight:700;padding:9px 10px;cursor:move;touch-action:none;user-select:none;display:flex;align-items:center;gap:6px;}
   .fxc-bar .fxc-sp{flex:1;}
   .fxc-icon{background:#3a4049;color:#fff;border:none;width:26px;height:26px;border-radius:7px;font-size:13px;cursor:pointer;line-height:1;}
