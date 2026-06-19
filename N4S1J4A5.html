@@ -165,8 +165,6 @@ body{ font-family:'JetBrains Mono','Courier New',monospace;
 .fin .fin-grade{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.95rem; color:var(--or); letter-spacing:.5px; margin-bottom:18px; }
 .btn-recommencer{ font-family:'Cinzel',serif; font-weight:700; font-size:.95rem; letter-spacing:1.5px; padding:14px 30px; border:none; border-radius:13px; background:var(--jour); color:#1a1208; cursor:pointer; box-shadow:0 4px 18px rgba(217,138,61,.55); transition:transform .12s; min-height:44px; }
 .btn-recommencer:active{ transform:scale(.96); }
-.replay-zone{ text-align:center; margin:10px 0 0; display:none; }
-.replay-zone.show{ display:block; }
 
 .progress-toast{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px); background:var(--panel); border:2px solid var(--jour); border-radius:14px; padding:12px 20px; font-size:.88rem; font-weight:bold; color:var(--jour-pale); box-shadow:0 6px 24px rgba(217,138,61,.45); z-index:60; opacity:0; pointer-events:none; max-width:90vw; text-align:center; }
 .progress-toast.show{ animation:toastIn 2.2s ease forwards; }
@@ -212,8 +210,7 @@ body{ font-family:'JetBrains Mono','Courier New',monospace;
           </div>
           <div class="aff-stele-eq">x = 6 est-il solution ?</div>
           <div class="aff-intro">
-            Pour chaque inscription : <b>remplace x par 6</b>, calcule la valeur, puis dis si
-            l'inégalité gravée est <b>vraie ou fausse</b>.
+            Pour chaque inscription gravée, à toi de déterminer si <b>x = 6 vérifie l'inégalité</b>.
           </div>
         </div>
       </div>
@@ -243,9 +240,6 @@ body{ font-family:'JetBrains Mono','Courier New',monospace;
         <button class="btn-recommencer" id="btn-rec-fin">↻ RECOMMENCER</button>
       </div>
 
-      <div class="replay-zone" id="replay-zone">
-        <button class="btn-recommencer" id="btn-rec-bas">↻ RECOMMENCER</button>
-      </div>
     </div>
   </div>
   </div>
@@ -274,21 +268,21 @@ body{ font-family:'JetBrains Mono','Courier New',monospace;
 var INSCRIPTIONS = [
   {
     exprHTML: '−3x<sup>2</sup> + 6x − 10 &gt; −84',
-    exprSubstHTML: '−3 × 6<sup>2</sup> + 6 × 6 − 10',
+    exprSubstHTML: '−3x<sup>2</sup> + 6x − 10',
     valeur: -82,
     compareHTML: '−82 &gt; −84',
     estSolution: true,                 // -82 > -84 vrai
     correction: 'Pour x = 6 : −3 × 6<sup>2</sup> + 6 × 6 − 10 = −108 + 36 − 10 = <span class="res">−82</span>.<br>Or <b>−82 &gt; −84</b> est <b>vrai</b>, donc <b>6 est solution</b> de l\'inéquation.',
-    badValMsg: 'Recompte : −3 × 36 = −108, puis +36, puis −10.'
+    badValMsg: 'Attention à l\'ordre des opérations et au signe du terme en x². Reprends terme par terme.'
   },
   {
     exprHTML: 'x<sup>2</sup> + 8x + 8 &lt; 90',
-    exprSubstHTML: '6<sup>2</sup> + 8 × 6 + 8',
+    exprSubstHTML: 'x<sup>2</sup> + 8x + 8',
     valeur: 92,
     compareHTML: '92 &lt; 90',
     estSolution: false,                // 92 < 90 faux
     correction: 'Pour x = 6 : 6<sup>2</sup> + 8 × 6 + 8 = 36 + 48 + 8 = <span class="res">92</span>.<br>Or <b>92 &lt; 90</b> est <b>faux</b>, donc <b>6 n\'est pas solution</b> de l\'inéquation.',
-    badValMsg: 'Recompte : 6² = 36, puis +48, puis +8.'
+    badValMsg: 'Vérifie chaque terme : le carré, le produit, puis la constante.'
   }
 ];
 var TOTAL = INSCRIPTIONS.length;
@@ -350,13 +344,13 @@ function renderStele(){
   +   '<div class="s-consigne">x = 6 est-il solution de cette inéquation gravée ?</div>'
   +   '<div class="ineq-display">'+q.exprHTML+'</div>'
   +   '<div class="subst" id="subst">'
-  +     '<div class="subst-titre">▸ ÉTAPE 1 — REMPLACE x PAR 6 ET CALCULE</div>'
+  +     '<div class="subst-titre">▸ ÉTAPE 1 — VALEUR DE L\'EXPRESSION POUR x = 6</div>'
   +     '<div class="subst-row">'
-  +       '<span class="calc-prefix">'+q.exprSubstHTML+' =</span>'
+  +       '<span class="calc-prefix">'+q.exprSubstHTML+' &nbsp;pour x = 6 :</span>'
   +       '<input class="calc-input" id="calc-input" type="text" inputmode="numeric" autocomplete="off" placeholder="?">'
   +       '<button class="btn-check" id="btn-check" disabled>VÉRIFIER</button>'
   +     '</div>'
-  +     '<div class="subst-hint">Calcule de tête la valeur de l\'expression pour x = 6.</div>'
+  +     '<div class="subst-hint">Quelle valeur prend cette expression pour x = 6 ?</div>'
   +   '</div>'
   +   '<div class="test-lbl" id="test-lbl" style="display:none;">▸ ÉTAPE 2 — L\'inégalité <b>'+q.compareHTML+'</b> est-elle vraie ?</div>'
   +   '<div class="ouinon" id="ouinon" style="display:none;">'
@@ -368,23 +362,32 @@ function renderStele(){
   +   '<div class="actions"><button class="btn-next" id="btn-next" disabled>INSCRIPTION SUIVANTE →</button></div>'
   +   '</div>';
   majDecor();
+  playEcho();
 }
 
 /* interactions */
 cont.addEventListener('click', function(e){
-  if(e.target.closest('#btn-check')){ verifCalc(); return; }
+  if(e.target.closest('#btn-check')){ playChisel(); verifCalc(); return; }
   var on = e.target.closest('.on-btn');
-  if(on){ repondre(on.dataset.r); return; }
-  if(e.target.closest('#btn-next')){ suivante(); return; }
+  if(on){ playChisel(); repondre(on.dataset.r); return; }
+  if(e.target.closest('#btn-next')){ playChisel(); suivante(); return; }
 });
 cont.addEventListener('input', function(e){
   if(e.target.id==='calc-input'){
     startChronoMaybe();
+    playStone();
     var v=e.target.value.trim();
     e.target.classList.remove('bad');
     $('btn-check').disabled = (v==='');
   }
 });
+/* souffle de caverne au survol (desktop) et au toucher (mobile), throttlé */
+cont.addEventListener('mouseover', function(e){
+  if(e.target.closest('.stele') || e.target.closest('.on-btn')){ playBreath(); }
+});
+cont.addEventListener('touchstart', function(e){
+  if(e.target.closest('.stele')){ playBreath(); }
+}, {passive:true});
 cont.addEventListener('keydown', function(e){
   if(e.target.id==='calc-input' && e.key==='Enter' && e.target.value.trim()!==''){ verifCalc(); }
 });
@@ -489,7 +492,7 @@ function terminer(){
   else                    grade='🥉 EXPLORATEUR PERSÉVÉRANT — la galerie est sécurisée !';
   $('fin-grade').textContent = grade;
   $('fin').classList.add('show');
-  $('replay-zone').classList.add('show');
+
   $('fin').scrollIntoView({behavior:'smooth',block:'center'});
   playCarillon();
 }
@@ -497,7 +500,7 @@ function terminer(){
 function recommencer(){
   etat = INSCRIPTIONS.map(function(){ return { done:false, tries:0, valOk:false }; });
   solved=0; current=0; phase='subst';
-  $('fin').classList.remove('show'); $('replay-zone').classList.remove('show');
+  $('fin').classList.remove('show');
   updateProgress();
   stopTimer(); timerStarted=false; $('timer').textContent='00:00';
   renderStele(); majDecor();
@@ -507,7 +510,6 @@ function recommencer(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 $('btn-rec-fin').addEventListener('click', recommencer);
-$('btn-rec-bas').addEventListener('click', recommencer);
 
 /* sons */
 var audioCtx=null, soundOn=false;
@@ -518,6 +520,42 @@ function playClochette(){ if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) ret
 function playTap(){ if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t=ctx.currentTime; var o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(180,t+0.1); var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.08,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.18); }
 function playWhoosh(){ if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t=ctx.currentTime; var src=ctx.createBufferSource(); src.buffer=noiseBuf(0.45); var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=0.7; bp.frequency.setValueAtTime(300,t); bp.frequency.exponentialRampToValueAtTime(1200,t+0.22); bp.frequency.exponentialRampToValueAtTime(400,t+0.45); var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.13,t+0.16); g.gain.exponentialRampToValueAtTime(0.0001,t+0.45); src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.47); }
 function playCarillon(){ if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t0=ctx.currentTime; [659,784,988,1319].forEach(function(f,k){ var t=t0+k*0.12; var o=ctx.createOscillator(); o.type='triangle'; o.frequency.value=f; var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.52); }); }
+
+/* ===== Sons d'ambiance immersifs (ponctuels, jamais en boucle) ===== */
+/* petit toc de pierre / poussière à la frappe d'un chiffre */
+function playStone(){ if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t=ctx.currentTime;
+  var src=ctx.createBufferSource(); src.buffer=noiseBuf(0.05);
+  var bp=ctx.createBiquadFilter(); bp.type='lowpass'; bp.frequency.value=520;
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.10,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.06);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.07);
+  // micro-résonance grave (cailloux qui retombent)
+  var o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(140,t); o.frequency.exponentialRampToValueAtTime(90,t+0.08);
+  var g2=ctx.createGain(); g2.gain.setValueAtTime(0.05,t); g2.gain.exponentialRampToValueAtTime(0.0001,t+0.09);
+  o.connect(g2); g2.connect(ctx.destination); o.start(t); o.stop(t+0.1);
+}
+/* grattement de burin sur la roche au clic d'un bouton/opérateur */
+function playChisel(){ if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t=ctx.currentTime;
+  var src=ctx.createBufferSource(); src.buffer=noiseBuf(0.09);
+  var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2600; bp.Q.value=3;
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(0.09,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.1);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.11);
+}
+/* écho de caverne : un "plip" avec quelques répétitions atténuées */
+function playEcho(){ if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t0=ctx.currentTime;
+  var delays=[0,0.16,0.34,0.55]; var gains=[0.16,0.10,0.06,0.03];
+  delays.forEach(function(d,k){ var t=t0+d; var o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(740,t); o.frequency.exponentialRampToValueAtTime(560,t+0.12);
+    var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(gains[k],t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.24); });
+}
+/* souffle de caverne (vent lointain), throttlé pour ne pas se répéter en rafale */
+var lastBreath=0;
+function playBreath(){ if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return;
+  var now=Date.now(); if(now-lastBreath < 2200) return; lastBreath=now;
+  var t=ctx.currentTime; var src=ctx.createBufferSource(); src.buffer=noiseBuf(0.9);
+  var bp=ctx.createBiquadFilter(); bp.type='lowpass'; bp.frequency.setValueAtTime(280,t); bp.frequency.linearRampToValueAtTime(160,t+0.9);
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.045,t+0.4); g.gain.exponentialRampToValueAtTime(0.0001,t+0.9);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.92);
+}
 $('sound-btn').addEventListener('click', function(){
   soundOn=!soundOn; var btn=$('sound-btn');
   if(soundOn){ btn.classList.add('on'); btn.textContent='🔊 SON'; var ctx=ensureCtx(); if(ctx && ctx.state!=='running' && ctx.resume){ var p=ctx.resume(); if(p&&p.then){ p.then(playClochette); } else { setTimeout(playClochette,60); } } else { playClochette(); } }
@@ -533,6 +571,7 @@ $('btn-commencer').addEventListener('click', function(){
   $('page-affiche').classList.remove('show');
   $('page-jeu').classList.add('show');
   renderStele();
+  startTimer();   // le chrono démarre dès l'arrivée sur la page des inscriptions
   window.scrollTo({top:0,behavior:'smooth'});
 });
 
