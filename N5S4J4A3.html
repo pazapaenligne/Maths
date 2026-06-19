@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableaux de proportionnalité — 5ème</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --main:#3ab5d8; --titre:#1c6e87; --light:#e8f6fb; --border:#a9def0;
+         --badgetxt:#0d3a48; --ink:#1a2730; --soft:#1c6e87; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'JetBrains Mono',monospace;background:#fff;color:var(--ink);line-height:1.55;padding:14px;max-width:760px;margin:0 auto;}
+  .hero{background:var(--light);border:3px solid var(--border);border-radius:20px;padding:22px 20px;text-align:center;margin-bottom:16px;}
+  .brand-pill{display:inline-flex;align-items:center;gap:9px;background:var(--main);color:#fff;font-weight:800;font-size:.92rem;letter-spacing:1px;padding:9px 22px;border-radius:30px;margin-bottom:16px;}
+  .brand-pill .dot{width:11px;height:11px;border-radius:50%;display:inline-block;}
+  .brand-pill .d1{background:rgba(255,255,255,.45);}
+  .brand-pill .d2{background:#fff;}
+  .week-label{color:var(--soft);font-weight:700;font-size:.86rem;letter-spacing:2px;margin-bottom:8px;}
+  h1{font-weight:800;line-height:1.15;margin-bottom:10px;}
+  h1 .serie{display:block;font-size:1.4rem;color:var(--titre);}
+  .subtitle{font-size:.95rem;color:var(--soft);font-weight:500;margin-bottom:16px;}
+  .level-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .pill{font-family:inherit;font-weight:800;font-size:.85rem;letter-spacing:.5px;padding:11px 18px;border-radius:14px;border:3px solid var(--border);background:#fff;color:var(--soft);min-width:104px;cursor:pointer;transition:.12s;}
+  .pill:hover{border-color:var(--main);}
+  .pill.active{background:var(--main);color:#fff;border-color:var(--titre);box-shadow:0 4px 0 rgba(0,0,0,.12);}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:3px solid var(--border);border-radius:16px;padding:12px 16px;margin-bottom:16px;box-shadow:0 4px 14px rgba(0,0,0,.06);flex-wrap:wrap;}
+  .score-tag{font-family:Georgia,serif;font-style:italic;font-weight:700;font-size:1.05rem;color:var(--titre);}
+  .qcount{font-size:.85rem;color:var(--soft);font-weight:700;}
+  .dots{display:flex;gap:7px;flex-wrap:wrap;}
+  .qdot{width:13px;height:13px;border-radius:50%;background:var(--light);border:2px solid var(--border);}
+  .qdot.done{background:var(--main);border-color:var(--titre);}
+  .qdot.cur{box-shadow:0 0 0 3px rgba(58,181,216,.35);}
+
+  .qcard{background:#fff;border:3px solid var(--border);border-radius:18px;padding:24px 22px 22px;box-shadow:0 4px 18px rgba(0,0,0,.07);min-height:290px;display:flex;flex-direction:column;}
+  .q-title{text-align:center;font-weight:800;font-size:1.18rem;color:var(--titre);margin-bottom:8px;}
+  .q-context{font-size:.98rem;line-height:1.6;margin-bottom:14px;text-align:center;color:var(--ink);}
+  .q-instr{text-align:center;font-weight:700;color:var(--soft);margin-bottom:14px;}
+  table.prop{border-collapse:collapse;margin:0 auto 18px;font-family:'JetBrains Mono',monospace;}
+  table.prop th, table.prop td{border:2px solid var(--border);padding:11px 18px;text-align:center;font-size:1.05rem;}
+  table.prop th{background:var(--light);color:var(--titre);font-weight:800;text-align:left;}
+  table.prop td{background:#fff;font-weight:700;}
+  table.prop td.q{background:var(--light);color:var(--titre);font-weight:800;}
+  .ans-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:6px;}
+  .ans-lbl{font-weight:800;font-size:1.05rem;color:var(--titre);}
+  input[type=text]{font-family:inherit;font-size:1.15rem;font-weight:700;width:min(180px,60vw);padding:12px 14px;border:3px solid var(--border);border-radius:11px;text-align:center;color:var(--ink);background:#fff;}
+  input[type=text]:focus{outline:none;border-color:var(--main);}
+  .help-syntax{font-size:.78rem;color:var(--soft);text-align:center;margin:6px 0 0;}
+  .fb{margin-top:16px;font-weight:700;font-size:1rem;padding:11px 13px;border-radius:11px;display:none;}
+  .fb.ok{display:block;background:#dff5c6;color:#3a4d00;border:2px solid #8dc63f;}
+  .fb.no{display:block;background:#ffe1dd;color:#7a1c14;border:2px solid #f28b82;}
+  .hint{display:none;margin-top:12px;background:#f3fbfe;border:2px dashed var(--border);border-radius:11px;padding:11px 13px;font-size:.9rem;color:var(--titre);line-height:1.6;}
+  .hint.show{display:block;}
+  .btn-bar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:auto;padding-top:18px;}
+  .btn{font-family:inherit;font-weight:800;font-size:.98rem;cursor:pointer;border:none;border-radius:12px;padding:13px 22px;background:var(--main);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.14);transition:.1s;}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.14);}
+  .btn.ghost{background:#fff;color:var(--soft);border:3px solid var(--border);box-shadow:none;}
+  .btn.retry{background:#bfe8f4;color:var(--badgetxt);}
+  .btn.next{background:#8dc63f;color:#214d00;box-shadow:0 4px 0 rgba(0,0,0,.14);}
+
+  .results{display:none;text-align:center;background:var(--light);border:3px solid var(--main);border-radius:20px;padding:30px 22px;}
+  .results.show{display:block;}
+  .results h2{color:var(--titre);font-size:1.4rem;margin-bottom:10px;}
+  .results .big{font-size:2.6rem;font-weight:800;color:var(--titre);margin:8px 0;}
+  .results .btn{margin-top:14px;}
+  .coefbox{display:none;margin-top:12px;background:#eef9c9;border:2px solid #8dc63f;border-radius:11px;padding:11px 13px;font-size:.92rem;color:#3a4d00;line-height:1.6;}
+  .coefbox.show{display:block;}
+  .coefbox b{color:#2c6e00;}
+  .learn-box{text-align:left;background:#fff;border:2px solid var(--border);border-radius:14px;padding:18px 20px;margin:0 auto 18px;max-width:480px;line-height:1.7;}
+  .learn-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--titre);margin-bottom:12px;}
+  .learn-box p{font-size:.93rem;color:var(--ink);margin-bottom:9px;}
+  .learn-box p.goal{font-weight:700;color:var(--titre);margin-top:12px;margin-bottom:0;}
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="brand-pill"><span class="dot d1"></span><span class="dot d2"></span>PAZAPA &middot; MATHS &middot; 5&Egrave;ME</div>
+  <div class="week-label">SEMAINE 4 — JOUR 4</div>
+  <h1><span class="serie">Compléter un tableau de proportionnalité</span></h1>
+  <div class="level-pills">
+    <button class="pill active" id="pill1" onclick="setLevel(1)">NIVEAU 1</button>
+    <button class="pill" id="pill2" onclick="setLevel(2)">NIVEAU 2</button>
+    <button class="pill" id="pill3" onclick="setLevel(3)">NIVEAU 3</button>
+  </div>
+</div>
+
+<div class="topbar">
+  <span class="score-tag" id="score-tag">Score : 0</span>
+  <div class="dots" id="dots"></div>
+  <span class="qcount" id="qcount">Question 1 / 2</span>
+</div>
+
+<div id="stage"></div>
+
+<div class="results" id="results">
+  <h2>&#127942; Niveau terminé !</h2>
+  <div class="learn-box">
+    <div class="learn-title">Ce que j'ai appris</div>
+    <p>&#9989; Dans un tableau de proportionnalité, la même relation relie toutes les colonnes.</p>
+    <p>&#9989; Pour retrouver une valeur manquante, je peux utiliser une colonne complète.</p>
+    <p>&#9989; Je peux multiplier ou diviser par un même nombre pour compléter le tableau.</p>
+    <p>&#9989; Le coefficient de proportionnalité permet de passer d'une ligne à l'autre.</p>
+    <p class="goal">&#127919; Je sais compléter un tableau de proportionnalité.</p>
+  </div>
+  <div class="big" id="res-score">0 / 0</div>
+  <p id="res-msg"></p>
+  <button class="btn" onclick="resetLevel()">&#8635; Recommencer ce niveau</button>
+</div>
+
+<script>
+function norm(s){
+  return String(s||'').toLowerCase()
+    .replace(/\s/g,'').replace(/\u00a0/g,'')
+    .replace(/,/g,'.');
+}
+function eqNum(val, answers){
+  var v=norm(val);
+  var vn=parseFloat(v);
+  for(var i=0;i<answers.length;i++){
+    var a=norm(answers[i]);
+    if(v===a) return true;                 // égalité texte
+    var an=parseFloat(a);
+    if(!isNaN(vn) && !isNaN(an) && Math.abs(vn-an)<1e-9) return true;  // égalité numérique
+  }
+  return false;
+}
+
+// Chaque question : tableau (rows = [label, c1, c2] avec '?' pour la case à trouver),
+// ctx (contexte optionnel), answers, hint, fbno (feedback erreur), lbl (étiquette de saisie)
+var LEVELS={
+1:[
+  {ctx:'', rows:[['Nombre de briques','3','5'],['Hauteur (en cm)','7,5','?']],
+   lbl:'Hauteur =', answers:['12.5','12,5'],
+   hint:'Observe la hauteur d\'une seule brique avant de compléter le tableau.',
+   fbno:'Cherche la hauteur correspondant à une brique avant de compléter le tableau.'},
+  {ctx:'', rows:[['Trousses','3','7'],['Stylos','12','?']],
+   lbl:'Stylos =', answers:['28'],
+   hint:'Observe combien de stylos contient une seule trousse.',
+   fbno:'Cherche combien de stylos correspondent à une trousse avant de compléter le tableau.'},
+  {ctx:'', rows:[['Nombre','4','32'],['Nombre','5','?']],
+   lbl:'Nombre =', answers:['40'],
+   hint:'Passe de 4 à 32 puis effectue la même transformation sur la deuxième ligne.',
+   fbno:'Dans un tableau de proportionnalité, on effectue la même opération sur les deux lignes.'},
+  {ctx:'', rows:[['Nombre','?','7'],['Nombre','5','1']],
+   lbl:'Nombre =', answers:['35'],
+   hint:'Cherche combien de fois 1 est contenu dans 5.',
+   fbno:'Utilise le passage d\'une colonne à l\'autre pour retrouver la valeur manquante.'},
+  {ctx:'', rows:[['Nombre','14','6','8'],['Nombre','?','54','72']],
+   lbl:'Nombre =', answers:['126'],
+   hint:'Compare 54 et 6 pour trouver par combien on multiplie.',
+   fbno:'Trouve d\'abord le coefficient à l\'aide d\'une colonne complète, puis applique-le.'}
+],
+2:[
+  {ctx:'', rows:[['Nombre','5','8'],['Nombre','7','?']],
+   lbl:'Nombre =', answers:['11.2','11,2'],
+   hint:'Passe de 5 à 7, puis effectue la même transformation sur 8.',
+   fbno:'On effectue la même opération sur les deux lignes du tableau.'},
+  {ctx:'', rows:[['Nombre','100','?'],['Nombre','35','112']],
+   lbl:'Nombre =', answers:['320'],
+   hint:'Cherche par combien on passe de 35 à 112.',
+   fbno:'Utilise la même opération dans les deux lignes.'},
+  {ctx:'', rows:[['Nombre','3','9','15'],['Nombre','5','15','?']],
+   lbl:'Nombre =', answers:['25'],
+   hint:'Compare 15 et 9, ou 5 et 3, pour trouver le coefficient.',
+   fbno:'Trouve le coefficient avec une colonne complète, puis applique-le à 15.'},
+  {ctx:'', rows:[['Nombre','8','12','20'],['Nombre','?','3,6','6']],
+   lbl:'Nombre =', answers:['2.4','2,4'],
+   hint:'Compare 6 et 20, ou 3,6 et 12, pour trouver le coefficient.',
+   fbno:'Détermine le coefficient à l\'aide d\'une colonne complète avant de compléter.'},
+  {ctx:'', rows:[['Nombre','10','13','12'],['Nombre','15','19,5','?']],
+   lbl:'Nombre =', answers:['18'],
+   hint:'Compare 15 et 10 pour trouver par combien on multiplie.',
+   fbno:'Applique le même coefficient sur toute la ligne du bas.'}
+],
+3:[
+  {ctx:'Un avion consomme 5 litres de carburant pour parcourir 690 m.', rows:[['Litres','5','60'],['Distance (m)','690','?']],
+   lbl:'Distance =', answers:['8280','8 280'],
+   hint:'60 litres est un multiple de 5 litres.',
+   fbno:'Compare d\'abord les quantités de carburant avant de compléter la distance.'},
+  {ctx:'Avec 5 kg d\'olives, on obtient 34 litres d\'huile.', rows:[['Olives (kg)','5','1'],['Huile (L)','34','?']],
+   lbl:'Huile =', answers:['6.8','6,8'],
+   hint:'Cherche la quantité d\'huile obtenue avec 1 kg d\'olives.',
+   fbno:'Divise pour trouver ce que donne 1 kg d\'olives.'},
+  {ctx:'6,4 m de fil coûtent 4,80 €.', rows:[['Fil (m)','6,4','1'],['Prix (€)','4,8','?']],
+   lbl:'Prix =', answers:['0.75','0,75'],
+   hint:'Cherche le prix d\'un seul mètre de fil.',
+   fbno:'Pour trouver le prix d\'un mètre, divise le prix par la longueur.'},
+  {ctx:'', rows:[['Nombre','1','3','8'],['Nombre','12','36','?']],
+   lbl:'Nombre =', answers:['96'],
+   hint:'Compare 12 et 1 pour trouver le coefficient.',
+   fbno:'Applique le même coefficient à 8 pour compléter la ligne du bas.'},
+  {ctx:'', rows:[['Nombre','9','7','8'],['Nombre','90','?','80']],
+   lbl:'Nombre =', answers:['70'],
+   hint:'Compare 90 et 9, ou 80 et 8, pour trouver le coefficient.',
+   fbno:'Trouve le coefficient avec une colonne complète, puis applique-le à 7.'}
+]
+};
+
+var COEFS={
+  1:['&times; 2,5 — chaque brique mesure 2,5 cm','&times; 4 — chaque trousse contient 4 stylos','&times; 8','la ligne du bas vers la ligne du haut : &times; 7','&times; 9 — car 54 = 6 &times; 9'],
+  2:['&times; 1,4 — car 7 = 5 &times; 1,4','&times; 3,2 — car 112 = 35 &times; 3,2','coefficient = 5 &divide; 3 — on passe de 3 à 5 (et de 15 à 25) en gardant la même proportion','&times; 0,3 — car 3,6 = 12 &times; 0,3','&times; 1,5 — car 15 = 10 &times; 1,5'],
+  3:['&times; 12 — car 60 L = 5 L &times; 12','&divide; 5 — 1 kg d&rsquo;olives donne 6,8 L','&divide; 6,4 — 1 m de fil coûte 0,75 &euro;','&times; 12','&times; 10'],
+};
+var level=1, cur=0, score=0, errCount=0, doneArr=[];
+
+function setLevel(n){
+  level=n; cur=0; score=0; errCount=0;
+  doneArr=LEVELS[n].map(function(){return false;});
+  [1,2,3].forEach(function(k){ document.getElementById('pill'+k).classList.toggle('active', k===n); });
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('stage').style.display='';
+  document.querySelector('.topbar').style.display='';
+  renderQuestion();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderDots(){
+  var d=document.getElementById('dots'); d.innerHTML='';
+  LEVELS[level].forEach(function(_,i){
+    d.insertAdjacentHTML('beforeend','<span class="qdot'+(doneArr[i]?' done':'')+(i===cur?' cur':'')+'"></span>');
+  });
+  document.getElementById('score-tag').textContent='Score : '+score;
+  document.getElementById('qcount').textContent='Question '+(cur+1)+' / '+LEVELS[level].length;
+}
+
+function buildTable(rows){
+  var html='<table class="prop">';
+  rows.forEach(function(r){
+    html+='<tr><th>'+r[0]+'</th>';
+    for(var i=1;i<r.length;i++){
+      if(r[i]==='?') html+='<td class="q">?</td>';
+      else html+='<td>'+r[i]+'</td>';
+    }
+    html+='</tr>';
+  });
+  html+='</table>';
+  return html;
+}
+
+function renderQuestion(){
+  var ex=LEVELS[level][cur];
+  var html='<div class="qcard">'
+   +'  <div class="q-title">Complète le tableau</div>';
+  if(ex.ctx) html+='  <div class="q-context">'+ex.ctx+'</div>';
+  html+= buildTable(ex.rows)
+   +'  <div class="ans-row"><span class="ans-lbl">'+ex.lbl+'</span>'
+   +'    <input type="text" id="ans" autocomplete="off"></div>'
+   +'  <div class="fb" id="fb"></div>'
+   +'  <div class="coefbox" id="coefbox"></div>'
+   +'  <div class="hint" id="hint">&#128161; '+ex.hint+'</div>'
+   +'  <div class="btn-bar" id="btnbar">'
+   +'    <button class="btn" id="vbtn" onclick="checkAns()">Valider</button>'
+   +'    <button class="btn ghost" id="hbtn" onclick="toggleHint()">&#128161; Indice</button>'
+   +'  </div>'
+   +'</div>';
+  document.getElementById('stage').innerHTML=html;
+  renderDots();
+  var inp=document.getElementById('ans');
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter') checkAns(); });
+  inp.focus();
+}
+
+function checkAns(){
+  var ex=LEVELS[level][cur];
+  var v=document.getElementById('ans').value;
+  if(String(v||'').trim()===''){ flash(false,'Écris d\'abord le nombre manquant.'); return; }
+  if(eqNum(v, ex.answers)){
+    if(!doneArr[cur]){ doneArr[cur]=true; score++; }
+    document.getElementById('vbtn').classList.add('hidden');
+    flash(true,'\u2713 Bravo ! Tu as correctement complété le tableau.');
+    var cb=document.getElementById('coefbox');
+    cb.innerHTML='&#127919; <b>Coefficient de proportionnalité :</b> '+COEFS[level][cur];
+    cb.classList.add('show');
+    addNextBtn();
+  } else {
+    errCount++;
+    flash(false,'\u2717 '+ex.fbno);
+    var vb=document.getElementById('vbtn'); vb.textContent='\u21bb Réessayer'; vb.classList.add('retry');
+  }
+  renderDots();
+}
+function toggleHint(){
+  var hb=document.getElementById('hint'); var b=document.getElementById('hbtn');
+  var open=hb.classList.toggle('show');
+  b.innerHTML = open ? '&#128161; Masquer l\'indice' : '&#128161; Indice';
+}
+function addNextBtn(){
+  if(document.getElementById('nbtn')) return;
+  var last = cur===LEVELS[level].length-1;
+  var label = last ? 'Voir le bilan &#8594;' : 'Suite &#8594;';
+  document.getElementById('btnbar').insertAdjacentHTML('beforeend',
+    '<button class="btn next" id="nbtn" onclick="nextQ()">'+label+'</button>');
+}
+function nextQ(){
+  if(cur < LEVELS[level].length-1){ cur++; renderQuestion(); }
+  else { showResults(); }
+}
+function flash(good,msg){ var fb=document.getElementById('fb'); fb.className='fb '+(good?'ok':'no'); fb.textContent=msg; }
+
+function showResults(){
+  document.getElementById('stage').style.display='none';
+  document.querySelector('.topbar').style.display='none';
+  var tot=LEVELS[level].length;
+  document.getElementById('res-score').textContent=score+' / '+tot;
+  var msg; if(errCount===0) msg='\u2b50 Sans-faute ! Tu maîtrises les tableaux de proportionnalité.'; else if(errCount<=2) msg='\uD83C\uDFC6 Très bien joué, tu as su rebondir après les erreurs.'; else msg='\uD83C\uDFAF Niveau terminé ! Recommence pour viser le sans-faute.';
+  document.getElementById('res-msg').textContent=msg;
+  var r=document.getElementById('results'); r.classList.add('show'); r.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function resetLevel(){ setLevel(level); }
+
+setLevel(1);
+</script>
+</body>
+</html>
