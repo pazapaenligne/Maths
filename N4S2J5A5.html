@@ -141,6 +141,7 @@
       border-radius:8px;padding:.75rem 1rem;margin-bottom:1.2rem;
       font-size:.84rem;font-family:'JetBrains Mono',monospace;
       color:var(--day-dark);line-height:1.8;}
+    .method-box.reveal{display:block;}
     .method-box strong{color:var(--day-color);}
     .method-box.reveal{display:block;}
 
@@ -224,6 +225,11 @@
     .recap-item.ok-item{border-color:#b5e08a;}
     .recap-item.ko-item{border-color:#f9c0bb;}
 
+
+    .hint-btn{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:.55rem 1.1rem;font-family:Arial,sans-serif;font-size:clamp(.95rem,2.5vw,1.05rem);font-weight:800;cursor:pointer;min-height:2.8rem;display:inline-flex;align-items:center;gap:.4rem;transition:transform .12s;}
+    .hint-btn:active{transform:scale(.96);}
+    .hint-box{margin-top:.7rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.75rem 1rem;font-size:.97rem;color:#7a6010;display:none;line-height:1.75;font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
     @keyframes fadeUp{
       from{opacity:0;transform:translateY(16px);}
       to  {opacity:1;transform:translateY(0);}
@@ -287,9 +293,9 @@
       PAZAPA &middot; MATHS &middot; 4&Egrave;ME
     </div>
     <div class="week-label">Semaine 2 &ndash; Jour 5</div>
-    <h1><span class="hl">&#9999;&#65039; S&eacute;rie d&rsquo;exercices</span><br><span class="lvl">Niveau 1</span></h1>
+    <h1><span class="hl">&#9999;&#65039; Priorit&eacute;s op&eacute;ratoires</span></h1>
     <p class="subtitle">Priorit&eacute;s op&eacute;ratoires &middot; rep&egrave;re l&rsquo;op&eacute;ration prioritaire</p>
-    <div class="level-row"><a class="level-btn active" href="N4S2J5_N1_PrioritesOperatoires.html">Niveau 1</a><a class="level-btn" href="N4S2J5_N2_PrioritesOperatoires.html">Niveau 2</a><a class="level-btn" href="N4S2J5_N3_PrioritesOperatoires.html">Niveau 3</a></div>
+    <div class="level-row"><span class="level-btn active">Niveau 1</span><span class="level-btn">Niveau 2</span><span class="level-btn">Niveau 3</span></div>
   </div>
 
   <div class="embed-card">
@@ -302,7 +308,7 @@
     <div class="stats-row">
       <div class="stat-box"><div class="stat-num" id="st-ok">0</div><div class="stat-label">R&eacute;ussies</div></div>
       <div class="stat-box"><div class="stat-num" id="st-rem">5</div><div class="stat-label">Restantes</div></div>
-      <div class="stat-box"><div class="stat-num" id="st-err">0</div><div class="stat-label">Erreurs</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-err">0</div><div class="stat-label">Échouées</div></div>
     </div>
     <div class="prog-bg"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
     <div class="prog-text" id="prog-text">0 / 5</div>
@@ -341,8 +347,13 @@
   var TOTAL=QS.length;
   var state;
   function $(id){return document.getElementById(id);}
+  function showHint(i){
+    var hb=$("hb"+i),hbox=$("hint"+i);if(!hbox)return;
+    hbox.classList.toggle("show");
+    if(hb)hb.innerHTML=hbox.classList.contains("show")?"&#128161; Masquer l\u2019indice":"&#128161; Indice";
+  }
   function buildCards(){
-    state=QS.map(function(){return{sel:null,done:false,ok:false};});
+    state=QS.map(function(){return{sel:null,done:false,ok:false,errored:false};});
     var html="";
     for(var i=0;i<TOTAL;i++){
       var q=QS[i], oi=0, line="";
@@ -355,8 +366,10 @@
         +'<div class="consigne">S\u00e9lectionne l\u2019op\u00e9ration prioritaire\u00a0:</div>'
         +'<div class="expr-line">'+line+'</div>'
         +'<div class="method-box" id="method'+i+'">'+q.method+'</div>'
-        +'<div class="btn-row" style="margin-top:1rem;"><button class="btn btn-primary" id="vb'+i+'" onclick="checkOne('+i+')">&#10003; V\u00e9rifier</button>'
+        +'<div class="btn-row" style="margin-top:1rem;"><button class="btn btn-primary" id="vb'+i+'" onclick="checkOne('+i+')">&#10003; Vérifier</button>'
+        +(q.hint?'<button class="hint-btn" id="hb'+i+'" onclick="showHint('+i+')">&#128161; Indice</button>':'')
         +'</div>'
+        +'<div class="hint-box" id="hint'+i+'">'+(q.hint||'')+'</div>'
         +'<div class="feedback" id="fb'+i+'"><span class="feedback-icon" id="fbi'+i+'"></span><div><span id="fbt'+i+'"></span></div></div></div>';
     }
     $("cards").innerHTML=html;
@@ -372,18 +385,37 @@
     if(state[i].done)return;
     if(state[i].sel===null){return;}
     var ci=correctOi(i), ok=(state[i].sel===ci);
-    state[i].done=true; state[i].ok=ok;
-    for(var j=0;j<nOps(i);j++){$("op"+i+"_"+j).disabled=true; $("op"+i+"_"+j).className="op-btn";}
-    $("op"+i+"_"+ci).className="op-btn good";
-    if(!ok)$("op"+i+"_"+state[i].sel).className="op-btn bad";
-    $("vb"+i).disabled=true;
-    $("method"+i).className="method-box reveal";
-    $("fb"+i).className="feedback show "+(ok?"ok":"ko");
-    $("fbi"+i).textContent=ok?"\u2713":"\u2717";
-    $("fbt"+i).innerHTML=ok?"Bravo, c\u2019est la bonne op\u00e9ration\u00a0!":"Pas tout \u00e0 fait\u00a0: l\u2019op\u00e9ration prioritaire est en vert.";
-    update();
+    if(ok){
+      state[i].done=true;state[i].ok=true;
+      for(var j=0;j<nOps(i);j++){$("op"+i+"_"+j).disabled=true;$("op"+i+"_"+j).className="op-btn";}
+      $("op"+i+"_"+ci).className="op-btn good";
+      $("vb"+i).disabled=true;
+      $("method"+i).className="method-box reveal";
+      $("fb"+i).className="feedback show ok";$("fbi"+i).textContent="\u2713";
+      $("fbt"+i).innerHTML="Bravo, c\u2019est la bonne op\u00e9ration\u00a0!";
+      update();
+    } else if(!state[i].errored){
+      state[i].errored=true;
+      $("op"+i+"_"+state[i].sel).className="op-btn bad";
+      $("fb"+i).className="feedback show ko";$("fbi"+i).textContent="\u2717";
+      $("fbt"+i).innerHTML="Pas tout \u00e0 fait \u2014 r\u00e9essaie\u00a0!";
+      $("vb"+i).innerHTML="\u21bb R\u00e9essayer";$("vb"+i).setAttribute("onclick","retryOne("+i+")");
+    } else {
+      state[i].done=true;state[i].ok=false;
+      for(var j=0;j<nOps(i);j++){$("op"+i+"_"+j).disabled=true;$("op"+i+"_"+j).className="op-btn";}
+      $("op"+i+"_"+ci).className="op-btn good";$("op"+i+"_"+state[i].sel).className="op-btn bad";
+      $("vb"+i).disabled=true;$("method"+i).className="method-box reveal";
+      $("fb"+i).className="feedback show ko";$("fbi"+i).textContent="\u2717";
+      $("fbt"+i).innerHTML="L\u2019op\u00e9ration prioritaire est en vert.";
+      update();
+    }
   }
-  function toggleHint(i){var hb=$("hint"+i);hb.className="hint-box"+(hb.className.indexOf("show")<0?" show":"");}
+  function retryOne(i){
+    $("op"+i+"_"+state[i].sel).className="op-btn";
+    state[i].sel=null;
+    $("fb"+i).className="feedback";
+    $("vb"+i).innerHTML="&#10003; V\u00e9rifier";$("vb"+i).setAttribute("onclick","checkOne("+i+")");
+  }
   function update(){
     var done=0,ok=0;for(var i=0;i<TOTAL;i++){if(state[i].done){done++;if(state[i].ok)ok++;}}
     $("st-ok").textContent=ok;$("st-err").textContent=done-ok;$("st-rem").textContent=TOTAL-done;
