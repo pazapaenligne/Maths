@@ -70,6 +70,11 @@
     .results-score .s-num{color:var(--day-color);}
     .stars{font-size:2.2rem;margin:.4rem 0 1rem;}
     .results-msg{color:var(--muted);font-size:1.05rem;margin-bottom:2rem;line-height:1.7;}
+
+    .hint-btn{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:.55rem 1.1rem;font-family:Arial,sans-serif;font-size:clamp(.95rem,2.5vw,1.05rem);font-weight:800;cursor:pointer;min-height:2.8rem;display:inline-flex;align-items:center;gap:.4rem;transition:transform .12s;}
+    .hint-btn:active{transform:scale(.96);}
+    .hint-box{margin-top:.7rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;padding:.75rem 1rem;font-size:.97rem;color:#7a6010;display:none;line-height:1.75;font-family:'JetBrains Mono',monospace;}
+    .hint-box.show{display:block;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
     .fxc-trigger{position:fixed;right:14px;bottom:14px;z-index:9998;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:0;}
     .fxc-trigger svg{filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));}
@@ -145,10 +150,10 @@ var EXOS = [
     fig:FIG1,
     questions:[
       {label:"VW\u00a0=", answers:["3,2 cm","3,2"], show:"3,2\u00a0cm",
-       cons:"Calcule VW.",
+       hint:"Repère les deux droites parallèles et les deux sécantes. Le rapport UV/US doit égaler VW/ST.",cons:"Calcule VW.",
        method:"D\u2019apr\u00e8s Thal\u00e8s\u00a0: UV/US = VW/ST\n2,4/6 = VW/8\nVW = 8 \u00d7 2,4 \u00f7 6 = 3,2\u00a0cm"},
       {label:"UT\u00a0=", answers:["7 cm","7"], show:"7\u00a0cm",
-       cons:"Calcule UT.",
+       hint:"Utilise le même rapport de Thalès. Identifie quel segment est l’inconnue et isole-le.",cons:"Calcule UT.",
        method:"D\u2019apr\u00e8s Thal\u00e8s\u00a0: UW/UT = UV/US\n2,8/UT = 2,4/6\nUT = 2,8 \u00d7 6 \u00f7 2,4 = 7\u00a0cm"},
     ]
   },
@@ -158,10 +163,10 @@ var EXOS = [
     fig:FIG2,
     questions:[
       {label:"JK\u00a0=", answers:["1,5 cm","1,5"], show:"1,5\u00a0cm",
-       cons:"Calcule JK.",
+       hint:"Écris le rapport entre les segments portés par la même sécante, puis égale-le au rapport correspondant.",cons:"Calcule JK.",
        method:"D\u2019apr\u00e8s Thal\u00e8s\u00a0: IJ/IG = JK/GH\n2,4/8 = JK/5\nJK = 5 \u00d7 2,4 \u00f7 8 = 1,5\u00a0cm"},
       {label:"IH\u00a0=", answers:["6 cm","6"], show:"6\u00a0cm",
-       cons:"Calcule IH.",
+       hint:"L’inconnue IH est au dénominateur. Écris l’égalité de Thalès, puis croise les produits pour l’isoler.",cons:"Calcule IH.",
        method:"D\u2019apr\u00e8s Thal\u00e8s\u00a0: IK/IH = IJ/IG\n1,8/IH = 2,4/8\nIH = 1,8 \u00d7 8 \u00f7 2,4 = 6\u00a0cm"},
     ]
   },
@@ -171,7 +176,7 @@ var EXOS = [
     fig:FIG3,
     questions:[
       {label:"=", type:"relation", expected:["uv/us","uw/ut","vw/st"], show:"UV/US = UW/UT = VW/ST",
-       cons:"\u00c9cris la double \u00e9galit\u00e9 de Thal\u00e8s (sous la forme \u2026/\u2026 = \u2026/\u2026 = \u2026/\u2026).",
+       hint:"Part du sommet commun S. Pour chaque sécante, écris le rapport grand segment / petit segment. Les deux ratios doivent égaler le rapport des parallèles.",cons:"\u00c9cris la double \u00e9galit\u00e9 de Thal\u00e8s (sous la forme \u2026/\u2026 = \u2026/\u2026 = \u2026/\u2026).",
        method:"UV/US = UW/UT = VW/ST\n(on peut aussi \u00e9crire US/UV = UT/UW = ST/VW)"},
     ]
   },
@@ -181,7 +186,7 @@ var EXOS = [
     fig:FIG4,
     questions:[
       {label:"=", type:"relation", expected:["lm/lj","ln/lk","mn/jk"], show:"LM/LJ = LN/LK = MN/JK",
-       cons:"\u00c9cris la double \u00e9galit\u00e9 de Thal\u00e8s.",
+       hint:"Même méthode : part du sommet L commun aux deux sécantes.",cons:"\u00c9cris la double \u00e9galit\u00e9 de Thal\u00e8s.",
        method:"LM/LJ = LN/LK = MN/JK\n(on peut aussi \u00e9crire LJ/LM = LK/LN = JK/MN)"},
     ]
   },
@@ -218,6 +223,13 @@ function relOk(raw,exp){
   return isPermOf(got,exp)||isPermOf(got,inv);
 }
 
+function showHint(i){
+  var hb=$("hb"+i);
+  var hbox=$("hint"+i);
+  if(!hbox)return;
+  hbox.classList.toggle("show");
+  if(hb)hb.innerHTML=hbox.classList.contains("show")?"&#128161; Masquer l\u2019indice":"&#128161; Indice";
+}
 function buildCards(){
   state=QS.map(function(){return{done:false,ok:false,errored:false};});
   var html="", qIdx=0;
@@ -233,7 +245,11 @@ function buildCards(){
         +'<div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.4rem;">'+q.cons+'</div>'
         +'<div class="input-row" style="margin-bottom:.3rem;"><span class="input-label">'+q.label+'</span>'
         +'<input type="text" class="answer-input" id="in'+i+'" placeholder="?" autocomplete="off" autocapitalize="off" spellcheck="false"/></div>'
-        +'<div class="btn-row" style="margin-bottom:.3rem;"><button class="btn btn-primary" id="vb'+i+'" onclick="checkOne('+i+')">&#10003; V&#233;rifier</button></div>'
+        +'<div class="btn-row" style="margin-bottom:.3rem;">'
+        +'<button class="btn btn-primary" id="vb'+i+'" onclick="checkOne('+i+')">&#10003; V\u00e9rifier</button>'
+        +(q.hint?'<button class="hint-btn" id="hb'+i+'" onclick="showHint('+i+')">&#128161; Indice</button>':'')  
+        +'</div>'
+        +'<div class="hint-box" id="hint'+i+'">'+( q.hint||'')+'</div>'
         +'<div class="method-box" id="method'+i+'" style="margin-top:.5rem;">'+q.method+'</div>'
         +'<div class="feedback" id="fb'+i+'"><span class="feedback-icon" id="fbi'+i+'"></span><div><span id="fbt'+i+'"></span></div></div>'
         +'</div>';
