@@ -157,12 +157,6 @@
   <p class="subtitle">Équations sans solution</p>
 </header>
 
-<button id="btn-mute" onclick="toggleMute()" title="Son" style="
-  position:fixed;top:14px;right:14px;z-index:999;
-  background:var(--day-light);border:2px solid var(--day);
-  border-radius:50%;width:40px;height:40px;font-size:1.1rem;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 8px rgba(0,0,0,.15);">🔊</button>
 
 
 <!-- Mission intro -->
@@ -186,7 +180,7 @@
   <div style="margin-top:1rem;">
     <div class="mission-title">🎯 Votre mission</div>
     <div class="mission-desc">
-      Félicitations, équipe de 3ème ! Vous avez accédé à la Mission Finale.<br>
+      Félicitations, équipe de 3ème ! Vous avez accédé à la mission finale.<br>
       Analysez l'équation du terminal pour déterminer si une solution existe :<br><br>
       <span style="font-family:'JetBrains Mono',monospace; color:var(--yellow); font-size:1.1rem;">\( x + 7 = x - 2 \)</span>
     </div>
@@ -275,152 +269,6 @@
 </div>
 
 <script>
-
-
-
-// === SONS TERMINAL QUANTIQUE — MUTABLE ===
-let _soundOn = true;
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let _actx = null;
-function getActx(){ if(!_actx){ _actx = new AudioCtx(); } return _actx; }
-function playIfOn(fn){ if(_soundOn) fn(); }
-
-// Défilement de chiffres sur écran : série de micro-clics rapides
-function soundScroll(duration_ms, pitchBase){
-  playIfOn(()=>{
-    const ctx = getActx();
-    const n = Math.floor(duration_ms / 38);
-    for(let i=0;i<n;i++){
-      const t = ctx.currentTime + i*0.038;
-      const freq = pitchBase + Math.random()*pitchBase*0.6;
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'square';
-      o.frequency.setValueAtTime(freq, t);
-      g.gain.setValueAtTime(0.04, t);
-      g.gain.exponentialRampToValueAtTime(0.001, t+0.03);
-      o.start(t); o.stop(t+0.035);
-    }
-  });
-}
-
-// Validation OK : scroll bref puis bip de confirmation
-function soundBeepOk(){
-  playIfOn(()=>{
-    soundScroll(200, 400);
-    const ctx = getActx();
-    setTimeout(()=>{
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sine';
-      o.frequency.setValueAtTime(1200, ctx.currentTime);
-      o.frequency.setValueAtTime(1600, ctx.currentTime+0.07);
-      g.gain.setValueAtTime(0.15, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.2);
-      o.start(ctx.currentTime); o.stop(ctx.currentTime+0.22);
-    }, 210);
-  });
-}
-
-// Erreur : scroll grave + bip descendant
-function soundBeepError(){
-  playIfOn(()=>{
-    soundScroll(120, 180);
-    const ctx = getActx();
-    setTimeout(()=>{
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(300, ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(120, ctx.currentTime+0.22);
-      g.gain.setValueAtTime(0.10, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.22);
-      o.start(ctx.currentTime); o.stop(ctx.currentTime+0.25);
-    }, 130);
-  });
-}
-
-// Succès final : long scroll + séquence d'accès accordé
-function soundAccessGranted(){
-  playIfOn(()=>{
-    soundScroll(600, 300);
-    const ctx = getActx();
-    // Déclic porte
-    const buf = ctx.createBuffer(1, ctx.sampleRate*0.06, ctx.sampleRate);
-    const d = buf.getChannelData(0);
-    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length)*0.6;
-    const src = ctx.createBufferSource();
-    const gn = ctx.createGain();
-    src.buffer=buf; src.connect(gn); gn.connect(ctx.destination);
-    gn.gain.setValueAtTime(0.3, ctx.currentTime+0.65);
-    src.start(ctx.currentTime+0.65);
-    // 3 bips montants espacés
-    [0.78, 0.96, 1.14].forEach((delay,i)=>{
-      const freq=[880,1100,1320][i];
-      const o=ctx.createOscillator();
-      const g=ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type='sine';
-      o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
-      g.gain.setValueAtTime(0.14,ctx.currentTime+delay);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.15);
-      o.start(ctx.currentTime+delay); o.stop(ctx.currentTime+delay+0.18);
-    });
-  });
-}
-
-
-// Son de fond continu : hum basse fréquence + clics aléatoires type scan
-let _ambientNodes = [];
-function startAmbient(){
-  if(!_soundOn) return;
-  const ctx = getActx();
-  // Hum électronique grave
-  const osc = ctx.createOscillator();
-  const gainHum = ctx.createGain();
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(48, ctx.currentTime);
-  gainHum.gain.setValueAtTime(0.022, ctx.currentTime);
-  osc.connect(gainHum); gainHum.connect(ctx.destination);
-  osc.start();
-  _ambientNodes.push(osc, gainHum);
-
-  // Micro-clics aléatoires (lecture de données)
-  function scheduleClick(){
-    if(!_soundOn){ return; }
-    const delay = 0.04 + Math.random()*0.18;
-    const freq = 600 + Math.random()*900;
-    const t = ctx.currentTime + delay;
-    const o2 = ctx.createOscillator();
-    const g2 = ctx.createGain();
-    o2.type = 'square';
-    o2.frequency.setValueAtTime(freq, t);
-    g2.gain.setValueAtTime(0.028, t);
-    g2.gain.exponentialRampToValueAtTime(0.001, t+0.018);
-    o2.connect(g2); g2.connect(ctx.destination);
-    o2.start(t); o2.stop(t+0.02);
-    _ambientNodes.push(o2, g2);
-    // Nettoyer les noeuds terminés
-    if(_ambientNodes.length > 40) _ambientNodes = _ambientNodes.slice(-20);
-    setTimeout(scheduleClick, delay*1000);
-  }
-  scheduleClick();
-}
-
-function stopAmbient(){
-  _ambientNodes.forEach(n=>{ try{ n.stop ? n.stop() : n.disconnect(); }catch(e){} });
-  _ambientNodes = [];
-}
-
-function toggleMute(){
-  _soundOn = !_soundOn;
-  document.getElementById('btn-mute').textContent = _soundOn ? '🔊' : '🔇';
-  if(_soundOn) startAmbient(); else stopAmbient();
-}
-
 let q1Selected = null, q2Selected = null;
 const CORRECT = { 1: 0, 2: 2 };
 
@@ -439,25 +287,18 @@ function checkQ1() {
   const ok = q1Selected === CORRECT[1];
   const choices = document.querySelectorAll("#q1-choices .quiz-choice");
   if(ok){
-    choices.forEach((c,i) => {
-      c.onclick = null; c.classList.remove("selected","wrong-c");
-      if(i===CORRECT[1]) c.classList.add("correct-c");
-    });
+    choices.forEach((c,i) => { c.onclick=null; c.classList.remove("selected","wrong-c"); if(i===CORRECT[1]) c.classList.add("correct-c"); });
     document.getElementById("btn-q1").disabled = true;
   } else {
-    choices.forEach((c,i) => {
-      c.classList.remove("correct-c","selected");
-      if(i===q1Selected) c.classList.add("wrong-c");
-    });
+    choices.forEach((c,i) => { c.classList.remove("correct-c","selected"); if(i===q1Selected) c.classList.add("wrong-c"); });
     document.getElementById("btn-q1").disabled = false;
   }
   const fb = document.getElementById("fb-q1");
   fb.className = "quiz-feedback show " + (ok ? "ok" : "ko");
-  if(ok) soundBeepOk(); else soundBeepError();
   fb.innerHTML = ok
     ? "✅ Exact ! En soustrayant x des deux membres, on obtient 7 = −2."
     : "❌ Pas tout à fait. Indice : que reste-t-il quand on retire x de chaque côté de x + 7 = x − 2 ?";
-  if(window.MathJax) MathJax.typesetPromise([fb]);
+  if (window.MathJax) MathJax.typesetPromise([fb]);
   if(ok){setTimeout(()=>{document.getElementById("q2-block").style.display="block";if(window.MathJax)MathJax.typesetPromise([document.getElementById("q2-block")]);},800);}
 }
 
@@ -465,26 +306,19 @@ function checkQ2() {
   const ok = q2Selected === CORRECT[2];
   const choices = document.querySelectorAll("#q2-choices .quiz-choice");
   if(ok){
-    choices.forEach((c,i) => {
-      c.onclick = null; c.classList.remove("selected","wrong-c");
-      if(i===CORRECT[2]) c.classList.add("correct-c");
-    });
+    choices.forEach((c,i) => { c.onclick=null; c.classList.remove("selected","wrong-c"); if(i===CORRECT[2]) c.classList.add("correct-c"); });
     document.getElementById("btn-q2").disabled = true;
   } else {
-    choices.forEach((c,i) => {
-      c.classList.remove("correct-c","selected");
-      if(i===q2Selected) c.classList.add("wrong-c");
-    });
+    choices.forEach((c,i) => { c.classList.remove("correct-c","selected"); if(i===q2Selected) c.classList.add("wrong-c"); });
     document.getElementById("btn-q2").disabled = false;
   }
   const fb = document.getElementById("fb-q2");
   fb.className = "quiz-feedback show " + (ok ? "ok" : "ko");
-  if(ok) soundBeepOk(); else soundBeepError();
   fb.innerHTML = ok
     ? "✅ Parfait ! 7 = −2 est impossible, donc l'équation n'a aucune solution."
     : "❌ Indice : si 7 = −2 est toujours faux, peut-il exister une valeur de x qui rende l'égalité vraie ?";
-  if(window.MathJax) MathJax.typesetPromise([fb]);
-  if(ok){setTimeout(()=>{document.getElementById("success-screen").classList.add("show"); soundAccessGranted();},800);}
+  if (window.MathJax) MathJax.typesetPromise([fb]);
+  if(ok){setTimeout(()=>{document.getElementById("success-screen").classList.add("show");},800);}
 }
 
 function restart(){
@@ -518,11 +352,6 @@ function restartQ2(){
 }
 
 // Animate timeline steps then show quiz
-document.addEventListener('click', function startOnFirstClick(){
-  if(_soundOn) startAmbient();
-  document.removeEventListener('click', startOnFirstClick);
-}, {once:true});
-
 window.addEventListener("DOMContentLoaded", () => {
   if (window.MathJax) MathJax.typesetPromise();
   let delay = 300;
