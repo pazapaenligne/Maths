@@ -195,7 +195,6 @@ img,svg,.eq-box,.card,.gb-inner,.course-inner{max-width:100%;}
 </head>
 <body>
 
-<button id="btn-mute" onclick="toggleMute()" title="Couper le son" style="position:fixed;top:14px;right:14px;z-index:9997;background:var(--day-light,#e8f6fb);border:2px solid var(--day,#3ab5d8);border-radius:50%;width:40px;height:40px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);">🔊</button>
 <div class="xp-pop" id="xp-pop">+25 XP&nbsp;!</div>
 <div class="frame">
   <div class="bubble b1"></div><div class="bubble b2"></div>
@@ -258,141 +257,6 @@ img,svg,.eq-box,.card,.gb-inner,.course-inner{max-width:100%;}
 </div>
 <script>
 
-// === SONS DRONE — MUTABLE ===
-let _soundOn = true;
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let _actx = null;
-function getActx(){ if(!_actx) _actx = new AudioCtx(); return _actx; }
-function playIfOn(fn){ if(_soundOn) fn(); }
-
-// Filtre passe-bas pour adoucir
-function makeLPF(ctx, freq){
-  const f = ctx.createBiquadFilter();
-  f.type = 'lowpass'; f.frequency.value = freq; f.Q.value = 0.7;
-  return f;
-}
-
-// ── AMBIANCE : drone lointain, doux et continu ──
-let _droneNodes = [];
-function startAmbient(){
-  if(!_soundOn) return;
-  const ctx = getActx();
-
-  // Bourdonnement grave très filtré (sine, presque inaudible mais présent)
-  const osc1 = ctx.createOscillator();
-  const lfo  = ctx.createOscillator();
-  const lfoG = ctx.createGain();
-  const lpf1 = makeLPF(ctx, 220);
-  const g1   = ctx.createGain();
-  osc1.type = 'sine';
-  osc1.frequency.setValueAtTime(95, ctx.currentTime);
-  lfo.type = 'sine'; lfo.frequency.setValueAtTime(6, ctx.currentTime);
-  lfoG.gain.setValueAtTime(2, ctx.currentTime);
-  lfo.connect(lfoG); lfoG.connect(osc1.frequency);
-  g1.gain.setValueAtTime(0.07, ctx.currentTime);
-  osc1.connect(lpf1); lpf1.connect(g1); g1.connect(ctx.destination);
-  osc1.start(); lfo.start();
-
-  // Légère modulation d'amplitude (respiration du drone)
-  const tremLFO = ctx.createOscillator();
-  const tremG   = ctx.createGain();
-  tremLFO.type = 'sine'; tremLFO.frequency.setValueAtTime(3.5, ctx.currentTime);
-  tremG.gain.setValueAtTime(0.025, ctx.currentTime);
-  tremLFO.connect(tremG); tremG.connect(g1.gain);
-  tremLFO.start();
-
-  _droneNodes = [osc1, lfo, lfoG, lpf1, g1, tremLFO, tremG];
-}
-
-function stopAmbient(){
-  _droneNodes.forEach(n=>{try{ n.stop?n.stop():n.disconnect(); }catch(e){}});
-  _droneNodes = [];
-}
-
-// ── BONNE RÉPONSE : bip court et propre, type interface ──
-function soundBeepOk(){
-  playIfOn(()=>{
-    const ctx = getActx();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    const lpf = makeLPF(ctx, 2000);
-    o.connect(lpf); lpf.connect(g); g.connect(ctx.destination);
-    o.type = 'sine';
-    o.frequency.setValueAtTime(660, ctx.currentTime);
-    o.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
-    g.gain.setValueAtTime(0, ctx.currentTime);
-    g.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.01);
-    g.gain.setValueAtTime(0.15, ctx.currentTime + 0.12);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-    o.start(ctx.currentTime);
-    o.stop(ctx.currentTime + 0.28);
-  });
-}
-
-// ── MAUVAISE RÉPONSE : son neutre, non agressif ──
-function soundBeepError(){
-  playIfOn(()=>{
-    const ctx = getActx();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    const lpf = makeLPF(ctx, 800);
-    o.connect(lpf); lpf.connect(g); g.connect(ctx.destination);
-    o.type = 'sine';
-    o.frequency.setValueAtTime(330, ctx.currentTime);
-    o.frequency.linearRampToValueAtTime(260, ctx.currentTime + 0.2);
-    g.gain.setValueAtTime(0, ctx.currentTime);
-    g.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
-    o.start(ctx.currentTime);
-    o.stop(ctx.currentTime + 0.25);
-  });
-}
-
-// ── MISSION VALIDÉE : montée douce puis accord de succès ──
-function soundAccessGranted(){
-  playIfOn(()=>{
-    const ctx = getActx();
-    // Montée douce du drone (accélération progressive)
-    const oAcc = ctx.createOscillator();
-    const gAcc = ctx.createGain();
-    const lpfAcc = makeLPF(ctx, 600);
-    oAcc.connect(lpfAcc); lpfAcc.connect(gAcc); gAcc.connect(ctx.destination);
-    oAcc.type = 'sine';
-    oAcc.frequency.setValueAtTime(95, ctx.currentTime);
-    oAcc.frequency.exponentialRampToValueAtTime(280, ctx.currentTime + 0.8);
-    gAcc.gain.setValueAtTime(0, ctx.currentTime);
-    gAcc.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.15);
-    gAcc.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.7);
-    gAcc.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.95);
-    oAcc.start(ctx.currentTime); oAcc.stop(ctx.currentTime + 1.0);
-
-    // Accord de succès : 3 sines purs, doux et espacés
-    [[0.9, 523], [1.05, 659], [1.22, 784]].forEach(([delay, freq])=>{
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      const lpf = makeLPF(ctx, 3000);
-      o.connect(lpf); lpf.connect(g); g.connect(ctx.destination);
-      o.type = 'sine';
-      o.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-      g.gain.setValueAtTime(0, ctx.currentTime + delay);
-      g.gain.linearRampToValueAtTime(0.13, ctx.currentTime + delay + 0.03);
-      g.gain.setValueAtTime(0.13, ctx.currentTime + delay + 0.15);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.4);
-      o.start(ctx.currentTime + delay);
-      o.stop(ctx.currentTime + delay + 0.45);
-    });
-  });
-}
-
-function toggleMute(){
-  _soundOn = !_soundOn;
-  document.getElementById('btn-mute').textContent = _soundOn ? '🔊' : '🔇';
-  if(_soundOn) startAmbient(); else stopAmbient();
-}
-document.addEventListener('click', function startOnFirstClick(){
-  if(_soundOn) startAmbient();
-  document.removeEventListener('click', startOnFirstClick);
-}, {once:true});
 
 var ITEMS=[{"typ": "vraifaux", "theme": "Diagnostic", "title": "La première manœuvre", "intro": "Pour stabiliser le drone, il faut résoudre la condition de vol. On veut isoler le terme en x.", "eq": "Pour résoudre 3x − 5 ≥ 10, on commence par ajouter 5 aux deux membres.", "method": "Vrai. On élimine d'abord le −5 en ajoutant 5 des deux côtés : 3x ≥ 15. <strong>Diviser par 3 viendra ensuite.</strong>", "hint": "Quelle opération fait disparaître le −5 du membre de gauche ?", "q": "Cette première étape est-elle correcte ?", "enc": "WyIwIl0="}, {"typ": "expr", "theme": "Résolution", "title": "Débloquer l'autorisation", "intro": "On applique les étapes : ajouter 5 (→ 3x ≥ 15), puis diviser par 3.", "eq": "3x − 5 ≥ 10", "method": "3x − 5 ≥ 10 → +5 → 3x ≥ 15 → ÷3 → <strong>x ≥ 5</strong>. Le vol est autorisé dès x ≥ 5.", "hint": "Ajoute 5 aux deux membres, puis divise par 3.", "q": "Résous l'inéquation (écris la solution sous la forme x ≥ … ).", "label": "Solution :", "ph": "ex : x ≥ 5", "enc": "WyJ4XHUyMjY1NSIsICJ4Pj01IiwgInhcdTJhN2U1IiwgInggXHUyMjY1NSIsICJcdTIyNjU1IiwgIj49NSJd"}, {"typ": "vraifaux", "theme": "Contrôle", "title": "Vérifier la borne", "intro": "Le signe « ≥ » est important pour savoir si la valeur limite est incluse.", "eq": "L'ensemble des solutions de 3x − 5 ≥ 10 est x ≥ 5 (5 inclus).", "method": "Vrai. Le signe « ≥ » signifie « supérieur OU ÉGAL » : 5 fait partie des solutions (3×5 − 5 = 10 ≥ 10).", "hint": "« ≥ » inclut-il la valeur 5 elle-même ?", "q": "Cette affirmation est-elle exacte ?", "enc": "WyIwIl0="}, {"typ": "vraifaux", "theme": "Capteur", "title": "Le capteur d'altitude", "intro": "Un capteur impose 2x + 3 ≤ 11. On veut la plage de réglage autorisée.", "eq": "2x + 3 ≤ 11   donne   x ≤ 4", "method": "Vrai. 2x + 3 ≤ 11 → −3 → 2x ≤ 8 → ÷2 (positif, sens conservé) → <strong>x ≤ 4</strong>.", "hint": "Diviser par un nombre positif ne change pas le sens de l'inégalité.", "q": "Ce réglage est-il correct ?", "enc": "WyIwIl0="}, {"typ": "expr", "theme": "Propulsion", "title": "Régler la propulsion", "intro": "La puissance des hélices doit vérifier 5x − 8 > 12 pour décoller.", "eq": "5x − 8 > 12", "method": "5x − 8 > 12 → +8 → 5x > 20 → ÷5 → <strong>x > 4</strong>.", "hint": "Ajoute 8, puis divise par 5.", "q": "Résous l'inéquation (forme x > … ).", "label": "Solution :", "ph": "ex : x > 4", "enc": "WyJ4PjQiLCAieCA+NCJd"}, {"typ": "vraifaux", "theme": "Alerte", "title": "Le piège du signe", "intro": "Attention : quand on divise par un nombre NÉGATIF, le sens de l'inégalité s'inverse !", "eq": "−2x < 6   donne   x > −3", "method": "Vrai. On divise par −2 (négatif) → on INVERSE le sens : −2x < 6 → x > −3.", "hint": "Diviser par un nombre négatif inverse le sens de l'inégalité.", "q": "Ce raisonnement est-il correct ?", "enc": "WyIwIl0="}, {"typ": "num", "theme": "Boss final", "title": "Autoriser le vol", "intro": "Le pilote propose le réglage x = 7. On vérifie le résultat du contrôle 3x − 5.", "eq": "3x − 5   pour x = 7", "method": "3 × 7 − 5 = 21 − 5 = <strong>16</strong>. Comme 16 ≥ 10, le vol est autorisé. 🛰️", "hint": "Calcule 3 × 7, puis retire 5.", "q": "Quelle est la valeur de 3x − 5 pour x = 7 ?", "label": "Résultat =", "ph": "ta réponse…", "enc": "WyIxNiJd"}];
 var CONCL="Grâce à tes calculs, le système a vérifié chaque paramètre instable : le seuil de sécurité est respecté, le sens des inégalités est maîtrisé. L'autorisation de vol est accordée — le drone décolle en toute sécurité !";var BADGE="Badge du Drone Stabilisé";var COURS="<strong>Résoudre une inéquation du 1ᵉʳ degré — l'essentiel</strong><br><br><strong>1. Isoler le terme en x</strong> : on fait la même opération des deux côtés. Ex : <span class='mono'>3x − 5 ≥ 10 → 3x ≥ 15</span> (on a ajouté 5).<br><br><strong>2. Diviser par le coefficient de x</strong>. Ex : <span class='mono'>3x ≥ 15 → x ≥ 5</span> (on a divisé par 3).<br><br><strong>3. ⚠️ Le piège du signe</strong> : si on multiplie ou divise par un nombre <strong>négatif</strong>, on <strong>inverse</strong> le sens de l'inégalité. Ex : <span class='mono'>−2x < 6 → x > −3</span>.<br><br><strong>4. La borne</strong> : « ≥ » et « ≤ » incluent la valeur limite ; « > » et « < » l'excluent.";
@@ -443,10 +307,7 @@ function checkOne(i){
   if(ex.typ==='expr'||ex.typ==='num'){var val=$("inp-"+i).value.trim();if(val===""){fb.className="fb show ko";fb.textContent="Entre une r\u00e9ponse avant de valider.";return;}userAns[i]=val;ok=dec(ex.enc).indexOf(norm(val))>-1;}
   else if(ex.typ==='vraifaux'){if(userAns[i]===null||userAns[i]===undefined){fb.className="fb show ko";fb.textContent="Choisis Vrai ou Faux avant de valider.";return;}ok=dec(ex.enc).indexOf(''+userAns[i])>-1;}
   userOk[i]=ok;buildAll();lightStars();updateScore();
-  if(ok){popXP();soundBeepOk();}else{soundBeepError();}
-  var allDone=userOk.every(function(v){return v!==null;});
-  var allOk=userOk.every(function(v){return v===true;});
-  if(allDone&&allOk) setTimeout(soundAccessGranted,600);
+  if(ok)popXP();
 }
 function toggleHint(i){var h=$("hint-"+i);if(h.classList.contains("show")){h.classList.remove("show");}else{h.innerHTML="&#128161; <strong>Indice :</strong> "+ITEMS[i].hint;h.classList.add("show");}}
 function toggleSol(i){var s=$("sol-"+i);if(s.classList.contains("show")){s.classList.remove("show");}else{s.innerHTML="<strong>Correction :</strong><br>"+ITEMS[i].method;s.classList.add("show");}}
