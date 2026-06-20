@@ -27,8 +27,8 @@
     .intro-card strong{color:var(--text);}
     .timeline{width:100%;max-width:700px;position:relative;z-index:1;}
     .timeline-line{position:absolute;left:28px;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--orange),var(--yellow),var(--green),var(--blue));border-radius:99px;z-index:0;pointer-events:none;}
-    .step{display:flex;gap:1.2rem;margin-bottom:1.5rem;opacity:0;transform:translateX(-20px);transition:opacity .5s ease,transform .5s ease;}
-    .step.visible{opacity:1;transform:translateX(0);}
+    .step{display:none;gap:1.2rem;margin-bottom:1.5rem;}
+    .step.visible{display:flex;animation:fadeUp .45s ease both;}
     .step-icon{width:58px;height:58px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:3px solid var(--surface);z-index:1;box-shadow:0 2px 12px rgba(0,0,0,.12);}
     .step-body{flex:1;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.4rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
     .step-tag{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
@@ -47,7 +47,7 @@
     .q-choice:hover:not(.locked){border-color:var(--orange);background:#fff8eb;}
     .q-choice.selected{border-color:var(--orange);background:#fff8eb;}
     .q-choice.correct-c{border-color:var(--green);background:#f0faeb;color:#2f6e10;cursor:default;}
-    .q-choice.wrong-c{border-color:var(--pink);background:#fff0ef;color:#a93226;cursor:default;}
+    .q-choice.wrong-c{border-color:var(--pink);background:#fff0ef;color:#a93226;}
     .q-choice.locked{cursor:default;}
     .q-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;}
     .q-choice.selected .q-radio{background:var(--orange);border-color:var(--orange);}
@@ -134,7 +134,7 @@
   </div>
 </div>
 <div class="quiz-card" id="quiz-card">
-  <div class="quiz-title">🎯 À ton tour — Vérifie que tu as compris !</div>
+  <div class="quiz-title">🎯 À ton tour — résous le problème toi-même !</div>
   <div class="q-block" id="q1">
     <div class="q-text"><strong>Q1 :</strong> Quelle équation correspond à ce problème ?</div>
     <div class="q-choices" id="q1-choices">
@@ -144,20 +144,16 @@
     </div>
     <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;">
       <button class="btn btn-orange" id="btn-q1" onclick="check(1)" disabled>Valider</button>
-      <button class="btn btn-ghost" onclick="restart()" style="display:none;" id="restart-q1">🔄 Recommencer</button>
     </div>
     <div class="q-feedback" id="fb-q1"></div>
   </div>
   <div class="q-block" id="q2" style="display:none;margin-top:1.2rem;">
     <div class="q-text"><strong>Q2 :</strong> Combien de pizzas la famille M. a-t-elle commandées ?</div>
-    <div class="q-choices" id="q2-choices">
-      <div class="q-choice"><div class="q-radio"></div>6 pizzas</div>
-      <div class="q-choice"><div class="q-radio"></div>7 pizzas</div>
-      <div class="q-choice"><div class="q-radio"></div>8 pizzas</div>
+    <div style="margin-bottom:.6rem;">
+      <input type="text" id="q2-input" inputmode="numeric" autocomplete="off" placeholder="Ton résultat : x = ?" style="width:100%;padding:.65rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--text);outline:none;"/>
     </div>
     <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;">
       <button class="btn btn-orange" id="btn-q2" onclick="check(2)" disabled>Valider</button>
-      <button class="btn btn-ghost" onclick="restart()" id="restart-q2" style="display:none;">🔄 Recommencer</button>
     </div>
     <div class="q-feedback" id="fb-q2"></div>
   </div>
@@ -169,15 +165,106 @@
   </div>
 </div>
 <script>
-const CORRECT={1:1,2:2};const sel={};
-document.addEventListener('DOMContentLoaded',()=>{
-  [1,2].forEach(q=>{document.querySelectorAll('#q'+q+'-choices .q-choice').forEach((c,i)=>{c.addEventListener('click',()=>pick(q,i));});});
-  let delay=200;["step-0","step-1","step-2","step-3","step-4"].forEach(id=>{setTimeout(()=>document.getElementById(id).classList.add("visible"),delay);delay+=500;});
-  setTimeout(()=>{const qc=document.getElementById("quiz-card");qc.style.display="block";qc.scrollIntoView({behavior:"smooth",block:"start"});},delay+200);
+const CORRECT={1:1};const sel={};const solved={1:false,2:false};
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('#q1-choices .q-choice').forEach(function(c,i){
+    c.addEventListener('click',function(){pick(1,i);});
+  });
+  var inp=document.getElementById('q2-input');
+  if(inp){
+    inp.addEventListener('input',function(){
+      if(solved[2])return;
+      document.getElementById('btn-q2').disabled=(inp.value.trim()==='');
+      inp.style.borderColor='';inp.style.background='';
+      document.getElementById('fb-q2').className='q-feedback';
+    });
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!document.getElementById('btn-q2').disabled){check(2);}});
+  }
+  // Au départ : seul l'énoncé (étape 1) est visible ; la solution reste cachée
+  // tant que l'élève n'a pas cherché lui-même.
+  setTimeout(function(){document.getElementById('step-0').classList.add('visible');},200);
+  setTimeout(function(){document.getElementById('quiz-card').style.display='block';},800);
 });
-function pick(q,i){sel[q]=i;document.querySelectorAll('#q'+q+'-choices .q-choice').forEach((c,idx)=>{c.classList.toggle("selected",idx===i);c.querySelector(".q-radio").style.background=idx===i?"var(--orange)":"";c.querySelector(".q-radio").style.borderColor=idx===i?"var(--orange)":"";});document.getElementById('btn-q'+q).disabled=false;}
-function check(q){var ok=sel[q]===CORRECT[q];document.querySelectorAll("#q"+q+"-choices .q-choice").forEach(function(c,i){c.style.pointerEvents="none";if(i===CORRECT[q])c.classList.add("correct-c");else if(i===sel[q]&&!ok)c.classList.add("wrong-c");});document.getElementById("btn-q"+q).disabled=true;document.getElementById("restart-q"+q).style.display="inline-flex";var fb=document.getElementById("fb-q"+q);fb.innerHTML="";var detail=document.createElement("div");detail.className="q-feedback-detail";if(q===1){fb.className="q-feedback show "+(ok?"ok":"ko");fb.innerHTML="<strong>"+(ok?"\u2705 Exact !":"\u274C Non.")+"</strong>";detail.textContent=ok?"x = nombre de pizzas. Prix total = 8x euros. Avec la r\u00e9duction de 5 euros : 8x \u2212 5 = 59.":"x pizzas \u00e0 8\u20AC chacune = 8x euros. Moins 5\u20AC de r\u00e9duction = 59\u20AC. Donc : 8x \u2212 5 = 59.";fb.appendChild(detail);setTimeout(function(){document.getElementById("q2").style.display="block";},700);}else{fb.className="q-feedback show "+(ok?"ok":"ko");fb.innerHTML="<strong>"+(ok?"\u2705 Parfait !":"\u274C Non.")+"</strong>";detail.textContent=ok?"8x \u2212 5 = 59 \u2192 8x = 64 \u2192 x = 64 \u00F7 8 = 8. V\u00E9rif : 8\u00D78\u22125 = 64\u22125 = 59 \u2713":"8x = 64 donc x = 64 \u00F7 8 = 8. La r\u00E9ponse est 8 pizzas.";fb.appendChild(detail);setTimeout(function(){document.getElementById("success-box").classList.add("show");},700);}}
-function restart(){sel[1]=undefined;sel[2]=undefined;[1,2].forEach(function(q){document.querySelectorAll('#q'+q+'-choices .q-choice').forEach(function(c){c.className='q-choice';c.style.pointerEvents='';c.querySelector('.q-radio').style.background='';c.querySelector('.q-radio').style.borderColor='';});document.getElementById('btn-q'+q).disabled=true;document.getElementById('restart-q'+q).style.display='none';document.getElementById('fb-q'+q).className='q-feedback';});document.getElementById('q2').style.display='none';document.getElementById('success-box').classList.remove('show');document.getElementById('quiz-card').scrollIntoView({behavior:'smooth',block:'start'});}
+function reveal(id,d){setTimeout(function(){document.getElementById(id).classList.add('visible');},d);}
+function pick(q,i){
+  if(solved[q])return;                         // verrouillé seulement si déjà réussi
+  sel[q]=i;
+  document.querySelectorAll('#q'+q+'-choices .q-choice').forEach(function(c,idx){
+    c.classList.toggle('selected',idx===i);
+    c.classList.remove('wrong-c');             // efface l'ancien marquage d'erreur
+    var r=c.querySelector('.q-radio');
+    r.style.background=idx===i?'var(--orange)':'';
+    r.style.borderColor=idx===i?'var(--orange)':'';
+  });
+  document.getElementById('btn-q'+q).disabled=false;
+}
+function normNum(s){var v=s.toLowerCase().replace(/\s+/g,'').replace(/pizzas?/g,'').replace(/^x=/,'').replace(',','.');return isNaN(parseFloat(v))?v:String(parseFloat(v));}
+function showSolution(){reveal('step-2',100);reveal('step-3',500);reveal('step-4',900);setTimeout(function(){document.getElementById('success-box').classList.add('show');},1100);}
+function check(q){
+  if(solved[q])return;
+  var fb=document.getElementById('fb-q'+q);
+  fb.innerHTML='';
+  var detail=document.createElement('div');detail.className='q-feedback-detail';
+  if(q===1){
+    if(sel[1]===undefined)return;
+    var ok=sel[1]===CORRECT[1];
+    var choices=document.querySelectorAll('#q1-choices .q-choice');
+    if(ok){
+      solved[1]=true;
+      choices.forEach(function(c,i){c.style.pointerEvents='none';c.classList.remove('selected','wrong-c');if(i===CORRECT[1])c.classList.add('correct-c');});
+      document.getElementById('btn-q1').disabled=true;
+      fb.className='q-feedback show ok';
+      fb.innerHTML='<strong>\u2705 Exact !</strong>';
+      detail.textContent='x pizzas \u00e0 8\u20AC, c\'est 8x \u20AC ; on retire la r\u00e9duction de 5\u20AC : 8x \u2212 5 = 59. \u00c0 toi de la r\u00e9soudre !';
+      fb.appendChild(detail);
+      reveal('step-1',100);                                   // révèle l'écriture de l'équation
+      setTimeout(function(){document.getElementById('q2').style.display='block';var i2=document.getElementById('q2-input');if(i2)i2.focus();},600);
+    }else{
+      var prev=sel[1];
+      choices.forEach(function(c,i){c.classList.remove('selected');if(i===prev)c.classList.add('wrong-c');});
+      fb.className='q-feedback show ko';
+      fb.innerHTML='<strong>\u274C Pas encore \u2014 r\u00e9essaie.</strong>';
+      detail.textContent='Indice : le prix de x pizzas s\'\u00e9crit 8x \u20AC, et une r\u00e9duction vient diminuer le total. Quelle \u00e9quation retire 5 \u00e0 8x ?';
+      fb.appendChild(detail);
+      document.getElementById('btn-q1').disabled=false;       // revalidable après nouveau choix
+    }
+  }else{
+    var inp=document.getElementById('q2-input');
+    var val=normNum(inp.value);
+    if(val==='')return;
+    var ok=(parseFloat(val)===8&&!isNaN(parseFloat(val)));
+    if(ok){
+      solved[2]=true;
+      inp.readOnly=true;inp.style.borderColor='var(--green)';inp.style.background='#f0faeb';inp.style.color='#2f6e10';
+      document.getElementById('btn-q2').disabled=true;
+      fb.className='q-feedback show ok';
+      fb.innerHTML='<strong>\u2705 Parfait !</strong>';
+      detail.textContent='8x \u2212 5 = 59 \u2192 8x = 64 \u2192 x = 8. V\u00e9rif : 8\u00d78\u22125 = 59 \u2713';
+      fb.appendChild(detail);
+      showSolution();                                         // révèle résolution + vérif + conclusion
+    }else{
+      inp.style.borderColor='var(--pink)';inp.style.background='#fff0ef';
+      fb.className='q-feedback show ko';
+      fb.innerHTML='<strong>\u274C Pas encore \u2014 r\u00e9essaie.</strong>';
+      detail.textContent='Indice : repars de 8x \u2212 5 = 59. Ajoute 5 des deux c\u00f4t\u00e9s pour obtenir 8x, puis divise par 8.';
+      fb.appendChild(detail);
+      document.getElementById('btn-q2').disabled=false;       // revalidable après correction
+    }
+  }
+}
+function restart(){
+  sel[1]=undefined;solved[1]=false;solved[2]=false;
+  document.querySelectorAll('#q1-choices .q-choice').forEach(function(c){c.className='q-choice';c.style.pointerEvents='';var r=c.querySelector('.q-radio');r.style.background='';r.style.borderColor='';});
+  document.getElementById('btn-q1').disabled=true;
+  document.getElementById('fb-q1').className='q-feedback';
+  var inp=document.getElementById('q2-input');if(inp){inp.value='';inp.readOnly=false;inp.style.borderColor='';inp.style.background='';inp.style.color='';}
+  document.getElementById('btn-q2').disabled=true;
+  document.getElementById('fb-q2').className='q-feedback';
+  document.getElementById('q2').style.display='none';
+  document.getElementById('success-box').classList.remove('show');
+  ['step-1','step-2','step-3','step-4'].forEach(function(id){document.getElementById(id).classList.remove('visible');});
+  document.getElementById('quiz-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
 </script>
 <!-- ===== CALCULATRICE fx-92 PAZAPA (déplaçable) ===== -->
 <style>
