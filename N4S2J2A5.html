@@ -234,6 +234,7 @@
       .btn{font-size:.85rem;padding:.55rem 1rem;}
     }
     .level-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
+    .consigne-box{width:100%;max-width:680px;background:var(--day-light);border:2px dashed var(--day-border);border-radius:12px;padding:.85rem 1.1rem;margin-bottom:1.2rem;text-align:center;font-weight:700;color:var(--day-dark);position:relative;z-index:1;line-height:1.6;}
     .level-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.92rem;letter-spacing:.06em;text-transform:uppercase;padding:.6rem 1.15rem;border-radius:12px;border:2px solid var(--day-border);background:var(--surface);color:var(--day-dark);min-height:2.9rem;display:inline-flex;align-items:center;}
     .level-btn.active{background:var(--day-color);color:#fff;border-color:var(--day-color);box-shadow:0 3px 10px var(--day-glow);}
   </style>
@@ -257,6 +258,8 @@
     <p class="subtitle">Lire l’abscisse d’un point sur une droite graduée</p>
     <div class="level-row"><span class="level-btn active">Niveau 1</span><span class="level-btn">Niveau 2</span><span class="level-btn">Niveau 3</span></div>
   </header>
+
+  <div class="consigne-box">👉 Lire l’abscisse de chacun des points suivants.</div>
 
   <div class="progress-wrap">
     <div class="progress-info">
@@ -480,17 +483,24 @@ function showResults(){
   var stars = ok >= TOTAL ? 5 : ok >= Math.ceil(TOTAL*.8) ? 4
     : ok >= Math.ceil(TOTAL*.6) ? 3 : ok >= Math.ceil(TOTAL*.4) ? 2 : 1;
   $("stars-row").textContent = "\u2B50".repeat(stars) + "\u2606".repeat(5-stars);
-  var msgs = ["Continue \u00e0 t\u2019entra\u00eener !","Bon d\u00e9but !",
-    "Pas mal !","Bien jou\u00e9 !","Tr\u00e8s bien !","Parfait ! Bravo ! \uD83C\uDF89"];
-  $("results-msg").textContent = msgs[Math.min(ok, msgs.length-1)];
+  var msg;
+  if(ok===TOTAL) msg="Parfait\u00a0! Bravo\u00a0! \uD83C\uDF89";
+  else if(ok>=Math.ceil(TOTAL*0.8)) msg="Tr\u00e8s bien\u00a0!";
+  else if(ok>=Math.ceil(TOTAL*0.6)) msg="Bien jou\u00e9\u00a0!";
+  else if(ok>=Math.ceil(TOTAL*0.4)) msg="Bon d\u00e9but\u00a0!";
+  else msg="Continue \u00e0 t\u2019entra\u00eener\u00a0!";
+  $("results-msg").textContent = msg;
   var list = $("recap-list"); list.innerHTML = "";
   EXERCISES.forEach(function(ex, i){
     var correct = isCorrect(userAnswers[i], ex);
+    /* nom du point extrait de la question (« abscisse du point X ») */
+    var m = ex.eq.match(/point\s+([A-Z])/);
+    var nomPoint = m ? ("Point " + m[1]) : ("Exercice " + (i+1));
     var div = document.createElement("div");
     div.className = "recap-item " + (correct ? "ok-item" : "ko-item");
     div.innerHTML = "<span>" + (correct ? "\u2705" : "\u274C") + "</span>"
-      + "<span class='eq'>" + ex.eq.replace(/<br>/g," ") + "</span>"
-      + "<span>" + ex.label + " " + (ex.show||ex.ans) + "</span>";
+      + "<span class='eq'>" + nomPoint + "</span>"
+      + "<span>" + (ex.show||ex.ans) + "</span>";
     list.appendChild(div);
   });
   window.scrollTo({top:0,behavior:"smooth"});
