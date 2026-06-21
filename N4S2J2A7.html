@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pazapa Maths – Nombres relatifs (4e S2 J2 – Niveau 3)</title>
+  <title>Pazapa Maths – Nombres relatifs négatifs</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     /* ═══════════════════════════════════════════════════
@@ -233,6 +233,12 @@
       .card{padding:1.4rem;}
       .btn{font-size:.85rem;padding:.55rem 1rem;}
     }
+    .place-consigne{font-size:1rem;color:var(--text);font-weight:600;line-height:1.7;margin-bottom:.4rem;}
+    .place-line{background:var(--bg);border:2px solid var(--day-border);border-radius:12px;padding:.6rem .4rem;margin:.6rem 0;}
+    .place-readout{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--day-dark);min-height:1.4rem;text-align:center;font-size:.95rem;}
+    .level-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
+    .level-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.92rem;letter-spacing:.06em;text-transform:uppercase;padding:.6rem 1.15rem;border-radius:12px;border:2px solid var(--day-border);background:var(--surface);color:var(--day-dark);min-height:2.9rem;display:inline-flex;align-items:center;}
+    .level-btn.active{background:var(--day-color);color:#fff;border-color:var(--day-color);box-shadow:0 3px 10px var(--day-glow);}
   </style>
 </head>
 <body>
@@ -249,9 +255,10 @@
     <!-- ★ MODIFIER : Semaine et Jour -->
     <div class="week-label">Semaine 2 &ndash; Jour 2</div>
     <!-- ★ MODIFIER : Titre de l'activité -->
-    <h1><span class="hl">Nombres relatifs</span></h1>
+    <h1><span class="hl">Nombres relatifs négatifs</span></h1>
     <!-- ★ MODIFIER : sous-titre -->
-    <p class="subtitle">7 exercices &middot; comparer et ranger &middot; niveau 4e</p>
+    <p class="subtitle">Placer un point sur une droite graduée</p>
+    <div class="level-row"><span class="level-btn">Niveau 1</span><span class="level-btn">Niveau 2</span><span class="level-btn active">Niveau 3</span></div>
   </header>
 
   <div class="progress-wrap">
@@ -277,12 +284,24 @@
     <div class="theme-badge" id="q-theme">Ranger</div>
     <div class="eq-box" id="q-eq"></div>
     <div class="q-text" id="q-text"></div>
+
+    <div class="place-area" id="place-area" style="display:none;">
+      <div class="place-consigne" id="place-consigne"></div>
+      <div class="place-line" id="place-line"></div>
+      <div class="place-readout" id="place-readout"></div>
+      <div class="btn-row" style="margin-top:.8rem;">
+        <button class="btn btn-primary" id="place-check" onclick="checkPlace()">&#10003; Valider</button>
+        <button class="btn btn-ghost" id="place-clear" onclick="clearPlace()">&#8635; Effacer</button>
+        <button class="btn btn-hint" onclick="toggleHint()">? Indice</button>
+      </div>
+    </div>
+
     <div class="method-box" id="method-box"></div>
 
-    <div class="input-row">
+    <div class="input-row" id="input-row">
       <span class="input-label" id="input-label">x =</span>
       <input type="text" class="answer-input" id="answer-input"
-             placeholder="?" autocomplete="off" autocapitalize="off" spellcheck="false"/>
+             autocomplete="off" autocapitalize="off" spellcheck="false"/>
       <button class="btn btn-primary" id="btn-check" onclick="checkAnswer()">
         &#10003; Valider
       </button>
@@ -318,7 +337,7 @@
         R&eacute;sultats
       </div>
       <div class="results-score">
-        <span class="s-num" id="score-num">0</span>/7
+        <span class="s-num" id="score-num">0</span>/<span id="score-total">7</span>
       </div>
       <div class="stars" id="stars-row"></div>
       <div class="results-msg" id="results-msg"></div>
@@ -349,25 +368,75 @@
 ═══════════════════════════════════════════════════════ */
 
 var EXERCISES = [
-  { eq:"Range dans l’ordre croissant : −5 ; 3 ; −2 ; 0<br><span style='font-size:.8em;color:#666;'>Réponds en séparant par des points‑virgules.</span>", label:"Réponse =", answers:["-5;-2;0;3","-5,-2,0,3"], show:"−5 ; −2 ; 0 ; 3", theme:"Ranger",
-    method:"Du plus petit au plus grand : −5 ; −2 ; 0 ; 3.", hint:"Le plus négatif est le plus petit." },
-  { eq:"Range dans l’ordre croissant : 4 ; −7 ; −1 ; 2<br><span style='font-size:.8em;color:#666;'>Réponds en séparant par des points‑virgules.</span>", label:"Réponse =", answers:["-7;-1;2;4","-7,-1,2,4"], show:"−7 ; −1 ; 2 ; 4", theme:"Ranger",
-    method:"Du plus petit au plus grand : −7 ; −1 ; 2 ; 4.", hint:"Commence par le plus négatif." },
-  { eq:"Range dans l’ordre décroissant : −3 ; 5 ; −8 ; 1<br><span style='font-size:.8em;color:#666;'>Réponds en séparant par des points‑virgules.</span>", label:"Réponse =", answers:["5;1;-3;-8","5,1,-3,-8"], show:"5 ; 1 ; −3 ; −8", theme:"Ranger",
-    method:"Du plus grand au plus petit : 5 ; 1 ; −3 ; −8.", hint:"Commence par le plus grand (le plus à droite)." },
-  { eq:"Range dans l’ordre croissant : −6 ; 2 ; −1 ; −9<br><span style='font-size:.8em;color:#666;'>Réponds en séparant par des points‑virgules.</span>", label:"Réponse =", answers:["-9;-6;-1;2","-9,-6,-1,2"], show:"−9 ; −6 ; −1 ; 2", theme:"Ranger",
-    method:"Du plus petit au plus grand : −9 ; −6 ; −1 ; 2.", hint:"Le plus négatif d’abord." },
-  { eq:"Quel est le plus petit : −12 ; −7 ; −20 ; −3&nbsp;?", label:"Réponse =", answers:["-20"], show:"−20", theme:"Comparer",
-    method:"Le plus négatif est le plus petit : −20.", hint:"Plus un négatif est grand en chiffres, plus il est petit." },
-  { eq:"Quel est le plus grand : −5 ; −15 ; −2 ; −8&nbsp;?", label:"Réponse =", answers:["-2"], show:"−2", theme:"Comparer",
-    method:"Le plus proche de 0 est le plus grand : −2.", hint:"Le plus proche de 0 est le plus grand." },
-  { eq:"Range dans l’ordre croissant : 0 ; −4 ; 7 ; −1<br><span style='font-size:.8em;color:#666;'>Réponds en séparant par des points‑virgules.</span>", label:"Réponse =", answers:["-4;-1;0;7","-4,-1,0,7"], show:"−4 ; −1 ; 0 ; 7", theme:"Ranger",
-    method:"Du plus petit au plus grand : −4 ; −1 ; 0 ; 7.", hint:"Le plus négatif d’abord." }
+  { type:"input", theme:"Deviner un nombre",
+    eq:"Je suis un nombre positif dont la distance \u00e0 z\u00e9ro est comprise entre 3 et 4. Le produit de mes trois chiffres vaut 6. Mon chiffre des centi\u00e8mes est inf\u00e9rieur \u00e0 mon chiffre des dixi\u00e8mes. Qui suis-je\u00a0?",
+    label:"R\u00e9ponse =", answers:["3.21","3,21"], show:"3,21",
+    method:"Entre 3 et 4 \u2192 3,?? ; 3 \u00d7 d \u00d7 c = 6 \u2192 d \u00d7 c = 2 ; centi\u00e8mes < dixi\u00e8mes \u2192 3,21.",
+    hint:"Le nombre commence par 3, puis cherche deux chiffres dont le produit avec 3 donne 6." },
+  { type:"place", theme:"Placer un point",
+    consigne:"Place le point <strong>A</strong> d\u2019abscisse <strong>\u22124,2</strong> sur la droite gradu\u00e9e.",
+    line:{labelMin:-6,labelMax:0,step:1,sub:0.1,drawMin:-6.3,drawMax:0.4}, nom:"A", target:-4.2, snap:0.1,
+    show:"\u22124,2", method:"\u22124,2 est entre \u22125 et \u22124, \u00e0 2 sous-graduations apr\u00e8s \u22125.",
+    hint:"Compte les petites graduations apr\u00e8s \u22125 ; chacune vaut 0,1." },
+  { type:"place", theme:"Placer un point",
+    consigne:"Place le point <strong>B</strong> d\u2019abscisse <strong>\u22121,7</strong> sur la droite gradu\u00e9e.",
+    line:{labelMin:-6,labelMax:0,step:1,sub:0.1,drawMin:-6.3,drawMax:0.4}, nom:"B", target:-1.7, snap:0.1,
+    show:"\u22121,7", method:"\u22121,7 est entre \u22122 et \u22121, \u00e0 3 sous-graduations apr\u00e8s \u22122.",
+    hint:"\u22121,7 se trouve entre \u22122 et \u22121." },
+  { type:"place", theme:"Placer un point",
+    consigne:"Place le point <strong>C</strong> d\u2019abscisse <strong>\u22120,9</strong> sur la droite gradu\u00e9e.",
+    line:{labelMin:-6,labelMax:0,step:1,sub:0.1,drawMin:-6.3,drawMax:0.4}, nom:"C", target:-0.9, snap:0.1,
+    show:"\u22120,9", method:"\u22120,9 est juste avant 0, \u00e0 une sous-graduation de 0.",
+    hint:"\u22120,9 est tout proche de 0, du c\u00f4t\u00e9 n\u00e9gatif." },
+  { type:"place", theme:"Placer un point",
+    consigne:"Place le point <strong>D</strong> d\u2019abscisse <strong>\u22122,6</strong> sur la droite gradu\u00e9e.",
+    line:{labelMin:-3,labelMax:3,step:1,sub:0.1,drawMin:-3.3,drawMax:3.4}, nom:"D", target:-2.6, snap:0.1,
+    show:"\u22122,6", method:"\u22122,6 est entre \u22123 et \u22122, \u00e0 4 sous-graduations apr\u00e8s \u22123.",
+    hint:"\u22122,6 se trouve entre \u22123 et \u22122." },
+  { type:"place", theme:"Placer un point",
+    consigne:"Place le point <strong>E</strong> d\u2019abscisse <strong>0,2</strong> sur la droite gradu\u00e9e.",
+    line:{labelMin:-3,labelMax:3,step:1,sub:0.1,drawMin:-3.3,drawMax:3.4}, nom:"E", target:0.2, snap:0.1,
+    show:"0,2", method:"0,2 est juste apr\u00e8s 0, \u00e0 2 sous-graduations.",
+    hint:"0,2 est tout proche de 0, du c\u00f4t\u00e9 positif." },
+  { type:"place", theme:"Placer un point",
+    consigne:"Place le point <strong>F</strong> d\u2019abscisse <strong>2,2</strong> sur la droite gradu\u00e9e.",
+    line:{labelMin:-3,labelMax:3,step:1,sub:0.1,drawMin:-3.3,drawMax:3.4}, nom:"F", target:2.2, snap:0.1,
+    show:"2,2", method:"2,2 est entre 2 et 3, \u00e0 2 sous-graduations apr\u00e8s 2.",
+    hint:"2,2 se trouve juste apr\u00e8s 2." }
 ];
 
 /* ═══════════════════════════════════════════════════════
    MOTEUR — NE PAS MODIFIER
 ═══════════════════════════════════════════════════════ */
+/* --- droite graduée cliquable (placement) --- */
+var PW=620, Px0=40, Py=70;
+function pxFor(t,dmin,dmax){ return Px0 + (t-dmin)/(dmax-dmin)*(PW-2*Px0); }
+function tFor(px,dmin,dmax){ return dmin + (px-Px0)/(PW-2*Px0)*(dmax-dmin); }
+function numTxt(v){ var s=(""+Math.abs(v)).replace(".",","); return (v<0?"\u2212":"")+s; }
+function snap(t,sub){ return Math.round(t/sub)*sub; }
+function buildLine(cfg, placed){
+  var dmin=cfg.drawMin, dmax=cfg.drawMax, xL=Px0-14, xR=PW-Px0+14;
+  var s="<svg viewBox='0 0 "+PW+" 110' style='width:100%;height:auto;display:block;touch-action:none;cursor:pointer;' id='place-svg'>";
+  s+="<line x1='"+xL+"' y1='"+Py+"' x2='"+xR+"' y2='"+Py+"' stroke='#444' stroke-width='2'/>";
+  s+="<polygon points='"+xR+","+Py+" "+(xR-10)+","+(Py-5)+" "+(xR-10)+","+(Py+5)+"' fill='#444'/>";
+  if(cfg.sub){
+    var n=Math.round((dmax-cfg.labelMin)/cfg.sub);
+    for(var i=0;i<=n;i++){ var t=cfg.labelMin+i*cfg.sub; if(t>dmax+1e-9)break;
+      var xs=pxFor(t,dmin,dmax); if(xs>=xL&&xs<=xR) s+="<line x1='"+xs.toFixed(1)+"' y1='"+(Py-4)+"' x2='"+xs.toFixed(1)+"' y2='"+(Py+4)+"' stroke='#888' stroke-width='1'/>"; }
+  }
+  for(var k=cfg.labelMin;k<=cfg.labelMax+1e-9;k+=cfg.step){
+    var x=pxFor(k,dmin,dmax);
+    s+="<line x1='"+x.toFixed(1)+"' y1='"+(Py-8)+"' x2='"+x.toFixed(1)+"' y2='"+(Py+8)+"' stroke='#444' stroke-width='2'/>";
+    s+="<text x='"+x.toFixed(1)+"' y='"+(Py+26)+"' font-size='13' text-anchor='middle' fill='#222' font-family='Arial'>"+numTxt(Math.round(k*1e6)/1e6)+"</text>";
+  }
+  if(placed && placed.t!==null && placed.t!==undefined){
+    var px=pxFor(placed.t,dmin,dmax);
+    s+="<line x1='"+(px-7).toFixed(1)+"' y1='"+(Py-7)+"' x2='"+(px+7).toFixed(1)+"' y2='"+(Py+7)+"' stroke='var(--day-color)' stroke-width='3'/>";
+    s+="<line x1='"+(px+7).toFixed(1)+"' y1='"+(Py-7)+"' x2='"+(px-7).toFixed(1)+"' y2='"+(Py+7)+"' stroke='var(--day-color)' stroke-width='3'/>";
+    s+="<text x='"+px.toFixed(1)+"' y='"+(Py-13)+"' font-size='15' font-weight='bold' font-style='italic' text-anchor='middle' fill='var(--day-dark)' font-family='Arial'>"+placed.nom+"</text>";
+  }
+  s+="</svg>"; return s;
+}
 var TOTAL = EXERCISES.length;
 var current = 0;
 var userAnswers = new Array(TOTAL).fill(null);
@@ -378,33 +447,95 @@ function render(){
   var ex = EXERCISES[current];
   $("q-num").textContent = "Exercice " + (current+1);
   $("q-theme").textContent = ex.theme;
-  $("q-eq").innerHTML = ex.eq;
-  $("q-text").textContent = "";
   $("method-box").innerHTML = ex.method;
   $("method-box").className = "method-box" + (userAnswers[current] !== null ? " reveal" : "");
-  $("input-label").textContent = ex.label;
   $("hint-box").innerHTML = "";
   $("hint-box").classList.remove("show");
   hintOpen = false;
   $("feedback").className = "feedback";
-  var inp = $("answer-input");
-  inp.className = "answer-input";
-  inp.value = userAnswers[current] !== null ? userAnswers[current] : "";
-  if(userAnswers[current] !== null){
-    var correct = isCorrect(userAnswers[current], ex);
-    inp.className = "answer-input " + (correct ? "correct-input" : "wrong-input");
-    inp.disabled = true;
-    $("btn-check").disabled = true;
-    $("btn-next").disabled = false;
-    showFeedback(correct);
+
+  if(ex.type === "place"){
+    /* ----- exercice de PLACEMENT (clic) ----- */
+    $("q-eq").innerHTML = "";
+    $("q-eq").style.display = "none";
+    $("input-row").style.display = "none";
+    $("place-area").style.display = "block";
+    $("place-consigne").innerHTML = ex.consigne;
+    var ph = userAnswers[current]; /* {t:...} ou null */
+    var placed = (ph !== null && ph !== undefined) ? { nom:ex.nom, t:ph.t } : null;
+    $("place-line").innerHTML = buildLine(ex.line, placed);
+    var svg = $("place-svg");
+    if(svg){ svg.addEventListener("click", onPlaceClick); }
+    if(ph !== null && ph !== undefined){
+      $("place-readout").textContent = "Point " + ex.nom + " placé sur " + numTxt(ph.t);
+      var correct = isCorrect(ph, ex);
+      $("place-check").disabled = true;
+      $("place-clear").disabled = true;
+      $("btn-next").disabled = false;
+      showFeedback(correct);
+    } else {
+      $("place-readout").textContent = "Clique sur la droite pour placer le point.";
+      $("place-check").disabled = false;
+      $("place-clear").disabled = false;
+      $("btn-next").disabled = true;
+    }
   } else {
-    inp.disabled = false;
-    $("btn-check").disabled = false;
-    $("btn-next").disabled = true;
-    inp.focus();
+    /* ----- exercice à SAISIE (input) ----- */
+    $("place-area").style.display = "none";
+    $("q-eq").style.display = "";
+    $("input-row").style.display = "flex";
+    $("q-eq").innerHTML = ex.eq;
+    $("input-label").textContent = ex.label;
+    var inp = $("answer-input");
+    inp.className = "answer-input";
+    inp.value = userAnswers[current] !== null ? userAnswers[current] : "";
+    if(userAnswers[current] !== null){
+      var ok = isCorrect(userAnswers[current], ex);
+      inp.className = "answer-input " + (ok ? "correct-input" : "wrong-input");
+      inp.disabled = true;
+      $("btn-check").disabled = true;
+      $("btn-next").disabled = false;
+      showFeedback(ok);
+    } else {
+      inp.disabled = false;
+      $("btn-check").disabled = false;
+      $("btn-next").disabled = true;
+      inp.focus();
+    }
   }
   updateProgress();
   $("btn-prev").disabled = current === 0;
+}
+
+/* ── moteur de placement par clic ── */
+var pendingT = null;
+function onPlaceClick(evt){
+  var ex = EXERCISES[current];
+  if(userAnswers[current] !== null) return;
+  var svg = $("place-svg");
+  var r = svg.getBoundingClientRect();
+  var px = (evt.clientX - r.left) / r.width * 620; /* viewBox width */
+  var t = snap(tFor(px, ex.line.drawMin, ex.line.drawMax), ex.snap);
+  if(t < ex.line.drawMin) t = ex.line.drawMin;
+  if(t > ex.line.drawMax) t = ex.line.drawMax;
+  pendingT = Math.round(t*1e6)/1e6;
+  $("place-line").innerHTML = buildLine(ex.line, { nom:ex.nom, t:pendingT });
+  var s2 = $("place-svg"); if(s2){ s2.addEventListener("click", onPlaceClick); }
+  $("place-readout").textContent = "Point " + ex.nom + " placé sur " + numTxt(pendingT) + " (clique sur Valider)";
+}
+function clearPlace(){
+  if(userAnswers[current] !== null) return;
+  pendingT = null;
+  var ex = EXERCISES[current];
+  $("place-line").innerHTML = buildLine(ex.line, null);
+  var s2 = $("place-svg"); if(s2){ s2.addEventListener("click", onPlaceClick); }
+  $("place-readout").textContent = "Clique sur la droite pour placer le point.";
+}
+function checkPlace(){
+  if(pendingT === null){ $("place-readout").textContent = "Place d’abord le point en cliquant sur la droite."; return; }
+  userAnswers[current] = { t: pendingT };
+  pendingT = null;
+  render();
 }
 
 function showFeedback(correct){
@@ -423,7 +554,7 @@ function showFeedback(correct){
 }
 
 function norm(s){return String(s).toLowerCase().replace(/\s+/g,"").replace(/\u2212/g,"-").replace(/\u00b2/g,"^2").replace(/\u00b3/g,"^3").replace(/[\u00d7\u00b7*]/g,"");}
-function isCorrect(v,ex){if(v===null||v===undefined)return false;if(ex.answers){var n=norm(v);return ex.answers.some(function(a){return norm(a)===n;});}return parseFloat(v)===ex.ans;}
+function isCorrect(v,ex){if(v===null||v===undefined)return false;if(ex.type==="place"){return v&&typeof v.t!=="undefined"&&Math.abs(v.t-ex.target)<1e-6;}if(ex.answers){var n=norm(v);return ex.answers.some(function(a){return norm(a)===n;});}return parseFloat(v)===ex.ans;}
 function checkAnswer(){
   var raw = $("answer-input").value.trim();
   if(raw===""){ $("answer-input").focus(); return; }
@@ -468,20 +599,26 @@ function showResults(){
     return a !== null && isCorrect(a, EXERCISES[i]);
   }).length;
   $("score-num").textContent = ok;
+  $("score-total").textContent = TOTAL;
   var stars = ok >= TOTAL ? 5 : ok >= Math.ceil(TOTAL*.8) ? 4
     : ok >= Math.ceil(TOTAL*.6) ? 3 : ok >= Math.ceil(TOTAL*.4) ? 2 : 1;
   $("stars-row").textContent = "\u2B50".repeat(stars) + "\u2606".repeat(5-stars);
-  var msgs = ["Continue \u00e0 t\u2019entra\u00eener !","Bon d\u00e9but !",
-    "Pas mal !","Bien jou\u00e9 !","Tr\u00e8s bien !","Parfait ! Bravo ! \uD83C\uDF89"];
-  $("results-msg").textContent = msgs[Math.min(ok, msgs.length-1)];
+  var msg;
+  if(ok===TOTAL) msg="Parfait\u00a0! Bravo\u00a0! \uD83C\uDF89";
+  else if(ok>=Math.ceil(TOTAL*0.8)) msg="Tr\u00e8s bien\u00a0!";
+  else if(ok>=Math.ceil(TOTAL*0.6)) msg="Bien jou\u00e9\u00a0!";
+  else if(ok>=Math.ceil(TOTAL*0.4)) msg="Bon d\u00e9but\u00a0!";
+  else msg="Continue \u00e0 t\u2019entra\u00eener\u00a0!";
+  $("results-msg").textContent = msg;
   var list = $("recap-list"); list.innerHTML = "";
   EXERCISES.forEach(function(ex, i){
     var correct = isCorrect(userAnswers[i], ex);
+    var libelle = (ex.type === "place") ? ("Point " + ex.nom) : "Deviner";
     var div = document.createElement("div");
     div.className = "recap-item " + (correct ? "ok-item" : "ko-item");
     div.innerHTML = "<span>" + (correct ? "\u2705" : "\u274C") + "</span>"
-      + "<span class='eq'>" + ex.eq.replace(/<br>/g," ") + "</span>"
-      + "<span>" + ex.label + " " + (ex.show||ex.ans) + "</span>";
+      + "<span class='eq'>" + libelle + "</span>"
+      + "<span>" + (ex.show||ex.ans) + "</span>";
     list.appendChild(div);
   });
   window.scrollTo({top:0,behavior:"smooth"});
