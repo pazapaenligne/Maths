@@ -25,21 +25,39 @@ body{
   margin:0; padding:18px 14px 60px;
   font-family:'JetBrains Mono','Courier New',monospace;
   color:var(--txt);
+  position:relative;
   background:
-    /* givre subtil dans les angles supérieurs */
-    radial-gradient(circle at 4% 2%, rgba(255,255,255,.55), transparent 14%),
-    radial-gradient(circle at 96% 3%, rgba(255,255,255,.5), transparent 16%),
-    /* halos glacés discrets */
-    radial-gradient(ellipse 70% 55% at 78% 12%, rgba(43,143,214,.10), transparent 60%),
-    radial-gradient(ellipse 80% 60% at 12% 42%, rgba(43,143,214,.09), transparent 62%),
-    radial-gradient(ellipse 75% 55% at 88% 78%, rgba(31,174,176,.07), transparent 60%),
-    /* grille technique très fine */
-    repeating-linear-gradient(0deg, rgba(43,143,214,.03) 0 1px, transparent 1px 38px),
-    repeating-linear-gradient(90deg, rgba(43,143,214,.03) 0 1px, transparent 1px 38px),
-    /* base bleu glacier clair */
-    linear-gradient(180deg, #f6fcff 0%, #e9f3fa 100%);
+    radial-gradient(ellipse 75% 55% at 80% 12%, rgba(64,150,210,.30), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 12% 45%, rgba(43,110,180,.26), transparent 62%),
+    radial-gradient(ellipse 75% 55% at 88% 85%, rgba(31,140,160,.20), transparent 60%),
+    linear-gradient(180deg, #16304a 0%, #0c1d30 100%);
   background-attachment: fixed;
   min-height:100vh;
+}
+/* décor immersif combo (givre + grille) — intensité douce ~35% */
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(90,180,240,.045) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(90deg, rgba(90,180,240,.045) 0 1px, transparent 1px 40px),
+    radial-gradient(2px 2px at 20% 30%, rgba(200,235,255,.35), transparent),
+    radial-gradient(2px 2px at 80% 18%, rgba(200,235,255,.30), transparent),
+    radial-gradient(1.5px 1.5px at 35% 78%, rgba(200,235,255,.25), transparent),
+    radial-gradient(2px 2px at 90% 60%, rgba(200,235,255,.30), transparent),
+    radial-gradient(1.5px 1.5px at 55% 45%, rgba(200,235,255,.22), transparent);
+  background-size: auto, auto, 320px 320px, 320px 320px, 320px 320px, 320px 320px, 320px 320px;
+  animation: bgFall 26s linear infinite;
+}
+/* balayage scan lumineux — discret */
+body::after{
+  content:""; position:fixed; left:0; right:0; height:150px; z-index:-1; pointer-events:none;
+  background:linear-gradient(180deg, transparent, rgba(120,210,255,.07), transparent);
+  animation: bgSweep 9s ease-in-out infinite;
+}
+@keyframes bgFall{ from{ background-position:0 0,0 0,0 -8%,0 -8%,0 -8%,0 -8%,0 -8%; } to{ background-position:0 0,0 0,0 12%,0 12%,0 12%,0 12%,0 12%; } }
+@keyframes bgSweep{ 0%{ top:-150px; } 100%{ top:100%; } }
+@media (prefers-reduced-motion: reduce){
+  body::before{ animation:none; } body::after{ display:none; }
 }
 .wrap{ max-width:760px; margin:0 auto; position:relative; }
 
@@ -58,10 +76,10 @@ body{
 .dots i:nth-child(1){ background:var(--vert); }
 .dots i:nth-child(2){ background:var(--neutre); }
 .dots i:nth-child(3){ background:var(--rouge); }
-.semaine{ margin-top:12px; font-family:'Orbitron',sans-serif; font-size:.74rem; letter-spacing:2px; color:var(--gris); text-transform:uppercase; }
-.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.9rem; line-height:1.15; margin:6px 0 6px; color:var(--txt); }
-.titre .accent{ color:var(--bleu); }
-.sous-titre{ font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:1px; color:var(--bleu-fonce); }
+.semaine{ margin-top:12px; font-family:'Orbitron',sans-serif; font-size:.74rem; letter-spacing:2px; color:#9fc4dd; text-transform:uppercase; }
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.9rem; line-height:1.15; margin:6px 0 6px; color:#f0f8ff; text-shadow:0 2px 14px rgba(0,0,0,.4); }
+.titre .accent{ color:#6cc4f5; }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:1px; color:#bfe2f7; }
 .sound-btn{
   margin-top:12px; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.66rem;
   letter-spacing:1px; padding:7px 14px; border-radius:14px;
@@ -416,7 +434,7 @@ body{
         Avant de relancer la fabrication des caramels, les techniciens doivent
         <b>trier les données selon leur signe</b>.
       </div>
-      <div class="aff-mission">🎯 Mission : identifier les données positives, neutres et négatives pour reprogrammer le système.</div>
+      <div class="aff-mission">🎯 Mission : identifier les données positives, les données négatives et la donnée nulle (0) afin de reprogrammer le système.</div>
       <button class="btn-start" id="btn-start">▶ DÉMARRER LA REPROGRAMMATION</button>
     </div>
   </div>
@@ -462,7 +480,7 @@ body{
           <div class="bac-zone" id="bac-POS"></div>
         </div>
         <div class="bac zero" data-zone="ZERO">
-          <div class="bac-titre">⚪ DONNÉE DE RÉFÉRENCE</div>
+          <div class="bac-titre">⚪ DONNÉE NULLE (0)</div>
           <div class="bac-zone" id="bac-ZERO"></div>
         </div>
         <div class="bac neg" data-zone="NEG">
@@ -556,6 +574,20 @@ let ep1Done = false, ep3Done = false;
 let soundOn = true, actx = null;
 function ctx(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } if(actx && actx.state!=='running'){ try{ actx.resume(); }catch(e){} } return actx; }
 function noise(d){ const c=actx; const n=Math.floor(c.sampleRate*d); const b=c.createBuffer(1,n,c.sampleRate); const a=b.getChannelData(0); for(let i=0;i<n;i++) a[i]=Math.random()*2-1; return b; }
+
+/* 🚀 démarrage système : deux bips électroniques + montée d'activation ~0,45 s */
+function playBoot(){
+  if(!soundOn) return; const c=ctx(); if(!c) return; const t=c.currentTime;
+  [[660,0],[990,0.16]].forEach(([f,d])=>{
+    const o=c.createOscillator(); o.type='square'; o.frequency.value=f;
+    const g=c.createGain(); const tt=t+d;
+    g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.07,tt+0.01); g.gain.exponentialRampToValueAtTime(0.0001,tt+0.13);
+    o.connect(g); g.connect(c.destination); o.start(tt); o.stop(tt+0.15);
+  });
+  const o2=c.createOscillator(); o2.type='sine'; o2.frequency.setValueAtTime(880,t+0.30); o2.frequency.exponentialRampToValueAtTime(1320,t+0.42);
+  const g2=c.createGain(); g2.gain.setValueAtTime(0.0001,t+0.30); g2.gain.exponentialRampToValueAtTime(0.09,t+0.33); g2.gain.exponentialRampToValueAtTime(0.0001,t+0.44);
+  o2.connect(g2); g2.connect(c.destination); o2.start(t+0.30); o2.stop(t+0.46);
+}
 
 /* 📦 carte bien déposée : clac magnétique (aimantation douce) ~0,12 s */
 function playClac(){
@@ -673,7 +705,7 @@ function checkEp1(){
     ep1Done=true; etapesOk++;
     $('ep1').classList.add('done');
     const fb=$('fb1'); fb.className='fb show ok';
-    fb.innerHTML='✅ <b>Données triées&nbsp;!</b> Le tri par signe est restauré. Module suivant déverrouillé.';
+    fb.innerHTML='✅ <b>Données triées&nbsp;!</b> Le tri par signe est restauré. Rappel : le nombre 0 est une valeur nulle, il n\'est ni positif ni négatif. Module suivant déverrouillé.';
     playValid();
     unlock('ep3');
     updateHud();
@@ -740,7 +772,7 @@ function updateHud(){
   const pct = Math.round(etapesOk/TOTAL_ETAPES*100);
   $('xp-fill').style.width = pct+'%';
   $('xp-pct').textContent = pct+' %';
-  $('etape-count').textContent = etapesOk===0 ? (TOTAL_ETAPES+' MODULES À RESTAURER') : (etapesOk+' / '+TOTAL_ETAPES+' MODULES RESTAURÉS');
+  $('etape-count').textContent = etapesOk===0 ? (TOTAL_ETAPES+' MODULES À RESTAURER') : (etapesOk===TOTAL_ETAPES ? '✅ TOUS LES MODULES SONT OPÉRATIONNELS' : (etapesOk+' / '+TOTAL_ETAPES+' MODULES RESTAURÉS'));
   const allDone = ep1Done && ep3Done;
   const bf=$('btn-final');
   bf.disabled = !allDone;
@@ -776,6 +808,7 @@ function armBacs(){
 }
 function startGame(){
   if(soundOn) ctx();
+  playBoot();
   $('page-affiche').classList.remove('show');
   $('page-jeu').classList.add('show');
 }
