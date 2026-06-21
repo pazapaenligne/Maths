@@ -3,1523 +3,806 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Je relève le défi – 4ème S2 J2 · Nombres relatifs</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<title>Reprogrammer le laboratoire Colle & Sugar – 4ème · Signe d'un nombre relatif</title>
 <style>
 /* ============================================================
-   PAZAPA — JE RELÈVE LE DÉFI
-   4e · Semaine 2 · Jour 2 (MARDI)
-   Couleur du jour : #f5a623 / #c47a10 / #fff5e0 / #f5d080
+   PAZAPA — REPROGRAMMER LE LABORATOIRE COLLE & SUGAR
+   4e · Signe d'un nombre relatif (positif / neutre / négatif)
+   Thème : laboratoire chambre froide, bleu glacé, verre dépoli
    ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
 :root{
-  --jour:        #f28b82;   /* couleur principale du jour */
-  --jour-fonce:  #c0392b;   /* version foncée */
-  --jour-clair:  #fff0ef;   /* fond très clair */
-  --jour-pale:   #f9c0bb;   /* version pâle */
-
-  --bg:          #fffdf7;   /* fond général clair Pazapa */
-  --dark:        #1a1f2e;   /* encart game sombre */
-  --dark-2:      #232a3d;
-  --vert:        #22c55e;
-  --vert-neon:   #4ade80;
-  --rouge:       #ef4444;
-  --txt:         #2b2b2b;
-  --gris:        #8b8b8b;
+  --bleu:#2b8fd6; --bleu-fonce:#1668a8; --bleu-clair:#eaf6ff; --bleu-pale:#bfe2f7;
+  --glace:#f4fbff; --bg:#eef7fc; --txt:#15303f; --gris:#6a8597;
+  --vert:#1fae6b; --vert-clair:#e3f9ee;
+  --rouge:#e0524a; --rouge-clair:#fdecea;
+  --neutre:#8aa0ad; --neutre-clair:#eef2f5;
+  --jour:var(--bleu); --jour-fonce:var(--bleu-fonce); --jour-clair:var(--bleu-clair); --jour-pale:var(--bleu-pale);
 }
-
-*{ box-sizing:border-box; margin:0; padding:0; }
-
+*{ box-sizing:border-box; }
 body{
-  font-family: Arial, Helvetica, sans-serif;
-  background: var(--bg);
-  color: var(--txt);
-  min-height: 100vh;
-  overflow-x: hidden;
-  position: relative;
-  padding: 20px 16px 50px;
+  margin:0; padding:18px 14px 60px;
+  font-family:'JetBrains Mono','Courier New',monospace;
+  color:var(--txt);
+  background:
+    /* givre subtil dans les angles supérieurs */
+    radial-gradient(circle at 4% 2%, rgba(255,255,255,.55), transparent 14%),
+    radial-gradient(circle at 96% 3%, rgba(255,255,255,.5), transparent 16%),
+    /* halos glacés discrets */
+    radial-gradient(ellipse 70% 55% at 78% 12%, rgba(43,143,214,.10), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 12% 42%, rgba(43,143,214,.09), transparent 62%),
+    radial-gradient(ellipse 75% 55% at 88% 78%, rgba(31,174,176,.07), transparent 60%),
+    /* grille technique très fine */
+    repeating-linear-gradient(0deg, rgba(43,143,214,.03) 0 1px, transparent 1px 38px),
+    repeating-linear-gradient(90deg, rgba(43,143,214,.03) 0 1px, transparent 1px 38px),
+    /* base bleu glacier clair */
+    linear-gradient(180deg, #f6fcff 0%, #e9f3fa 100%);
+  background-attachment: fixed;
+  min-height:100vh;
 }
+.wrap{ max-width:760px; margin:0 auto; position:relative; }
 
-/* ====== BULLES STATIQUES DE FOND ======
-   - nettes (pas de blur), opacité douce, bulle rose retirée */
-.bulle{ position:fixed; border-radius:50%; opacity:.32; z-index:0; pointer-events:none; }
-.bulle-jaune  { width:200px; height:200px; background:#ffd84d; top:-60px;   right:-50px; }
-.bulle-jour   { width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
-.bulle-verte  { width:150px; height:150px; background:#9be7a5; top:45%;     right:-70px; }
-
-.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; }
-
-/* ====================== HEADER ====================== */
-.header{ text-align:center; margin-bottom:22px; }
-
+/* ===== HEADER ===== */
+.header{ text-align:center; margin-bottom:18px; }
 .logo-badge{
   display:inline-flex; align-items:center; gap:8px;
-  background: var(--jour);
-  color:#3a2c00;
+  background:#fff; border:1.5px solid var(--bleu-pale);
+  border-radius:20px; padding:6px 16px;
   font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
-  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
-  box-shadow:0 3px 10px rgba(242,139,130,.4);
-  margin-bottom:12px;
+  letter-spacing:1.5px; color:var(--bleu-fonce);
+  box-shadow:0 2px 8px rgba(43,143,214,.12);
 }
-.logo-badge .dots{ display:inline-flex; gap:3px; }
-.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
-.logo-badge .dots i:nth-child(2){ opacity:.6; }
-.logo-badge .dots i:nth-child(3){ opacity:.3; }
-
-.semaine{
-  font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px;
-  color:var(--gris); text-transform:uppercase; margin-bottom:6px;
-}
-.titre{
-  font-family:'Orbitron', sans-serif; font-weight:900;
-  font-size:2.3rem; line-height:1.1; color:var(--txt); margin-bottom:6px;
-}
-.titre .accent{ color:var(--jour); }
-.sous-titre{
-  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px;
-  color:var(--gris); margin-bottom:16px;
-}
-.sous-titre code{ color:var(--jour-fonce); font-weight:700; }
-
-.badge-revision{
-  display:inline-block;
-  background: var(--jour);
-  color:#3a2c00;
-  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
-  letter-spacing:1px; padding:9px 22px; border-radius:24px;
-  box-shadow:0 4px 14px rgba(242,139,130,.45);
-  animation: pulse 1.8s ease-in-out infinite;
-}
-@keyframes pulse{
-  0%,100%{ transform:scale(1);   box-shadow:0 4px 14px rgba(242,139,130,.45); }
-  50%    { transform:scale(1.05);box-shadow:0 6px 22px rgba(242,139,130,.7); }
+.dots{ display:inline-flex; gap:3px; }
+.dots i{ width:7px; height:7px; border-radius:50%; display:inline-block; }
+.dots i:nth-child(1){ background:var(--vert); }
+.dots i:nth-child(2){ background:var(--neutre); }
+.dots i:nth-child(3){ background:var(--rouge); }
+.semaine{ margin-top:12px; font-family:'Orbitron',sans-serif; font-size:.74rem; letter-spacing:2px; color:var(--gris); text-transform:uppercase; }
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.9rem; line-height:1.15; margin:6px 0 6px; color:var(--txt); }
+.titre .accent{ color:var(--bleu); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:1px; color:var(--bleu-fonce); }
+.sound-btn{
+  margin-top:12px; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.66rem;
+  letter-spacing:1px; padding:7px 14px; border-radius:14px;
+  border:1.5px solid var(--bleu); background:#fff; color:var(--bleu-fonce); cursor:pointer;
 }
 
-/* ================ ENCART GAME (fond clair dys-friendly) ================ */
+/* ===== PAGES ===== */
+.page{ display:none; }
+.page.show{ display:block; animation:fade .4s ease; }
+@keyframes fade{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+/* ===== AFFICHE ===== */
+.affiche{
+  background:rgba(255,255,255,.72); backdrop-filter:blur(6px);
+  border:2px solid var(--bleu); border-radius:18px;
+  padding:26px 24px; text-align:center;
+  box-shadow:0 8px 30px rgba(43,143,214,.18);
+}
+.banniere{
+  position:relative; border-radius:14px; overflow:hidden; margin-bottom:18px;
+  border:2px solid var(--bleu); box-shadow:0 6px 20px rgba(22,64,95,.3);
+  aspect-ratio:800/260;
+}
+.banniere-svg{ display:block; width:100%; height:100%; }
+.banniere-voile{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(22,64,95,.22) 0%, rgba(22,64,95,.55) 100%);
+}
+.banniere-titre{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:0 14px;
+}
+.bt-pre{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:2px;
+  color:#dff2ff; background:rgba(15,51,80,.55); border:1px solid rgba(191,230,255,.5);
+  padding:5px 14px; border-radius:14px; margin-bottom:10px;
+}
+.bt-main{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.5rem; line-height:1.2;
+  color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.45);
+}
+@media(max-width:560px){ .bt-main{ font-size:1.15rem; } }
+.aff-alerte{
+  display:inline-block; background:var(--rouge-clair); color:var(--rouge);
+  border:1.5px solid var(--rouge); border-radius:20px; padding:8px 20px;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.86rem; letter-spacing:1px;
+  margin-bottom:18px; animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(224,82,74,.4);} 50%{ box-shadow:0 0 0 8px rgba(224,82,74,0);} }
+.aff-intro{ font-size:.98rem; line-height:1.65; color:var(--txt); max-width:560px; margin:0 auto 14px; text-align:left; }
+.aff-intro b{ color:var(--bleu-fonce); }
+.aff-liste{ text-align:left; max-width:520px; margin:10px auto 16px; padding:14px 18px; background:var(--bleu-clair); border-radius:12px; border:1px solid var(--bleu-pale); font-size:.92rem; line-height:1.7; }
+.aff-mission{ font-family:'Orbitron',sans-serif; font-weight:700; color:var(--bleu-fonce); font-size:1rem; margin:14px 0; line-height:1.5; }
+.btn-start{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1.05rem; letter-spacing:1px;
+  padding:16px 34px; border:none; border-radius:14px; cursor:pointer;
+  background:linear-gradient(135deg, var(--bleu), var(--bleu-fonce)); color:#fff;
+  box-shadow:0 6px 18px rgba(43,143,214,.4); transition:transform .12s;
+}
+.btn-start:hover{ transform:translateY(-2px); }
+.btn-start:active{ transform:scale(.97); }
+
+/* ===== HUD / SCOREBOARD ===== */
 .game{
-  background: #fff;
-  border:2px solid var(--jour);
-  border-radius:18px;
-  padding:18px 20px 16px;
-  margin-bottom:24px;
-  box-shadow:0 4px 16px rgba(242,139,130,.18);
+  background:rgba(255,255,255,.78); backdrop-filter:blur(5px);
+  border:2px solid var(--bleu); border-radius:16px;
+  padding:14px; margin-bottom:16px; box-shadow:0 4px 16px rgba(43,143,214,.14);
 }
-.game-label{
-  font-family:'Orbitron',sans-serif; font-size:.66rem; font-weight:700;
-  letter-spacing:2px; color:var(--jour-fonce); margin-bottom:12px;
-}
+.game-label{ font-family:'Orbitron',sans-serif; font-size:.7rem; letter-spacing:2px; color:var(--bleu-fonce); text-align:center; margin-bottom:10px; }
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px; }
+.score-col{ text-align:center; padding:8px 4px; background:var(--glace); border:1.5px solid var(--bleu-pale); border-radius:10px; }
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.5rem; color:var(--bleu-fonce); }
+.score-lbl{ font-size:.66rem; color:var(--gris); margin-top:2px; }
+.score-col.ok .score-num{ color:var(--vert); }
+.score-col.err .score-num{ color:var(--rouge); }
+.xp-head{ display:flex; justify-content:space-between; font-family:'Orbitron',sans-serif; font-size:.68rem; letter-spacing:1px; color:var(--bleu-fonce); margin-bottom:5px; }
+.xp-bar{ height:12px; background:var(--neutre-clair); border-radius:8px; overflow:hidden; border:1px solid var(--bleu-pale); }
+.xp-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--bleu), var(--vert)); border-radius:8px; transition:width .5s ease; }
+.etape-count{ text-align:center; margin-top:10px; font-family:'Orbitron',sans-serif; font-size:.72rem; letter-spacing:1px; color:var(--gris); }
 
-/* étoiles */
-.etoiles{ text-align:center; margin-bottom:18px; font-size:1.55rem; letter-spacing:8px; }
-.etoiles .star{ color:#e0d3d0; transition:.3s; display:inline-block; }
-.etoiles .star.on{
-  color:var(--jour);
-  animation: pop .5s cubic-bezier(.18,.89,.32,1.6);
+/* ===== CARTE ÉPREUVE ===== */
+.epreuve{
+  position:relative;
+  background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(234,246,255,.72));
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border:2px solid var(--bleu); border-radius:16px;
+  padding:22px 18px 20px; margin-bottom:18px;
+  box-shadow:0 4px 16px rgba(43,143,214,.14), inset 0 0 22px rgba(43,143,214,.07), 0 0 0 1px rgba(116,182,224,.35);
 }
-@keyframes pop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+/* liseré lumineux haut (barre de console) */
+.epreuve::after{
+  content:""; position:absolute; top:0; left:18px; right:18px; height:2px;
+  background:linear-gradient(90deg, transparent, var(--bleu), transparent);
+  opacity:.7;
+}
+/* rangée de voyants d'état (coin haut-droit) */
+.epreuve::before{
+  content:""; position:absolute; top:10px; right:14px;
+  width:34px; height:8px; border-radius:4px;
+  background:
+    radial-gradient(circle 3px at 5px 4px, var(--vert) 60%, transparent 62%),
+    radial-gradient(circle 3px at 17px 4px, #ffd23e 60%, transparent 62%),
+    radial-gradient(circle 3px at 29px 4px, var(--neutre) 60%, transparent 62%);
+}
+.epreuve.done{ border-color:var(--vert); box-shadow:0 4px 16px rgba(31,174,107,.2), inset 0 0 22px rgba(31,174,107,.08), 0 0 0 1px rgba(31,174,107,.4); }
+/* quand validée : voyants tous au vert */
+.epreuve.done::before{
+  background:
+    radial-gradient(circle 3px at 5px 4px, var(--vert) 60%, transparent 62%),
+    radial-gradient(circle 3px at 17px 4px, var(--vert) 60%, transparent 62%),
+    radial-gradient(circle 3px at 29px 4px, var(--vert) 60%, transparent 62%);
+}
+.epreuve.locked{ opacity:.45; filter:grayscale(.6); pointer-events:none; }
+.epreuve.done{ border-color:var(--vert); }
+.ep-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.ep-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; color:var(--bleu-fonce); }
+.ep-badge{ font-family:'Orbitron',sans-serif; font-size:.6rem; font-weight:700; background:var(--bleu-clair); color:var(--bleu-fonce); border:1px solid var(--bleu-pale); padding:5px 11px; border-radius:14px; }
+.ep-consigne{ font-size:.94rem; line-height:1.55; margin-bottom:14px; color:var(--txt); }
+.ep-consigne b{ color:var(--bleu-fonce); }
 
-/* scoreboard */
-.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
-.score-col{
-  background: #fdf6f5;
-  border:1.5px solid #f0e0de;
-  border-radius:12px; padding:12px 6px; text-align:center;
+/* ===== ÉPREUVE 1 : tri ===== */
+.pool{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:54px; padding:12px; background:var(--glace); border:1.5px dashed var(--bleu-pale); border-radius:12px; margin-bottom:14px; }
+.pool:empty::after{ content:"Toutes les données sont classées ✓"; color:var(--gris); font-size:.85rem; }
+.releve{
+  font-family:'JetBrains Mono',monospace; font-weight:700; font-size:1.05rem;
+  padding:10px 14px; background:#fff; border:2px solid var(--bleu);
+  border-radius:10px; cursor:pointer; min-height:44px; min-width:64px;
+  display:inline-flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 6px rgba(43,143,214,.18); transition:transform .1s, box-shadow .15s;
+  position:relative;
 }
-.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.6rem; line-height:1; }
-.score-col.reussis  { border-color:#9be7a5; }
-.score-col.reussis  .score-num{ color:#157f3a; }
-.score-col.restants { border-color:var(--jour-pale); }
-.score-col.restants .score-num{ color:var(--jour-fonce); }
-.score-col.erreurs  { border-color:#f5b5b5; }
-.score-col.erreurs  .score-num{ color:#c0392b; }
-.score-lbl{
-  font-family:'Orbitron',sans-serif; font-size:.6rem; font-weight:700;
-  letter-spacing:1.5px; color:#7a7a7a; margin-top:6px; text-transform:uppercase;
-}
+.releve:hover{ transform:translateY(-2px); }
+.releve.sel{ outline:3px solid var(--bleu-fonce); outline-offset:2px; transform:scale(1.06); }
+.releve .role{ display:none; }
+.bacs{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+@media(max-width:560px){ .bacs{ grid-template-columns:1fr; } }
+.bac{ border-radius:12px; padding:10px 8px 14px; min-height:120px; border:2px solid; transition:background .15s; }
+.bac.pos{ border-color:var(--vert); background:var(--vert-clair); }
+.bac.zero{ border-color:var(--neutre); background:var(--neutre-clair); }
+.bac.neg{ border-color:var(--rouge); background:var(--rouge-clair); }
+.bac.hot{ box-shadow:0 0 0 4px rgba(43,143,214,.25); }
+.bac-titre{ font-family:'Orbitron',sans-serif; font-size:.72rem; font-weight:700; text-align:center; margin-bottom:8px; letter-spacing:.5px; }
+.bac.pos .bac-titre{ color:var(--vert); }
+.bac.zero .bac-titre{ color:var(--neutre); }
+.bac.neg .bac-titre{ color:var(--rouge); }
+.bac-zone{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; min-height:40px; }
+.bac .releve{ font-size:.95rem; padding:7px 10px; min-width:0; cursor:pointer; }
+.bac .releve.bad{ border-color:var(--rouge); animation:shake .35s; }
+@keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
 
-/* barre XP */
-.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-.xp-head span:first-child{
-  font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:1.5px; color:var(--jour-fonce);
+/* ===== ÉPREUVE 2 / 3 : QCM ===== */
+.qbloc{ margin-bottom:16px; }
+.qbloc:last-child{ margin-bottom:0; }
+.q-txt{ font-size:.95rem; font-weight:bold; margin-bottom:10px; color:var(--txt); }
+.q-txt .data{ color:var(--bleu-fonce); }
+.choices{ display:grid; gap:8px; }
+.choices.row2{ grid-template-columns:1fr 1fr; }
+.choix{
+  font-family:'JetBrains Mono',monospace; font-size:.95rem; text-align:left;
+  padding:12px 14px; border:2px solid var(--bleu-pale); border-radius:10px;
+  background:#fff; color:var(--txt); cursor:pointer; min-height:44px; transition:.12s;
 }
-.xp-head span:last-child{
-  font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; color:var(--jour-fonce);
-}
-.xp-bar{ height:9px; background:#f3e3e1; border-radius:8px; overflow:hidden; }
-.xp-fill{
-  height:100%; width:0%;
-  background:linear-gradient(90deg, var(--jour-fonce), var(--jour), #f9c0bb);
-  border-radius:8px; transition:width .6s cubic-bezier(.22,1,.36,1);
-}
-.defi-count{
-  text-align:center; margin-top:12px;
-  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:700;
-  letter-spacing:2px; color:#7a7a7a;
-}
+.choix:hover{ border-color:var(--bleu); background:var(--bleu-clair); }
+.choix.good{ border-color:var(--vert); background:var(--vert-clair); color:var(--vert); font-weight:700; }
+.choix.bad{ border-color:var(--rouge); background:var(--rouge-clair); color:var(--rouge); }
+.choix:disabled{ cursor:default; }
 
-/* ================== CARD EXERCICE ================== */
-.card{
-  background:#fff;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
-}
-.rainbow{
-  height:6px;
-  background:linear-gradient(90deg,#ff5e5e,#f28b82,#9be7a5,#3ab5d8,#a884ff,#ff5e5e);
-  background-size:300% 100%;
-  animation: slide 4s linear infinite;
-}
-@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+/* ===== feedback ===== */
+.fb{ display:none; margin-top:12px; padding:11px 14px; border-radius:10px; font-size:.9rem; line-height:1.5; }
+.fb.show{ display:block; }
+.fb.ok{ background:var(--vert-clair); color:#10894f; border:1px solid #9be7c0; }
+.fb.ko{ background:var(--rouge-clair); color:#b23129; border:1px solid #f3b8b3; }
 
-.card-body{ padding:22px 24px 24px; }
+/* ===== bouton final + résultats ===== */
+.btn-final{
+  display:block; width:100%; font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:1rem; letter-spacing:1px; padding:16px; border:2px solid var(--bleu);
+  border-radius:14px; background:#fff; color:var(--gris); cursor:not-allowed; margin-top:6px;
+}
+.btn-final:not(:disabled){ background:linear-gradient(135deg, var(--bleu), var(--bleu-fonce)); color:#fff; cursor:pointer; box-shadow:0 6px 18px rgba(43,143,214,.4); }
+.hint-final{ text-align:center; font-size:.78rem; color:var(--gris); margin-top:8px; }
 
-.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:10px; }
-.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--txt); }
-.type-badge{
-  font-family:'Orbitron',sans-serif; font-size:.62rem; font-weight:700;
-  background:var(--jour-clair); color:var(--jour-fonce);
-  padding:5px 11px; border-radius:14px; border:1px solid var(--jour-pale);
-  white-space:nowrap;
-}
-
-/* encart énoncé : FOND CLAIR (dys-friendly) */
-.texte-fable{
-  background:var(--jour-clair);
-  border:2px solid var(--jour);
-  border-radius:14px;
-  padding:18px 18px;
-  margin-bottom:16px;
-  text-align:center;
-  box-shadow:0 2px 8px rgba(242,139,130,.12);
-}
-.texte-fable .ft-titre{
-  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
-  letter-spacing:1px; color:var(--jour-fonce); margin-bottom:10px;
-}
-.texte-fable .ft-expr{
-  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem;
-  color:var(--jour-fonce); letter-spacing:1px;
-}
-
-/* style "blocs Scratch" : pseudo-code lisible */
-.scratch-script{
-  display:inline-block; text-align:left;
-  background:#fff; border:1.5px solid var(--jour-pale);
-  border-radius:10px; padding:12px 14px;
-  font-family:'Courier New', Consolas, monospace; font-size:.95rem;
-  line-height:1.55; color:#2b2b2b;
-  box-shadow:0 1px 3px rgba(0,0,0,.05);
-  white-space:pre;
-}
-.scratch-script .bloc{
-  display:inline-block; padding:1px 7px; margin:1px 1px;
-  border-radius:5px; font-weight:bold; color:#fff;
-}
-.scratch-script .b-mouv{ background:#4c97ff; }   /* mouvement bleu */
-.scratch-script .b-ctrl{ background:#ffab19; }   /* contrôle orange */
-.scratch-script .b-var { background:#ff8c1a; }   /* variables orange-rouge */
-.scratch-script .b-op  { background:#59c059; }   /* opérateurs vert */
-.scratch-script .b-look{ background:#9966ff; }   /* apparence violet */
-.scratch-script .b-pen { background:#0fbd8c; }   /* stylo vert-bleu */
-.scratch-script .indent{ padding-left:24px; }
-
-/* zone figure SVG (pour les questions de tracé) */
-.scratch-figure{
-  display:flex; justify-content:center; align-items:center;
-  margin-top:8px;
-}
-.scratch-figure svg{ max-width:160px; height:auto; }
-
-.cursor{
-  display:inline-block; width:3px; height:1.5rem; background:var(--jour-fonce);
-  margin-left:4px; vertical-align:-4px;
-  animation: blink 1s step-end infinite;
-}
-@keyframes blink{ 0%,50%{ opacity:1; } 51%,100%{ opacity:0; } }
-
-.question-txt{
-  font-size:1.05rem; font-weight:bold; color:var(--txt);
-  margin-bottom:16px; line-height:1.5;
-}
-
-/* choix QCM */
-.choix{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
-.choix-btn{
-  text-align:left; font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700;
-  padding:14px 16px; border:2px solid #e8e2d4; background:#fff;
-  border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt);
-  display:flex; align-items:center; gap:11px;
-}
-.choix-btn .choix-content{ flex:1; }
-.choix-btn .choix-content svg{ max-width:140px; max-height:60px; vertical-align:middle; margin-right:10px; }
-.choix-btn .lettre{
-  flex-shrink:0; width:28px; height:28px; border-radius:50%;
-  background:var(--jour-clair); color:var(--jour-fonce);
-  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.85rem;
-  display:flex; align-items:center; justify-content:center;
-  border:1px solid var(--jour-pale);
-}
-.choix-btn sup{ font-size:.7rem; }
-.choix-btn:hover:not(.locked){ border-color:var(--jour); background:var(--jour-clair); }
-.choix-btn.selected{
-  border-color:var(--jour); background:var(--jour-clair);
-  box-shadow:0 0 0 3px rgba(242,139,130,.25);
-}
-.choix-btn.selected .lettre{ background:var(--jour); color:#fff; }
-.choix-btn.locked{ cursor:default; }
-.choix-btn.good{
-  border-color:var(--vert); background:#e7faec;
-}
-.choix-btn.good .lettre{ background:var(--vert); color:#fff; }
-.choix-btn.bad{
-  border-color:var(--rouge); background:#fdeaea;
-}
-.choix-btn.bad .lettre{ background:var(--rouge); color:#fff; }
-
-/* boutons */
-.btns{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 4px; }
-.btn{
-  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
-  letter-spacing:1px; padding:11px 18px; border:none; border-radius:10px;
-  cursor:pointer; transition:transform .12s; color:#fff; position:relative;
-}
-.btn:active{ transform:scale(.96); }
-.btn-valider{ background:var(--vert); }
-.btn-indice{  background:#3ab5d8; }
-.btn-suivant{ background:var(--jour); color:#3a2c00; }
-
-.btn-valider:not(:disabled){ animation: neon-vert 1.4s ease-in-out infinite; }
-.btn-indice:not(:disabled){  animation: neon-bleu 1.4s ease-in-out infinite; }
-.btn-suivant:not(:disabled){ animation: neon-jour 1.4s ease-in-out infinite; }
-
-@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5);}  50%{ box-shadow:0 0 18px rgba(34,197,94,.95);} }
-@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5);} 50%{ box-shadow:0 0 18px rgba(58,181,216,.95);} }
-@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(242,139,130,.5);} 50%{ box-shadow:0 0 18px rgba(242,139,130,.95);} }
-
-.btn:disabled{
-  background:#d8d8d8 !important; color:#fff !important;
-  cursor:not-allowed; animation:none !important; box-shadow:none !important;
-}
-
-/* indice */
-.indice-box{
-  display:none; margin-top:14px; padding:13px 16px;
-  background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px;
-  font-size:.9rem; color:#1a6e88;
-}
-.indice-box.show{ display:block; animation: pop .35s ease; }
-
-/* feedback */
-.feedback{ display:none; margin-top:16px; padding:14px 16px; border-radius:10px; font-weight:bold; font-size:1rem; }
-.feedback.show{ display:block; animation: pop .4s cubic-bezier(.18,.89,.32,1.6); }
-.feedback.ok{  background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
-.feedback.ko{  background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
-
-/* correction */
-.correction{
-  display:none; margin-top:14px; padding:15px 18px;
-  background:#fff8e6; border:1px dashed var(--jour); border-radius:10px;
-  font-size:.92rem; color:#5a4500; line-height:1.6;
-}
-.correction.show{ display:block; animation: pop .4s ease; }
-.correction b{ color:var(--jour-fonce); }
-
-/* navigation */
-.nav{ display:flex; justify-content:space-between; margin-top:20px; }
-.nav button{
-  font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:500;
-  letter-spacing:.5px; padding:9px 16px; border-radius:8px;
-  border:1px solid #ddd; background:#f7f7f7; color:#888; cursor:pointer; transition:.15s;
-}
-.nav button:not(:disabled):hover{ background:#eee; color:#555; }
-.nav button:disabled{ opacity:.4; cursor:not-allowed; }
-
-/* +25 XP flottant */
-.xp-pop{
-  position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5);
-  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3rem;
-  color:var(--jour); text-shadow:0 0 20px var(--jour), 0 4px 10px rgba(0,0,0,.3);
-  z-index:50; opacity:0; pointer-events:none;
-}
-.xp-pop.go{ animation: xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
-@keyframes xpfly{
-  0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
-  25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); }
-  70%{ opacity:1; transform:translate(-50%,-80%) scale(1); }
-  100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); }
-}
-
-/* ================= ÉCRAN RÉSULTATS ================= */
 .results{ display:none; }
-.results.show{ display:block; animation: pop .5s ease; }
-.results .mission{
-  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.7rem;
-  text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px;
+.results.show{ display:block; animation:fade .4s ease; }
+.results-card{
+  position:relative; overflow:hidden;
+  background:linear-gradient(180deg, rgba(255,255,255,.82), rgba(234,246,255,.78));
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border:2px solid var(--bleu); border-radius:18px; padding:0 22px 26px; text-align:center;
+  box-shadow:0 10px 36px rgba(43,143,214,.25), inset 0 0 28px rgba(43,143,214,.08), 0 0 0 1px rgba(116,182,224,.4);
 }
-.results .big-score{
-  font-family:'Orbitron',sans-serif; font-weight:900; font-size:3.4rem;
-  text-align:center; color:var(--jour);
-  text-shadow:0 0 16px rgba(242,139,130,.5); margin:8px 0;
+.res-statusbar{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin:0 -22px 18px; padding:9px 16px;
+  background:linear-gradient(90deg, var(--bleu-fonce), var(--bleu));
+  color:#eaf6ff; font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:1.5px; font-weight:700;
 }
-.results .res-stars{ text-align:center; font-size:1.7rem; letter-spacing:5px; color:var(--jour); margin-bottom:10px; }
-.results .gg{
-  text-align:center; font-family:'Orbitron',sans-serif; font-size:.88rem;
-  color:var(--vert); font-weight:700; letter-spacing:1px; margin-bottom:20px;
+.res-leds{ display:inline-flex; gap:5px; }
+.res-leds .led{ width:8px; height:8px; border-radius:50%; background:#1c4566; display:inline-block; }
+.res-leds .led.on{ background:#5fe0a0; box-shadow:0 0 6px #5fe0a0; animation:ledblink 1.6s ease-in-out infinite; }
+.res-leds .led:nth-child(2).on{ animation-delay:.3s; }
+.res-leds .led:nth-child(3).on{ animation-delay:.6s; }
+@keyframes ledblink{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
+.res-statustxt{ flex:1; }
+.res-mission{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.3rem; color:var(--bleu-fonce); margin-bottom:8px; }
+.res-sub{ font-size:.95rem; color:var(--txt); line-height:1.55; margin-bottom:16px; }
+.res-gauge{
+  position:relative; height:22px; border-radius:11px; margin:0 0 18px;
+  background:var(--neutre-clair); border:1px solid var(--bleu-pale); overflow:hidden;
 }
-.recap{ background:#faf7ef; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
-.recap-item{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:.86rem; gap:10px;
+.res-gauge-fill{ position:absolute; inset:0; width:0; background:linear-gradient(90deg, var(--bleu), var(--vert)); border-radius:11px; animation:gaugefill 1s ease-out .2s forwards; }
+@keyframes gaugefill{ to{ width:100%; } }
+.res-gauge-lbl{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',sans-serif; font-size:.64rem; font-weight:700; letter-spacing:1px; color:#0f3350; }
+.res-panel{
+  background:rgba(15,51,80,.06); border:1px solid var(--bleu-pale); border-radius:12px;
+  padding:10px 14px; margin-bottom:16px;
 }
-.recap-item:last-child{ border-bottom:none; }
-.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; }
-.recap-item .st{ font-size:1.1rem; flex-shrink:0; }
+.res-panel-row{ display:flex; align-items:center; justify-content:space-between; padding:7px 0; font-size:.9rem; }
+.res-panel-row + .res-panel-row{ border-top:1px dashed var(--bleu-pale); }
+.rp-lbl{ color:var(--gris); }
+.rp-val{ font-family:'Orbitron',sans-serif; font-weight:700; color:var(--bleu-fonce); }
+.res-prod{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1.1rem; color:var(--vert); margin:12px 0; }
 .btn-rejouer{
-  display:block; width:100%;
-  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px;
-  padding:14px; border:none; border-radius:12px; color:#3a2c00;
-  background:var(--jour); cursor:pointer;
-  animation: neon-jour 1.4s ease-in-out infinite;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.95rem; letter-spacing:1px;
+  padding:14px 28px; border:none; border-radius:12px; cursor:pointer;
+  background:linear-gradient(135deg, var(--bleu), var(--bleu-fonce)); color:#fff;
+  box-shadow:0 4px 14px rgba(43,143,214,.35);
 }
-.btn-rejouer:active{ transform:scale(.97); }
-
-/* ========== BOUTON SCORE FINAL (mode liste) ========== */
-.btn-score-final{
-  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem;
-  letter-spacing:1.5px; padding:16px 32px;
-  border:2px solid var(--jour); border-radius:14px;
-  background:#fff; color:var(--gris);
-  cursor:not-allowed; transition:all .25s;
-  opacity:.55;
-}
-.btn-score-final:not(:disabled){
-  background:linear-gradient(135deg, var(--jour) 0%, #fff8d0 50%, var(--jour) 100%);
-  background-size:200% 100%;
-  color:#3a2c00; cursor:pointer; opacity:1;
-  border-color:var(--jour-fonce);
-  animation: shine-final 2s linear infinite, pulse-final 1.6s ease-in-out infinite;
-  box-shadow:0 6px 20px rgba(242,139,130,.4);
-}
-.btn-score-final:not(:disabled):hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 24px rgba(242,139,130,.5);
-}
-.btn-score-final:not(:disabled):active{
-  transform:translateY(0) scale(.97);
-}
-@keyframes shine-final{
-  0%{ background-position:0% 0; }
-  100%{ background-position:200% 0; }
-}
-@keyframes pulse-final{
-  0%,100%{ box-shadow:0 6px 20px rgba(242,139,130,.4); }
-  50%    { box-shadow:0 8px 28px rgba(242,139,130,.7); }
-}
-.hint-score{
-  font-family:'Orbitron',sans-serif; font-size:.7rem;
-  letter-spacing:1px; color:var(--gris);
-  margin-top:8px; text-transform:uppercase;
-  transition:opacity .3s;
-}
-.hint-score.hidden{ opacity:0; }
+/* ===== événement final : flash + SYSTÈME EN LIGNE ===== */
+#boot-overlay{ position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center; }
+#boot-overlay.show{ display:flex; }
+.boot-flash{ position:absolute; inset:0; background:radial-gradient(circle at center, #cdeafd, #2b8fd6 60%, #0f3350); opacity:0; animation:bootflash 1.4s ease-out forwards; }
+@keyframes bootflash{ 0%{ opacity:0; } 12%{ opacity:.92; } 45%{ opacity:.7; } 100%{ opacity:0; } }
+.boot-msg{ position:relative; text-align:center; opacity:0; animation:bootmsg 1.4s ease-out forwards; }
+@keyframes bootmsg{ 0%,10%{ opacity:0; transform:scale(.9); } 30%{ opacity:1; transform:scale(1); } 80%{ opacity:1; } 100%{ opacity:0; } }
+.boot-leds{ display:flex; gap:8px; justify-content:center; margin-bottom:14px; }
+.boot-leds i{ width:12px; height:12px; border-radius:50%; background:#5fe0a0; box-shadow:0 0 10px #5fe0a0; animation:bootled .5s ease-in-out infinite alternate; }
+.boot-leds i:nth-child(2){ animation-delay:.1s; } .boot-leds i:nth-child(3){ animation-delay:.2s; } .boot-leds i:nth-child(4){ animation-delay:.3s; } .boot-leds i:nth-child(5){ animation-delay:.4s; }
+@keyframes bootled{ from{ opacity:.4; } to{ opacity:1; } }
+.boot-txt{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.6rem; letter-spacing:2px; color:#fff; text-shadow:0 2px 16px rgba(15,51,80,.6); }
 </style>
 </head>
 <body>
-
-<!-- bulles statiques de fond -->
-<div class="bulle bulle-jaune"></div>
-<div class="bulle bulle-jour"></div>
-<div class="bulle bulle-verte"></div>
-
 <div class="wrap">
 
-  <!-- ===== HEADER ===== -->
   <div class="header">
     <div class="logo-badge">
       <span class="dots"><i></i><i></i><i></i></span>
-      PAZAPA · MATHS · 4ÈME
+      PAZAPA · MATHS · 4E
     </div>
-    <div class="semaine">Semaine 2 – Jour 2</div>
-    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span> !</h1>
-    <div class="sous-titre">➕➖ Nombres relatifs : positif ou négatif ? · 10 challenges</div>
-    <div class="badge-revision">▶ DÉFI MATHS 4ÈME</div>
+    <div class="semaine">Signe d'un nombre relatif</div>
+    <h1 class="titre">🍬 Reprogrammer le <span class="accent">laboratoire</span></h1>
+    <div class="sous-titre">🧪 Colle &amp; Sugar · tri des données</div>
+    <button class="sound-btn" id="sound-btn">🔊 SON</button>
   </div>
 
-  <!-- ===== ENCART GAME (fond clair) ===== -->
-  <div class="game">
-    <div class="game-label">▶ DÉFI MATHS 4ÈME</div>
-
-    <div class="etoiles" id="etoiles"></div>
-
-    <div class="scoreboard">
-      <div class="score-col reussis">
-        <div class="score-num" id="sc-reussis">0</div>
-        <div class="score-lbl">△ Réussis</div>
+  <!-- ===== PAGE 1 : AFFICHE ===== -->
+  <div class="page show" id="page-affiche">
+    <div class="affiche">
+      <div class="banniere">
+        <svg class="banniere-svg" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chambre froide industrielle">
+          <defs>
+            <linearGradient id="bgFroid" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1a4e7a"/>
+              <stop offset="55%" stop-color="#256a9e"/>
+              <stop offset="100%" stop-color="#16405f"/>
+            </linearGradient>
+            <linearGradient id="solGlace" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#bfe2f7"/>
+              <stop offset="100%" stop-color="#8fc3e8"/>
+            </linearGradient>
+            <linearGradient id="panneau" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3d77a8"/>
+              <stop offset="100%" stop-color="#24557d"/>
+            </linearGradient>
+            <linearGradient id="givre" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity=".55"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="halo" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#bfe6ff" stop-opacity=".5"/>
+              <stop offset="100%" stop-color="#bfe6ff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <!-- fond -->
+          <rect width="800" height="260" fill="url(#bgFroid)"/>
+          <ellipse cx="400" cy="70" rx="360" ry="120" fill="url(#halo)"/>
+          <!-- sol glacé -->
+          <polygon points="0,210 800,210 800,260 0,260" fill="url(#solGlace)" opacity=".9"/>
+          <line x1="0" y1="210" x2="800" y2="210" stroke="#dff2ff" stroke-width="2" opacity=".6"/>
+          <!-- tuyaux givrés au plafond -->
+          <rect x="0" y="24" width="800" height="14" rx="7" fill="#357098"/>
+          <rect x="0" y="24" width="800" height="6" rx="3" fill="url(#givre)"/>
+          <circle cx="150" cy="31" r="11" fill="#2b5b80"/><circle cx="400" cy="31" r="11" fill="#2b5b80"/><circle cx="650" cy="31" r="11" fill="#2b5b80"/>
+          <!-- rangées de panneaux/étagères de stockage givrés -->
+          <g>
+            <!-- panneau gauche -->
+            <rect x="40" y="78" width="150" height="128" rx="10" fill="url(#panneau)" stroke="#5b9ccb" stroke-width="2"/>
+            <rect x="40" y="78" width="150" height="40" rx="10" fill="url(#givre)"/>
+            <line x1="40" y1="122" x2="190" y2="122" stroke="#1c4566" stroke-width="2"/>
+            <line x1="40" y1="164" x2="190" y2="164" stroke="#1c4566" stroke-width="2"/>
+            <!-- voyants -->
+            <circle cx="62" cy="98" r="6" fill="#37d27a"/><circle cx="80" cy="98" r="6" fill="#ffd23e"/>
+            <!-- panneau centre -->
+            <rect x="325" y="68" width="150" height="138" rx="10" fill="url(#panneau)" stroke="#74b6e0" stroke-width="2.5"/>
+            <rect x="325" y="68" width="150" height="44" rx="10" fill="url(#givre)"/>
+            <line x1="325" y1="116" x2="475" y2="116" stroke="#1c4566" stroke-width="2"/>
+            <line x1="325" y1="160" x2="475" y2="160" stroke="#1c4566" stroke-width="2"/>
+            <circle cx="347" cy="88" r="6" fill="#37d27a"/><circle cx="365" cy="88" r="6" fill="#37d27a"/><circle cx="383" cy="88" r="6" fill="#e0524a"/>
+            <!-- panneau droit -->
+            <rect x="610" y="78" width="150" height="128" rx="10" fill="url(#panneau)" stroke="#5b9ccb" stroke-width="2"/>
+            <rect x="610" y="78" width="150" height="40" rx="10" fill="url(#givre)"/>
+            <line x1="610" y1="122" x2="760" y2="122" stroke="#1c4566" stroke-width="2"/>
+            <line x1="610" y1="164" x2="760" y2="164" stroke="#1c4566" stroke-width="2"/>
+            <circle cx="632" cy="98" r="6" fill="#ffd23e"/><circle cx="650" cy="98" r="6" fill="#37d27a"/>
+          </g>
+          <!-- capteur central (thermomètre/écran) -->
+          <g>
+            <rect x="228" y="120" width="64" height="86" rx="8" fill="#0f3350" stroke="#5b9ccb" stroke-width="2"/>
+            <rect x="236" y="130" width="48" height="30" rx="4" fill="#0a2030"/>
+            <rect x="242" y="140" width="36" height="5" rx="2.5" fill="#5fe0a0"/>
+            <rect x="242" y="149" width="22" height="4" rx="2" fill="#5fe0a0" opacity=".7"/>
+            <circle cx="248" cy="176" r="5" fill="#37d27a"/><circle cx="272" cy="176" r="5" fill="#e0524a"/>
+          </g>
+          <rect x="508" y="120" width="64" height="86" rx="8" fill="#0f3350" stroke="#5b9ccb" stroke-width="2"/>
+          <rect x="516" y="130" width="48" height="30" rx="4" fill="#0a2030"/>
+          <rect x="524" y="140" width="32" height="5" rx="2.5" fill="#5fd0e0"/>
+          <rect x="524" y="149" width="20" height="4" rx="2" fill="#5fd0e0" opacity=".7"/>
+          <circle cx="528" cy="176" r="5" fill="#ffd23e"/><circle cx="552" cy="176" r="5" fill="#37d27a"/>
+          <!-- flocons givre coins -->
+          <g fill="#ffffff" opacity=".5">
+            <circle cx="30" cy="55" r="2.5"/><circle cx="60" cy="44" r="2"/><circle cx="95" cy="60" r="1.6"/>
+            <circle cx="770" cy="55" r="2.5"/><circle cx="735" cy="44" r="2"/><circle cx="705" cy="62" r="1.6"/>
+          </g>
+        </svg>
+        <div class="banniere-voile"></div>
+        <div class="banniere-titre">
+          <span class="bt-pre">🧊 MISSION LABORATOIRE</span>
+          <span class="bt-main">Reprogrammer la chambre froide</span>
+        </div>
       </div>
-      <div class="score-col restants">
-        <div class="score-num" id="sc-restants">6</div>
-        <div class="score-lbl">◆ Restants</div>
+      <div class="aff-alerte">🚨 PANNE DANS LE LABORATOIRE</div>
+      <div class="aff-intro">
+        Une <b>panne informatique</b> a touché le laboratoire <b>Colle &amp; Sugar</b>.
+        Le système de contrôle qualité mélange désormais toutes les données de production&nbsp;:
       </div>
-      <div class="score-col erreurs">
-        <div class="score-num" id="sc-erreurs">0</div>
-        <div class="score-lbl">△ Erreurs</div>
+      <div class="aff-liste">
+        🌡️ températures &nbsp;·&nbsp; 🍬 quantités de sucre &nbsp;·&nbsp; ⚙️ coefficients de réglage<br>
+        ❄️ taux de refroidissement &nbsp;·&nbsp; 📡 valeurs de calibration des capteurs
       </div>
+      <div class="aff-intro">
+        Avant de relancer la fabrication des caramels, les techniciens doivent
+        <b>trier les données selon leur signe</b>.
+      </div>
+      <div class="aff-mission">🎯 Mission : identifier les données positives, neutres et négatives pour reprogrammer le système.</div>
+      <button class="btn-start" id="btn-start">▶ DÉMARRER LA REPROGRAMMATION</button>
     </div>
-
-    <div class="xp-head">
-      <span>▶ XP PROGRESS</span>
-      <span id="xp-pct">0 %</span>
-    </div>
-    <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
-
-    <div class="defi-count" id="defi-count">10 DÉFIS À RÉSOUDRE</div>
   </div>
 
-  <!-- ===== TOUS LES DÉFIS (générés par JS) ===== -->
-  <div id="defis-container"></div>
+  <!-- ===== PAGE 2 : JEU ===== -->
+  <div class="page" id="page-jeu">
 
-  <!-- ===== BOUTON FINAL ===== -->
-  <div style="margin: 24px 0 10px; text-align:center;">
-    <button class="btn-score-final" id="btn-score-final" disabled>
-      🏆 VOIR MON SCORE FINAL
-    </button>
-    <div class="hint-score" id="hint-score">Termine les 10 défis pour débloquer ton score final</div>
+    <div class="game">
+      <div class="game-label">🧪 CONSOLE DE CONTRÔLE QUALITÉ</div>
+      <div class="scoreboard">
+        <div class="score-col ok">
+          <div class="score-num" id="sc-ok">0</div>
+          <div class="score-lbl">🟢 Modules restaurés</div>
+        </div>
+        <div class="score-col rem">
+          <div class="score-num" id="sc-rem">2</div>
+          <div class="score-lbl">⚙️ Modules restants</div>
+        </div>
+        <div class="score-col err">
+          <div class="score-num" id="sc-err">0</div>
+          <div class="score-lbl">🔴 Erreurs détectées</div>
+        </div>
+      </div>
+      <div class="xp-head"><span>🧪 REPROGRAMMATION</span><span id="xp-pct">0 %</span></div>
+      <div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+      <div class="etape-count" id="etape-count">2 MODULES À RESTAURER</div>
+    </div>
+
+    <!-- ÉPREUVE 1 : TRI -->
+    <div class="epreuve" id="ep1">
+      <div class="ep-head">
+        <div class="ep-num">⚙️ MODULE 1 — Diagnostic des données</div>
+        <div class="ep-badge">CLASSIFICATION</div>
+      </div>
+      <div class="ep-consigne">
+        Le système a mélangé plusieurs données utilisées dans la fabrication des caramels.
+        Touche un <b>relevé</b>, puis le <b>bac</b> qui lui correspond, pour restaurer le programme du laboratoire.
+      </div>
+      <div class="pool" id="pool"></div>
+      <div class="bacs">
+        <div class="bac pos" data-zone="POS">
+          <div class="bac-titre">🟢 DONNÉES POSITIVES</div>
+          <div class="bac-zone" id="bac-POS"></div>
+        </div>
+        <div class="bac zero" data-zone="ZERO">
+          <div class="bac-titre">⚪ DONNÉE DE RÉFÉRENCE</div>
+          <div class="bac-zone" id="bac-ZERO"></div>
+        </div>
+        <div class="bac neg" data-zone="NEG">
+          <div class="bac-titre">🔴 DONNÉES NÉGATIVES</div>
+          <div class="bac-zone" id="bac-NEG"></div>
+        </div>
+      </div>
+      <div class="fb" id="fb1"></div>
+    </div>
+
+    <!-- ÉPREUVE 2 : CONTRÔLE CAPTEURS (QCM) -->
+    <div class="epreuve locked" id="ep3">
+      <div class="ep-head">
+        <div class="ep-num">🧪 MODULE 2 — Contrôle des capteurs</div>
+        <div class="ep-badge">VÉRIFICATION</div>
+      </div>
+      <div class="ep-consigne">
+        Dernier contrôle&nbsp;: pour chaque capteur, indique si la donnée est <b>positive</b> ou <b>négative</b>.
+      </div>
+      <div id="ep3-questions"></div>
+      <div class="fb" id="fb3"></div>
+    </div>
+
+    <button class="btn-final" id="btn-final" disabled>🚀 REDÉMARRER LE SYSTÈME</button>
+    <div class="hint-final" id="hint-final">Restaure les 2 modules pour relancer la production</div>
   </div>
 
-  <!-- ===== ÉCRAN RÉSULTATS ===== -->
-  <div class="card results" id="results-card">
-    <div class="rainbow"></div>
-    <div class="card-body">
-      <div class="mission">// MISSION ACCOMPLIE</div>
-      <div class="big-score" id="res-score">0 / 10</div>
-      <div class="res-stars" id="res-stars"></div>
-      <div class="gg" id="res-msg">// GG — validé !</div>
-      <div class="recap" id="res-recap"></div>
-      <button class="btn-rejouer" id="btn-rejouer">▶ NOUVEAU DÉFI</button>
+  <!-- ===== RÉSULTATS ===== -->
+  <div class="results" id="results">
+    <div class="results-card">
+      <div class="res-statusbar">
+        <span class="res-leds"><i class="led on"></i><i class="led on"></i><i class="led on"></i></span>
+        <span class="res-statustxt">CONSOLE · SYSTÈME EN LIGNE</span>
+        <span class="res-leds"><i class="led on"></i><i class="led on"></i></span>
+      </div>
+      <div class="res-mission">🏭 Système reprogrammé</div>
+      <div class="res-sub">Toutes les données ont été correctement triées.<br>Les machines peuvent redémarrer.</div>
+      <div class="res-gauge"><div class="res-gauge-fill"></div><span class="res-gauge-lbl">RESTAURATION 100 %</span></div>
+      <div class="res-panel">
+        <div class="res-panel-row">
+          <span class="rp-lbl">📊 Modules restaurés</span>
+          <span class="rp-val" id="res-score">0 / 2</span>
+        </div>
+        <div class="res-panel-row">
+          <span class="rp-lbl">📡 Diagnostic</span>
+          <span class="rp-val" id="res-grade"></span>
+        </div>
+      </div>
+      <div class="res-prod" id="res-prod">🍬 Production autorisée&nbsp;!</div>
+      <button class="btn-rejouer" id="btn-rejouer">▶ NOUVELLE REPROGRAMMATION</button>
     </div>
   </div>
 
 </div>
 
-<!-- +25 XP flottant -->
-<div class="xp-pop" id="xp-pop">+25 XP !</div>
+<!-- overlay événement final -->
+<div id="boot-overlay">
+  <div class="boot-flash"></div>
+  <div class="boot-msg">
+    <span class="boot-leds"><i></i><i></i><i></i><i></i><i></i></span>
+    <span class="boot-txt">✅ SYSTÈME EN LIGNE</span>
+  </div>
+</div>
 
 <script>
-/* =========================================================
-   DONNÉES DES 10 DÉFIS — Nombres relatifs : positif ou négatif ?
-   ========================================================= */
-const DEFIS = [
-  {
-    titre:`Définition`,
-    expr:`<div style="font-size:.95rem; line-height:1.6; padding:10px 12px; text-align:left; background:#fff0ef; border-left:3px solid #c0392b; border-radius:6px; margin-bottom:10px;">
-       ➕➖ <b>Rappel :</b> un <b>nombre relatif</b> est un nombre avec un signe : positif (+) ou négatif (−).<br>
-       Exemples : +7 ou 7 (positif), −3 (négatif).
-       </div>
-       <div style="font-size:.92rem; padding:6px;">
-       Le nombre <b>0</b> est-il positif, négatif, ou les deux ?
-       </div>`,
-    question:`Comment classer le nombre 0 ?`,
-    choices:[
-      `0 est positif uniquement`,
-      `0 est négatif uniquement`,
-      `0 est à la fois positif ET négatif`,
-      `0 n'est ni positif ni négatif`
-    ],
-    correct:2,
-    indice:`0 est un cas particulier. On considère qu'il appartient aux deux ensembles à la fois (positifs et négatifs).`,
-    correction:`Par convention, <b>0 est à la fois positif et négatif</b>. On dit parfois qu'il est "le seul nombre qui n'est ni strictement positif ni strictement négatif".`
-  },
-  {
-    titre:`+7 : positif ou négatif ?`,
-    expr:`<div style="font-size:.95rem; line-height:1.55; padding:8px;">
-       ➕➖ Quel est le signe de ce nombre ?
-       </div>
-       <div class="ft-expr" style="font-size:2rem;">+7</div>`,
-    question:`Le nombre +7 est :`,
-    choices:[
-      `Positif`,
-      `Négatif`,
-      `Ni positif ni négatif`,
-      `Cela dépend du contexte`
-    ],
-    correct:0,
-    indice:`Le signe + devant le nombre indique son signe. Ici, c'est un +.`,
-    correction:`+7 (qu'on écrit aussi simplement 7) est un nombre <b>positif</b>. Le signe + peut être omis pour les positifs.`
-  },
-  {
-    titre:`−3 : positif ou négatif ?`,
-    expr:`<div style="font-size:.95rem; line-height:1.55; padding:8px;">
-       ➕➖ Quel est le signe de ce nombre ?
-       </div>
-       <div class="ft-expr" style="font-size:2rem;">−3</div>`,
-    question:`Le nombre −3 est :`,
-    choices:[
-      `Positif`,
-      `Négatif`,
-      `Les deux`,
-      `Ni l'un ni l'autre`
-    ],
-    correct:1,
-    indice:`Le signe − devant un nombre indique qu'il est inférieur à zéro.`,
-    correction:`<b>−3 est un nombre négatif</b>. Le signe − devant le 3 indique qu'il est plus petit que 0. On le situe à gauche de 0 sur une droite graduée.`
-  },
-  {
-    titre:`12 (sans signe écrit)`,
-    expr:`<div style="font-size:.95rem; line-height:1.55; padding:8px;">
-       ➕➖ Quel est le signe de ce nombre, écrit sans signe explicite ?
-       </div>
-       <div class="ft-expr" style="font-size:2rem;">12</div>`,
-    question:`Quel est le signe de 12 ?`,
-    choices:[
-      `Positif (signe + sous-entendu)`,
-      `Négatif`,
-      `Aucun signe`,
-      `Impossible à déterminer`
-    ],
-    correct:0,
-    indice:`Quand on écrit un nombre sans signe, c'est par convention un raccourci. Quel signe est sous-entendu ?`,
-    correction:`Quand on écrit "12" sans signe, on sous-entend "+12" : c'est un nombre <b>positif</b>. Convention : pour un positif, le signe + est facultatif. Pour un négatif, le signe − est obligatoire.`
-  },
-  {
-    titre:`Le plus petit`,
-    expr:`<div style="font-size:.95rem; line-height:1.55; padding:8px;">
-       ➕➖ Classe ces nombres relatifs : lequel est le plus petit ?
-       </div>
-       <div class="ft-expr" style="font-size:1.4rem;">−5 &nbsp;;&nbsp; +2 &nbsp;;&nbsp; −1 &nbsp;;&nbsp; 0</div>`,
-    question:`Lequel est le plus petit ?`,
-    choices:[
-      `0`,
-      `−1`,
-      `−5`,
-      `+2`
-    ],
-    correct:2,
-    indice:`Sur une droite graduée, les nombres les plus à gauche sont les plus petits. Un nombre négatif est toujours plus petit qu'un positif. Entre deux négatifs, le plus "grand en chiffre" est le plus petit.`,
-    correction:`Sur une droite graduée : ←  −5  −1  0  +2  → (du plus petit au plus grand).<br>Le plus petit est <b>−5</b>. (Attention : −5 < −1 même si 5 > 1 ! Plus un négatif a un grand chiffre, plus il est petit.)`
-  },
-  {
-    titre:`Le plus grand`,
-    expr:`<div style="font-size:.95rem; line-height:1.55; padding:8px;">
-       ➕➖ Lequel de ces nombres est le plus grand ?
-       </div>
-       <div class="ft-expr" style="font-size:1.4rem;">−8 &nbsp;;&nbsp; −2 &nbsp;;&nbsp; +1 &nbsp;;&nbsp; +4</div>`,
-    question:`Lequel est le plus grand ?`,
-    choices:[
-      `−8 (c'est le plus "fort")`,
-      `+4`,
-      `+1`,
-      `−2`
-    ],
-    correct:1,
-    indice:`Place ces nombres sur une droite graduée. Le plus à droite est le plus grand.`,
-    correction:`Ordonnés : −8 < −2 < +1 < +4. Le plus grand est <b>+4</b>.<br>(Erreur classique : croire que −8 est "plus grand" parce que 8 > 4. Le signe − inverse l'ordre !)`
-  },
-  {
-    titre:`Comparer 2 négatifs`,
-    expr:`<div style="font-size:.95rem; line-height:1.55; padding:8px;">
-       ➕➖ Compare ces deux nombres négatifs :
-       </div>
-       <div class="ft-expr" style="font-size:1.8rem;">−12 &nbsp;...&nbsp; −7</div>`,
-    question:`Quel signe mettre entre −12 et −7 ?`,
-    choices:[
-      `−12 > −7 (car 12 > 7)`,
-      `−12 < −7`,
-      `−12 = −7`,
-      `On ne peut pas comparer deux négatifs`
-    ],
-    correct:1,
-    indice:`Entre deux négatifs, c'est l'inverse des positifs : plus le chiffre est "grand", plus le nombre est petit. Visualise sur une droite graduée.`,
-    correction:`Sur une droite : ← −12  −7  0 → → <b>−12 < −7</b>.<br>Règle : pour comparer deux négatifs, on regarde lequel a le chiffre le plus grand (sans le signe) : ce nombre-là est le plus PETIT.`
-  },
-  {
-    titre:`Application : la température`,
-    expr:`<div style="font-size:.95rem; line-height:1.6; padding:10px 12px; text-align:left; background:#fff0ef; border-left:3px solid #c0392b; border-radius:6px; margin-bottom:10px;">
-       🌡️ <b>Situation :</b> il fait −4 °C ce matin. Cet après-midi, il fait −1 °C.
-       </div>
-       <div style="font-size:.92rem; padding:6px;">
-       Comment a évolué la température ?
-       </div>`,
-    question:`La température a :`,
-    choices:[
-      `Augmenté (il fait plus chaud)`,
-      `Diminué (il fait plus froid)`,
-      `Pas changé`,
-      `Impossible à savoir`
-    ],
-    correct:0,
-    indice:`Compare −4 et −1. Lequel est le plus grand ? Si on passe d'un nombre à un autre plus grand, c'est une augmentation.`,
-    correction:`On passe de −4 °C à −1 °C. Or <b>−1 > −4</b> (−1 est plus à droite sur la droite). Donc la température a <b>augmenté</b> de 3 °C : il fait plus chaud.<br>(Attention : −1 °C reste très froid, mais c'est moins froid que −4 °C !)`
-  },
-  {
-    titre:`Opposé d'un nombre`,
-    expr:`<div style="font-size:.95rem; line-height:1.6; padding:10px 12px; text-align:left; background:#fff0ef; border-left:3px solid #c0392b; border-radius:6px; margin-bottom:10px;">
-       ➕➖ <b>Définition :</b> l'<b>opposé</b> d'un nombre relatif est le nombre qui a la même distance à 0, mais avec le signe contraire.
-       </div>
-       <div style="font-size:.95rem; padding:6px;">
-       Quel est l'opposé de <b>−9</b> ?
-       </div>`,
-    question:`L'opposé de −9 est :`,
-    choices:[
-      `−9 (lui-même)`,
-      `0`,
-      `+9`,
-      `+1/9`
-    ],
-    correct:2,
-    indice:`L'opposé inverse le signe. L'opposé de −n est +n, et l'opposé de +n est −n.`,
-    correction:`L'opposé de −9 est <b>+9</b> (on inverse le signe).<br>Vérification : −9 et +9 sont tous les deux à 9 unités de zéro, mais de chaque côté. Leur somme vaut toujours 0 : −9 + 9 = 0.`
-  },
-  {
-    titre:`Ranger 5 nombres`,
-    expr:`<div style="font-size:.95rem; line-height:1.55; padding:8px;">
-       ➕➖ Range ces 5 nombres relatifs dans l'ordre <b>croissant</b> (du plus petit au plus grand) :
-       </div>
-       <div class="ft-expr" style="font-size:1.3rem;">−6 ; +3 ; 0 ; −2 ; +1</div>`,
-    question:`Quel est le bon ordre croissant ?`,
-    choices:[
-      `−6 ; −2 ; 0 ; +1 ; +3`,
-      `+3 ; +1 ; 0 ; −2 ; −6`,
-      `0 ; +1 ; −2 ; +3 ; −6`,
-      `−2 ; −6 ; 0 ; +1 ; +3`
-    ],
-    correct:0,
-    indice:`Croissant = du plus petit au plus grand. Pense à la droite graduée : les négatifs à gauche (du plus négatif au moins négatif), puis 0, puis les positifs.`,
-    correction:`Sur la droite graduée, en allant de gauche à droite :<br>← <b>−6</b> ; <b>−2</b> ; <b>0</b> ; <b>+1</b> ; <b>+3</b> →<br>Méthode : d'abord les négatifs (le plus négatif d'abord), puis 0, puis les positifs (du plus petit au plus grand).`
-  }
+'use strict';
+function $(id){ return document.getElementById(id); }
+
+/* ===== DONNÉES (13 relevés) ===== */
+const RELEVES = [
+  { v:'+34,2',   zone:'POS',  role:'mesure de température' },
+  { v:'+12',     zone:'POS',  role:'coefficient de réglage' },
+  { v:'2',       zone:'POS',  role:'indice de production' },
+  { v:'0,05',    zone:'POS',  role:'taux de sucre' },
+  { v:'12,6',    zone:'POS',  role:'taux de refroidissement' },
+  { v:'48 000',  zone:'POS',  role:'quantité produite' },
+  { v:'0',       zone:'ZERO', role:'réglage neutre' },
+  { v:'\u22123/4',    zone:'NEG',  role:"correction d'un capteur" },
+  { v:'\u221254,7',   zone:'NEG',  role:'écart de calibration' },
+  { v:'\u22120,001',  zone:'NEG',  role:'dérive de mesure' },
+  { v:'\u221217',     zone:'NEG',  role:'réglage de refroidissement' },
+  { v:'\u2212153,24', zone:'NEG',  role:'valeur de calibration' },
+  { v:'\u22121,18',   zone:'NEG',  role:'écart capteur' }
 ];
 
-const TOTAL = DEFIS.length;
+const TOTAL_ETAPES = 2;
+let etapesOk = 0, erreurs = 0;
+let ep1Done = false, ep3Done = false;
 
-/* ===================== ÉTAT (mode liste) ===================== */
-/*
-   Mode "tout sur une page" : on génère 6 cards et chacune a son état propre.
-   etat[i] = { validated:bool, correct:bool, picked:int|null, indiceShown:bool }
-*/
-let etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
-let reussis = 0;
-let erreurs = 0;
+/* ===================== AUDIO — pack labo bleu glacé ===================== */
+let soundOn = true, actx = null;
+function ctx(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } if(actx && actx.state!=='running'){ try{ actx.resume(); }catch(e){} } return actx; }
+function noise(d){ const c=actx; const n=Math.floor(c.sampleRate*d); const b=c.createBuffer(1,n,c.sampleRate); const a=b.getChannelData(0); for(let i=0;i<n;i++) a[i]=Math.random()*2-1; return b; }
 
-/* ============== RÉFÉRENCES DOM ============== */
-const $ = id => document.getElementById(id);
-const LETTRES = ['A','B','C','D','E','F'];
-
-/* ============== INIT ÉTOILES ============== */
-function buildStars(containerId){
-  const c = $(containerId); if(!c) return;
-  c.innerHTML = '';
-  for(let i=0;i<TOTAL;i++){
-    const s = document.createElement('span');
-    s.className = 'star'; s.textContent = '★';
-    c.appendChild(s);
-  }
+/* 📦 carte bien déposée : clac magnétique (aimantation douce) ~0,12 s */
+function playClac(){
+  if(!soundOn) return; const c=ctx(); if(!c) return; const t=c.currentTime;
+  // composante bruitée brève (impact) filtrée passe-bas + petite résonance
+  const src=c.createBufferSource(); src.buffer=noise(0.06);
+  const lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=1200;
+  const g=c.createGain(); g.gain.setValueAtTime(0.16,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.09);
+  src.connect(lp); lp.connect(g); g.connect(c.destination); src.start(t); src.stop(t+0.1);
+  const o=c.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(320,t); o.frequency.exponentialRampToValueAtTime(180,t+0.09);
+  const go=c.createGain(); go.gain.setValueAtTime(0.0001,t); go.gain.exponentialRampToValueAtTime(0.12,t+0.006); go.gain.exponentialRampToValueAtTime(0.0001,t+0.1);
+  o.connect(go); go.connect(c.destination); o.start(t); o.stop(t+0.12);
 }
-buildStars('etoiles');
-
-/* ============== GÉNÉRATION DES 6 CARDS ============== */
-const container = $('defis-container');
-container.innerHTML = '';
-
-DEFIS.forEach((d, idx) => {
-  const card = document.createElement('div');
-  card.className = 'card defi-card';
-  card.id = 'defi-card-' + idx;
-  card.style.marginBottom = '20px';
-
-  let choicesHTML = '';
-  d.choices.forEach((ch, ci) => {
-    choicesHTML += '<button class="choix-btn" data-idx="'+idx+'" data-ci="'+ci+'">'
-                + '<span class="lettre">'+LETTRES[ci]+'</span>'
-                + '<span class="choix-content">'+ch+'</span>'
-                + '</button>';
+/* 🔄 carte mal placée : tic très discret ~0,08 s */
+function playTic(){
+  if(!soundOn) return; const c=ctx(); if(!c) return; const t=c.currentTime;
+  const src=c.createBufferSource(); src.buffer=noise(0.03);
+  const bp=c.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2200; bp.Q.value=2;
+  const g=c.createGain(); g.gain.setValueAtTime(0.07,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
+  src.connect(bp); bp.connect(g); g.connect(c.destination); src.start(t); src.stop(t+0.06);
+}
+/* 🎯 bonne réponse : ding capteur vert (voyant qui s'allume) ~0,3 s */
+function playValid(){
+  if(!soundOn) return; const c=ctx(); if(!c) return; const t=c.currentTime;
+  const o=c.createOscillator(); o.type='sine'; o.frequency.value=1320;
+  const g=c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.16,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+0.32);
+  // légère harmonique pour le côté "voyant"
+  const o2=c.createOscillator(); o2.type='sine'; o2.frequency.value=1980;
+  const g2=c.createGain(); g2.gain.setValueAtTime(0.0001,t); g2.gain.exponentialRampToValueAtTime(0.06,t+0.01); g2.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
+  o2.connect(g2); g2.connect(c.destination); o2.start(t); o2.stop(t+0.24);
+}
+/* ❌ erreur : bip grave (tut industriel) ~0,2 s, pas de buzzer */
+function playErr(){
+  if(!soundOn) return; const c=ctx(); if(!c) return; const t=c.currentTime;
+  const o=c.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(196,t); o.frequency.exponentialRampToValueAtTime(150,t+0.16);
+  const g=c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.12,t+0.015); g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+0.22);
+}
+/* 💡 indice : bip de tablette / scanner froid "bip... bip" ~0,3 s */
+function playTablette(){
+  if(!soundOn) return; const c=ctx(); if(!c) return; const t=c.currentTime;
+  [0,0.14].forEach((d)=>{
+    const o=c.createOscillator(); o.type='square'; o.frequency.value=1500;
+    const g=c.createGain(); const tt=t+d; g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.05,tt+0.006); g.gain.exponentialRampToValueAtTime(0.0001,tt+0.08);
+    o.connect(g); g.connect(c.destination); o.start(tt); o.stop(tt+0.09);
   });
-
-  card.innerHTML =
-    '<div class="rainbow"></div>'
-  + '<div class="card-body">'
-  +   '<div class="card-head">'
-  +     '<div class="defi-num">DÉFI ' + String(idx+1).padStart(2,'0') + '</div>'
-  +     '<div class="type-badge">NOMBRES RELATIFS</div>'
-  +   '</div>'
-  +   '<div class="texte-fable">'
-  +     '<div class="ft-titre">🔢 ' + (d.titre ? d.titre.toUpperCase() : 'DÉFI') + '</div>'
-  +     '<div class="ft-expr">' + d.expr + '</div>'
-  +   '</div>'
-  +   '<div class="question-txt">' + d.question + '</div>'
-  +   '<div class="choix" id="choix-'+idx+'">' + choicesHTML + '</div>'
-  +   '<div class="btns">'
-  +     '<button class="btn btn-valider" id="btn-valider-'+idx+'" disabled>✓ VALIDER</button>'
-  +     '<button class="btn btn-indice"  id="btn-indice-'+idx+'">? INDICE</button>'
-  +   '</div>'
-  +   '<div class="indice-box" id="indice-box-'+idx+'"></div>'
-  +   '<div class="feedback"   id="feedback-'+idx+'"></div>'
-  +   '<div class="correction" id="correction-'+idx+'"></div>'
-  + '</div>';
-
-  container.appendChild(card);
-});
-
-/* ============== ÉVÉNEMENTS sur les choix (délégation) ============== */
-container.addEventListener('click', (e) => {
-  const btn = e.target.closest('.choix-btn');
-  if(btn){
-    const i = parseInt(btn.dataset.idx, 10);
-    const ci = parseInt(btn.dataset.ci, 10);
-    if(etat[i].validated) return;     // figé après validation
-    etat[i].picked = ci;
-    // mise à jour visuelle de la sélection
-    const choixZone = $('choix-'+i);
-    choixZone.querySelectorAll('.choix-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    // activer Valider
-    $('btn-valider-'+i).disabled = false;
-    return;
-  }
-  // Boutons Valider / Indice (délégation aussi)
-  if(e.target.id && e.target.id.startsWith('btn-valider-')){
-    const i = parseInt(e.target.id.split('-').pop(), 10);
-    valider(i);
-  } else if(e.target.id && e.target.id.startsWith('btn-indice-')){
-    const i = parseInt(e.target.id.split('-').pop(), 10);
-    indice(i);
-  }
-});
-
-/* ============== VALIDATION D'UN EXO ============== */
-function valider(i){
-  const e = etat[i];
-  if(e.validated) return;
-  if(e.picked == null) return;
-
-  e.validated = true;
-  e.correct = (e.picked === DEFIS[i].correct);
-  if(e.correct) reussis++;
-  else erreurs++;
-
-  // figer la zone de choix : surligner bon/mauvais
-  const choixZone = $('choix-'+i);
-  choixZone.querySelectorAll('.choix-btn').forEach((b, ci) => {
-    b.disabled = true;
-    b.classList.add('locked');
-    if(ci === DEFIS[i].correct) b.classList.add('good');
-    else if(ci === e.picked)     b.classList.add('bad');
+}
+/* 🏁 fin : carillon cristallin glacé (verre/glace) ding→ding→ding ~1 s */
+function playFinal(){
+  if(!soundOn) return; const c=ctx(); if(!c) return; const t0=c.currentTime;
+  // notes cristallines aiguës, type verre
+  [1568,2093,2637].forEach((f,k)=>{
+    const t=t0+k*0.18;
+    const o=c.createOscillator(); o.type='sine'; o.frequency.value=f;
+    const g=c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+0.7);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+0.72);
+    // harmonique scintillante
+    const o2=c.createOscillator(); o2.type='sine'; o2.frequency.value=f*1.5;
+    const g2=c.createGain(); g2.gain.setValueAtTime(0.0001,t); g2.gain.exponentialRampToValueAtTime(0.04,t+0.008); g2.gain.exponentialRampToValueAtTime(0.0001,t+0.45);
+    o2.connect(g2); g2.connect(c.destination); o2.start(t); o2.stop(t+0.47);
   });
+}
 
-  // feedback + correction
-  const fb = $('feedback-'+i);
-  if(e.correct){
-    fb.className = 'feedback ok show';
-    fb.innerHTML = '✅ Bonne réponse !';
-    fireXP();
+/* ===================== ÉPREUVE 1 : TRI ===================== */
+let selected = null; // relevé sélectionné (index)
+
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function buildPool(){
+  const pool = $('pool'); pool.innerHTML='';
+  const order = shuffle(RELEVES.map((_,i)=>i));
+  order.forEach(i=>{
+    const el=document.createElement('button');
+    el.className='releve'; el.dataset.idx=i; el.textContent=RELEVES[i].v;
+    el.addEventListener('click', ()=>selectReleve(i, el));
+    pool.appendChild(el);
+  });
+}
+function selectReleve(i, el){
+  // bascule sélection
+  document.querySelectorAll('.pool .releve').forEach(r=>r.classList.remove('sel'));
+  document.querySelectorAll('.bac').forEach(b=>b.classList.remove('hot'));
+  if(selected===i){ selected=null; return; }
+  selected=i; el.classList.add('sel');
+  document.querySelectorAll('.bac').forEach(b=>b.classList.add('hot'));
+}
+function placeInBac(zone){
+  if(selected===null) return;
+  const idx=selected;
+  const correct = (RELEVES[idx].zone===zone);
+  const poolEl = document.querySelector('.pool .releve[data-idx="'+idx+'"]');
+  if(!poolEl) return;
+  if(correct){
+    playClac();
+    const dest=$('bac-'+zone);
+    const chip=document.createElement('span');
+    chip.className='releve'; chip.textContent=RELEVES[idx].v; chip.dataset.idx=idx;
+    chip.style.cursor='default';
+    dest.appendChild(chip);
+    poolEl.remove();
+    selected=null;
+    document.querySelectorAll('.bac').forEach(b=>b.classList.remove('hot'));
+    checkEp1();
   } else {
-    fb.className = 'feedback ko show';
-    fb.innerHTML = '❌ Réponse incorrecte. Regarde la correction.';
+    playTic();
+    erreurs++; updateHud();
+    poolEl.classList.add('bad');
+    setTimeout(()=>poolEl.classList.remove('bad'),400);
   }
-  const corr = $('correction-'+i);
-  corr.className = 'correction show';
-  corr.innerHTML = '<b>📖 Correction :</b> ' + DEFIS[i].correction;
-
-  // désactiver Valider + Indice
-  $('btn-valider-'+i).disabled = true;
-  $('btn-indice-'+i).disabled = true;
-
-  // mise à jour scoreboard
-  updateScoreboard();
-
-  // si tous validés → activer le bouton final (l'utilisateur cliquera pour voir le bilan)
-  const tousValides = etat.every(s => s.validated);
-  if(tousValides){
-    activerBoutonFinal();
+}
+function checkEp1(){
+  const placed = document.querySelectorAll('.bacs .releve').length;
+  if(placed===RELEVES.length){
+    ep1Done=true; etapesOk++;
+    $('ep1').classList.add('done');
+    const fb=$('fb1'); fb.className='fb show ok';
+    fb.innerHTML='✅ <b>Données triées&nbsp;!</b> Le tri par signe est restauré. Module suivant déverrouillé.';
+    playValid();
+    unlock('ep3');
+    updateHud();
   }
 }
 
-/* ============== ACTIVATION BOUTON FINAL ============== */
-function activerBoutonFinal(){
-  const btn = $('btn-score-final');
-  btn.disabled = false;
-  btn.textContent = '🏆 VOIR MON SCORE FINAL';
-  $('hint-score').classList.add('hidden');
-  // discret rebond visuel à l'activation
-  btn.style.transform = 'scale(1.1)';
-  setTimeout(()=> btn.style.transform = '', 250);
+/* ===================== ÉPREUVE 2 : QCM signe (capteurs) ===================== */
+const EP3 = [
+  { q:'Capteur — donnée <span class="data">\u221254,7</span> :', choices:['Positive','Négative'], correct:1 },
+  { q:'Capteur — donnée <span class="data">+34,2</span> :', choices:['Positive','Négative'], correct:0 },
+  { q:'Capteur — donnée <span class="data">\u22120,001</span> :', choices:['Positive','Négative'], correct:1 },
+  { q:'Capteur — donnée <span class="data">0,05</span> :', choices:['Positive','Négative'], correct:0 }
+];
+let ep3Answered=0;
+function buildEp3(){
+  const box=$('ep3-questions'); box.innerHTML='';
+  EP3.forEach((item,qi)=>{
+    const bloc=document.createElement('div'); bloc.className='qbloc';
+    let html='<div class="q-txt">'+item.q+'</div><div class="choices row2">';
+    item.choices.forEach((c,ci)=>{ html+='<button class="choix" data-qi="'+qi+'" data-ci="'+ci+'">'+c+'</button>'; });
+    html+='</div>';
+    bloc.innerHTML=html; box.appendChild(bloc);
+  });
+  box.querySelectorAll('.choix').forEach(btn=>{
+    btn.addEventListener('click',()=>answerQCM(btn, EP3, 'ep3-questions', ()=>{
+      ep3Answered++;
+      if(ep3Answered===EP3.length){ finishEp('ep3','fb3','✅ <b>Capteurs vérifiés&nbsp;!</b> Tous les signes sont confirmés.', ()=>{ ep3Done=true; }); }
+    }));
+  });
 }
 
-/* ============== INDICE ============== */
-function indice(i){
-  const e = etat[i];
-  if(e.validated) return;
-  const box = $('indice-box-'+i);
-  box.className = 'indice-box show';
-  box.innerHTML = '💡 <b>Indice :</b> ' + DEFIS[i].indice;
-  e.indiceShown = true;
-  $('btn-indice-'+i).disabled = true;
+/* ===== logique QCM commune (retry-until-success) ===== */
+function answerQCM(btn, data, boxId, onAllDone){
+  const qi=+btn.dataset.qi, ci=+btn.dataset.ci;
+  const item=data[qi];
+  const group=document.querySelectorAll('#'+boxId+' .choix[data-qi="'+qi+'"]');
+  // déjà résolue ?
+  let solved=false; group.forEach(b=>{ if(b.classList.contains('good')) solved=true; });
+  if(solved) return;
+  if(ci===item.correct){
+    btn.classList.add('good'); btn.disabled=true;
+    group.forEach(b=>{ if(b!==btn){ b.disabled=true; } });
+    playValid();
+    onAllDone();
+  } else {
+    btn.classList.add('bad'); btn.disabled=true;
+    erreurs++; updateHud(); playErr();
+  }
+}
+function finishEp(epId, fbId, msg, cb){
+  etapesOk++;
+  $(epId).classList.add('done');
+  const fb=$(fbId); fb.className='fb show ok'; fb.innerHTML=msg;
+  if(cb) cb();
+  updateHud();
 }
 
-/* ============== SCOREBOARD ============== */
-function updateScoreboard(){
-  $('sc-reussis').textContent = reussis;
-  $('sc-erreurs').textContent = erreurs;
-  $('sc-restants').textContent = TOTAL - reussis - erreurs;
-
-  // étoiles : 1 étoile par exo réussi
-  const stars = document.querySelectorAll('#etoiles .star');
-  stars.forEach((s, k) => s.classList.toggle('on', k < reussis));
-
-  // XP : % de défis validés (réussis OU erreurs)
-  const finis = etat.filter(s => s.validated).length;
-  const pct = Math.round((finis / TOTAL) * 100);
-  $('xp-fill').style.width = pct + '%';
-  $('xp-pct').textContent = pct + ' %';
-
-  // compteur (info)
-  $('defi-count').textContent = finis + ' / ' + TOTAL + ' DÉFIS VALIDÉS';
+/* ===================== HUD / déverrouillage ===================== */
+function unlock(epId){ $(epId).classList.remove('locked'); }
+function updateHud(){
+  $('sc-ok').textContent = etapesOk;
+  $('sc-rem').textContent = TOTAL_ETAPES - etapesOk;
+  $('sc-err').textContent = erreurs;
+  const pct = Math.round(etapesOk/TOTAL_ETAPES*100);
+  $('xp-fill').style.width = pct+'%';
+  $('xp-pct').textContent = pct+' %';
+  $('etape-count').textContent = etapesOk===0 ? (TOTAL_ETAPES+' MODULES À RESTAURER') : (etapesOk+' / '+TOTAL_ETAPES+' MODULES RESTAURÉS');
+  const allDone = ep1Done && ep3Done;
+  const bf=$('btn-final');
+  bf.disabled = !allDone;
+  if(allDone){ $('hint-final').textContent='Système prêt — relance les machines !'; }
 }
 
-/* ============== +25 XP FLOTTANT ============== */
-function fireXP(){
-  const p = $('xp-pop');
-  p.classList.remove('go');
-  void p.offsetWidth;
-  p.classList.add('go');
+/* ===================== RÉSULTATS ===================== */
+function runBootSequence(){
+  // voyants des modules au vert (déjà via .done, mais on s'assure)
+  document.querySelectorAll('.epreuve').forEach(e=>e.classList.add('done'));
+  playFinal();
+  const ov=$('boot-overlay'); ov.classList.add('show');
+  // après l'animation, afficher le bilan et masquer l'overlay
+  setTimeout(()=>{ showResults(); }, 900);
+  setTimeout(()=>{ ov.classList.remove('show'); }, 1450);
 }
-
-/* ============== ÉCRAN RÉSULTATS FINAL ============== */
 function showResults(){
-  const r = $('results-card');
-  r.classList.add('show');
-
-  $('res-score').textContent = reussis + ' / ' + TOTAL;
-  let stars = '';
-  for(let i=0;i<TOTAL;i++) stars += (i < reussis) ? '★' : '☆';
-  $('res-stars').textContent = stars;
-
-  let msg;
-  const ratio = reussis / TOTAL;
-  if(reussis === TOTAL)        msg = '// PARFAIT — GG, sans-faute ! 🏆';
-  else if(ratio >= 0.75)       msg = '// EXCELLENT — beau score !';
-  else if(ratio >= 0.5)        msg = '// BIEN JOUÉ — continue à t\'entraîner !';
-  else if(reussis > 0)         msg = '// PAS MAL — relis le cours et réessaie !';
-  else                         msg = '// COURAGE — révise et relance !';
-  $('res-msg').textContent = msg;
-
-  let html = '';
-  DEFIS.forEach((d, i) => {
-    html += '<div class="recap-item">'
-         + '<span class="eq">' + (d.titre || 'Défi ' + (i+1)) + '</span>'
-         + '<span class="st">' + (etat[i].correct ? '✅' : '❌') + '</span>'
-         + '</div>';
-  });
-  $('res-recap').innerHTML = html;
-
-  // remonter en haut de la page pour voir le scoreboard final + le récap
-  window.scrollTo({ top:0, behavior:'smooth' });
+  $('page-jeu').style.display='none';
+  $('results').classList.add('show');
+  $('res-score').textContent = etapesOk+' / '+TOTAL_ETAPES;
+  let grade;
+  if(erreurs===0) grade='🏅 Technicien expert — zéro erreur !';
+  else if(erreurs<=3) grade='🔧 Bonne reprogrammation';
+  else grade='🛠 Système restauré (avec quelques essais)';
+  $('res-grade').textContent = grade;
 }
 
-/* ============== REJOUER ============== */
-function rejouer(){
-  // reset état
-  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
-  reussis = 0;
-  erreurs = 0;
-
-  // cacher écran résultats
-  $('results-card').classList.remove('show');
-
-  // reset visuel de chaque card
-  DEFIS.forEach((d, i) => {
-    // choix
-    const choixZone = $('choix-'+i);
-    choixZone.querySelectorAll('.choix-btn').forEach(b => {
-      b.disabled = false;
-      b.classList.remove('selected','good','bad','locked');
-    });
-    // boutons
-    $('btn-valider-'+i).disabled = true;
-    $('btn-indice-'+i).disabled = false;
-    // feedback/correction/indice
-    $('feedback-'+i).className = 'feedback';
-    $('feedback-'+i).innerHTML = '';
-    $('correction-'+i).className = 'correction';
-    $('correction-'+i).innerHTML = '';
-    $('indice-box-'+i).className = 'indice-box';
-    $('indice-box-'+i).innerHTML = '';
+/* ===================== INIT ===================== */
+function armBacs(){
+  document.querySelectorAll('.bac').forEach(b=>{
+    b.addEventListener('click', ()=>placeInBac(b.dataset.zone));
   });
-
-  updateScoreboard();
-
-  // reset bouton final
-  const btnF = $('btn-score-final');
-  btnF.disabled = true;
-  $('hint-score').classList.remove('hidden');
-
-  window.scrollTo({ top:0, behavior:'smooth' });
+}
+function startGame(){
+  if(soundOn) ctx();
+  $('page-affiche').classList.remove('show');
+  $('page-jeu').classList.add('show');
+}
+function restart(){
+  etapesOk=0; erreurs=0; ep1Done=ep3Done=false; ep3Answered=0; selected=null;
+  ['ep1','ep3'].forEach(id=>$(id).classList.remove('done'));
+  $('ep3').classList.add('locked');
+  ['fb1','fb3'].forEach(id=>{ $(id).className='fb'; $(id).innerHTML=''; });
+  $('bac-POS').innerHTML=''; $('bac-ZERO').innerHTML=''; $('bac-NEG').innerHTML='';
+  buildPool(); buildEp3(); updateHud();
+  $('results').classList.remove('show');
+  $('boot-overlay').classList.remove('show');
+  $('page-jeu').style.display='';
+  $('hint-final').textContent='Restaure les 2 modules pour relancer la production';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-$('btn-rejouer').addEventListener('click', rejouer);
-$('btn-score-final').addEventListener('click', showResults);
+$('btn-start').addEventListener('click', startGame);
+$('btn-final').addEventListener('click', runBootSequence);
+$('btn-rejouer').addEventListener('click', restart);
+$('sound-btn').addEventListener('click', ()=>{
+  soundOn=!soundOn;
+  $('sound-btn').textContent = soundOn ? '🔊 SON' : '🔇 SON';
+  if(soundOn) ctx();
+});
 
-/* ============== INIT ============== */
-updateScoreboard();
+buildPool(); buildEp3(); armBacs(); updateHud();
 </script>
-<!-- ===== CALCULATRICE fx-92 PAZAPA (déplaçable) ===== -->
-<style>
-/* === Déclencheur (SVG CASIO + étiquette) === */
-#fxc-trigger{
-  position:fixed; right:14px; bottom:14px; z-index:9998;
-  display:flex; flex-direction:column; align-items:center; gap:4px;
-  cursor:pointer; user-select:none;
-  transition:transform .15s ease;
-}
-#fxc-trigger:hover{ transform:translateY(-2px) scale(1.03); }
-#fxc-trigger.fxc-hidden{ display:none; }
-#fxc-trigger svg{ display:block; filter:drop-shadow(0 4px 10px rgba(0,0,0,.25)); }
-#fxc-trigger .fxc-label{
-  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.65rem;
-  letter-spacing:1px; padding:3px 10px; border-radius:10px;
-  background:var(--titre,#1a1f2e); color:#fff;
-  box-shadow:0 2px 6px rgba(0,0,0,.2);
-}
-
-/* === Panneau calculatrice === */
-#fxc-panel{
-  position:fixed; right:14px; bottom:14px; z-index:9999;
-  width:330px; max-width:calc(100vw - 20px);
-  background:#2f343b; border-radius:14px;
-  box-shadow:0 12px 36px rgba(0,0,0,.45);
-  font-family:'JetBrains Mono','Courier New',monospace;
-  display:none; flex-direction:column;
-  border:2px solid var(--main, #3ab5d8);
-}
-#fxc-panel.fxc-open{ display:flex; }
-
-/* Barre de titre */
-.fxc-bar{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:8px 12px; border-radius:12px 12px 0 0;
-  background:var(--main, #3ab5d8); color:#fff;
-  font-size:.78rem; font-weight:700;
-  cursor:move; touch-action:none; user-select:none;
-}
-.fxc-bar .fxc-icon{
-  width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center;
-  background:rgba(255,255,255,.18); border:none; border-radius:6px;
-  color:#fff; font-size:.95rem; cursor:pointer; margin-left:4px;
-  font-family:inherit;
-}
-.fxc-bar .fxc-icon:hover{ background:rgba(255,255,255,.32); }
-.fxc-bar-title{ flex:1; pointer-events:none; }
-
-/* Aide */
-.fxc-help{
-  display:none; padding:8px 12px;
-  background:#3a3f47; color:#cfe2dc;
-  font-size:.72rem; line-height:1.5;
-  border-bottom:1px solid #1a1f2e;
-}
-.fxc-help.fxc-show{ display:block; }
-.fxc-help b{ color:var(--main, #3ab5d8); }
-
-/* Écran LCD */
-.fxc-screen{
-  margin:10px; padding:10px 12px;
-  background:#d7e3c8; color:#1a1f2e;
-  border:2px solid #4d5663; border-radius:6px;
-  min-height:60px;
-  display:flex; flex-direction:column; justify-content:space-between;
-  font-family:'JetBrains Mono','Courier New',monospace;
-}
-.fxc-expr{
-  font-size:.85rem; color:#3a4250; text-align:right;
-  min-height:1.2em;
-  overflow-x:auto; white-space:nowrap;
-}
-.fxc-result{
-  font-size:1.3rem; font-weight:700; text-align:right;
-  overflow-x:auto; white-space:nowrap;
-}
-
-/* Clavier */
-.fxc-pad{
-  display:grid; grid-template-columns:repeat(5, 1fr);
-  gap:6px; padding:0 10px 12px;
-}
-.fxc-key{
-  font-family:'JetBrains Mono','Courier New',monospace;
-  font-size:.95rem; font-weight:700;
-  padding:12px 6px; border:none; border-radius:8px;
-  background:#4d5663; color:#fff;
-  cursor:pointer; transition:transform .08s, background .15s;
-  min-height:44px;
-}
-.fxc-key:hover{ background:#5a6371; }
-.fxc-key:active{ transform:scale(.94); }
-.fxc-key.fxc-fn{ background:#3a7a8c; font-size:.78rem; }
-.fxc-key.fxc-fn:hover{ background:#458899; }
-.fxc-key.fxc-op{ background:#5a6371; }
-.fxc-key.fxc-eq{ background:#3a7bd5; }
-.fxc-key.fxc-eq:hover{ background:#4d8aea; }
-.fxc-key.fxc-del{ background:#a04a3a; font-size:.8rem; }
-.fxc-key.fxc-del:hover{ background:#b85a4a; }
-.fxc-key.fxc-ac{ background:#d04a3a; font-size:.85rem; }
-.fxc-key.fxc-ac:hover{ background:#e85a4a; }
-.fxc-key.fxc-divr{ background:#3a7a8c; font-size:.75rem; }
-.fxc-key.fxc-simp{ background:#3a7a8c; font-size:.7rem; line-height:1; }
-.fxc-key.fxc-simp small{ display:block; font-size:.55rem; opacity:.85; margin-top:2px; }
-</style>
-
-<!-- Déclencheur SVG CASIO fx-92 -->
-<div id="fxc-trigger" aria-label="Ouvrir la calculatrice">
-  <svg width="64" height="78" viewBox="0 0 64 78" xmlns="http://www.w3.org/2000/svg">
-    <!-- Corps turquoise avec dégradé -->
-    <defs>
-      <linearGradient id="fxcBody" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#dcefe8"/>
-        <stop offset="100%" stop-color="#bcdcd5"/>
-      </linearGradient>
-    </defs>
-    <rect x="2" y="2" width="60" height="74" rx="7" fill="url(#fxcBody)" stroke="#7ea89e" stroke-width="1"/>
-    <!-- Label CASIO -->
-    <text x="8" y="11" font-family="Arial,sans-serif" font-size="5.5" font-weight="bold" fill="#1a3540">CASIO</text>
-    <!-- Label fx-92 -->
-    <text x="40" y="11" font-family="Arial,sans-serif" font-size="5" font-weight="bold" fill="#1a3540">fx-92</text>
-    <!-- Bandeau solaire -->
-    <rect x="8" y="14" width="20" height="3.5" fill="#2a3540" rx="0.5"/>
-    <!-- Écran LCD -->
-    <rect x="6" y="20" width="52" height="16" fill="#c4d3a6" stroke="#5a6f3a" stroke-width="0.6" rx="1"/>
-    <text x="52" y="32" font-family="Courier New,monospace" font-size="6" fill="#2a3a1a" text-anchor="end" font-weight="bold">0</text>
-    <!-- Pavé directionnel rond turquoise -->
-    <circle cx="14" cy="46" r="6" fill="#9bc4ba" stroke="#5a8479" stroke-width="0.6"/>
-    <circle cx="14" cy="46" r="2" fill="#7ea89e"/>
-    <!-- Grille petites touches -->
-    <g fill="#4d5663" stroke="#2a3540" stroke-width="0.3">
-      <rect x="26" y="42" width="6" height="4" rx="1"/>
-      <rect x="34" y="42" width="6" height="4" rx="1"/>
-      <rect x="42" y="42" width="6" height="4" rx="1"/>
-      <rect x="50" y="42" width="6" height="4" rx="1"/>
-      <rect x="26" y="48" width="6" height="4" rx="1"/>
-      <rect x="34" y="48" width="6" height="4" rx="1"/>
-      <rect x="42" y="48" width="6" height="4" rx="1"/>
-      <rect x="50" y="48" width="6" height="4" rx="1"/>
-    </g>
-    <!-- Touches bas : chiffres -->
-    <g fill="#dcefe8" stroke="#7ea89e" stroke-width="0.4">
-      <rect x="6" y="56" width="7" height="5" rx="1"/>
-      <rect x="14" y="56" width="7" height="5" rx="1"/>
-      <rect x="22" y="56" width="7" height="5" rx="1"/>
-      <rect x="30" y="56" width="7" height="5" rx="1"/>
-      <rect x="6" y="62" width="7" height="5" rx="1"/>
-      <rect x="14" y="62" width="7" height="5" rx="1"/>
-      <rect x="22" y="62" width="7" height="5" rx="1"/>
-      <rect x="30" y="62" width="7" height="5" rx="1"/>
-      <rect x="6" y="68" width="7" height="5" rx="1"/>
-      <rect x="14" y="68" width="7" height="5" rx="1"/>
-      <rect x="22" y="68" width="7" height="5" rx="1"/>
-      <rect x="30" y="68" width="7" height="5" rx="1"/>
-    </g>
-    <!-- Touche "=" bleue -->
-    <rect x="50" y="68" width="8" height="5" rx="1" fill="#3a7bd5" stroke="#1f5cab" stroke-width="0.4"/>
-    <text x="54" y="71.7" font-family="Arial,sans-serif" font-size="3" fill="#fff" text-anchor="middle" font-weight="bold">=</text>
-    <!-- Touche rouge -->
-    <rect x="50" y="56" width="8" height="5" rx="1" fill="#d04a3a" stroke="#9c3528" stroke-width="0.4"/>
-    <!-- Touches +/- côté droite -->
-    <g fill="#4d5663" stroke="#2a3540" stroke-width="0.3">
-      <rect x="40" y="56" width="7" height="5" rx="1"/>
-      <rect x="40" y="62" width="7" height="5" rx="1"/>
-      <rect x="40" y="68" width="7" height="5" rx="1"/>
-      <rect x="50" y="62" width="8" height="5" rx="1"/>
-    </g>
-  </svg>
-  <span class="fxc-label">Calculatrice</span>
-</div>
-
-<!-- Panneau calculatrice -->
-<div id="fxc-panel" aria-label="Calculatrice fx-92 Pazapa">
-  <div class="fxc-bar" id="fxc-bar">
-    <span class="fxc-bar-title">☰ fx-92 · glisse pour déplacer</span>
-    <button class="fxc-icon" id="fxc-help-btn" title="Aide">?</button>
-    <button class="fxc-icon" id="fxc-close-btn" title="Fermer">✕</button>
-  </div>
-  <div class="fxc-help" id="fxc-help">
-    <b>÷R</b> division euclidienne (quotient · reste)<br>
-    <b>FACT(</b>n<b>)</b> décomposition en facteurs premiers<br>
-    <b>PGCD(</b>a;b<b>)</b> · <b>PPCM(</b>a;b<b>)</b><br>
-    <b>SIMP(</b>a;b<b>)</b> fraction a/b irréductible<br>
-    <b>√</b> racine · <b>x²</b> carré · <b>^</b> puissance
-  </div>
-  <div class="fxc-screen">
-    <div class="fxc-expr" id="fxc-expr"></div>
-    <div class="fxc-result" id="fxc-result">0</div>
-  </div>
-  <div class="fxc-pad" id="fxc-pad">
-    <button class="fxc-key fxc-fn" data-k="FACT(">FACT(</button>
-    <button class="fxc-key fxc-fn" data-k="PGCD(">PGCD(</button>
-    <button class="fxc-key fxc-fn" data-k="PPCM(">PPCM(</button>
-    <button class="fxc-key fxc-simp" data-k="SIMP(">SIMP(<small>a/b</small></button>
-    <button class="fxc-key fxc-ac"  data-k="AC">AC</button>
-
-    <button class="fxc-key fxc-del" data-k="DEL">DEL</button>
-    <button class="fxc-key fxc-op"  data-k="(">(</button>
-    <button class="fxc-key fxc-op"  data-k=")">)</button>
-    <button class="fxc-key fxc-op"  data-k=";">;</button>
-    <button class="fxc-key fxc-divr" data-k="÷R">÷R</button>
-
-    <button class="fxc-key" data-k="7">7</button>
-    <button class="fxc-key" data-k="8">8</button>
-    <button class="fxc-key" data-k="9">9</button>
-    <button class="fxc-key fxc-op" data-k="÷">÷</button>
-    <button class="fxc-key fxc-op" data-k="√(">√(</button>
-
-    <button class="fxc-key" data-k="4">4</button>
-    <button class="fxc-key" data-k="5">5</button>
-    <button class="fxc-key" data-k="6">6</button>
-    <button class="fxc-key fxc-op" data-k="×">×</button>
-    <button class="fxc-key fxc-op" data-k="²">x²</button>
-
-    <button class="fxc-key" data-k="1">1</button>
-    <button class="fxc-key" data-k="2">2</button>
-    <button class="fxc-key" data-k="3">3</button>
-    <button class="fxc-key fxc-op" data-k="−">−</button>
-    <button class="fxc-key fxc-op" data-k="^">^</button>
-
-    <button class="fxc-key" data-k="0">0</button>
-    <button class="fxc-key" data-k=",">,</button>
-    <button class="fxc-key fxc-op" data-k="(−)">(−)</button>
-    <button class="fxc-key fxc-op" data-k="+">+</button>
-    <button class="fxc-key fxc-eq" data-k="=">=</button>
-  </div>
-</div>
-
-<script>
-(function(){
-  'use strict';
-
-  // ============ MOTEUR DE CALCUL ============
-  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
-  function lcmFn(a, b){ if(!a || !b) return 0; return Math.abs(a*b)/gcd(a,b); }
-  function isInt(x){ return Number.isFinite(x) && Math.floor(x) === x; }
-
-  function factor(n){
-    n = Math.abs(Math.round(n));
-    if(n === 0) return null;
-    if(n === 1) return { '1': 1 };
-    var f = {};
-    var p = 2;
-    while(p * p <= n){
-      while(n % p === 0){ f[p] = (f[p]||0) + 1; n = n / p; }
-      p++;
-    }
-    if(n > 1) f[n] = (f[n]||0) + 1;
-    return f;
-  }
-
-  var SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
-  function sup(n){ return String(n).split('').map(function(c){ return SUP[c]||c; }).join(''); }
-
-  function factPretty(n){
-    if(n === 1) return '1';
-    if(n < 1 || !isInt(n)) return 'Erreur';
-    var f = factor(n);
-    if(f === null) return 'Erreur';
-    var keys = Object.keys(f).map(Number).sort(function(a,b){ return a-b; });
-    if(keys.length === 1 && f[keys[0]] === 1) return keys[0] + ' (premier)';
-    return keys.map(function(p){ return p + (f[p] > 1 ? sup(f[p]) : ''); }).join('×');
-  }
-
-  function parseExpr(src){
-    var s = src
-      .replace(/\s+/g, '')
-      .replace(/²/g, '^2')
-      .replace(/√/g, 'sqrt')
-      .replace(/×/g, '*')
-      .replace(/÷/g, '/')
-      .replace(/\(−\)/g, '(-)')
-      .replace(/−/g, '-')
-      .replace(/,/g, '.');
-
-    var i = 0;
-    function peek(){ return s[i]; }
-    function isDigit(c){ return c >= '0' && c <= '9'; }
-
-    function parseNumber(){
-      var start = i;
-      while(i < s.length && (isDigit(s[i]) || s[i] === '.')) i++;
-      return parseFloat(s.substring(start, i));
-    }
-
-    function parseFactor(){
-      if(peek() === '+'){ i++; return parseFactor(); }
-      if(peek() === '-'){ i++; return -parseFactor(); }
-      if(peek() === '('){
-        i++;
-        var v = parseExp();
-        if(peek() !== ')') throw new Error(') manquante');
-        i++;
-        return v;
-      }
-      if(s.substr(i, 5) === 'sqrt('){
-        i += 5;
-        var v2 = parseExp();
-        if(peek() !== ')') throw new Error(') sqrt');
-        i++;
-        if(v2 < 0) throw new Error('sqrt négatif');
-        return Math.sqrt(v2);
-      }
-      if(isDigit(peek()) || peek() === '.'){
-        return parseNumber();
-      }
-      throw new Error('token');
-    }
-
-    function parsePow(){
-      var base = parseFactor();
-      if(peek() === '^'){
-        i++;
-        var exp = parsePow();
-        return Math.pow(base, exp);
-      }
-      return base;
-    }
-
-    function parseTerm(){
-      var v = parsePow();
-      while(peek() === '*' || peek() === '/'){
-        var op = s[i++];
-        var r = parsePow();
-        if(op === '*') v = v * r;
-        else { if(r === 0) throw new Error('div 0'); v = v / r; }
-      }
-      return v;
-    }
-
-    function parseExp(){
-      var v = parseTerm();
-      while(peek() === '+' || peek() === '-'){
-        var op = s[i++];
-        var r = parseTerm();
-        if(op === '+') v = v + r;
-        else v = v - r;
-      }
-      return v;
-    }
-
-    var result = parseExp();
-    if(i !== s.length) throw new Error('reste');
-    return result;
-  }
-
-  function calculer(expr){
-    var e = expr.trim();
-    if(e === '') return '0';
-
-    try {
-      var m = /^FACT\(([^)]+)\)$/i.exec(e);
-      if(m){
-        var n = parseExpr(m[1]);
-        if(!isInt(n) || n < 1) return 'Erreur';
-        return factPretty(n);
-      }
-
-      m = /^PGCD\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
-      if(m){
-        var a = parseExpr(m[1]); var b = parseExpr(m[2]);
-        if(!isInt(a) || !isInt(b)) return 'Erreur';
-        return String(gcd(a, b));
-      }
-
-      m = /^PPCM\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
-      if(m){
-        var a2 = parseExpr(m[1]); var b2 = parseExpr(m[2]);
-        if(!isInt(a2) || !isInt(b2)) return 'Erreur';
-        return String(lcmFn(a2, b2));
-      }
-
-      m = /^SIMP\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
-      if(m){
-        var a3 = parseExpr(m[1]); var b3 = parseExpr(m[2]);
-        if(!isInt(a3) || !isInt(b3) || b3 === 0) return 'Erreur';
-        var g = gcd(a3, b3);
-        var na = a3 / g, nb = b3 / g;
-        if(nb === 1) return String(na);
-        if(nb === -1) return String(-na);
-        if(nb < 0) return (-na) + '/' + (-nb);
-        return na + '/' + nb;
-      }
-
-      m = /^([^÷R]+)÷R(.+)$/i.exec(e);
-      if(m){
-        var a4 = parseExpr(m[1]); var b4 = parseExpr(m[2]);
-        if(!isInt(a4) || !isInt(b4) || b4 === 0 || a4 < 0 || b4 < 0) return 'Erreur';
-        var q = Math.floor(a4 / b4);
-        var r = a4 - q * b4;
-        return 'quotient ' + q + ' · reste ' + r;
-      }
-
-      var rr = parseExpr(e);
-      if(!Number.isFinite(rr)) return 'Erreur';
-      if(isInt(rr)) return String(rr);
-      var rounded = Math.round(rr * 1e10) / 1e10;
-      return String(rounded).replace('.', ',');
-    } catch(err) {
-      return 'Erreur';
-    }
-  }
-
-  // ============ DOM & ÉTAT ============
-  var trigger = document.getElementById('fxc-trigger');
-  var panel   = document.getElementById('fxc-panel');
-  var bar     = document.getElementById('fxc-bar');
-  var helpBtn = document.getElementById('fxc-help-btn');
-  var closeBtn= document.getElementById('fxc-close-btn');
-  var help    = document.getElementById('fxc-help');
-  var exprEl  = document.getElementById('fxc-expr');
-  var resEl   = document.getElementById('fxc-result');
-  var pad     = document.getElementById('fxc-pad');
-
-  var currentExpr = '';
-  var lastResult  = null;
-  var resetOnNext = false;
-
-  // ============ OUVERTURE / FERMETURE ============
-  trigger.addEventListener('click', function(){
-    trigger.classList.add('fxc-hidden');
-    panel.classList.add('fxc-open');
-  });
-
-  closeBtn.addEventListener('click', function(e){
-    e.stopPropagation();
-    panel.classList.remove('fxc-open');
-    trigger.classList.remove('fxc-hidden');
-  });
-
-  helpBtn.addEventListener('click', function(e){
-    e.stopPropagation();
-    help.classList.toggle('fxc-show');
-  });
-
-  // ============ DRAG (Pointer Events) ============
-  var dragging = false;
-  var startX = 0, startY = 0;
-  var startLeft = 0, startTop = 0;
-  var convertedToLeftTop = false;
-
-  bar.addEventListener('pointerdown', function(e){
-    if(e.target.classList && e.target.classList.contains('fxc-icon')) return;
-    dragging = true;
-    bar.setPointerCapture(e.pointerId);
-    // Convertir right/bottom en left/top une seule fois
-    if(!convertedToLeftTop){
-      var rect = panel.getBoundingClientRect();
-      panel.style.right = '';
-      panel.style.bottom = '';
-      panel.style.left = rect.left + 'px';
-      panel.style.top  = rect.top  + 'px';
-      convertedToLeftTop = true;
-    }
-    startX = e.clientX;
-    startY = e.clientY;
-    startLeft = parseFloat(panel.style.left) || 0;
-    startTop  = parseFloat(panel.style.top)  || 0;
-    e.preventDefault();
-  });
-
-  bar.addEventListener('pointermove', function(e){
-    if(!dragging) return;
-    var dx = e.clientX - startX;
-    var dy = e.clientY - startY;
-    var newLeft = startLeft + dx;
-    var newTop  = startTop  + dy;
-    // Bornage à l'écran (marge 4 px)
-    var w = panel.offsetWidth;
-    var h = panel.offsetHeight;
-    var maxLeft = window.innerWidth  - w - 4;
-    var maxTop  = window.innerHeight - h - 4;
-    if(newLeft < 4) newLeft = 4;
-    if(newTop  < 4) newTop  = 4;
-    if(newLeft > maxLeft) newLeft = maxLeft;
-    if(newTop  > maxTop ) newTop  = maxTop;
-    panel.style.left = newLeft + 'px';
-    panel.style.top  = newTop  + 'px';
-  });
-
-  function endDrag(e){
-    if(dragging){
-      dragging = false;
-      try { bar.releasePointerCapture(e.pointerId); } catch(_){}
-    }
-  }
-  bar.addEventListener('pointerup', endDrag);
-  bar.addEventListener('pointercancel', endDrag);
-
-  // ============ AFFICHAGE ============
-  function refresh(){
-    exprEl.textContent = currentExpr;
-    if(lastResult !== null){
-      resEl.textContent = lastResult;
-    } else {
-      resEl.textContent = currentExpr === '' ? '0' : currentExpr;
-    }
-  }
-
-  // ============ DEL intelligent ============
-  function smartDel(){
-    if(currentExpr === '') return;
-    var prefixes = ['FACT(', 'PGCD(', 'PPCM(', 'SIMP(', '÷R', '√('];
-    for(var i = 0; i < prefixes.length; i++){
-      var p = prefixes[i];
-      if(currentExpr.endsWith(p)){
-        currentExpr = currentExpr.slice(0, -p.length);
-        return;
-      }
-    }
-    currentExpr = currentExpr.slice(0, -1);
-  }
-
-  // ============ CLAVIER ============
-  pad.addEventListener('click', function(e){
-    var t = e.target.closest('.fxc-key');
-    if(!t) return;
-    var k = t.dataset.k;
-    if(!k) return;
-
-    if(k === 'AC'){
-      currentExpr = '';
-      lastResult = null;
-      resetOnNext = false;
-    } else if(k === 'DEL'){
-      if(resetOnNext){
-        lastResult = null;
-        resetOnNext = false;
-      }
-      smartDel();
-    } else if(k === '='){
-      if(currentExpr === '') return;
-      lastResult = calculer(currentExpr);
-      resetOnNext = true;
-    } else {
-      // si on était sur un résultat, repartir à zéro (sauf opérateur qui chaîne)
-      if(resetOnNext){
-        var chainOps = ['+', '−', '×', '÷', '^', '²', '÷R'];
-        var isChain = chainOps.indexOf(k) !== -1;
-        if(isChain && lastResult && lastResult !== 'Erreur' && lastResult.indexOf('quotient') === -1 && lastResult.indexOf('/') === -1 && lastResult.indexOf('(premier)') === -1){
-          // chaîner avec le résultat précédent
-          currentExpr = lastResult.replace(',', '.') + k;
-        } else {
-          currentExpr = k;
-        }
-        lastResult = null;
-        resetOnNext = false;
-      } else {
-        currentExpr += k;
-      }
-    }
-    refresh();
-  });
-
-  // Init
-  refresh();
-})();
-</script>
-<!-- ===== FIN CALCULATRICE ===== -->
 </body>
 </html>
