@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PAZAPA Maths 4e — S1J1 · Résoudre une équation du premier degré</title>
+<title>PAZAPA Maths 4e — Exprimer en fonction de …</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 /* ───────── CHARTE J1 ORANGE ───────── */
@@ -215,20 +215,21 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 
 <header class="hero">
   <div class="badge-semaine">Semaine 1 · Jour 1</div>
-  <h1>✏️ Résoudre les exercices</h1>
-  <p class="sous-titre">Résoudre une équation du premier degré</p>
+  <h1>✏️ Exprimer en fonction de …</h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs</p>
   <div class="consigne">⚡ Je travaille mes automatismes : 20&nbsp;s par question, réponds vite&nbsp;!</div>
 </header>
 
 <section class="startgate" id="startgate">
   <h2>⏱️ Défi flash : 20 s par question</h2>
-  <p>Tu vas résoudre <strong>5 équations</strong> du premier degré, du type <strong>7<i>x</i> = 3</strong> ou <strong>5<i>x</i> + 4 = 19</strong>. Écris la valeur de <i>x</i> puis valide.</p>
-  <p>Si la solution n&rsquo;est pas un nombre entier, réponds en <strong>fraction</strong> (ex.&nbsp;3/7) ou en <strong>décimal exact</strong> (ex.&nbsp;0,75).</p>
-  <p>Tu peux rejouer à l&rsquo;infini&nbsp;: à chaque partie, <strong>de nouvelles équations</strong> sont tirées au hasard.</p>
+  <p>Tu vas résoudre <strong>5 équations</strong> du premier degré.<br>
+  Pour chaque équation, trouve la valeur de <i>x</i>, puis valide ta réponse.</p>
+  <p>Tu peux répondre sous forme d&rsquo;entier, de <strong>fraction simplifiée</strong> (ex.&nbsp;&minus;8/13) ou de <strong>décimal exact</strong>.</p>
+  <p>🔄 Tu peux refaire le défi autant de fois que nécessaire pour progresser.</p>
   <div class="memo">
-    💡 <strong>Mémo méthode :</strong><br>
-    👉 <strong>5<i>x</i> + 4 = 19</strong> : j&rsquo;enlève 4 des deux côtés → 5<i>x</i> = 15, puis je divise par 5 → <i>x</i> = 3.<br>
-    👉 <strong>7<i>x</i> = 3</strong> : je divise les deux côtés par 7 → <i>x</i> = 3/7 (la solution peut être une fraction&nbsp;!).
+    💡 <strong>Mémo :</strong><br>
+    👉 Une équation est équilibrée&nbsp;: ce que l&rsquo;on fait d&rsquo;un côté, on le fait aussi de l&rsquo;autre.<br>
+    👉 La solution est la valeur de <i>x</i> qui rend l&rsquo;égalité vraie.
   </div>
   <button class="btn btn-start" id="btnStart">▶️ Démarrer le défi</button>
 </section>
@@ -250,7 +251,7 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
     </div>
     <div class="saisie-ligne">
       <span><i>x</i>&nbsp;=</span>
-      <input type="text" id="reponse" autocomplete="off" spellcheck="false" placeholder="ex : 3/4 · 0,75 · −2"/>
+      <input type="text" id="reponse" autocomplete="off" spellcheck="false"/>
       <button class="btn btn-valider" id="btnValidate">✅ Valider</button>
     </div>
     <div class="aide-saisie">Écris un entier (−2), une fraction (3/7) ou un décimal exact (0,75). Virgule ou point, comme tu veux.</div>
@@ -265,7 +266,7 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
   <div class="etoiles" id="etoiles"></div>
   <div class="msg-final" id="msgFinal"></div>
   <div class="recap" id="recap"></div>
-  <button class="btn btn-rejouer" id="btnRejouer">↻ Rejouer avec de nouvelles équations</button>
+  <button class="btn btn-rejouer" id="btnRejouer">↻ Rejouer</button>
 </section>
 
 <div class="countdown" id="countdown"><div class="cd-num" id="cdNum">3</div></div>
@@ -325,25 +326,33 @@ function genQ(type, prevKey){
   return { type:type, a:a, b:b, c:c, sol:sol, key:key };
 }
 /* une partie : 5 équations, les 2 types présents, mix entiers/fractions garanti */
+/* 5 équations fixes (demandées par l'enseignante), dans l'ordre des captures.
+   Toutes du type B : a·x + b = c → x = (c−b)/a. Solutions vérifiées. */
+var EQUATIONS = [
+  { a:13, b:13,  c:5   },  /* x = −8/13 */
+  { a:4,  b:3,   c:-10 },  /* x = −13/4 */
+  { a:-4, b:9,   c:-11 },  /* x = 5 */
+  { a:1,  b:13,  c:3   },  /* x = −10 */
+  { a:-3, b:1,   c:-2  }   /* x = 1 */
+];
 function genGame(){
   var qs = [];
-  for(var t=0;t<300;t++){
-    var types = shuffle(["A","A","B","B", (Math.random()<0.5?"A":"B")]);
-    qs = []; var prev = "", ents = 0, fracs = 0;
-    for(var i=0;i<QTOTAL;i++){
-      var q = genQ(types[i], prev);
-      prev = q.key; qs.push(q);
-      if(q.sol.d === 1){ ents++; } else { fracs++; }
-    }
-    if(ents >= 1 && fracs >= 2){ return qs; }
+  for(var i=0;i<EQUATIONS.length;i++){
+    var e = EQUATIONS[i];
+    qs.push({ type:"B", a:e.a, b:e.b, c:e.c, sol:makeFrac(e.c - e.b, e.a), key:"B"+e.a+","+e.b+","+e.c });
   }
   return qs;
 }
 
 /* ═══════════ AFFICHAGE ═══════════ */
 function numHTML(v){ return v < 0 ? "\u2212" + (-v) : "" + v; }
+function coefHTML(a){
+  if(a === 1) return "<i>x</i>";
+  if(a === -1) return "\u2212<i>x</i>";
+  return numHTML(a) + "<i>x</i>";
+}
 function eqHTML(q){
-  var s = q.a + "<i>x</i>";
+  var s = coefHTML(q.a);
   if(q.type === "B"){
     s += (q.b < 0) ? "\u00a0\u2212\u00a0" + (-q.b) : "\u00a0+\u00a0" + q.b;
     s += "\u00a0=\u00a0" + numHTML(q.c);
@@ -353,7 +362,7 @@ function eqHTML(q){
   return s;
 }
 function eqTexte(q){
-  var s = q.a + "x";
+  var s = (q.a === 1) ? "x" : (q.a === -1) ? "\u2212x" : (q.a + "x");
   if(q.type === "B"){
     s += (q.b < 0) ? " \u2212 " + (-q.b) : " + " + q.b;
     s += " = " + (q.c < 0 ? "\u2212" + (-q.c) : q.c);
@@ -388,16 +397,16 @@ function methodeHTML(q){
     var r = q.c - q.b;
     if(q.b > 0){
       h += "On enl\u00e8ve " + q.b + " des deux c\u00f4t\u00e9s\u00a0: "
-         + q.a + "<i>x</i> = " + numHTML(q.c) + " \u2212 " + q.b + " = " + numHTML(r) + ".<br>";
+         + coefHTML(q.a) + " = " + numHTML(q.c) + " \u2212 " + q.b + " = " + numHTML(r) + ".<br>";
     }else{
       h += "On ajoute " + (-q.b) + " des deux c\u00f4t\u00e9s\u00a0: "
-         + q.a + "<i>x</i> = " + numHTML(q.c) + " + " + (-q.b) + " = " + numHTML(r) + ".<br>";
+         + coefHTML(q.a) + " = " + numHTML(q.c) + " + " + (-q.b) + " = " + numHTML(r) + ".<br>";
     }
-    h += "Puis on divise par " + q.a + "\u00a0: <i>x</i> = " + numHTML(r) + " \u00f7 " + q.a
+    h += "Puis on divise par " + numHTML(q.a) + "\u00a0: <i>x</i> = " + numHTML(r) + " \u00f7 " + numHTML(q.a)
        + " = " + solHTML(q.sol) + ".";
   }else{
-    h += "On divise les deux c\u00f4t\u00e9s par " + q.a + "\u00a0: <i>x</i> = "
-       + numHTML(q.b) + " \u00f7 " + q.a + " = " + solHTML(q.sol) + ".";
+    h += "On divise les deux c\u00f4t\u00e9s par " + numHTML(q.a) + "\u00a0: <i>x</i> = "
+       + numHTML(q.b) + " \u00f7 " + numHTML(q.a) + " = " + solHTML(q.sol) + ".";
   }
   return h;
 }
@@ -600,11 +609,11 @@ function showResults(){
   var r = $("resultats");
   r.classList.add("show");
   $("scoreFinal").textContent = game.score + " / " + QTOTAL + " dans le temps\u00a0!";
-  var stars = (game.score===5) ? 3 : (game.score>=3 ? 2 : 1);
+  var stars = (game.score===5) ? 3 : (game.score>=Math.ceil(5*0.8) ? 2 : 1);
   $("etoiles").textContent = "\u2b50".repeat(stars) + "\u2606".repeat(3-stars);
   var msg;
-  if(game.score===5){ msg = "Parfait\u00a0! Tu sais r\u00e9soudre les \u00e9quations du premier degr\u00e9\u00a0! \uD83C\uDF89"; }
-  else if(game.score>=3){ msg = "Bien jou\u00e9\u00a0! Encore un petit entra\u00eenement et ce sera parfait\u00a0!"; }
+  if(game.score===5){ msg = "Parfait\u00a0! Bravo\u00a0! \uD83C\uDF89"; }
+  else if(game.score>=Math.ceil(5*0.8)){ msg = "Bien jou\u00e9\u00a0! Encore un petit entra\u00eenement et ce sera parfait\u00a0!"; }
   else { msg = "C\u2019est un bon d\u00e9but\u00a0! Rejoue pour t\u2019entra\u00eener, tu vas y arriver\u00a0! \uD83D\uDCAA"; }
   $("msgFinal").textContent = msg;
   var rec = $("recap"); rec.innerHTML = "";
