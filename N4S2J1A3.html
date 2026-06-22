@@ -277,7 +277,96 @@
     .seq.good{border-color:var(--green);} .seq.good .slot{border-color:var(--green);}
     .seq.bad{border-color:var(--pink);}
     body{letter-spacing:.03em;word-spacing:.08em;line-height:1.6;}
-  </style>
+  
+/* ── Combat de troupes ── */
+#combat-wrapper{overflow:hidden;border-radius:10px;}
+
+:root{
+  --pos:#2f7fb0; --pos-soft:#e8f4fc; --pos-dark:#1a4d6e;
+  --neg:#c0392b; --neg-soft:#fdecea; --neg-dark:#7a1c14;
+  --jour:#f28b82; --jour-dark:#b03a30; --jour-soft:#ffeae7;
+  --green:#8dc63f; --green-dark:#3d7a10; --green-soft:#f0faeb;
+  --ink:#23262d; --muted:#8a8f9a; --bg:#fffdf7; --surface:#fff;
+  --border:#ece8dd; --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--ink);min-height:100vh;padding:0 0 80px;}
+
+/* ── HEADER ── */
+.hero{background:var(--jour-soft);border-bottom:3px solid var(--jour);padding:18px 16px 14px;text-align:center;}
+.badge{display:inline-flex;align-items:center;gap:7px;background:var(--jour);color:#fff;font-weight:800;font-size:.8rem;letter-spacing:1px;padding:6px 18px;border-radius:20px;margin-bottom:10px;}
+.badge .d{width:9px;height:9px;border-radius:50%;}
+h1{font-size:1.35rem;font-weight:800;color:var(--jour-dark);margin-bottom:4px;}
+.subtitle{font-size:.88rem;color:var(--muted);margin-bottom:12px;}
+
+/* ── CONTRÔLES ── */
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 16px;}
+.ctrl-btn{font-family:inherit;font-weight:700;font-size:.82rem;padding:9px 16px;border:2.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer;transition:.12s;}
+.ctrl-btn:hover{border-color:var(--jour);}
+.ctrl-btn.active{background:var(--pos);color:#fff;border-color:var(--pos-dark);}
+.ctrl-btn.mode.active{background:var(--jour);border-color:var(--jour-dark);}
+.ctrl-sep{width:2px;background:var(--border);border-radius:2px;margin:0 2px;}
+
+/* ── ARÈNE ── */
+.arena-wrap{max-width:860px;margin:0 auto;padding:0 12px;}
+.consigne{text-align:center;font-size:.82rem;color:var(--muted);margin:6px 0 10px;font-style:italic;}
+
+.arena{background:var(--surface);border:3px solid var(--border);border-radius:var(--radius);padding:20px 12px 16px;min-height:160px;position:relative;overflow:hidden;}
+.arena-label{position:absolute;top:8px;left:12px;font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+
+/* Ligne des opérandes */
+.operandes{display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;justify-content:center;min-height:90px;}
+.groupe{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.groupe-label{font-weight:800;font-size:.95rem;color:var(--ink);}
+.groupe-label.pos{color:var(--pos-dark);}
+.groupe-label.neg{color:var(--neg-dark);}
+.pions-row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:180px;min-height:38px;}
+.op-sign{font-size:1.4rem;font-weight:800;color:var(--muted);align-self:center;padding-top:22px;}
+
+/* PION */
+.pion{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;cursor:grab;user-select:none;touch-action:none;transition:transform .12s,box-shadow .12s;position:relative;flex-shrink:0;}
+.pion:active{cursor:grabbing;}
+.pion.pos-pion{background:var(--surface);border:2.5px solid var(--pos);color:var(--pos-dark);}
+.pion.neg-pion{background:var(--neg-soft);border:2.5px solid var(--neg);color:var(--neg-dark);}
+.pion.dragging{transform:scale(1.15);box-shadow:0 6px 20px rgba(0,0,0,.22);z-index:100;opacity:.9;}
+.pion.annule{animation:annule .35s forwards;}
+@keyframes annule{
+  0%{transform:scale(1);opacity:1;}
+  50%{transform:scale(1.4);opacity:.6;}
+  100%{transform:scale(0);opacity:0;}
+}
+.pion.over{box-shadow:0 0 0 4px var(--jour);}
+
+/* Zone drop centrale */
+.drop-zone{border:2.5px dashed var(--border);border-radius:10px;min-height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem;margin:10px 0;transition:border-color .15s,background .15s;}
+.drop-zone.drag-over{border-color:var(--jour);background:var(--jour-soft);}
+.drop-zone .pions-row{padding:6px;}
+
+/* Résultat */
+.result-box{margin-top:14px;padding:12px 16px;border-radius:10px;text-align:center;display:none;}
+.result-box.show{display:block;}
+.result-box.pos-win{background:var(--pos-soft);border:2px solid var(--pos);color:var(--pos-dark);}
+.result-box.neg-win{background:var(--neg-soft);border:2px solid var(--neg);color:var(--neg-dark);}
+.result-box.egalite{background:var(--green-soft);border:2px solid var(--green);color:var(--green-dark);}
+.result-title{font-weight:800;font-size:1rem;margin-bottom:4px;}
+.result-calc{font-size:.85rem;margin-bottom:2px;}
+.result-rel{font-size:.85rem;font-weight:700;}
+
+/* Bouton nouveau combat */
+.btn-nouveau{font-family:inherit;font-weight:800;font-size:.95rem;padding:12px 28px;background:var(--jour);color:#fff;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 0 var(--jour-dark);margin-top:12px;display:block;width:fit-content;margin-left:auto;margin-right:auto;transition:.1s;}
+.btn-nouveau:active{transform:translateY(3px);box-shadow:0 1px 0 var(--jour-dark);}
+
+/* Instruction drag */
+.drag-hint{text-align:center;font-size:.78rem;color:var(--muted);margin:8px 0 0;font-style:italic;}
+
+/* Scoreboard */
+.score-bar{max-width:860px;margin:14px auto 0;padding:0 12px;}
+.score-inner{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;gap:12px;justify-content:space-around;flex-wrap:wrap;}
+.sc{text-align:center;}
+.sc b{display:block;font-size:1.2rem;color:var(--jour-dark);}
+.sc small{font-size:.7rem;color:var(--muted);font-weight:600;}
+
+</style>
 </head>
 <body>
   <div class="bubble1"></div><div class="bubble2"></div>
@@ -290,12 +379,414 @@
   </div>
   <p class="subtitle" style="max-width:680px;margin:0 auto 16px;text-align:center;">Entra&icirc;ne-toi avec ces activit&eacute;s interactives. Tu valides directement dans chacune.</p>
   <div class="stats-card" style="padding:12px;">
-    <div class="prog-text" style="text-align:left;font-weight:700;color:var(--day-dark);margin:2px 0 10px;font-size:.98rem;">Placer et reconnaître les nombres relatifs</div>
-    <iframe src="https://mathix.org/relatifs/" title="Activité interactive" loading="lazy" style="border:0;width:100%;height:520px;border-radius:12px;display:block;background:#fff;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+    <div class="prog-text" style="text-align:left;font-weight:700;color:var(--day-dark);margin:2px 0 10px;font-size:.98rem;">⚔️ Combat de troupes</div>
+    <div id="combat-wrapper">
+<div class="controls">
+  <button class="ctrl-btn mode active" id="btnAdd" onclick="setMode('add')">Que des additions</button>
+  <button class="ctrl-btn mode" id="btnMix" onclick="setMode('mix')">Additions et soustractions</button>
+  <div class="ctrl-sep"></div>
+  <button class="ctrl-btn" id="btnMoins" onclick="setSize('small')">− de troupes</button>
+  <button class="ctrl-btn active" id="btnPlus" onclick="setSize('large')">+ de troupes</button>
+</div>
+
+<div class="arena-wrap">
+  <div class="consigne">💡 Fais glisser un pion ⊕ sur un pion ⊖ (ou l'inverse) pour les annihiler.</div>
+  <div class="arena" id="arena">
+    <div class="arena-label">CHAMP DE BATAILLE</div>
+    <div class="operandes" id="operandes"></div>
+    <div class="drag-hint" id="dragHint">⬆ Glisse les pions les uns sur les autres pour les annuler</div>
+    <div id="addSteps" style="display:none;margin-top:10px;"></div>
+    <div class="result-box" id="resultBox">
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-calc" id="resultCalc"></div>
+      <div class="result-rel" id="resultRel"></div>
+    </div>
+    <button class="btn-nouveau" id="btnNouveau" onclick="nouveauCombat()" style="display:none;">↻ Nouveau combat</button>
+  </div>
+</div>
+
+<div class="score-bar">
+  <div class="score-inner">
+    <div class="sc"><b id="scPos">0</b><small>Victoires ⊕</small></div>
+    <div class="sc"><b id="scEg">0</b><small>Égalités</small></div>
+    <div class="sc"><b id="scNeg">0</b><small>Victoires ⊖</small></div>
+    <div class="sc"><b id="scTotal">0</b><small>Combats</small></div>
+  </div>
+</div>
+<script>
+(function(){
+// ── VARIABLES ──
+var mode='add', size='large';
+var score={pos:0,neg:0,eg:0,total:0};
+var operandes=[], done=false;
+var pions=[], pidCounter=0;
+var draggingId=null, startX, startY, clone=null, lastOver=null;
+
+// ── AUDIO ──
+var AC=null;
+function getAC(){ if(!AC) try{ AC=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} return AC; }
+function sndOk(){
+  try{ var ac=getAC(); if(!ac) return; var t=ac.currentTime;
+    var o=ac.createOscillator(), g=ac.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(660,t); o.frequency.linearRampToValueAtTime(880,t+.08);
+    g.gain.setValueAtTime(.18,t); g.gain.exponentialRampToValueAtTime(.001,t+.18);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.2);
+  }catch(e){}
+}
+function sndErr(){
+  try{ var ac=getAC(); if(!ac) return; var t=ac.currentTime;
+    var o=ac.createOscillator(), g=ac.createGain();
+    o.type='square'; o.frequency.value=180;
+    g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.001,t+.15);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.18);
+  }catch(e){}
+}
+function sndVictoire(){
+  try{ var ac=getAC(); if(!ac) return; var t=ac.currentTime;
+    var o=ac.createOscillator(), g=ac.createGain();
+    o.type='sine'; o.frequency.value=880;
+    g.gain.setValueAtTime(.22,t); g.gain.exponentialRampToValueAtTime(.001,t+.4);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.45);
+  }catch(e){}
+}
+
+// ── MODES ──
+function setMode(m){
+  mode=m;
+  document.getElementById('btnAdd').classList.toggle('active',m==='add');
+  document.getElementById('btnMix').classList.toggle('active',m==='mix');
+  nouveauCombat();
+}
+function setSize(sz){
+  size=sz;
+  document.getElementById('btnMoins').classList.toggle('active',sz==='small');
+  document.getElementById('btnPlus').classList.toggle('active',sz==='large');
+  nouveauCombat();
+}
+
+// ── GÉNÉRATEUR ──
+function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function genCombat(){
+  var n = size==='small' ? rnd(2,3) : rnd(3,5);
+  var vals=[];
+  if(mode==='add'){
+    // additions : tous positifs, le résultat est la somme directe
+    for(var i=0;i<n;i++){ vals.push(rnd(1, size==='small'?5:8)); }
+  } else {
+    var signs=[1,-1,-1,1,-1,1,1,-1];
+    for(var i=0;i<n;i++){ vals.push(signs[rnd(0,7)]*rnd(1, size==='small'?5:9)); }
+    if(vals.every(function(v){return v>0;})){ vals[rnd(0,n-1)] *= -1; }
+    if(vals.every(function(v){return v<0;})){ vals[rnd(0,n-1)] *= -1; }
+  }
+  return vals;
+}
+function labelVal(v){ return v>0 ? '(+'+v+')' : '('+v+')'; }
+function signBetween(i,vals){
+  if(i===0) return '';
+  return vals[i]>0 ? ' + ' : ' - ';
+}
+
+// ── PIONS ──
+function buildPion(v){
+  var pid=pidCounter++;
+  var el=document.createElement('div');
+  el.className='pion '+(v>0?'pos-pion':'neg-pion');
+  el.id='pion'+pid; el.textContent=v>0?'+'+v:''+v;
+  el.dataset.pid=pid; el.dataset.val=v;
+  addDragListeners(el);
+  return {id:pid, val:v, el:el, annule:false};
+}
+
+// ── MODE ADDITION : glisser de gauche à droite ──
+function buildAddSteps(vals){
+  var stepsDiv=document.getElementById('addSteps');
+  stepsDiv.innerHTML='';
+
+  var hint=document.createElement('div');
+  hint.style.cssText='text-align:center;font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:10px;';
+  hint.textContent='Fais glisser le groupe de gauche vers le groupe suivant pour les additionner.';
+  stepsDiv.appendChild(hint);
+
+  var arena=document.createElement('div');
+  arena.id='addArena';
+  arena.style.cssText='display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;justify-content:center;padding:8px 0;';
+  stepsDiv.appendChild(arena);
+
+  // Créer les groupes
+  var grpEls=[], lblEls=[], rowEls=[];
+  vals.forEach(function(v,gi){
+    if(gi>0){
+      var plus=document.createElement('div');
+      plus.className='op-sign'; plus.id='plus'+gi;
+      plus.textContent='+';
+      plus.style.cssText='align-self:center;padding-top:22px;font-size:1.3rem;color:var(--muted);';
+      arena.appendChild(plus);
+    }
+    var wrap=document.createElement('div');
+    wrap.className='groupe'; wrap.id='addGrp'+gi;
+
+    var lbl=document.createElement('div');
+    lbl.className='groupe-label pos'; lbl.id='addLbl'+gi;
+    lbl.textContent='(+'+v+')';
+
+    var row=document.createElement('div');
+    row.className='pions-row'; row.style.maxWidth='180px';
+    for(var j=0;j<v;j++){
+      var p=document.createElement('div');
+      p.className='pion pos-pion'; p.textContent='+1';
+      p.style.pointerEvents='none';
+      row.appendChild(p);
+    }
+    wrap.appendChild(lbl); wrap.appendChild(row);
+    arena.appendChild(wrap);
+    grpEls.push(wrap); lblEls.push(lbl); rowEls.push(row);
+  });
+
+  // État
+  var accumIdx=0; // le groupe accumulateur courant (celui qui grossit)
+  var runTotal=vals[0];
+  var dragGi=null, cloneAdd=null, sxA, syA;
+
+  function highlight(on){
+    var target=grpEls[accumIdx+1];
+    if(target) target.style.boxShadow = on ? '0 0 0 3px var(--pos)' : '';
+  }
+
+  function startAdd(cx,cy){
+    // Seul l'accumulateur courant est draggable (vers la droite)
+    if(accumIdx >= vals.length-1) return;
+    dragGi=accumIdx;
+    var r=grpEls[dragGi].getBoundingClientRect();
+    cloneAdd=grpEls[dragGi].cloneNode(true);
+    cloneAdd.style.cssText='position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;pointer-events:none;z-index:999;opacity:.85;';
+    document.body.appendChild(cloneAdd);
+    grpEls[dragGi].style.opacity='0.3';
+    sxA=cx; syA=cy;
+  }
+  function moveAdd(cx,cy){
+    if(!cloneAdd) return;
+    cloneAdd.style.left=(parseFloat(cloneAdd.style.left)+(cx-sxA))+'px';
+    cloneAdd.style.top=(parseFloat(cloneAdd.style.top)+(cy-syA))+'px';
+    sxA=cx; syA=cy;
+    cloneAdd.style.display='none';
+    var el=document.elementFromPoint(cx,cy);
+    cloneAdd.style.display='';
+    var targetEl=grpEls[accumIdx+1];
+    highlight(targetEl && (targetEl===el || targetEl.contains(el)));
+  }
+  function endAdd(cx,cy){
+    if(!cloneAdd||dragGi===null) return;
+    grpEls[dragGi].style.opacity='';
+    highlight(false);
+    cloneAdd.remove(); cloneAdd=null;
+    var el=document.elementFromPoint(cx,cy);
+    var targetEl=grpEls[accumIdx+1];
+    var onTarget=targetEl && (targetEl===el || targetEl.contains(el));
+    if(onTarget){
+      fuse();
+    } else {
+      sndErr();
+    }
+    dragGi=null;
+  }
+
+  function fuse(){
+    sndOk();
+    var nextIdx=accumIdx+1;
+    runTotal+=vals[nextIdx];
+    // Mettre à jour le label du groupe cible (qui devient le nouvel accumulateur)
+    lblEls[nextIdx].textContent='(+'+runTotal+')';
+    // Ajouter les pions de l'accumulateur vers le groupe cible
+    var srcPions=rowEls[accumIdx].querySelectorAll('.pion');
+    srcPions.forEach(function(p,j){
+      var np=p.cloneNode(true);
+      np.style.opacity='0'; np.style.transition='opacity .2s';
+      np.style.pointerEvents='none';
+      rowEls[nextIdx].appendChild(np);
+      setTimeout(function(){ np.style.opacity='1'; }, j*15+30);
+    });
+    // Masquer l'ancien accumulateur et son signe +
+    grpEls[accumIdx].style.display='none';
+    var plusEl=document.getElementById('plus'+accumIdx);
+    if(!plusEl) plusEl=document.getElementById('plus'+(accumIdx));
+    // Le signe + entre accumIdx et nextIdx
+    var plusNext=document.getElementById('plus'+nextIdx);
+    if(plusNext) plusNext.style.display='none';
+    // Aussi masquer le signe avant l'ancien accumulateur si ce n'est pas le premier
+    var plusPrev=document.getElementById('plus'+accumIdx);
+    if(plusPrev) plusPrev.style.display='none';
+
+    accumIdx=nextIdx;
+
+    // Fin ?
+    if(accumIdx >= vals.length-1){
+      setTimeout(function(){ showResult(runTotal); }, 500);
+    }
+  }
+
+  // Listeners sur l'accumulateur courant
+  // On attache sur toute l'arène et on filtre
+  arena.addEventListener('mousedown',function(e){
+    e.preventDefault(); startAdd(e.clientX,e.clientY);
+    document.addEventListener('mousemove',mAdd); document.addEventListener('mouseup',uAdd);
+  });
+  arena.addEventListener('touchstart',function(e){
+    e.preventDefault(); var t=e.touches[0]; startAdd(t.clientX,t.clientY);
+    document.addEventListener('touchmove',tmAdd,{passive:false}); document.addEventListener('touchend',tuAdd);
+  },{passive:false});
+  function mAdd(e){ moveAdd(e.clientX,e.clientY); }
+  function uAdd(e){ endAdd(e.clientX,e.clientY); document.removeEventListener('mousemove',mAdd); document.removeEventListener('mouseup',uAdd); }
+  function tmAdd(e){ e.preventDefault(); var t=e.touches[0]; moveAdd(t.clientX,t.clientY); }
+  function tuAdd(e){ var t=e.changedTouches[0]; endAdd(t.clientX,t.clientY); document.removeEventListener('touchmove',tmAdd); document.removeEventListener('touchend',tuAdd); }
+}
+
+var currentStep=-1;
+function revealStep(si){ currentStep=si; }
+
+// ── NOUVEAU COMBAT ──
+function nouveauCombat(){
+  done=false; pions=[]; pidCounter=0;
+  var vals=genCombat(); operandes=vals;
+  document.getElementById('resultBox').classList.remove('show');
+  document.getElementById('btnNouveau').style.display='none';
+  var box=document.getElementById('operandes'); box.innerHTML='';
+  var stepsDiv=document.getElementById('addSteps');
+  stepsDiv.innerHTML=''; stepsDiv.style.display='none';
+  var allSameSign = vals.every(function(v){return v>0;}) || vals.every(function(v){return v<0;});
+  document.getElementById('dragHint').style.display = allSameSign ? 'none' : 'block';
+  if(allSameSign){
+    // Mode add : tout dans addSteps, operandes reste vide
+    stepsDiv.style.display='block';
+    buildAddSteps(vals);
+    return;
+  }
+  // Mode mix : groupes avec pions draggables dans operandes
+  for(var i=0;i<vals.length;i++){
+    if(i>0){
+      var sign=document.createElement('div'); sign.className='op-sign';
+      sign.textContent=signBetween(i,vals); box.appendChild(sign);
+    }
+    var v=vals[i], absV=Math.abs(v);
+    var grp=document.createElement('div'); grp.className='groupe';
+    var lbl=document.createElement('div');
+    lbl.className='groupe-label '+(v>0?'pos':'neg'); lbl.textContent=labelVal(v);
+    var row=document.createElement('div'); row.className='pions-row';
+    for(var j=0;j<absV;j++){ var p=buildPion(v>0?1:-1); pions.push(p); row.appendChild(p.el); }
+    grp.appendChild(lbl); grp.appendChild(row); box.appendChild(grp);
+  }
+}
+
+// ── DRAG & DROP ──
+function addDragListeners(el){
+  el.addEventListener('mousedown', onDown);
+  el.addEventListener('touchstart', onTouch, {passive:false});
+}
+function onDown(e){ if(done) return; e.preventDefault(); startDrag(parseInt(e.currentTarget.dataset.pid),e.clientX,e.clientY); document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp); }
+function onTouch(e){ if(done) return; e.preventDefault(); var t=e.touches[0]; startDrag(parseInt(e.currentTarget.dataset.pid),t.clientX,t.clientY); document.addEventListener('touchmove',onTMove,{passive:false}); document.addEventListener('touchend',onTUp); }
+function onTMove(e){ e.preventDefault(); var t=e.touches[0]; moveAt(t.clientX,t.clientY); }
+function onTUp(e){ endDrag(e.changedTouches[0].clientX,e.changedTouches[0].clientY); document.removeEventListener('touchmove',onTMove); document.removeEventListener('touchend',onTUp); }
+function onMove(e){ moveAt(e.clientX,e.clientY); }
+function onUp(e){ endDrag(e.clientX,e.clientY); document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); }
+function getPion(id){ for(var i=0;i<pions.length;i++) if(pions[i].id===id && !pions[i].annule) return pions[i]; return null; }
+function startDrag(pid,cx,cy){
+  if(done) return; var p=getPion(pid); if(!p) return;
+  draggingId=pid;
+  var r=p.el.getBoundingClientRect();
+  clone=p.el.cloneNode(true); clone.classList.add('dragging');
+  clone.style.cssText='position:fixed;width:'+r.width+'px;height:'+r.height+'px;left:'+r.left+'px;top:'+r.top+'px;pointer-events:none;transition:none;';
+  document.body.appendChild(clone); p.el.style.opacity='0.3'; startX=cx; startY=cy;
+}
+function moveAt(cx,cy){
+  if(!clone) return;
+  clone.style.left=(parseFloat(clone.style.left)+(cx-startX))+'px';
+  clone.style.top=(parseFloat(clone.style.top)+(cy-startY))+'px';
+  startX=cx; startY=cy;
+  clone.style.display='none'; var el=document.elementFromPoint(cx,cy); clone.style.display='';
+  var over=el && el.classList && el.classList.contains('pion') ? el : null;
+  if(lastOver && lastOver!==over) lastOver.classList.remove('over');
+  if(over && parseInt(over.dataset.pid)!==draggingId){
+    var p2=getPion(parseInt(over.dataset.pid)), p1=getPion(draggingId);
+    if(p2 && p1 && p1.val*p2.val<0) over.classList.add('over'); else over=null;
+  }
+  lastOver=over||null;
+}
+function endDrag(cx,cy){
+  if(!clone || draggingId===null) return;
+  var p1=getPion(draggingId); if(p1) p1.el.style.opacity='';
+  clone.remove(); clone=null;
+  if(lastOver) lastOver.classList.remove('over');
+  var el=document.elementFromPoint(cx,cy);
+  var target=el && el.classList && el.classList.contains('pion') ? el : null;
+  if(target){
+    var pid2=parseInt(target.dataset.pid), p2=getPion(pid2);
+    if(p1 && p2 && pid2!==draggingId && p1.val*p2.val<0){ annihile(p1,p2); }
+    else if(p1 && p2 && pid2!==draggingId && p1.val*p2.val>0){ sndErr(); }
+  }
+  draggingId=null; lastOver=null;
+}
+
+// ── ANNIHILATION ──
+function annihile(p1,p2){
+  p1.annule=true; p2.annule=true; sndOk();
+  p1.el.classList.add('annule'); p2.el.classList.add('annule');
+  setTimeout(function(){ p1.el.style.display='none'; p2.el.style.display='none'; checkFin(); }, 380);
+}
+function checkFin(){
+  var actifs=pions.filter(function(p){return !p.annule;});
+  if(actifs.length===0){ showResult(0); return; }
+  var hasPos=actifs.some(function(p){return p.val>0;});
+  var hasNeg=actifs.some(function(p){return p.val<0;});
+  if(!hasPos || !hasNeg){ showResult(actifs.reduce(function(s,p){return s+p.val;},0)); }
+}
+
+// ── RÉSULTAT ──
+function showResult(sum){
+  done=true;
+  document.getElementById('dragHint').style.display='none';
+  var btnRes=document.getElementById('btnResult'); if(btnRes) btnRes.style.display='none';
+  var stepsDiv=document.getElementById('addSteps'); if(stepsDiv) stepsDiv.style.display='none';
+  var parts=operandes.map(function(v){return v>0?'(+'+v+')':'('+v+')';});
+  var total=operandes.reduce(function(s,v){return s+v;},0);
+  var rb=document.getElementById('resultBox');
+  var title=document.getElementById('resultTitle');
+  var calc=document.getElementById('resultCalc');
+  var rel=document.getElementById('resultRel');
+  calc.textContent=parts.join(' + ')+' = '+(total>0?'(+'+total+')':'('+total+')');
+  if(total>0){
+    rb.className='result-box show pos-win';
+    title.textContent='\u2295 Les positifs gagnent avec '+total+' survivant'+(total>1?'s':'')+' !';
+    rel.textContent='R\u00e9sultat\u00a0: (+'+total+')'; score.pos++;
+  } else if(total<0){
+    rb.className='result-box show neg-win';
+    title.textContent='\u2296 Les n\u00e9gatifs gagnent avec '+Math.abs(total)+' survivant'+(Math.abs(total)>1?'s':'')+' !';
+    rel.textContent='R\u00e9sultat\u00a0: ('+total+')'; score.neg++;
+  } else {
+    rb.className='result-box show egalite';
+    title.textContent='\u2705 \u00c9galit\u00e9 parfaite\u00a0! Tous les soldats sont annihil\u00e9s.';
+    rel.textContent='R\u00e9sultat\u00a0: (0)'; score.eg++;
+  }
+  score.total++; sndVictoire();
+  document.getElementById('scPos').textContent=score.pos;
+  document.getElementById('scNeg').textContent=score.neg;
+  document.getElementById('scEg').textContent=score.eg;
+  document.getElementById('scTotal').textContent=score.total;
+  document.getElementById('btnNouveau').style.display='block';
+}
+
+// ── INIT ──
+window.setMode=setMode; window.setSize=setSize; window.nouveauCombat=nouveauCombat;
+nouveauCombat();
+})();
+</script>
+    </div>
   </div>
   <div class="stats-card" style="padding:12px;">
     <div class="prog-text" style="text-align:left;font-weight:700;color:var(--day-dark);margin:2px 0 10px;font-size:.98rem;">Calcul mental — nombres relatifs</div>
     <iframe src="https://tacproedupublicresources.blob.core.windows.net/hatier/calculmental/objectif05/index.htm" title="Activité interactive" loading="lazy" style="border:0;width:100%;height:520px;border-radius:12px;display:block;background:#fff;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+  </div>
+  <div class="stats-card" style="padding:12px;">
+    <div class="prog-text" style="text-align:left;font-weight:700;color:var(--day-dark);margin:2px 0 10px;font-size:.98rem;">Exercice interactif — nombres relatifs</div>
+    <iframe src="https://college.hachette-education.com/ressources/0002016291979/cami5_c05_007_050_exointer/" title="Activité interactive" loading="lazy" style="border:0;width:100%;height:520px;border-radius:12px;display:block;background:#fff;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
   </div>
 </body>
 </html>
