@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PAZAPA Maths — N4S3J1 · Défi mixte de calcul</title>
+<title>PAZAPA Maths — N4S3J1 · Développer et réduire</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 /* ───────── CHARTE J1 ORANGE ───────── */
@@ -164,23 +164,30 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 
 <header class="hero">
   <div class="badge-semaine">4e · Semaine 3 · Jour 1</div>
-  <h1>✏️ Résoudre les exercices</h1>
-  <p class="sous-titre">Défi mixte : décimaux, nombres relatifs, fractions et calcul littéral</p>
-  <div class="consigne">⚡ Je travaille mes automatismes : 5 questions, 5 thèmes différents. Réponds vite&nbsp;!</div>
+  <h1>✏️ Développer et réduire une expression littérale</h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs</p>
 </header>
 
 <section class="startgate" id="startgate">
-  <h2>⏱️ Défi flash : 5 thèmes</h2>
+  <h2>⏱️ Défi flash : 5 questions</h2>
+  <div class="consigne">👉 Consigne : résoudre mentalement et sans calculatrice les calculs suivants.</div>
   <p>5 questions, une par thème&nbsp;:</p>
-  <p>① valeur <strong>décimale</strong> d'une fraction&nbsp;; ② <strong>comparer</strong> deux décimaux relatifs&nbsp;; ③ une <strong>opération</strong> entre deux relatifs&nbsp;; ④ une <strong>opération</strong> entre deux fractions&nbsp;; ⑤ <strong>réduire</strong> une expression.</p>
+  <p>① valeur <strong>décimale</strong> d'une fraction</p>
+  <p>② <strong>comparer</strong> des nombres relatifs</p>
+  <p>③ une <strong>opération</strong> entre deux relatifs</p>
+  <p>④ une <strong>opération</strong> entre deux fractions</p>
+  <p>⑤ <strong>réduire</strong> une expression</p>
   <p>Tu peux rejouer à l'infini&nbsp;: à chaque partie, <strong>de nouvelles questions</strong> sont tirées au hasard.</p>
   <div class="memo">
     💡 <b>Rappels :</b><br>
-    ① fraction → décimal&nbsp;: ex. <span class="frac"><span class="num">6</span><span class="den">5</span></span> = 1,2.<br>
-    ② comparer&nbsp;: on regarde d'abord la partie entière, puis les chiffres après la virgule un par un (2,12 &lt; 2,5&nbsp;!).<br>
-    ③ relatifs&nbsp;: règle des signes pour × et ÷.<br>
-    ④ fractions&nbsp;: même dénominateur pour + et −&nbsp;; pour ÷, je multiplie par l'inverse.<br>
-    ⑤ réduire&nbsp;: je regroupe les termes en <i>x</i> ensemble, les <i>x</i>² ensemble, et les nombres ensemble (<i>x</i> et <i>x</i>² ne sont <b>pas</b> semblables).
+    ① Fraction → décimal&nbsp;: par exemple, <span class="frac"><span class="num">6</span><span class="den">5</span></span> = 1,2.<br>
+    ② Comparer&nbsp;: on compare les nombres chiffre par chiffre en tenant compte de la valeur de chaque rang (par exemple&nbsp;: 2,12 &lt; 2,5).<br>
+    ③ Relatifs&nbsp;: attention aux signes pour +, −, × et ÷.<br>
+    ④ Fractions&nbsp;:<br>
+    &nbsp;&nbsp;• pour + et −, il faut un même dénominateur&nbsp;;<br>
+    &nbsp;&nbsp;• pour ×, je multiplie les numérateurs entre eux et les dénominateurs entre eux&nbsp;;<br>
+    &nbsp;&nbsp;• pour ÷, je multiplie par l'inverse de la deuxième fraction.<br>
+    ⑤ Réduire&nbsp;: je regroupe les termes en <i>x</i> ensemble, les termes en <i>x</i>² ensemble et les nombres ensemble (<i>x</i> et <i>x</i>² ne sont pas des termes semblables).
   </div>
   <button class="btn btn-start" id="btnStart">▶️ Démarrer le défi</button>
 </section>
@@ -204,7 +211,7 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
     <div class="rep-bloc" id="blocSaisie">
       <div class="saisie-ligne">
         <span id="saiPrefixe"></span>
-        <input type="text" id="reponse" autocomplete="off" spellcheck="false" inputmode="text" placeholder="?"/>
+        <input type="text" id="reponse" autocomplete="off" spellcheck="false" inputmode="text" placeholder=""/>
         <span id="saiSuffixe"></span>
         <button class="btn btn-valider" id="btnValSaisie">✅ Valider</button>
       </div>
@@ -246,48 +253,57 @@ function sameFrac(f,g){ return f && g && f.n*g.d === g.n*f.d; }
 
 /* ═══════════ GÉNÉRATEURS RECALIBRÉS (niveau séance S3J1) ═══════════ */
 
-/* Q1 — fraction → décimal (dénominateurs à décimale finie, comme 6/5) */
+/* Q1 — fraction → décimal (dénominateurs à décimale finie) */
 function genDecimal(){
-  var d = pick([2,4,5,8,10,20]);
-  var n; do{ n = 1 + rnd(4*d); }while(n % d === 0);
-  var f = makeFrac(n, d);
+  var d=pick([2,4,5,8,10,20,25,50]);
+  var n; do{ n=1+rnd(5*d); }while(n%d===0);
+  var f=makeFrac(n,d);
   return { type:"dec", f:f, sol:f };
 }
 
-/* Q2 — comparer deux décimaux relatifs (dixièmes/centièmes, piège "plus de chiffres") */
+/* Q2 — comparer deux décimaux/relatifs */
 function mkDec(){
-  var neg = Math.random() < 0.35 ? -1 : 1;
-  var ip  = rnd(10);
-  var len = 1 + rnd(2);          /* 1 ou 2 décimales */
-  var dp  = 1 + rnd(Math.pow(10,len)-1);
-  var ds  = ""+dp; while(ds.length < len) ds = "0"+ds;
-  var val = (ip*Math.pow(10,len) + dp) * neg;
+  var neg=Math.random()<0.3?-1:1;
+  var ip=rnd(10);
+  var len=1+rnd(2);
+  var dp=1+rnd(Math.pow(10,len)-1);
+  var ds=""+dp; while(ds.length<len) ds="0"+ds;
+  var val=(ip*Math.pow(10,len)+dp)*neg;
   return { s:(neg<0?"\u2212":"")+ip+","+ds, v:val };
 }
 function genCompare(){
-  var a,b,guard=0;
-  do{ a=mkDec(); b=mkDec(); guard++; }while(a.v===b.v && guard<60);
-  return { type:"cmp", a:a, b:b, rel:(a.v<b.v?"<":">") };
+  var pairs=[
+    {a:{s:"2,3",v:2.3},b:{s:"2,8",v:2.8}},
+    {a:{s:"2,05",v:2.05},b:{s:"2,7",v:2.7}},
+    {a:{s:"1,08",v:1.08},b:{s:"1,108",v:1.108}},
+    {a:{s:"\u221215",v:-15},b:{s:"33",v:33}},
+    {a:{s:"\u22123,2",v:-3.2},b:{s:"\u22123,8",v:-3.8}},
+    {a:{s:"1,07",v:1.07},b:{s:"1,7",v:1.7}},
+    {a:{s:"2,45",v:2.45},b:{s:"2,405",v:2.405}},
+    {a:{s:"\u221212",v:-12},b:{s:"4",v:4}}
+  ];
+  var p=pick(pairs);
+  return { type:"cmp", a:p.a, b:p.b, rel:(p.a.v<p.b.v?"<":">") };
 }
 
-/* Q3 — opération sur deux entiers relatifs (niveau 4e : ×/÷ tables jusqu'à 12) */
+/* Q3 — opération sur deux entiers relatifs */
 function genRelatif(){
-  var op = pick(["add","sub","mul","div"]), a, b, ans;
+  var op=pick(["add","sub","mul","div"]), a, b, ans;
   if(op==="add"||op==="sub"){
     a=(1+rnd(20))*sgn(0.5); b=(1+rnd(20))*sgn(0.5);
     ans=(op==="add")?a+b:a-b;
-  }else if(op==="mul"){
+  } else if(op==="mul"){
     a=(2+rnd(11))*sgn(0.5); b=(2+rnd(11))*sgn(0.5); ans=a*b;
-  }else{
+  } else {
     b=(2+rnd(8))*sgn(0.5);
     var q=(2+rnd(11))*sgn(0.5); a=q*b; ans=q;
   }
   return { type:"rel", op:op, a:a, b:b, ans:ans };
 }
 
-/* Q4 — une opération entre deux fractions (mul, add ou sub, résultat réduit) */
+/* Q4 — opération entre deux fractions */
 function genFraction(){
-  var op = pick(["mul","mul","add","sub"]);   /* mul plus fréquent, comme la séance */
+  var op=pick(["mul","mul","add","sub"]);
   var n1,d1,n2,d2,s,guard=0;
   do{
     n1=1+rnd(7); d1=2+rnd(8); n2=1+rnd(7); d2=2+rnd(8);
@@ -299,9 +315,9 @@ function genFraction(){
   return { type:"frac", op:op, n1:n1, d1:d1, n2:n2, d2:d2, sol:s };
 }
 
-/* Q5 — réduire : somme (termes en x + constantes) OU produit nombre×monôme (comme 4x×9) */
+/* Q5 — réduire une expression */
 function genReduire(){
-  var sub = pick(["somme","somme","produit"]);
+  var sub=pick(["somme","somme","produit"]);
   if(sub==="produit"){
     var mag1=2+rnd(9), mag2=2+rnd(9), neg=Math.random()<0.5;
     if(Math.random()<0.5){
@@ -315,14 +331,13 @@ function genReduire(){
                exprHTML:mag1+"<i>x</i> \u00d7 "+nd };
     }
   }
-  /* somme : 3-4 termes, termes en x ET constantes */
-  var ts=[], nt=3+rnd(2), A=0, B=0;
+  var ts=[], nt=2+rnd(2), A=0, B=0;
   for(var i=0;i<nt;i++){
-    var c=(1+rnd(9))*sgn(0.5), deg=(Math.random()<0.55?1:0);
+    var c=(1+rnd(9))*sgn(0.5), deg=(Math.random()<0.6?1:0);
     ts.push({c:c,deg:deg}); if(deg===1)A+=c; else B+=c;
   }
-  if(!ts.some(function(t){return t.deg===1;})||A===0){ ts.push({c:2,deg:1}); A+=2; }
-  if(!ts.some(function(t){return t.deg===0;})){ ts.push({c:3,deg:0}); B+=3; }
+  if(!ts.some(function(t){return t.deg===1;})||A===0){ ts.push({c:2+rnd(7),deg:1}); A+=ts[ts.length-1].c; }
+  if(!ts.some(function(t){return t.deg===0;})){ ts.push({c:1+rnd(9),deg:0}); B+=ts[ts.length-1].c; }
   shuffle(ts);
   var h=""; ts.forEach(function(t,i){
     var ac=Math.abs(t.c), body=t.deg===1?((ac===1?"":ac)+"<i>x</i>"):""+ac;
@@ -378,9 +393,9 @@ function eqHTML(q){
   if(q.type === "cmp"){ return q.a.s + "\u00a0\u2026\u00a0" + q.b.s; }
   if(q.type === "rel"){ return parHTML(q.a) + "\u00a0" + OPSYM[q.op] + "\u00a0" + parHTML(q.b) + "\u00a0=\u00a0?"; }
   if(q.type === "frac"){
-    return "<span class='frac'><span class='num'>" + q.n1 + "</span><span class='den'>" + q.d1 + "</span></span>"
-      + "\u00a0" + OPSYM[q.op] + "\u00a0"
-      + "<span class='frac'><span class='num'>" + q.n2 + "</span><span class='den'>" + q.d2 + "</span></span>\u00a0=\u00a0?";
+    return "<span class='frac'><span class='num'>"+q.n1+"</span><span class='den'>"+q.d1+"</span></span>"
+      +"\u00a0"+OPSYM[q.op]+"\u00a0"
+      +"<span class='frac'><span class='num'>"+q.n2+"</span><span class='den'>"+q.d2+"</span></span>\u00a0=\u00a0?";
   }
   return q.exprHTML;  /* réduire */
 }
@@ -424,13 +439,13 @@ function methode(q){
   }
   if(q.type === "frac"){
     var intro;
-    if(q.op === "add" || q.op === "sub"){ intro = "On met au m\u00eame d\u00e9nominateur, puis on " + (q.op === "add" ? "additionne" : "soustrait") + " les num\u00e9rateurs."; }
-    else if(q.op === "mul"){ intro = "On multiplie les num\u00e9rateurs entre eux et les d\u00e9nominateurs entre eux."; }
-    else { intro = "Diviser, c'est multiplier par l'inverse de la 2e fraction."; }
-    return intro + "<br>R\u00e9sultat (r\u00e9duit)\u00a0: <strong>" + fracHTML(q.sol) + "</strong>" + (q.sol.d===1 ? "" : " (= " + decimalExactSafe(q.sol) + ")") + ".";
+    if(q.op==="add"||q.op==="sub"){ intro="On met au même dénominateur, puis on "+(q.op==="add"?"additionne":"soustrait")+" les numérateurs."; }
+    else if(q.op==="mul"){ intro="On effectue d'abord la multiplication\u00a0: on multiplie les numérateurs entre eux et les dénominateurs entre eux."; }
+    else { intro="Diviser, c'est multiplier par l'inverse de la 2e fraction."; }
+    return intro+"<br>Résultat (réduit)\u00a0: <strong>"+fracHTML(q.sol)+"</strong>"+(q.sol.d===1?"":" (= "+decimalExactSafe(q.sol)+")")+".";
   }
   /* réduire */
-  if(q.sub === "produit"){ return "On multiplie le nombre par le coefficient du terme en <i>x</i>\u00a0: r\u00e9sultat <strong>" + polyDisplay(q.a2,q.a1,q.a0) + "</strong>."; }
+  if(q.sub==="produit"){ return "On multiplie le coefficient du terme en <i>x</i> par le nombre\u00a0:<br><strong>"+polyDisplay(q.a2,q.a1,q.a0)+"</strong>."; }
   if(q.sub === "carre"){ return "On regroupe les termes <strong>semblables</strong>. Attention\u00a0: <i>x</i> et <i>x</i>\u00b2 ne sont pas semblables, on ne les additionne pas.<br>R\u00e9sultat\u00a0: <strong>" + polyDisplay(q.a2,q.a1,q.a0) + "</strong>."; }
   return "On regroupe les termes en <i>x</i> ensemble, et les nombres ensemble\u00a0:<br>r\u00e9sultat <strong>" + polyDisplay(q.a2,q.a1,q.a0) + "</strong>.";
 }
@@ -516,10 +531,10 @@ function newQuestion(){
     $("blocSaisie").classList.add("show");
     $("reponse").value=""; $("reponse").disabled=false; $("btnValSaisie").disabled=false;
     $("saiPrefixe").innerHTML=""; $("saiSuffixe").innerHTML="";
-    if(q.type === "dec"){ $("reponse").placeholder="ex : 0,75"; $("aideSaisie").innerHTML="\u00c9cris un nombre d\u00e9cimal (virgule ou point)."; }
-    else if(q.type === "rel"){ $("reponse").placeholder="ex : \u22127"; $("aideSaisie").innerHTML="\u00c9cris un nombre entier (signe \u2212 accept\u00e9)."; }
-    else if(q.type === "frac"){ $("reponse").placeholder="ex : 3/4"; $("aideSaisie").innerHTML="\u00c9cris une fraction (ex. 3/4) ou un entier. Le r\u00e9sultat sera r\u00e9duit automatiquement."; }
-    else { $("reponse").placeholder="ex : 3x-5"; $("aideSaisie").innerHTML="\u00c9cris l'expression <strong>r\u00e9duite</strong> (ex. 3x-5, 36x, -4x\u00b2+2x). Tu peux taper x\u00b2 ou x^2."; }
+    if(q.type === "dec"){ $("reponse").placeholder=""; $("aideSaisie").innerHTML="\u00c9cris un nombre d\u00e9cimal (virgule ou point)."; }
+    else if(q.type === "rel"){ $("reponse").placeholder=""; $("aideSaisie").innerHTML="\u00c9cris un nombre entier (signe \u2212 accept\u00e9)."; }
+    else if(q.type === "frac"){ $("reponse").placeholder=""; $("aideSaisie").innerHTML="\u00c9cris une fraction (ex. 3/4) ou un entier. Le r\u00e9sultat sera r\u00e9duit automatiquement."; }
+    else { $("reponse").placeholder=""; $("aideSaisie").innerHTML="\u00c9cris l'expression <strong>r\u00e9duite</strong> (ex. 3x-5, 36x, -4x\u00b2+2x). Tu peux taper x\u00b2 ou x^2."; }
   }
   updateChrono();
   setPastille(game.qIndex, "active");
