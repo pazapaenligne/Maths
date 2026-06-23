@@ -470,9 +470,17 @@ function genCombat(){
   var n = size==='small' ? rnd(2,3) : rnd(3,5);
   var vals=[];
   if(mode==='add'){
-    // additions : tous positifs, le résultat est la somme directe
-    for(var i=0;i<n;i++){ vals.push(rnd(1, size==='small'?5:8)); }
+    // Additions de relatifs : opérateurs tous +, groupes positifs ET négatifs
+    for(var i=0;i<n;i++){
+      var v=rnd(1, size==='small'?5:8);
+      vals.push(Math.random()<0.5 ? v : -v);
+    }
+    // Garantir au moins un positif et un négatif
+    if(vals.every(function(v){return v>0;})){ vals[rnd(0,n-1)] *= -1; }
+    if(vals.every(function(v){return v<0;})){ vals[rnd(0,n-1)] *= -1; }
   } else {
+    // Additions et soustractions : on génère des valeurs absolues avec signes
+    // On affichera (+a) − (+b) au lieu de (+a) + (−b)
     var signs=[1,-1,-1,1,-1,1,1,-1];
     for(var i=0;i<n;i++){ vals.push(signs[rnd(0,7)]*rnd(1, size==='small'?5:9)); }
     if(vals.every(function(v){return v>0;})){ vals[rnd(0,n-1)] *= -1; }
@@ -480,10 +488,23 @@ function genCombat(){
   }
   return vals;
 }
-function labelVal(v){ return v>0 ? '(+'+v+')' : '('+v+')'; }
+function labelVal(v){
+  // En mode add : toujours (+v) ou (−v)
+  // En mode mix : le 1er opérande avec signe, les suivants avec valeur absolue (le signe est dans l'opérateur)
+  return v>0 ? '(+'+v+')' : '(\u2212'+Math.abs(v)+')';
+}
+function labelValAbs(v){
+  // Pour mode mix, après le 1er terme : afficher la valeur absolue entre parenthèses
+  return '(+'+Math.abs(v)+')';
+}
 function signBetween(i,vals){
   if(i===0) return '';
-  return vals[i]>0 ? ' + ' : ' - ';
+  if(mode==='mix'){
+    // Vraie soustraction : (+a) − (+b) au lieu de (+a) + (−b)
+    return vals[i]>0 ? ' + ' : ' \u2212 ';
+  }
+  // Mode add : toujours +
+  return ' + ';
 }
 
 // ── PIONS ──
@@ -669,7 +690,9 @@ function nouveauCombat(){
     var v=vals[i], absV=Math.abs(v);
     var grp=document.createElement('div'); grp.className='groupe';
     var lbl=document.createElement('div');
-    lbl.className='groupe-label '+(v>0?'pos':'neg'); lbl.textContent=labelVal(v);
+    lbl.className='groupe-label '+(v>0?'pos':'neg');
+    // Mode mix : après le 1er terme, afficher la valeur absolue (le signe est dans l'opérateur)
+    lbl.textContent=(mode==='mix'&&i>0) ? labelValAbs(v) : labelVal(v);
     var row=document.createElement('div'); row.className='pions-row';
     for(var j=0;j<absV;j++){ var p=buildPion(v>0?1:-1); pions.push(p); row.appendChild(p.el); }
     grp.appendChild(lbl); grp.appendChild(row); box.appendChild(grp);
@@ -745,13 +768,28 @@ function showResult(sum){
   document.getElementById('dragHint').style.display='none';
   var btnRes=document.getElementById('btnResult'); if(btnRes) btnRes.style.display='none';
   var stepsDiv=document.getElementById('addSteps'); if(stepsDiv) stepsDiv.style.display='none';
-  var parts=operandes.map(function(v){return v>0?'(+'+v+')':'('+v+')';});
+  var parts, calcStr;
+  if(mode==='mix'){
+    // Afficher comme vraie soustraction : (+8) − (+3) − (+2)
+    parts=operandes.map(function(v,i){
+      if(i===0) return v>0?'(+'+v+')':'(\u2212'+Math.abs(v)+')';
+      return '(+'+Math.abs(v)+')';
+    });
+    calcStr=parts[0];
+    for(var i=1;i<parts.length;i++){
+      calcStr+=(operandes[i]>0?' + ':' \u2212 ')+parts[i];
+    }
+  } else {
+    // Mode add : toutes additions de relatifs (+a) + (−b)
+    parts=operandes.map(function(v){return v>0?'(+'+v+')':'(\u2212'+Math.abs(v)+')';});
+    calcStr=parts.join(' + ');
+  }
   var total=operandes.reduce(function(s,v){return s+v;},0);
   var rb=document.getElementById('resultBox');
   var title=document.getElementById('resultTitle');
   var calc=document.getElementById('resultCalc');
   var rel=document.getElementById('resultRel');
-  calc.textContent=parts.join(' + ')+' = '+(total>0?'(+'+total+')':'('+total+')');
+  calc.textContent=calcStr+' = '+(total>0?'(+'+total+')':'(\u2212'+Math.abs(total)+')');
   if(total>0){
     rb.className='result-box show pos-win';
     title.textContent='\u2295 Les positifs gagnent avec '+total+' survivant'+(total>1?'s':'')+' !';
@@ -783,10 +821,6 @@ nouveauCombat();
   <div class="stats-card" style="padding:12px;">
     <div class="prog-text" style="text-align:left;font-weight:700;color:var(--day-dark);margin:2px 0 10px;font-size:.98rem;">Calcul mental — nombres relatifs</div>
     <iframe src="https://tacproedupublicresources.blob.core.windows.net/hatier/calculmental/objectif05/index.htm" title="Activité interactive" loading="lazy" style="border:0;width:100%;height:520px;border-radius:12px;display:block;background:#fff;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
-  </div>
-  <div class="stats-card" style="padding:12px;">
-    <div class="prog-text" style="text-align:left;font-weight:700;color:var(--day-dark);margin:2px 0 10px;font-size:.98rem;">Exercice interactif — nombres relatifs</div>
-    <iframe src="https://college.hachette-education.com/ressources/0002016291979/cami5_c05_007_050_exointer/" title="Activité interactive" loading="lazy" style="border:0;width:100%;height:520px;border-radius:12px;display:block;background:#fff;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
   </div>
 </body>
 </html>
