@@ -164,24 +164,29 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 
 <header class="hero">
   <div class="badge-semaine">4e · Semaine 3 · Jour 2</div>
-  <h1>✏️ Résoudre les exercices</h1>
-  <p class="sous-titre">Automatismes : équation, géométrie, proportionnalité, programmation, durées et pourcentages</p>
-  <div class="consigne">⚡ Je travaille mes automatismes : 6 questions, 6 thèmes différents. Réponds vite&nbsp;!</div>
+  <h1>✏️ Développer et réduire une expression littérale</h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs</p>
 </header>
 
 <section class="startgate" id="startgate">
-  <h2>⏱️ Défi flash : 6 thèmes</h2>
+  <h2>⏱️ Défi flash : 6 questions</h2>
+  <div class="consigne">👉 Résous ces 6 automatismes sans calculatrice.</div>
   <p>6 questions, une par thème&nbsp;:</p>
-  <p>① <strong>équation</strong>&nbsp;; ② <strong>angle</strong> dans un triangle&nbsp;; ③ <strong>vitesse/temps</strong>&nbsp;; ④ <strong>programmation</strong> Scratch&nbsp;; ⑤ <strong>durée</strong>&nbsp;; ⑥ <strong>pourcentage</strong>.</p>
-  <p>Tu peux rejouer à l'infini&nbsp;: à chaque partie, <strong>de nouvelles questions</strong> sont proposées.</p>
+  <p>① <strong>périmètre</strong> d'un carré ou d'un triangle équilatéral</p>
+  <p>② <strong>vitesse / temps</strong> (QCM)</p>
+  <p>③ <strong>lecture de graphique</strong></p>
+  <p>④ <strong>algorithme</strong> Scratch</p>
+  <p>⑤ <strong>fractions</strong> d'une quantité</p>
+  <p>⑥ <strong>durée</strong> en h et min</p>
+  <p>Tu peux rejouer à l'infini&nbsp;: à chaque partie, <strong>de nouvelles questions</strong> sont tirées au hasard.</p>
   <div class="memo">
     💡 <b>Rappels :</b><br>
-    ① équation : isoler <i>x</i> en faisant la même opération des deux côtés.<br>
-    ② angles : la somme des angles d'un triangle vaut 180°.<br>
-    ③ vitesse : temps = distance ÷ vitesse ; convertis en minutes (×60).<br>
-    ④ Scratch : pour un polygone régulier, angle = 360 ÷ nombre de côtés.<br>
-    ⑤ durée : 1 h = 60 min ; pose la division euclidienne.<br>
-    ⑥ pourcentage : p % de n = n × p/100.
+    ① Périmètre&nbsp;: carré → P = 4 × côté&nbsp;; triangle équilatéral → P = 3 × côté.<br>
+    ② Vitesse&nbsp;: temps = distance ÷ vitesse.<br>
+    ③ Graphique&nbsp;: lis les valeurs aux deux instants, puis calcule la différence.<br>
+    ④ Algorithme&nbsp;: suis les instructions pas à pas avec la valeur donnée.<br>
+    ⑤ Fraction d'une quantité&nbsp;: je calcule d'abord l'unité fractionnaire (1/<i>q</i> de la quantité), puis je multiplie par <i>p</i>.<br>
+    ⑥ Durée&nbsp;: 1 h = 60 min ; pose la division euclidienne par 60.
   </div>
   <button class="btn btn-start" id="btnStart">▶️ Démarrer le défi</button>
 </section>
@@ -197,7 +202,7 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
 
 <main class="gamearea hidden" id="gamearea">
   <div class="carte" id="carte">
-    <div class="q-label" id="qLabel">Question 1 / 5</div>
+    <div class="q-label" id="qLabel">Question 1 / 6</div>
     <div style="text-align:center"><span class="theme-badge" id="themeBadge"></span></div>
     <div class="q-consigne" id="qConsigne"></div>
     <div class="eq-bloc"><div class="eq-ligne" id="eqLigne"></div></div>
@@ -205,7 +210,7 @@ h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;color:var(--jour-titre);l
     <div class="rep-bloc" id="blocSaisie">
       <div class="saisie-ligne">
         <span id="saiPrefixe"></span>
-        <input type="text" id="reponse" autocomplete="off" spellcheck="false" inputmode="text" placeholder="?"/>
+        <input type="text" id="reponse" autocomplete="off" spellcheck="false" inputmode="text" placeholder=""/>
         <span id="saiSuffixe"></span>
         <button class="btn btn-valider" id="btnValSaisie">✅ Valider</button>
       </div>
@@ -251,114 +256,171 @@ function sameFrac(f,g){ return f && g && f.n*g.d === g.n*f.d; }
 function frH(n,d){ return "<span class='frac'><span class='num'>"+n+"</span><span class='den'>"+d+"</span></span>"; }
 
 /* Q1 — équation a(x+b)=c → QCM 4 options */
-function genEquation(){
-  var aVals=[2,3,4,5,6,7], bVals=[2,3,4,5,6,7,8,9,10];
-  var a=pick(aVals), b=pick(bVals);
-  var cRaw=(a*(pick([1,2,3,4,5,6,7,8,9,10])+b));  /* c = a*(x0+b) avec x0 entier */
-  var c=cRaw;
-  /* bonne réponse : c/a − b */
-  var correct=frH(c,a)+" \u2212 "+b;
-  /* 3 distracteurs : vraies erreurs d'élèves */
-  var wrongs=[
-    frH(c,a)+" + "+b,          /* oublie de soustraire */
-    frH(b,a)+" \u2212 "+c,    /* inverse num/den */
-    frH(c-b, a)                /* soustrait b avant de diviser */
+function genPerimetre(){
+  var cotes=[3,4,5,6,7,8,9,3.5,4.5,5.5,6.5,7.5,8.5];
+  var c=pick(cotes);
+  var cStr=(''+c).replace('.',',');
+  var forme=Math.random()<0.5?'carre':'triangle';
+  var nb=forme==='carre'?4:3;
+  var p=Math.round(nb*c*10)/10;
+  var pStr=(''+p).replace('.',',').replace(/,0$/,'');
+  var fig, label, meth;
+  if(forme==='carre'){
+    fig="<svg viewBox='0 0 200 200' style='width:140px;height:140px;display:block;margin:10px auto;'>"
+      +"<polygon points='100,20 180,100 100,180 20,100' fill='none' stroke='#444' stroke-width='2.5'/>"
+      +"<text x='100' y='12' text-anchor='middle' font-size='14' font-style='italic' fill='#333'>D</text>"
+      +"<text x='188' y='104' text-anchor='start' font-size='14' font-style='italic' fill='#333'>A</text>"
+      +"<text x='100' y='196' text-anchor='middle' font-size='14' font-style='italic' fill='#333'>B</text>"
+      +"<text x='10' y='104' text-anchor='end' font-size='14' font-style='italic' fill='#333'>C</text>"
+      +"<text x='152' y='148' text-anchor='middle' font-size='12' fill='#555'>"+cStr+" cm</text>"
+      +"</svg>";
+    label="Calculer le p\u00e9rim\u00e8tre du carr\u00e9 <i>ABCD</i> repr\u00e9sent\u00e9 ci-dessous\u00a0:";
+    meth="Le carr\u00e9 a 4 c\u00f4t\u00e9s de longueur "+cStr+" cm.<br>P\u00e9rim\u00e8tre = 4 \u00d7 "+cStr+" = <strong>"+pStr+" cm</strong>.";
+  } else {
+    fig="<svg viewBox='0 0 200 180' style='width:140px;height:126px;display:block;margin:10px auto;'>"
+      +"<polygon points='100,15 185,165 15,165' fill='none' stroke='#444' stroke-width='2.5'/>"
+      +"<text x='100' y='10' text-anchor='middle' font-size='14' font-style='italic' fill='#333'>A</text>"
+      +"<text x='192' y='170' text-anchor='start' font-size='14' font-style='italic' fill='#333'>B</text>"
+      +"<text x='8' y='170' text-anchor='end' font-size='14' font-style='italic' fill='#333'>C</text>"
+      +"<text x='148' y='110' text-anchor='middle' font-size='12' fill='#555'>"+cStr+" cm</text>"
+      +"</svg>";
+    label="Calculer le p\u00e9rim\u00e8tre du triangle \u00e9quilat\u00e9ral <i>ABC</i> repr\u00e9sent\u00e9 ci-dessous\u00a0:";
+    meth="Le triangle \u00e9quilat\u00e9ral a 3 c\u00f4t\u00e9s de longueur "+cStr+" cm.<br>P\u00e9rim\u00e8tre = 3 \u00d7 "+cStr+" = <strong>"+pStr+" cm</strong>.";
+  }
+  return { type:"num", theme:"perimetre",
+    label:label, figure:fig,
+    ans:p, unit:"cm", tol:0.01,
+    solTxt:"<strong>"+pStr+" cm</strong>",
+    meth:meth
+  };
+}
+
+function genTemps(){
+  var configs=[
+    {v:60,d:66,sol:"1 h 06 min",meth:"66 \u00f7 60 = 1,1 h = <strong>1 h 06 min</strong>."},
+    {v:80,d:100,sol:"1 h 15 min",meth:"100 \u00f7 80 = 1,25 h = <strong>1 h 15 min</strong>."},
+    {v:90,d:120,sol:"1 h 20 min",meth:"120 \u00f7 90 = 4/3 h = <strong>1 h 20 min</strong>."},
+    {v:60,d:90,sol:"1 h 30 min",meth:"90 \u00f7 60 = 1,5 h = <strong>1 h 30 min</strong>."},
+    {v:80,d:60,sol:"45 min",meth:"60 \u00f7 80 = 0,75 h = <strong>45 min</strong>."},
+    {v:120,d:80,sol:"40 min",meth:"80 \u00f7 120 = 2/3 h = <strong>40 min</strong>."},
+    {v:60,d:48,sol:"48 min",meth:"48 \u00f7 60 = 0,8 h = <strong>48 min</strong>."},
+    {v:100,d:75,sol:"45 min",meth:"75 \u00f7 100 = 0,75 h = <strong>45 min</strong>."}
   ];
+  var cfg=pick(configs);
+  var wrongs=["2 h 12 min","1 h 38 min","33 min","50 min","1 h 45 min","55 min","1 h 10 min","35 min"].filter(function(x){return x!==cfg.sol;});
   shuffle(wrongs);
-  var opts=[wrongs[0], correct, wrongs[1], wrongs[2]];
-  shuffle(opts);
-  var ci=opts.indexOf(correct);
-  return { type:"qcm", theme:"eq", label:"7(<i>x</i> + 8) = 22", opts:opts, correct:ci,
-    eqHTML:a+"(<i>x</i> + "+b+") = "+c,
-    solTxt:"<strong>"+frH(c,a)+" \u2212 "+b+"</strong>",
-    meth:"On divise les deux membres par "+a+", puis on soustrait "+b+".<br>x + "+b+" = "+frH(c,a)+" \u2192 x = "+frH(c,a)+" \u2212 "+b+"."
+  var opts=[cfg.sol,wrongs[0],wrongs[1],wrongs[2]]; shuffle(opts);
+  return { type:"qcm", theme:"temps",
+    label:"Une voiture roule \u00e0 <strong>"+cfg.v+" km/h</strong>. Combien de temps pour <strong>"+cfg.d+" km</strong>\u00a0?",
+    opts:opts, correct:opts.indexOf(cfg.sol),
+    solTxt:"<strong>"+cfg.sol+"</strong>",
+    meth:cfg.meth
   };
 }
 
-/* Q2 — angle dans un triangle rectangle : Â donné, Ĉ = ? */
-function genAngle(){
-  var A=pick([25,30,32,35,37,40,42,45,48,50,55,58,60,62,65]);
-  var C=90-A;
-  return { type:"num", theme:"angle",
-    label:"Triangle <i>ABC</i> rectangle en B, \u00c2 = "+A+"\u00b0. Calcule \u0108.",
-    ans:C, unit:"\u00b0",
-    solTxt:"<strong>"+C+"\u00b0</strong>",
-    meth:"\u00c2 + B\u0302 + \u0108 = 180\u00b0 ; B\u0302 = 90\u00b0.<br>\u0108 = 180 \u2212 90 \u2212 "+A+" = <strong>"+C+"\u00b0</strong>."
-  };
-}
-
-/* Q3 — temps de trajet (vitesse ronde, distance multiple) → QCM */
-function genVitesse(){
-  var vitesses=[60,80,90,100,120];
-  var v=pick(vitesses);
-  var fracs=[1,2,3,4,5,6,7,8,9]; /* fractions d'heure en dixièmes */
-  var f=pick(fracs);
-  var d=Math.round(v*f/10);       /* distance = v × f/10 */
-  var tMin=Math.round(f*6);       /* temps en minutes = f×6 */
-  var tH=Math.floor(tMin/60), tR=tMin%60;
-  var solStr=tH>0?(tH+" h "+tR+" min"):(tMin+" min");
-  /* distracteurs */
-  var d1=tH>0?((tH+1)+" h "+(tR>0?tR:10)+" min"):((tMin+6)+" min");
-  var d2=tH>0?(tH+" h "+(tR+6)+" min"):((tMin-6)+" min");
-  var d3=Math.round(d*60/v)+" min";
-  var wrongs=[d1,d2,d3].filter(function(x){return x!==solStr;});
-  while(wrongs.length<3) wrongs.push((tMin+12)+" min");
-  var opts=[wrongs[0],wrongs[1],solStr,wrongs[2]]; shuffle(opts);
-  var ci=opts.indexOf(solStr);
-  return { type:"qcm", theme:"vitesse",
-    label:"Une voiture roule \u00e0 <strong>"+v+" km/h</strong>. Combien de temps pour <strong>"+d+" km</strong>&nbsp;?",
-    opts:opts, correct:ci,
-    solTxt:"<strong>"+solStr+"</strong>",
-    meth:"Temps = "+d+" \u00f7 "+v+" = "+frH(f,10)+" h = "+tMin+" min"+(tH>0?" = "+solStr:"")+"."
-  };
-}
-
-/* Q4 — Scratch polygone régulier : nombre de côtés tiré au hasard */
-function genScratch(){
-  var polys=[
-    {n:3,  nom:"triangle \u00e9quilat\u00e9ral", deg:120},
-    {n:4,  nom:"carr\u00e9",                    deg:90},
-    {n:5,  nom:"pentagone r\u00e9gulier",       deg:72},
-    {n:6,  nom:"hexagone r\u00e9gulier",        deg:60},
-    {n:8,  nom:"octogone r\u00e9gulier",        deg:45},
-    {n:10, nom:"d\u00e9cagone r\u00e9gulier",   deg:36}
+function genGraphique(){
+  var configs=[
+    {t1:4,t2:16,T1:10,T1s:"10",T2:22.5,T2s:"22,5",diff:12.5,diffs:"12,5"},
+    {t1:6,t2:18,T1:8,T1s:"8",T2:20,T2s:"20",diff:12,diffs:"12"},
+    {t1:4,t2:12,T1:12,T1s:"12",T2:24,T2s:"24",diff:12,diffs:"12"},
+    {t1:8,t2:20,T1:15,T1s:"15",T2:27.5,T2s:"27,5",diff:12.5,diffs:"12,5"}
   ];
-  var p=pick(polys);
-  return { type:"deux", theme:"scratch",
-    label:"Dessiner un <strong>"+p.nom+"</strong>.<br>Ligne\u00a03\u00a0: r\u00e9p\u00e9ter <u>\u00a0\u00a0\u00a0\u00a0</u> fois &nbsp;|&nbsp; Ligne\u00a05\u00a0: tourner de <u>\u00a0\u00a0\u00a0\u00a0</u>\u00b0",
-    ansA:p.n, ansB:p.deg,
-    solTxt:"<strong>"+p.n+" fois &nbsp;/&nbsp; "+p.deg+"\u00b0</strong>",
-    meth:"Un "+p.nom+" a "+p.n+" c\u00f4t\u00e9s. Angle = 360 \u00f7 "+p.n+" = <strong>"+p.deg+"\u00b0</strong>."
+  var cfg=pick(configs);
+  function px(h){return Math.round(40+h/18*260);}
+  function py(T){return Math.round(170-T/35*160);}
+  var Tm=(cfg.T1+cfg.T2)/2, tm=(cfg.t1+cfg.t2)/2;
+  var svg="<svg viewBox=\"0 0 320 200\" style=\"width:100%;max-width:300px;height:auto;display:block;margin:8px auto;\">";
+  [5,10,15,20,25,30,35].forEach(function(v){
+    svg+="<line x1=\"40\" y1=\""+py(v)+"\" x2=\"305\" y2=\""+py(v)+"\" stroke=\"#e0e0e0\" stroke-width=\"1\"/>";
+    svg+="<text x=\"35\" y=\""+(py(v)+4)+"\" text-anchor=\"end\" font-size=\"10\" fill=\"#666\">"+v+"</text>";
+  });
+  [2,4,6,8,10,12,14,16,18].forEach(function(h){
+    svg+="<line x1=\""+px(h)+"\" y1=\"10\" x2=\""+px(h)+"\" y2=\"170\" stroke=\"#e0e0e0\" stroke-width=\"1\"/>";
+    svg+="<text x=\""+px(h)+"\" y=\"183\" text-anchor=\"middle\" font-size=\"10\" fill=\"#666\">"+h+"</text>";
+  });
+  svg+="<line x1=\"40\" y1=\"10\" x2=\"40\" y2=\"170\" stroke=\"#555\" stroke-width=\"1.5\"/>";
+  svg+="<line x1=\"40\" y1=\"170\" x2=\"305\" y2=\"170\" stroke=\"#555\" stroke-width=\"1.5\"/>";
+  svg+="<text x=\"172\" y=\"197\" text-anchor=\"middle\" font-size=\"10\" fill=\"#444\">Horaire (en heures)</text>";
+  svg+="<text x=\"13\" y=\"90\" text-anchor=\"middle\" font-size=\"9\" fill=\"#444\" transform=\"rotate(-90,13,90)\">Temp. (\u00b0C)</text>";
+  svg+="<polyline points=\""+px(cfg.t1)+","+py(cfg.T1)+" "+px(tm)+","+py(Tm)+" "+px(cfg.t2)+","+py(cfg.T2)+"\" fill=\"none\" stroke=\"#666\" stroke-width=\"2\"/>";
+  svg+="<circle cx=\""+px(cfg.t1)+"\" cy=\""+py(cfg.T1)+"\" r=\"5\" fill=\"#555\"/>";
+  svg+="<circle cx=\""+px(tm)+"\" cy=\""+py(Tm)+"\" r=\"5\" fill=\"#555\"/>";
+  svg+="<circle cx=\""+px(cfg.t2)+"\" cy=\""+py(cfg.T2)+"\" r=\"5\" fill=\"#555\"/>";
+  svg+="</svg>";
+  return { type:"num", theme:"graphique",
+    label:"Entre "+cfg.t1+"h et "+cfg.t2+"h, de combien de degr\u00e9s la temp\u00e9rature a-t-elle augment\u00e9\u00a0?",
+    figure:svg,
+    ans:cfg.diff, unit:"\u00b0C", tol:0.1,
+    solTxt:"<strong>"+cfg.diffs+"\u00a0\u00b0C</strong>",
+    meth:"D\u2019apr\u00e8s le graphique, \u00e0 "+cfg.t1+"h la temp\u00e9rature est de "+cfg.T1s+"\u00a0\u00b0C et \u00e0 "+cfg.t2+"h elle est de "+cfg.T2s+"\u00a0\u00b0C.<br>L\u2019augmentation est donc de\u00a0: "+cfg.T2s+" \u2212 "+cfg.T1s+" = <strong>"+cfg.diffs+"\u00a0\u00b0C</strong>."
   };
 }
 
-/* Q5 — durée en h et min (division euclidienne par 60) */
+function genScratch(){
+  var configs=[
+    {v:2,mult:10,add:20,div:4,ans:10},
+    {v:3,mult:5,add:15,div:2,ans:15},
+    {v:4,mult:3,add:12,div:3,ans:8},
+    {v:5,mult:6,add:-10,div:4,ans:5}
+  ];
+  var cfg=pick(configs);
+  var addStr=cfg.add>=0?("r\u00e9sultat + "+cfg.add):("r\u00e9sultat \u2212 "+Math.abs(cfg.add));
+  var addSign=cfg.add>=0?("+"+cfg.add):"\u2212"+Math.abs(cfg.add);
+  var fig="<div style='font-size:.8rem;line-height:1.9;margin:8px auto;max-width:340px;text-align:left;'>"
+    +"<div style='background:#f5a623;color:#fff;border-radius:8px 8px 0 0;padding:3px 12px;display:inline-block;'>quand &#x1F6A9; est cliqu\u00e9</div><br>"
+    +"<div style='background:#3ab5d8;color:#fff;border-radius:6px;padding:3px 12px;margin:2px 0;'>demander <b>Choisir un nombre</b> et attendre</div>"
+    +"<div style='background:#f5a623;color:#fff;border-radius:6px;padding:3px 12px;margin:2px 0;'>mettre <b>variable</b> &#x2190; <span style='background:#8dc63f;border-radius:4px;padding:1px 7px;'>r\u00e9ponse</span></div>"
+    +"<div style='background:#f5a623;color:#fff;border-radius:6px;padding:3px 12px;margin:2px 0;'>mettre <b>r\u00e9sultat</b> &#x2190; <span style='background:#8dc63f;border-radius:4px;padding:1px 7px;'>"+cfg.mult+" \u00d7 variable</span></div>"
+    +"<div style='background:#f5a623;color:#fff;border-radius:6px;padding:3px 12px;margin:2px 0;'>mettre <b>r\u00e9sultat</b> &#x2190; <span style='background:#8dc63f;border-radius:4px;padding:1px 7px;'>"+addStr+"</span></div>"
+    +"<div style='background:#f5a623;color:#fff;border-radius:6px;padding:3px 12px;margin:2px 0;'>mettre <b>r\u00e9sultat</b> &#x2190; <span style='background:#8dc63f;border-radius:4px;padding:1px 7px;'>r\u00e9sultat \u00f7 "+cfg.div+"</span></div>"
+    +"<div style='background:#7c5cbf;color:#fff;border-radius:6px;padding:3px 12px;margin:2px 0;'>dire <b>r\u00e9sultat</b></div>"
+    +"</div>";
+  var r1=cfg.mult*cfg.v; var r2=r1+cfg.add; var r3=r2/cfg.div;
+  return { type:"num", theme:"scratch",
+    label:"Algorithme Scratch ci-dessous :\u00a0<br>"+fig+"<br>Qu\u2019obtient-on si on choisit <strong>"+cfg.v+"</strong> comme nombre de d\u00e9part\u00a0?",
+    ans:cfg.ans, unit:"", tol:0.001,
+    solTxt:"<strong>"+cfg.ans+"</strong>",
+    meth:"variable="+cfg.v+" \u2192 r="+cfg.mult+"\u00d7"+cfg.v+"="+r1+" \u2192 r="+r1+addSign+"="+r2+" \u2192 r="+r2+"\u00f7"+cfg.div+"=<strong>"+r3+"</strong>."
+  };
+}
+
+function genFraction(){
+  var configs=[
+    {p:2,q:3,n:27,ans:18,unite:27,meth:"Un tiers de 27 = 27 \u00f7 3 = 9 ; 2/3 de 27 = 2 \u00d7 9 = <strong>18</strong>."},
+    {p:3,q:4,n:28,ans:21,meth:"Un quart de 28 = 28 \u00f7 4 = 7 ; 3/4 de 28 = 3 \u00d7 7 = <strong>21</strong>."},
+    {p:2,q:5,n:35,ans:14,meth:"Un cinqui\u00e8me de 35 = 35 \u00f7 5 = 7 ; 2/5 de 35 = 2 \u00d7 7 = <strong>14</strong>."},
+    {p:3,q:5,n:40,ans:24,meth:"Un cinqui\u00e8me de 40 = 40 \u00f7 5 = 8 ; 3/5 de 40 = 3 \u00d7 8 = <strong>24</strong>."},
+    {p:5,q:6,n:30,ans:25,meth:"Un sixi\u00e8me de 30 = 30 \u00f7 6 = 5 ; 5/6 de 30 = 5 \u00d7 5 = <strong>25</strong>."},
+    {p:3,q:8,n:32,ans:12,meth:"Un huiti\u00e8me de 32 = 32 \u00f7 8 = 4 ; 3/8 de 32 = 3 \u00d7 4 = <strong>12</strong>."}
+  ];
+  var cfg=pick(configs);
+  return { type:"num", theme:"fraction",
+    label:"Combien valent les <strong>"+cfg.p+"/"+cfg.q+"</strong> de <strong>"+cfg.n+"</strong>\u00a0?",
+    ans:cfg.ans, unit:"", tol:0.001,
+    solTxt:"<strong>"+cfg.ans+"</strong>",
+    meth:cfg.meth
+  };
+}
+
 function genDuree(){
-  var h=pick([1,2,3,4,5,6,7,8]), m=pick([5,10,15,20,25,30,35,40,45,50]);
-  var tot=h*60+m;
+  var configs=[
+    {tot:280,h:4,m:40,meth:"280 = 4\u00d760 + 40 \u2192 <strong>4 h 40 min</strong>."},
+    {tot:195,h:3,m:15,meth:"195 = 3\u00d760 + 15 \u2192 <strong>3 h 15 min</strong>."},
+    {tot:250,h:4,m:10,meth:"250 = 4\u00d760 + 10 \u2192 <strong>4 h 10 min</strong>."},
+    {tot:145,h:2,m:25,meth:"145 = 2\u00d760 + 25 \u2192 <strong>2 h 25 min</strong>."},
+    {tot:310,h:5,m:10,meth:"310 = 5\u00d760 + 10 \u2192 <strong>5 h 10 min</strong>."},
+    {tot:215,h:3,m:35,meth:"215 = 3\u00d760 + 35 \u2192 <strong>3 h 35 min</strong>."}
+  ];
+  var cfg=pick(configs);
   return { type:"duree", theme:"duree",
-    label:"Un concours dure <strong>"+tot+" minutes</strong>. Durée en heures et minutes&nbsp;?",
-    ansH:h, ansM:m,
-    solTxt:"<strong>"+h+" h "+m+" min</strong>",
-    meth:tot+" = "+h+" \u00d7 60 + "+m+" \u2192 <strong>"+h+" h "+m+" min</strong>."
+    label:"Une \u00e9mission dure <strong>"+cfg.tot+" minutes</strong>. Quelle est sa dur\u00e9e en heures et minutes\u00a0?",
+    ansH:cfg.h, ansM:cfg.m,
+    solTxt:"<strong>"+cfg.h+" h "+cfg.m+" min</strong>",
+    meth:cfg.meth
   };
 }
 
-/* Q6 — pourcentage p% de n */
-function genPourcent(){
-  var ns=[100,150,200,250,300,400,500];
-  var ps=[5,10,15,20,25,30,40,50];
-  var n=pick(ns), p=pick(ps);
-  var ans=Math.round(n*p/100);
-  return { type:"num", theme:"pourcent",
-    label:"Dans un groupe de <strong>"+n+"</strong> personnes, <strong>"+p+" %</strong> aiment le sport. Combien\u00a0?",
-    ans:ans, unit:"personnes",
-    solTxt:"<strong>"+ans+"</strong>",
-    meth:n+" \u00d7 "+frH(p,100)+" = "+frH(n*p,100)+" = <strong>"+ans+"</strong>."
-  };
-}
-
-var GENS=[genEquation,genAngle,genVitesse,genScratch,genDuree,genPourcent];
+var GENS=[genPerimetre,genTemps,genGraphique,genScratch,genFraction,genDuree];
 function genGame(){ var qs=[]; for(var i=0;i<QTOTAL;i++){ qs.push(GENS[i]()); } return qs; }
 function polyDisplay(a2,a1,a0){
   var arr=[];
@@ -385,6 +447,7 @@ function decimalExact(f){
 var OPSYM = { add:"+", sub:"\u2212", mul:"\u00d7", div:"\u00f7" };
 function eqHTML(q){
   if(q.eqHTML) return q.eqHTML;
+  if(q.figure) return q.figure;
   if(q.type === "dec"){ return fracHTML(q.f) + "\u00a0=\u00a0?"; }
   if(q.type === "cmp"){ return q.a.s + "\u00a0\u2026\u00a0" + q.b.s; }
   if(q.type === "rel"){ return parHTML(q.a) + "\u00a0" + OPSYM[q.op] + "\u00a0" + parHTML(q.b) + "\u00a0=\u00a0?"; }
@@ -403,7 +466,7 @@ function consigne(q){
   if(q.type === "frac"){ return "\uD83C\uDF70 Calcule et donne le r\u00e9sultat en <strong>fraction</strong>\u00a0:"; }
   return "\uD83E\uDDF9 R\u00e9duis cette expression (si c'est possible)\u00a0:";
 }
-var THEME = { eq:"\u00c9quation", angle:"Angles", vitesse:"Vitesse / Temps", scratch:"Programmation", duree:"Dur\u00e9es", pourcent:"Pourcentages", dec:"Fraction \u2192 d\u00e9cimal", cmp:"Comparer des relatifs", rel:"Op\u00e9ration de relatifs",
+var THEME = { perimetre:"Périmètre", fraction:"Fraction d\u2019une quantité", temps:"Vitesse / Temps", graphique:"Lecture de graphique", scratch:"Programmation", duree:"Durées", eq:"\u00c9quation", angle:"Angles", vitesse:"Vitesse / Temps", pourcent:"Pourcentages", dec:"Fraction \u2192 décimal", cmp:"Comparer des relatifs", rel:"Opération de relatifs",
   frac:"Op\u00e9ration de fractions", red:"R\u00e9duire une expression" };
 function solTexte(q){
   if(q.solTxt) return q.solTxt;
@@ -465,6 +528,11 @@ function parseFracOrDec(raw){
     return makeFrac(parseInt(m[2]+dec,10)*sgn2, Math.pow(10, dec.length)); }
   return null;
 }
+function parseNombre(raw){
+  var st=String(raw).replace(/\s+/g,"").replace(",",".").replace("\u2212","-").replace("−","-");
+  if(!/^[+-]?\d+(\.\d+)?$/.test(st)) return null;
+  return Number(st);
+}
 function parseEntier(raw){
   var s = String(raw).replace(/\s+/g, "").replace(/\u2212/g, "-");
   if(!/^[+-]?\d+$/.test(s)){ return null; }
@@ -511,6 +579,7 @@ function hideRepBlocs(){ $("blocSaisie").classList.remove("show"); $("blocQcm").
 function newQuestion(){
   game.q = game.qs[game.qIndex];
   game.locked = false;
+  $("feedback").className="feedback";
   var q = game.q;
   game.timeLeft = TIME_BY[q.theme] || TIME_BY[q.type] || 15;
   $("themeBadge").textContent = THEME[q.theme] || THEME[q.type] || q.theme;
@@ -530,19 +599,19 @@ function newQuestion(){
     $("blocSaisie").classList.add("show");
     $("reponse").value=""; $("reponse").disabled=false; $("btnValSaisie").disabled=false;
     $("saiPrefixe").innerHTML="Répéter :"; $("saiSuffixe").innerHTML="";
-    $("reponse").placeholder="ex : 6 60"; $("aideSaisie").innerHTML="Écris les deux valeurs séparées par un espace : nb de répétitions puis angle en degrés.";
+    $("reponse").placeholder=""; $("aideSaisie").innerHTML="Écris les deux valeurs séparées par un espace : nb de répétitions puis angle en degrés.";
     $("reponse").style.width="8rem";
   }else if(q.type === "duree"){
     $("blocSaisie").classList.add("show");
     $("reponse").value=""; $("reponse").disabled=false; $("btnValSaisie").disabled=false;
     $("saiPrefixe").innerHTML=""; $("saiSuffixe").innerHTML="";
-    $("reponse").placeholder="ex : 7h50min"; $("aideSaisie").innerHTML="Écris sous la forme 2h30min.";
+    $("reponse").placeholder=""; $("aideSaisie").innerHTML="Écris sous la forme 2h30min.";
     $("reponse").style.width="9rem";
   }else{
     $("blocSaisie").classList.add("show");
     $("reponse").value=""; $("reponse").disabled=false; $("btnValSaisie").disabled=false;
     $("saiPrefixe").innerHTML=""; $("saiSuffixe").innerHTML=q.unit?(" "+q.unit):"";
-    $("reponse").placeholder="?"; $("aideSaisie").innerHTML="Écris un nombre entier.";
+    $("reponse").placeholder=""; $("aideSaisie").innerHTML="Écris un nombre entier.";
     $("reponse").style.width="7rem";
   }
   updateChrono();
@@ -571,7 +640,7 @@ function validateSaisie(){
   if(game.locked) return;
   var q=game.q, ok, raw=$("reponse").value.trim();
   if(q.type==="num"){
-    var v=parseEntier(raw); if(v===null){$("warnSaisie").classList.add("show");sndBad();return;} ok=(v===q.ans);
+    var v=parseNombre(raw); if(v===null){$("warnSaisie").classList.add("show");sndBad();return;} ok=Math.abs(v-q.ans)<=(q.tol||0.001);
   }else if(q.type==="deux"){
     var parts=raw.replace(/[^0-9]/g," ").trim().split(/\s+/);
     if(parts.length<2){$("warnSaisie").classList.add("show");sndBad();return;}
@@ -607,7 +676,7 @@ function finishQuestion(ok, timedOut){
     var intro = timedOut ? "\u2718 Temps \u00e9coul\u00e9\u00a0!" : "\u2718 Pas grave, regarde la m\u00e9thode\u00a0:";
     fb.innerHTML = "<div class='fb-titre'>" + intro + "</div>La bonne r\u00e9ponse\u00a0: " + solTexte(q) + "<br>" + methode(q);
   }
-  setTimeout(nextQuestion, ok ? 2500 : 3300);
+  setTimeout(nextQuestion, ok ? 4500 : 6000);
 }
 function nextQuestion(){ game.qIndex++; if(game.qIndex<QTOTAL){ newQuestion(); } else { showResults(); } }
 
@@ -625,7 +694,7 @@ function showResults(){
   var rec=$("recap"); rec.innerHTML="";
   game.results.forEach(function(res){
     var div=document.createElement("div"); div.className="recap-item "+(res.ok?"ok":"ko");
-    div.innerHTML = "<span>"+(res.ok?"\u2714":"\u2718")+"</span><span>"+THEME[res.q.theme] || THEME[res.q.type] || res.q.theme+"\u00a0: "+solTexte(res.q)+"</span>";
+    var themeName=THEME[res.q.theme]||THEME[res.q.type]||res.q.theme; div.innerHTML="<span>"+(res.ok?"\u2714":"\u2718")+"</span><span>"+themeName+"\u00a0: "+solTexte(res.q)+"</span>";
     rec.appendChild(div);
   });
   if(game.score===QTOTAL){ sndFanfare(); } else { sndGood(); }
