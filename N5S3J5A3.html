@@ -143,7 +143,8 @@ header{text-align:center;margin-bottom:1.2rem;}
 @keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
 
 .agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(26,20,38,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
-.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto;cursor:pointer;}
+.agent-hint{display:block;margin-top:.7rem;font-size:.66rem;letter-spacing:.04em;color:var(--muted);font-family:'Orbitron',sans-serif;text-transform:uppercase;opacity:.8;}
 .scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
   background:radial-gradient(circle at 50% 50%, rgba(26,20,38,.96), rgba(16,11,24,.99));}
 .scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
@@ -175,7 +176,7 @@ header{text-align:center;margin-bottom:1.2rem;}
 <body>
 <div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
 <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
-<div class="agent-msg" id="agent-msg"></div>
+<div class="agent-msg" id="agent-msg" onclick="hideAgent()"></div>
 
 <div class="scan-overlay" id="scan-overlay">
   <div class="scan-box">
@@ -274,7 +275,11 @@ function sWin(){if(!soundOn)return;[523,659,784,1047,1319,1047,1568].forEach(fun
 function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
 
 var amTimer=null;
-function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(function(){el.classList.remove("show");},3400);}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt+'<span class="agent-hint">&#128072; Clique pour continuer</span>';el.classList.add("show");clearTimeout(amTimer);
+  var plain=el.textContent||"";
+  var dur=Math.min(12000,Math.max(6000,plain.length*100));
+  amTimer=setTimeout(function(){el.classList.remove("show");},dur);}
+function hideAgent(){var el=$("agent-msg");el.classList.remove("show");clearTimeout(amTimer);}
 var SCAN_SUB=["Lecture des premiers rep\u00e8res","Lecture des \u00e9tapes","Lecture des chemins \u00e9quivalents","Comparaison des deux groupes"];
 function runScan(mi,done){
   var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
@@ -324,24 +329,24 @@ var MISSIONS=[
    ]},
   {ico:"&#128279;", step:"Mission 3", codename:"Les chemins \u00e9quivalents", name:"Les chemins \u00e9quivalents", comp:"D\u00e9nominateurs multiples",
    frag:"&#128205;",
-   intro:"&#127956;&#65039; Chemins \u00e9quivalents<br><span class='scr'>Compare chaque paire avec le bon signe.</span>",
-   hint:"Une fraction ne change pas de valeur si on multiplie num\u00e9rateur et d\u00e9nominateur par le m\u00eame nombre.",
+   intro:"&#127956;&#65039; Chemins \u00e9quivalents<br><span class='scr'>Certaines paires sont \u00e9gales, d'autres non. Transforme puis compare avec le bon signe.</span>",
+   hint:"Une fraction ne change pas de valeur si on multiplie num\u00e9rateur et d\u00e9nominateur par le m\u00eame nombre. Transforme pour obtenir le m\u00eame d\u00e9nominateur, puis compare.",
    type:"cmp",
    exos:[
      {a:"1/2", b:"2/4", ans:1},
      {a:"3/4", b:"6/8", ans:1},
-     {a:"2/3", b:"4/6", ans:1},
-     {a:"3/5", b:"6/10", ans:1}
+     {a:"2/3", b:"3/6", ans:2},
+     {a:"2/5", b:"6/10", ans:0}
    ]},
   {ico:"&#127942;", step:"Mission 4", codename:"Qui est le plus avanc\u00e9", name:"Qui est le plus avanc\u00e9\u00a0?", comp:"D\u00e9nominateurs diff\u00e9rents",
    frag:"&#128205;",
    intro:"&#127956;&#65039; Qui est devant&#8201;?<br><span class='scr'>Les d\u00e9nominateurs sont diff\u00e9rents. Compare chaque paire avec le bon signe.</span>",
-   hint:"Lorsque les d\u00e9nominateurs sont diff\u00e9rents, il peut \u00eatre utile de transformer les fractions pour obtenir le m\u00eame d\u00e9nominateur.",
+   hint:"Cherche une mani\u00e8re de rendre les deux fractions plus faciles \u00e0 comparer.",
    type:"cmp",
    exos:[
-     {a:"3/4", b:"5/8", ans:2},
+     {a:"3/8", b:"1/2", ans:0},
      {a:"7/10", b:"3/5", ans:2},
-     {a:"5/6", b:"7/9", ans:2},
+     {a:"2/3", b:"4/6", ans:1},
      {a:"4/5", b:"3/4", ans:2}
    ]}
 ];
@@ -457,7 +462,15 @@ function tryStep(mi){
   else{
     sBad();$("step-"+mi).classList.add("shake");setTimeout(function(){$("step-"+mi).classList.remove("shake");},400);
     var fb=$("fb-"+mi);fb.className="fb show ko";$("fbi-"+mi).textContent="\u26A0\uFE0F";
-    $("fbm-"+mi).innerHTML="Observe attentivement les num\u00e9rateurs et les d\u00e9nominateurs.<br>Essaie encore.";
+    var msgKO;
+    if(mi===3){
+      msgKO="Cherche une autre \u00e9criture des fractions avant de les comparer.<br>Essaie encore.";
+    }else if(mi===2){
+      msgKO="Ces deux fractions ne repr\u00e9sentent peut-\u00eatre pas la m\u00eame quantit\u00e9. Cherche si tu peux les r\u00e9\u00e9crire autrement avant de comparer.";
+    }else{
+      msgKO="Observe attentivement les num\u00e9rateurs et les d\u00e9nominateurs.<br>Essaie encore.";
+    }
+    $("fbm-"+mi).innerHTML=msgKO;
   }
 }
 
@@ -499,7 +512,7 @@ function openEnigma(){
   var host=$("steps");
   var card=document.createElement("div");card.className="step-card solved";card.id="step-enigma";
   card.innerHTML='<div class="step-head"><span class="step-ico">&#127919;</span>'
-    +'<div class="step-meta"><div class="step-step">\u00c9nigme finale</div><div class="step-name">Quel groupe est devant&#8201;?</div><div class="step-comp">&#127956;&#65039; 3/4 contre 5/8</div></div></div>'
+    +'<div class="step-meta"><div class="step-step">\u00c9nigme finale</div><div class="step-name">Quel groupe est devant&#8201;?</div><div class="step-comp">&#127956;&#65039; Comparer les deux groupes</div></div></div>'
     +'<div class="step-body">'
     +'<div class="exo-q" style="margin-bottom:.8rem;color:#dcd2ee;font-size:clamp(.84rem,2.5vw,.94rem)">'+ENIGMA.intro+'</div>'
     +'<div class="opts" id="enig-opts"></div>'
@@ -527,7 +540,7 @@ function tryEnigma(){
     enigmaOk=true;
     var tb=$("try-enig");if(tb){tb.disabled=true;tb.style.display="none";}
     var fb=$("fb-enig");fb.className="fb show ok";$("fbi-enig").textContent="\u2705";
-    $("fbm-enig").innerHTML="<b style='color:var(--green)'>Bravo&#8201;! Le groupe A est le plus avanc\u00e9.</b>";
+    $("fbm-enig").innerHTML="<b style='color:var(--green)'>Bravo&#8201;! Tu as aid\u00e9 les animateurs \u00e0 comparer la progression des deux groupes.</b>";
     sOk();sFrag();
     setTimeout(openFinale,1400);
   }else{
@@ -587,7 +600,7 @@ function beginGame(){
       build();
       showAgent("&#127956;&#65039; L\u2019animateur&nbsp;:<br>Premi\u00e8re \u00e9tape&#8201;: choisis la plus grande fraction.");
     });
-  },1400);
+  },2400);
 }
 function restartAll(){
   clearInterval(totalInt);totalSec=0;
