@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Repérer une fraction sur une demi-droite</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — MERCREDI (J3) VERT ═══ */
+    :root{
+      --day-color:#8dc63f; --day-dark:#3d7a10; --day-light:#f0faeb;
+      --day-border:#b5e08a; --day-glow:rgba(141,198,63,.3);
+    }
+    /* ═══ CHARTE PAZAPA ═══ */
+    :root{
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+      --err-bg:#fce4e4; --err-border:#8e1b13; --err-text:#8e1b13;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+      letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;
+      font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.25rem,5vw,1.8rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .niveau-badge{display:inline-flex;align-items:center;gap:.5rem;margin-top:.6rem;
+      background:var(--day-light);border:2px solid var(--day-color);color:var(--day-dark);
+      font-weight:800;font-size:clamp(.9rem,2.8vw,1.05rem);padding:.35rem 1.1rem;border-radius:99px;}
+    .niveau-badge .nb-dot{width:12px;height:12px;border-radius:50%;background:var(--day-color);display:inline-block;}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .stage{width:100%;max-width:680px;position:relative;z-index:1;}
+
+    .hud{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;align-items:center;margin-bottom:1.1rem;}
+    .hud-chip{display:flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:99px;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;
+      border:2px solid var(--border);background:var(--surface);}
+    .hud-chip.act{background:var(--day-light);border-color:var(--day-border);color:var(--day-dark);}
+
+    .start-overlay{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .start-overlay h2{font-size:1.1rem;color:var(--day-dark);margin-bottom:.5rem;}
+    .start-overlay p{font-size:clamp(.9rem,2.6vw,1rem);line-height:1.9;margin-bottom:1.1rem;}
+    .start-overlay strong{color:var(--day-dark);}
+
+    .screen{display:none;}
+    .screen.show{display:block;animation:fadeUp .35s ease both;}
+
+    .progress-wrap{margin-bottom:1.2rem;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));
+      border-radius:99px;transition:width .4s ease;}
+
+    /* Badge niveau dans le board */
+    .niv-label{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--day-dark);
+      font-weight:700;margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.06em;}
+
+    .enonce{background:var(--day-light);border:2px solid var(--day-border);border-left:5px solid var(--day-color);
+      border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.86rem,2.5vw,.94rem);line-height:1.9;}
+    .enonce .ex-titre{font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+    .enonce .ex-quest{color:var(--day-dark);font-weight:700;margin-top:.3rem;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink));}
+
+    /* SVG droite graduée */
+    .svg-wrap{width:100%;overflow-x:auto;margin:.5rem 0 .9rem;}
+    .svg-wrap svg{display:block;width:100%;max-width:580px;height:auto;margin:0 auto;}
+    svg .ax{stroke:var(--text);stroke-width:1.8;fill:none;}
+    svg .tk{stroke:var(--text);stroke-width:1.2;}
+    svg .tk-m{stroke:var(--text);stroke-width:2.2;}
+    svg .lbl-ax{font-size:13px;fill:var(--text);font-family:Arial,sans-serif;text-anchor:middle;}
+    svg .arrow-red{fill:#c0392b;}
+    svg .grad-idle{fill:#fff;stroke:var(--day-border);stroke-width:2;cursor:pointer;}
+    svg .grad-sel{fill:var(--day-color);stroke:var(--day-dark);stroke-width:2;cursor:pointer;}
+    svg .grad-ok{fill:#8dc63f;stroke:#3d7a10;stroke-width:2;}
+    svg .grad-wrong{fill:#f28b82;stroke:#8e1b13;stroke-width:2;}
+
+    .q-tag{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-text{font-size:clamp(.95rem,2.9vw,1.1rem);font-weight:700;line-height:1.8;margin-bottom:1rem;color:var(--text);}
+
+    /* Fractions empilées */
+    .frac{display:inline-flex;flex-direction:column;align-items:stretch;
+      vertical-align:middle;text-align:center;line-height:1.15;margin:0 .15em;font-size:.95em;}
+    .frac sup,.frac sub{display:block;font-size:.88em;padding:0 .3em;vertical-align:baseline;position:static;top:auto;}
+    .frac sup{border-bottom:1.3px solid currentColor;padding-bottom:.05em;}
+    .frac sub{padding-top:.05em;}
+
+    .options{display:flex;flex-direction:column;gap:.6rem;}
+    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
+      border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;
+      font-size:clamp(.9rem,2.7vw,1rem);line-height:1.8;transition:border-color .15s,background .15s;text-align:left;}
+    .opt .opt-key{font-size:1.1rem;flex-shrink:0;width:1.5rem;text-align:center;}
+    .opt:hover:not(.locked){border-color:var(--day-color);}
+    .opt.locked{cursor:default;}
+    .opt.sel{border-color:var(--day-color);background:var(--day-light);}
+    .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
+    .opt.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .opt.reveal-correct{border-color:var(--green);background:#f0faeb;}
+
+    /* Q5 mini-qcm vrai/faux */
+    .vf-group{margin:.6rem 0;padding:.65rem .9rem;background:var(--day-light);
+      border:1.5px solid var(--day-border);border-radius:10px;}
+    .vf-frac-lbl{font-size:1rem;margin-bottom:.4rem;font-weight:700;}
+    .vf-row{display:flex;gap:.6rem;}
+    .vf-btn{flex:1;padding:.7rem .8rem;border-radius:10px;border:2px solid var(--border);
+      background:var(--bg);cursor:pointer;min-height:44px;font-family:Arial,sans-serif;
+      font-weight:700;font-size:clamp(.9rem,2.6vw,1rem);transition:border-color .15s,background .15s;}
+    .vf-btn:hover:not(.locked){border-color:var(--day-color);}
+    .vf-btn.sel{border-color:var(--day-color);background:var(--day-light);}
+    .vf-btn.locked{cursor:default;}
+    .vf-btn.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .vf-btn.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .vf-btn.reveal-correct{border-color:var(--green);background:#f0faeb;}
+    .vf-fb{font-size:.83rem;margin-top:.35rem;display:none;color:var(--err-text);}
+    .vf-fb.show{display:block;}
+
+    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.92rem);
+      display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback .fi{font-size:1.3rem;flex-shrink:0;}
+
+    .actions{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.3rem;}
+    .hint-row{margin-top:.9rem;}
+    .btn-hint{background:transparent;color:var(--day-dark);border:2px dashed var(--day-border);
+      padding:.45rem 1rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;
+      font-size:.85rem;cursor:pointer;min-height:40px;}
+    .btn-hint:hover{background:var(--day-light);}
+    .hint-box{display:none;margin-top:.6rem;padding:.75rem 1rem;border-radius:10px;
+      background:var(--day-light);border:1.5px solid var(--day-border);color:var(--text);
+      font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.8;}
+    .hint-box.show{display:block;animation:fadeUp .25s ease both;}
+    .hint-box::before{content:"💡 ";}
+
+    /* Correction cachée */
+    .corr-wrap{margin-top:.6rem;}
+    .btn-corr{display:none;background:transparent;color:var(--day-dark);border:2px solid var(--day-border);
+      padding:.38rem .9rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;
+      font-size:.82rem;cursor:pointer;min-height:38px;align-items:center;gap:.3rem;}
+    .btn-corr.show{display:inline-flex;}
+    .corr-box{display:none;margin-top:.5rem;padding:.7rem 1rem;border-radius:10px;
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      font-size:clamp(.84rem,2.4vw,.9rem);line-height:1.8;color:var(--day-dark);}
+    .corr-box.show{display:block;}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;
+      border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.6vw,.95rem);font-weight:700;
+      cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.4;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#000;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+
+    /* Bilan */
+    .res{display:none;text-align:center;}
+    .res.show{display:block;animation:fadeUp .4s ease both;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .trophee{font-size:3rem;line-height:1;margin-bottom:.3rem;}
+    .res-score{font-size:clamp(1.8rem,8vw,3rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
+    .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
+    .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
+    .recap-list{display:flex;flex-direction:column;gap:.5rem;margin:.8rem auto 1.3rem;max-width:500px;}
+    .recap-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.6rem .9rem;
+      border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.8;text-align:left;}
+    .recap-row .rk{flex:1;min-width:8rem;font-weight:600;}
+    .recap-row.ok{background:#f0faeb;border:1.5px solid #8dc63f;color:#3d7a10;}
+    .recap-row.ko{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
+    .skills-text{color:var(--day-dark);line-height:1.8;background:var(--day-light);
+      border:2px solid var(--day-border);border-radius:12px;padding:.9rem 1.1rem;
+      margin:0 auto 1.3rem;max-width:460px;text-align:left;}
+    .skills-text .skills-title{font-weight:800;font-size:clamp(.84rem,2.4vw,.92rem);margin-bottom:.5rem;}
+    .skills-text .skill-line{display:flex;gap:.6rem;font-size:clamp(.86rem,2.5vw,.94rem);
+      line-height:1.8;margin-bottom:.5rem;font-weight:600;}
+    .skills-text .skill-line:last-child{margin-bottom:0;}
+    .skills-text .arr{color:var(--day-color);font-weight:800;flex-shrink:0;}
+    .res-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(min-width:481px) and (max-width:820px){.stage{max-width:640px;}}
+    @media(max-width:480px){
+      body{padding:1.4rem .75rem 3rem;}
+      .actions{justify-content:stretch;} .actions .btn{flex:1;}
+      .vf-row{flex-wrap:wrap;}
+      .svg-wrap svg{min-width:280px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5ème
+    </div>
+    <div class="week-label">Semaine 3 &ndash; Jour 3</div>
+    <h1>Repérer une fraction sur une <span class="hl">demi-droite</span></h1>
+    <p class="subtitle">lire, placer et réinvestir</p>
+    <div class="niveau-badge"><span class="nb-dot"></span>Je m'entraîne</div>
+  </header>
+
+  <div class="stage">
+    <!-- ÉCRAN ACCUEIL -->
+    <div class="screen show" id="start">
+      <div class="start-overlay">
+        <h2>C'est parti, on s'entraîne&nbsp;!</h2>
+        <p>🎯 Dans cette activité, tu vas apprendre à <strong>lire</strong>, <strong>placer</strong> et <strong>réinvestir</strong> les fractions sur une demi-droite graduée.<br/>
+        <span style="color:var(--muted);font-size:.85rem;">3 niveaux</span></p>
+        <button class="btn btn-primary" onclick="startGame()">Commencer &rarr;</button>
+      </div>
+    </div>
+
+    <!-- BOARD -->
+    <div class="screen" id="board">
+      <div class="hud">
+        <div class="hud-chip act"><span id="act-label">Question 1</span></div>
+        <div class="hud-chip"><span id="score-live">0</span>&nbsp;<span>bonne(s) réponse(s)</span></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-info">
+          <span id="prog-label">Question 1 / 15</span>
+          <span id="prog-pct">0&nbsp;%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="niv-label" id="niv-label"></div>
+      <div class="svg-wrap" id="svg-wrap" style="display:none;"></div>
+
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="q-tag" id="q-tag"></div>
+        <div class="q-text" id="q-text"></div>
+        <div id="answer-zone"></div>
+        <div class="feedback" id="feedback"><span class="fi" id="fb-ic"></span><div><span id="fb-msg"></span></div></div>
+        <div class="hint-row">
+          <button class="btn-hint" id="btn-hint" onclick="toggleHint()">💡 Indice</button>
+          <div class="hint-box" id="hint-box"></div>
+        </div>
+        <div class="corr-wrap">
+          <button class="btn-corr" id="btn-corr" onclick="toggleCorr()">Voir la correction</button>
+          <div class="corr-box" id="corr-box"></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="btn-validate" onclick="validate()" disabled>Valider</button>
+          <button class="btn btn-primary" id="btn-next" onclick="nextStep()" style="display:none;">Suivant &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BILAN -->
+    <div class="res" id="final">
+      <div class="res-card">
+        <div class="trophee">🏆</div>
+        <div class="res-score"><span id="final-num">0</span></div>
+        <div class="stars" id="final-stars"></div>
+        <div class="res-msg" id="final-msg"></div>
+        <div class="skills-text">
+          <div class="skills-title">📌 Ce que je sais maintenant</div>
+          <div class="skill-line"><span class="arr">→</span><span>Pour <strong>lire</strong> une fraction sur une demi-droite graduée, j'identifie le partage de l'unité puis je repère la graduation correspondante.</span></div>
+          <div class="skill-line"><span class="arr">→</span><span>Pour <strong>placer</strong> une fraction supérieure à 1, je repère d'abord l'entier précédent puis je compte les graduations.</span></div>
+          <div class="skill-line"><span class="arr">→</span><span>Certaines fractions peuvent s'écrire sous forme d'un nombre décimal exact, d'autres non.</span></div>
+        </div>
+        <div class="recap-list" id="final-recap"></div>
+        <div class="res-btns">
+          <button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+
+/* ══════════════════════════════════════════════
+   DONNÉES
+══════════════════════════════════════════════ */
+function f(n,d){ return '<span class="frac"><sup>'+n+'</sup><sub>'+d+'</sub></span>'; }
+
+/* NIV 1 : lire une fraction (flèche SVG) */
+var NIV1 = [
+  { svg:1, num:2, den:5, emax:1,
+    opts:["2/5","5/2","3/5","1"], ans:"2/5",
+    hint:"Observe d'abord comment l'unité est partagée, puis repère la position de la flèche.",
+    method:"La flèche pointe sur la 2e graduation. La droite est partagée en 5 parts : la fraction est "+f(2,5)+"." },
+  { svg:1, num:3, den:4, emax:1,
+    opts:["4/3","1/4","3/4","1"], ans:"3/4",
+    hint:"Le dénominateur, c'est le nombre total de parts entre 0 et 1.",
+    method:"La flèche pointe sur la 3e graduation sur 4 parts : la fraction est "+f(3,4)+"." },
+  { svg:1, num:7, den:4, emax:2,
+    opts:["5/4","7/4","7/3","4/7"], ans:"7/4",
+    hint:"Observe comment l'unité est partagée, puis repère la position de la flèche par rapport aux entiers.",
+    method:"La flèche pointe sur la 7e graduation (4 parts par unité) : la fraction est "+f(7,4)+"." },
+  { svg:1, num:11, den:6, emax:2,
+    opts:["5/6","11/6","6/11","2"], ans:"11/6",
+    hint:"Observe entre quels entiers se trouve la flèche, puis examine le partage de l'unité.",
+    method:"La flèche est entre 1 et 2, à la 5e graduation après 1 : 6+5=11 depuis 0. La fraction est "+f(11,6)+"." },
+  { svg:1, num:13, den:8, emax:2,
+    opts:["5/8","13/8","13/6","1"], ans:"13/8",
+    hint:"Repère l'entier juste avant la flèche, puis observe le partage de l'unité.",
+    method:"La flèche est entre 1 et 2, à la 5e graduation après 1 : 8+5=13 depuis 0. La fraction est "+f(13,8)+"." }
+];
+
+/* NIV 2 : placer une fraction (clic sur graduation) */
+var NIV2 = [
+  { svg:2, num:3, den:4, emax:1,
+    hint:"Observe comment la droite est partagée, puis repère la graduation correspondante.",
+    method:f(3,4)+" se place à la 3e graduation en partant de 0, sur une droite partagée en quarts." },
+  { svg:2, num:7, den:4, emax:2,
+    hint:f(7,4)+" = 1 entier et "+f(3,4)+". Repère d'abord 1, puis avance de 3 graduations.",
+    method:f(7,4)+" = 1 + "+f(3,4)+". Sur la droite en quarts de 0 à 2, c'est la 7e graduation depuis 0." },
+  { svg:2, num:9, den:4, emax:3,
+    hint:f(9,4)+" = 2 entiers et "+f(1,4)+". Repère d'abord 2, puis avance d'une graduation.",
+    method:f(9,4)+" = 2 + "+f(1,4)+". Sur la droite en quarts de 0 à 3, c'est la 9e graduation depuis 0." },
+  { svg:2, num:13, den:4, emax:4,
+    hint:f(13,4)+" = 3 entiers et "+f(1,4)+". Repère d'abord 3, puis avance d'une graduation.",
+    method:f(13,4)+" = 3 + "+f(1,4)+". Sur la droite en quarts de 0 à 4, c'est la 13e graduation depuis 0." },
+  { svg:2, num:3, den:2, emax:2,
+    hint:f(3,2)+" = 1 entier et "+f(1,2)+". La droite est partagée en demis.",
+    method:f(3,2)+" = 1 + "+f(1,2)+". Sur la droite en demis de 0 à 2, c'est la 3e graduation depuis 0." }
+];
+
+/* NIV 3 : réinvestir */
+var NIV3 = [
+  { svg:0, type:"qcm",
+    enonce:"Complète : 15 &times; □ = 60",
+    opts:["3","4","5","45"], ans:"4",
+    hint:"Cherche quel nombre multiplié par 15 donne 60.",
+    method:"15 &times; <strong>4</strong> = 60. Le nombre manquant est 4." },
+  { svg:0, type:"qcm",
+    enonce:"Complète : 4 &times; □ = 10",
+    opts:["2,5","4","6","40"], ans:"2,5",
+    hint:"Le résultat n'est pas forcément un entier.",
+    method:"4 &times; <strong>2,5</strong> = 10. On peut écrire aussi "+f(5,2)+"." },
+  { svg:0, type:"qcm",
+    enonce:"Complète : 4 &times; □ = 3",
+    opts:["0,25","0,75","1,25","12"], ans:"0,75",
+    hint:"Calcule 3 ÷ 4.",
+    method:"3 ÷ 4 = <strong>0,75</strong>. On peut écrire aussi "+f(3,4)+"." },
+  { svg:0, type:"qcm",
+    enonce:"Complète : 7 &times; □ = 1",
+    opts:["1/7","7","1/3","0"], ans:"1/7",
+    hint:"Quel nombre multiplié par 7 donne 1 ?",
+    method:"7 &times; "+f(1,7)+" = 1. Le nombre manquant est "+f(1,7)+"." },
+  { svg:0, type:"decimal3",
+    enonce:"Pour chaque fraction, indique si elle possède une écriture décimale finie.",
+    fracs:[{n:1,d:2,ans:"Oui"},{n:5,d:8,ans:"Oui"},{n:2,d:3,ans:"Non"}],
+    method:f(1,2)+" = <strong>0,5</strong> (Oui) &nbsp;·&nbsp; "+f(5,8)+" = <strong>0,625</strong> (Oui) &nbsp;·&nbsp; "+f(2,3)+" = 0,666… (Non)" }
+];
+
+/* ══════════════════════════════════════════════
+   SVG
+══════════════════════════════════════════════ */
+function svgLire(num, den, emax){
+  var W=560, H=80, pL=36, pR=40, y=42;
+  var total = emax * den;
+  var span = W - pL - pR;
+  function X(k){ return pL + (k/total)*span; }
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Demi-droite graduée">';
+  s+='<line class="ax" x1="'+pL+'" y1="'+y+'" x2="'+(W-pR+8)+'" y2="'+y+'"/>';
+  s+='<polygon style="fill:var(--text)" points="'+(W-pR+8)+','+(y-5)+' '+(W-pR+20)+','+y+' '+(W-pR+8)+','+(y+5)+'"/>';
+  for(var i=0;i<=total;i++){
+    var main=(i%den===0), len=main?14:8;
+    s+='<line class="'+(main?"tk-m":"tk")+'" x1="'+X(i)+'" y1="'+(y-len/2)+'" x2="'+X(i)+'" y2="'+(y+len/2)+'"/>';
+    if(main) s+='<text class="lbl-ax" x="'+X(i)+'" y="'+(y+24)+'">'+(i/den)+'</text>';
+  }
+  var px=X(num);
+  s+='<line style="stroke:#c0392b;stroke-width:2.2" x1="'+px+'" y1="'+(y-22)+'" x2="'+px+'" y2="'+(y-9)+'"/>';
+  s+='<polygon class="arrow-red" points="'+(px-5)+','+(y-20)+' '+px+','+(y-7)+' '+(px+5)+','+(y-20)+'"/>';
+  s+='</svg>';
+  return s;
+}
+
+var _curPlacer = null;
+var _selGrad = null;
+
+function svgPlacer(den, emax, bonneGrad, done, selG){
+  var W=560, H=88, pL=36, pR=40, y=46;
+  var total = emax * den;
+  var span = W - pL - pR;
+  function X(k){ return pL + (k/total)*span; }
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Demi-droite graduée à compléter">';
+  s+='<line class="ax" x1="'+pL+'" y1="'+y+'" x2="'+(W-pR+8)+'" y2="'+y+'"/>';
+  s+='<polygon style="fill:var(--text)" points="'+(W-pR+8)+','+(y-5)+' '+(W-pR+20)+','+y+' '+(W-pR+8)+','+(y+5)+'"/>';
+  for(var i=0;i<=total;i++){
+    var main=(i%den===0), len=main?14:8;
+    s+='<line class="'+(main?"tk-m":"tk")+'" x1="'+X(i)+'" y1="'+(y-len/2)+'" x2="'+X(i)+'" y2="'+(y+len/2)+'"/>';
+    if(main) s+='<text class="lbl-ax" x="'+X(i)+'" y="'+(y+28)+'">'+(i/den)+'</text>';
+  }
+  for(var j=0;j<=total;j++){
+    var px2=X(j);
+    var cls;
+    if(done){
+      if(j===bonneGrad) cls="grad-ok";
+      else if(j===selG && j!==bonneGrad) cls="grad-wrong";
+      else cls="grad-idle";
+    } else {
+      cls = (j===selG) ? "grad-sel" : "grad-idle";
+    }
+    var action = done ? "" : 'onclick="clickGrad('+j+')"';
+    s+='<circle class="'+cls+'" cx="'+px2+'" cy="'+y+'" r="8" '+action+'/>';
+  }
+  s+='</svg>';
+  return s;
+}
+
+/* ══════════════════════════════════════════════
+   ÉTAT
+══════════════════════════════════════════════ */
+var allQ = [];
+var step=0, sel=null, locked=false, passed=[];
+
+function buildAllQ(){
+  allQ = [];
+  NIV1.forEach(function(q,i){ allQ.push({niv:1, idx:i, q:q}); });
+  NIV2.forEach(function(q,i){ allQ.push({niv:2, idx:i, q:q}); });
+  NIV3.forEach(function(q,i){ allQ.push({niv:3, idx:i, q:q}); });
+}
+
+/* ══════════════════════════════════════════════
+   JEUX
+══════════════════════════════════════════════ */
+function startGame(){
+  $("start").classList.remove("show");
+  $("final").classList.remove("show");
+  step=0; passed=[]; sel=null; locked=false; _selGrad=null;
+  buildAllQ();
+  render();
+  $("board").classList.add("show");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function render(){
+  sel=null; locked=false; _selGrad=null;
+  var item=allQ[step], q=item.q, niv=item.niv;
+  var total=allQ.length;
+
+  /* HUD */
+  $("act-label").textContent = "Question "+(step+1);
+  $("score-live").textContent = passed.filter(Boolean).length;
+  $("prog-label").textContent = "Question "+(step+1)+" / "+total;
+  var pct=Math.round(step/total*100);
+  $("progress-bar").style.width=pct+"%";
+  $("prog-pct").textContent=pct+"\u00a0%";
+
+  /* Badge niveau */
+  var nivTxt = niv===1 ? "🟢 Niveau 1 — Lire une fraction" :
+               niv===2 ? "🟡 Niveau 2 — Placer une fraction" :
+                         "🔵 Niveau 3 — Réinvestir";
+  $("niv-label").textContent=nivTxt;
+
+  /* SVG */
+  var svgWrap=$("svg-wrap");
+  if(q.svg===1){
+    svgWrap.style.display="block";
+    svgWrap.innerHTML=svgLire(q.num,q.den,q.emax);
+    _curPlacer=null;
+  } else if(q.svg===2){
+    svgWrap.style.display="block";
+    svgWrap.innerHTML=svgPlacer(q.den,q.emax,q.num,false,null);
+    _curPlacer=q;
+  } else {
+    svgWrap.style.display="none";
+    _curPlacer=null;
+  }
+
+  /* Reset card */
+  $("feedback").className="feedback";
+  $("hint-box").className="hint-box";
+  $("hint-box").innerHTML=q.hint||"";
+  $("corr-box").className="corr-box";
+  $("corr-box").innerHTML=q.method||"";
+  $("btn-corr").className="btn-corr";
+  $("btn-next").style.display="none";
+  $("btn-validate").style.display="inline-flex";
+  $("btn-validate").disabled=true;
+
+  /* Contenu */
+  if(q.type==="decimal3"){
+    $("q-tag").textContent="Écriture décimale";
+    $("q-text").innerHTML=q.enonce;
+    buildDecimal3(q);
+  } else if(q.svg===2){
+    $("q-tag").textContent="Clique sur la graduation";
+    $("q-text").innerHTML="Place la fraction "+f(q.num,q.den)+" sur la demi-droite.";
+    $("answer-zone").innerHTML="";
+  } else {
+    $("q-tag").textContent = niv===1 ? "Quelle fraction est repérée ?" : "Complète";
+    $("q-text").innerHTML = niv===1 ? "" : q.enonce;
+    buildQCM(q);
+  }
+}
+
+/* QCM standard */
+function buildQCM(q){
+  var zone=$("answer-zone");
+  zone.innerHTML="<div class='options' id='opts'></div>";
+  var box=$("opts");
+  q.opts.forEach(function(op){
+    var b=document.createElement("div");
+    b.className="opt";
+    var lbl=op;
+    if(op.indexOf("/")>-1){ var p=op.split("/"); lbl=f(p[0],p[1]); }
+    b.innerHTML="<span class='opt-key'>&bull;</span><span>"+lbl+"</span>";
+    b.setAttribute("data-val",op);
+    b.onclick=function(){
+      if(locked) return;
+      sel=op;
+      Array.from($("opts").children).forEach(function(x){ x.classList.remove("sel"); });
+      b.classList.add("sel");
+      $("btn-validate").disabled=false;
+    };
+    box.appendChild(b);
+  });
+}
+
+/* Q5 décimale */
+var _q5sel={};
+function buildDecimal3(q){
+  var zone=$("answer-zone");
+  _q5sel={};
+  var html="";
+  q.fracs.forEach(function(fr,j){
+    html+='<div class="vf-group">'+
+      '<div class="vf-frac-lbl">'+f(fr.n,fr.d)+'</div>'+
+      '<div class="vf-row">'+
+      '<button class="vf-btn" id="oui'+j+'" onclick="selQ5('+j+',\'Oui\')">Oui</button>'+
+      '<button class="vf-btn" id="non'+j+'" onclick="selQ5('+j+',\'Non\')">Non</button>'+
+      '</div>'+
+      '<div class="vf-fb" id="vffb'+j+'"></div>'+
+      '</div>';
+  });
+  zone.innerHTML=html;
+}
+window.selQ5=function(j,val){
+  if(locked) return;
+  _q5sel[j]=val;
+  var q=allQ[step].q;
+  q.fracs.forEach(function(_,k){
+    var ob=$("oui"+k), nb=$("non"+k);
+    if(ob) ob.classList.remove("sel");
+    if(nb) nb.classList.remove("sel");
+    if(_q5sel[k]==="Oui" && ob) ob.classList.add("sel");
+    if(_q5sel[k]==="Non" && nb) nb.classList.add("sel");
+  });
+  if(Object.keys(_q5sel).length===q.fracs.length) $("btn-validate").disabled=false;
+};
+
+/* Clic graduation placer */
+window.clickGrad=function(idx){
+  if(locked) return;
+  _selGrad=idx;
+  var q=allQ[step].q;
+  $("svg-wrap").innerHTML=svgPlacer(q.den,q.emax,q.num,false,idx);
+  $("btn-validate").disabled=false;
+};
+
+/* ══════════════════════════════════════════════
+   VALIDER
+══════════════════════════════════════════════ */
+function validate(){
+  if(locked) return;
+  locked=true;
+  var item=allQ[step], q=item.q, niv=item.niv;
+  var good=false;
+
+  if(q.svg===2){
+    /* Placer */
+    good=(_selGrad===q.num);
+    $("svg-wrap").innerHTML=svgPlacer(q.den,q.emax,q.num,true,_selGrad);
+  } else if(q.type==="decimal3"){
+    /* Décimale */
+    good=true;
+    q.fracs.forEach(function(fr,j){
+      var ok=(_q5sel[j]===fr.ans);
+      if(!ok) good=false;
+      var ob=$("oui"+j), nb=$("non"+j);
+      [ob,nb].forEach(function(b){ if(b){ b.classList.add("locked"); b.onclick=null; }});
+      if(fr.ans==="Oui" && ob){ ob.classList.remove("sel"); ob.classList.add("chosen-correct"); }
+      else if(fr.ans==="Non" && nb){ nb.classList.remove("sel"); nb.classList.add("chosen-correct"); }
+      if(!ok){
+        if(_q5sel[j]==="Oui" && ob) ob.classList.add("chosen-wrong");
+        if(_q5sel[j]==="Non" && nb) nb.classList.add("chosen-wrong");
+      }
+      var fb=$("vffb"+j);
+      if(fb && !ok){ fb.className="vf-fb show"; fb.innerHTML="❌ "+f(fr.n,fr.d)+" → "+fr.ans; }
+    });
+  } else {
+    /* QCM standard */
+    good=(sel===q.ans);
+    var opts=$("opts");
+    if(opts) Array.from(opts.children).forEach(function(b){
+      b.classList.add("locked"); b.onclick=null;
+      var v=b.getAttribute("data-val");
+      if(v===q.ans){ b.classList.remove("sel"); b.classList.add(sel===v?"chosen-correct":"reveal-correct"); }
+      else if(v===sel){ b.classList.add("chosen-wrong"); }
+    });
+  }
+
+  passed[step]=good;
+  $("score-live").textContent=passed.filter(Boolean).length;
+  showFb(good, good ? "Bonne réponse !" : "Pas tout à fait. Observe à nouveau la demi-droite ou l'égalité, puis compare avec la correction pour comprendre ton erreur.");
+  $("hint-box").classList.remove("show");
+  $("btn-validate").style.display="none";
+  $("btn-next").style.display="inline-flex";
+  $("btn-next").textContent=(step===allQ.length-1) ? "Voir le bilan →" : "Suivant →";
+  $("btn-corr").classList.add("show");
+}
+
+function showFb(ok,msg){
+  var fb=$("feedback");
+  fb.className="feedback show "+(ok?"ok":"ko");
+  $("fb-ic").textContent=ok?"✅":"❌";
+  $("fb-msg").innerHTML=msg;
+}
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+function nextStep(){
+  if(step<allQ.length-1){ step++; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else showFinal();
+}
+
+function toggleHint(){
+  var h=$("hint-box"); h.classList.toggle("show");
+}
+function toggleCorr(){
+  var c=$("corr-box"); c.classList.toggle("show");
+  $("btn-corr").textContent=c.classList.contains("show")?"Masquer la correction":"Voir la correction";
+}
+
+/* ══════════════════════════════════════════════
+   BILAN
+══════════════════════════════════════════════ */
+function starsFrac(ok,tot){ var r=ok/tot; return r>=1?5:r>=.8?4:r>=.6?3:r>=.4?2:1; }
+
+function showFinal(){
+  $("board").classList.remove("show");
+  $("final").classList.add("show");
+  var ok=passed.filter(Boolean).length, tot=allQ.length;
+  $("final-num").textContent=ok+" / "+tot;
+  var st=starsFrac(ok,tot);
+  $("final-stars").textContent="⭐".repeat(st)+"☆".repeat(5-st);
+  var msg;
+  if(ok===tot) msg="Parfait ! Tu maîtrises les fractions sur la demi-droite.";
+  else if(ok>=Math.ceil(tot*.8)) msg="Très bien ! Quelques points à consolider.";
+  else if(ok>=Math.ceil(tot*.6)) msg="Bien joué ! Reprends les exercices marqués ✘ pour consolider tes connaissances.";
+  else msg="Continue à t'entraîner, tu progresseras !";
+  $("final-msg").innerHTML=msg;
+
+  var recap="";
+  allQ.forEach(function(item,i){
+    var r=passed[i]===true, q=item.q;
+    var label="";
+    if(q.svg===1) label=q.num+"/"+q.den+" (lire)";
+    else if(q.svg===2) label=q.num+"/"+q.den+" (placer)";
+    else if(q.type==="decimal3") label="Écriture décimale";
+    else label=q.enonce.replace(/<[^>]+>/g,"");
+    recap+="<div class='recap-row "+(r?"ok":"ko")+"'>"+
+      "<span>"+(r?"✔":"✘")+"</span>"+
+      "<span class='rk'>"+label+"</span>"+
+      "</div>";
+  });
+  $("final-recap").innerHTML=recap;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  $("final").classList.remove("show");
+  $("board").classList.remove("show");
+  $("start").classList.add("show");
+}
+</script>
+</body>
+</html>
