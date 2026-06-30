@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths — Comparer des fractions</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ═══ COULEUR DU JOUR — VENDREDI (J5) JAUNE ═══ */
+    :root{
+      --day-color:#f5c518; --day-dark:#8a6000; --day-light:#fffbeb;
+      --day-border:#f5e08a; --day-glow:rgba(245,197,24,.3);
+    }
+    /* ═══ CHARTE PAZAPA ═══ */
+    :root{
+      --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+      --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+      --pink:#f28b82; --orange:#f5a623;
+      --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+      --err-bg:#fce4e4; --err-border:#8e1b13; --err-text:#8e1b13;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+      letter-spacing:.02em;word-spacing:.06em;line-height:1.8;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+    header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:100%;}
+    .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;
+      font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;white-space:nowrap;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+    h1{font-size:clamp(1.25rem,5vw,1.8rem);font-weight:800;line-height:1.3;word-break:break-word;}
+    h1 .hl{color:var(--day-dark);}
+    .niveau-badge{display:inline-flex;align-items:center;gap:.5rem;margin-top:.6rem;
+      background:var(--day-light);border:2px solid var(--day-color);color:var(--day-dark);
+      font-weight:800;font-size:clamp(.9rem,2.8vw,1.05rem);padding:.35rem 1.1rem;border-radius:99px;}
+    .niveau-badge .nb-dot{width:12px;height:12px;border-radius:50%;background:var(--day-color);display:inline-block;}
+    .subtitle{color:var(--muted);font-size:clamp(.8rem,2.5vw,.88rem);margin-top:.4rem;
+      font-family:'JetBrains Mono',monospace;word-break:break-word;}
+
+    .stage{width:100%;max-width:680px;position:relative;z-index:1;}
+
+    .hud{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;align-items:center;margin-bottom:1.1rem;}
+    .hud-chip{display:flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:99px;
+      font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;
+      border:2px solid var(--border);background:var(--surface);}
+    .hud-chip.act{background:var(--day-light);border-color:var(--day-border);color:var(--day-dark);}
+
+    .start-overlay{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .start-overlay h2{font-size:1.1rem;color:var(--day-dark);margin-bottom:.5rem;}
+    .start-overlay p{font-size:clamp(.9rem,2.6vw,1rem);line-height:1.9;margin-bottom:1.1rem;}
+    .start-overlay strong{color:var(--day-dark);}
+
+    .screen{display:none;}
+    .screen.show{display:block;animation:fadeUp .35s ease both;}
+
+    .progress-wrap{margin-bottom:1.2rem;}
+    .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
+      font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+    .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));
+      border-radius:99px;transition:width .4s ease;}
+
+    .niv-label{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--day-dark);
+      font-weight:700;margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.06em;}
+
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.6rem 1.4rem 1.2rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink));}
+    .q-tag{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+    .q-text{font-size:clamp(.95rem,2.9vw,1.1rem);font-weight:700;line-height:1.8;margin-bottom:1rem;color:var(--text);}
+
+    /* Fractions empilées */
+    .frac{display:inline-flex;flex-direction:column;align-items:stretch;
+      vertical-align:middle;text-align:center;line-height:1.15;margin:0 .18em;font-size:.95em;}
+    .frac sup,.frac sub{display:block;font-size:.88em;padding:0 .35em;vertical-align:baseline;position:static;top:auto;}
+    .frac sup{border-bottom:1.3px solid currentColor;padding-bottom:.05em;}
+    .frac sub{padding-top:.05em;}
+
+    /* Comparaison NIV1 : A ... B avec boutons signe */
+    .comp-row{display:flex;align-items:center;justify-content:center;gap:1rem;
+      font-size:1.4rem;font-weight:800;margin:1rem 0 1.2rem;flex-wrap:wrap;}
+    .comp-frac{font-size:1.1rem;}
+    .signe-group{display:flex;gap:.5rem;}
+    .signe-btn{width:48px;height:48px;border-radius:10px;border:2px solid var(--border);
+      background:var(--bg);cursor:pointer;font-size:1.2rem;font-weight:800;
+      display:flex;align-items:center;justify-content:center;
+      transition:border-color .15s,background .15s;font-family:'JetBrains Mono',monospace;}
+    .signe-btn:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+    .signe-btn.sel{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+    .signe-btn.locked{cursor:default;}
+    .signe-btn.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+    .signe-btn.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .signe-btn.reveal-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+
+    /* NIV2 : fraction équivalente */
+    .equiv-row{display:flex;align-items:center;justify-content:center;gap:.7rem;
+      font-size:1.1rem;font-weight:800;margin:1rem 0 1.2rem;flex-wrap:wrap;}
+    .equiv-eq{color:var(--muted);font-weight:700;}
+
+    /* Options QCM */
+    .options{display:flex;flex-direction:column;gap:.6rem;}
+    .opt{display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;border-radius:10px;
+      border:2px solid var(--border);background:var(--bg);cursor:pointer;min-height:44px;
+      font-size:clamp(.9rem,2.7vw,1rem);line-height:1.8;transition:border-color .15s,background .15s;text-align:left;}
+    .opt .opt-key{font-size:1rem;flex-shrink:0;width:1.5rem;text-align:center;font-family:'JetBrains Mono',monospace;}
+    .opt:hover:not(.locked){border-color:var(--day-color);}
+    .opt.locked{cursor:default;}
+    .opt.sel{border-color:var(--day-color);background:var(--day-light);}
+    .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;}
+    .opt.chosen-wrong{border-color:var(--err-border);background:var(--err-bg);color:var(--err-text);}
+    .opt.reveal-correct{border-color:var(--green);background:#f0faeb;}
+
+    /* NIV3 : étapes de raisonnement */
+    .steps-box{background:var(--day-light);border:2px solid var(--day-border);
+      border-left:5px solid var(--day-color);border-radius:12px;
+      padding:.9rem 1.1rem;margin:1rem 0;font-size:clamp(.88rem,2.5vw,.96rem);line-height:2;}
+    .steps-box .step-line{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--day-dark);}
+
+    .feedback{margin-top:1.1rem;padding:.8rem 1rem;border-radius:10px;font-size:clamp(.86rem,2.5vw,.92rem);
+      display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:var(--err-bg);border:1.5px solid var(--err-border);color:var(--err-text);}
+    .feedback .fi{font-size:1.3rem;flex-shrink:0;}
+
+    .actions{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.3rem;}
+    .hint-row{margin-top:.9rem;}
+    .btn-hint{background:transparent;color:var(--day-dark);border:2px dashed var(--day-border);
+      padding:.45rem 1rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;
+      font-size:.85rem;cursor:pointer;min-height:40px;}
+    .btn-hint:hover{background:var(--day-light);}
+    .hint-box{display:none;margin-top:.6rem;padding:.75rem 1rem;border-radius:10px;
+      background:var(--day-light);border:1.5px solid var(--day-border);color:var(--text);
+      font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.8;}
+    .hint-box.show{display:block;animation:fadeUp .25s ease both;}
+    .hint-box::before{content:"💡 ";}
+
+    .corr-wrap{margin-top:.6rem;}
+    .btn-corr{display:none;background:transparent;color:var(--day-dark);border:2px solid var(--day-border);
+      padding:.38rem .9rem;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;
+      font-size:.82rem;cursor:pointer;min-height:38px;align-items:center;gap:.3rem;}
+    .btn-corr.show{display:inline-flex;}
+    .corr-box{display:none;margin-top:.5rem;padding:.7rem 1rem;border-radius:10px;
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      font-size:clamp(.84rem,2.4vw,.9rem);line-height:1.8;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;}
+    .corr-box.show{display:block;}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.4rem;
+      border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.6vw,.95rem);font-weight:700;
+      cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.4;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#000;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+
+    /* Bilan */
+    .res{display:none;text-align:center;}
+    .res.show{display:block;animation:fadeUp .4s ease both;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .trophee{font-size:3rem;line-height:1;margin-bottom:.3rem;}
+    .res-score{font-size:clamp(1.8rem,8vw,3rem);font-weight:800;color:var(--day-dark);margin:.2rem 0;}
+    .stars{font-size:1.9rem;margin:.2rem 0 .8rem;}
+    .res-msg{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;line-height:1.9;margin-bottom:1.2rem;}
+    .recap-list{display:flex;flex-direction:column;gap:.5rem;margin:.8rem auto 1.3rem;max-width:500px;}
+    .recap-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.6rem .9rem;
+      border-radius:10px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.8;text-align:left;}
+    .recap-row .rk{flex:1;min-width:8rem;font-weight:600;font-family:'JetBrains Mono',monospace;}
+    .recap-row.ok{background:#f0faeb;border:1.5px solid #8dc63f;color:#3d7a10;}
+    .recap-row.ko{background:#fce4e4;border:1.5px solid #8e1b13;color:#8e1b13;}
+    .skills-text{color:var(--day-dark);line-height:1.8;background:var(--day-light);
+      border:2px solid var(--day-border);border-radius:12px;padding:.9rem 1.1rem;
+      margin:0 auto 1.3rem;max-width:460px;text-align:left;}
+    .skills-text .skills-title{font-weight:800;font-size:clamp(.84rem,2.4vw,.92rem);margin-bottom:.5rem;}
+    .skills-text .skill-line{display:flex;gap:.6rem;font-size:clamp(.86rem,2.5vw,.94rem);
+      line-height:1.8;margin-bottom:.5rem;font-weight:600;}
+    .skills-text .skill-line:last-child{margin-bottom:0;}
+    .skills-text .arr{color:var(--day-color);font-weight:800;flex-shrink:0;}
+    .res-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(min-width:481px) and (max-width:820px){.stage{max-width:640px;}}
+    @media(max-width:480px){
+      body{padding:1.4rem .75rem 3rem;}
+      .actions{justify-content:stretch;} .actions .btn{flex:1;}
+      .comp-row{gap:.6rem;} .signe-group{gap:.35rem;}
+      .signe-btn{width:42px;height:42px;font-size:1rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5ème
+    </div>
+    <div class="week-label">Semaine 3 &ndash; Jour 5</div>
+    <h1>Comparer des <span class="hl">fractions</span></h1>
+    <p class="subtitle">lire, transformer, comparer</p>
+    <div class="niveau-badge"><span class="nb-dot"></span>Je m'entraîne</div>
+  </header>
+
+  <div class="stage">
+    <!-- ACCUEIL -->
+    <div class="screen show" id="start">
+      <div class="start-overlay">
+        <h2>C'est parti, on s'entraîne&nbsp;!</h2>
+        <p>🎯 Tu vas apprendre à <strong>comparer des fractions</strong>, d'abord directement, puis en les transformant.<br/>
+        <span style="color:var(--muted);font-size:.85rem;">3 niveaux progressifs</span></p>
+        <button class="btn btn-primary" onclick="startGame()">Commencer &rarr;</button>
+      </div>
+    </div>
+
+    <!-- BOARD -->
+    <div class="screen" id="board">
+      <div class="hud">
+        <div class="hud-chip act"><span id="act-label">Question 1</span></div>
+        <div class="hud-chip"><span id="score-live">0</span>&nbsp;<span>bonne(s) réponse(s)</span></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-info">
+          <span id="prog-label">Question 1 / 9</span>
+          <span id="prog-pct">0&nbsp;%</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+      </div>
+
+      <div class="niv-label" id="niv-label"></div>
+
+      <div class="card">
+        <div class="card-stripe"></div>
+        <div class="q-tag" id="q-tag"></div>
+        <div id="answer-zone"></div>
+        <div class="feedback" id="feedback"><span class="fi" id="fb-ic"></span><div><span id="fb-msg"></span></div></div>
+        <div class="hint-row" id="hint-row" style="display:none;">
+          <button class="btn-hint" onclick="toggleHint()">💡 Indice</button>
+          <div class="hint-box" id="hint-box"></div>
+        </div>
+        <div class="corr-wrap">
+          <button class="btn-corr" id="btn-corr" onclick="toggleCorr()">Voir la correction</button>
+          <div class="corr-box" id="corr-box"></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="btn-validate" onclick="validate()" disabled>Valider</button>
+          <button class="btn btn-primary" id="btn-next" onclick="nextStep()" style="display:none;">Suivant &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BILAN -->
+    <div class="res" id="final">
+      <div class="res-card">
+        <div class="trophee">🏆</div>
+        <div class="res-score"><span id="final-num">0</span></div>
+        <div class="stars" id="final-stars"></div>
+        <div class="res-msg" id="final-msg"></div>
+        <div class="skills-text">
+          <div class="skills-title">📌 Ce que je sais maintenant</div>
+          <div class="skill-line"><span class="arr">→</span><span>Quand deux fractions ont le <strong>même dénominateur</strong>, je compare directement les numérateurs.</span></div>
+          <div class="skill-line"><span class="arr">→</span><span>Quand deux fractions ont le <strong>même numérateur</strong>, la plus grande a le plus petit dénominateur.</span></div>
+          <div class="skill-line"><span class="arr">→</span><span>Pour comparer deux fractions quelconques, je les transforme pour obtenir un <strong>dénominateur commun</strong>.</span></div>
+        </div>
+        <div class="recap-list" id="final-recap"></div>
+        <div class="res-btns">
+          <button class="btn btn-primary" onclick="restart()">🔄 Recommencer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+
+function f(n,d){ return '<span class="frac"><sup>'+n+'</sup><sub>'+d+'</sub></span>'; }
+
+/* ══════════════════════════════════════════════
+   DONNÉES
+══════════════════════════════════════════════ */
+
+var NIV1 = [
+  { a:[7,12], b:[9,12], ans:"<",
+    hint:"Ces deux fractions ont le même dénominateur. Observe leurs numérateurs.",
+    method:"7 < 9, donc "+f(7,12)+" < "+f(9,12) },
+  { a:[13,20], b:[5,20], ans:">",
+    hint:"Ces deux fractions ont le même dénominateur. Observe leurs numérateurs.",
+    method:"13 > 5, donc "+f(13,20)+" > "+f(5,20) },
+  { a:[8,15], b:[8,19], ans:">",
+    hint:"Ces deux fractions ont le même numérateur. Observe leurs dénominateurs.",
+    method:"Même numérateur : plus le dénominateur est grand, plus la fraction est petite. 15 < 19, donc "+f(8,15)+" > "+f(8,19) }
+];
+
+var NIV2 = [
+  { frac:[3,4], den2:8, ans:6,
+    opts:[5,6,7],
+    hint:"Pour passer de 4 à 8, on multiplie par 2. Il faut faire la même chose au numérateur.",
+    method:f(3,4)+" = "+f("3&times;2","4&times;2")+" = "+f(6,8) },
+  { frac:[2,5], den2:10, ans:4,
+    opts:[3,4,5],
+    hint:"Pour passer de 5 à 10, on multiplie par 2. Il faut faire la même chose au numérateur.",
+    method:f(2,5)+" = "+f("2&times;2","5&times;2")+" = "+f(4,10) },
+  { frac:[4,3], den2:6, ans:8,
+    opts:[6,7,8],
+    hint:"Pour passer de 3 à 6, on multiplie par 2. Il faut faire la même chose au numérateur.",
+    method:f(4,3)+" = "+f("4&times;2","3&times;2")+" = "+f(8,6) }
+];
+
+var NIV3 = [
+  { a:[3,4], b:[5,8], ans:">",
+    steps: f(3,4)+" = "+f(6,8)+"&nbsp;&nbsp;&nbsp;"+f(6,8)+" > "+f(5,8)+"&nbsp;&nbsp;&nbsp;donc "+f(3,4)+" > "+f(5,8),
+    hint:"Cherche un dénominateur commun aux deux fractions, puis transforme l'une d'elles.",
+    fbOk:"Tu as transformé les fractions pour obtenir le même dénominateur avant de les comparer.",
+    method:f(3,4)+" = "+f(6,8)+"&nbsp;&nbsp;or&nbsp;&nbsp;"+f(6,8)+" > "+f(5,8)+"&nbsp;&nbsp;donc&nbsp;&nbsp;"+f(3,4)+" > "+f(5,8) },
+  { a:[2,3], b:[5,6], ans:"<",
+    steps: f(2,3)+" = "+f(4,6)+"&nbsp;&nbsp;&nbsp;"+f(4,6)+" < "+f(5,6)+"&nbsp;&nbsp;&nbsp;donc "+f(2,3)+" < "+f(5,6),
+    hint:"Cherche un dénominateur commun aux deux fractions, puis transforme l'une d'elles.",
+    fbOk:"Tu as transformé les fractions pour obtenir le même dénominateur avant de les comparer.",
+    method:f(2,3)+" = "+f(4,6)+"&nbsp;&nbsp;or&nbsp;&nbsp;"+f(4,6)+" < "+f(5,6)+"&nbsp;&nbsp;donc&nbsp;&nbsp;"+f(2,3)+" < "+f(5,6) },
+  { a:[7,10], b:[3,5], ans:">",
+    steps: f(3,5)+" = "+f(6,10)+"&nbsp;&nbsp;&nbsp;"+f(7,10)+" > "+f(6,10)+"&nbsp;&nbsp;&nbsp;donc "+f(7,10)+" > "+f(3,5),
+    hint:"Cherche un dénominateur commun aux deux fractions, puis transforme l'une d'elles.",
+    fbOk:"Tu as transformé les fractions pour obtenir le même dénominateur avant de les comparer.",
+    method:f(3,5)+" = "+f(6,10)+"&nbsp;&nbsp;or&nbsp;&nbsp;"+f(7,10)+" > "+f(6,10)+"&nbsp;&nbsp;donc&nbsp;&nbsp;"+f(7,10)+" > "+f(3,5) }
+];
+
+/* Toutes les questions dans l'ordre */
+var ALL = [];
+NIV1.forEach(function(q){ ALL.push({niv:1,q:q}); });
+NIV2.forEach(function(q){ ALL.push({niv:2,q:q}); });
+NIV3.forEach(function(q){ ALL.push({niv:3,q:q}); });
+
+/* ══════════════════════════════════════════════
+   ÉTAT
+══════════════════════════════════════════════ */
+var step=0, sel=null, locked=false, passed=[];
+
+function startGame(){
+  $("start").classList.remove("show");
+  $("final").classList.remove("show");
+  step=0; sel=null; locked=false; passed=[];
+  render();
+  $("board").classList.add("show");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ══════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════ */
+function render(){
+  sel=null; locked=false;
+  var item=ALL[step], q=item.q, niv=item.niv, tot=ALL.length;
+
+  $("act-label").textContent="Question "+(step+1);
+  $("score-live").textContent=passed.filter(Boolean).length;
+  $("prog-label").textContent="Question "+(step+1)+" / "+tot;
+  var pct=Math.round(step/tot*100);
+  $("progress-bar").style.width=pct+"%";
+  $("prog-pct").textContent=pct+"\u00a0%";
+
+  var nivTxt = niv===1 ? "🟢 Niveau 1 — Comparer directement" :
+               niv===2 ? "🟡 Niveau 2 — Fractions équivalentes" :
+                         "🔴 Niveau 3 — Comparer après transformation";
+  $("niv-label").textContent=nivTxt;
+
+  $("feedback").className="feedback";
+  $("hint-box").className="hint-box";
+  $("corr-box").className="corr-box";
+  $("btn-corr").className="btn-corr";
+  $("btn-corr").textContent="Voir la correction";
+  $("btn-next").style.display="none";
+  $("btn-validate").style.display="inline-flex";
+  $("btn-validate").disabled=true;
+
+  /* Indice */
+  var hr=$("hint-row");
+  if(q.hint){
+    hr.style.display="block";
+    $("hint-box").innerHTML=q.hint;
+  } else {
+    hr.style.display="none";
+  }
+
+  if(niv===1) renderN1(q);
+  else if(niv===2) renderN2(q);
+  else renderN3(q);
+}
+
+/* ── NIV 1 : boutons signe ── */
+function renderN1(q){
+  $("q-tag").textContent="Choisis le bon signe";
+  var fa=f(q.a[0],q.a[1]), fb2=f(q.b[0],q.b[1]);
+  var html='<div class="comp-row">'+
+    '<span class="comp-frac">'+fa+'</span>'+
+    '<div class="signe-group" id="signe-group">'+
+    '<button class="signe-btn" data-val="<" onclick="selSigne(this,\'<\')">&lt;</button>'+
+    '<button class="signe-btn" data-val="=" onclick="selSigne(this,\'=\')"> = </button>'+
+    '<button class="signe-btn" data-val=">" onclick="selSigne(this,\'>\')"> &gt;</button>'+
+    '</div>'+
+    '<span class="comp-frac">'+fb2+'</span>'+
+    '</div>';
+  $("answer-zone").innerHTML=html;
+  $("corr-box").innerHTML=q.method;
+}
+window.selSigne=function(el,val){
+  if(locked) return;
+  sel=val;
+  Array.from($("signe-group").children).forEach(function(b){ b.classList.remove("sel"); });
+  el.classList.add("sel");
+  $("btn-validate").disabled=false;
+};
+
+/* ── NIV 2 : QCM numérateur ── */
+function renderN2(q){
+  $("q-tag").textContent="Complète la fraction équivalente";
+  var html='<div class="equiv-row">'+
+    f(q.frac[0],q.frac[1])+
+    '<span class="equiv-eq"> = </span>'+
+    '<span class="frac"><sup>?</sup><sub>'+q.den2+'</sub></span>'+
+    '</div>'+
+    '<div class="options" id="opts"></div>';
+  $("answer-zone").innerHTML=html;
+  var box=$("opts");
+  q.opts.forEach(function(op){
+    var b=document.createElement("div");
+    b.className="opt";
+    b.setAttribute("data-val",op);
+    b.innerHTML='<span class="opt-key">•</span><span>'+f(op,q.den2)+'</span>';
+    b.onclick=function(){
+      if(locked) return;
+      sel=op;
+      Array.from($("opts").children).forEach(function(x){ x.classList.remove("sel"); });
+      b.classList.add("sel");
+      $("btn-validate").disabled=false;
+    };
+    box.appendChild(b);
+  });
+  $("corr-box").innerHTML=q.method;
+}
+
+/* ── NIV 3 : boutons signe + étapes ── */
+function renderN3(q){
+  $("q-tag").textContent="Compare ces deux fractions";
+  var fa=f(q.a[0],q.a[1]), fb2=f(q.b[0],q.b[1]);
+  var html='<div class="comp-row">'+
+    '<span class="comp-frac">'+fa+'</span>'+
+    '<div class="signe-group" id="signe-group">'+
+    '<button class="signe-btn" data-val="<" onclick="selSigne(this,\'<\')">&lt;</button>'+
+    '<button class="signe-btn" data-val="=" onclick="selSigne(this,\'=\')"> = </button>'+
+    '<button class="signe-btn" data-val=">" onclick="selSigne(this,\'>\')"> &gt;</button>'+
+    '</div>'+
+    '<span class="comp-frac">'+fb2+'</span>'+
+    '</div>';
+  $("answer-zone").innerHTML=html;
+  $("corr-box").innerHTML=q.method;
+}
+
+/* ══════════════════════════════════════════════
+   VALIDER
+══════════════════════════════════════════════ */
+function validate(){
+  if(locked) return;
+  locked=true;
+  var item=ALL[step], q=item.q, niv=item.niv;
+  var good=false;
+
+  if(niv===1 || niv===3){
+    good=(sel===q.ans);
+    var grp=$("signe-group");
+    if(grp) Array.from(grp.children).forEach(function(b){
+      b.classList.add("locked"); b.onclick=null;
+      var v=b.getAttribute("data-val");
+      if(v===q.ans){ b.classList.remove("sel"); b.classList.add(sel===v?"chosen-correct":"reveal-correct"); }
+      else if(v===sel){ b.classList.add("chosen-wrong"); }
+    });
+    /* NIV3 : afficher les étapes dans la correction */
+    if(niv===3) $("corr-box").innerHTML='<div class="step-line">'+q.steps+'</div>';
+  } else {
+    good=(sel===q.ans);
+    var opts=$("opts");
+    if(opts) Array.from(opts.children).forEach(function(b){
+      b.classList.add("locked"); b.onclick=null;
+      var v=parseInt(b.getAttribute("data-val"),10);
+      if(v===q.ans){ b.classList.remove("sel"); b.classList.add(sel===v?"chosen-correct":"reveal-correct"); }
+      else if(v===sel){ b.classList.add("chosen-wrong"); }
+    });
+  }
+
+  passed[step]=good;
+  $("score-live").textContent=passed.filter(Boolean).length;
+
+  var fbOkMsg, fbKoMsg;
+  if(niv===1){
+    fbOkMsg="Bravo ! Tu as comparé les fractions en observant directement les numérateurs ou les dénominateurs.";
+    fbKoMsg="Pas tout à fait. Lorsque les dénominateurs sont identiques, compare les numérateurs. Lorsque les numérateurs sont identiques, compare les dénominateurs.";
+  } else if(niv===2){
+    fbOkMsg="Bravo ! Tu as trouvé une fraction équivalente.";
+    fbKoMsg="Pas tout à fait. Pour obtenir une fraction équivalente, multiplie le numérateur et le dénominateur par le même nombre.";
+  } else {
+    fbOkMsg=(q.fbOk) ? q.fbOk : "Bonne réponse !";
+    fbKoMsg="Pas tout à fait. Commence par chercher un dénominateur commun aux deux fractions.";
+  }
+  showFb(good, good ? fbOkMsg : fbKoMsg);
+
+  $("hint-box").classList.remove("show");
+  $("btn-validate").style.display="none";
+  $("btn-next").style.display="inline-flex";
+  $("btn-next").textContent=(step===ALL.length-1)?"Voir le bilan \u2192":"Suivant \u2192";
+  $("btn-corr").classList.add("show");
+}
+
+function showFb(ok,msg){
+  var fb=$("feedback");
+  fb.className="feedback show "+(ok?"ok":"ko");
+  $("fb-ic").textContent=ok?"✅":"❌";
+  $("fb-msg").innerHTML=msg;
+}
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+function nextStep(){
+  if(step<ALL.length-1){ step++; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else showFinal();
+}
+function toggleHint(){
+  $("hint-box").classList.toggle("show");
+}
+function toggleCorr(){
+  var c=$("corr-box"); c.classList.toggle("show");
+  $("btn-corr").textContent=c.classList.contains("show")?"Masquer la correction":"Voir la correction";
+}
+
+/* ══════════════════════════════════════════════
+   BILAN
+══════════════════════════════════════════════ */
+function starsFrac(ok,tot){ var r=ok/tot; return r>=1?5:r>=.8?4:r>=.6?3:r>=.4?2:1; }
+
+function showFinal(){
+  $("board").classList.remove("show");
+  $("final").classList.add("show");
+  var ok=passed.filter(Boolean).length, tot=ALL.length;
+  $("final-num").textContent=ok+" / "+tot;
+  var st=starsFrac(ok,tot);
+  $("final-stars").textContent="\u2B50".repeat(st)+"\u2606".repeat(5-st);
+  var msg;
+  if(ok===tot) msg="Parfait ! Tu maîtrises la comparaison de fractions.";
+  else if(ok>=Math.ceil(tot*.8)) msg="Très bien ! Quelques points à consolider.";
+  else if(ok>=Math.ceil(tot*.6)) msg="Bien joué ! Reprends les exercices marqués ✘ pour consolider tes connaissances.";
+  else msg="Continue à t'entraîner, tu progresseras !";
+  $("final-msg").innerHTML=msg;
+
+  var recap="";
+  ALL.forEach(function(item,i){
+    var r=passed[i]===true, q=item.q, niv=item.niv;
+    var label="";
+    if(niv===1||niv===3) label=q.a[0]+"/"+q.a[1]+" ... "+q.b[0]+"/"+q.b[1];
+    else label=q.frac[0]+"/"+q.frac[1]+" = ?/"+q.den2;
+    recap+="<div class='recap-row "+(r?"ok":"ko")+"'>"+
+      "<span>"+(r?"\u2714":"\u2718")+"</span>"+
+      "<span class='rk'>"+label+"</span>"+
+      "<span><b>"+(r?q.ans:"?")+"</b></span></div>";
+  });
+  $("final-recap").innerHTML=recap;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  $("final").classList.remove("show");
+  $("board").classList.remove("show");
+  $("start").classList.add("show");
+}
+</script>
+</body>
+</html>
