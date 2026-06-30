@@ -146,6 +146,11 @@ h1 .hl{color:var(--day-color);text-shadow:var(--neon-g);}
 .hint.show{display:block;}
 .hint strong{color:var(--orange);}
 
+.bonus-box{display:inline-block;margin-top:.7rem;background:var(--surface2);border:1.5px dashed var(--day-border);border-radius:99px;padding:.4rem 1rem;font-size:clamp(.72rem,2.3vw,.8rem);color:#5a5f72;line-height:1.6;max-width:90%;}
+.bonus-box strong{color:var(--day-dark);}
+.chip.timer{font-variant-numeric:tabular-nums;color:var(--day-dark);border-color:var(--day-border);background:var(--day-light);}
+.global-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.6vw,.95rem);color:var(--day-dark);margin-bottom:1.1rem;}
+
 .fb{margin-top:.9rem;padding:.75rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.84rem,2.5vw,.9rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.8;}
 .fb.show{display:flex;animation:pop .3s cubic-bezier(.18,.89,.32,1.6);}
 .fb.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
@@ -197,6 +202,7 @@ h1 .hl{color:var(--day-color);text-shadow:var(--neon-g);}
   </div>
   <h1>Les nombres <span class="hl">décimaux</span></h1>
   <p class="subtitle">5 exercices &middot; décompositions &middot; fractions &middot; écritures</p>
+  <div class="bonus-box">&#9201;&#65039; <strong>Défi bonus&nbsp;:</strong> le chrono est lancé… à toi de jouer&#8201;! Le plus important est de bien réfléchir.</div>
 </header>
 
 <div class="scorebar">
@@ -204,6 +210,7 @@ h1 .hl{color:var(--day-color);text-shadow:var(--neon-g);}
   <div class="sb-track"><div class="sb-fill" id="sb-fill"></div></div>
   <span class="chip correct"><span class="dot"></span><span id="sb-ok">0</span></span>
   <span class="chip wrong"><span class="dot"></span><span id="sb-ko">0</span></span>
+  <span class="chip timer"><span id="sb-timer">00:00</span></span>
 </div>
 
 <div id="cards"></div>
@@ -215,6 +222,7 @@ h1 .hl{color:var(--day-color);text-shadow:var(--neon-g);}
     <div class="global-score"><span class="s-num" id="g-num">0</span> / 23</div>
     <div class="stars" id="g-stars">&#9734;&#9734;&#9734;&#9734;&#9734;</div>
     <div class="global-msg" id="g-msg">Valide les 5 exercices pour voir ton bilan.</div>
+    <div class="global-time" id="g-time"></div>
     <button class="btn btn-p" onclick="restartAll()" style="margin:0 auto;display:inline-flex;">&#8635; Tout recommencer</button>
   </div>
 </div>
@@ -247,7 +255,7 @@ var GROUPS=[
     items:[
       {type:"txt",ql:"a)",prompt:"378,5",accepted:["(3 x 100) + (7 x 10) + (8 x 1) + (5 x 0,1)","3 x 100 + 7 x 10 + 8 x 1 + 5 x 0,1"],sol:"(3 × 100) + (7 × 10) + (8 × 1) + (5 × 0,1)"},
       {type:"txt",ql:"b)",prompt:"10,53",accepted:["(1 x 10) + (5 x 0,1) + (3 x 0,01)","1 x 10 + 5 x 0,1 + 3 x 0,01"],sol:"(1 × 10) + (5 × 0,1) + (3 × 0,01)"},
-      {type:"txt",ql:"c)",prompt:"5 200",accepted:["(5 x 1000) + (2 x 100)","5 x 1000 + 2 x 100"],sol:"(5 × 1000) + (2 × 100)"},
+      {type:"txt",ql:"c)",prompt:"304,8",accepted:["(3 x 100) + (4 x 1) + (8 x 0,1)","3 x 100 + 4 x 1 + 8 x 0,1"],sol:"(3 × 100) + (4 × 1) + (8 × 0,1)"},
       {type:"txt",ql:"d)",prompt:"0,109",accepted:["(1 x 0,1) + (9 x 0,001)","1 x 0,1 + 9 x 0,001"],sol:"(1 × 0,1) + (9 × 0,001)"},
       {type:"txt",ql:"e)",prompt:"684,652",accepted:["(6 x 100) + (8 x 10) + (4 x 1) + (6 x 0,1) + (5 x 0,01) + (2 x 0,001)","6 x 100 + 8 x 10 + 4 x 1 + 6 x 0,1 + 5 x 0,01 + 2 x 0,001"],sol:"(6 × 100) + (8 × 10) + (4 × 1) + (6 × 0,1) + (5 × 0,01) + (2 × 0,001)"},
       {type:"txt",ql:"f)",prompt:"890,07",accepted:["(8 x 100) + (9 x 10) + (7 x 0,01)","8 x 100 + 9 x 10 + 7 x 0,01"],sol:"(8 × 100) + (9 × 10) + (7 × 0,01)"}
@@ -273,7 +281,7 @@ var GROUPS=[
       {type:"num",ql:"b)",prompt:"3 centaines, 5 unités et un dixième",ans:"305,1",sol:"300 + 5 + 0,1 = 305,1"},
       {type:"num",ql:"c)",prompt:"deux-cent-quatre-vingt-dix-sept dixièmes",ans:"29,7",sol:"297 ÷ 10 = 29,7"},
       {type:"num",ql:"d)",prompt:"7 dizaines et 4 centièmes",ans:"70,04",sol:"70 + 0,04 = 70,04"},
-      {type:"num",ql:"e)",prompt:"trois-millions-huit-cent-mille",ans:"3800000",sol:"3 800 000"}
+      {type:"num",ql:"e)",prompt:"9 unités et 6 centièmes",ans:"9,06",sol:"9 + 0,06 = 9,06 (pas de dixièmes)"}
     ]
   },
   {
@@ -293,6 +301,26 @@ var TOTAL=0; GROUPS.forEach(function(g){TOTAL+=g.items.length;});
 var done=new Array(GROUPS.length).fill(false);
 var groupScore=new Array(GROUPS.length).fill(0);
 function $(id){return document.getElementById(id);}
+
+/* ===== Chrono (ludique, jamais lié au score) ===== */
+var timerSec=0, timerInt=null, timerStarted=false;
+function fmtClock(s){var m=Math.floor(s/60),r=s%60;return (m<10?"0":"")+m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+function startTimer(){
+  if(timerStarted) return;
+  timerStarted=true;
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    timerSec++;
+    var t=$("sb-timer");if(t)t.textContent=fmtClock(timerSec);
+  },1000);
+}
+function stopTimer(){clearInterval(timerInt);}
+function resetTimer(){
+  clearInterval(timerInt);timerSec=0;timerStarted=false;
+  var t=$("sb-timer");if(t)t.textContent="00:00";
+  var gt=$("g-time");if(gt)gt.textContent="";
+}
 
 function build(){
   var host=$("cards");host.innerHTML="";var gi=0;
@@ -330,7 +358,7 @@ function build(){
     card.innerHTML=html;host.appendChild(card);
     g.items.forEach(function(it,k){
       var ids=it.type==="frac"?["in-"+gIdx+"-"+k+"-n","in-"+gIdx+"-"+k+"-d"]:["in-"+gIdx+"-"+k];
-      ids.forEach(function(id){var el=$(id);if(el)el.addEventListener("input",function(){updCheckBtn(gIdx);});});
+      ids.forEach(function(id){var el=$(id);if(el)el.addEventListener("input",function(){startTimer();updCheckBtn(gIdx);});});
     });
   });
   updateScorebar();
@@ -382,6 +410,7 @@ function resetGroup(g){
 
 function checkGroup(g){
   if(done[g]) return;            /* anti-double-clic */
+  startTimer();
   done[g]=true;
   $("btnc-"+g).disabled=true;
   $("btnc-"+g).style.display="none";
@@ -441,8 +470,13 @@ function updateBilan(){
   var nbDone=done.filter(Boolean).length, pts=groupScore.reduce(function(a,b){return a+b;},0);
   if(nbDone<GROUPS.length){
     $("g-msg").textContent="Valide les "+GROUPS.length+" exercices pour voir ton bilan. ("+nbDone+" / "+GROUPS.length+" faits)";
-    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";return;
+    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";
+    var gt0=$("g-time");if(gt0)gt0.textContent="";
+    return;
   }
+  /* Tous les exercices sont validés : on fige le chrono (purement informatif). */
+  stopTimer();
+  var gt=$("g-time");if(gt)gt.innerHTML="&#9201;&#65039; Temps utilisé&#8201;: "+fmtLong(timerSec);
   var ratio=pts/TOTAL;
   var stars=pts>=TOTAL?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:pts>0?1:0;
   $("g-stars").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
@@ -457,6 +491,7 @@ function updateBilan(){
 function restartAll(){
   done=new Array(GROUPS.length).fill(false);
   groupScore=new Array(GROUPS.length).fill(0);
+  resetTimer();
   build();
   window.scrollTo({top:0,behavior:"smooth"});
 }
