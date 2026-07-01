@@ -132,6 +132,15 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
 .hint.show{display:block;}
 .hint strong{color:var(--orange);}
 
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--surface);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;font-size:1.05rem;padding:.5rem .6rem;min-height:44px;min-width:44px;color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.08);transition:transform .12s,border-color .15s;}
+.sound-btn:hover{border-color:var(--day-color);}
+.sound-btn:active{transform:scale(.94);}
+.sound-btn.off{opacity:.5;}
+.bonus-box{display:inline-block;margin-top:.7rem;background:var(--surface2);border:1.5px dashed var(--day-border);border-radius:99px;padding:.4rem 1rem;font-size:clamp(.72rem,2.3vw,.8rem);color:#5a5f72;line-height:1.6;max-width:90%;}
+.bonus-box strong{color:var(--day-dark);}
+.chip.timer{font-variant-numeric:tabular-nums;color:var(--day-dark);border-color:var(--day-border);background:var(--day-light);}
+.global-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.6vw,.95rem);color:var(--day-dark);margin-bottom:1.1rem;}
+
 .fb{margin-top:.9rem;padding:.75rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.84rem,2.5vw,.9rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.8;}
 .fb.show{display:flex;animation:pop .3s cubic-bezier(.18,.89,.32,1.6);}
 .fb.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
@@ -166,6 +175,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
 </head>
 <body>
 <div class="g1"></div><div class="g2"></div><div class="g3"></div><div class="g4"></div>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Activer/couper le son" aria-label="Son">&#128266;</button>
 <div class="wrap">
 
 <header>
@@ -183,6 +193,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
   </div>
   <h1>Multiplier par <span class="hl">10, 100, 1000</span></h1>
   <p class="subtitle">1 exercice &middot; 9 produits à effectuer</p>
+  <div class="bonus-box">&#9201;&#65039; <strong>Défi bonus&nbsp;:</strong> le chrono est lancé… à toi de jouer&#8201;! Le plus important est de bien réfléchir.</div>
 </header>
 
 <div class="scorebar">
@@ -190,6 +201,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
   <div class="sb-track"><div class="sb-fill" id="sb-fill"></div></div>
   <span class="chip correct"><span class="dot"></span><span id="sb-ok">0</span></span>
   <span class="chip wrong"><span class="dot"></span><span id="sb-ko">0</span></span>
+  <span class="chip timer"><span id="sb-timer">00:00</span></span>
 </div>
 
 <div id="cards"></div>
@@ -200,7 +212,8 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
     <div style="font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem;">Bilan final</div>
     <div class="global-score"><span class="s-num" id="g-num">0</span><span class="s-den">&#8202;/&#8202;9</span></div>
     <div class="stars" id="g-stars">&#9734;&#9734;&#9734;&#9734;&#9734;</div>
-    <div class="global-msg" id="g-msg">Valide l\u2019exercice pour voir ton bilan.</div>
+    <div class="global-msg" id="g-msg">Valide l'exercice pour voir ton bilan.</div>
+    <div class="global-time" id="g-time"></div>
     <button class="btn btn-p" onclick="restartAll()" style="margin:0 auto;display:inline-flex;">&#8635; Tout recommencer</button>
   </div>
 </div>
@@ -208,25 +221,53 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
 </div>
 
 <script>
+/* ===== Sons ===== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,start,dur,type,vol){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=type||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var t=c.currentTime+start;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.15,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur+0.02);}
+function sOk(){if(!soundOn)return;beep(523,0,0.1,"square",0.16);beep(784,0.08,0.12,"square",0.16);beep(1047,0.18,0.16,"triangle",0.18);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.14);beep(150,0.1,0.18,"square",0.14);}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");if(b){b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);}var c=ac();if(soundOn&&c&&c.state==="suspended")c.resume();}
+
+/* ===== Chrono (ludique, jamais lié au score) ===== */
+var timerSec=0, timerInt=null, timerStarted=false;
+function fmtClock(s){var m=Math.floor(s/60),r=s%60;return (m<10?"0":"")+m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+function startTimer(){
+  if(timerStarted) return;
+  timerStarted=true;
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    timerSec++;
+    var t=$("sb-timer");if(t)t.textContent=fmtClock(timerSec);
+  },1000);
+}
+function stopTimer(){clearInterval(timerInt);}
+function resetTimer(){
+  clearInterval(timerInt);timerSec=0;timerStarted=false;
+  var t=$("sb-timer");if(t)t.textContent="00:00";
+  var gt=$("g-time");if(gt)gt.textContent="";
+}
+
 function normNum(s){var n=parseFloat(String(s).trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
 function valOk(t,v){var n=normNum(v);return n!==null && Math.abs(n-t)<1e-9;}
 
 var GROUPS=[
   {
     type:'fill', theme:'Effectuer les produits', title:'Effectue les produits suivants.',
-    method:"<strong>Méthode&nbsp;:</strong> multiplier par 10, 100 ou 1000 décale les chiffres vers la gauche. Multiplier par 0,1 ; 0,01 ou 0,001 les décale vers la droite. La virgule se déplace d\u2019autant de rangs qu\u2019il y a de zéros (ou de décimales).",
+    method:"<strong>Méthode&nbsp;:</strong> lorsqu\u2019on multiplie par 10, 100 ou 1000, chaque chiffre prend une valeur 10, 100 ou 1000 fois plus grande. Lorsqu\u2019on multiplie par 0,1\u00a0; 0,01 ou 0,001, chaque chiffre prend une valeur 10, 100 ou 1000 fois plus petite.",
     items:[
-      {lbl:"a)",prompt:"32 × 0,1",ans:3.2},
-      {lbl:"b)",prompt:"0,01 × 275",ans:2.75},
-      {lbl:"c)",prompt:"123 × 100",ans:12300},
-      {lbl:"d)",prompt:"0,001 × 56",ans:0.056},
-      {lbl:"e)",prompt:"83 × 10",ans:830},
-      {lbl:"f)",prompt:"1000 × 407",ans:407000},
-      {lbl:"g)",prompt:"0,01 × 501",ans:5.01},
-      {lbl:"h)",prompt:"32 × 1000",ans:32000},
+      {lbl:"a)",prompt:"83 × 10",ans:830},
+      {lbl:"b)",prompt:"123 × 100",ans:12300},
+      {lbl:"c)",prompt:"1000 × 407",ans:407000},
+      {lbl:"d)",prompt:"32 × 1000",ans:32000},
+      {lbl:"e)",prompt:"32 × 0,1",ans:3.2},
+      {lbl:"f)",prompt:"0,01 × 275",ans:2.75},
+      {lbl:"g)",prompt:"0,001 × 56",ans:0.056},
+      {lbl:"h)",prompt:"0,01 × 501",ans:5.01},
       {lbl:"i)",prompt:"42 × 0,01",ans:0.42}
     ],
-    hint:"Compte les zéros (×10, ×100, ×1000) ou les décimales (×0,1 ; ×0,01) du second facteur&nbsp;: c\u2019est le nombre de rangs dont la virgule se déplace."
+    hint:"Rep\u00e8re si le r\u00e9sultat doit \u00eatre 10, 100 ou 1000 fois plus grand, ou 10, 100 ou 1000 fois plus petit. V\u00e9rifie ensuite le rang des chiffres."
   }
 ];
 
@@ -274,7 +315,7 @@ function renderBody(gi){
       inp.value=(g._ans&&g._ans[i]!==undefined)?g._ans[i]:'';inp.disabled=true;
       inp.className='cell-in '+(valOk(it.ans,inp.value)?'ok':'ko');
     }else{
-      inp.addEventListener('input',function(){updCheck(gi);});
+      inp.addEventListener('input',function(){startTimer();updCheck(gi);});
     }
     cell.appendChild(lbl);cell.appendChild(expr);cell.appendChild(inp);
     grid.appendChild(cell);
@@ -303,6 +344,7 @@ function showSolution(gi){
 
 function checkGroup(gi){
   if(done[gi])return;
+  startTimer();
   var g=GROUPS[gi];
   done[gi]=true;
   $("btnc-"+gi).disabled=true;$("btnc-"+gi).style.display="none";
@@ -314,15 +356,16 @@ function checkGroup(gi){
     if(valOk(it.ans,g._ans[i]))ok++;else wrong.push(it.lbl);
   });
   groupScore[gi]=ok;
-  renderBody(gi);
   var n=g.items.length,ratio=ok/n;
+  if(ok===n){sOk();}else{sBad();}
+  renderBody(gi);
   var fb=$("fb-"+gi);fb.className="fb show "+(ok===n?"ok":"ko");
   $("fbi-"+gi).textContent=ok===n?"✅":"❌";
   $("fbm-"+gi).textContent=
     ok===n     ? "Parfait\u00a0! Tout est juste." :
     ratio>=.75 ? "Très bien\u00a0! Vérifie ce qui est en rouge." :
     ratio>=.5  ? "Bien\u00a0! Revois la méthode pour ce qui reste." :
-                 "À retravailler\u00a0: relis la méthode et recommence.";
+                 "À retravailler. Reprends la méthode, vérifie chaque calcul, puis recommence.";
   $("fbd-"+gi).innerHTML=ok===n?"":"À revoir&nbsp;: "+wrong.join(" &middot; ")+".";
   updateScorebar();
 }
@@ -343,16 +386,20 @@ function updateBilan(){
   var nbDone=done.filter(Boolean).length,pts=groupScore.reduce(function(a,b){return a+b;},0);
   if(nbDone<GROUPS.length){
     $("g-msg").textContent="Valide l\u2019exercice pour voir ton bilan.";
-    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";return;
+    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";
+    var gt0=$("g-time");if(gt0)gt0.textContent="";
+    return;
   }
+  stopTimer();
+  var gt=$("g-time");if(gt)gt.innerHTML="&#9201;&#65039; Temps utilisé&#8201;: "+fmtLong(timerSec);
   var ratio=pts/TOTAL;
   var stars=pts>=TOTAL?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:pts>0?1:0;
   $("g-stars").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
   var msg=pts===TOTAL?"Parfait\u00a0! Tu maîtrises la multiplication par 10, 100 et 1000.":
     ratio>=.8?"Très bien\u00a0! Encore un petit effort.":
     ratio>=.6?"Bien\u00a0! Quelques points à retravailler.":
-    ratio>=.4?"Passable. Revois le déplacement de la virgule.":
-    "À retravailler\u00a0: reprends la méthode et recommence.";
+    ratio>=.4?"Passable. Revois la méthode pour les calculs restants.":
+    "À retravailler\u00a0: reprends la méthode, vérifie chaque calcul, puis recommence.";
   $("g-msg").textContent=msg;
 }
 
@@ -360,6 +407,7 @@ function restartAll(){
   done=new Array(GROUPS.length).fill(false);
   groupScore=new Array(GROUPS.length).fill(0);
   GROUPS.forEach(function(g){delete g._ans;});
+  resetTimer();
   build();
   window.scrollTo({top:0,behavior:"smooth"});
 }
