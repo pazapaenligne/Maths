@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -142,6 +143,11 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
 .hint.show{display:block;}
 .hint strong{color:var(--orange);}
 
+.bonus-box{display:inline-block;margin-top:.7rem;background:var(--surface2);border:1.5px dashed var(--day-border);border-radius:99px;padding:.4rem 1rem;font-size:clamp(.72rem,2.3vw,.8rem);color:#5a5f72;line-height:1.6;max-width:90%;}
+.bonus-box strong{color:var(--day-dark);}
+.chip.timer{font-variant-numeric:tabular-nums;color:var(--day-dark);border-color:var(--day-border);background:var(--day-light);}
+.global-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.6vw,.95rem);color:var(--day-dark);margin-bottom:1.1rem;}
+
 .fb{margin-top:.9rem;padding:.75rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.84rem,2.5vw,.9rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.8;}
 .fb.show{display:flex;animation:pop .3s cubic-bezier(.18,.89,.32,1.6);}
 .fb.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
@@ -191,6 +197,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
   </div>
   <h1>Placer et lire sur la <span class="hl">droite graduée</span></h1>
   <p class="subtitle">4 exercices &middot; placer &middot; lire des abscisses</p>
+  <div class="bonus-box">&#9201;&#65039; <strong>Défi bonus&nbsp;:</strong> le chrono est lancé… à toi de jouer&#8201;! Le plus important est de bien réfléchir.</div>
 </header>
 
 <div class="scorebar">
@@ -198,6 +205,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
   <div class="sb-track"><div class="sb-fill" id="sb-fill"></div></div>
   <span class="chip correct"><span class="dot"></span><span id="sb-ok">0</span></span>
   <span class="chip wrong"><span class="dot"></span><span id="sb-ko">0</span></span>
+  <span class="chip timer"><span id="sb-timer">00:00</span></span>
 </div>
 
 <div id="cards"></div>
@@ -209,6 +217,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
     <div class="global-score"><span class="s-num" id="g-num">0</span> / 16</div>
     <div class="stars" id="g-stars">&#9734;&#9734;&#9734;&#9734;&#9734;</div>
     <div class="global-msg" id="g-msg">Valide les 4 exercices pour voir ton bilan.</div>
+    <div class="global-time" id="g-time"></div>
     <button class="btn btn-p" onclick="restartAll()" style="margin:0 auto;display:inline-flex;">&#8635; Tout recommencer</button>
   </div>
 </div>
@@ -232,9 +241,9 @@ var EXS=[
     mode:'place', theme:'Placer au millième', title:'Place les points Q, R, S et T.',
     method:"<strong>Méthode&nbsp;:</strong> ici on travaille au millième. De 2,18 à 2,19 il y a 10 intervalles, donc chaque graduation vaut 0,001.",
     txt:'Sélectionne un point puis clique sur la bonne graduation.',
-    line:{start:2.18,end:2.234,step:0.001,majors:[2.18,2.19]},
+    line:{start:2.18,end:2.234,step:0.001,majors:[2.18,2.19,2.2]},
     points:[{name:'Q',val:2.185,color:COL.red},{name:'R',val:2.191,color:COL.blue},{name:'S',val:2.189,color:COL.green},{name:'T',val:2.2,color:COL.orange}],
-    hint:"Chaque graduation vaut 0,001. Pour T = 2,2, pars du repère 2,19 et avance de 10 graduations (le grand trait suivant)."
+    hint:"Chaque graduation vaut 0,001. Pour T = 2,2, repère-toi sur le grand trait \u00e9tiquet\u00e9 2,2."
   },
   {
     mode:'read', theme:'Lire des abscisses', title:'Donne les abscisses des points A, B, C, D et E.',
@@ -263,6 +272,26 @@ function rnd(v){return Math.round(v*1e6)/1e6;}
 function fr(v){return String(rnd(v)).replace('.',',');}
 function numNorm(s){var n=parseFloat(String(s).trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
 function valOk(t,v){var n=numNorm(v);return n!==null && Math.abs(n-t)<1e-9;}
+
+/* ===== Chrono (ludique, jamais lié au score) ===== */
+var timerSec=0, timerInt=null, timerStarted=false;
+function fmtClock(s){var m=Math.floor(s/60),r=s%60;return (m<10?"0":"")+m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+function startTimer(){
+  if(timerStarted) return;
+  timerStarted=true;
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    timerSec++;
+    var t=$("sb-timer");if(t)t.textContent=fmtClock(timerSec);
+  },1000);
+}
+function stopTimer(){clearInterval(timerInt);}
+function resetTimer(){
+  clearInterval(timerInt);timerSec=0;timerStarted=false;
+  var t=$("sb-timer");if(t)t.textContent="00:00";
+  var gt=$("g-time");if(gt)gt.textContent="";
+}
 
 var VW=640,padL=42,padR=42,axisY=58,VH=110;
 function makeSVG(cfg){
@@ -352,7 +381,7 @@ function renderBody(gi){
       c.innerHTML='<span class="pl-name" style="color:'+p.color+'">'+p.name+'</span><span class="pl-val">'+fr(p.val)+'</span>';
       if(ex._placed[p.name]!==undefined)c.classList.add('done');
       if(sel[gi]===p.name)c.classList.add('sel');
-      c.onclick=function(){if(done[gi])return;sel[gi]=p.name;renderBody(gi);};
+      c.onclick=function(){if(done[gi])return;startTimer();sel[gi]=p.name;renderBody(gi);};
       leg.appendChild(c);
     });
     body.appendChild(leg);
@@ -392,7 +421,7 @@ function renderBody(gi){
       var lab=document.createElement('span');lab.className='ra-lab';lab.style.color=m.color||'#1a1d23';lab.textContent=m.name+' =';
       var inp=document.createElement('input');inp.type='text';inp.className='nl-input';inp.placeholder='?';inp.autocomplete='off';inp.id='r-'+gi+'-'+mi;inp.inputMode='decimal';
       if(done[gi]&&ex._ans){inp.value=ex._ans[mi];inp.disabled=true;inp.className='nl-input '+(valOk(m.val,ex._ans[mi])?'ok':'ko');}
-      else{inp.addEventListener('input',function(){updReadBtn(gi);});}
+      else{inp.addEventListener('input',function(){startTimer();updReadBtn(gi);});}
       cell.appendChild(lab);cell.appendChild(inp);row.appendChild(cell);
     });
     body.appendChild(row);
@@ -402,6 +431,7 @@ function renderBody(gi){
 
 function placeAt(gi,v){
   var ex=EXS[gi];if(done[gi])return;if(!sel[gi])return;
+  startTimer();
   ex._placed[sel[gi]]=v;sel[gi]=null;renderBody(gi);
 }
 function updPlaceBtn(gi){
@@ -435,6 +465,7 @@ function showSolution(gi){
 
 function checkGroup(gi){
   if(done[gi]) return;
+  startTimer();
   var ex=EXS[gi];
   if(ex.mode==='read'){
     ex._ans=ex.line.marks.map(function(m,mi){return ($('r-'+gi+'-'+mi)||{value:''}).value;});
@@ -461,7 +492,7 @@ function checkGroup(gi){
     ok===total ? "Parfait\u00a0! "+ok+" / "+total+" points justes." :
     ratio>=.75 ? "Très bien\u00a0! "+ok+" / "+total+" justes. Vérifie les points en rouge." :
     ratio>=.5  ? "Bien\u00a0! "+ok+" / "+total+" justes. Revois la méthode pour les autres." :
-                 "À retravailler\u00a0: "+ok+" / "+total+" justes. Relis la méthode et recommence.";
+                 "À retravailler\u00a0: "+ok+" / "+total+" justes. Observe les graduations et relis la méthode avant de recommencer.";
   $("fbd-"+gi).innerHTML=ok===total?"":"À corriger&nbsp;: "+wrong.join(" &middot; ")+".";
   updateScorebar();
 }
@@ -495,8 +526,13 @@ function updateBilan(){
   var nbDone=done.filter(Boolean).length,pts=groupScore.reduce(function(a,b){return a+b;},0);
   if(nbDone<EXS.length){
     $("g-msg").textContent="Valide les "+EXS.length+" exercices pour voir ton bilan. ("+nbDone+" / "+EXS.length+" faits)";
-    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";return;
+    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";
+    var gt0=$("g-time");if(gt0)gt0.textContent="";
+    return;
   }
+  /* Tous les exercices sont validés : on fige le chrono (purement informatif). */
+  stopTimer();
+  var gt=$("g-time");if(gt)gt.innerHTML="&#9201;&#65039; Temps utilisé&#8201;: "+fmtLong(timerSec);
   var ratio=pts/TOTAL;
   var stars=pts>=TOTAL?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:pts>0?1:0;
   $("g-stars").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
@@ -504,7 +540,7 @@ function updateBilan(){
     ratio>=.8?"Très bien\u00a0! Encore un petit effort.":
     ratio>=.6?"Bien\u00a0! Quelques points à retravailler.":
     ratio>=.4?"Passable. Revois la valeur des graduations.":
-    "À retravailler\u00a0: reprends la méthode et recommence.";
+    "À retravailler\u00a0: observe les graduations et relis la méthode avant de recommencer.";
   $("g-msg").textContent=msg;
 }
 
@@ -513,6 +549,7 @@ function restartAll(){
   groupScore=new Array(EXS.length).fill(0);
   sel=new Array(EXS.length).fill(null);
   EXS.forEach(function(ex){delete ex._ans;delete ex._placed;});
+  resetTimer();
   build();
   window.scrollTo({top:0,behavior:"smooth"});
 }
