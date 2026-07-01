@@ -149,6 +149,11 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
 .hint.show{display:block;}
 .hint strong{color:var(--orange);}
 
+.bonus-box{display:inline-block;margin-top:.7rem;background:var(--surface2);border:1.5px dashed var(--day-border);border-radius:99px;padding:.4rem 1rem;font-size:clamp(.72rem,2.3vw,.8rem);color:#5a5f72;line-height:1.6;max-width:90%;}
+.bonus-box strong{color:var(--day-dark);}
+.chip.timer{font-variant-numeric:tabular-nums;color:var(--day-dark);border-color:var(--day-border);background:var(--day-light);}
+.global-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.82rem,2.6vw,.95rem);color:var(--day-dark);margin-bottom:1.1rem;}
+
 .fb{margin-top:.9rem;padding:.75rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.84rem,2.5vw,.9rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.8;}
 .fb.show{display:flex;animation:pop .3s cubic-bezier(.18,.89,.32,1.6);}
 .fb.ok{background:var(--green-light);border:1.5px solid var(--green);color:var(--green-dark);}
@@ -200,6 +205,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
   </div>
   <h1>Multiplier les nombres <span class="hl">décimaux</span></h1>
   <p class="subtitle">3 exercices &middot; aires &middot; déduire des produits</p>
+  <div class="bonus-box">&#9201;&#65039; <strong>Défi bonus&nbsp;:</strong> le chrono est lancé… à toi de jouer&#8201;! Le plus important est de bien réfléchir.</div>
 </header>
 
 <div class="scorebar">
@@ -207,6 +213,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
   <div class="sb-track"><div class="sb-fill" id="sb-fill"></div></div>
   <span class="chip correct"><span class="dot"></span><span id="sb-ok">0</span></span>
   <span class="chip wrong"><span class="dot"></span><span id="sb-ko">0</span></span>
+  <span class="chip timer"><span id="sb-timer">00:00</span></span>
 </div>
 
 <div id="cards"></div>
@@ -218,6 +225,7 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
     <div class="global-score"><span class="s-num" id="g-num">0</span><span class="s-den">&#8202;/&#8202;7</span></div>
     <div class="stars" id="g-stars">&#9734;&#9734;&#9734;&#9734;&#9734;</div>
     <div class="global-msg" id="g-msg">Valide les 3 exercices pour voir ton bilan.</div>
+    <div class="global-time" id="g-time"></div>
     <button class="btn btn-p" onclick="restartAll()" style="margin:0 auto;display:inline-flex;">&#8635; Tout recommencer</button>
   </div>
 </div>
@@ -225,6 +233,26 @@ h1 .hl{color:var(--day-dark);text-shadow:var(--neon-g);}
 </div>
 
 <script>
+/* ===== Chrono (ludique, jamais lié au score) ===== */
+var timerSec=0, timerInt=null, timerStarted=false;
+function fmtClock(s){var m=Math.floor(s/60),r=s%60;return (m<10?"0":"")+m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+function startTimer(){
+  if(timerStarted) return;
+  timerStarted=true;
+  clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    timerSec++;
+    var t=$("sb-timer");if(t)t.textContent=fmtClock(timerSec);
+  },1000);
+}
+function stopTimer(){clearInterval(timerInt);}
+function resetTimer(){
+  clearInterval(timerInt);timerSec=0;timerStarted=false;
+  var t=$("sb-timer");if(t)t.textContent="00:00";
+  var gt=$("g-time");if(gt)gt.textContent="";
+}
+
 function normNum(s){var n=parseFloat(String(s).trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(/cm²|cm2|cm/g,'').replace(',','.'));return isNaN(n)?null:n;}
 function valOk(t,v){var n=normNum(v);return n!==null && Math.abs(n-t)<1e-6;}
 
@@ -359,7 +387,7 @@ function answerRow(gi,i,suffix){
     inp.value=(g._ans&&g._ans[i]!==undefined)?g._ans[i]:'';inp.disabled=true;
     inp.className='cell-in '+(valOk(ans,inp.value)?'ok':'ko');
   }else{
-    inp.addEventListener('input',function(){updCheck(gi);});
+    inp.addEventListener('input',function(){startTimer();updCheck(gi);});
   }
   row.appendChild(inp);
   if(suffix){var sfx=document.createElement('span');sfx.className='a-suffix';sfx.textContent=suffix;row.appendChild(sfx);}
@@ -395,6 +423,7 @@ function showSolution(gi){
 
 function checkGroup(gi){
   if(done[gi])return;
+  startTimer();
   var g=GROUPS[gi];
   done[gi]=true;
   $("btnc-"+gi).disabled=true;$("btnc-"+gi).style.display="none";
@@ -416,13 +445,13 @@ function checkGroup(gi){
   var fb=$("fb-"+gi);fb.className="fb show "+(ok===n?"ok":"ko");
   $("fbi-"+gi).textContent=ok===n?"✅":"❌";
   if(n===1){
-    $("fbm-"+gi).textContent = ok===n ? "Parfait\u00a0! C\u2019est juste." : "Ce n\u2019est pas le bon résultat. Relis la méthode et recommence.";
+    $("fbm-"+gi).textContent = ok===n ? "Parfait\u00a0! C\u2019est juste." : "À retravailler. Reprends la méthode, vérifie chaque étape, puis recommence.";
   }else{
     $("fbm-"+gi).textContent=
       ok===n     ? "Parfait\u00a0! Tout est juste." :
       ratio>=.75 ? "Très bien\u00a0! Vérifie ce qui est en rouge." :
       ratio>=.5  ? "Bien\u00a0! Revois la méthode pour ce qui reste." :
-                   "À retravailler\u00a0: relis la méthode et recommence.";
+                   "À retravailler. Reprends la méthode, vérifie chaque étape, puis recommence.";
   }
   $("fbd-"+gi).innerHTML=(ok===n||n===1)?"":"À revoir&nbsp;: "+wrong.join(" &middot; ")+".";
   updateScorebar();
@@ -457,8 +486,12 @@ function updateBilan(){
   var nbDone=done.filter(Boolean).length,pts=groupScore.reduce(function(a,b){return a+b;},0);
   if(nbDone<GROUPS.length){
     $("g-msg").textContent="Valide les "+GROUPS.length+" exercices pour voir ton bilan. ("+nbDone+" / "+GROUPS.length+" faits)";
-    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";return;
+    $("g-stars").innerHTML="&#9734;&#9734;&#9734;&#9734;&#9734;";
+    var gt0=$("g-time");if(gt0)gt0.textContent="";
+    return;
   }
+  stopTimer();
+  var gt=$("g-time");if(gt)gt.innerHTML="&#9201;&#65039; Temps utilisé&#8201;: "+fmtLong(timerSec);
   var ratio=pts/TOTAL;
   var stars=pts>=TOTAL?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:pts>0?1:0;
   $("g-stars").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
@@ -466,7 +499,7 @@ function updateBilan(){
     ratio>=.8?"Très bien\u00a0! Encore un petit effort.":
     ratio>=.6?"Bien\u00a0! Quelques points à retravailler.":
     ratio>=.4?"Passable. Revois le placement de la virgule.":
-    "À retravailler\u00a0: reprends la méthode et recommence.";
+    "À retravailler\u00a0: reprends la méthode, vérifie chaque étape, puis recommence.";
   $("g-msg").textContent=msg;
 }
 
@@ -474,6 +507,7 @@ function restartAll(){
   done=new Array(GROUPS.length).fill(false);
   groupScore=new Array(GROUPS.length).fill(0);
   GROUPS.forEach(function(g){delete g._ans;});
+  resetTimer();
   build();
   window.scrollTo({top:0,behavior:"smooth"});
 }
