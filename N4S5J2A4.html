@@ -12,7 +12,7 @@
   --bleu:#2b8fd6; --vert:#2fb86f; --rouge:#e0524a;
   --txt:#e8f4fd; --gris:#9aabba;
   /* couleurs officielles Scratch 3 */
-  --s-ev:#FFAB19; --s-sens:#5CB1D6; --s-var:#FF8C1A;
+  --s-ev:#FFBF00; --s-sens:#5CB1D6; --s-var:#FF8C1A;
   --s-ctrl:#FFAB19; --s-appar:#9966FF; --s-distract:#616E78;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -104,7 +104,7 @@ body{
   min-height:44px;cursor:pointer;
   user-select:none;color:#1a1a1a;
   width:100%;text-align:left;border:none;
-  border-radius:4px;
+  border-radius:8px;
   margin-bottom:2px;
   transition:filter .1s,transform .1s;
 }
@@ -113,7 +113,7 @@ body{
 .bloc.dragging{opacity:.3;}
 .bloc.correct{animation:blockOk .5s ease;}
 .bloc.erreur-anim{animation:blockErr .45s ease;}
-@keyframes blockOk{0%{transform:scale(1);}50%{transform:scale(1.07);}100%{transform:scale(1);}}
+@keyframes blockOk{0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
 @keyframes blockErr{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
 
 /* Encoche "reçoit" en haut : créneau rentrant */
@@ -131,7 +131,20 @@ body{
 }
 
 /* Couleurs officielles Scratch 3 */
-.bloc-ev    {background:var(--s-ev);}
+.bloc-ev{
+  background:var(--s-ev);
+  border-radius:14px 14px 4px 4px;
+}
+.bloc-ev::before{display:none!important;}
+/* bosse ovale du chapeau (hat block Scratch) */
+.bloc-ev-hat{
+  position:absolute;
+  top:-15px; left:50%;
+  transform:translateX(-50%);
+  width:80px; height:16px;
+  background:var(--s-ev);
+  border-radius:50% 50% 0 0;
+}
 .bloc-sens  {background:var(--s-sens);color:#fff!important;}
 .bloc-var   {background:var(--s-var);}
 .bloc-ctrl  {background:var(--s-ctrl);}
@@ -145,12 +158,12 @@ body{
 }
 .bloc-ctrl.ouvre .bras-gauche{
   position:absolute;left:0;top:100%;
-  width:28px;height:24px;
+  width:28px;height:52px;
   background:var(--s-ctrl);
   border-radius:0 0 0 4px;
 }
 .bloc-ctrl.ouvre .fermeture{
-  position:absolute;left:0;top:calc(100% + 24px);
+  position:absolute;left:0;top:calc(100% + 52px);
   right:0;height:14px;
   background:var(--s-ctrl);
   border-radius:0 0 4px 4px;
@@ -219,7 +232,7 @@ body{
 
   <!-- Légende couleurs Scratch -->
   <div class="legende">
-    <div class="leg-item"><div class="leg-dot" style="background:#FFAB19"></div>Événements</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#FFBF00"></div>Événements</div>
     <div class="leg-item"><div class="leg-dot" style="background:#9966FF"></div>Apparence</div>
     <div class="leg-item"><div class="leg-dot" style="background:#FFAB19;border:2px solid #cc8a00"></div>Contrôle</div>
     <div class="leg-item"><div class="leg-dot" style="background:#616E78;opacity:.8"></div>Inutile</div>
@@ -262,7 +275,8 @@ body{
 
   <div class="ecran-final" id="ecran-final">
     <div class="ef-titre">🏅 Programme validé</div>
-    <div class="ef-sub">Les 120 capteurs seront vérifiés automatiquement.<br>Le programme utilise une boucle : une seule instruction suffit.</div>
+    <div class="ef-sub">Les 120 capteurs seront testés automatiquement.<br>Le programme utilise une boucle : une seule instruction suffit.</div>
+      <div style="margin:10px 0 0;padding:10px 14px;background:rgba(255,159,28,.12);border-left:3px solid #ff9f1c;border-radius:0 8px 8px 0;font-size:.85rem;color:#e8f4fd;line-height:1.55;">💡 Une boucle évite de réécrire plusieurs fois les mêmes instructions. C'est la règle à retenir.</div>
     <div class="ef-jauge"><div class="ef-jauge-fill"></div></div>
     <div class="ef-grade" id="ef-grade"></div>
     <button class="btn-rejouer" id="btn-rejouer">↻ Recommencer</button>
@@ -277,10 +291,10 @@ body{
 'use strict';
 // ===== DONNÉES =====
 const BLOCS_DATA = [
-  {id:'quand_drapeau',    label:'quand le drapeau vert est cliqué',       cat:'ev',     correct:true,  indent:0, ouvre:false},
+  {id:'quand_drapeau',    label:'quand <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" style="vertical-align:middle;margin:0 3px 1px 2px;"><path d="M5 3v18" stroke="#5a3e1b" stroke-width="2.2" stroke-linecap="round"/><path d="M5 3 L20 8 L5 14 Z" fill="#3fba4f"/></svg> est cliqué',       cat:'ev',     correct:true,  indent:0, ouvre:false},
   {id:'repeter_120',      label:'répéter <b>120</b> fois',                cat:'ctrl',   correct:true,  indent:0, ouvre:true},
-  {id:'dire_verification',label:'dire [Vérification d\'un capteur]',      cat:'appar',  correct:true,  indent:1, ouvre:false},
-  {id:'dire_final',       label:'dire [Tous les capteurs sont vérifiés]', cat:'appar',  correct:true,  indent:0, ouvre:false},
+  {id:'dire_verification',label:"dire [Vérification d'un capteur]",      cat:'appar',  correct:true,  indent:1, ouvre:false},
+  {id:'dire_final',       label:'dire [Tous les capteurs ont été vérifiés.]', cat:'appar',  correct:true,  indent:0, ouvre:false},
   // distracteurs
   {id:'attendre_5',       label:'attendre <b>5</b> secondes',             cat:'distract',correct:false,indent:0, ouvre:false},
   {id:'repeter_10',       label:'répéter <b>10</b> fois',                 cat:'distract',correct:false,indent:0, ouvre:false},
@@ -305,13 +319,18 @@ function makeBloc(id, context){
   const b=BLOCS_DATA.find(x=>x.id===id);
   const wrap=document.createElement('div');
   wrap.style.position='relative';
-  wrap.style.marginBottom = b.ouvre ? '28px' : '2px'; // espace pour le C-shape
+  wrap.style.marginBottom = b.ouvre ? '62px' : '2px'; // espace pour le C-shape
 
   const el=document.createElement('button');
   el.className='bloc bloc-'+b.cat+(b.indent?' bloc-indent':'')+(b.ouvre?' ouvre':'');
   el.dataset.id=id;
   el.innerHTML=b.label;
 
+  if(b.cat==='ev'){
+    const hat=document.createElement('div');
+    hat.className='bloc-ev-hat';
+    el.appendChild(hat);
+  }
   if(b.ouvre){
     // Bras gauche du C
     const bras=document.createElement('div');
@@ -443,7 +462,7 @@ function validerProgramme(){
   });
   setVoyant(true);
   document.getElementById('feedback').className='feedback ok';
-  document.getElementById('feedback').innerHTML='<b>✅ Programme valide.</b><br>Le satellite CS-1 est correctement préparé. La boucle permet de répéter automatiquement la même vérification pour les 120 capteurs, sans réécrire 120 fois la même instruction.';
+  document.getElementById('feedback').innerHTML='<b>✅ Programme valide.</b><br>Le satellite CS-1 est correctement préparé. La boucle permet de tester automatiquement les 120 capteurs, sans réécrire 120 fois la même instruction.';
   document.getElementById('h-err').textContent=erreurs;
   let grade='';
   if(erreurs===0) grade='🏅 Boucle parfaite — aucune erreur de conception !';
