@@ -12,7 +12,7 @@
   --bleu:#2b8fd6; --vert:#2fb86f; --rouge:#e0524a;
   --txt:#e8f4fd; --gris:#9aabba;
   /* couleurs officielles Scratch 3 */
-  --s-ev:#FFBF00; --s-sens:#5CB1D6; --s-var:#FF8C1A;
+  --s-ev:#FFAB19; --s-sens:#5CB1D6; --s-var:#FF8C1A;
   --s-ctrl:#FFAB19; --s-appar:#9966FF; --s-distract:#616E78;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -219,16 +219,13 @@ body{
 
   <!-- Légende couleurs Scratch -->
   <div class="legende">
-    <div class="leg-item"><div class="leg-dot" style="background:#FFBF00"></div>Événements</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#5CB1D6"></div>Capteurs</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#FF8C1A"></div>Variables</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#FFAB19"></div>Contrôle</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#FFAB19"></div>Événements</div>
     <div class="leg-item"><div class="leg-dot" style="background:#9966FF"></div>Apparence</div>
     <div class="leg-item"><div class="leg-dot" style="background:#616E78;opacity:.8"></div>Inutile</div>
   </div>
 
   <div class="hud">
-    <div class="hud-item"><span id="h-blocs">0 / 9</span>blocs placés</div>
+    <div class="hud-item"><span id="h-blocs">0 / 5</span>blocs placés</div>
     <div class="hud-item err"><span id="h-err">0</span>anomalies</div>
   </div>
 
@@ -279,22 +276,18 @@ body{
 'use strict';
 // ===== DONNÉES =====
 const BLOCS_DATA = [
-  {id:'quand_drapeau',    label:'quand le drapeau vert est cliqué', cat:'ev',     correct:true,  indent:0, ouvre:false},
-  {id:'demander_nom',     label:'demander [Nom du satellite ?] et attendre',      cat:'sens',   correct:true,  indent:0, ouvre:false},
-  {id:'mettre_satellite', label:'mettre <b>Satellite</b> à <i>réponse</i>',       cat:'var',    correct:true,  indent:0, ouvre:false},
-  {id:'demander_verifs',  label:'demander [Nombre de vérifications ?] et attendre',cat:'sens',  correct:true,  indent:0, ouvre:false},
-  {id:'mettre_N',         label:'mettre <b>N</b> à <i>réponse</i>',               cat:'var',    correct:true,  indent:0, ouvre:false},
-  {id:'dire_preparation', label:'dire [Préparation du satellite...]',              cat:'appar',  correct:true,  indent:0, ouvre:false},
-  {id:'repeter_N',        label:'répéter <b>(N)</b> fois',                         cat:'ctrl',   correct:true,  indent:0, ouvre:true},
-  {id:'dire_verification',label:'dire [Vérification effectuée]',                  cat:'appar',  correct:true,  indent:1, ouvre:false},
-  {id:'dire_pret',        label:'dire [Satellite prêt au lancement]',             cat:'appar',  correct:true,  indent:0, ouvre:false},
+  {id:'quand_drapeau',      label:'quand le drapeau vert est cliqué',   cat:'ev',     correct:true,  indent:0, ouvre:false},
+  {id:'dire_preparation',   label:'dire [Préparation du satellite...]',  cat:'appar',  correct:true,  indent:0, ouvre:false},
+  {id:'dire_systemes',      label:'dire [Vérification des systèmes]',    cat:'appar',  correct:true,  indent:0, ouvre:false},
+  {id:'dire_communications',label:'dire [Contrôle des communications]',  cat:'appar',  correct:true,  indent:0, ouvre:false},
+  {id:'dire_pret',          label:'dire [Satellite prêt au lancement]',  cat:'appar',  correct:true,  indent:0, ouvre:false},
   // distracteurs
-  {id:'attendre_5',       label:'attendre <b>5</b> secondes',                     cat:'distract',correct:false,indent:0, ouvre:false},
-  {id:'repeter_jusqu',    label:"répéter jusqu'à (<i>Satellite prêt</i>)",        cat:'distract',correct:false,indent:0, ouvre:false},
-  {id:'mettre_score',     label:'mettre <b>Score</b> à <b>0</b>',                cat:'distract',correct:false,indent:0, ouvre:false},
+  {id:'attendre_5',         label:'attendre <b>5</b> secondes',          cat:'distract',correct:false,indent:0, ouvre:false},
+  {id:'repeter_jusqu',      label:"répéter jusqu'à (<i>Satellite prêt</i>)", cat:'distract',correct:false,indent:0, ouvre:false},
+  {id:'arreter_tout',       label:'arrêter <b>tout</b>',                 cat:'distract',correct:false,indent:0, ouvre:false},
 ];
-const SOLUTION=['quand_drapeau','demander_nom','mettre_satellite','demander_verifs','mettre_N','dire_preparation','repeter_N','dire_verification','dire_pret'];
-const DISTRACT=['attendre_5','repeter_jusqu','mettre_score'];
+const SOLUTION=['quand_drapeau','dire_preparation','dire_systemes','dire_communications','dire_pret'];
+const DISTRACT=['attendre_5','repeter_jusqu','arreter_tout'];
 
 let palette=[], programme=[], selected=null, erreurs=0, valide=false, soundOn=true, actx=null;
 
@@ -360,7 +353,7 @@ function renderProgramme(){
     dz.appendChild(w);
   });
   document.getElementById('placeholder').classList.toggle('hidden',programme.length>0);
-  document.getElementById('h-blocs').textContent=programme.length+' / 9';
+  document.getElementById('h-blocs').textContent=programme.length+' / 5';
 }
 function render(){renderPalette();renderProgramme();}
 
@@ -426,12 +419,12 @@ function setErreur(titre,msg){
 }
 function validerProgramme(){
   if(valide)return;
-  if(programme.length<9){playErrSnd();setErreur('❌ Programme incomplet.','Il manque des blocs. Le programme doit contenir 9 instructions.');return;}
+  if(programme.length<5){playErrSnd();setErreur('❌ Programme incomplet.','Il manque des blocs. Le programme doit contenir 5 instructions.');return;}
   if(programme.some(id=>DISTRACT.includes(id))){playErrSnd();setErreur('❌ Bloc inutile détecté.','Un ou plusieurs blocs ne sont pas nécessaires pour cette mission. Retire les blocs inutiles.');return;}
   for(let i=0;i<SOLUTION.length;i++){
     if(programme[i]!==SOLUTION[i]){
       playErrSnd();
-      setErreur('❌ Ordre incorrect.','Observe l\'ordre des instructions. Les variables doivent être créées avant d\'être utilisées. Le bloc « Vérification effectuée » doit être placé juste après « répéter N fois ».');
+      setErreur('❌ Ordre incorrect.','Observe l\'ordre des instructions. Un algorithme s\'exécute de haut en bas : chaque instruction doit être à sa place.');
       const blocs=[...document.querySelectorAll('#drop-zone .bloc')];
       if(blocs[i]){blocs[i].classList.add('erreur-anim');setTimeout(()=>blocs[i].classList.remove('erreur-anim'),500);}
       return;
@@ -444,7 +437,7 @@ function validerProgramme(){
   });
   setVoyant(true);
   document.getElementById('feedback').className='feedback ok';
-  document.getElementById('feedback').innerHTML='<b>✅ Programme valide.</b><br>Le satellite CS-1 est correctement préparé. Toutes les vérifications seront exécutées avant le lancement.';
+  document.getElementById('feedback').innerHTML='<b>✅ Programme valide.</b><br>Le satellite CS-1 est correctement préparé. Les instructions s\'exécuteront dans le bon ordre au lancement.';
   document.getElementById('h-err').textContent=erreurs;
   let grade='';
   if(erreurs===0) grade='🏅 Algorithme parfait — aucune erreur de conception !';
@@ -474,7 +467,7 @@ function init(){
   document.getElementById('ecran-final').classList.remove('show');
   document.getElementById('reco-zone').style.display='none';
   document.getElementById('h-err').textContent='0';
-  document.getElementById('h-blocs').textContent='0 / 9';
+  document.getElementById('h-blocs').textContent='0 / 5';
 }
 function restart(){init();window.scrollTo({top:0,behavior:'smooth'});}
 init();
