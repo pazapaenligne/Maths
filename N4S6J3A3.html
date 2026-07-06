@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — Reconnaître une section plane</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --jour:#8dc63f;--jour-fonce:#3d7a10;--jour-soft:#f0faeb;
+  --jour-accent:#b5e08a;--jour-titre:#3d7a10;--badge-txt:#1e4a05;
+  --vert:#8dc63f;--vert-fonce:#3d7a10;--vert-soft:#f0faeb;
+  --rouge:#e74c3c;--rouge-soft:#fdedec;--rouge-fonce:#c0392b;
+  --texte:#23262d;--gris:#8a8f9a;--bord:#ece8dd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:#fffdf7;color:var(--texte);font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 4rem;position:relative;}
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.28;background:#f5d080;border-radius:38% 62% 55% 45%/56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.22;background:var(--jour-accent);border-radius:62% 38% 44% 56%/42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.20;background:#8dc63f;border-radius:45% 55% 62% 38%/55% 45% 58% 42%;}
+.blob4{width:140px;height:150px;bottom:200px;left:-30px;opacity:.16;background:#f28b82;border-radius:50% 50% 40% 60%/60% 40% 60% 40%;}
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;width:100%;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--gris);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.8vw,1.9rem);font-weight:800;line-height:1.3;}
+h1 .hl{color:var(--jour-titre);}
+.sous-titre{color:var(--gris);font-size:.9rem;margin-top:.4rem;line-height:1.8;}
+.consigne{margin:1rem auto 0;max-width:560px;border:2px dashed var(--jour);background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+.section-defi{position:relative;z-index:1;width:100%;max-width:700px;background:#fff;border:2px solid var(--bord);border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.defi-stripe{height:4px;background:linear-gradient(90deg,var(--jour),#f5c518,#f5a623);}
+.topbar{background:rgba(255,255,255,.97);border-bottom:2px solid var(--bord);padding:.65rem 1rem .7rem;}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;}
+.pastilles{display:flex;gap:.28rem;flex-wrap:wrap;flex:1;justify-content:center;}
+.pastille{width:1.55rem;height:1.55rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.74rem;border:2px solid var(--bord);color:var(--gris);background:#fff;transition:all .25s;}
+.pastille.active{background:var(--jour);border-color:var(--jour);color:#fff;transform:scale(1.13);}
+.pastille.ok{background:var(--vert);border-color:var(--vert);color:#fff;}
+.pastille.ko{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+.chrono{display:inline-flex;align-items:center;gap:.3rem;background:var(--jour-soft);border:2px solid var(--jour);color:var(--jour-fonce);font-weight:800;font-size:1rem;padding:.3rem .8rem;border-radius:99px;min-width:5rem;justify-content:center;}
+.chrono.warn{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);animation:pulse .55s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.09);}}
+.btn-son{background:#fff;border:2px solid var(--bord);border-radius:50%;width:2.5rem;height:2.5rem;min-height:2.5rem;font-size:1.05rem;cursor:pointer;font-family:inherit;}
+.progress-bg{background:var(--bord);border-radius:99px;height:7px;overflow:hidden;margin-top:.55rem;}
+.progress-fill{height:100%;width:0%;border-radius:99px;transition:width .5s ease;background:linear-gradient(90deg,var(--jour),#f5c518);}
+/* STARTGATE */
+.startgate{padding:1.6rem 1.4rem 1.8rem;text-align:center;}
+.startgate h3{font-size:1.05rem;color:var(--jour-fonce);margin-bottom:.7rem;}
+.startgate p{font-size:.88rem;color:var(--texte);line-height:1.95;text-align:left;margin-bottom:.5rem;}
+.memo{background:var(--jour-soft);border:1.5px solid var(--jour-accent);border-left:5px solid var(--jour);border-radius:10px;padding:.75rem 1rem;margin:.85rem 0 1.3rem;font-size:.85rem;color:var(--jour-fonce);line-height:1.95;text-align:left;}
+.btn{font-family:'JetBrains Mono',monospace;border:none;cursor:pointer;border-radius:12px;font-weight:800;transition:transform .12s,box-shadow .15s,opacity .15s;min-height:2.9rem;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-start{background:var(--jour);color:#fff;font-size:1rem;padding:.85rem 2.2rem;box-shadow:0 4px 14px rgba(141,198,63,.4);}
+.btn-start:hover{transform:translateY(-2px);}
+/* ZONE JEU */
+.gamearea{padding:1.2rem 1.3rem 1.5rem;}
+.carte-q{background:#fff;border:2px solid var(--bord);border-radius:14px;padding:1.2rem;box-shadow:0 4px 16px rgba(0,0,0,.05);animation:fadeUp .3s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.q-label{font-size:.72rem;color:var(--gris);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:.5rem;}
+.q-titre{font-size:.98rem;font-weight:800;color:var(--jour-fonce);text-align:center;margin-bottom:1rem;line-height:1.8;}
+/* Grille 4 cartes */
+.grille{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.9rem;}
+.carte-opt{
+  border-radius:12px;padding:.85rem .7rem;font-size:.88rem;line-height:1.7;
+  text-align:center;cursor:pointer;border:3px solid transparent;
+  transition:transform .15s,box-shadow .15s,border-color .15s;
+  font-family:'JetBrains Mono',monospace;font-weight:600;
+  background:#f5f2ec;
+}
+.carte-opt:hover:not(.disabled){transform:scale(1.03);box-shadow:0 4px 12px rgba(0,0,0,.12);}
+.carte-opt.selected{border-color:var(--jour);background:var(--jour-soft);}
+.carte-opt.correct-opt{border-color:var(--vert);background:var(--vert-soft);}
+.carte-opt.wrong-opt{border-color:var(--rouge);background:var(--rouge-soft);}
+.carte-opt.disabled{cursor:default;}
+.formule{font-style:italic;font-size:1rem;font-weight:700;}
+.btn-valider{background:var(--jour);color:#fff;font-size:.95rem;padding:.65rem 1.5rem;box-shadow:0 3px 10px rgba(141,198,63,.4);display:block;margin:0 auto;}
+.warn-saisie{display:none;text-align:center;color:var(--rouge-fonce);background:var(--rouge-soft);border:1.5px solid var(--rouge);border-radius:9px;padding:.4rem .7rem;font-size:.82rem;margin-bottom:.6rem;}
+.warn-saisie.show{display:block;}
+/* DÉCOMPTE */
+.countdown{position:absolute;inset:0;z-index:10;background:rgba(240,250,235,.97);display:none;align-items:center;justify-content:center;border-radius:18px;}
+.countdown.show{display:flex;}
+.cd-num{font-size:clamp(5rem,18vw,7.5rem);font-weight:800;color:var(--jour-titre);animation:cdPop .8s ease both;}
+@keyframes cdPop{0%{transform:scale(.25);opacity:0;}45%{transform:scale(1.18);opacity:1;}100%{transform:scale(1);opacity:1;}}
+/* RÉSULTATS */
+.resultats{display:none;padding:1.8rem 1.4rem;text-align:center;}
+.resultats.show{display:block;}
+.trophee{font-size:3rem;margin-bottom:.4rem;}
+.score-final{font-size:1.4rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.4rem;}
+.etoiles{font-size:1.9rem;letter-spacing:.15em;margin-bottom:.6rem;}
+.msg-final{font-size:.92rem;color:var(--texte);line-height:1.9;margin-bottom:1.2rem;}
+.recap{text-align:left;margin-bottom:1.4rem;display:flex;flex-direction:column;gap:.45rem;}
+.recap-item{border-radius:10px;padding:.55rem .8rem;font-size:.82rem;line-height:1.9;}
+.recap-item.ok{background:var(--vert-soft);border:1.5px solid var(--vert);color:var(--vert-fonce);}
+.recap-item.ko{background:var(--rouge-soft);border:1.5px solid var(--rouge);color:var(--rouge-fonce);}
+.btn-rejouer{background:var(--jour);color:#fff;font-size:.98rem;padding:.78rem 1.7rem;}
+.hidden{display:none !important;}
+@media(max-width:500px){
+  body{padding:1rem .6rem 3rem;}
+  .gamearea{padding:.9rem;}
+  .grille{gap:.5rem;}
+  .carte-opt{font-size:.8rem;padding:.7rem .5rem;}
+}
+</style>
+</head>
+<body>
+<div class="blob blob1"></div><div class="blob blob2"></div>
+<div class="blob blob3"></div><div class="blob blob4"></div>
+
+<header class="hero">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine&nbsp;6 &ndash; Jour&nbsp;3</div>
+  <h1><span class="hl">Reconna&icirc;tre une section plane</span></h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs.</p>
+  <div class="consigne">&#128073; Trouve l&rsquo;intrus parmi les 4 cartes.</div>
+</header>
+
+<section class="section-defi" id="sectionDefi">
+  <div class="defi-stripe"></div>
+  <div class="topbar hidden" id="topbar">
+    <div class="topbar-row">
+      <div class="pastilles" id="pastilles"></div>
+      <div class="chrono" id="chrono">&#9203; 25</div>
+      <button class="btn btn-son" id="btnSon">&#128266;</button>
+    </div>
+    <div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="startgate" id="startgate">
+    <h3>&#9660; D&eacute;fi flash &mdash; Quel est l&rsquo;intrus&nbsp;?</h3>
+    <p>Pour chaque question, <strong>3 cartes sont vraies</strong> pour une m&ecirc;me fonction <em>f</em>, et <strong>1 carte est fausse</strong>. Trouve l&rsquo;intrus&nbsp;!</p>
+    <div class="memo">
+      &#128161; <strong>Rappel&nbsp;:</strong><br>
+      &bull; <em>f</em>(x) = ax + b &nbsp;&rarr;&nbsp; remplace x par la valeur et calcule.<br>
+      &bull; Image de <em>a</em> = f(<em>a</em>)<br>
+      &bull; Ant&eacute;c&eacute;dent de <em>b</em> = valeur de x telle que f(x) = <em>b</em>
+    </div>
+    <button class="btn btn-start" id="btnStart">&#9654;&#65039; D&eacute;marrer</button>
+  </div>
+
+  <div class="gamearea hidden" id="gamearea">
+    <div class="carte-q" id="carteQ">
+      <div class="q-label" id="qLabel">Question 1 / 6</div>
+      <div class="q-titre">&#128269; Quelle est la carte intrus&nbsp;?</div>
+      <div class="grille" id="grille"></div>
+      <div class="warn-saisie" id="warnSaisie">&#9888;&#65039; Clique sur une carte avant de valider&nbsp;!</div>
+      <button class="btn btn-valider" id="btnValidate">&#10003; Valider</button>
+    </div>
+  </div>
+
+  <div class="resultats hidden" id="resultats">
+    <div class="trophee">&#127942;</div>
+    <div class="score-final" id="scoreFinal"></div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="msg-final" id="msgFinal"></div>
+    <div class="recap" id="recap"></div>
+    <button class="btn btn-rejouer" id="btnRejouer">&#8635; Rejouer</button>
+  </div>
+
+  <div class="countdown" id="countdown"><div class="cd-num" id="cdNum">3</div></div>
+</section>
+
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var QTOTAL=6, QTIME=25, WARN_AT=8;
+
+/* ════════════════════════════════════════
+   QUESTIONS — "Quel est l'intrus ?"
+   Chaque question : 4 cartes, 1 est l'intrus (ans = index 0-3)
+   Les maths sont vérifiées par programme.
+
+   Vérification :
+   Série 1 : f(x)=9x+6 → f(7)=69✓ f(5)=51✓ f(8)=78✓  intrus=f(x)=5x+9
+   Série 2 : f(x)=9x-6 → f(-7)=-69✓ f(-5)=-51✓ f(8)=66✓  intrus=f(x)=5x-9
+   Série 3 : f(x)=9x   → f(1)=9✓ f(8)=72✓  intrus="1 est antécédent de 19"
+   + 3 séries supplémentaires construites sur le même modèle
+════════════════════════════════════════ */
+var QUESTIONS=[
+
+  /* ── Série 1 : f(x)=9x+6 ── */
+  {
+    cartes:[
+      {txt:"7 a pour image\u00a069\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"<span class='formule'>f(x) = 5x + 9</span>", vrai:false},
+      {txt:"5 est l\u2019ant\u00e9c\u00e9dent\u00a0de\u00a051\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"78 est l\u2019image\u00a0de\u00a08\u00a0par\u00a0<em>f</em>.", vrai:true},
+    ],
+    ans:1,
+    expl:"La vraie formule est <strong><em>f</em>(x)&nbsp;= 9x&nbsp;+&nbsp;6</strong>&nbsp;: f(7)=69, f(5)=51, f(8)=78. La carte <em>f</em>(x)=5x+9 est l\u2019intrus."
+  },
+
+  /* ── Série 2 : f(x)=9x-6 ── */
+  {
+    cartes:[
+      {txt:"\u22127 a pour image\u00a0\u221269\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"<span class='formule'>f(x) = 5x \u2212 9</span>", vrai:false},
+      {txt:"\u22125 est l\u2019ant\u00e9c\u00e9dent\u00a0de\u00a0\u221251\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"66 est l\u2019image\u00a0de\u00a08\u00a0par\u00a0<em>f</em>.", vrai:true},
+    ],
+    ans:1,
+    expl:"La vraie formule est <strong><em>f</em>(x)&nbsp;= 9x&nbsp;\u2212&nbsp;6</strong>&nbsp;: f(\u22127)=\u221269, f(\u22125)=\u221251, f(8)=66. La carte <em>f</em>(x)=5x\u22129 est l\u2019intrus."
+  },
+
+  /* ── Série 3 : f(x)=9x ── */
+  {
+    cartes:[
+      {txt:"1 a pour image\u00a09\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"72 est l\u2019image\u00a0de\u00a08\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"<span class='formule'>f(x) = 9x</span>", vrai:true},
+      {txt:"1 est l\u2019ant\u00e9c\u00e9dent\u00a0de\u00a019\u00a0par\u00a0<em>f</em>.", vrai:false},
+    ],
+    ans:3,
+    expl:"<em>f</em>(x)=9x donc l\u2019ant\u00e9c\u00e9dent de 19 est 19/9 \u2260 1. La 4e carte est l\u2019intrus."
+  },
+
+  /* ── Série 4 : f(x)=3x+5 ── */
+  /* f(4)=17✓ f(10)=35✓ f(0)=5✓  intrus: "2 a pour image 9" (f(2)=11≠9) */
+  {
+    cartes:[
+      {txt:"4 a pour image\u00a017\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"2 a pour image\u00a09\u00a0par\u00a0<em>f</em>.", vrai:false},
+      {txt:"10 a pour image\u00a035\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"<span class='formule'>f(x) = 3x + 5</span>", vrai:true},
+    ],
+    ans:1,
+    expl:"<em>f</em>(x)=3x+5 donc f(2)=11\u200a\u2260\u200a9. La 2e carte est l\u2019intrus."
+  },
+
+  /* ── Série 5 : f(x)=4x-3 ── */
+  /* f(5)=17✓ f(2)=5✓ f(0)=-3✓  intrus: "3 a pour image 10" (f(3)=9≠10) */
+  {
+    cartes:[
+      {txt:"5 a pour image\u00a017\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"<span class='formule'>f(x) = 4x \u2212 3</span>", vrai:true},
+      {txt:"3 a pour image\u00a010\u00a0par\u00a0<em>f</em>.", vrai:false},
+      {txt:"2 est l\u2019ant\u00e9c\u00e9dent\u00a0de\u00a05\u00a0par\u00a0<em>f</em>.", vrai:true},
+    ],
+    ans:2,
+    expl:"<em>f</em>(x)=4x\u22123 donc f(3)=9\u200a\u2260\u200a10. La 3e carte est l\u2019intrus."
+  },
+
+  /* ── Série 6 : f(x)=2x+7 ── */
+  /* f(3)=13✓ f(6)=19✓ antécédent de 15 = (15-7)/2=4✓  intrus: "f(x)=2x+5" */
+  {
+    cartes:[
+      {txt:"3 a pour image\u00a013\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"4 est l\u2019ant\u00e9c\u00e9dent\u00a0de\u00a015\u00a0par\u00a0<em>f</em>.", vrai:true},
+      {txt:"<span class='formule'>f(x) = 2x + 5</span>", vrai:false},
+      {txt:"6 a pour image\u00a019\u00a0par\u00a0<em>f</em>.", vrai:true},
+    ],
+    ans:2,
+    expl:"La vraie formule est <strong><em>f</em>(x)&nbsp;= 2x&nbsp;+&nbsp;7</strong>. La carte <em>f</em>(x)=2x+5 est l\u2019intrus."
+  }
+];
+
+/* ════════ SON ════════ */
+var audioCtx=null,soundOn=true;
+function getCtx(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}if(audioCtx&&audioCtx.state==="suspended"){audioCtx.resume();}return audioCtx;}
+function beep(f,d,t,v,dl){if(!soundOn)return;var ctx=getCtx();if(!ctx)return;var t0=ctx.currentTime+(dl||0);var osc=ctx.createOscillator(),g=ctx.createGain();osc.type=t||"sine";osc.frequency.value=f;g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(v||0.18,t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t0+d);osc.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+d+0.05);}
+function sndTick(){beep(820,0.07,"square",0.07);}
+function sndCdBip(){beep(440,0.16,"sine",0.2);}
+function sndCdGo(){beep(880,0.32,"sine",0.24);}
+function sndGood(){beep(660,0.13,"sine",0.2);beep(880,0.22,"sine",0.2,0.12);}
+function sndBad(){beep(220,0.3,"sawtooth",0.14);}
+function sndFanfare(){beep(523,0.16,"sine",0.2,0);beep(659,0.16,"sine",0.2,0.15);beep(784,0.16,"sine",0.2,0.30);beep(1047,0.4,"sine",0.22,0.45);}
+
+/* ════════ ÉTAT ════════ */
+var game={qIndex:0,score:0,results:[],qs:[],q:null,timeLeft:QTIME,timer:null,locked:false,selected:-1};
+
+function buildPastilles(){var p=$("pastilles");p.innerHTML="";for(var i=0;i<QTOTAL;i++){var s=document.createElement("span");s.className="pastille";s.id="past"+i;s.textContent=(i+1);p.appendChild(s);}}
+function setPastille(i,st){var s=$("past"+i);if(!s)return;s.classList.remove("active","ok","ko");if(st==="active"){s.classList.add("active");s.textContent=(i+1);}else if(st==="ok"){s.classList.add("ok");s.textContent="\u2713";}else if(st==="ko"){s.classList.add("ko");s.textContent="\u2717";}}
+function updateProgress(){$("progressFill").style.width=Math.round(game.results.length/QTOTAL*100)+"%";}
+function updateChrono(){var c=$("chrono");c.textContent="\u23f1\ufe0f "+game.timeLeft;if(game.timeLeft<=WARN_AT){c.classList.add("warn");}else{c.classList.remove("warn");}}
+
+function runCountdown(cb){var ov=$("countdown"),num=$("cdNum");ov.classList.add("show");var steps=["3","2","1","Partez\u00a0!"],i=0;function step(){num.textContent=steps[i];num.style.animation="none";void num.offsetWidth;num.style.animation="";if(i<3){sndCdBip();}else{sndCdGo();}i++;if(i<steps.length){setTimeout(step,800);}else{setTimeout(function(){ov.classList.remove("show");cb();},700);}}step();}
+
+function renderGrille(locked,sel){
+  var g=$("grille");g.innerHTML="";
+  game.q.cartes.forEach(function(c,i){
+    var div=document.createElement("div");
+    div.className="carte-opt";
+    if(locked){
+      div.classList.add("disabled");
+      if(!c.vrai){div.classList.add("correct-opt");} // la vraie intrus en vert
+      else if(i===sel&&c.vrai){div.classList.add("wrong-opt");} // mauvais choix en rouge
+    } else {
+      if(i===sel){div.classList.add("selected");}
+    }
+    div.innerHTML=c.txt;
+    if(!locked){
+      (function(idx){div.addEventListener("click",function(){selectCarte(idx);});})(i);
+    }
+    g.appendChild(div);
+  });
+}
+
+function selectCarte(i){
+  if(game.locked)return;
+  game.selected=i;
+  $("warnSaisie").classList.remove("show");
+  renderGrille(false,i);
+}
+
+function newQuestion(){
+  game.q=game.qs[game.qIndex];
+  game.locked=false;game.selected=-1;game.timeLeft=QTIME;
+  $("qLabel").textContent="Question "+(game.qIndex+1)+" / "+QTOTAL;
+  $("warnSaisie").classList.remove("show");
+  $("btnValidate").disabled=false;
+  renderGrille(false,-1);
+  updateChrono();setPastille(game.qIndex,"active");
+  startTimer();
+}
+
+function startTimer(){stopTimer();game.timer=setInterval(function(){game.timeLeft--;updateChrono();if(game.timeLeft<=WARN_AT&&game.timeLeft>0){sndTick();}if(game.timeLeft<=0){onTimeout();}},1000);}
+function stopTimer(){if(game.timer){clearInterval(game.timer);game.timer=null;}}
+
+function validate(){
+  if(game.locked)return;
+  if(game.selected===-1){$("warnSaisie").classList.add("show");sndBad();return;}
+  $("warnSaisie").classList.remove("show");
+  game.locked=true;stopTimer();
+  finishQuestion(game.selected===game.q.ans,false);
+}
+function onTimeout(){if(game.locked)return;game.locked=true;stopTimer();finishQuestion(false,true);}
+
+function finishQuestion(ok,timedOut){
+  var q=game.q;
+  game.results.push({q:q,ok:ok,timedOut:timedOut,sel:game.selected});
+  if(ok){game.score++;}
+  setPastille(game.qIndex,ok?"ok":"ko");updateProgress();
+  $("btnValidate").disabled=true;
+  renderGrille(true,game.selected);
+  if(ok){sndGood();}else{sndBad();}
+  setTimeout(nextQuestion,1200);
+}
+function nextQuestion(){game.qIndex++;if(game.qIndex<QTOTAL){newQuestion();}else{showResults();}}
+
+function showResults(){
+  $("gamearea").classList.add("hidden");$("topbar").classList.add("hidden");
+  var r=$("resultats");r.classList.remove("hidden");r.classList.add("show");
+  $("scoreFinal").textContent=game.score+" / "+QTOTAL;
+  var stars=(game.score===QTOTAL)?3:(game.score>=Math.ceil(QTOTAL*.8)?2:1);
+  $("etoiles").textContent="\u2b50".repeat(stars)+"\u2606".repeat(3-stars);
+  var msgs=["Continue \u00e0 t\u2019entra\u00eener\u00a0!","Bon d\u00e9but\u00a0!","Pas mal\u00a0!","Bien jou\u00e9\u00a0!","Tr\u00e8s bien\u00a0!","Parfait\u00a0! Tu trouves l\u2019intrus du premier coup\u00a0!"];
+  $("msgFinal").textContent=msgs[Math.min(game.score,msgs.length-1)];
+  var rec=$("recap");rec.innerHTML="";
+  game.results.forEach(function(res,idx){
+    var div=document.createElement("div");
+    div.className="recap-item "+(res.ok?"ok":"ko");
+    var intrusTxt=res.q.cartes[res.q.ans].txt.replace(/<[^>]+>/g,"");
+    div.innerHTML="<span>"+(res.ok?"\u2714":"\u2718")+"</span> S\u00e9rie "+(idx+1)
+      +" &mdash; Intrus\u00a0: <strong>"+intrusTxt+"</strong><br>"
+      +"<small style='opacity:.8'>"+res.q.expl.replace(/<[^>]+>/g,"")+"</small>";
+    rec.appendChild(div);
+  });
+  if(game.score===QTOTAL){sndFanfare();}else{sndGood();}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function startGame(){
+  game.qIndex=0;game.score=0;game.results=[];game.selected=-1;
+  game.qs=QUESTIONS.slice();
+  buildPastilles();updateProgress();
+  $("startgate").classList.add("hidden");
+  $("resultats").classList.remove("show");$("resultats").classList.add("hidden");
+  $("topbar").classList.remove("hidden");$("gamearea").classList.remove("hidden");
+  getCtx();runCountdown(function(){newQuestion();});
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  $("btnStart").addEventListener("click",startGame);
+  $("btnRejouer").addEventListener("click",startGame);
+  $("btnValidate").addEventListener("click",validate);
+  $("btnSon").addEventListener("click",function(){soundOn=!soundOn;$("btnSon").textContent=soundOn?"\uD83D\uDD0A":"\uD83D\uDD07";});
+});
+</script>
+</body>
+</html>
