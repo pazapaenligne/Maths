@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — Décomposer en facteurs premiers</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --jour:#b94040;--jour-fonce:#7a1f1f;--jour-soft:#f7eded;
+  --jour-accent:#f9c0bb;--jour-titre:#7a1f1f;
+  --vert:#8dc63f;--vert-fonce:#3d7a10;--vert-soft:#f0faeb;
+  --rouge:#e74c3c;--rouge-soft:#fdedec;--rouge-fonce:#c0392b;
+  --texte:#23262d;--gris:#8a8f9a;--bord:#ece8dd;
+  --bleu:#5ab4e8;--bleu-f:#1a6e9a;
+  --violet:#c9a0e8;--violet-f:#7a3aa0;
+  --or:#f5c518;--or-f:#8a6000;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:#fffdf7;color:var(--texte);font-family:'JetBrains Mono',monospace;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.6rem 1rem 4rem;position:relative;}
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.28;background:#f5d080;border-radius:38% 62% 55% 45%/56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.22;background:var(--jour-accent);border-radius:62% 38% 44% 56%/42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.20;background:#8dc63f;border-radius:45% 55% 62% 38%/55% 45% 58% 42%;}
+.blob4{width:140px;height:150px;bottom:200px;left:-30px;opacity:.16;background:#f28b82;border-radius:50% 50% 40% 60%/60% 40% 60% 40%;}
+
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;width:100%;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-size:.82rem;color:var(--gris);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.8vw,1.9rem);font-weight:800;line-height:1.3;}
+h1 .hl{color:var(--jour-titre);}
+.sous-titre{color:var(--gris);font-size:.9rem;margin-top:.4rem;line-height:1.8;}
+.consigne{margin:1rem auto 0;max-width:580px;border:2px dashed var(--jour);background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+
+/* SECTION JEU */
+.section-jeu{position:relative;z-index:1;width:100%;max-width:680px;background:#fff;border:2px solid var(--bord);border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.jeu-stripe{height:4px;background:linear-gradient(90deg,var(--jour),#f5a623,#f5c518);}
+
+/* ÉCRAN ACCUEIL NIVEAUX */
+.ecran-niveaux{padding:1.8rem 1.4rem 2rem;text-align:center;}
+.ecran-niveaux h2{font-size:1.1rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.5rem;}
+.ecran-niveaux p{font-size:.88rem;color:var(--gris);line-height:1.8;margin-bottom:1.4rem;}
+.niveaux-grid{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.niv-card{
+  flex:1;min-width:150px;max-width:190px;padding:1.2rem .8rem;
+  border:2.5px solid var(--bord);border-radius:14px;cursor:pointer;
+  background:#fff;transition:border-color .15s,transform .1s,box-shadow .15s;
+  text-align:center;
+}
+.niv-card:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,.12);}
+.niv-card.niv1:hover{border-color:#5ab4e8;}
+.niv-card.niv2:hover{border-color:#9a60c8;}
+.niv-card.niv3:hover{border-color:#e74c3c;}
+.niv-gems{font-size:1.8rem;margin-bottom:.4rem;}
+.niv-titre{font-weight:800;font-size:.95rem;margin-bottom:.3rem;}
+.niv-desc{font-size:.78rem;color:var(--gris);line-height:1.6;}
+
+/* JEU */
+.ecran-jeu{display:none;}
+.jeu-topbar{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.1rem;border-bottom:2px solid var(--bord);flex-wrap:wrap;gap:.4rem;}
+.jeu-topbar-left{display:flex;align-items:center;gap:.7rem;}
+.btn-retour{background:none;border:1.5px solid var(--bord);border-radius:8px;padding:.25rem .6rem;font-family:inherit;font-size:.78rem;cursor:pointer;color:var(--gris);}
+.btn-retour:hover{background:var(--bord);}
+.niv-badge{font-size:.75rem;font-weight:700;padding:.2rem .6rem;border-radius:6px;color:#fff;}
+.niv-badge.n1{background:#5ab4e8;}
+.niv-badge.n2{background:#9a60c8;}
+.niv-badge.n3{background:var(--rouge);}
+.serie-info{font-size:.82rem;font-weight:700;color:var(--gris);}
+.score-badge{background:var(--jour);color:#fff;font-weight:800;font-size:.88rem;padding:.25rem .7rem;border-radius:8px;}
+.progress-bar{height:5px;background:var(--bord);}
+.progress-fill{height:100%;background:var(--jour);transition:width .35s ease;}
+.sol-cible{background:#fff8e8;border-bottom:2px solid var(--or);padding:.55rem 1.1rem;text-align:center;font-size:.98rem;font-weight:800;color:var(--or-f);}
+.tuiles-zone{padding:.9rem 1.1rem .5rem;border-bottom:1px solid var(--bord);}
+.tuiles-label{font-size:.68rem;color:var(--gris);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;}
+.tuiles-row{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;min-height:50px;}
+.tuile{
+  min-width:50px;height:50px;padding:0 .65rem;
+  background:var(--bleu);color:#fff;border:none;border-radius:9px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1rem;
+  cursor:grab;box-shadow:0 3px 0 var(--bleu-f);
+  transition:opacity .15s,transform .1s;
+  user-select:none;touch-action:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.tuile.sel{outline:3px solid var(--or);transform:scale(1.06);}
+.tuile.used{opacity:0;pointer-events:none;}
+.tuile.dragging{opacity:.4;}
+.eq-zone{padding:1.1rem 1rem;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.45rem;font-size:1.25rem;font-weight:700;color:#222;min-height:76px;}
+.eq-text{font-style:italic;}
+.case{
+  min-width:50px;height:50px;padding:0 .5rem;
+  background:var(--violet);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  border:3px dashed var(--violet-f);cursor:pointer;
+  transition:background .12s;
+}
+.case:hover{background:#b880d8;}
+.case.filled{background:#9a60c8;border-style:solid;border-color:var(--violet-f);}
+.case .cval{color:#fff;font-weight:800;font-size:.98rem;}
+.case.ok-c{background:var(--vert)!important;border-color:var(--vert-fonce)!important;}
+.case.ko-c{background:var(--rouge)!important;border-color:var(--rouge-fonce)!important;}
+.feedback-zone{padding:.55rem 1.1rem;text-align:center;min-height:2.3rem;font-weight:700;font-size:.9rem;}
+.feedback-zone.ok{color:var(--vert-fonce);}
+.feedback-zone.ko{color:var(--rouge-fonce);}
+.btns-row{display:flex;gap:.6rem;justify-content:center;padding:.6rem 1rem .9rem;flex-wrap:wrap;}
+.jbtn{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.85rem;border:none;border-radius:10px;cursor:pointer;padding:.55rem 1.1rem;min-height:2.4rem;transition:transform .08s;}
+.jbtn:active{transform:scale(.95);}
+.jbtn.valider{background:var(--jour);color:#fff;box-shadow:0 3px 0 var(--jour-fonce);}
+.jbtn.reset{background:#e8e4d9;color:#555;border:1.5px solid #ccc;}
+.jbtn.suivant{background:var(--vert);color:#fff;box-shadow:0 3px 0 var(--vert-fonce);}
+.jbtn:disabled{opacity:.35;cursor:default;}
+
+/* ÉCRAN FIN DE NIVEAU */
+.ecran-fin{display:none;padding:1.5rem 1.4rem 1.8rem;text-align:center;}
+
+.fin-trophee{font-size:2.5rem;margin-bottom:.4rem;}
+.fin-titre{font-size:1.2rem;font-weight:800;color:var(--vert-fonce);margin-bottom:.4rem;}
+.fin-score{font-size:.92rem;color:var(--texte);margin-bottom:1.2rem;line-height:1.8;}
+.fin-btns{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+
+@media(max-width:480px){
+  .eq-zone{font-size:1.05rem;gap:.3rem;}
+  .case,.tuile{min-width:43px;height:43px;font-size:.88rem;}
+  .niveaux-grid{flex-direction:column;align-items:center;}
+}
+</style>
+</head>
+<body>
+<div class="blob blob1"></div><div class="blob blob2"></div>
+<div class="blob blob3"></div><div class="blob blob4"></div>
+
+<header class="hero">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine&nbsp;8 &ndash; Jour&nbsp;2</div>
+  <h1><span class="hl">D&eacute;composer un nombre en produit de facteurs premiers</span></h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs.</p>
+  <div class="consigne">&#128073; Compl&egrave;te l&rsquo;&eacute;quation avec les tuiles bleues pour qu&rsquo;elle admette la solution indiqu&eacute;e.</div>
+</header>
+
+<section class="section-jeu">
+  <div class="jeu-stripe"></div>
+
+  <!-- ÉCRAN NIVEAUX -->
+  <div class="ecran-niveaux" id="ecranNiveaux">
+    <h2>Choisis ton niveau</h2>
+    <p>Compl&egrave;te l&rsquo;&eacute;quation pour qu&rsquo;elle admette pour solution la valeur de <em>x</em> propos&eacute;e.</p>
+    <div class="niveaux-grid">
+      <div class="niv-card niv1" onclick="startNiveau(1)">
+        <div class="niv-gems">&#128142;</div>
+        <div class="niv-titre">Niveau 1</div>
+
+      </div>
+      <div class="niv-card niv2" onclick="startNiveau(2)">
+        <div class="niv-gems">&#128142;&#128142;</div>
+        <div class="niv-titre">Niveau 2</div>
+
+      </div>
+      <div class="niv-card niv3" onclick="startNiveau(3)">
+        <div class="niv-gems">&#128142;&#128142;&#128142;</div>
+        <div class="niv-titre">Niveau 3</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- JEU -->
+  <div class="ecran-jeu" id="ecranJeu">
+    <div class="jeu-topbar">
+      <div class="jeu-topbar-left">
+        <button class="btn-retour" onclick="retourNiveaux()">&#8592; Niveaux</button>
+        <span class="niv-badge" id="nivBadge">N1</span>
+        <span class="serie-info" id="serieInfo">Série 1/10</span>
+      </div>
+      <div class="score-badge" id="scoreBadge">Score : 0</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="sol-cible" id="solCible"></div>
+    <div class="tuiles-zone">
+      <div class="tuiles-label">Tuiles disponibles — glisse ou clique</div>
+      <div class="tuiles-row" id="tuilesRow"></div>
+    </div>
+    <div class="eq-zone" id="eqZone"></div>
+    <div class="feedback-zone" id="feedbackZone"></div>
+    <div class="btns-row">
+      <button class="jbtn reset" onclick="resetSerie()">&#8635; Recommencer</button>
+      <button class="jbtn valider" id="btnValider" onclick="valider()">&#10003; Valider</button>
+      <button class="jbtn suivant" id="btnSuivant" onclick="seriesSuivante()" disabled>Suivante &#8594;</button>
+    </div>
+  </div>
+
+  <!-- FIN DE NIVEAU -->
+  <div class="ecran-fin" id="ecranFin">
+    <div class="fin-trophee">&#127942;</div>
+    <div class="fin-titre" id="finTitre">Niveau terminé !</div>
+    <div class="fin-score" id="finScore"></div>
+    <div class="fin-btns">
+      <button class="jbtn reset" onclick="retourNiveaux()">&#8592; Choisir un niveau</button>
+      <button class="jbtn suivant" id="btnNivSuiv" onclick="nivSuivant()">Niveau suivant &#8594;</button>
+    </div>
+  </div>
+</section>
+
+<script>
+"use strict";
+
+/* ══════════════ DONNÉES ══════════════ */
+var DATA = {
+  /* Niveau 1 : □x + □ = □   —   xVal = valeur de x à substituer */
+  1: [
+    {tiles:[2,4,10,6,3],     xVal:3,  sol:"x = 3"},
+    {tiles:[3,6,15,9,2],     xVal:3,  sol:"x = 3"},
+    {tiles:[5,0,20,10,4],    xVal:4,  sol:"x = 4"},
+    {tiles:[4,8,20,12,2],    xVal:3,  sol:"x = 3"},
+    {tiles:[2,3,11,5,7],     xVal:4,  sol:"x = 4"},
+    {tiles:[6,2,14,8,3],     xVal:2,  sol:"x = 2"},
+    {tiles:[3,1,10,7,4],     xVal:3,  sol:"x = 3"},
+    {tiles:[7,3,17,10,5],    xVal:2,  sol:"x = 2"},
+    {tiles:[4,1,13,5,3],     xVal:3,  sol:"x = 3"},
+    {tiles:[5,2,17,7,3],     xVal:3,  sol:"x = 3"},
+  ],
+  /* Niveau 2 : □x + □ = □x + □ */
+  2: [
+    {tiles:[5,3,2,9,1],      xVal:2,  sol:"x = 2"},
+    {tiles:[6,1,3,10,2],     xVal:3,  sol:"x = 3"},
+    {tiles:[8,2,4,14,5],     xVal:3,  sol:"x = 3"},
+    {tiles:[7,4,3,16,2],     xVal:3,  sol:"x = 3"},
+    {tiles:[4,5,2,11,1],     xVal:3,  sol:"x = 3"},
+    {tiles:[9,1,5,13,3],     xVal:3,  sol:"x = 3"},
+    {tiles:[6,3,2,11,1],     xVal:2,  sol:"x = 2"},
+    {tiles:[5,6,1,14,2],     xVal:2,  sol:"x = 2"},
+    {tiles:[8,1,3,11,2],     xVal:2,  sol:"x = 2"},
+    {tiles:[7,2,3,10,1],     xVal:2,  sol:"x = 2"},
+  ],
+  /* Niveau 3 : (□x + □)(□x + □) = 0  —  xVal = [x1, x2] */
+  3: [
+    {tiles:[-16,-16,-4,-8,-12,-3], xVal:[-4,-2], sol:"x = −4 et x = −2"},
+    {tiles:[2,6,3,-9,5,-1],        xVal:[-3,3],  sol:"x = −3 et x = 3"},
+    {tiles:[1,5,2,-4,3,-6],        xVal:[-5,2],  sol:"x = −5 et x = 2"},
+    {tiles:[1,3,1,-5,2,-1],        xVal:[-3,5],  sol:"x = −3 et x = 5"},
+    {tiles:[2,4,3,-6,1,-2],        xVal:[-2,2],  sol:"x = −2 et x = 2"},
+    {tiles:[1,7,1,-2,3,-1],        xVal:[-7,2],  sol:"x = −7 et x = 2"},
+    {tiles:[2,8,1,-3,4,-4],        xVal:[-4,3],  sol:"x = −4 et x = 3"},
+    {tiles:[3,6,2,-8,1,-3],        xVal:[-2,4],  sol:"x = −2 et x = 4"},
+    {tiles:[1,4,1,-6,2,-2],        xVal:[-4,6],  sol:"x = −4 et x = 6"},
+    {tiles:[2,6,1,-4,3,-3],        xVal:[-3,4],  sol:"x = −3 et x = 4"},
+  ]
+};
+
+/* ══════════════ ÉTAT ══════════════ */
+var niveau=0, serieIdx=0, score=0;
+var caseVals=[], tuilesUsed=[], selTuile=null, locked=false;
+var dragIdx=null;
+
+function $i(id){return document.getElementById(id);}
+
+/* ══════════════ NAVIGATION ══════════════ */
+function show(id){
+  $i("ecranNiveaux").style.display = id==="ecranNiveaux" ? "block" : "none";
+  $i("ecranJeu").style.display     = id==="ecranJeu"     ? "block" : "none";
+  $i("ecranFin").style.display     = id==="ecranFin"     ? "block" : "none";
+}
+
+function startNiveau(n){
+  niveau=n; serieIdx=0; score=0;
+  var badges={1:"N1 ◆",2:"N2 ◆◆",3:"N3 ◆◆◆"};
+  var cls={1:"n1",2:"n2",3:"n3"};
+  $i("nivBadge").textContent=badges[n];
+  $i("nivBadge").className="niv-badge "+cls[n];
+  show("ecranJeu");
+  initSerie();
+  render();
+}
+
+function retourNiveaux(){
+  show("ecranNiveaux");
+}
+
+function nivSuivant(){
+  if(niveau<3){ startNiveau(niveau+1); }
+  else{ retourNiveaux(); }
+}
+
+/* ══════════════ SÉRIE ══════════════ */
+function nbCases(){
+  /* Niveau 1 : 3 cases, Niveau 2 : 4 cases, Niveau 3 : 4 cases */
+  return niveau===1 ? 3 : 4;
+}
+function initSerie(){
+  var nb=nbCases();
+  caseVals=Array(nb).fill(null);
+  tuilesUsed=Array(nb).fill(-1);
+  selTuile=null; locked=false;
+}
+
+function render(){
+  var s=DATA[niveau][serieIdx];
+  $i("serieInfo").textContent="Série "+(serieIdx+1)+"/10";
+  $i("scoreBadge").textContent="Score : "+score;
+  $i("progressFill").style.width=(serieIdx/10*100)+"%";
+  $i("solCible").innerHTML="&#128273; Solution : <strong>"+s.sol+"</strong>";
+  $i("feedbackZone").textContent="";
+  $i("feedbackZone").className="feedback-zone";
+  $i("btnValider").disabled=false;
+  $i("btnSuivant").disabled=true;
+  renderTuiles();
+  renderEq();
+}
+
+function renderTuiles(){
+  var s=DATA[niveau][serieIdx];
+  var row=$i("tuilesRow"); row.innerHTML="";
+  s.tiles.forEach(function(val,i){
+    var used=tuilesUsed.indexOf(i)!==-1;
+    var d=document.createElement("div");
+    d.className="tuile"+(used?" used":"")+(selTuile===i?" sel":"");
+    d.textContent=val; d.dataset.idx=i;
+    if(!used&&!locked){
+      d.draggable=true;
+      d.addEventListener("dragstart",onDS);
+      d.addEventListener("dragend",onDE);
+      d.addEventListener("click",onTC);
+      d.addEventListener("touchstart",onTSt,{passive:false});
+    }
+    row.appendChild(d);
+  });
+}
+
+function renderEq(){
+  var s=DATA[niveau][serieIdx];
+  var zone=$i("eqZone"); zone.innerHTML="";
+  function txt(h){var sp=document.createElement("span");sp.className="eq-text";sp.innerHTML=h;zone.appendChild(sp);}
+  function cas(ci){
+    var d=document.createElement("div");
+    d.className="case"+(caseVals[ci]!==null?" filled":"");
+    d.dataset.ci=ci;
+    if(caseVals[ci]!==null){var sp=document.createElement("span");sp.className="cval";sp.textContent=caseVals[ci];d.appendChild(sp);}
+    if(!locked){d.addEventListener("dragover",onDO);d.addEventListener("drop",onDr);d.addEventListener("click",onCC);}
+    zone.appendChild(d);
+  }
+  if(niveau===1){
+    cas(0);txt("&thinsp;<em>x</em>&nbsp;+&nbsp;");cas(1);txt("&nbsp;=&nbsp;");cas(2);
+  } else if(niveau===2){
+    cas(0);txt("&thinsp;<em>x</em>&nbsp;+&nbsp;");cas(1);txt("&nbsp;=&nbsp;");cas(2);txt("&thinsp;<em>x</em>&nbsp;+&nbsp;");cas(3);
+  } else {
+    txt("(&thinsp;");cas(0);txt("&thinsp;<em>x</em>&nbsp;+&nbsp;");cas(1);txt("&thinsp;)(&thinsp;");cas(2);txt("&thinsp;<em>x</em>&nbsp;+&nbsp;");cas(3);txt("&thinsp;) = 0");
+  }
+}
+
+/* ══════════════ DRAG & DROP ══════════════ */
+function onDS(e){dragIdx=parseInt(this.dataset.idx);this.classList.add("dragging");e.dataTransfer.effectAllowed="move";}
+function onDE(){this.classList.remove("dragging");dragIdx=null;}
+function onDO(e){e.preventDefault();}
+function onDr(e){e.preventDefault();if(dragIdx!==null)place(parseInt(this.dataset.ci),dragIdx);}
+
+/* ══════════════ CLIC ══════════════ */
+function onTC(){
+  if(locked)return;
+  var i=parseInt(this.dataset.idx);
+  selTuile=(selTuile===i)?null:i;
+  renderTuiles();
+}
+function onCC(){
+  if(locked)return;
+  var ci=parseInt(this.dataset.ci);
+  if(selTuile!==null){place(ci,selTuile);selTuile=null;}
+  else if(caseVals[ci]!==null){remove(ci);}
+}
+
+/* ══════════════ TOUCH ══════════════ */
+var tClone=null,tOrigin=null;
+function onTSt(e){
+  if(locked)return;
+  tOrigin=parseInt(this.dataset.idx);
+  var t=e.touches[0];
+  tClone=this.cloneNode(true);
+  tClone.style.cssText="position:fixed;z-index:9999;opacity:.8;pointer-events:none;transform:translate(-50%,-50%);";
+  tClone.style.left=t.clientX+"px";tClone.style.top=t.clientY+"px";
+  document.body.appendChild(tClone);
+  document.addEventListener("touchmove",onTMv,{passive:false});
+  document.addEventListener("touchend",onTEn);
+  e.preventDefault();
+}
+function onTMv(e){if(!tClone)return;var t=e.touches[0];tClone.style.left=t.clientX+"px";tClone.style.top=t.clientY+"px";e.preventDefault();}
+function onTEn(e){
+  if(!tClone)return;
+  var t=e.changedTouches[0];
+  tClone.remove();tClone=null;
+  document.removeEventListener("touchmove",onTMv);
+  document.removeEventListener("touchend",onTEn);
+  var el=document.elementFromPoint(t.clientX,t.clientY);
+  if(el){var c=el.closest(".case");if(c)place(parseInt(c.dataset.ci),tOrigin);}
+  tOrigin=null;
+}
+
+/* ══════════════ LOGIQUE ══════════════ */
+function place(ci,ti){
+  remove(ci);
+  tuilesUsed.forEach(function(t,c){if(t===ti){caseVals[c]=null;tuilesUsed[c]=-1;}});
+  caseVals[ci]=DATA[niveau][serieIdx].tiles[ti];
+  tuilesUsed[ci]=ti;
+  renderTuiles();renderEq();
+}
+function remove(ci){caseVals[ci]=null;tuilesUsed[ci]=-1;renderTuiles();renderEq();}
+
+function resetSerie(){initSerie();render();}
+
+/* ══ VALIDATION MATHÉMATIQUE (style Hatier) ══
+   On reconstruit l'équation avec les tuiles placées,
+   on substitue x par xVal et on vérifie l'égalité.
+   Plusieurs combinaisons correctes sont possibles.
+*/
+function evalEq(){
+  /* Retourne true si l'équation est vérifiée, false sinon, null si cases vides */
+  var s=DATA[niveau][serieIdx];
+  var cv=caseVals;
+  if(cv.indexOf(null)!==-1) return null;
+  var a=cv[0], b=cv[1], c=cv[2];
+
+  if(niveau===1){
+    /* a*x + b = c */
+    var xv=s.xVal;
+    return (a*xv + b) === c;
+
+  } else if(niveau===2){
+    /* a*x + b = c*x + d */
+    var d=cv[3], xv=s.xVal;
+    return (a*xv + b) === (c*xv + d);
+
+  } else {
+    /* (a*x + b)(c*x + d) = 0  ⟺  au moins un facteur = 0 pour chaque solution */
+    var d=cv[3];
+    var xArr=s.xVal; /* tableau [x1, x2] */
+    /* Les deux solutions doivent annuler un facteur chacune */
+    return xArr.every(function(xv){
+      return (a*xv + b === 0) || (c*xv + d === 0);
+    });
+  }
+}
+
+function valider(){
+  var s=DATA[niveau][serieIdx];
+  if(caseVals.indexOf(null)!==-1){
+    var fb=$i("feedbackZone");fb.textContent="⚠️ Remplis toutes les cases d'abord !";fb.className="feedback-zone ko";return;
+  }
+  var ok=evalEq();
+  locked=true;$i("btnValider").disabled=true;
+  /* Colorier toutes les cases en vert si ok, rouge sinon */
+  document.querySelectorAll(".case").forEach(function(c){
+    c.classList.add(ok?"ok-c":"ko-c");
+  });
+  var fb=$i("feedbackZone");
+  if(ok){
+    fb.innerHTML="✔ Bravo ! L’égalité est vérifiée.";
+    fb.className="feedback-zone ok";
+    score++;$i("scoreBadge").textContent="Score : "+score;
+  } else {
+    /* Reconstruire l'équation affichée pour expliquer l'erreur */
+    var cv=caseVals, xv=Array.isArray(s.xVal)?s.xVal[0]:s.xVal;
+    var explication="";
+    if(niveau===1){
+      explication=cv[0]+"×"+xv+"+"+cv[1]+"="+(cv[0]*xv+cv[1])+" ≠ "+cv[2];
+    } else if(niveau===2){
+      explication=cv[0]+"×"+xv+"+"+cv[1]+"="+(cv[0]*xv+cv[1])
+        +" mais "+cv[2]+"×"+xv+"+"+cv[3]+"="+(cv[2]*xv+cv[3]);
+    } else {
+      var x1=s.xVal[0],x2=s.xVal[1];
+      explication="Pour x="+x1+" : ("+(cv[0]*x1+cv[1])+")×("+(cv[2]*x1+cv[3])+")"
+        +" — Pour x="+x2+" : ("+(cv[0]*x2+cv[1])+")×("+(cv[2]*x2+cv[3])+")";
+    }
+    fb.innerHTML="✘ L’égalité n’est pas vérifiée.<br>"
+      +"<small style='opacity:.85'>"+explication+"</small>";
+    fb.className="feedback-zone ko";
+  }
+  $i("btnSuivant").disabled=false;
+}
+
+function seriesSuivante(){
+  serieIdx++;
+  if(serieIdx>=10){
+    // Fin du niveau
+    $i("progressFill").style.width="100%";
+    var nomNiv=["","Niveau 1","Niveau 2","Niveau 3"];
+    $i("finTitre").textContent=nomNiv[niveau]+" terminé !";
+    $i("finScore").innerHTML="Tu as réussi <strong>"+score+" série"+(score>1?"s":"")+
+      "</strong> sur 10.";
+    $i("btnNivSuiv").style.display=(niveau<3)?"":"none";
+    show("ecranFin");
+    return;
+  }
+  initSerie();render();
+}
+
+/* ══════════════ INIT ══════════════ */
+document.addEventListener("DOMContentLoaded",function(){
+  show("ecranNiveaux");
+});
+</script>
+</body>
+</html>
