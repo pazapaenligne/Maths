@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — Puissances et notation scientifique</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --jour:#f5c518;--jour-fonce:#8a6000;--jour-soft:#fffbeb;
+  --jour-accent:#f5e08a;--jour-titre:#8a6000;
+  --vert:#8dc63f;--vert-fonce:#3d7a10;--vert-soft:#f0faeb;
+  --rouge:#e74c3c;--rouge-soft:#fdedec;--rouge-fonce:#c0392b;
+  --texte:#23262d;--gris:#8a8f9a;--bord:#ece8dd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:#fffdf7;color:var(--texte);font-family:'JetBrains Mono',monospace;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.6rem 1rem 4rem;position:relative;}
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.28;background:#f5d080;border-radius:38% 62% 55% 45%/56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.22;background:var(--jour-accent);border-radius:62% 38% 44% 56%/42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.20;background:#8dc63f;border-radius:45% 55% 62% 38%/55% 45% 58% 42%;}
+.blob4{width:140px;height:150px;bottom:200px;left:-30px;opacity:.16;background:#f28b82;border-radius:50% 50% 40% 60%/60% 40% 60% 40%;}
+
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;width:100%;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-size:.82rem;color:var(--gris);margin-bottom:.5rem;}
+h1{font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:800;line-height:1.3;}
+h1 .hl{color:var(--jour-titre);}
+.sous-titre{color:var(--gris);font-size:.9rem;margin-top:.4rem;line-height:1.8;}
+.consigne{margin:1rem auto 0;max-width:560px;border:2px dashed var(--jour);background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+
+/* SECTION */
+.section{position:relative;z-index:1;width:100%;max-width:660px;background:#fff;border:2px solid var(--bord);border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.stripe{height:4px;background:linear-gradient(90deg,var(--jour),#f5a623,#f28b82);}
+
+/* ACCUEIL */
+.ecran-accueil{padding:1.8rem 1.5rem 2.2rem;text-align:center;}
+.accueil-h{font-size:1.05rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.4rem;}
+.accueil-d{font-size:.86rem;color:var(--gris);line-height:1.8;margin-bottom:.6rem;}
+.memo{background:var(--jour-soft);border-left:4px solid var(--jour);border-radius:8px;padding:.7rem 1rem;margin:.8rem 0 1.2rem;font-size:.84rem;color:var(--jour-fonce);line-height:1.95;text-align:left;}
+.niv-row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem;}
+.niv-btn{
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.88rem;
+  padding:.55rem 1.2rem;border:2.5px solid var(--bord);border-radius:10px;
+  background:#fff;cursor:pointer;color:var(--gris);transition:.15s;
+}
+.niv-btn.active{background:var(--jour);border-color:var(--jour);color:#222;}
+.btn-start{
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1rem;
+  background:var(--jour);color:#222;border:none;border-radius:14px;
+  padding:.85rem 2.2rem;cursor:pointer;box-shadow:0 4px 14px rgba(245,197,24,.4);
+  transition:transform .1s;
+}
+.btn-start:hover{transform:translateY(-2px);}
+
+/* COMPTE À REBOURS */
+.ecran-cd{display:none;padding:3.5rem 1rem;text-align:center;}
+.cd-n{font-size:clamp(6rem,20vw,9rem);font-weight:800;color:var(--jour-titre);
+  animation:cdPop .7s ease both;line-height:1;}
+@keyframes cdPop{0%{transform:scale(.2);opacity:0;}55%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+
+/* JEU */
+.ecran-jeu{display:none;}
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem 1.1rem;border-bottom:2px solid var(--bord);flex-wrap:wrap;gap:.4rem;}
+.q-info{font-size:.82rem;font-weight:700;color:var(--gris);}
+.chrono{display:inline-flex;align-items:center;gap:.25rem;
+  background:var(--jour-soft);border:2px solid var(--jour);
+  color:var(--jour-fonce);font-weight:800;font-size:.95rem;
+  padding:.25rem .75rem;border-radius:99px;min-width:4.8rem;justify-content:center;}
+.chrono.warn{background:var(--rouge-soft);border-color:var(--rouge);
+  color:var(--rouge-fonce);animation:cp .5s infinite;}
+@keyframes cp{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.btn-son{background:#fff;border:2px solid var(--bord);border-radius:50%;
+  width:2.2rem;height:2.2rem;font-size:.9rem;cursor:pointer;font-family:inherit;}
+.prog-bg{background:var(--bord);height:5px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--jour),#f5a623);transition:width .35s;}
+
+/* Affichage équation */
+.eq-zone{padding:1.4rem 1.2rem 1rem;text-align:center;}
+.niv-tag{font-size:.68rem;color:var(--gris);text-transform:uppercase;
+  letter-spacing:.1em;font-weight:700;margin-bottom:.6rem;}
+.eq-box{
+  background:#f8f5ec;border:2px solid var(--bord);border-radius:12px;
+  padding:1.1rem 1rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;
+}
+.eq-ligne{display:flex;align-items:center;justify-content:center;
+  flex-wrap:wrap;gap:.3rem;font-size:1.1rem;font-weight:700;line-height:1.4;}
+.eq-facteur{font-size:1.15rem;font-weight:800;color:var(--jour-fonce);}
+.eq-signe{font-size:1.1rem;color:var(--gris);padding:0 .1rem;}
+.eq-case{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:2.4rem;height:2.2rem;padding:0 .4rem;
+  background:var(--jour-accent);border:2.5px solid var(--jour);
+  border-radius:7px;font-size:1rem;font-weight:800;color:var(--jour-fonce);
+  cursor:pointer;transition:.15s;position:relative;
+}
+.eq-case:hover{background:var(--jour);color:#222;}
+.eq-case.actif{background:var(--jour);color:#222;box-shadow:0 0 0 3px rgba(245,197,24,.4);}
+.eq-case.ok{background:var(--vert);border-color:var(--vert-fonce);color:#fff;}
+.eq-case.ko{background:var(--rouge);border-color:var(--rouge-fonce);color:#fff;}
+.eq-case.revele{background:var(--vert);border-color:var(--vert-fonce);color:#fff;}
+sup{font-size:.6em;vertical-align:super;line-height:0;}
+
+/* Feedback */
+.feedback{margin:.5rem 1.2rem;padding:.55rem .9rem;border-radius:10px;
+  font-size:.88rem;font-weight:700;text-align:center;display:none;line-height:1.7;}
+.feedback.ok{display:block;background:var(--vert-soft);border:2px solid var(--vert);color:var(--vert-fonce);}
+.feedback.ko{display:block;background:var(--rouge-soft);border:2px solid var(--rouge);color:var(--rouge-fonce);}
+
+/* Propositions */
+.props-zone{padding:.6rem 1.2rem 1.1rem;display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;}
+.prop-btn{
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.05rem;
+  min-width:3.8rem;height:3.2rem;padding:0 1rem;
+  border:2.5px solid var(--bord);border-radius:11px;
+  background:#fff;color:var(--texte);cursor:pointer;
+  transition:border-color .12s,background .12s,transform .08s;
+}
+.prop-btn:hover:not(:disabled){border-color:var(--jour);background:var(--jour-soft);}
+.prop-btn:active:not(:disabled){transform:scale(.95);}
+.prop-btn:disabled{cursor:default;}
+.prop-btn.ok{background:var(--vert);border-color:var(--vert-fonce);color:#fff;}
+.prop-btn.ko{background:var(--rouge);border-color:var(--rouge-fonce);color:#fff;}
+.prop-btn.revele{background:var(--vert-soft);border-color:var(--vert);color:var(--vert-fonce);}
+
+/* FIN */
+.ecran-fin{display:none;padding:1.8rem 1.4rem 2rem;text-align:center;}
+.fin-ico{font-size:2.8rem;margin-bottom:.3rem;}
+.fin-sc{font-size:1.5rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.3rem;}
+.fin-et{font-size:1.9rem;letter-spacing:.15em;margin-bottom:.8rem;}
+.fin-stats{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.1rem;}
+.stat{background:var(--jour-soft);border:1.5px solid var(--jour-accent);
+  border-radius:10px;padding:.4rem .8rem;font-size:.82rem;font-weight:700;color:var(--jour-fonce);}
+.stat span{display:block;font-size:1.15rem;font-weight:800;}
+.recap{text-align:left;margin-bottom:1.3rem;display:flex;flex-direction:column;gap:.35rem;}
+.ri{display:flex;flex-direction:column;gap:.08rem;border-radius:9px;
+  padding:.45rem .75rem;font-size:.8rem;line-height:1.85;}
+.ri.ok{background:var(--vert-soft);border:1.5px solid var(--vert);color:var(--vert-fonce);}
+.ri.ko{background:var(--rouge-soft);border:1.5px solid var(--rouge);color:var(--rouge-fonce);}
+.btn-rejouer{
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.95rem;
+  background:var(--jour);color:#222;border:none;border-radius:12px;
+  padding:.72rem 1.6rem;cursor:pointer;box-shadow:0 3px 0 var(--jour-fonce);
+}
+
+@media(max-width:480px){
+  .eq-ligne{font-size:.95rem;}
+  .prop-btn{font-size:.95rem;min-width:3.2rem;height:2.8rem;}
+}
+</style>
+</head>
+<body>
+<div class="blob blob1"></div><div class="blob blob2"></div>
+<div class="blob blob3"></div><div class="blob blob4"></div>
+
+<header class="hero">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine&nbsp;8 &ndash; Jour&nbsp;5</div>
+  <h1><span class="hl">Calculer avec des puissances et notation scientifique</span></h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs.</p>
+  <div class="consigne">&#128073; Clique sur la valeur qui compl&egrave;te correctement le d&eacute;veloppement.</div>
+</header>
+
+<section class="section" id="section">
+  <div class="stripe"></div>
+
+  <!-- ACCUEIL -->
+  <div class="ecran-accueil" id="ecranAccueil">
+    <div class="accueil-h">&#9889; D&eacute;fi double distributivit&eacute;</div>
+    <div class="accueil-d">10 questions &middot; Clique sur la bonne valeur</div>
+
+    <div class="niv-row" id="nivRow">
+      <button class="niv-btn active" onclick="setNiv(1)" id="n1">&#128142; N1 &mdash; 1 case</button>
+      <button class="niv-btn" onclick="setNiv(2)" id="n2">&#128142;&#128142; N2 &mdash; N&eacute;gatifs</button>
+      <button class="niv-btn" onclick="setNiv(3)" id="n3">&#128142;&#128142;&#128142; N3 &mdash; 2 cases</button>
+    </div>
+    <button class="btn-start" onclick="lancer()">&#9654;&#65039; Commencer</button>
+  </div>
+
+  <!-- COMPTE À REBOURS -->
+  <div class="ecran-cd" id="ecranCd"><div class="cd-n" id="cdN">3</div></div>
+
+  <!-- JEU -->
+  <div class="ecran-jeu" id="ecranJeu">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span class="q-info" id="qInfo">1 / 10</span>
+        <div class="chrono" id="chrono">&#9203; 20</div>
+      </div>
+      <button class="btn-son" id="btnSon" onclick="toggleSon()">&#128266;</button>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="eq-zone">
+      <div class="niv-tag" id="nivTag"></div>
+      <div class="eq-box">
+        <div class="eq-ligne" id="eqFacteurs"></div>
+        <div class="eq-signe">=</div>
+        <div class="eq-ligne" id="eqDev"></div>
+      </div>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="props-zone" id="propsZone"></div>
+  </div>
+
+  <!-- FIN -->
+  <div class="ecran-fin" id="ecranFin">
+    <div class="fin-ico" id="finIco">&#127942;</div>
+    <div class="fin-sc" id="finSc"></div>
+    <div class="fin-et" id="finEt"></div>
+    <div class="fin-stats" id="finStats"></div>
+    <div class="recap" id="recap"></div>
+    <button class="btn-rejouer" onclick="restart()">&#8635; Rejouer</button>
+  </div>
+</section>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════════
+   MOTEUR ENTIÈREMENT GÉNÉRATIF
+   (ax+b)(cx+d) = acx² + (ad+bc)x + bd
+   Aucune réponse stockée — tout calculé.
+══════════════════════════════════════════ */
+
+var QTOTAL=10, WARN=5;
+var case1ok=false, case1val=null;
+function getQTIME(){return niveauChoisi===1?14:niveauChoisi===2?17:20;}
+var niveauChoisi=1;
+var questions=[], qIdx=0, score=0, results=[], tDebut=0;
+var timer=null, timeLeft=0, locked=false;
+/* Pour N3 : gestion des 2 cases */
+var caseActive=0, repCases=[];
+
+/* ── UTILS ── */
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rndNZ(a,b){var v;do{v=rnd(a,b);}while(v===0);return v;}
+function sign(n){return n<0?'':'+';} /* pour coller le signe */
+function showSign(n,premier){
+  if(premier) return String(n);
+  return n>=0?'+'+n:String(n);
+}
+function coefStr(c,premier){
+  if(c===1&&!premier) return '+';
+  if(c===-1) return premier?'-':'-';
+  return showSign(c,premier);
+}
+
+/* ── GÉNÉRATION D'UNE QUESTION ── */
+function genQ(niveau){
+  var a,b,c,d;
+  if(niveau===1){
+    a=rndNZ(2,9); b=rndNZ(1,9); c=rndNZ(2,9); d=rndNZ(1,9);
+  } else if(niveau===2){
+    /* Coefficients négatifs possibles */
+    a=rndNZ(-9,9); b=rndNZ(-9,9); c=rndNZ(2,9); d=rndNZ(-9,9);
+  } else {
+    a=rndNZ(2,7); b=rndNZ(1,7); c=rndNZ(2,7); d=rndNZ(1,7);
+  }
+
+  var A=a*c;           /* coef x² */
+  var B=a*d+b*c;       /* coef x  */
+  var C=b*d;           /* constante */
+
+  /* Choisir quelle(s) case(s) masquer */
+  var masques;
+  if(niveau<=2){
+    /* 1 case : aléatoire parmi A, B, C — préférer B (plus intéressant) */
+    var choix=[0,1,1,2]; /* B plus fréquent */
+    masques=[choix[rnd(0,3)]];
+  } else {
+    /* 2 cases : paires variées [x²+x], [x²+cst], [x+cst] */
+    var paires=[[0,1],[0,2],[1,2]];
+    masques=paires[rnd(0,2)];
+  }
+
+  return {a,b,c,d,A,B,C,masques};
+}
+
+/* ── DISTRACTEURS INTELLIGENTS ── */
+function distracteurs(q,caseIdx){
+  var sol;
+  if(caseIdx===0) sol=q.A;
+  else if(caseIdx===1) sol=q.B;
+  else sol=q.C;
+
+  var d=new Set();
+  d.add(sol);
+
+  /* Erreurs typiques d'élève */
+  if(caseIdx===0){ /* coef x² */
+    d.add(q.a+q.c);           /* addition au lieu de multiplication */
+    d.add(q.a*q.c+1);
+    d.add(q.a*q.c-1);
+    d.add(-q.a*q.c);
+  } else if(caseIdx===1){ /* coef x */
+    d.add(q.a*q.d);            /* oubli du 2e produit */
+    d.add(q.b*q.c);            /* oubli du 1er produit */
+    d.add(q.a*q.d - q.b*q.c); /* mauvais signe */
+    d.add(q.a*q.d + q.b*q.c + rnd(-3,3)); /* proche */
+    d.add(q.B + rnd(1,4)*(Math.random()<.5?1:-1));
+  } else { /* constante */
+    d.add(q.b+q.d);
+    d.add(-q.b*q.d);
+    d.add(q.b*q.d + rnd(1,5)*(Math.random()<.5?1:-1));
+    d.add(q.b*q.c);
+  }
+
+  /* Retirer la solution, garder 3 distracteurs */
+  d.delete(sol);
+  var arr=Array.from(d).filter(function(v){return v!==sol;});
+  /* Mélanger et prendre 3 */
+  arr=shuffle(arr).slice(0,3);
+  /* Assembler + mélanger avec la solution */
+  var props=[sol].concat(arr);
+  return shuffle(props);
+}
+
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){var j=rnd(0,i);var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+/* ── HTML ÉQUATION ── */
+function facteurHTML(a,b){
+  var as=a===1?'':a===-1?'-':String(a);
+  var bs=showSign(b,false);
+  return '<span class="eq-facteur">('+as+'x&nbsp;'+bs+')</span>';
+}
+
+function devHTML(q,masques,repCasesActuels){
+  /* Construit la ligne développée avec cases vides ou valeurs */
+  var html='';
+  var vals=[q.A,q.B,q.C];
+  var labels=['A','B','C']; /* pour data-case */
+
+  /* x² */
+  var v0=masques.indexOf(0)!==-1 ? null : q.A;
+  var repV0=repCasesActuels[masques.indexOf(0)]!==undefined?repCasesActuels[masques.indexOf(0)]:null;
+  if(v0!==null){
+    html+=termHTML(v0,true,'x2',false,-1);
+  } else {
+    html+=caseHTML(0,repV0,'x2');
+  }
+
+  /* x */
+  var v1=masques.indexOf(1)!==-1 ? null : q.B;
+  var repV1=repCasesActuels[masques.indexOf(1)]!==undefined?repCasesActuels[masques.indexOf(1)]:null;
+  if(v1!==null){
+    html+=termHTML(q.B,false,'x',false,-1);
+  } else {
+    html+=caseHTML(1,repV1,'x');
+  }
+
+  /* constante */
+  var v2=masques.indexOf(2)!==-1 ? null : q.C;
+  var repV2=repCasesActuels[masques.indexOf(2)]!==undefined?repCasesActuels[masques.indexOf(2)]:null;
+  if(v2!==null){
+    html+=termHTML(q.C,false,'',false,-1);
+  } else {
+    html+=caseHTML(2,repV2,'');
+  }
+
+  return html;
+}
+
+function termHTML(val,premier,type,ok,cas){
+  var prefix=premier?'':'&nbsp;';
+  var s='';
+  if(type==='x2'){
+    if(val===1) s=prefix+'x<sup>2</sup>';
+    else if(val===-1) s=prefix+'-x<sup>2</sup>';
+    else s=prefix+(premier?val:showSign(val,false))+'x<sup>2</sup>';
+  } else if(type==='x'){
+    if(val===1) s='&nbsp;+&nbsp;x';
+    else if(val===-1) s='&nbsp;-&nbsp;x';
+    else s='&nbsp;'+showSign(val,false)+'x';
+  } else {
+    s='&nbsp;'+showSign(val,false);
+  }
+  return '<span class="eq-facteur">'+s+'</span>';
+}
+
+function caseHTML(caseIdx,val,type){
+  var suffix='';
+  if(type==='x2') suffix='x<sup>2</sup>';
+  else if(type==='x') suffix='x';
+  var inner=val!==null?val:'&nbsp;&nbsp;';
+  return '&nbsp;<span class="eq-case" id="eqcase'+caseIdx+'" data-c="'+caseIdx+'">'
+    +inner+'</span>'+suffix;
+}
+
+/* ── AFFICHAGE ── */
+function afficherQ(){
+  var q=questions[qIdx];
+  locked=false; caseActive=0; repCases=[]; case1ok=false; case1val=null;
+
+  document.getElementById('qInfo').textContent=(qIdx+1)+' / '+QTOTAL;
+  document.getElementById('progFill').style.width=(qIdx/QTOTAL*100)+'%';
+  document.getElementById('feedback').className='feedback';
+
+  var nivNames=['','N1 &mdash; 1 case &agrave; trouver',
+    'N2 &mdash; Coefficients n&eacute;gatifs','N3 &mdash; 2 cases &agrave; trouver'];
+  document.getElementById('nivTag').innerHTML=nivNames[niveauChoisi];
+
+  /* Facteurs */
+  document.getElementById('eqFacteurs').innerHTML=facteurHTML(q.a,q.b)+facteurHTML(q.c,q.d);
+
+  /* Développé */
+  document.getElementById('eqDev').innerHTML=devHTML(q,q.masques,[]);
+
+  /* Propositions pour la 1re case active */
+  afficherProps(q,q.masques[0]);
+
+  /* Chrono */
+  timeLeft=getQTIME();
+  majChrono();
+  document.getElementById('chrono').className='chrono';
+  startTimer();
+}
+
+function afficherProps(q,caseIdx){
+  var props=distracteurs(q,caseIdx);
+  var zone=document.getElementById('propsZone'); zone.innerHTML='';
+  props.forEach(function(v){
+    var btn=document.createElement('button');
+    btn.className='prop-btn';
+    btn.textContent=v;
+    btn.onclick=function(){clickProp(v,caseIdx,props,q,btn);};
+    zone.appendChild(btn);
+  });
+}
+
+/* ── CLIC SUR UNE PROPOSITION ── */
+function clickProp(val,caseIdx,props,q,btnEl){
+  if(locked) return;
+
+  var solVals=[q.A,q.B,q.C];
+  var sol=solVals[caseIdx];
+  var ok=(val===sol);
+
+  /* Colorier les boutons */
+  var btns=document.querySelectorAll('.prop-btn');
+  btns.forEach(function(b){
+    b.disabled=true;
+    if(parseInt(b.textContent)===sol) b.className='prop-btn revele';
+  });
+  if(!ok) btnEl.className='prop-btn ko';
+  else btnEl.className='prop-btn ok';
+
+  /* Mettre à jour la case dans l'équation */
+  var caseEl=document.getElementById('eqcase'+caseIdx);
+  if(caseEl){
+    caseEl.textContent=ok?sol:val;
+    caseEl.className='eq-case '+(ok?'ok':'ko');
+  }
+
+  /* Niveau 3 : s'il reste une 2e case */
+  if(niveauChoisi===3 && q.masques.length===2 && caseIdx===q.masques[0]){
+    repCases[0]=ok?sol:val;
+    if(ok){
+      sndOk();
+      var fb=document.getElementById('feedback');
+      fb.innerHTML='\u2714 Bonne r\u00e9ponse\u00a0! Continue...';
+      fb.className='feedback ok';
+      setTimeout(function(){
+        fb.className='feedback';
+        caseActive=1;
+        afficherProps(q,q.masques[1]);
+      },1000);
+      return; /* pas de fin de question */
+    } else {
+      sndKo();
+      /* Révéler la 1ère case correcte puis passer à la 2e */
+      if(caseEl) caseEl.textContent=sol;
+      setTimeout(function(){
+        caseActive=1;
+        afficherProps(q,q.masques[1]);
+      },1200);
+      /* On compte déjà l'erreur */
+      enregistrer(q,false,val);
+      return;
+    }
+  }
+
+  /* Fin de la question */
+  stopTimer();
+  locked=true;
+  enregistrer(q,ok,val);
+  afficherFeedback(ok,sol,caseIdx,q);
+  setTimeout(function(){
+    qIdx++;
+    if(qIdx<QTOTAL) afficherQ(); else afficherFin();
+  },ok?1600:2400);
+}
+
+function enregistrer(q,ok,val){
+  /* Eviter le double enregistrement pour N3 */
+  if(results.length>qIdx) return;
+  if(ok) score++;
+  results.push({q:q,ok:ok,val:val});
+}
+
+function afficherFeedback(ok,sol,caseIdx,q){
+  var fb=document.getElementById('feedback');
+  if(ok){
+    sndOk();
+    fb.innerHTML='\u2714 Bravo\u00a0! Bonne r\u00e9ponse.';
+    fb.className='feedback ok';
+  } else {
+    sndKo();
+    var labels=['acx\u00b2','(ad+bc)x','bd'];
+    fb.innerHTML='\u2718 La bonne r\u00e9ponse \u00e9tait\u00a0: <strong>'+sol+'</strong>';
+    fb.className='feedback ko';
+  }
+}
+
+/* ── TIMEOUT ── */
+function timeout(){
+  if(locked) return;
+  stopTimer();locked=true;
+  var q=questions[qIdx];
+  var ci=q.masques[caseActive]!==undefined?q.masques[caseActive]:q.masques[0];
+  var sol=[q.A,q.B,q.C][ci];
+  var btns=document.querySelectorAll('.prop-btn');
+  btns.forEach(function(b){b.disabled=true;if(parseInt(b.textContent)===sol)b.className='prop-btn revele';});
+  var caseEl=document.getElementById('eqcase'+ci);
+  if(caseEl){caseEl.textContent=sol;caseEl.className='eq-case revele';}
+  sndKo();
+  var fb=document.getElementById('feedback');
+  fb.innerHTML='\u23f0 Temps \u00e9coul\u00e9\u00a0! La r\u00e9ponse \u00e9tait\u00a0: <strong>'+sol+'</strong>';
+  fb.className='feedback ko';
+  enregistrer(q,false,'');
+  setTimeout(function(){qIdx++;if(qIdx<QTOTAL)afficherQ();else afficherFin();},2000);
+}
+
+/* ── CHRONO ── */
+function majChrono(){
+  document.getElementById('chrono').textContent='\u23f1 '+timeLeft;
+}
+function startTimer(){
+  stopTimer();
+  timer=setInterval(function(){
+    timeLeft--;majChrono();
+    if(timeLeft<=WARN&&timeLeft>0) sndTick();
+    document.getElementById('chrono').className=timeLeft<=WARN?'chrono warn':'chrono';
+    if(timeLeft<=0) timeout();
+  },1000);
+}
+function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
+
+/* ── FIN ── */
+function afficherFin(){
+  stopTimer();
+  show('ecranFin');
+  document.getElementById('progFill').style.width='100%';
+  var duree=Math.round((Date.now()-tDebut)/1000);
+  var pct=Math.round(score/QTOTAL*100);
+  var stars=score===QTOTAL?3:score>=7?2:1;
+  document.getElementById('finSc').textContent=score+' / '+QTOTAL;
+  document.getElementById('finEt').textContent='\u2b50'.repeat(stars)+'\u2606'.repeat(3-stars);
+  document.getElementById('finStats').innerHTML=
+    '<div class="stat">\u23f1 Temps<span>'+duree+' s</span></div>'
+    +'<div class="stat">\u2714 R\u00e9ussies<span>'+score+'</span></div>'
+    +'<div class="stat">\u2718 Erreurs<span>'+(QTOTAL-score)+'</span></div>'
+    +'<div class="stat">\u25ce Score<span>'+pct+' %</span></div>';
+
+  var rec=document.getElementById('recap');rec.innerHTML='';
+  results.forEach(function(r,i){
+    var d=document.createElement('div');
+    d.className='ri '+(r.ok?'ok':'ko');
+    var a=r.q.a,b=r.q.b,c=r.q.c,dd=r.q.d;
+    var eq='('+a+'x'+(b>=0?'+':'')+b+')('+c+'x'+(dd>=0?'+':'')+dd+')'
+      +' = '+r.q.A+'x\u00b2 '+(r.q.B>=0?'+':'')+r.q.B+'x '+(r.q.C>=0?'+':'')+r.q.C;
+    d.innerHTML='<div style="display:flex;gap:.4rem"><span>'+(r.ok?'\u2714':'\u2718')+'</span>'
+      +'<span style="flex:1;font-weight:700">Q'+(i+1)+'</span></div>'
+      +'<div style="font-size:.78rem;opacity:.9">'+eq+'</div>';
+    rec.appendChild(d);
+  });
+  if(score===QTOTAL)sndFanfare();else sndFinSimple();
+}
+
+/* ── SON ── */
+var actx=null,sonActif=true;
+function ctx(){if(!actx)try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  if(actx&&actx.state==='suspended')actx.resume();return actx;}
+function beep(f,d,t,v,dl){if(!sonActif)return;var c=ctx();if(!c)return;
+  var t0=c.currentTime+(dl||0);var o=c.createOscillator(),g=c.createGain();
+  o.type=t||'sine';o.frequency.value=f;
+  g.gain.setValueAtTime(0.001,t0);g.gain.linearRampToValueAtTime(v||0.18,t0+0.01);
+  g.gain.exponentialRampToValueAtTime(0.001,t0+d);
+  o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+0.05);}
+function sndTick(){beep(900,0.06,'square',0.06);}
+function sndCd(){beep(440,0.13,'sine',0.18);}
+function sndGo(){beep(880,0.26,'sine',0.22);}
+function sndOk(){beep(660,0.11,'sine',0.16);beep(880,0.17,'sine',0.16,0.10);}
+function sndKo(){beep(200,0.20,'sawtooth',0.11);}
+function sndFanfare(){beep(523,0.13,'sine',0.17,0);beep(659,0.13,'sine',0.17,0.13);
+  beep(784,0.13,'sine',0.17,0.26);beep(1047,0.32,'sine',0.19,0.39);}
+function sndFinSimple(){beep(440,0.18,'sine',0.14);beep(550,0.28,'sine',0.14,0.2);}
+function toggleSon(){sonActif=!sonActif;document.getElementById('btnSon').textContent=sonActif?'\uD83D\uDD0A':'\uD83D\uDD07';}
+
+/* ── NAVIGATION ── */
+function show(id){
+  ['ecranAccueil','ecranCd','ecranJeu','ecranFin'].forEach(function(e){
+    document.getElementById(e).style.display=e===id?'block':'none';
+  });
+}
+function setNiv(n){
+  niveauChoisi=n;
+  [1,2,3].forEach(function(i){
+    document.getElementById('n'+i).className='niv-btn'+(i===n?' active':'');
+  });
+}
+
+/* ── LANCEMENT ── */
+function lancer(){
+  questions=[];
+  for(var i=0;i<QTOTAL;i++) questions.push(genQ(niveauChoisi));
+  qIdx=0;score=0;results=[];caseActive=0;repCases=[];case1ok=false;case1val=null;
+  tDebut=Date.now();
+  ctx();
+  runCd();
+}
+
+function runCd(){
+  show('ecranCd');
+  var steps=['3','2','1','Partez\u00a0!'],i=0;
+  var el=document.getElementById('cdN');
+  function step(){
+    el.textContent=steps[i];
+    el.style.animation='none';void el.offsetWidth;el.style.animation='';
+    sndCd();i++;
+    if(i<steps.length) setTimeout(step,700);
+    else setTimeout(function(){sndGo();show('ecranJeu');afficherQ();},700);
+  }
+  step();
+}
+
+function restart(){show('ecranAccueil');}
+
+document.addEventListener('DOMContentLoaded',function(){show('ecranAccueil');});
+</script>
+</body>
+</html>
