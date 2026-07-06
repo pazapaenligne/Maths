@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — Additionner et soustraire des fractions</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --jour:#8dc63f;--jour-fonce:#3d7a10;--jour-soft:#f0faeb;
+  --jour-accent:#b5e08a;--jour-titre:#3d7a10;--badge-txt:#1e4a05;
+  --vert:#8dc63f;--vert-fonce:#3d7a10;--vert-soft:#f0faeb;
+  --rouge:#e74c3c;--rouge-soft:#fdedec;--rouge-fonce:#c0392b;
+  --texte:#23262d;--gris:#8a8f9a;--bord:#ece8dd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:#fffdf7;color:var(--texte);font-family:'JetBrains Mono',monospace;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.6rem 1rem 4rem;position:relative;}
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.28;background:#f5d080;border-radius:38% 62% 55% 45%/56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.22;background:var(--jour-accent);border-radius:62% 38% 44% 56%/42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.20;background:#8dc63f;border-radius:45% 55% 62% 38%/55% 45% 58% 42%;}
+.blob4{width:140px;height:150px;bottom:200px;left:-30px;opacity:.16;background:#f28b82;border-radius:50% 50% 40% 60%/60% 40% 60% 40%;}
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;width:100%;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-size:.82rem;color:var(--gris);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.8vw,1.9rem);font-weight:800;line-height:1.3;}
+h1 .hl{color:var(--jour-titre);}
+.sous-titre{color:var(--gris);font-size:.9rem;margin-top:.4rem;line-height:1.8;}
+.consigne{margin:1rem auto 0;max-width:560px;border:2px dashed var(--jour);background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+
+/* SECTION DÉFI */
+.section-defi{position:relative;z-index:1;width:100%;max-width:680px;background:#fff;border:2px solid var(--bord);border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.defi-stripe{height:4px;background:linear-gradient(90deg,var(--jour),#f5c518,#f5a623);}
+.topbar{background:rgba(255,255,255,.97);border-bottom:2px solid var(--bord);padding:.65rem 1rem .7rem;}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;}
+.pastilles{display:flex;gap:.28rem;flex-wrap:wrap;flex:1;justify-content:center;}
+.pastille{width:1.55rem;height:1.55rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.74rem;border:2px solid var(--bord);color:var(--gris);background:#fff;transition:all .25s;}
+.pastille.active{background:var(--jour);border-color:var(--jour);color:#fff;transform:scale(1.13);}
+.pastille.ok{background:var(--vert);border-color:var(--vert);color:#fff;}
+.pastille.ko{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+.chrono{display:inline-flex;align-items:center;gap:.3rem;background:var(--jour-soft);border:2px solid var(--jour);color:var(--jour-fonce);font-weight:800;font-size:1rem;padding:.3rem .8rem;border-radius:99px;min-width:5rem;justify-content:center;}
+.chrono.warn{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);animation:pulse .55s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.09);}}
+.btn-son{background:#fff;border:2px solid var(--bord);border-radius:50%;width:2.5rem;height:2.5rem;font-size:1.05rem;cursor:pointer;font-family:inherit;}
+.progress-bg{background:var(--bord);border-radius:99px;height:7px;overflow:hidden;margin-top:.55rem;}
+.progress-fill{height:100%;width:0%;border-radius:99px;transition:width .5s ease;background:linear-gradient(90deg,var(--jour),#f5c518);}
+
+/* STARTGATE */
+.startgate{padding:1.6rem 1.4rem 1.8rem;text-align:center;}
+.startgate h3{font-size:1.05rem;color:var(--jour-fonce);margin-bottom:.7rem;}
+.memo{background:var(--jour-soft);border:1.5px solid var(--jour-accent);border-left:5px solid var(--jour);border-radius:10px;padding:.75rem 1rem;margin:.85rem 0 1.3rem;font-size:.85rem;color:var(--jour-fonce);line-height:1.95;text-align:left;}
+.btn{font-family:'JetBrains Mono',monospace;border:none;cursor:pointer;border-radius:12px;font-weight:800;transition:transform .12s,box-shadow .15s;min-height:2.9rem;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-start{background:var(--jour);color:#fff;font-size:1rem;padding:.85rem 2.2rem;box-shadow:0 4px 14px rgba(141,198,63,.4);}
+
+/* ZONE JEU */
+.gamearea{padding:1.1rem 1.3rem 1.2rem;}
+.carte-q{background:#fff;border:2px solid var(--bord);border-radius:14px;padding:1.1rem 1.2rem;box-shadow:0 4px 16px rgba(0,0,0,.05);animation:fadeUp .3s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.q-label{font-size:.72rem;color:var(--gris);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:.5rem;}
+.q-text{font-size:1.05rem;font-weight:700;color:var(--jour-fonce);text-align:center;margin-bottom:.9rem;line-height:1.9;}
+
+/* CHAMP DE SAISIE */
+.saisie-wrap{margin-bottom:.6rem;}
+.saisie-input{
+  font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;
+  width:100%;padding:.55rem .8rem;border-radius:11px;
+  border:2.5px solid var(--jour);background:#fff;color:var(--texte);
+  text-align:center;
+}
+.saisie-input:focus{outline:3px solid var(--jour-accent);}
+.saisie-input.ok{border-color:var(--vert);background:var(--vert-soft);}
+.saisie-input.ko{border-color:var(--rouge);background:var(--rouge-soft);}
+
+/* CLAVIER */
+.clavier-wrap{
+  background:#c8c8c8;border-radius:12px;padding:7px 8px;
+  margin:.6rem 0;display:flex;gap:8px;align-items:stretch;
+}
+.clavier-main{display:flex;flex-direction:column;gap:4px;flex:1;}
+.clavier-row{display:flex;gap:4px;}
+.clavier-side{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:108px;}
+.clavier-mid{display:flex;flex-direction:column;gap:4px;width:50px;}
+.ck{
+  font-family:'JetBrains Mono',Arial,monospace;border:2px solid #aaa;border-radius:8px;
+  cursor:pointer;font-size:.92rem;font-weight:700;background:#fff;color:#222;
+  display:flex;align-items:center;justify-content:center;
+  height:50px;min-width:50px;flex:1;
+  box-shadow:0 2px 0 #999;transition:transform .08s,filter .1s;
+}
+.ck:active{transform:scale(.93);filter:brightness(.9);}
+.ck.blue{background:#8c8ff0;color:#fff;border-color:#5a5dc0;box-shadow:0 2px 0 #3a3d90;}
+.ck.grey{background:#b0b0b0;color:#444;border-color:#888;box-shadow:0 2px 0 #666;}
+.ck.wide{flex:2.1;}
+.ck.tall{height:108px;}
+.ck sup{font-size:.55em;vertical-align:super;line-height:0;}
+
+/* BOUTON VALIDER */
+.btn-valider{background:var(--jour);color:#fff;font-size:.95rem;padding:.6rem 1.5rem;box-shadow:0 3px 10px rgba(141,198,63,.4);display:block;margin:.2rem auto 0;}
+.warn-saisie{display:none;text-align:center;color:var(--rouge-fonce);background:var(--rouge-soft);border:1.5px solid var(--rouge);border-radius:9px;padding:.35rem .7rem;font-size:.82rem;margin-bottom:.4rem;}
+.warn-saisie.show{display:block;}
+
+/* DÉCOMPTE */
+.countdown{position:absolute;inset:0;z-index:10;background:rgba(240,250,235,.97);display:none;align-items:center;justify-content:center;border-radius:18px;}
+.countdown.show{display:flex;}
+.cd-num{font-size:clamp(5rem,18vw,7.5rem);font-weight:800;color:var(--jour-titre);animation:cdPop .8s ease both;}
+@keyframes cdPop{0%{transform:scale(.25);opacity:0;}45%{transform:scale(1.18);opacity:1;}100%{transform:scale(1);opacity:1;}}
+
+/* RÉSULTATS */
+.resultats{display:none;padding:1.6rem 1.4rem;text-align:center;}
+.resultats.show{display:block;}
+.trophee{font-size:3rem;margin-bottom:.4rem;}
+.score-final{font-size:1.4rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.4rem;}
+.etoiles{font-size:1.9rem;letter-spacing:.15em;margin-bottom:.6rem;}
+.msg-final{font-size:.92rem;color:var(--texte);line-height:1.9;margin-bottom:1.2rem;}
+.recap{text-align:left;margin-bottom:1.4rem;display:flex;flex-direction:column;gap:.4rem;}
+.recap-item{display:flex;flex-direction:column;gap:.1rem;border-radius:10px;padding:.55rem .8rem;font-size:.82rem;line-height:1.9;}
+.recap-item.ok{background:var(--vert-soft);border:1.5px solid var(--vert);color:var(--vert-fonce);}
+.recap-item.ko{background:var(--rouge-soft);border:1.5px solid var(--rouge);color:var(--rouge-fonce);}
+.btn-rejouer{background:var(--jour);color:#fff;font-size:.98rem;padding:.75rem 1.7rem;}
+.hidden{display:none !important;}
+@media(max-width:500px){body{padding:1rem .5rem 3rem;}.gamearea{padding:.8rem;}.ck{height:44px;min-width:44px;font-size:.82rem;}.clavier-side{width:94px;}}
+</style>
+</head>
+<body>
+<div class="blob blob1"></div><div class="blob blob2"></div>
+<div class="blob blob3"></div><div class="blob blob4"></div>
+
+<header class="hero">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine&nbsp;8 &ndash; Jour&nbsp;3</div>
+  <h1><span class="hl">Additionner et soustraire des fractions</span></h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs.</p>
+  <div class="consigne">&#128073; R&eacute;soudre mentalement et sans calculatrice.</div>
+</header>
+
+<section class="section-defi" id="sectionDefi">
+  <div class="defi-stripe"></div>
+  <div class="topbar hidden" id="topbar">
+    <div class="topbar-row">
+      <div class="pastilles" id="pastilles"></div>
+      <div class="chrono" id="chrono">&#9203; 30</div>
+      <button class="btn btn-son" id="btnSon">&#128266;</button>
+    </div>
+    <div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="startgate" id="startgate">
+    <h3>&#9660; D&eacute;fi flash &mdash; &Eacute;quations du premier degr&eacute;</h3>
+    <div class="memo">
+      &#128161; <strong>M&eacute;thode&nbsp;:</strong><br>
+      &bull; Regrouper les termes en <em>x</em> d&rsquo;un c&ocirc;t&eacute;, les nombres de l&rsquo;autre.<br>
+      &bull; Diviser par le coefficient de <em>x</em>.<br>
+      &bull; &Eacute;crire la fraction simplifi&eacute;e si n&eacute;cessaire (ex\u00a0: <strong>2/3</strong>).
+    </div>
+    <button class="btn btn-start" id="btnStart">&#9654;&#65039; D&eacute;marrer</button>
+  </div>
+
+  <div class="gamearea hidden" id="gamearea">
+    <div class="carte-q" id="carteQ">
+      <div class="q-label" id="qLabel">Question 1 / 10</div>
+      <div class="q-text" id="qText"></div>
+      <div class="saisie-wrap">
+        <input type="text" class="saisie-input" id="rep" autocomplete="off" placeholder=""/>
+      </div>
+      <!-- CLAVIER -->
+      <div class="clavier-wrap">
+        <div class="clavier-main">
+          <div class="clavier-row">
+            <button class="ck" onclick="cTap('7')">7</button>
+            <button class="ck" onclick="cTap('8')">8</button>
+            <button class="ck" onclick="cTap('9')">9</button>
+            <button class="ck blue" onclick="cTap('\u00f7')">&divide;</button>
+          </div>
+          <div class="clavier-row">
+            <button class="ck" onclick="cTap('4')">4</button>
+            <button class="ck" onclick="cTap('5')">5</button>
+            <button class="ck" onclick="cTap('6')">6</button>
+            <button class="ck blue" onclick="cTap('\u00d7')">&times;</button>
+          </div>
+          <div class="clavier-row">
+            <button class="ck" onclick="cTap('1')">1</button>
+            <button class="ck" onclick="cTap('2')">2</button>
+            <button class="ck" onclick="cTap('3')">3</button>
+            <button class="ck blue" onclick="cTap('-')">−</button>
+          </div>
+          <div class="clavier-row">
+            <button class="ck wide" onclick="cTap('0')">0</button>
+            <button class="ck" onclick="cTap(',')">&#44;</button>
+            <button class="ck blue" onclick="cTap('+')">+</button>
+          </div>
+        </div>
+        <div class="clavier-mid">
+          <button class="ck grey" onclick="cBack()">&#9003;</button>
+          <button class="ck grey tall" onclick="cEnter()">&#8629;</button>
+        </div>
+        <div class="clavier-side">
+          <button class="ck blue" onclick="cTap('()')">(  )</button>
+          <button class="ck blue" onclick="cTap('x')"><em>x</em></button>
+          <button class="ck blue" onclick="cSq()"><em>x</em><sup>2</sup></button>
+          <button class="ck blue" onclick="cTap('/')">/</button>
+          <button class="ck grey" onclick="cUndo()">&#8634;</button>
+          <button class="ck grey" onclick="cRedo()">&#8635;</button>
+          <button class="ck grey" onclick="cLeft()">&#8592;</button>
+          <button class="ck grey" onclick="cRight()">&#8594;</button>
+        </div>
+      </div>
+      <div class="warn-saisie" id="warnSaisie">&#9888;&#65039; &Eacute;cris ta r&eacute;ponse avant de valider&nbsp;!</div>
+      <button class="btn btn-valider" id="btnValidate">&#10003; Valider</button>
+    </div>
+  </div>
+
+  <div class="resultats hidden" id="resultats">
+    <div class="trophee">&#127942;</div>
+    <div class="score-final" id="scoreFinal"></div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="msg-final" id="msgFinal"></div>
+    <div class="recap" id="recap"></div>
+    <button class="btn btn-rejouer" id="btnRejouer">&#8635; Rejouer</button>
+  </div>
+
+  <div class="countdown" id="countdown"><div class="cd-num" id="cdNum">3</div></div>
+</section>
+
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var QTOTAL=10,QTIME=30,WARN_AT=8;
+
+/* ════════ QUESTIONS — exactes de la fiche ════════
+   sol : fraction sous forme {n, d} (numérateur/dénominateur irréductible)
+   Accepte aussi l'entier si d=1
+*/
+var QUESTIONS=[
+  {lettre:"A", q:"R\u00e9soudre&nbsp;<strong>8y\u00a0=\u00a01</strong>",         sol:{n:1,d:8}},
+  {lettre:"B", q:"R\u00e9soudre&nbsp;<strong>\u22128x\u00a0+\u00a02\u00a0=\u00a0\u22122x\u00a0\u2212\u00a09</strong>", sol:{n:11,d:6}},
+  {lettre:"C", q:"R\u00e9soudre&nbsp;<strong>\u22129u\u00a0+\u00a06\u00a0=\u00a00</strong>", sol:{n:2,d:3}},
+  {lettre:"D", q:"R\u00e9soudre&nbsp;<strong>\u22126z\u00a0+\u00a04\u00a0=\u00a00</strong>", sol:{n:2,d:3}},
+  {lettre:"E", q:"R\u00e9soudre&nbsp;<strong>3v\u00a0+\u00a09\u00a0=\u00a06</strong>",       sol:{n:-1,d:1}},
+  {lettre:"F", q:"R\u00e9soudre&nbsp;<strong>4t\u00a0+\u00a010\u00a0=\u00a0\u22128t\u00a0+\u00a08</strong>", sol:{n:-1,d:6}},
+  {lettre:"G", q:"R\u00e9soudre&nbsp;<strong>5x\u00a0+\u00a07\u00a0=\u00a00</strong>",       sol:{n:-7,d:5}},
+  {lettre:"H", q:"R\u00e9soudre&nbsp;<strong>7y\u00a0\u2212\u00a03\u00a0=\u00a04y\u00a0+\u00a04</strong>", sol:{n:7,d:3}},
+  {lettre:"I", q:"R\u00e9soudre&nbsp;<strong>\u22122t\u00a0\u2212\u00a01\u00a0=\u00a0\u22121</strong>",      sol:{n:0,d:1}},
+  {lettre:"J", q:"R\u00e9soudre&nbsp;<strong>\u22125v\u00a0\u2212\u00a010\u00a0=\u00a05</strong>",          sol:{n:-3,d:1}},
+];
+
+function solStr(s){
+  if(s.d===1) return String(s.n);
+  return s.n+"/"+s.d;
+}
+
+/* ════════ NORMALISATION & COMPARAISON ════════
+   Accepte : entier, fraction a/b, fraction -a/b, -a/b, a,-b, etc.
+   Compare mathématiquement (cross-multiplication).
+*/
+function gcd(a,b){ a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a; }
+
+function parseFraction(str){
+  /* Nettoie */
+  var s=str.trim()
+    .replace(/\s+/g,"")
+    .replace(/,/g,".")       // virgule décimale
+    .replace(/÷/g,"/")
+    .replace(/\u2212/g,"-"); // signe moins unicode
+
+  /* Fraction a/b */
+  var m=s.match(/^(-?\d+)\/(-?\d+)$/);
+  if(m){
+    var n=parseInt(m[1]), d=parseInt(m[2]);
+    if(d===0) return null;
+    if(d<0){n=-n;d=-d;}
+    var g=gcd(Math.abs(n),d);
+    return {n:n/g, d:d/g};
+  }
+  /* Entier */
+  var m2=s.match(/^(-?\d+)$/);
+  if(m2) return {n:parseInt(m2[1]), d:1};
+  /* Décimal */
+  var m3=s.match(/^(-?\d+\.\d+)$/);
+  if(m3){
+    var f=parseFloat(m3[1]);
+    /* Chercher fraction exacte avec dénominateur jusqu'à 100 */
+    for(var d=1;d<=100;d++){
+      var nr=Math.round(f*d);
+      if(Math.abs(nr/d-f)<1e-9){
+        var g=gcd(Math.abs(nr),d);
+        return {n:nr/g, d:d/g};
+      }
+    }
+    return null;
+  }
+  return null;
+}
+
+function isCorrect(str, sol){
+  var p=parseFraction(str);
+  if(!p) return false;
+  /* Comparaison par cross-multiplication : p.n/p.d === sol.n/sol.d */
+  return p.n*sol.d === sol.n*p.d;
+}
+
+/* ════════ CLAVIER ════════ */
+var cHist=[], cHistIdx=-1;
+function cSave(){ var v=$("rep").value; cHist=cHist.slice(0,cHistIdx+1); cHist.push(v); cHistIdx=cHist.length-1; }
+function cTap(ch){
+  var inp=$("rep"); var s=inp.selectionStart,e=inp.selectionEnd,v=inp.value;
+  cSave();
+  inp.value=v.substring(0,s)+ch+v.substring(e);
+  inp.setSelectionRange(s+ch.length,s+ch.length); inp.focus();
+}
+function cSq(){ cTap('\u00b2'); }
+function cBack(){
+  var inp=$("rep"); var s=inp.selectionStart,e=inp.selectionEnd,v=inp.value;
+  cSave();
+  if(s!==e){ inp.value=v.substring(0,s)+v.substring(e); inp.setSelectionRange(s,s); }
+  else if(s>0){ inp.value=v.substring(0,s-1)+v.substring(s); inp.setSelectionRange(s-1,s-1); }
+  inp.focus();
+}
+function cEnter(){ validate(); }
+function cUndo(){ var inp=$("rep"); if(cHistIdx>0){cHistIdx--;inp.value=cHist[cHistIdx];inp.focus();} }
+function cRedo(){ var inp=$("rep"); if(cHistIdx<cHist.length-1){cHistIdx++;inp.value=cHist[cHistIdx];inp.focus();} }
+function cLeft(){ var inp=$("rep"); var s=inp.selectionStart; if(s>0)inp.setSelectionRange(s-1,s-1); inp.focus(); }
+function cRight(){ var inp=$("rep"); var s=inp.selectionStart,l=inp.value.length; if(s<l)inp.setSelectionRange(s+1,s+1); inp.focus(); }
+
+/* ════════ SON ════════ */
+var audioCtx=null,soundOn=true;
+function getCtx(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}if(audioCtx&&audioCtx.state==="suspended"){audioCtx.resume();}return audioCtx;}
+function beep(f,d,t,v,dl){if(!soundOn)return;var ctx=getCtx();if(!ctx)return;var t0=ctx.currentTime+(dl||0);var osc=ctx.createOscillator(),g=ctx.createGain();osc.type=t||"sine";osc.frequency.value=f;g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(v||0.18,t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t0+d);osc.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+d+0.05);}
+function sndTick(){beep(820,0.07,"square",0.07);}
+function sndCdBip(){beep(440,0.16,"sine",0.2);}
+function sndCdGo(){beep(880,0.32,"sine",0.24);}
+function sndGood(){beep(660,0.13,"sine",0.2);beep(880,0.22,"sine",0.2,0.12);}
+function sndBad(){beep(220,0.3,"sawtooth",0.14);}
+function sndFanfare(){beep(523,0.16,"sine",0.2,0);beep(659,0.16,"sine",0.2,0.15);beep(784,0.16,"sine",0.2,0.30);beep(1047,0.4,"sine",0.22,0.45);}
+
+/* ════════ ÉTAT ════════ */
+var game={qIndex:0,score:0,results:[],qs:[],q:null,timeLeft:QTIME,timer:null,locked:false};
+
+function buildPastilles(){var p=$("pastilles");p.innerHTML="";for(var i=0;i<QTOTAL;i++){var s=document.createElement("span");s.className="pastille";s.id="past"+i;s.textContent=(i+1);p.appendChild(s);}}
+function setPastille(i,st){var s=$("past"+i);if(!s)return;s.classList.remove("active","ok","ko");if(st==="active"){s.classList.add("active");s.textContent=(i+1);}else if(st==="ok"){s.classList.add("ok");s.textContent="\u2713";}else if(st==="ko"){s.classList.add("ko");s.textContent="\u2717";}}
+function updateProgress(){$("progressFill").style.width=Math.round(game.results.length/QTOTAL*100)+"%";}
+function updateChrono(){var c=$("chrono");c.textContent="\u23f1\ufe0f "+game.timeLeft;if(game.timeLeft<=WARN_AT){c.classList.add("warn");}else{c.classList.remove("warn");}}
+function runCountdown(cb){var ov=$("countdown"),num=$("cdNum");ov.classList.add("show");var steps=["3","2","1","Partez\u00a0!"],i=0;function step(){num.textContent=steps[i];num.style.animation="none";void num.offsetWidth;num.style.animation="";if(i<3){sndCdBip();}else{sndCdGo();}i++;if(i<steps.length){setTimeout(step,800);}else{setTimeout(function(){ov.classList.remove("show");cb();},700);}}step();}
+
+function newQuestion(){
+  game.q=game.qs[game.qIndex];game.locked=false;game.timeLeft=QTIME;
+  $("qLabel").textContent="Question "+(game.qIndex+1)+" / "+QTOTAL;
+  $("qText").innerHTML=game.q.q;
+  $("rep").value="";$("rep").className="saisie-input";$("rep").disabled=false;
+  $("btnValidate").disabled=false;
+  $("warnSaisie").classList.remove("show");
+  cHist=[];cHistIdx=-1;
+  updateChrono();setPastille(game.qIndex,"active");
+  startTimer();$("rep").focus();
+}
+
+function startTimer(){stopTimer();game.timer=setInterval(function(){game.timeLeft--;updateChrono();if(game.timeLeft<=WARN_AT&&game.timeLeft>0){sndTick();}if(game.timeLeft<=0){onTimeout();}},1000);}
+function stopTimer(){if(game.timer){clearInterval(game.timer);game.timer=null;}}
+
+function validate(){
+  if(game.locked)return;
+  var v=$("rep").value.trim();
+  if(v===""){$("warnSaisie").classList.add("show");sndBad();return;}
+  $("warnSaisie").classList.remove("show");
+  game.locked=true;stopTimer();
+  var ok=isCorrect(v,game.q.sol);
+  game.results.push({q:game.q,ok:ok,val:v});
+  if(ok){game.score++;}
+  setPastille(game.qIndex,ok?"ok":"ko");updateProgress();
+  $("rep").disabled=true;$("btnValidate").disabled=true;
+  $("rep").className="saisie-input "+(ok?"ok":"ko");
+  if(ok){sndGood();}else{sndBad();}
+  setTimeout(nextQuestion,1200);
+}
+function onTimeout(){
+  if(game.locked)return;
+  game.locked=true;stopTimer();
+  game.results.push({q:game.q,ok:false,val:"(temps \u00e9coul\u00e9)"});
+  setPastille(game.qIndex,"ko");updateProgress();
+  $("rep").disabled=true;$("btnValidate").disabled=true;
+  sndBad();setTimeout(nextQuestion,1200);
+}
+function nextQuestion(){game.qIndex++;if(game.qIndex<QTOTAL){newQuestion();}else{showResults();}}
+
+function showResults(){
+  $("gamearea").classList.add("hidden");$("topbar").classList.add("hidden");
+  var r=$("resultats");r.classList.remove("hidden");r.classList.add("show");
+  $("scoreFinal").textContent=game.score+" / "+QTOTAL;
+  var stars=(game.score===10)?3:(game.score>=8?2:1);
+  $("etoiles").textContent="\u2b50".repeat(stars)+"\u2606".repeat(3-stars);
+  var msgs=["Continue \u00e0 t\u2019entra\u00eener\u00a0!","Bon d\u00e9but\u00a0!","Pas mal\u00a0!","Bien jou\u00e9\u00a0!","Tr\u00e8s bien\u00a0!","Super\u00a0!","Bravo\u00a0!","Excellent\u00a0!","Tr\u00e8s bien\u00a0!","Quasi parfait\u00a0!","Parfait\u00a0! Tu ma\u00eettrises les \u00e9quations\u00a0!"];
+  $("msgFinal").textContent=msgs[Math.min(game.score,10)];
+  var rec=$("recap");rec.innerHTML="";
+  game.results.forEach(function(res){
+    var div=document.createElement("div");
+    div.className="recap-item "+(res.ok?"ok":"ko");
+    div.innerHTML=
+      "<div style='display:flex;gap:.5rem;align-items:center'>"
+      +"<span>"+(res.ok?"\u2714":"\u2718")+"</span>"
+      +"<span style='flex:1;font-weight:700'>"+res.q.lettre+") "+res.q.q.replace(/<[^>]+>/g,"")+"</span>"
+      +"</div>"
+      +"<div style='padding-left:1.3rem;font-size:.8rem;margin-top:.1rem'>"
+      +"Correction\u00a0: <strong>"+solStr(res.q.sol)+"</strong>"
+      +(!res.ok?" \u2014 Ta r\u00e9ponse\u00a0: <em>"+res.val+"</em>":"")
+      +"</div>";
+    rec.appendChild(div);
+  });
+  if(game.score===10){sndFanfare();}else{sndGood();}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function startGame(){
+  game.qIndex=0;game.score=0;game.results=[];
+  game.qs=QUESTIONS.slice();
+  buildPastilles();updateProgress();
+  $("startgate").classList.add("hidden");
+  $("resultats").classList.remove("show");$("resultats").classList.add("hidden");
+  $("topbar").classList.remove("hidden");$("gamearea").classList.remove("hidden");
+  getCtx();runCountdown(function(){newQuestion();});
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  $("btnStart").addEventListener("click",startGame);
+  $("btnRejouer").addEventListener("click",startGame);
+  $("btnValidate").addEventListener("click",validate);
+  $("rep").addEventListener("keydown",function(e){if(e.key==="Enter"){validate();}});
+  $("btnSon").addEventListener("click",function(){soundOn=!soundOn;$("btnSon").textContent=soundOn?"\uD83D\uDD0A":"\uD83D\uDD07";});
+});
+</script>
+</body>
+</html>
