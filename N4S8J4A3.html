@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — Multiplier et diviser des fractions</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --jour:#3ab5d8;--jour-fonce:#1a6e88;--jour-soft:#e8f6fb;
+  --jour-accent:#9dd4e8;--jour-titre:#1a6e88;
+  --vert:#8dc63f;--vert-fonce:#3d7a10;--vert-soft:#f0faeb;
+  --rouge:#e74c3c;--rouge-soft:#fdedec;--rouge-fonce:#c0392b;
+  --or:#f5c518;--or-f:#8a6000;
+  --texte:#23262d;--gris:#8a8f9a;--bord:#ece8dd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{
+  background:#fffdf7;color:var(--texte);font-family:'JetBrains Mono',monospace;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.6rem 1rem 4rem;position:relative;
+}
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.28;background:#f5d080;border-radius:38% 62% 55% 45%/56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.22;background:var(--jour-accent);border-radius:62% 38% 44% 56%/42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.20;background:#8dc63f;border-radius:45% 55% 62% 38%/55% 45% 58% 42%;}
+.blob4{width:140px;height:150px;bottom:200px;left:-30px;opacity:.16;background:#f28b82;border-radius:50% 50% 40% 60%/60% 40% 60% 40%;}
+
+/* HERO */
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;width:100%;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-size:.82rem;color:var(--gris);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.8vw,1.9rem);font-weight:800;line-height:1.3;}
+h1 .hl{color:var(--jour-titre);}
+.sous-titre{color:var(--gris);font-size:.9rem;margin-top:.4rem;line-height:1.8;}
+.consigne{margin:1rem auto 0;max-width:560px;border:2px dashed var(--jour);background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+
+/* SECTION JEU */
+.section{position:relative;z-index:1;width:100%;max-width:640px;background:#fff;border:2px solid var(--bord);border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.stripe{height:4px;background:linear-gradient(90deg,var(--jour),#8dc63f,#f5c518);}
+
+/* ── ÉCRAN ACCUEIL ── */
+.ecran-accueil{padding:2rem 1.6rem 2.2rem;text-align:center;}
+.accueil-titre{font-size:1.1rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.5rem;}
+.accueil-desc{font-size:.88rem;color:var(--gris);line-height:1.8;margin-bottom:.5rem;}
+.memo{background:var(--jour-soft);border-left:4px solid var(--jour);border-radius:8px;padding:.7rem 1rem;margin:.9rem 0 1.3rem;font-size:.84rem;color:var(--jour-fonce);line-height:1.9;text-align:left;}
+.btn-demarrer{
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1rem;
+  background:var(--jour);color:#fff;border:none;border-radius:14px;
+  padding:.9rem 2.4rem;cursor:pointer;
+  box-shadow:0 4px 14px rgba(58,181,216,.45);
+  transition:transform .1s,box-shadow .12s;
+}
+.btn-demarrer:hover{transform:translateY(-2px);box-shadow:0 7px 20px rgba(58,181,216,.55);}
+
+/* ── COMPTE À REBOURS ── */
+.ecran-cd{display:none;padding:3rem 1rem;text-align:center;}
+.cd-chiffre{
+  font-size:clamp(6rem,20vw,9rem);font-weight:800;color:var(--jour-titre);
+  animation:cdPop .7s ease both;line-height:1;
+}
+@keyframes cdPop{0%{transform:scale(.2);opacity:0;}50%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+
+/* ── JEU ── */
+.ecran-jeu{display:none;}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:2px solid var(--bord);flex-wrap:wrap;gap:.4rem;}
+.topbar-left{display:flex;align-items:center;gap:.7rem;}
+.q-num{font-size:.82rem;font-weight:700;color:var(--gris);}
+.chrono-wrap{display:inline-flex;align-items:center;gap:.3rem;background:var(--jour-soft);border:2px solid var(--jour);color:var(--jour-fonce);font-weight:800;font-size:1rem;padding:.28rem .8rem;border-radius:99px;min-width:5rem;justify-content:center;}
+.chrono-wrap.warn{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);animation:cpulse .5s infinite;}
+@keyframes cpulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.btn-son{background:#fff;border:2px solid var(--bord);border-radius:50%;width:2.3rem;height:2.3rem;font-size:.95rem;cursor:pointer;font-family:inherit;}
+
+/* Barre de progression */
+.prog-bg{background:var(--bord);height:6px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--jour),#8dc63f);transition:width .4s ease;}
+
+/* Zone question */
+.q-zone{padding:1.4rem 1.2rem 1.1rem;text-align:center;}
+.q-label{font-size:.72rem;color:var(--gris);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:.8rem;}
+/* Fraction affichée */
+.q-expr{
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  flex-wrap:wrap;margin-bottom:1.2rem;line-height:1;
+}
+.frac{display:inline-flex;flex-direction:column;align-items:center;gap:.08rem;font-weight:800;font-size:1.4rem;}
+.frac .num{border-bottom:3px solid var(--texte);padding:0 .25rem;line-height:1.2;}
+.frac .den{padding:0 .25rem;line-height:1.2;}
+.op-sym{font-size:1.6rem;font-weight:800;color:var(--jour-fonce);padding:0 .2rem;}
+.eq-sym{font-size:1.4rem;font-weight:700;color:var(--gris);padding:0 .2rem;}
+.entier{font-size:1.5rem;font-weight:800;}
+
+/* Saisie */
+.saisie-zone{display:flex;flex-direction:column;align-items:center;gap:.5rem;}
+.rep-input{
+  font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;
+  width:200px;padding:.55rem .8rem;border-radius:12px;
+  border:2.5px solid var(--jour);background:#fff;color:var(--texte);text-align:center;
+}
+.rep-input:focus{outline:3px solid var(--jour-accent);}
+.rep-input.ok{border-color:var(--vert);background:var(--vert-soft);}
+.rep-input.ko{border-color:var(--rouge);background:var(--rouge-soft);}
+.btn-val{
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.95rem;
+  background:var(--jour);color:#fff;border:none;border-radius:11px;
+  padding:.6rem 1.5rem;cursor:pointer;box-shadow:0 3px 0 var(--jour-fonce);
+  transition:transform .08s;
+}
+.btn-val:active{transform:scale(.95);}
+.btn-val:disabled{opacity:.35;cursor:default;}
+
+/* Feedback */
+.feedback{
+  margin:.8rem 1.2rem 0;padding:.7rem 1rem;border-radius:12px;
+  font-size:.92rem;font-weight:700;text-align:center;min-height:2.8rem;
+  line-height:1.7;
+}
+.feedback.ok{background:var(--vert-soft);border:2px solid var(--vert);color:var(--vert-fonce);}
+.feedback.ko{background:var(--rouge-soft);border:2px solid var(--rouge);color:var(--rouge-fonce);}
+.feedback.hidden{visibility:hidden;}
+
+/* Clavier */
+.clavier-wrap{
+  background:#c8c8c8;border-radius:12px;padding:7px 8px;
+  margin:.8rem 1.2rem 1rem;display:flex;gap:8px;align-items:stretch;
+}
+.clavier-main{display:flex;flex-direction:column;gap:4px;flex:1;}
+.clavier-row{display:flex;gap:4px;}
+.clavier-side{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:108px;}
+.clavier-mid{display:flex;flex-direction:column;gap:4px;width:50px;}
+.ck{
+  font-family:'JetBrains Mono',Arial,monospace;border:2px solid #aaa;border-radius:8px;
+  cursor:pointer;font-size:.92rem;font-weight:700;background:#fff;color:#222;
+  display:flex;align-items:center;justify-content:center;
+  height:50px;min-width:50px;flex:1;
+  box-shadow:0 2px 0 #999;transition:transform .08s,filter .1s;
+}
+.ck:active{transform:scale(.93);filter:brightness(.9);}
+.ck.blue{background:#8c8ff0;color:#fff;border-color:#5a5dc0;box-shadow:0 2px 0 #3a3d90;}
+.ck.grey{background:#b0b0b0;color:#444;border-color:#888;box-shadow:0 2px 0 #666;}
+.ck.wide{flex:2.1;}
+.ck.tall{height:108px;}
+.ck sup{font-size:.55em;vertical-align:super;line-height:0;}
+
+/* ── RÉSULTATS ── */
+.ecran-fin{display:none;padding:1.8rem 1.4rem 2rem;text-align:center;}
+.fin-trophy{font-size:3rem;margin-bottom:.4rem;}
+.fin-score{font-size:1.5rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.3rem;}
+.fin-etoiles{font-size:2rem;letter-spacing:.15em;margin-bottom:.8rem;}
+.fin-stats{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem;}
+.fin-stat{background:var(--jour-soft);border:1.5px solid var(--jour-accent);border-radius:10px;padding:.5rem .9rem;font-size:.85rem;font-weight:700;color:var(--jour-fonce);}
+.fin-stat span{display:block;font-size:1.2rem;font-weight:800;}
+.recap{text-align:left;margin-bottom:1.4rem;display:flex;flex-direction:column;gap:.4rem;}
+.recap-item{display:flex;flex-direction:column;gap:.1rem;border-radius:10px;padding:.5rem .8rem;font-size:.82rem;line-height:1.8;}
+.recap-item.ok{background:var(--vert-soft);border:1.5px solid var(--vert);color:var(--vert-fonce);}
+.recap-item.ko{background:var(--rouge-soft);border:1.5px solid var(--rouge);color:var(--rouge-fonce);}
+.btn-rejouer{
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.98rem;
+  background:var(--jour);color:#fff;border:none;border-radius:12px;
+  padding:.75rem 1.7rem;cursor:pointer;box-shadow:0 4px 0 var(--jour-fonce);
+}
+
+/* Responsive */
+@media(max-width:480px){
+  .q-expr{font-size:1.1rem;}
+  .frac{font-size:1.2rem;}
+  .ck{height:44px;min-width:44px;font-size:.82rem;}
+  .clavier-side{width:94px;}
+}
+</style>
+</head>
+<body>
+<div class="blob blob1"></div><div class="blob blob2"></div>
+<div class="blob blob3"></div><div class="blob blob4"></div>
+
+<header class="hero">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine&nbsp;8 &ndash; Jour&nbsp;4</div>
+  <h1><span class="hl">Multiplier et diviser des fractions</span></h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs.</p>
+  <div class="consigne">&#128073; Trouve la valeur manquante.</div>
+</header>
+
+<section class="section" id="section">
+  <div class="stripe"></div>
+
+  <!-- ACCUEIL -->
+  <div class="ecran-accueil" id="ecranAccueil">
+    <div class="accueil-titre">&#9889; D&eacute;fi flash &mdash; Fractions</div>
+    <div class="accueil-desc">10 questions &middot; 20&nbsp;s par question &middot; correction en fin</div>
+    <div class="memo">
+      &#128161; <strong>Rappel (4e proportionnalit&eacute;)&nbsp;:</strong><br>
+      Si <sup>a</sup>&frasl;<sub>b</sub> = <sup>c</sup>&frasl;<sub>d</sub>, alors <strong>? = <sup>a &times; c</sup>&frasl;<sub>b</sub></strong> ou <strong>? = <sup>a &times; d</sup>&frasl;<sub>c</sub></strong><br>
+      &bull; &Eacute;cris le r&eacute;sultat en utilisant la virgule (ex. <strong>12,5</strong>)
+    </div>
+    <button class="btn-demarrer" onclick="lancer()">&#9654;&#65039; Commencer</button>
+  </div>
+
+  <!-- COMPTE À REBOURS -->
+  <div class="ecran-cd" id="ecranCd">
+    <div class="cd-chiffre" id="cdChiffre">3</div>
+  </div>
+
+  <!-- JEU -->
+  <div class="ecran-jeu" id="ecranJeu">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="q-num" id="qNum">1 / 10</span>
+        <div class="chrono-wrap" id="chronoWrap">&#9203; 20</div>
+      </div>
+      <button class="btn-son" id="btnSon" onclick="toggleSon()">&#128266;</button>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+
+    <div class="q-zone">
+      <div class="q-label" id="qLabel">Calcule&nbsp;:</div>
+      <div class="q-expr" id="qExpr"></div>
+      <div class="saisie-zone">
+        <input type="text" class="rep-input" id="repInput" placeholder="" autocomplete="off" inputmode="text"/>
+        <button class="btn-val" id="btnVal" onclick="valider()">&#10003; Valider</button>
+      </div>
+    </div>
+    <div class="feedback hidden" id="feedback"></div>
+
+    <!-- CLAVIER -->
+    <div class="clavier-wrap">
+      <div class="clavier-main">
+        <div class="clavier-row">
+          <button class="ck" onclick="cTap('7')">7</button>
+          <button class="ck" onclick="cTap('8')">8</button>
+          <button class="ck" onclick="cTap('9')">9</button>
+          <button class="ck blue" onclick="cTap('\u00f7')">&divide;</button>
+        </div>
+        <div class="clavier-row">
+          <button class="ck" onclick="cTap('4')">4</button>
+          <button class="ck" onclick="cTap('5')">5</button>
+          <button class="ck" onclick="cTap('6')">6</button>
+          <button class="ck blue" onclick="cTap('\u00d7')">&times;</button>
+        </div>
+        <div class="clavier-row">
+          <button class="ck" onclick="cTap('1')">1</button>
+          <button class="ck" onclick="cTap('2')">2</button>
+          <button class="ck" onclick="cTap('3')">3</button>
+          <button class="ck blue" onclick="cTap('-')">−</button>
+        </div>
+        <div class="clavier-row">
+          <button class="ck wide" onclick="cTap('0')">0</button>
+          <button class="ck" onclick="cTap(',')">,</button>
+          <button class="ck blue" onclick="cTap('+')">+</button>
+        </div>
+      </div>
+      <div class="clavier-mid">
+        <button class="ck grey" onclick="cBack()">&#9003;</button>
+        <button class="ck grey tall" onclick="valider()">&#8629;</button>
+      </div>
+      <div class="clavier-side">
+        <button class="ck blue" onclick="cTap('()')">(  )</button>
+        <button class="ck blue" onclick="cTap('x')"><em>x</em></button>
+        <button class="ck blue" onclick="cSq()"><em>x</em><sup>2</sup></button>
+        <button class="ck blue" onclick="cTap('/')">/</button>
+        <button class="ck grey" onclick="cUndo()">&#8634;</button>
+        <button class="ck grey" onclick="cRedo()">&#8635;</button>
+        <button class="ck grey" onclick="cLeft()">&#8592;</button>
+        <button class="ck grey" onclick="cRight()">&#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RÉSULTATS -->
+  <div class="ecran-fin" id="ecranFin">
+    <div class="fin-trophy" id="finTrophy">&#127942;</div>
+    <div class="fin-score" id="finScore"></div>
+    <div class="fin-etoiles" id="finEtoiles"></div>
+    <div class="fin-stats" id="finStats"></div>
+    <div class="recap" id="recap"></div>
+    <button class="btn-rejouer" onclick="restart()">&#8635; Rejouer</button>
+  </div>
+</section>
+
+<script>
+"use strict";
+
+/* ══════════════════════════════════════
+   10 EXERCICES EXACTS (captures fournies)
+   Proportionnalité : trouver la valeur ?
+   Formule : ? = (a × b) / c
+══════════════════════════════════════ */
+
+/* Les 10 questions fixes dans l'ordre de la fiche */
+var QUESTIONS_FIXES = [
+  /* 1 — ?/11,2 = 20/14  →  11,2×20/14 = 16 */
+  {
+    label:"Trouve la valeur manquante",
+    html: propHTML("?","11,2","20","14","11,2 &times; 20","14"),
+    formule:"11,2 &times; 20 &divide; 14",
+    sol:16
+  },
+  /* 2 — 12/20,4 = 11/?  →  20,4×11/12 = 18,7 */
+  {
+    label:"Trouve la valeur manquante",
+    html: propHTML("12","20,4","11","?","20,4 &times; 11","12"),
+    formule:"20,4 &times; 11 &divide; 12",
+    sol:18.7
+  },
+  /* 3 — 9/10,8 = ?/22,8  →  22,8×9/10,8 = 19 */
+  {
+    label:"Trouve la valeur manquante",
+    html: propHTML("9","10,8","?","22,8","22,8 &times; 9","10,8"),
+    formule:"22,8 &times; 9 &divide; 10,8",
+    sol:19
+  },
+  /* 4 — ?/84,6 = 47/61,2  →  61,2×47/84,6 = 34 */
+  {
+    label:"Trouve la valeur manquante",
+    html: tableHTML("?","47","61,2","84,6","61,2 &times; 47","84,6"),
+    formule:"61,2 &times; 47 &divide; 84,6",
+    sol:34
+  },
+  /* 5 — ?/6 = 16/4,8  →  4,8×16/6 = 12,8 */
+  {
+    label:"Trouve la valeur manquante",
+    html: tableHTML("16","6","?","4,8","4,8 &times; 16","6"),
+    formule:"4,8 &times; 16 &divide; 6",
+    sol:12.8
+  },
+  /* 6 — 30/? = 11/22  →  22×30/11 = 60 */
+  {
+    label:"Trouve la valeur manquante",
+    html: propHTML("30","?","11","22","22 &times; 30","11"),
+    formule:"22 &times; 30 &divide; 11",
+    sol:60
+  },
+  /* 7 — 43/17,2 = ?/12  →  12×43/17,2 = 30 */
+  {
+    label:"Trouve la valeur manquante",
+    html: tableHTML("43","?","17,2","12","12 &times; 43","17,2"),
+    formule:"12 &times; 43 &divide; 17,2",
+    sol:30
+  },
+  /* 8 — 22/55 = 5/?  →  55×5/22 = 12,5 */
+  {
+    label:"Trouve la valeur manquante",
+    html: tableHTML("22","5","55","?","55 &times; 5","22"),
+    formule:"55 &times; 5 &divide; 22",
+    sol:12.5
+  },
+  /* 9 — 42/96,6 = ?/9,2  →  9,2×42/96,6 = 4 */
+  {
+    label:"Trouve la valeur manquante",
+    html: tableHTML("42","?","96,6","9,2","9,2 &times; 42","96,6"),
+    formule:"9,2 &times; 42 &divide; 96,6",
+    sol:4
+  },
+  /* 10 — ?/74,4 = 31/52,8  →  52,8×31/74,4 = 22 */
+  {
+    label:"Trouve la valeur manquante",
+    html: tableHTML("?","31","52,8","74,4","52,8 &times; 31","74,4"),
+    formule:"52,8 &times; 31 &divide; 74,4",
+    sol:22
+  }
+];
+
+/* Affichage proportion : a/b = c/d  (sans formule intermédiaire) */
+function propHTML(a,b,c,d,num,den){
+  var left='<span class="frac"><span class="num">'+a+'</span><span class="den">'+b+'</span></span>';
+  var mid='<span class="op-sym">=</span>';
+  var right='<span class="frac"><span class="num">'+c+'</span><span class="den">'+d+'</span></span>';
+  return left+mid+right;
+}
+
+/* Affichage tableau 2×2  (sans formule intermédiaire) */
+function tableHTML(a,b,c,d,num,den){
+  var table='<table style="border-collapse:collapse;font-size:1.1rem;font-weight:700;margin:0 auto">'
+    +'<tr><td style="border:2px solid #333;padding:.35rem .7rem;text-align:center">'+a+'</td>'
+    +'<td style="border:2px solid #333;padding:.35rem .7rem;text-align:center">'+b+'</td></tr>'
+    +'<tr><td style="border:2px solid #333;padding:.35rem .7rem;text-align:center">'+c+'</td>'
+    +'<td style="border:2px solid #333;padding:.35rem .7rem;text-align:center">'+d+'</td></tr>'
+    +'</table>';
+  return '<div style="display:flex;align-items:center;justify-content:center;">'+table+'</div>';
+}
+
+function solStr(sol){
+  /* Affiche avec virgule à la française */
+  return String(sol).replace('.',',');
+}
+
+/* ══ NORMALISATION & COMPARAISON ══
+   Accepte : 16 / 18,7 / 18.7 / 12,5 etc.
+   Tolérance flottante ±0.05
+*/
+function isCorrect(str, sol){
+  var s=str.trim().replace(/,/g,'.').replace(/\s+/g,'');
+  var v=parseFloat(s);
+  if(isNaN(v)) return false;
+  return Math.abs(v - sol) < 0.06;
+}
+
+/* ══ SON (Web Audio API — original PAZAPA) ══ */
+var audioCtx=null, sonActif=true;
+function ctx(){
+  if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+function beep(freq,dur,type,vol,delay){
+  if(!sonActif)return;
+  var c=ctx();if(!c)return;
+  var t0=c.currentTime+(delay||0);
+  var o=c.createOscillator(),g=c.createGain();
+  o.type=type||'sine';o.frequency.value=freq;
+  g.gain.setValueAtTime(0.001,t0);
+  g.gain.linearRampToValueAtTime(vol||0.18,t0+0.01);
+  g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  o.connect(g);g.connect(c.destination);
+  o.start(t0);o.stop(t0+dur+0.05);
+}
+function sndTick(){beep(900,0.06,'square',0.06);}
+function sndCd(){beep(440,0.14,'sine',0.2);}
+function sndGo(){beep(880,0.28,'sine',0.24);}
+function sndOk(){beep(660,0.12,'sine',0.18);beep(880,0.18,'sine',0.18,0.11);}
+function sndKo(){beep(200,0.22,'sawtooth',0.12);}
+function sndFin(){beep(523,0.14,'sine',0.18,0);beep(659,0.14,'sine',0.18,0.14);beep(784,0.14,'sine',0.18,0.28);beep(1047,0.35,'sine',0.2,0.42);}
+function sndFinSimple(){beep(440,0.2,'sine',0.15);beep(550,0.3,'sine',0.15,0.22);}
+function toggleSon(){sonActif=!sonActif;document.getElementById('btnSon').textContent=sonActif?'🔊':'🔇';}
+
+/* ══ ÉTAT ══ */
+var QTOTAL=10, QTIME=20, WARN=5;
+var questions=[], qIdx=0, score=0, results=[];
+var timer=null, timeLeft=0, locked=false;
+var tDebut=0;
+
+/* ══ CLAVIER ══ */
+var cHist=[],cHistIdx=-1;
+function cSave(){var v=document.getElementById('repInput').value;cHist=cHist.slice(0,cHistIdx+1);cHist.push(v);cHistIdx=cHist.length-1;}
+function cTap(ch){var i=document.getElementById('repInput');var s=i.selectionStart,e=i.selectionEnd,v=i.value;cSave();i.value=v.substring(0,s)+ch+v.substring(e);i.setSelectionRange(s+ch.length,s+ch.length);i.focus();}
+function cSq(){cTap('²');}
+function cBack(){var i=document.getElementById('repInput');var s=i.selectionStart,e=i.selectionEnd,v=i.value;cSave();if(s!==e){i.value=v.substring(0,s)+v.substring(e);i.setSelectionRange(s,s);}else if(s>0){i.value=v.substring(0,s-1)+v.substring(s);i.setSelectionRange(s-1,s-1);}i.focus();}
+function cUndo(){var i=document.getElementById('repInput');if(cHistIdx>0){cHistIdx--;i.value=cHist[cHistIdx];i.focus();}}
+function cRedo(){var i=document.getElementById('repInput');if(cHistIdx<cHist.length-1){cHistIdx++;i.value=cHist[cHistIdx];i.focus();}}
+function cLeft(){var i=document.getElementById('repInput');var s=i.selectionStart;if(s>0)i.setSelectionRange(s-1,s-1);i.focus();}
+function cRight(){var i=document.getElementById('repInput');var s=i.selectionStart,l=i.value.length;if(s<l)i.setSelectionRange(s+1,s+1);i.focus();}
+
+/* ══ ÉCRANS ══ */
+function show(id){
+  ['ecranAccueil','ecranCd','ecranJeu','ecranFin'].forEach(function(e){
+    document.getElementById(e).style.display=e===id?'block':'none';
+  });
+}
+
+/* ══ LANCEMENT ══ */
+function lancer(){
+  questions=QUESTIONS_FIXES; /* ordre fixe, jamais mélangé */
+  qIdx=0;score=0;results=[];
+  tDebut=Date.now();
+  ctx(); // init audio
+  runCd();
+}
+
+function runCd(){
+  show('ecranCd');
+  var steps=['3','2','1','Partez\u00a0!'], i=0;
+  var el=document.getElementById('cdChiffre');
+  function step(){
+    el.textContent=steps[i];
+    el.style.animation='none';void el.offsetWidth;el.style.animation='';
+    sndCd();
+    i++;
+    if(i<steps.length) setTimeout(step,700);
+    else setTimeout(function(){if(i===steps.length)sndGo();show('ecranJeu');newQ();},700);
+  }
+  step();
+}
+
+/* ══ QUESTION ══ */
+function newQ(){
+  var q=questions[qIdx];
+  locked=false;timeLeft=QTIME;
+  cHist=[];cHistIdx=-1;
+  document.getElementById('qNum').textContent=(qIdx+1)+' / '+QTOTAL;
+  document.getElementById('qExpr').innerHTML=q.html;
+  var inp=document.getElementById('repInput');
+  inp.value='';inp.className='rep-input';inp.disabled=false;
+  document.getElementById('btnVal').disabled=false;
+  document.getElementById('feedback').className='feedback hidden';
+  document.getElementById('progFill').style.width=(qIdx/QTOTAL*100)+'%';
+  document.getElementById('chronoWrap').className='chrono-wrap';
+  majChrono();
+  startTimer();
+  inp.focus();
+}
+
+function majChrono(){
+  document.getElementById('chronoWrap').textContent='⏱ '+timeLeft;
+}
+
+function startTimer(){
+  stopTimer();
+  timer=setInterval(function(){
+    timeLeft--;
+    majChrono();
+    if(timeLeft<=WARN&&timeLeft>0) sndTick();
+    var cw=document.getElementById('chronoWrap');
+    if(timeLeft<=WARN) cw.className='chrono-wrap warn'; else cw.className='chrono-wrap';
+    if(timeLeft<=0) timeout();
+  },1000);
+}
+function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
+
+/* ══ VALIDATION ══ */
+function valider(){
+  if(locked)return;
+  var v=document.getElementById('repInput').value.trim();
+  if(v===''){document.getElementById('repInput').focus();return;}
+  stopTimer();
+  locked=true;
+  var q=questions[qIdx];
+  var ok=isCorrect(v,q.sol);
+  finish(ok,v,'valide');
+}
+
+function timeout(){
+  if(locked)return;
+  stopTimer();locked=true;
+  finish(false,'','timeout');
+}
+
+function finish(ok,valEleve,mode){
+  var q=questions[qIdx];
+  results.push({q:q,ok:ok,val:valEleve,mode:mode});
+  if(ok) score++;
+
+  var inp=document.getElementById('repInput');
+  inp.disabled=true;
+  inp.className='rep-input '+(ok?'ok':'ko');
+  document.getElementById('btnVal').disabled=true;
+
+  var fb=document.getElementById('feedback');
+  if(ok){
+    sndOk();
+    fb.className='feedback ok';
+    fb.innerHTML='&#10004; Bonne r&eacute;ponse&nbsp;!';
+    setTimeout(suite,1800);
+  } else {
+    sndKo();
+    fb.className='feedback ko';
+    var msg=mode==='timeout'?'&#10008; Temps &eacute;coul&eacute;&nbsp;!':'&#10008; Pas tout &agrave; fait.';
+    fb.innerHTML=msg+'<br>La bonne r&eacute;ponse &eacute;tait&nbsp;: <strong>'+solStr(q.sol)+'</strong>';
+    setTimeout(suite,2800);
+  }
+}
+
+function suite(){
+  qIdx++;
+  if(qIdx<QTOTAL) newQ();
+  else afficherFin();
+}
+
+/* ══ FIN ══ */
+function afficherFin(){
+  stopTimer();
+  var duree=Math.round((Date.now()-tDebut)/1000);
+  show('ecranFin');
+  document.getElementById('progFill').style.width='100%';
+
+  var pct=Math.round(score/QTOTAL*100);
+  var stars=score===QTOTAL?3:score>=7?2:1;
+  document.getElementById('finScore').textContent=score+' / '+QTOTAL;
+  document.getElementById('finEtoiles').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+
+  var erreurs=QTOTAL-score;
+  document.getElementById('finStats').innerHTML=
+    '<div class="fin-stat">&#128336; Temps<span>'+duree+' s</span></div>'
+    +'<div class="fin-stat">&#10004; R&eacute;ussies<span>'+score+'</span></div>'
+    +'<div class="fin-stat">&#10008; Erreurs<span>'+erreurs+'</span></div>'
+    +'<div class="fin-stat">&#127919; Score<span>'+pct+' %</span></div>';
+
+  // Récap
+  var rec=document.getElementById('recap');rec.innerHTML='';
+  results.forEach(function(r,i){
+    var d=document.createElement('div');
+    d.className='recap-item '+(r.ok?'ok':'ko');
+    d.innerHTML='<div style="display:flex;gap:.5rem"><span>'+(r.ok?'✔':'✘')+'</span>'
+      +'<span style="flex:1;font-weight:700">Q'+(i+1)+' &mdash; '+(r.q.formule||'')+'</span></div>'
+      +'<div style="padding-left:1.3rem;font-size:.8rem">Correction&nbsp;: <strong>'+solStr(r.q.sol)+'</strong>'
+      +(!r.ok&&r.val?' &mdash; Ta r&eacute;ponse&nbsp;: <em>'+r.val+'</em>':'')+'</div>';
+    rec.appendChild(d);
+  });
+
+  if(score===QTOTAL) sndFin(); else sndFinSimple();
+}
+
+function restart(){show('ecranAccueil');}
+
+/* ══ INIT ══ */
+document.addEventListener('DOMContentLoaded',function(){
+  show('ecranAccueil');
+  document.getElementById('repInput').addEventListener('keydown',function(e){
+    if(e.key==='Enter') valider();
+  });
+});
+</script>
+</body>
+</html>
