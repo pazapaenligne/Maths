@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Programmer la tortue Scratch &mdash; Niveau 3 &mdash; N4S5J2</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#b94040;--day-dark:#7a1f1f;--day-light:#f7eded;
+      --day-border:#e3b3b3;--day-glow:rgba(185,64,64,.3);
+      --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;
+      --pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--blue);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--yellow);top:200px;left:-30px;pointer-events:none;}
+
+    .head-card{width:100%;max-width:760px;background:var(--day-light);border:2px solid var(--day-border);border-radius:var(--radius);padding:1.9rem 1.5rem 1.6rem;text-align:center;position:relative;z-index:1;margin-bottom:1.3rem;}
+    .logo-badge{background:var(--day-color);color:#fff;font-size:14px;letter-spacing:.09em;display:inline-flex;align-items:center;gap:.5rem;font-weight:700;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{color:var(--day-dark);font-size:.95rem;margin:.5rem 0;font-family:'JetBrains Mono',monospace;}
+    h1 .hl{color:var(--day-dark);font-size:clamp(1.3rem,3.8vw,1.75rem);font-weight:800;display:inline-block;}
+    .subtitle{color:var(--muted);font-size:.95rem;margin-top:.5rem;font-family:'JetBrains Mono',monospace;}
+    .level-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;}
+    .level-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.92rem;letter-spacing:.06em;text-transform:uppercase;padding:.6rem 1.15rem;border-radius:12px;border:2px solid var(--day-border);background:var(--surface);color:var(--day-dark);min-height:2.9rem;display:inline-flex;align-items:center;cursor:default;}
+    .level-btn.active{background:var(--day-color);color:#fff;border-color:var(--day-color);box-shadow:0 3px 10px var(--day-glow);}
+
+    .card{width:100%;max-width:760px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.8rem 1.7rem 1.5rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.5rem;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--orange),var(--pink));}
+    .q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-bottom:.7rem;text-transform:uppercase;letter-spacing:.1em;}
+    .q-text{font-size:.97rem;line-height:1.8;margin-bottom:1.2rem;color:var(--text);}
+
+    /* Layout programme + figures */
+    .exo-layout{display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;}
+    .scratch-prog{flex:0 0 auto;min-width:200px;}
+
+    /* Blocs Scratch */
+    .s-block{border-radius:6px;padding:7px 14px;font-size:.82rem;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:8px;line-height:1.3;}
+    .s-block.event{background:#f5a623;border-radius:10px 10px 0 0;}
+    .s-block.motion{background:#3ab5d8;}
+    .s-block.pen{background:#59c059;}
+    .s-block.ctrl{background:#f5a623;}
+    .s-block.ctrl-inner{background:#f5a623;margin-left:20px;}
+    .s-block.ctrl-inner2{background:#f5a623;margin-left:40px;}
+    .s-val{background:rgba(255,255,255,.25);border-radius:12px;padding:1px 8px;font-family:'JetBrains Mono',monospace;font-size:.82rem;}
+    .s-end{height:10px;background:#f5a623;border-radius:0 0 6px 6px;margin-bottom:3px;width:calc(100% - 0px);}
+    .s-end-inner{height:8px;background:#f5a623;border-radius:0 0 4px 4px;margin-bottom:3px;margin-left:20px;}
+    .s-arrow{font-size:.9rem;margin-left:4px;}
+
+    /* Grille figures */
+    .figs-grid{flex:1 1 300px;display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .fig-card{border:2px solid var(--border);border-radius:12px;padding:.7rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:var(--surface);}
+    .fig-card:hover{border-color:var(--day-color);background:var(--day-light);}
+    .fig-card.sel{border-color:var(--day-color);background:var(--day-light);}
+    .fig-card.good{border-color:var(--green);background:#eef7e9;}
+    .fig-card.bad{border-color:var(--pink);background:#fff0ef;}
+    .fig-card svg{display:block;margin:0 auto;width:100%;max-width:160px;height:160px;}
+    .fig-label{font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-top:.4rem;font-weight:700;}
+
+    .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:1.2rem;}
+    .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.45rem;border-radius:10px;font-family:Arial,sans-serif;font-size:1rem;font-weight:800;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:3.1rem;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-primary:hover:not(:disabled){transform:translateY(-1px);}
+    .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+    .btn.hidden{display:none;}
+
+    .feedback{margin-top:1.2rem;padding:.9rem 1rem;border-radius:10px;font-size:1rem;display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+    .feedback.show{display:flex;}
+    .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .feedback-icon{font-size:1.5rem;flex-shrink:0;}
+
+    .method-box{display:none;background:var(--day-light);border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);border-radius:8px;padding:.95rem 1.15rem;margin-top:.9rem;font-size:.92rem;font-family:'JetBrains Mono',monospace;color:var(--day-dark);line-height:1.9;}
+    .method-box.reveal{display:block;}
+
+    @media(max-width:540px){.exo-layout{flex-direction:column;}.figs-grid{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+  <div class="bubble1"></div>
+  <div class="bubble2"></div>
+
+  <div class="head-card">
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#b94040"></span>
+      PAZAPA &middot; MATHS &middot; 4&Egrave;ME
+    </div>
+    <div class="week-label">Semaine 5 &ndash; Jour 2</div>
+    <h1><span class="hl">&#9999;&#65039; Programmer la tortue Scratch avec des r&eacute;p&eacute;titions</span></h1>
+    <p class="subtitle">Algorithmique &middot; s&eacute;rie d&rsquo;exercices</p>
+    <div class="level-row">
+      <span class="level-btn">Niveau 1</span>
+      <span class="level-btn">Niveau 2</span>
+      <span class="level-btn active">Niveau 3</span>
+    </div>
+  </div>
+
+  <div class="card" id="card0">
+    <div class="card-stripe"></div>
+    <div class="q-num">Exercice 1 / 1</div>
+    <div class="q-text">
+      Quelle figure est trac&eacute;e par le stylo &agrave; l&rsquo;ex&eacute;cution du programme ci-dessous&nbsp;?<br>
+      Le trac&eacute; d&eacute;marre &agrave; la croix bleue. S&rsquo;orienter &agrave; 90&deg; signifie s&rsquo;orienter vers la droite de l&rsquo;&eacute;cran.
+    </div>
+
+    <div class="exo-layout">
+      <!-- Programme Scratch -->
+      <div class="scratch-prog">
+        <div class="s-block event">quand &#127897; est cliqu&eacute;</div>
+        <div class="s-block motion">aller &agrave; x&nbsp;: <span class="s-val">0</span> y&nbsp;: <span class="s-val">0</span></div>
+        <div class="s-block motion">s&rsquo;orienter &agrave; <span class="s-val">90</span></div>
+        <div class="s-block pen">&#9998; stylo en position d&rsquo;&eacute;criture</div>
+        <div class="s-block ctrl">r&eacute;p&eacute;ter <span class="s-val">5</span> fois</div>
+        <div class="s-block ctrl-inner motion">avancer de <span class="s-val">62</span> pas</div>
+        <div class="s-block ctrl-inner ctrl">r&eacute;p&eacute;ter <span class="s-val">4</span> fois</div>
+        <div class="s-block ctrl-inner2 motion">avancer de <span class="s-val">16</span> pas</div>
+        <div class="s-block ctrl-inner2 motion">tourner &#8634; de <span class="s-val">90</span> degr&eacute;s</div>
+        <div class="s-end-inner"></div>
+        <div class="s-block ctrl-inner motion">tourner &#8635; de <span class="s-val">180</span> degr&eacute;s</div>
+        <div class="s-block ctrl-inner motion">tourner &#8634; de <span class="s-val">72</span> degr&eacute;s</div>
+        <div class="s-end"></div>
+        <div class="s-block pen" style="border-radius:0 0 8px 8px;">&#9998; relever le stylo</div>
+      </div>
+
+      <!-- 4 figures SVG -->
+      <div class="figs-grid">
+
+        <!-- Figure 1 : étoile 5 branches régulières (72°) avec carrés -->
+        <div class="fig-card" id="fig0" onclick="select(0)">
+          <svg viewBox="-85 -91 175 177" xmlns="http://www.w3.org/2000/svg"><text x="-6" y="5" font-size="14" fill="#5b9bd5" font-weight="bold">&#10005;</text><line x1="0" y1="0" x2="62" y2="-0" stroke="#111" stroke-width="2.5"/><polygon points="62,-0 78,-0 78,-16 62,-16" fill="none" stroke="#111" stroke-width="2"/><line x1="0" y1="0" x2="19" y2="-59" stroke="#111" stroke-width="2.5"/><polygon points="19,-59 24,-74 9,-79 4,-64" fill="none" stroke="#111" stroke-width="2"/><line x1="0" y1="0" x2="-50" y2="-36" stroke="#111" stroke-width="2.5"/><polygon points="-50,-36 -63,-46 -73,-33 -60,-23" fill="none" stroke="#111" stroke-width="2"/><line x1="0" y1="0" x2="-50" y2="36" stroke="#111" stroke-width="2.5"/><polygon points="-50,36 -63,46 -54,59 -41,49" fill="none" stroke="#111" stroke-width="2"/><line x1="0" y1="0" x2="19" y2="59" stroke="#111" stroke-width="2.5"/><polygon points="19,59 24,74 39,69 34,54" fill="none" stroke="#111" stroke-width="2"/></svg>
+          <div class="fig-label">figure 1</div>
+        </div>
+
+        <!-- Figure 2 : bonne réponse — branches à 108° avec chevauchement -->
+        <div class="fig-card" id="fig1" onclick="select(1)">
+          <svg viewBox="-42 -48 136 139" xmlns="http://www.w3.org/2000/svg"><text x="-8" y="6" font-size="14" fill="#5b9bd5" font-weight="bold">&#10005;</text><line x1="0" y1="0" x2="62" y2="-0" stroke="#111" stroke-width="2.5"/><polygon points="62,-0 78,-0 78,-16 62,-16" fill="none" stroke="#111" stroke-width="2"/><line x1="62" y1="-0" x2="43" y2="59" stroke="#111" stroke-width="2.5"/><polygon points="43,59 38,74 53,79 58,64" fill="none" stroke="#111" stroke-width="2"/><line x1="43" y1="59" x2="-7" y2="23" stroke="#111" stroke-width="2.5"/><polygon points="-7,23 -20,13 -30,26 -17,35" fill="none" stroke="#111" stroke-width="2"/><line x1="-7" y1="23" x2="43" y2="-14" stroke="#111" stroke-width="2.5"/><polygon points="43,-14 56,-23 46,-36 33,-27" fill="none" stroke="#111" stroke-width="2"/><line x1="43" y1="-14" x2="62" y2="45" stroke="#111" stroke-width="2.5"/><polygon points="62,45 67,60 82,55 77,40" fill="none" stroke="#111" stroke-width="2"/></svg>
+          <div class="fig-label">figure 2</div>
+        </div>
+
+        <!-- Figure 3 : 6 branches régulières (60°) avec carrés -->
+        <div class="fig-card" id="fig2" onclick="select(2)">
+          <svg viewBox="-85 -91 175 177" xmlns="http://www.w3.org/2000/svg"><text x="-6" y="5" font-size="14" fill="#5b9bd5" font-weight="bold">&#10005;</text><line x1="0" y1="0" x2="62" y2="0" stroke="#111" stroke-width="2.5"/><polygon points="78,0 78,-16 62,-16 62,0" fill="none" stroke="#111" stroke-width="2"/><line x1="0" y1="0" x2="19" y2="59" stroke="#111" stroke-width="2.5"/><polygon points="24,74 39,69 34,54 19,59" fill="none" stroke="#111" stroke-width="2"/><line x1="0" y1="0" x2="-50" y2="36" stroke="#111" stroke-width="2.5"/><polygon points="-63,46 -54,59 -41,49 -50,36" fill="none" stroke="#111" stroke-width="2"/><line x1="0" y1="0" x2="-50" y2="-36" stroke="#111" stroke-width="2.5"/><polygon points="-63,-46 -73,-33 -60,-23 -50,-36" fill="none" stroke="#111" stroke-width="2"/><line x1="0" y1="0" x2="19" y2="-59" stroke="#111" stroke-width="2.5"/><polygon points="24,-74 9,-79 4,-64 19,-59" fill="none" stroke="#111" stroke-width="2"/></svg>
+          <div class="fig-label">figure 3</div>
+        </div>
+
+        <!-- Figure 4 : pentagone régulier avec carrés aux sommets -->
+        <div class="fig-card" id="fig3" onclick="select(3)">
+          <svg viewBox="-92 -83 184 176" xmlns="http://www.w3.org/2000/svg"><polygon points="41,-57 67,22 0,70 -67,22 -41,-57" fill="none" stroke="#111" stroke-width="2.5"/><polygon points="30,-55 43,-46 52,-59 39,-68" fill="none" stroke="#111" stroke-width="2"/><polygon points="62,12 57,27 72,32 77,17" fill="none" stroke="#111" stroke-width="2"/><polygon points="8,62 -8,62 -8,78 8,78" fill="none" stroke="#111" stroke-width="2"/><polygon points="-57,27 -62,12 -77,17 -72,32" fill="none" stroke="#111" stroke-width="2"/><polygon points="-43,-46 -30,-55 -39,-68 -52,-59" fill="none" stroke="#111" stroke-width="2"/><text x="-5" y="75" font-size="14" fill="#5b9bd5" font-weight="bold">&#10005;</text></svg>
+          <div class="fig-label">figure 4</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="vbtn" onclick="checkAnswer()" disabled>&#10003; V&eacute;rifier</button>
+      <button class="btn btn-ghost hidden" id="ebtn" onclick="toggleExpl()">&#128064; Voir la correction</button>
+    </div>
+
+    <div class="feedback" id="fb">
+      <span class="feedback-icon" id="fbi"></span>
+      <div><span id="fbt"></span></div>
+    </div>
+
+    <div class="method-box" id="method">
+      <strong>Correction&nbsp;:</strong> La bonne figure est la <strong>figure 2</strong>.<br><br>
+      Le programme trace <strong>5 branches</strong> depuis le point de d&eacute;part.<br>
+      Chaque branche&nbsp;:<br>
+      &nbsp;&nbsp;1. La tortue avance de 62 pas &rarr; trac&eacute; de la branche.<br>
+      &nbsp;&nbsp;2. Elle trace un carré (r&eacute;p&eacute;ter 4 fois&nbsp;: avancer 16, tourner &agrave; gauche 90°) &rarr; le carré au bout.<br>
+      &nbsp;&nbsp;3. Elle tourne &agrave; droite de 180° (demi-tour) &rarr; revient vers le centre.<br>
+      &nbsp;&nbsp;4. Elle tourne &agrave; gauche de 72° &rarr; pivote pour la branche suivante.<br><br>
+      Apr&egrave;s le carr&eacute;, la tortue a effectu&eacute; 4&times;90° = 360° (orientation conserv&eacute;e).<br>
+      La rotation nette entre deux branches est&nbsp;: 180° &minus; 72° = <strong>108°</strong>.<br>
+      Les 5 branches ne sont <strong>pas r&eacute;guli&egrave;rement espac&eacute;es</strong> (pas 72°), ce qui correspond &agrave; la figure 2.
+    </div>
+  </div>
+
+  <script>
+  var sel = null;
+  var ANS = 1; // index de la bonne réponse (figure 2 = index 1)
+  var done = false;
+
+  function select(k) {
+    if (done) return;
+    sel = k;
+    [0,1,2,3].forEach(function(i) {
+      document.getElementById('fig'+i).className = 'fig-card' + (i===k?' sel':'');
+    });
+    document.getElementById('vbtn').disabled = false;
+  }
+
+  function checkAnswer() {
+    if (sel === null || done) return;
+    var ok = (sel === ANS);
+    done = true;
+    var fb = document.getElementById('fb');
+    var fbi = document.getElementById('fbi');
+    var fbt = document.getElementById('fbt');
+    if (ok) {
+      document.getElementById('fig'+sel).className = 'fig-card good';
+      fb.className = 'feedback show ok';
+      fbi.textContent = '\u2713';
+      fbt.textContent = 'Bravo\u00a0! La bonne r\u00e9ponse est bien la figure\u00a02.';
+    } else {
+      document.getElementById('fig'+sel).className = 'fig-card bad';
+      document.getElementById('fig'+ANS).className = 'fig-card good';
+      fb.className = 'feedback show ko';
+      fbi.textContent = '\u2717';
+      fbt.textContent = 'Pas tout \u00e0 fait\u00a0\u2014 la bonne r\u00e9ponse est la figure\u00a02.';
+    }
+    document.getElementById('vbtn').disabled = true;
+    document.getElementById('ebtn').classList.remove('hidden');
+  }
+
+  function toggleExpl() {
+    var m = document.getElementById('method');
+    var o = m.classList.toggle('reveal');
+    document.getElementById('ebtn').textContent = o ? '\u128064 Masquer la correction' : '\u128064 Voir la correction';
+  }
+  </script>
+</body>
+</html>
