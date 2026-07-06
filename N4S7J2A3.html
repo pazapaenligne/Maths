@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — Calculer une médiane</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --jour:#b94040;--jour-fonce:#7a1f1f;--jour-soft:#f7eded;
+  --jour-accent:#f9c0bb;--jour-titre:#7a1f1f;--badge-txt:#4a0e0e;
+  --vert:#8dc63f;--vert-fonce:#3d7a10;--vert-soft:#f0faeb;
+  --rouge:#e74c3c;--rouge-soft:#fdedec;--rouge-fonce:#c0392b;
+  --texte:#23262d;--gris:#8a8f9a;--bord:#ece8dd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:#fffdf7;color:var(--texte);font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 4rem;position:relative;}
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.28;background:#f5d080;border-radius:38% 62% 55% 45%/56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.22;background:var(--jour-accent);border-radius:62% 38% 44% 56%/42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.20;background:#8dc63f;border-radius:45% 55% 62% 38%/55% 45% 58% 42%;}
+.blob4{width:140px;height:150px;bottom:200px;left:-30px;opacity:.16;background:#f28b82;border-radius:50% 50% 40% 60%/60% 40% 60% 40%;}
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;width:100%;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-size:.82rem;color:var(--gris);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.8vw,1.9rem);font-weight:800;line-height:1.3;}
+h1 .hl{color:var(--jour-titre);}
+.sous-titre{color:var(--gris);font-size:.9rem;margin-top:.4rem;line-height:1.8;}
+.consigne{margin:1rem auto 0;max-width:560px;border:2px dashed var(--jour);background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+.section-defi{position:relative;z-index:1;width:100%;max-width:700px;background:#fff;border:2px solid var(--bord);border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.defi-stripe{height:4px;background:linear-gradient(90deg,var(--jour),#f5a623,#f5c518);}
+.topbar{background:rgba(255,255,255,.97);border-bottom:2px solid var(--bord);padding:.65rem 1rem .7rem;}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;}
+.pastilles{display:flex;gap:.28rem;flex-wrap:wrap;flex:1;justify-content:center;}
+.pastille{width:1.55rem;height:1.55rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.74rem;border:2px solid var(--bord);color:var(--gris);background:#fff;transition:all .25s;}
+.pastille.active{background:var(--jour);border-color:var(--jour);color:#fff;transform:scale(1.13);}
+.pastille.ok{background:var(--vert);border-color:var(--vert);color:#fff;}
+.pastille.ko{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+.chrono{display:inline-flex;align-items:center;gap:.3rem;background:var(--jour-soft);border:2px solid var(--jour);color:var(--jour-fonce);font-weight:800;font-size:1rem;padding:.3rem .8rem;border-radius:99px;min-width:5rem;justify-content:center;}
+.chrono.warn{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);animation:pulse .55s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.09);}}
+.btn-son{background:#fff;border:2px solid var(--bord);border-radius:50%;width:2.5rem;height:2.5rem;min-height:2.5rem;font-size:1.05rem;cursor:pointer;font-family:inherit;}
+.progress-bg{background:var(--bord);border-radius:99px;height:7px;overflow:hidden;margin-top:.55rem;}
+.progress-fill{height:100%;width:0%;border-radius:99px;transition:width .5s ease;background:linear-gradient(90deg,var(--jour),#e85050);}
+.startgate{padding:1.6rem 1.4rem 1.8rem;text-align:center;}
+.startgate h3{font-size:1.05rem;color:var(--jour-fonce);margin-bottom:.7rem;}
+.startgate p{font-size:.88rem;color:var(--texte);line-height:1.95;text-align:left;margin-bottom:.5rem;}
+.memo{background:var(--jour-soft);border:1.5px solid var(--jour-accent);border-left:5px solid var(--jour);border-radius:10px;padding:.75rem 1rem;margin:.85rem 0 1.3rem;font-size:.84rem;color:var(--jour-fonce);line-height:2;text-align:left;}
+.memo table{border-collapse:collapse;width:100%;margin-top:.4rem;}
+.memo td{padding:.2rem .5rem;border:1px solid var(--jour-accent);font-size:.8rem;}
+.memo th{padding:.2rem .5rem;border:1px solid var(--jour-accent);background:var(--jour-accent);font-size:.8rem;text-align:center;}
+.btn{font-family:'JetBrains Mono',monospace;border:none;cursor:pointer;border-radius:12px;font-weight:800;transition:transform .12s,box-shadow .15s,opacity .15s;min-height:2.9rem;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-start{background:var(--jour);color:#fff;font-size:1rem;padding:.85rem 2.2rem;box-shadow:0 4px 14px rgba(185,64,64,.4);}
+.btn-start:hover{transform:translateY(-2px);}
+.gamearea{padding:1.2rem 1.3rem 1.5rem;}
+.carte-q{background:#fff;border:2px solid var(--bord);border-radius:14px;padding:1.2rem;box-shadow:0 4px 16px rgba(0,0,0,.05);animation:fadeUp .3s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.q-label{font-size:.72rem;color:var(--gris);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:.6rem;}
+.q-text{font-size:.9rem;font-weight:700;color:var(--jour-fonce);text-align:center;margin-bottom:.8rem;line-height:1.8;}
+/* Triangle SVG */
+.tri-box{display:flex;justify-content:center;margin-bottom:.9rem;}
+.tri-box svg{width:200px;height:160px;}
+/* Boutons SIN/COS/TAN */
+.choix-sct{display:flex;gap:.55rem;justify-content:center;margin-bottom:.6rem;flex-wrap:wrap;}
+.opt-sct{
+  flex:1;max-width:160px;min-width:90px;padding:.75rem .4rem;border-radius:12px;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:.95rem;
+  border:2.5px solid var(--bord);background:#f5f2ec;cursor:pointer;
+  transition:border-color .18s,background .18s;text-align:center;color:var(--texte);
+  font-style:italic;
+}
+.opt-sct:hover:not(.disabled){border-color:var(--jour);background:var(--jour-soft);}
+.opt-sct.selected{border-color:var(--jour);background:var(--jour-soft);color:var(--jour-fonce);}
+.opt-sct.correct-opt{border-color:var(--vert);background:var(--vert-soft);color:var(--vert-fonce);}
+.opt-sct.wrong-opt{border-color:var(--rouge);background:var(--rouge-soft);color:var(--rouge-fonce);}
+.opt-sct.disabled{cursor:default;}
+.btn-valider{background:var(--jour);color:#fff;font-size:.95rem;padding:.65rem 1.5rem;box-shadow:0 3px 10px rgba(185,64,64,.35);display:block;margin:0 auto;}
+.warn-saisie{display:none;text-align:center;color:var(--rouge-fonce);background:var(--rouge-soft);border:1.5px solid var(--rouge);border-radius:9px;padding:.4rem .7rem;font-size:.82rem;margin-bottom:.6rem;}
+.warn-saisie.show{display:block;}
+.countdown{position:absolute;inset:0;z-index:10;background:rgba(247,237,237,.97);display:none;align-items:center;justify-content:center;border-radius:18px;}
+.countdown.show{display:flex;}
+.cd-num{font-size:clamp(5rem,18vw,7.5rem);font-weight:800;color:var(--jour-titre);animation:cdPop .8s ease both;}
+@keyframes cdPop{0%{transform:scale(.25);opacity:0;}45%{transform:scale(1.18);opacity:1;}100%{transform:scale(1);opacity:1;}}
+.resultats{display:none;padding:1.8rem 1.4rem;text-align:center;}
+.resultats.show{display:block;}
+.trophee{font-size:3rem;margin-bottom:.4rem;}
+.score-final{font-size:1.4rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.4rem;}
+.etoiles{font-size:1.9rem;letter-spacing:.15em;margin-bottom:.6rem;}
+.msg-final{font-size:.92rem;color:var(--texte);line-height:1.9;margin-bottom:1.2rem;}
+.recap{text-align:left;margin-bottom:1.4rem;display:flex;flex-direction:column;gap:.45rem;}
+.recap-item{display:flex;flex-direction:column;gap:.1rem;border-radius:10px;padding:.6rem .8rem;font-size:.82rem;line-height:1.9;}
+.recap-item.ok{background:var(--vert-soft);border:1.5px solid var(--vert);color:var(--vert-fonce);}
+.recap-item.ko{background:var(--rouge-soft);border:1.5px solid var(--rouge);color:var(--rouge-fonce);}
+.btn-rejouer{background:var(--jour);color:#fff;font-size:.98rem;padding:.78rem 1.7rem;}
+.hidden{display:none !important;}
+@media(max-width:500px){body{padding:1rem .6rem 3rem;}.gamearea{padding:.9rem;}.choix-sct{gap:.4rem;}}
+</style>
+</head>
+<body>
+<div class="blob blob1"></div><div class="blob blob2"></div>
+<div class="blob blob3"></div><div class="blob blob4"></div>
+
+<header class="hero">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine&nbsp;7 &ndash; Jour&nbsp;2</div>
+  <h1><span class="hl">Calculer une m&eacute;diane</span></h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs.</p>
+  <div class="consigne">&#128073; Identifie la relation trigonom&eacute;trique utilis&eacute;e.</div>
+</header>
+
+<section class="section-defi" id="sectionDefi">
+  <div class="defi-stripe"></div>
+  <div class="topbar hidden" id="topbar">
+    <div class="topbar-row">
+      <div class="pastilles" id="pastilles"></div>
+      <div class="chrono" id="chrono">&#9203; 20</div>
+      <button class="btn btn-son" id="btnSon">&#128266;</button>
+    </div>
+    <div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="startgate" id="startgate">
+    <h3>&#9660; D&eacute;fi flash &mdash; Trouver la relation trigonom&eacute;trique</h3>
+    <p>Observe le triangle rectangle et choisis la bonne relation. Tu as <strong>20&nbsp;secondes</strong> par question.</p>
+    <div class="memo">
+      &#128161; <strong>Rappel</strong> (angle &alpha; dans un triangle rectangle) :<br><br>
+      <table>
+        <tr><th>Relation</th><th>C&ocirc;t&eacute;s connus</th><th>Formule</th></tr>
+        <tr><td><em>cosinus</em></td><td>adjacent / hypot&eacute;nuse</td><td>cos(&alpha;) = adj / hyp</td></tr>
+        <tr><td><em>sinus</em></td><td>oppos&eacute; / hypot&eacute;nuse</td><td>sin(&alpha;) = opp / hyp</td></tr>
+        <tr><td><em>tangente</em></td><td>oppos&eacute; / adjacent</td><td>tan(&alpha;) = opp / adj</td></tr>
+      </table>
+    </div>
+    <button class="btn btn-start" id="btnStart">&#9654;&#65039; D&eacute;marrer</button>
+  </div>
+
+  <div class="gamearea hidden" id="gamearea">
+    <div class="carte-q" id="carteQ">
+      <div class="q-label" id="qLabel">Question 1 / 10</div>
+      <div class="q-text" id="qText"></div>
+      <div class="tri-box" id="triBox"></div>
+      <div class="choix-sct">
+        <button class="opt-sct" id="optCos" onclick="selectOpt('cos')"><em>cosinus</em></button>
+        <button class="opt-sct" id="optSin" onclick="selectOpt('sin')"><em>sinus</em></button>
+        <button class="opt-sct" id="optTan" onclick="selectOpt('tan')"><em>tangente</em></button>
+      </div>
+      <div class="warn-saisie" id="warnSaisie">&#9888;&#65039; Choisis une relation avant de valider&nbsp;!</div>
+      <button class="btn btn-valider" id="btnValidate">&#10003; Valider</button>
+    </div>
+  </div>
+
+  <div class="resultats hidden" id="resultats">
+    <div class="trophee">&#127942;</div>
+    <div class="score-final" id="scoreFinal"></div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="msg-final" id="msgFinal"></div>
+    <div class="recap" id="recap"></div>
+    <button class="btn btn-rejouer" id="btnRejouer">&#8635; Rejouer</button>
+  </div>
+
+  <div class="countdown" id="countdown"><div class="cd-num" id="cdNum">3</div></div>
+</section>
+
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var QTOTAL=10,QTIME=20,WARN_AT=6;
+
+/* ════════════════════════════════════════
+   SVG TRIANGLES RECTANGLES
+   Fidèles aux figures de la fiche
+   Angle rouge = angle de référence (triangle rouge plein)
+   Angle droit = petit carré
+   ════════════════════════════════════════ */
+
+function svgTriangle(cfg){
+  /* cfg = {
+       pts: [{x,y,label,labelPos}x3],  // A B C coords + labels
+       right: index du sommet angle droit,
+       red:   index du sommet angle rouge (référence),
+       w: largeur svg, h: hauteur svg
+     }
+  */
+  var w=cfg.w||200, h=cfg.h||155;
+  var pts=cfg.pts;
+  var s='<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">';
+
+  // Triangle rempli légèrement
+  s+='<polygon points="'+pts.map(function(p){return p.x+','+p.y;}).join(' ')+'" fill="#f5f2ec" stroke="#333" stroke-width="1.6" stroke-linejoin="round"/>';
+
+  // Angle droit (petit carré)
+  var ri=cfg.right;
+  var rpt=pts[ri];
+  var prev=pts[(ri+2)%3], next=pts[(ri+1)%3];
+  var dx1=(prev.x-rpt.x), dy1=(prev.y-rpt.y);
+  var dx2=(next.x-rpt.x), dy2=(next.y-rpt.y);
+  var len1=Math.sqrt(dx1*dx1+dy1*dy1), len2=Math.sqrt(dx2*dx2+dy2*dy2);
+  var sz=10;
+  var u1x=dx1/len1*sz, u1y=dy1/len1*sz;
+  var u2x=dx2/len2*sz, u2y=dy2/len2*sz;
+  var sq=[
+    {x:rpt.x+u1x, y:rpt.y+u1y},
+    {x:rpt.x+u1x+u2x, y:rpt.y+u1y+u2y},
+    {x:rpt.x+u2x, y:rpt.y+u2y}
+  ];
+  s+='<polyline points="'+sq.map(function(p){return p.x+','+p.y;}).join(' ')+'" fill="none" stroke="#333" stroke-width="1.3"/>';
+
+  // Angle rouge (triangle plein rouge au sommet de référence)
+  var ai=cfg.red;
+  var apt=pts[ai];
+  var aprev=pts[(ai+2)%3], anext=pts[(ai+1)%3];
+  var adx1=(aprev.x-apt.x), ady1=(aprev.y-apt.y);
+  var adx2=(anext.x-apt.x), ady2=(anext.y-apt.y);
+  var alen1=Math.sqrt(adx1*adx1+ady1*ady1), alen2=Math.sqrt(adx2*adx2+ady2*ady2);
+  var asiz=14;
+  var au1x=adx1/alen1*asiz, au1y=ady1/alen1*asiz;
+  var au2x=adx2/alen2*asiz, au2y=ady2/alen2*asiz;
+  s+='<polygon points="'+apt.x+','+apt.y+' '+(apt.x+au1x)+','+(apt.y+au1y)+' '+(apt.x+au1x+au2x)+','+(apt.y+au1y+au2y)+' '+(apt.x+au2x)+','+(apt.y+au2y)+'" fill="#e74c3c" opacity="0.85"/>';
+
+  // Labels sommets
+  pts.forEach(function(p){
+    var ox=0, oy=0;
+    if(p.lp==='tl'){ox=-12;oy=-6;}
+    else if(p.lp==='tr'){ox=6;oy=-6;}
+    else if(p.lp==='bl'){ox=-12;oy=14;}
+    else if(p.lp==='br'){ox=6;oy=14;}
+    else if(p.lp==='l'){ox=-14;oy=4;}
+    else if(p.lp==='r'){ox=8;oy=4;}
+    else if(p.lp==='t'){ox=-4;oy=-8;}
+    else if(p.lp==='b'){ox=-4;oy=14;}
+    s+='<text x="'+(p.x+ox)+'" y="'+(p.y+oy)+'" font-size="14" font-weight="700" font-family="Arial,sans-serif" fill="#222">'+p.l+'</text>';
+  });
+
+  s+='</svg>';
+  return s;
+}
+
+/* ════════ 10 QUESTIONS exactes de la fiche ════════ */
+var QUESTIONS=[
+
+  /* A — On connaît G et EI, angle rouge = G → sinus (opp/hyp = EI/IG)
+     Triangle : G bas-gauche, E bas-droite, I haut-droite, angle droit en E */
+  {lettre:"A",
+   q:"On conna\u00eet <strong>G\u0302</strong> et <strong>EI</strong>. Utilise-t-on cos, sin ou tan pour d\u00e9terminer <strong>IG</strong>&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:1,red:0,
+     pts:[{x:28,y:125,l:"G",lp:"bl"},{x:158,y:125,l:"E",lp:"br"},{x:158,y:28,l:"I",lp:"tr"}]}),
+   ans:"sin",
+   expl:"<em>sin</em>(\u011c) = EI/IG (oppos\u00e9 sur hypot\u00e9nuse)"},
+
+  /* B — On connaît M et GK, angle rouge = M → tangente (GK/MK)
+     Triangle : M haut-gauche, K haut-droite, G bas-droite, angle droit en G */
+  {lettre:"B",
+   q:"On conna\u00eet <strong>MK</strong> et <strong>GK</strong>. Sont-ils li\u00e9s \u00e0 <strong>M\u0302</strong> par cos, sin ou tan&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:2,red:0,
+     pts:[{x:28,y:38,l:"M",lp:"tl"},{x:168,y:38,l:"K",lp:"tr"},{x:168,y:128,l:"G",lp:"br"}]}),
+   ans:"tan",
+   expl:"<em>tan</em>(\u1e40) = GK/MK (oppos\u00e9 sur adjacent)"},
+
+  /* C — On connaît R et RH,RV → cosinus (cos = adj/hyp = RH/RV)
+     Triangle : R bas-gauche (angle rouge), H haut-gauche, V haut-droite, angle droit en H */
+  {lettre:"C",
+   q:"On conna\u00eet <strong>RH</strong> et <strong>RV</strong>. Sont-ils li\u00e9s \u00e0 <strong>R\u0302</strong> par cos, sin ou tan&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:1,red:0,
+     pts:[{x:28,y:128,l:"R",lp:"bl"},{x:28,y:28,l:"H",lp:"tl"},{x:168,y:28,l:"V",lp:"tr"}]}),
+   ans:"cos",
+   expl:"<em>cos</em>(\u1e36) = RH/RV (adjacent sur hypot\u00e9nuse)"},
+
+  /* D — On connaît A et AD → sinus pour MD
+     Triangle : D bas-gauche, A bas-droite (angle rouge), M haut-milieu, angle droit en M */
+  {lettre:"D",
+   q:"On conna\u00eet <strong>A\u0302</strong> et <strong>AD</strong>. Utilise-t-on cos, sin ou tan pour d\u00e9terminer <strong>MD</strong>&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:2,red:1,
+     pts:[{x:28,y:128,l:"D",lp:"bl"},{x:168,y:128,l:"A",lp:"br"},{x:108,y:28,l:"M",lp:"t"}]}),
+   ans:"sin",
+   expl:"<em>sin</em>(\u00c2) = MD/AD (oppos\u00e9 sur hypot\u00e9nuse)"},
+
+  /* E — On connaît W et SW,WM → cosinus (adj/hyp)
+     Triangle : S bas-gauche, W bas-droite (angle rouge), M haut-gauche, angle droit en S */
+  {lettre:"E",
+   q:"On conna\u00eet <strong>SW</strong> et <strong>WM</strong>. Sont-ils li\u00e9s \u00e0 <strong>W\u0302</strong> par cos, sin ou tan&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:0,red:2,
+     pts:[{x:28,y:128,l:"S",lp:"bl"},{x:168,y:128,l:"W",lp:"br"},{x:28,y:38,l:"M",lp:"tl"}]}),
+   ans:"cos",
+   expl:"<em>cos</em>(\u0057\u0302) = SW/WM (adjacent sur hypot\u00e9nuse)"},
+
+  /* F — On connaît L et EB → tangente pour LE
+     Triangle : B haut-gauche, L haut-droite (angle rouge), E bas-milieu, angle droit en E */
+  {lettre:"F",
+   q:"On conna\u00eet <strong>L\u0302</strong> et <strong>EB</strong>. Utilise-t-on cos, sin ou tan pour d\u00e9terminer <strong>LE</strong>&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:2,red:1,
+     pts:[{x:28,y:38,l:"B",lp:"tl"},{x:168,y:38,l:"L",lp:"tr"},{x:108,y:128,l:"E",lp:"b"}]}),
+   ans:"tan",
+   expl:"<em>tan</em>(\u013c) = EB/LE (oppos\u00e9 sur adjacent)"},
+
+  /* G — On connaît C et BC → cosinus pour MC
+     Triangle : C haut-gauche (angle rouge), B bas-milieu, M haut-droite, angle droit en B */
+  {lettre:"G",
+   q:"On conna\u00eet <strong>C\u0302</strong> et <strong>BC</strong>. Utilise-t-on cos, sin ou tan pour d\u00e9terminer <strong>MC</strong>&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:1,red:0,
+     pts:[{x:28,y:38,l:"C",lp:"tl"},{x:98,y:128,l:"B",lp:"b"},{x:168,y:38,l:"M",lp:"tr"}]}),
+   ans:"cos",
+   expl:"<em>cos</em>(\u010c) = BC/MC (adjacent sur hypot\u00e9nuse)"},
+
+  /* H — On connaît J et LJ,LS → sinus (LS/LJ)
+     Triangle : L haut-gauche, S bas-gauche, J bas-droite (angle rouge), angle droit en S */
+  {lettre:"H",
+   q:"On conna\u00eet <strong>LJ</strong> et <strong>LS</strong>. Sont-ils li\u00e9s \u00e0 <strong>J\u0302</strong> par cos, sin ou tan&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:1,red:2,
+     pts:[{x:28,y:28,l:"L",lp:"tl"},{x:28,y:128,l:"S",lp:"bl"},{x:168,y:128,l:"J",lp:"br"}]}),
+   ans:"sin",
+   expl:"<em>sin</em>(\u0135) = LS/LJ (oppos\u00e9 sur hypot\u00e9nuse)"},
+
+  /* I — On connaît B et BR,HR → tangente (HR/BR)
+     Triangle : H haut-gauche, R haut-droite, B bas-droite (angle rouge), angle droit en R */
+  {lettre:"I",
+   q:"On conna\u00eet <strong>BR</strong> et <strong>HR</strong>. Sont-ils li\u00e9s \u00e0 <strong>B\u0302</strong> par cos, sin ou tan&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:1,red:2,
+     pts:[{x:28,y:38,l:"H",lp:"tl"},{x:168,y:38,l:"R",lp:"tr"},{x:168,y:128,l:"B",lp:"br"}]}),
+   ans:"tan",
+   expl:"<em>tan</em>(\u0181) = HR/BR (oppos\u00e9 sur adjacent)"},
+
+  /* J — On connaît N et SJ → sinus pour NJ
+     Triangle : J haut-gauche, S bas-gauche, N bas-droite, angle droit en S, angle rouge = N */
+  {lettre:"J",
+   q:"On conna\u00eet <strong>N\u0302</strong> et <strong>SJ</strong>. Utilise-t-on cos, sin ou tan pour d\u00e9terminer <strong>NJ</strong>&nbsp;?",
+   svg:svgTriangle({w:200,h:155,right:1,red:2,
+     pts:[{x:28,y:38,l:"J",lp:"tl"},{x:28,y:128,l:"S",lp:"bl"},{x:168,y:128,l:"N",lp:"br"}]}),
+   ans:"sin",
+   expl:"<em>sin</em>(\u1e46) = SJ/NJ (oppos\u00e9 sur hypot\u00e9nuse)"}
+];
+
+/* ════════ SON ════════ */
+var audioCtx=null,soundOn=true;
+function getCtx(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}if(audioCtx&&audioCtx.state==="suspended"){audioCtx.resume();}return audioCtx;}
+function beep(f,d,t,v,dl){if(!soundOn)return;var ctx=getCtx();if(!ctx)return;var t0=ctx.currentTime+(dl||0);var osc=ctx.createOscillator(),g=ctx.createGain();osc.type=t||"sine";osc.frequency.value=f;g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(v||0.18,t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t0+d);osc.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+d+0.05);}
+function sndTick(){beep(820,0.07,"square",0.07);}
+function sndCdBip(){beep(440,0.16,"sine",0.2);}
+function sndCdGo(){beep(880,0.32,"sine",0.24);}
+function sndGood(){beep(660,0.13,"sine",0.2);beep(880,0.22,"sine",0.2,0.12);}
+function sndBad(){beep(220,0.3,"sawtooth",0.14);}
+function sndFanfare(){beep(523,0.16,"sine",0.2,0);beep(659,0.16,"sine",0.2,0.15);beep(784,0.16,"sine",0.2,0.30);beep(1047,0.4,"sine",0.22,0.45);}
+
+/* ════════ ÉTAT ════════ */
+var game={qIndex:0,score:0,results:[],qs:[],q:null,timeLeft:QTIME,timer:null,locked:false,selected:null};
+
+function buildPastilles(){var p=$("pastilles");p.innerHTML="";for(var i=0;i<QTOTAL;i++){var s=document.createElement("span");s.className="pastille";s.id="past"+i;s.textContent=(i+1);p.appendChild(s);}}
+function setPastille(i,st){var s=$("past"+i);if(!s)return;s.classList.remove("active","ok","ko");if(st==="active"){s.classList.add("active");s.textContent=(i+1);}else if(st==="ok"){s.classList.add("ok");s.textContent="\u2713";}else if(st==="ko"){s.classList.add("ko");s.textContent="\u2717";}}
+function updateProgress(){$("progressFill").style.width=Math.round(game.results.length/QTOTAL*100)+"%";}
+function updateChrono(){var c=$("chrono");c.textContent="\u23f1\ufe0f "+game.timeLeft;if(game.timeLeft<=WARN_AT){c.classList.add("warn");}else{c.classList.remove("warn");}}
+function runCountdown(cb){var ov=$("countdown"),num=$("cdNum");ov.classList.add("show");var steps=["3","2","1","Partez\u00a0!"],i=0;function step(){num.textContent=steps[i];num.style.animation="none";void num.offsetWidth;num.style.animation="";if(i<3){sndCdBip();}else{sndCdGo();}i++;if(i<steps.length){setTimeout(step,800);}else{setTimeout(function(){ov.classList.remove("show");cb();},700);}}step();}
+
+function resetOpts(){
+  ["optCos","optSin","optTan"].forEach(function(id){
+    $(id).className="opt-sct";$(id).disabled=false;
+  });
+}
+function newQuestion(){
+  game.q=game.qs[game.qIndex];
+  game.locked=false;game.selected=null;game.timeLeft=QTIME;
+  $("qLabel").textContent="Question "+(game.qIndex+1)+" / "+QTOTAL;
+  $("qText").innerHTML=game.q.q;
+  $("triBox").innerHTML=game.q.svg;
+  resetOpts();
+  $("warnSaisie").classList.remove("show");
+  $("btnValidate").disabled=false;
+  updateChrono();setPastille(game.qIndex,"active");
+  startTimer();
+}
+
+function selectOpt(v){
+  if(game.locked)return;
+  game.selected=v;
+  resetOpts();
+  var ids={cos:"optCos",sin:"optSin",tan:"optTan"};
+  $(ids[v]).className="opt-sct selected";
+  $("warnSaisie").classList.remove("show");
+}
+
+function startTimer(){stopTimer();game.timer=setInterval(function(){game.timeLeft--;updateChrono();if(game.timeLeft<=WARN_AT&&game.timeLeft>0){sndTick();}if(game.timeLeft<=0){onTimeout();}},1000);}
+function stopTimer(){if(game.timer){clearInterval(game.timer);game.timer=null;}}
+
+function validate(){
+  if(game.locked)return;
+  if(!game.selected){$("warnSaisie").classList.add("show");sndBad();return;}
+  game.locked=true;stopTimer();
+  finishQuestion(game.selected===game.q.ans,false);
+}
+function onTimeout(){if(game.locked)return;game.locked=true;stopTimer();finishQuestion(false,true);}
+
+function finishQuestion(ok,timedOut){
+  var q=game.q;
+  game.results.push({q:q,ok:ok,timedOut:timedOut,sel:game.selected});
+  if(ok){game.score++;}
+  setPastille(game.qIndex,ok?"ok":"ko");updateProgress();
+  ["optCos","optSin","optTan"].forEach(function(id){$(id).disabled=true;});
+  $("btnValidate").disabled=true;
+  var ids={cos:"optCos",sin:"optSin",tan:"optTan"};
+  $(ids[q.ans]).className="opt-sct correct-opt";
+  if(game.selected&&game.selected!==q.ans){$(ids[game.selected]).className="opt-sct wrong-opt";}
+  if(ok){sndGood();}else{sndBad();}
+  setTimeout(nextQuestion,1200);
+}
+function nextQuestion(){game.qIndex++;if(game.qIndex<QTOTAL){newQuestion();}else{showResults();}}
+
+function showResults(){
+  $("gamearea").classList.add("hidden");$("topbar").classList.add("hidden");
+  var r=$("resultats");r.classList.remove("hidden");r.classList.add("show");
+  $("scoreFinal").textContent=game.score+" / "+QTOTAL;
+  var stars=(game.score===10)?3:(game.score>=8?2:1);
+  $("etoiles").textContent="\u2b50".repeat(stars)+"\u2606".repeat(3-stars);
+  var msgs=["Continue \u00e0 t\u2019entra\u00eener\u00a0!","Bon d\u00e9but\u00a0!","Pas mal\u00a0!","Bien jou\u00e9\u00a0!","Tr\u00e8s bien\u00a0!","Super\u00a0!","Bravo\u00a0!","Excellent\u00a0!","Tr\u00e8s bien\u00a0!","Quasi parfait\u00a0!","Parfait\u00a0! Tu ma\u00eettrises cos, sin et tan\u00a0!"];
+  $("msgFinal").textContent=msgs[Math.min(game.score,10)];
+  var rec=$("recap");rec.innerHTML="";
+  game.results.forEach(function(res,idx){
+    var div=document.createElement("div");
+    div.className="recap-item "+(res.ok?"ok":"ko");
+    var repNom={cos:"cosinus",sin:"sinus",tan:"tangente"};
+    div.innerHTML="<span>"+(res.ok?"\u2714":"\u2718")+"</span>"
+      +"<span style='flex:1'>"+res.q.lettre+") "+res.q.q.replace(/<[^>]+>/g,"")+"</span>"
+      +"<span><em>"+repNom[res.q.ans]+"</em></span>";
+    rec.appendChild(div);
+  });
+  if(game.score===10){sndFanfare();}else{sndGood();}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function startGame(){
+  game.qIndex=0;game.score=0;game.results=[];game.selected=null;
+  game.qs=QUESTIONS.slice();
+  buildPastilles();updateProgress();
+  $("startgate").classList.add("hidden");
+  $("resultats").classList.remove("show");$("resultats").classList.add("hidden");
+  $("topbar").classList.remove("hidden");$("gamearea").classList.remove("hidden");
+  getCtx();runCountdown(function(){newQuestion();});
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  $("btnStart").addEventListener("click",startGame);
+  $("btnRejouer").addEventListener("click",startGame);
+  $("btnValidate").addEventListener("click",validate);
+  $("btnSon").addEventListener("click",function(){soundOn=!soundOn;$("btnSon").textContent=soundOn?"\uD83D\uDD0A":"\uD83D\uDD07";});
+});
+</script>
+</body>
+</html>
