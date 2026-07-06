@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — Faire le lien entre fréquence et probabilités</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --jour:#8dc63f;--jour-fonce:#3d7a10;--jour-soft:#f0faeb;
+  --jour-accent:#b5e08a;--jour-titre:#3d7a10;--badge-txt:#1e4a05;
+  --vert:#8dc63f;--vert-fonce:#3d7a10;--vert-soft:#f0faeb;
+  --rouge:#e74c3c;--rouge-soft:#fdedec;--rouge-fonce:#c0392b;
+  --texte:#23262d;--gris:#8a8f9a;--bord:#ece8dd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:#fffdf7;color:var(--texte);font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.6rem 1rem 4rem;position:relative;}
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.28;background:#f5d080;border-radius:38% 62% 55% 45%/56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.22;background:var(--jour-accent);border-radius:62% 38% 44% 56%/42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.20;background:#8dc63f;border-radius:45% 55% 62% 38%/55% 45% 58% 42%;}
+.blob4{width:140px;height:150px;bottom:200px;left:-30px;opacity:.16;background:#f28b82;border-radius:50% 50% 40% 60%/60% 40% 60% 40%;}
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;width:100%;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{font-size:.82rem;color:var(--gris);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.8vw,1.9rem);font-weight:800;line-height:1.3;}
+h1 .hl{color:var(--jour-titre);}
+.sous-titre{color:var(--gris);font-size:.9rem;margin-top:.4rem;line-height:1.8;}
+.consigne{margin:1rem auto 0;max-width:560px;border:2px dashed var(--jour);background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;}
+.section-defi{position:relative;z-index:1;width:100%;max-width:700px;background:#fff;border:2px solid var(--bord);border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);}
+.defi-stripe{height:4px;background:linear-gradient(90deg,var(--jour),#f5c518,#f5a623);}
+.topbar{background:rgba(255,255,255,.97);border-bottom:2px solid var(--bord);padding:.65rem 1rem .7rem;}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;}
+.pastilles{display:flex;gap:.28rem;flex-wrap:wrap;flex:1;justify-content:center;}
+.pastille{width:1.55rem;height:1.55rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.74rem;border:2px solid var(--bord);color:var(--gris);background:#fff;transition:all .25s;}
+.pastille.active{background:var(--jour);border-color:var(--jour);color:#fff;transform:scale(1.13);}
+.pastille.ok{background:var(--vert);border-color:var(--vert);color:#fff;}
+.pastille.ko{background:var(--rouge);border-color:var(--rouge);color:#fff;}
+.chrono{display:inline-flex;align-items:center;gap:.3rem;background:var(--jour-soft);border:2px solid var(--jour);color:var(--jour-fonce);font-weight:800;font-size:1rem;padding:.3rem .8rem;border-radius:99px;min-width:5rem;justify-content:center;}
+.chrono.warn{background:var(--rouge-soft);border-color:var(--rouge);color:var(--rouge-fonce);animation:pulse .55s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.09);}}
+.btn-son{background:#fff;border:2px solid var(--bord);border-radius:50%;width:2.5rem;height:2.5rem;min-height:2.5rem;font-size:1.05rem;cursor:pointer;font-family:inherit;}
+.progress-bg{background:var(--bord);border-radius:99px;height:7px;overflow:hidden;margin-top:.55rem;}
+.progress-fill{height:100%;width:0%;border-radius:99px;transition:width .5s ease;background:linear-gradient(90deg,var(--jour),#f5c518);}
+.startgate{padding:1.6rem 1.4rem 1.8rem;text-align:center;}
+.startgate h3{font-size:1.05rem;color:var(--jour-fonce);margin-bottom:.7rem;}
+.startgate p{font-size:.88rem;color:var(--texte);line-height:1.95;text-align:left;margin-bottom:.5rem;}
+.memo{background:var(--jour-soft);border:1.5px solid var(--jour-accent);border-left:5px solid var(--jour);border-radius:10px;padding:.75rem 1rem;margin:.85rem 0 1.3rem;font-size:.85rem;color:var(--jour-fonce);line-height:1.95;text-align:left;}
+.btn{font-family:'JetBrains Mono',monospace;border:none;cursor:pointer;border-radius:12px;font-weight:800;transition:transform .12s,box-shadow .15s,opacity .15s;min-height:2.9rem;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-start{background:var(--jour);color:#fff;font-size:1rem;padding:.85rem 2.2rem;box-shadow:0 4px 14px rgba(141,198,63,.4);}
+.btn-start:hover{transform:translateY(-2px);}
+.gamearea{padding:1.2rem 1.3rem 1.5rem;}
+.carte-q{background:#fff;border:2px solid var(--bord);border-radius:14px;padding:1.2rem;box-shadow:0 4px 16px rgba(0,0,0,.05);animation:fadeUp .3s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.q-label{font-size:.72rem;color:var(--gris);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:.5rem;}
+.q-text{font-size:.9rem;font-weight:700;color:var(--jour-fonce);text-align:center;margin-bottom:.8rem;line-height:1.8;}
+.tri-box{display:flex;justify-content:center;margin-bottom:.9rem;}
+.tri-box svg{width:190px;height:155px;}
+/* Options QCM — 4 égalités de Pythagore */
+.saisie-wrap{margin-bottom:.7rem;}
+.saisie-aide{font-size:.78rem;color:var(--gris);text-align:center;margin-bottom:.5rem;line-height:1.7;}
+.saisie-aide code{background:var(--jour-soft);border:1px solid var(--jour-accent);padding:.05rem .35rem;border-radius:4px;font-size:.82rem;color:var(--jour-fonce);}
+.saisie-input{
+  font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;
+  width:100%;padding:.6rem .8rem;border-radius:11px;
+  border:2.5px solid var(--jour);background:#fff;color:var(--texte);
+  text-align:center;letter-spacing:.04em;
+}
+.saisie-input:focus{outline:3px solid var(--jour-accent);}
+.saisie-input.ok{border-color:var(--vert);background:var(--vert-soft);}
+.saisie-input.ko{border-color:var(--rouge);background:var(--rouge-soft);}
+.btn-valider{background:var(--jour);color:#fff;font-size:.95rem;padding:.65rem 1.5rem;box-shadow:0 3px 10px rgba(141,198,63,.4);display:block;margin:.2rem auto 0;}
+.warn-saisie{display:none;text-align:center;color:var(--rouge-fonce);background:var(--rouge-soft);border:1.5px solid var(--rouge);border-radius:9px;padding:.4rem .7rem;font-size:.82rem;margin-bottom:.5rem;}
+.warn-saisie.show{display:block;}
+.countdown{position:absolute;inset:0;z-index:10;background:rgba(240,250,235,.97);display:none;align-items:center;justify-content:center;border-radius:18px;}
+.countdown.show{display:flex;}
+.cd-num{font-size:clamp(5rem,18vw,7.5rem);font-weight:800;color:var(--jour-titre);animation:cdPop .8s ease both;}
+@keyframes cdPop{0%{transform:scale(.25);opacity:0;}45%{transform:scale(1.18);opacity:1;}100%{transform:scale(1);opacity:1;}}
+.resultats{display:none;padding:1.8rem 1.4rem;text-align:center;}
+.resultats.show{display:block;}
+.trophee{font-size:3rem;margin-bottom:.4rem;}
+.score-final{font-size:1.4rem;font-weight:800;color:var(--jour-fonce);margin-bottom:.4rem;}
+.etoiles{font-size:1.9rem;letter-spacing:.15em;margin-bottom:.6rem;}
+.msg-final{font-size:.92rem;color:var(--texte);line-height:1.9;margin-bottom:1.2rem;}
+.recap{text-align:left;margin-bottom:1.4rem;display:flex;flex-direction:column;gap:.45rem;}
+.recap-item{display:flex;flex-direction:column;gap:.1rem;border-radius:10px;padding:.6rem .8rem;font-size:.82rem;line-height:1.9;}
+.recap-item.ok{background:var(--vert-soft);border:1.5px solid var(--vert);color:var(--vert-fonce);}
+.recap-item.ko{background:var(--rouge-soft);border:1.5px solid var(--rouge);color:var(--rouge-fonce);}
+.btn-rejouer{background:var(--jour);color:#fff;font-size:.98rem;padding:.78rem 1.7rem;}
+.hidden{display:none !important;}
+@media(max-width:500px){body{padding:1rem .6rem 3rem;}.gamearea{padding:.9rem;}.opt{font-size:.82rem;}}
+
+/* ════════ CLAVIER MATHSMENTALES ════════ */
+.clavier-wrap{
+  background:#c8c8c8;border-radius:12px;padding:8px 10px;
+  margin:0 auto .7rem;max-width:420px;
+  display:flex;gap:10px;align-items:stretch;
+}
+.clavier-main{display:flex;flex-direction:column;gap:5px;flex:1;}
+.clavier-row{display:flex;gap:5px;}
+.clavier-side{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:110px;}
+.clavier-mid{display:flex;flex-direction:column;gap:5px;width:52px;}
+.ck2{
+  font-family:'JetBrains Mono',Arial,sans-serif;
+  border:2px solid #aaa;border-radius:8px;cursor:pointer;
+  font-size:1rem;font-weight:600;background:#fff;color:#222;
+  display:flex;align-items:center;justify-content:center;
+  height:52px;min-width:52px;flex:1;
+  transition:transform .08s,filter .1s;
+  box-shadow:0 2px 0 #999;
+}
+.ck2:active{transform:scale(.93);filter:brightness(.9);}
+.ck2.blue{background:#8c8ff0;color:#fff;border-color:#5a5dc0;box-shadow:0 2px 0 #3a3d90;}
+.ck2.grey{background:#b0b0b0;color:#444;border-color:#888;box-shadow:0 2px 0 #666;}
+.ck2.wide{flex:2.1;}
+.ck2.tall{height:112px;}
+/* Touche x² */
+.ck2 sup{font-size:.6em;vertical-align:super;line-height:0;}
+
+</style>
+</head>
+<body>
+<div class="blob blob1"></div><div class="blob blob2"></div>
+<div class="blob blob3"></div><div class="blob blob4"></div>
+
+<header class="hero">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 4&egrave;me
+  </div>
+  <div class="week-label">Semaine&nbsp;7 &ndash; Jour&nbsp;3</div>
+  <h1><span class="hl">Faire le lien entre fr&eacute;quence et probabilit&eacute;s</span></h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs.</p>
+  <div class="consigne">&#128073; &Eacute;cris l&rsquo;&eacute;galit&eacute; de Pythagore pour chaque figure.</div>
+</header>
+
+<section class="section-defi" id="sectionDefi">
+  <div class="defi-stripe"></div>
+  <div class="topbar hidden" id="topbar">
+    <div class="topbar-row">
+      <div class="pastilles" id="pastilles"></div>
+      <div class="chrono" id="chrono">&#9203; 20</div>
+      <button class="btn btn-son" id="btnSon">&#128266;</button>
+    </div>
+    <div class="progress-bg"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="startgate" id="startgate">
+    <h3>&#9660; D&eacute;fi flash &mdash; &Eacute;galit&eacute; de Pythagore</h3>
+    <p>Observe le triangle rectangle et choisis la bonne &eacute;galit&eacute;. Tu as <strong>20&nbsp;secondes</strong> par question.</p>
+    <div class="memo">
+      &#128161; <strong>Rappel&nbsp;:</strong> Dans un triangle rectangle en <strong>S</strong>,<br>
+      l&rsquo;hypot&eacute;nuse est le c&ocirc;t&eacute; en face de l&rsquo;angle droit.<br>
+      <strong>hypot&eacute;nuse&sup2; = c&ocirc;t&eacute;&sup2; + c&ocirc;t&eacute;&sup2;</strong>
+    </div>
+    <button class="btn btn-start" id="btnStart">&#9654;&#65039; D&eacute;marrer</button>
+  </div>
+
+  <div class="gamearea hidden" id="gamearea">
+    <div class="carte-q" id="carteQ">
+      <div class="q-label" id="qLabel">Question 1 / 10</div>
+      <div class="q-text">&Eacute;cris l&rsquo;&eacute;galit&eacute; de Pythagore pour la figure suivante&nbsp;:</div>
+      <div class="tri-box" id="triBox"></div>
+      <div class="saisie-wrap">
+        <input type="text" class="saisie-input" id="rep" autocomplete="off" placeholder=""/>
+      </div>
+
+      <!-- CLAVIER MATHSMENTALES -->
+      <div class="clavier-wrap" id="clavierWrap">
+        <!-- Bloc principal gauche -->
+        <div class="clavier-main">
+          <div class="clavier-row">
+            <button class="ck2" onclick="clavTap('7')">7</button>
+            <button class="ck2" onclick="clavTap('8')">8</button>
+            <button class="ck2" onclick="clavTap('9')">9</button>
+            <button class="ck2 blue" onclick="clavTap('÷')">÷</button>
+          </div>
+          <div class="clavier-row">
+            <button class="ck2" onclick="clavTap('4')">4</button>
+            <button class="ck2" onclick="clavTap('5')">5</button>
+            <button class="ck2" onclick="clavTap('6')">6</button>
+            <button class="ck2 blue" onclick="clavTap('×')">×</button>
+          </div>
+          <div class="clavier-row">
+            <button class="ck2" onclick="clavTap('1')">1</button>
+            <button class="ck2" onclick="clavTap('2')">2</button>
+            <button class="ck2" onclick="clavTap('3')">3</button>
+            <button class="ck2 blue" onclick="clavTap('-')">-</button>
+          </div>
+          <div class="clavier-row">
+            <button class="ck2 wide" onclick="clavTap('0')">0</button>
+            <button class="ck2" onclick="clavTap(',')">&#44;</button>
+            <button class="ck2 blue" onclick="clavTap('+')">+</button>
+          </div>
+        </div>
+        <!-- Bloc milieu : backspace + entrée -->
+        <div class="clavier-mid">
+          <button class="ck2 grey" onclick="clavBack()" style="font-size:.85rem;">⌫</button>
+          <button class="ck2 grey tall" onclick="clavEnter()" style="font-size:.85rem;">↵</button>
+        </div>
+        <!-- Bloc droite -->
+        <div class="clavier-side">
+          <button class="ck2 blue" onclick="clavTap('(')">(</button>
+          <button class="ck2 blue" onclick="clavTap('x')"><em>x</em></button>
+          <button class="ck2 blue" onclick="clavSq()"><em>x</em><sup>2</sup></button>
+          <button class="ck2 blue" onclick="clavTap('√')">√</button>
+          <button class="ck2 grey" onclick="clavUndo()">↺</button>
+          <button class="ck2 grey" onclick="clavRedo()">↻</button>
+          <button class="ck2 grey" onclick="clavLeft()">←</button>
+          <button class="ck2 grey" onclick="clavRight()">→</button>
+        </div>
+      </div>
+
+      <div class="warn-saisie" id="warnSaisie">&#9888;&#65039; &Eacute;cris ta r&eacute;ponse avant de valider&nbsp;!</div>
+      <button class="btn btn-valider" id="btnValidate">&#10003; Valider</button>
+    </div>
+  </div>
+
+  <div class="resultats hidden" id="resultats">
+    <div class="trophee">&#127942;</div>
+    <div class="score-final" id="scoreFinal"></div>
+    <div class="etoiles" id="etoiles"></div>
+    <div class="msg-final" id="msgFinal"></div>
+    <div class="recap" id="recap"></div>
+    <button class="btn btn-rejouer" id="btnRejouer">&#8635; Rejouer</button>
+  </div>
+
+  <div class="countdown" id="countdown"><div class="cd-num" id="cdNum">3</div></div>
+</section>
+
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var QTOTAL=10,QTIME=20,WARN_AT=6;
+
+/* ══════ SVG TRIANGLES (fidèles à la fiche) ══════ */
+function tri(pts, rightIdx){
+  /* pts = [{x,y,l,lp}], rightIdx = index angle droit */
+  var w=190,h=155;
+  var s='<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">';
+  // Triangle
+  s+='<polygon points="'+pts.map(function(p){return p.x+','+p.y;}).join(' ')+'" fill="#f5f2ec" stroke="#333" stroke-width="1.6" stroke-linejoin="round"/>';
+  // Carré angle droit
+  var rp=pts[rightIdx];
+  var p1=pts[(rightIdx+1)%3], p2=pts[(rightIdx+2)%3];
+  var d1x=p1.x-rp.x, d1y=p1.y-rp.y, l1=Math.sqrt(d1x*d1x+d1y*d1y);
+  var d2x=p2.x-rp.x, d2y=p2.y-rp.y, l2=Math.sqrt(d2x*d2x+d2y*d2y);
+  var sz=9;
+  var u1x=d1x/l1*sz,u1y=d1y/l1*sz,u2x=d2x/l2*sz,u2y=d2y/l2*sz;
+  s+='<polyline points="'+(rp.x+u1x)+','+(rp.y+u1y)+' '+(rp.x+u1x+u2x)+','+(rp.y+u1y+u2y)+' '+(rp.x+u2x)+','+(rp.y+u2y)+'" fill="none" stroke="#333" stroke-width="1.2"/>';
+  // Labels
+  pts.forEach(function(p){
+    var ox=0,oy=0;
+    if(p.lp==='tl'){ox=-13;oy=-5;}else if(p.lp==='tr'){ox=5;oy=-5;}
+    else if(p.lp==='bl'){ox=-13;oy=14;}else if(p.lp==='br'){ox=5;oy=14;}
+    else if(p.lp==='t'){ox=-4;oy=-7;}else if(p.lp==='b'){ox=-4;oy=14;}
+    else if(p.lp==='l'){ox=-14;oy=4;}else if(p.lp==='r'){ox=6;oy=4;}
+    s+='<text x="'+(p.x+ox)+'" y="'+(p.y+oy)+'" font-size="14" font-weight="700" font-family="Arial,sans-serif" fill="#222">'+p.l+'</text>';
+  });
+  s+='</svg>';
+  return s;
+}
+
+/* ══════ 10 QUESTIONS (correction exacte de la fiche) ══════
+   Chaque question : svg, ans (index 0-3 dans opts), opts[4]
+   L'égalité correcte est toujours : hyp² = cote1² + cote2²
+   On génère 3 distracteurs plausibles.
+══════ */
+
+function opts4(correct, wrong1, wrong2, wrong3){
+  /* Mélange les 4 options et retourne {opts, ans} */
+  var arr=[
+    {txt:correct, correct:true},
+    {txt:wrong1,  correct:false},
+    {txt:wrong2,  correct:false},
+    {txt:wrong3,  correct:false}
+  ];
+  // Mélange Fisher-Yates (déterministe pour reproductibilité)
+  var seed=correct.charCodeAt(0)+correct.charCodeAt(1);
+  function rng(n){seed=(seed*1664525+1013904223)&0xffffffff;return((seed>>>0)%n);}
+  for(var i=arr.length-1;i>0;i--){var j=rng(i+1);var t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  var ans=arr.findIndex(function(o){return o.correct;});
+  return {opts:arr.map(function(o){return o.txt;}), ans:ans};
+}
+
+var raw=[
+  /* A — angle droit en R, hyp = BF → RF²=RB²+FB² */
+  {lettre:"A",
+   svg:tri([{x:38,y:118,l:"B",lp:"bl"},{x:155,y:58,l:"F",lp:"tr"},{x:155,y:118,l:"R",lp:"br"}],2),
+   q4:opts4("RF\u00b2 = RB\u00b2 + FB\u00b2","BF\u00b2 = RB\u00b2 + RF\u00b2","RB\u00b2 = RF\u00b2 + BF\u00b2","RF\u00b2 = BF\u00b2 \u2212 RB\u00b2")},
+
+  /* B — angle droit en D, hyp = CP → CP²=CD²+PD² */
+  {lettre:"B",
+   svg:tri([{x:28,y:38,l:"P",lp:"tl"},{x:155,y:38,l:"D",lp:"tr"},{x:155,y:128,l:"C",lp:"br"}],1),
+   q4:opts4("CP\u00b2 = CD\u00b2 + PD\u00b2","PD\u00b2 = CP\u00b2 + CD\u00b2","CD\u00b2 = CP\u00b2 + PD\u00b2","CP\u00b2 = CD\u00b2 \u2212 PD\u00b2")},
+
+  /* C — angle droit en V, hyp = BK → BK²=BV²+KV² */
+  {lettre:"C",
+   svg:tri([{x:38,y:75,l:"K",lp:"l"},{x:148,y:38,l:"B",lp:"tr"},{x:148,y:128,l:"V",lp:"br"}],2),
+   q4:opts4("BK\u00b2 = BV\u00b2 + KV\u00b2","KV\u00b2 = BK\u00b2 + BV\u00b2","BV\u00b2 = BK\u00b2 + KV\u00b2","BK\u00b2 = BV\u00b2 \u2212 KV\u00b2")},
+
+  /* D — angle droit en S, hyp = GF → GF²=GS²+FS² */
+  {lettre:"D",
+   svg:tri([{x:28,y:128,l:"F",lp:"bl"},{x:155,y:38,l:"G",lp:"tr"},{x:155,y:128,l:"S",lp:"br"}],2),
+   q4:opts4("GF\u00b2 = GS\u00b2 + FS\u00b2","FS\u00b2 = GF\u00b2 + GS\u00b2","GS\u00b2 = GF\u00b2 + FS\u00b2","GF\u00b2 = GS\u00b2 \u2212 FS\u00b2")},
+
+  /* E — angle droit en T, hyp = PJ → PJ²=PT²+JT² */
+  {lettre:"E",
+   svg:tri([{x:28,y:128,l:"P",lp:"bl"},{x:28,y:48,l:"T",lp:"tl"},{x:155,y:48,l:"J",lp:"tr"}],1),
+   q4:opts4("PJ\u00b2 = PT\u00b2 + JT\u00b2","JT\u00b2 = PJ\u00b2 + PT\u00b2","PT\u00b2 = PJ\u00b2 + JT\u00b2","PJ\u00b2 = PT\u00b2 \u2212 JT\u00b2")},
+
+  /* F — angle droit en C, hyp = LB → LB²=LC²+BC² */
+  {lettre:"F",
+   svg:tri([{x:38,y:38,l:"L",lp:"tl"},{x:28,y:128,l:"C",lp:"bl"},{x:155,y:128,l:"B",lp:"br"}],1),
+   q4:opts4("LB\u00b2 = LC\u00b2 + BC\u00b2","BC\u00b2 = LB\u00b2 + LC\u00b2","LC\u00b2 = LB\u00b2 + BC\u00b2","LB\u00b2 = LC\u00b2 \u2212 BC\u00b2")},
+
+  /* G — angle droit en S, hyp = KP → KP²=KS²+PS² */
+  {lettre:"G",
+   svg:tri([{x:38,y:88,l:"P",lp:"l"},{x:128,y:38,l:"S",lp:"tr"},{x:155,y:128,l:"K",lp:"br"}],1),
+   q4:opts4("KP\u00b2 = KS\u00b2 + PS\u00b2","PS\u00b2 = KP\u00b2 + KS\u00b2","KS\u00b2 = KP\u00b2 + PS\u00b2","KP\u00b2 = KS\u00b2 \u2212 PS\u00b2")},
+
+  /* H — angle droit en F, hyp = LE → LE²=LF²+EF² */
+  {lettre:"H",
+   svg:tri([{x:28,y:48,l:"F",lp:"tl"},{x:155,y:48,l:"E",lp:"tr"},{x:28,y:128,l:"L",lp:"bl"}],0),
+   q4:opts4("LE\u00b2 = LF\u00b2 + EF\u00b2","EF\u00b2 = LE\u00b2 + LF\u00b2","LF\u00b2 = LE\u00b2 + EF\u00b2","LE\u00b2 = LF\u00b2 \u2212 EF\u00b2")},
+
+  /* I — angle droit en K, hyp = EN → EN²=EK²+NK² */
+  {lettre:"I",
+   svg:tri([{x:38,y:88,l:"N",lp:"l"},{x:148,y:38,l:"E",lp:"tr"},{x:148,y:128,l:"K",lp:"br"}],2),
+   q4:opts4("EN\u00b2 = EK\u00b2 + NK\u00b2","NK\u00b2 = EN\u00b2 + EK\u00b2","EK\u00b2 = EN\u00b2 + NK\u00b2","EN\u00b2 = EK\u00b2 \u2212 NK\u00b2")},
+
+  /* J — angle droit en E, hyp = MT → MT²=ME²+TE² */
+  {lettre:"J",
+   svg:tri([{x:38,y:38,l:"M",lp:"tl"},{x:28,y:128,l:"E",lp:"bl"},{x:155,y:128,l:"T",lp:"br"}],1),
+   q4:opts4("MT\u00b2 = ME\u00b2 + TE\u00b2","TE\u00b2 = MT\u00b2 + ME\u00b2","ME\u00b2 = MT\u00b2 + TE\u00b2","MT\u00b2 = ME\u00b2 \u2212 TE\u00b2")}
+];
+
+var QUESTIONS=raw.map(function(r){
+  return {lettre:r.lettre, svg:r.svg, ans:r.q4.opts[r.q4.ans]};
+});
+
+/* ════════ SON ════════ */
+var audioCtx=null,soundOn=true;
+function getCtx(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}if(audioCtx&&audioCtx.state==="suspended"){audioCtx.resume();}return audioCtx;}
+function beep(f,d,t,v,dl){if(!soundOn)return;var ctx=getCtx();if(!ctx)return;var t0=ctx.currentTime+(dl||0);var osc=ctx.createOscillator(),g=ctx.createGain();osc.type=t||"sine";osc.frequency.value=f;g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(v||0.18,t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t0+d);osc.connect(g);g.connect(ctx.destination);osc.start(t0);osc.stop(t0+d+0.05);}
+function sndTick(){beep(820,0.07,"square",0.07);}
+function sndCdBip(){beep(440,0.16,"sine",0.2);}
+function sndCdGo(){beep(880,0.32,"sine",0.24);}
+function sndGood(){beep(660,0.13,"sine",0.2);beep(880,0.22,"sine",0.2,0.12);}
+function sndBad(){beep(220,0.3,"sawtooth",0.14);}
+function sndFanfare(){beep(523,0.16,"sine",0.2,0);beep(659,0.16,"sine",0.2,0.15);beep(784,0.16,"sine",0.2,0.30);beep(1047,0.4,"sine",0.22,0.45);}
+
+/* ════════ ÉTAT ════════ */
+var game={qIndex:0,score:0,results:[],qs:[],q:null,timeLeft:QTIME,timer:null,locked:false,selected:-1};
+
+function buildPastilles(){var p=$("pastilles");p.innerHTML="";for(var i=0;i<QTOTAL;i++){var s=document.createElement("span");s.className="pastille";s.id="past"+i;s.textContent=(i+1);p.appendChild(s);}}
+function setPastille(i,st){var s=$("past"+i);if(!s)return;s.classList.remove("active","ok","ko");if(st==="active"){s.classList.add("active");s.textContent=(i+1);}else if(st==="ok"){s.classList.add("ok");s.textContent="\u2713";}else if(st==="ko"){s.classList.add("ko");s.textContent="\u2717";}}
+function updateProgress(){$("progressFill").style.width=Math.round(game.results.length/QTOTAL*100)+"%";}
+function updateChrono(){var c=$("chrono");c.textContent="\u23f1\ufe0f "+game.timeLeft;if(game.timeLeft<=WARN_AT){c.classList.add("warn");}else{c.classList.remove("warn");}}
+function runCountdown(cb){var ov=$("countdown"),num=$("cdNum");ov.classList.add("show");var steps=["3","2","1","Partez\u00a0!"],i=0;function step(){num.textContent=steps[i];num.style.animation="none";void num.offsetWidth;num.style.animation="";if(i<3){sndCdBip();}else{sndCdGo();}i++;if(i<steps.length){setTimeout(step,800);}else{setTimeout(function(){ov.classList.remove("show");cb();},700);}}step();}
+
+
+
+function normalise(s){
+  return String(s).trim()
+    .toUpperCase()
+    .replace(/\s+/g,"")
+    .replace(/²/g,"2")
+    .replace(/\^2/g,"2")
+    .replace(/\*\*2/g,"2")
+    .replace(/=/g,"=")
+    .replace(/\+/g,"+")
+    .replace(/−/g,"-")
+    .replace(/-/g,"-");
+}
+function stripSpaces(s){ return s.replace(/\s+/g,""); }
+
+function isCorrect(val){
+  /* Accepte toutes les formes équivalentes de l'égalité de Pythagore :
+     hyp² = a² + b²  et aussi  hyp² = b² + a²
+     On normalise et compare avec la réponse et sa version commutée */
+  var n=normalise(val);
+  var correct=normalise(game.q.ans);
+  if(n===correct) return true;
+  /* Tenter commutativité : hyp² = a² + b² <=> hyp² = b² + a² */
+  var m=correct.match(/^(.+)=(.+)\+(.+)$/);
+  if(m){
+    var alt=m[1]+"="+m[3]+"+"+m[2];
+    if(n===alt) return true;
+  }
+  return false;
+}
+
+function newQuestion(){
+  game.q=game.qs[game.qIndex];game.locked=false;game.selected=-1;game.timeLeft=QTIME;
+  $("qLabel").textContent="Question "+(game.qIndex+1)+" / "+QTOTAL;
+  $("triBox").innerHTML=game.q.svg;
+  $("rep").value="";$("rep").className="saisie-input";$("rep").disabled=false;
+  $("warnSaisie").classList.remove("show");$("btnValidate").disabled=false;
+  updateChrono();setPastille(game.qIndex,"active");startTimer();
+  $("rep").focus();
+}
+
+function startTimer(){stopTimer();game.timer=setInterval(function(){game.timeLeft--;updateChrono();if(game.timeLeft<=WARN_AT&&game.timeLeft>0){sndTick();}if(game.timeLeft<=0){onTimeout();}},1000);}
+function stopTimer(){if(game.timer){clearInterval(game.timer);game.timer=null;}}
+
+function validate(){
+  if(game.locked)return;
+  var v=$("rep").value.trim();
+  if(v===""){$("warnSaisie").classList.add("show");sndBad();return;}
+  $("warnSaisie").classList.remove("show");
+  game.selected=v;
+  game.locked=true;stopTimer();
+  finishQuestion(isCorrect(v),false);
+}
+function onTimeout(){if(game.locked)return;game.locked=true;stopTimer();finishQuestion(false,true);}
+
+function finishQuestion(ok,timedOut){
+  var q=game.q;
+  game.results.push({q:q,ok:ok,timedOut:timedOut,sel:game.selected});
+  if(ok){game.score++;}
+  setPastille(game.qIndex,ok?"ok":"ko");updateProgress();
+  $("btnValidate").disabled=true;
+  $("rep").disabled=true;
+  $("rep").className="saisie-input "+(ok?"ok":"ko");
+  if(ok){sndGood();}else{sndBad();}
+  setTimeout(nextQuestion,1200);
+}
+function nextQuestion(){game.qIndex++;if(game.qIndex<QTOTAL){newQuestion();}else{showResults();}}
+
+function showResults(){
+  $("gamearea").classList.add("hidden");$("topbar").classList.add("hidden");
+  var r=$("resultats");r.classList.remove("hidden");r.classList.add("show");
+  $("scoreFinal").textContent=game.score+" / "+QTOTAL;
+  var stars=(game.score===10)?3:(game.score>=8?2:1);
+  $("etoiles").textContent="\u2b50".repeat(stars)+"\u2606".repeat(3-stars);
+  var msgs=["Continue \u00e0 t\u2019entra\u00eener\u00a0!","Bon d\u00e9but\u00a0!","Pas mal\u00a0!","Bien jou\u00e9\u00a0!","Tr\u00e8s bien\u00a0!","Super\u00a0!","Bravo\u00a0!","Excellent\u00a0!","Tr\u00e8s bien\u00a0!","Quasi parfait\u00a0!","Parfait\u00a0! Tu ma\u00eettrises Pythagore\u00a0!"];
+  $("msgFinal").textContent=msgs[Math.min(game.score,10)];
+  var rec=$("recap");rec.innerHTML="";
+  game.results.forEach(function(res,idx){
+    var div=document.createElement("div");
+    div.className="recap-item "+(res.ok?"ok":"ko");
+    var correcte=res.q.ans;
+    var repEleve = res.timedOut ? "(temps \u00e9coul\u00e9)" : (res.sel||"(sans r\u00e9ponse)");
+    div.innerHTML=
+      "<div style='display:flex;align-items:center;gap:.5rem'>"
+      +"<span>"+(res.ok?"\u2714":"\u2718")+"</span>"
+      +"<span style='font-weight:800'>"+res.q.lettre+")</span>"
+      +"<span style='flex:1'>"+(res.ok?"Bonne r\u00e9ponse\u00a0!":"R\u00e9ponse incorrecte")+"</span>"
+      +"</div>"
+      +"<div style='padding-left:1.4rem;font-size:.84rem;margin-top:.2rem'>"
+      +"\u2192 Correction\u00a0: <strong>"+correcte+"</strong>"
+      +(!res.ok ? "<br>\u2192 Ta r\u00e9ponse\u00a0: <em>"+repEleve+"</em>" : "")
+      +"</div>";
+    rec.appendChild(div);
+  });
+  if(game.score===10){sndFanfare();}else{sndGood();}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function startGame(){
+  game.qIndex=0;game.score=0;game.results=[];game.selected=-1;
+  game.qs=QUESTIONS.slice();
+  buildPastilles();updateProgress();
+  $("startgate").classList.add("hidden");
+  $("resultats").classList.remove("show");$("resultats").classList.add("hidden");
+  $("topbar").classList.remove("hidden");$("gamearea").classList.remove("hidden");
+  getCtx();runCountdown(function(){newQuestion();});
+}
+
+
+/* ════════ LOGIQUE CLAVIER ════════ */
+var clavHistory=[], clavHistIdx=-1;
+
+function clavSave(){
+  var v=$("rep").value;
+  clavHistory=clavHistory.slice(0,clavHistIdx+1);
+  clavHistory.push(v);
+  clavHistIdx=clavHistory.length-1;
+}
+function clavTap(ch){
+  var inp=$("rep");
+  var s=inp.selectionStart, e=inp.selectionEnd;
+  var v=inp.value;
+  var newV=v.substring(0,s)+ch+v.substring(e);
+  clavSave();
+  inp.value=newV;
+  inp.setSelectionRange(s+ch.length,s+ch.length);
+  inp.focus();
+}
+function clavSq(){
+  /* Insère ² après le curseur */
+  var inp=$("rep");
+  var s=inp.selectionStart, e=inp.selectionEnd;
+  var v=inp.value;
+  var newV=v.substring(0,s)+'²'+v.substring(e);
+  clavSave();
+  inp.value=newV;
+  inp.setSelectionRange(s+1,s+1);
+  inp.focus();
+}
+function clavBack(){
+  var inp=$("rep");
+  var s=inp.selectionStart, e=inp.selectionEnd;
+  var v=inp.value;
+  if(s!==e){ clavSave();inp.value=v.substring(0,s)+v.substring(e);inp.setSelectionRange(s,s);}
+  else if(s>0){ clavSave();inp.value=v.substring(0,s-1)+v.substring(s);inp.setSelectionRange(s-1,s-1);}
+  inp.focus();
+}
+function clavEnter(){ validate(); }
+function clavUndo(){
+  var inp=$("rep");
+  if(clavHistIdx>0){ clavHistIdx--;inp.value=clavHistory[clavHistIdx];inp.focus();}
+}
+function clavRedo(){
+  var inp=$("rep");
+  if(clavHistIdx<clavHistory.length-1){ clavHistIdx++;inp.value=clavHistory[clavHistIdx];inp.focus();}
+}
+function clavLeft(){
+  var inp=$("rep");
+  var s=inp.selectionStart;
+  if(s>0)inp.setSelectionRange(s-1,s-1);
+  inp.focus();
+}
+function clavRight(){
+  var inp=$("rep");
+  var s=inp.selectionStart, l=inp.value.length;
+  if(s<l)inp.setSelectionRange(s+1,s+1);
+  inp.focus();
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  $("btnStart").addEventListener("click",startGame);
+  $("btnRejouer").addEventListener("click",startGame);
+  $("btnValidate").addEventListener("click",validate);
+  $("rep").addEventListener("keydown",function(e){if(e.key==="Enter"){validate();}});
+  $("btnSon").addEventListener("click",function(){soundOn=!soundOn;$("btnSon").textContent=soundOn?"\uD83D\uDD0A":"\uD83D\uDD07";});
+});
+</script>
+</body>
+</html>
