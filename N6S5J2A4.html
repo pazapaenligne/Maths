@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths — Semaine 5 Jour 2 — Fraction d'un nombre</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --day-color:#b94040;--day-dark:#7a1f1f;--day-light:#f7eded;
+    --day-border:#e3b3b3;--day-glow:rgba(185,64,64,.25);
+  }
+  :root{
+    --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+    --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+    --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    --n1:#8dc63f;--n2:#f5a623;--n3:#b94040;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+    position:relative;overflow-x:hidden;letter-spacing:.02em;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+  header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+  .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+  .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+  .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--day-border));border-radius:99px;transition:width .5s ease;}
+
+  .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+  .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+  .chip .dot{width:8px;height:8px;border-radius:50%;}
+  .chip.correct .dot{background:var(--green);}
+  .chip.wrong .dot{background:var(--pink);}
+  .chip.remaining .dot{background:var(--muted);}
+
+  /* CARD */
+  .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--day-border),var(--pink),var(--orange));}
+  .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;}
+  .consigne-bar{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;color:var(--day-dark);text-transform:uppercase;margin-bottom:1.4rem;display:flex;align-items:center;gap:.5rem;}
+  .consigne-bar::before{content:'';display:inline-block;width:3px;height:16px;border-radius:2px;background:var(--day-color);flex-shrink:0;}
+
+  /* EXERCICE HEADER */
+  .ex-header{display:flex;align-items:center;gap:.7rem;margin-bottom:1.1rem;}
+  .ex-num{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:50%;color:#fff;font-weight:800;font-size:.9rem;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+
+  /* QUESTIONS LISTE */
+  .q-list{display:flex;flex-direction:column;gap:1.1rem;}
+  .q-row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;}
+  .q-label{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:var(--muted);width:1.2rem;flex-shrink:0;}
+  .math-expr{display:flex;align-items:center;gap:.4rem;font-size:1rem;font-weight:700;color:var(--day-dark);min-width:140px;}
+  .frac{display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;text-align:center;line-height:1.15;margin:0 .1em;font-size:1em;}
+  .frac sup,.frac sub{display:block;font-size:.85em;padding:0 .3em;vertical-align:baseline;position:static;top:auto;}
+  .frac sup{border-bottom:1.5px solid currentColor;padding-bottom:.05em;}
+  .frac sub{padding-top:.05em;}
+  .eq-sign{font-size:1rem;font-weight:700;color:var(--muted);}
+
+  /* INPUT */
+  .ans-input{width:64px;height:40px;border:2px solid var(--border);border-radius:8px;text-align:center;font-size:1.1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text);background:var(--surface);transition:border-color .15s;outline:none;min-width:0;}
+  .ans-input:focus{border-color:var(--day-color);}
+  .ans-input.inp-ok{border-color:var(--green);background:#f0faeb;}
+  .ans-input.inp-ko{border-color:#c0392b;background:#fff0ef;}
+  .ans-input:disabled{opacity:1;}
+
+  /* FEEDBACK INLINE */
+  .q-fb{font-family:'JetBrains Mono',monospace;font-size:.75rem;display:none;margin-left:.3rem;}
+  .q-fb.ok{color:var(--green);}
+  .q-fb.ko{color:#c0392b;}
+  .q-fb.show{display:inline;}
+
+  /* INDICE / FEEDBACK EXERCICE */
+  .ex-hint-wrap{margin:.8rem 0 0 0;}
+  .btn-hint-ex{background:none;border:1.5px dashed var(--day-border);border-radius:8px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;color:var(--day-dark);font-family:'JetBrains Mono',monospace;transition:background .15s;min-height:36px;}
+  .btn-hint-ex:hover{background:var(--day-light);}
+  .hint-box-ex{margin-top:.5rem;background:#fdf0f0;border:1.5px dashed var(--day-border);border-radius:10px;padding:.6rem .9rem;font-size:.82rem;color:var(--day-dark);display:none;line-height:1.8;}
+  .hint-box-ex.show{display:block;}
+
+  .ex-feedback{margin:.8rem 0 0;padding:.6rem .9rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;display:none;}
+  .ex-feedback.show{display:block;}
+  .ex-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .ex-feedback.ko{background:#fff0ef;border:1.5px solid #c0392b;color:#c0392b;}
+
+  .btn-corr-wrap{margin:.6rem 0 0;display:none;}
+  .btn-corr{background:none;border:1.5px solid var(--border);border-radius:8px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;color:var(--muted);font-family:'JetBrains Mono',monospace;transition:border-color .15s,color .15s;min-height:36px;}
+  .btn-corr:hover{border-color:var(--day-color);color:var(--day-dark);}
+  .corr-box{display:none;margin-top:.6rem;background:#f0f4ff;border:1.5px solid #a0b4ff;border-radius:10px;padding:.7rem 1rem;font-size:.82rem;color:#1a2d6e;line-height:1.8;}
+
+  /* EX6 QCM */
+  .qcm-opts{display:flex;flex-direction:column;gap:.5rem;margin:.8rem 0;}
+  .qcm-opt{display:flex;align-items:center;gap:.7rem;padding:.65rem 1rem;border:2px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;font-size:.92rem;transition:border-color .15s,background .15s;min-height:44px;}
+  .qcm-opt:hover:not(.locked){border-color:var(--day-border);background:var(--day-light);}
+  .qcm-opt.selected{border-color:var(--day-color);background:var(--day-light);}
+  .qcm-opt.correct{border-color:var(--green);background:#f0faeb;}
+  .qcm-opt.wrong{border-color:#c0392b;background:#fff0ef;}
+  .qcm-opt.locked{cursor:default;}
+  .qcm-key{width:24px;height:24px;border-radius:6px;background:var(--day-light);color:var(--day-dark);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.82rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+  /* BOUTONS */
+  .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.6rem;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+  .btn:active{transform:scale(.96);}
+  .btn:disabled{opacity:.38;cursor:default;}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+  /* TRANSITION */
+  .transition-screen{width:100%;max-width:680px;display:none;position:relative;z-index:1;}
+  .transition-screen.show{display:block;}
+  .transition-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;animation:fadeUp .4s ease both;}
+  .transition-icon{font-size:3rem;margin-bottom:.8rem;}
+  .transition-title{font-size:clamp(1.2rem,3vw,1.6rem);font-weight:800;margin-bottom:.6rem;}
+  .transition-msg{color:var(--muted);font-size:.95rem;line-height:1.8;margin-bottom:1.8rem;}
+  .niveau-pill{display:inline-block;padding:.4rem 1.2rem;border-radius:99px;font-weight:700;font-size:.85rem;margin-bottom:1.2rem;}
+
+  /* BILAN */
+  .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+  .results.show{display:block;}
+  .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+  .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+  .results-score .s-num{color:var(--day-dark);}
+  .stars{font-size:2rem;margin:.4rem 0 1rem;letter-spacing:.1em;}
+  .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:1.5rem;font-weight:600;}
+  .recap-niveaux{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;text-align:left;}
+  .recap-niveau{padding:.8rem 1rem;border-radius:10px;font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:.7rem;border:1.5px solid var(--border);}
+  .recap-niveau.n1{background:#f0faeb;border-color:var(--n1);color:#2d6a00;}
+  .recap-niveau.n2{background:#fff5e0;border-color:var(--n2);color:#7a3500;}
+  .recap-niveau.n3{background:#f7eded;border-color:var(--n3);color:#7a1f1f;}
+  .comp-box{text-align:left;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem;}
+  .comp-box h3{color:var(--day-dark);font-size:.9rem;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;}
+  .comp-line{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.4rem;font-size:.85rem;line-height:1.8;color:var(--text);}
+  .comp-line .arr{color:var(--day-dark);font-weight:800;flex-shrink:0;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    .card,.results-card,.transition-card{padding:1.4rem;}
+    .math-expr{min-width:110px;}
+    .ans-input{width:54px;}
+    .btn{font-size:.85rem;padding:.55rem 1rem;}
+  }
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 2</div>
+  <h1 style="color:var(--day-dark)">Calculer et exprimer une proportion</h1>
+  <p class="subtitle">Je m&rsquo;entra&icirc;ne &middot; 6 exercices &middot; 3 niveaux</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Exercice 1 / 6</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">15</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="theme-badge" id="theme-badge"></div>
+  <div class="consigne-bar">Calcule.</div>
+  <div id="quiz-zone"></div>
+  <div class="btn-row" id="btn-row">
+    <button class="btn btn-primary" id="btn-valider" onclick="validerEx()" disabled>V&eacute;rifier</button>
+    <button class="btn btn-ghost" id="btn-next" onclick="nextEx()" style="display:none;">Exercice suivant &#8594;</button>
+    <button class="btn btn-ghost" id="btn-bilan" onclick="showBilan()" style="display:none;">Voir le bilan &#8594;</button>
+  </div>
+</div>
+
+<!-- TRANSITION N1→N2 -->
+<div class="transition-screen" id="trans-1">
+  <div class="transition-card">
+    <div class="transition-icon">&#x1F7E2;</div>
+    <div class="niveau-pill" style="background:#f0faeb;color:#2d6a00;border:1.5px solid var(--n1);">Niveau 1 termin&eacute;&nbsp;!</div>
+    <div class="transition-title">Bien jou&eacute;&nbsp;!</div>
+    <div class="transition-msg">Tu sais calculer la fraction unitaire d&rsquo;un nombre.<br>Dans le niveau suivant, les calculs vont devenir un peu plus vari&eacute;s.</div>
+    <button class="btn btn-primary" style="margin:0 auto" onclick="startNiveau(2)">&#9654;&nbsp;Commencer le niveau 2</button>
+  </div>
+</div>
+
+<!-- TRANSITION N2→N3 -->
+<div class="transition-screen" id="trans-2">
+  <div class="transition-card">
+    <div class="transition-icon">&#x1F7E1;</div>
+    <div class="niveau-pill" style="background:#fff5e0;color:#7a3500;border:1.5px solid var(--n2);">Niveau 2 termin&eacute;&nbsp;!</div>
+    <div class="transition-title">Excellent travail&nbsp;!</div>
+    <div class="transition-msg">Tu es pr&ecirc;t &agrave; utiliser diff&eacute;rentes strat&eacute;gies de calcul.<br>Dans le niveau suivant, tu vas choisir l&rsquo;approche la plus efficace.</div>
+    <button class="btn btn-primary" style="margin:0 auto" onclick="startNiveau(3)">&#9654;&nbsp;Commencer le niveau 3</button>
+  </div>
+</div>
+
+<!-- BILAN -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score"><span class="s-num" id="score-num">0</span>/17</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-niveaux" id="recap-niveaux"></div>
+    <div class="comp-box">
+      <h3>Ce que je sais maintenant&nbsp;:</h3>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Prendre la fraction d&rsquo;un nombre, c&rsquo;est le <strong>multiplier</strong> par cette fraction.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Pour une fraction unitaire : n &times; <span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.9em"><sup style="border-bottom:1px solid currentColor;padding:0 .2em">1</sup><sub style="padding:0 .2em">d</sub></span> = n &divide; d.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Pour <span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-size:.9em"><sup style="border-bottom:1px solid currentColor;padding:0 .2em">a</sup><sub style="padding:0 .2em">b</sub></span> : je peux multiplier par a puis diviser par b, ou diviser par b puis multiplier par a.</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">&#128260;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+
+function fr(n,d){
+  return "<span class='frac'><sup>"+n+"</sup><sub>"+d+"</sub></span>";
+}
+
+// Structure : 6 exercices, chacun avec des sous-questions
+var EXERCICES = [
+  // N1
+  {
+    lvl:1, num:1,
+    titre:"Niveau 1 \u2014 Fractions unitaires",
+    hint:"Pour une fraction unitaire, prendre \u00a0"+fr(1,"d")+"\u00a0 d\u2019un nombre, c\u2019est le diviser par d.",
+    fbOk:"\u2705 Bravo\u00a0! Tu ma\u00eetrises les fractions unitaires\u00a0: multiplier par \u00a0"+fr(1,"d")+"\u00a0 revient \u00e0 diviser par d.",
+    fbKo:"V\u00e9rifie chaque calcul. Prendre \u00a0"+fr(1,"d")+"\u00a0 d\u2019un nombre, c\u2019est le diviser par d.",
+    qs:[
+      {label:"a",expr:"12 \u00d7 "+fr(1,2),an:6},
+      {label:"b",expr:"16 \u00d7 "+fr(1,4),an:4},
+      {label:"c",expr:"18 \u00d7 "+fr(1,3),an:6}
+    ],
+    corr:"a) 12 \u00d7 "+fr(1,2)+" = 12 \u00f7 2 = <strong>6</strong><br>b) 16 \u00d7 "+fr(1,4)+" = 16 \u00f7 4 = <strong>4</strong><br>c) 18 \u00d7 "+fr(1,3)+" = 18 \u00f7 3 = <strong>6</strong>"
+  },
+  {
+    lvl:1, num:2,
+    titre:"Niveau 1 \u2014 Fractions unitaires",
+    hint:"Prendre \u00a0"+fr(1,"d")+"\u00a0 d\u2019un nombre\u00a0: divise le nombre par d.",
+    fbOk:"\u2705 Parfait\u00a0! Tu divises par le d\u00e9nominateur avec assurance.",
+    fbKo:"Pour chaque calcul, divise le nombre par le d\u00e9nominateur de la fraction.",
+    qs:[
+      {label:"a",expr:"20 \u00d7 "+fr(1,5),an:4},
+      {label:"b",expr:"15 \u00d7 "+fr(1,3),an:5},
+      {label:"c",expr:"24 \u00d7 "+fr(1,2),an:12}
+    ],
+    corr:"a) 20 \u00d7 "+fr(1,5)+" = 20 \u00f7 5 = <strong>4</strong><br>b) 15 \u00d7 "+fr(1,3)+" = 15 \u00f7 3 = <strong>5</strong><br>c) 24 \u00d7 "+fr(1,2)+" = 24 \u00f7 2 = <strong>12</strong>"
+  },
+  // N2
+  {
+    lvl:2, num:3,
+    titre:"Niveau 2 \u2014 Num\u00e9rateur sup\u00e9rieur \u00e0 1",
+    hint:"Pour \u00a0"+fr("a","b")+"\u00a0 d\u2019un nombre\u00a0: multiplie par a puis divise par b (ou divise d\u2019abord par b).",
+    fbOk:"\u2705 Bravo\u00a0! Tu ma\u00eetrises la m\u00e9thode\u00a0: multiplier par le num\u00e9rateur puis diviser par le d\u00e9nominateur.",
+    fbKo:"V\u00e9rifie chaque calcul. Pense \u00e0 multiplier par le num\u00e9rateur puis diviser par le d\u00e9nominateur.",
+    qs:[
+      {label:"a",expr:"24 \u00d7 "+fr(2,3),an:16},
+      {label:"b",expr:"30 \u00d7 "+fr(3,5),an:18},
+      {label:"c",expr:"36 \u00d7 "+fr(3,4),an:27}
+    ],
+    corr:"a) 24 \u00d7 "+fr(2,3)+" = 24 \u00d7 2 \u00f7 3 = 48 \u00f7 3 = <strong>16</strong><br>b) 30 \u00d7 "+fr(3,5)+" = 30 \u00d7 3 \u00f7 5 = 90 \u00f7 5 = <strong>18</strong><br>c) 36 \u00d7 "+fr(3,4)+" = 36 \u00d7 3 \u00f7 4 = 108 \u00f7 4 = <strong>27</strong>"
+  },
+  {
+    lvl:2, num:4,
+    titre:"Niveau 2 \u2014 Num\u00e9rateur sup\u00e9rieur \u00e0 1",
+    hint:"Tu peux aussi diviser d\u2019abord par le d\u00e9nominateur puis multiplier par le num\u00e9rateur.",
+    fbOk:"\u2705 Excellent\u00a0! Les deux m\u00e9thodes fonctionnent\u00a0: \u00d7 num puis \u00f7 d\u00e9n, ou \u00f7 d\u00e9n puis \u00d7 num.",
+    fbKo:"Essaie de diviser d\u2019abord par le d\u00e9nominateur puis de multiplier par le num\u00e9rateur.",
+    qs:[
+      {label:"a",expr:"28 \u00d7 "+fr(3,7),an:12},
+      {label:"b",expr:"40 \u00d7 "+fr(5,8),an:25},
+      {label:"c",expr:"42 \u00d7 "+fr(6,7),an:36}
+    ],
+    corr:"a) 28 \u00d7 "+fr(3,7)+" = 28 \u00f7 7 \u00d7 3 = 4 \u00d7 3 = <strong>12</strong><br>b) 40 \u00d7 "+fr(5,8)+" = 40 \u00f7 8 \u00d7 5 = 5 \u00d7 5 = <strong>25</strong><br>c) 42 \u00d7 "+fr(6,7)+" = 42 \u00f7 7 \u00d7 6 = 6 \u00d7 6 = <strong>36</strong>"
+  },
+  // N3
+  {
+    lvl:3, num:5,
+    titre:"Niveau 3 \u2014 Je r\u00e9investis",
+    hint:"Choisis la strat\u00e9gie la plus simple\u00a0: diviser d\u2019abord par le d\u00e9nominateur si le r\u00e9sultat est entier.",
+    fbOk:"\u2705 Bravo\u00a0! Tu choisis la meilleure strat\u00e9gie selon les nombres.",
+    fbKo:"Essaie de diviser d\u2019abord par le d\u00e9nominateur\u00a0: c\u2019est souvent plus simple.",
+    qs:[
+      {label:"a",expr:"48 \u00d7 "+fr(3,8),an:18},
+      {label:"b",expr:"32 \u00d7 "+fr(3,4),an:24},
+      {label:"c",expr:"54 \u00d7 "+fr(2,9),an:12}
+    ],
+    corr:"a) 48 \u00d7 "+fr(3,8)+" = 48 \u00f7 8 \u00d7 3 = 6 \u00d7 3 = <strong>18</strong><br>b) 32 \u00d7 "+fr(3,4)+" = 32 \u00f7 4 \u00d7 3 = 8 \u00d7 3 = <strong>24</strong><br>c) 54 \u00d7 "+fr(2,9)+" = 54 \u00f7 9 \u00d7 2 = 6 \u00d7 2 = <strong>12</strong>"
+  },
+  {
+    lvl:3, num:6,
+    titre:"Niveau 3 \u2014 Je choisis ma strat\u00e9gie",
+    hint:"Les deux m\u00e9thodes A et B donnent le m\u00eame r\u00e9sultat. Laquelle est plus rapide avec ces nombres\u00a0?",
+    fbOk:"\u2705 Bravo\u00a0! Les deux m\u00e9thodes sont \u00e9quivalentes. Choisir la plus pratique, c\u2019est calculer intelligemment.",
+    fbKo:"V\u00e9rifie ta r\u00e9ponse au QCM et ton calcul. Les deux m\u00e9thodes doivent donner 16.",
+    isQcm:true,
+    qcmOpts:["A.\u00a024 \u00d7 2 \u00f7 3","B.\u00a024 \u00f7 3 \u00d7 2","C.\u00a0Les deux m\u00e9thodes sont possibles."],
+    qcmAn:2, // index 2 = C
+    calcExpr:"24 \u00d7 "+fr(2,3),
+    calcAn:16,
+    corr:"R\u00e9ponse QCM\u00a0: <strong>C</strong> \u2014 Les deux m\u00e9thodes sont possibles.<br>24 \u00d7 2 \u00f7 3 = 48 \u00f7 3 = <strong>16</strong><br>24 \u00f7 3 \u00d7 2 = 8 \u00d7 2 = <strong>16</strong>"
+  }
+];
+
+var TOTAL_QS = 17; // 3+3+3+3+3+2 (qcm+calcul)
+var currentEx = 0;
+var exValidated = [false,false,false,false,false,false];
+var exResults = [[],[],[],[],[],[]]; // ok/ko par sous-question
+var qcmSelected = -1;
+var hintOpen = [false,false,false,false,false,false];
+var corrOpen = [false,false,false,false,false,false];
+
+function getScore(){
+  var ok=0;
+  exResults.forEach(function(r){ r.forEach(function(v){ if(v===true) ok++; }); });
+  return ok;
+}
+function getAnswered(){
+  var n=0;
+  exResults.forEach(function(r){ r.forEach(function(v){ if(v!==null&&v!==undefined) n++; }); });
+  return n;
+}
+
+var BADGE_STYLES = {
+  1:'background:#f0faeb;color:#2d6a00;border:1.5px solid var(--n1)',
+  2:'background:#fff5e0;color:#7a3500;border:1.5px solid var(--n2)',
+  3:'background:#f7eded;color:#7a1f1f;border:1.5px solid var(--n3)'
+};
+
+function renderEx(){
+  var ex = EXERCICES[currentEx];
+  var badge = $('theme-badge');
+  badge.textContent = ex.titre;
+  badge.style.cssText = BADGE_STYLES[ex.lvl];
+
+  var z = $('quiz-zone');
+  var html = '';
+
+  if(!ex.isQcm){
+    html += '<div class="ex-header">'
+      +'<span class="ex-num" style="background:'+(ex.lvl===1?'var(--n1)':ex.lvl===2?'var(--n2)':'var(--n3)')+'">'+ex.num+'</span>'
+      +'<span style="font-weight:700;font-size:1rem">Exercice '+ex.num+'</span></div>'
+      +'<div class="q-list" id="q-list">';
+    ex.qs.forEach(function(q,i){
+      html += '<div class="q-row">'
+        +'<span class="q-label">'+q.label+')</span>'
+        +'<span class="math-expr">'+q.expr+'<span class="eq-sign">=</span></span>'
+        +'<input type="text" inputmode="numeric" pattern="[0-9]*" class="ans-input" id="inp-'+i+'" placeholder="" oninput="checkInputs()" onkeydown="handleEnter(event)"/>'
+        +'<span class="q-fb" id="fb-'+i+'"></span>'
+        +'</div>';
+    });
+    html += '</div>';
+  } else {
+    // Ex6 QCM + calcul
+    html += '<div class="ex-header">'
+      +'<span class="ex-num" style="background:var(--n3)">6</span>'
+      +'<span style="font-weight:700;font-size:1rem">Exercice 6</span></div>'
+      +'<div style="margin-bottom:.8rem;font-size:.95rem;line-height:1.7">Que peut-on dire des deux m\u00e9thodes suivantes pour calculer <span style="font-weight:700">24 \u00d7 '+fr(2,3)+'</span>\u00a0?</div>'
+      +'<div class="qcm-opts" id="qcm-opts">';
+    ex.qcmOpts.forEach(function(o,i){
+      html += '<div class="qcm-opt" id="qcm-'+i+'" onclick="selectQcm('+i+')">'
+        +'<span class="qcm-key">'+String.fromCharCode(65+i)+'</span>'
+        +'<span>'+o+'</span></div>';
+    });
+    html += '</div>'
+      +'<div style="margin:.8rem 0 .4rem;font-size:.92rem;font-weight:700">Puis calcule le r\u00e9sultat\u00a0:</div>'
+      +'<div class="q-row">'
+      +'<span class="math-expr">24 \u00d7 '+fr(2,3)+'<span class="eq-sign">=</span></span>'
+      +'<input type="text" inputmode="numeric" pattern="[0-9]*" class="ans-input" id="inp-calc" placeholder="" oninput="checkInputs()" onkeydown="handleEnter(event)"/>'
+      +'<span class="q-fb" id="fb-calc"></span>'
+      +'</div>';
+  }
+
+  html += '<div class="ex-hint-wrap">'
+    +'<button class="btn-hint-ex" id="btnhint-ex" onclick="toggleHint()">Indice</button>'
+    +'<div class="hint-box-ex" id="hint-box-ex">'+ex.hint+'</div></div>'
+    +'<div class="ex-feedback" id="ex-fb"></div>'
+    +'<div class="btn-corr-wrap" id="corr-wrap">'
+    +'<button class="btn-corr" id="btn-corr" onclick="toggleCorr()">Voir la correction</button></div>'
+    +'<div class="corr-box" id="corr-box">'+ex.corr+'</div>';
+
+  z.innerHTML = html;
+  qcmSelected = -1;
+
+  // Restaurer état si déjà validé
+  if(exValidated[currentEx]){
+    var ex2 = EXERCICES[currentEx];
+    if(!ex2.isQcm){
+      ex2.qs.forEach(function(q,i){
+        var inp = $('inp-'+i);
+        if(inp){ inp.value = q.an; inp.disabled=true; inp.className='ans-input '+(exResults[currentEx][i]?'inp-ok':'inp-ko'); }
+        var fb = $('fb-'+i);
+        if(fb){ fb.textContent=exResults[currentEx][i]?'\u2705':'\u274C'; fb.className='q-fb show '+(exResults[currentEx][i]?'ok':'ko'); }
+      });
+    } else {
+      // QCM
+      var qOpts = document.querySelectorAll('.qcm-opt');
+      qOpts.forEach(function(o,i){ o.classList.add('locked'); if(i===ex2.qcmAn) o.classList.add('correct'); });
+      var ci = $('inp-calc');
+      if(ci){ ci.value=ex2.calcAn; ci.disabled=true; ci.className='ans-input '+(exResults[currentEx][1]?'inp-ok':'inp-ko'); }
+      var fc = $('fb-calc');
+      if(fc){ fc.textContent=exResults[currentEx][1]?'\u2705':'\u274C'; fc.className='q-fb show '+(exResults[currentEx][1]?'ok':'ko'); }
+    }
+    $('btn-valider').disabled=true;
+    $('ex-fb').className='ex-feedback show '+(exResults[currentEx].every(function(v){return v;})?'ok':'ko');
+    $('ex-fb').innerHTML=exResults[currentEx].every(function(v){return v;})?ex2.fbOk:ex2.fbKo;
+    if(corrOpen[currentEx]){ $('corr-wrap').style.display='block'; $('corr-box').style.display='block'; }
+    $('btnhint-ex').style.display='none';
+    updateNextBtn();
+  }
+
+  $('btn-valider').disabled = !exValidated[currentEx];
+  updateProgress();
+}
+
+window.checkInputs = function checkInputs(){
+  var ex = EXERCICES[currentEx];
+  if(exValidated[currentEx]) return;
+  var ok = false;
+  if(!ex.isQcm){
+    ok = ex.qs.every(function(_,i){
+      var v = $('inp-'+i); return v && v.value.trim()!=='';
+    });
+  } else {
+    var ci = $('inp-calc');
+    ok = qcmSelected>=0 && ci && ci.value.trim()!=='';
+  }
+  $('btn-valider').disabled = !ok;
+}
+
+window.handleEnter = function handleEnter(e){ if(e.key==='Enter' && !$('btn-valider').disabled) validerEx(); }
+
+window.selectQcm = function(i){
+  if(exValidated[currentEx]) return;
+  qcmSelected = i;
+  document.querySelectorAll('.qcm-opt').forEach(function(o,j){
+    o.classList.toggle('selected', j===i);
+  });
+  checkInputs();
+};
+
+window.validerEx = function(){
+  if(exValidated[currentEx]) return;
+  exValidated[currentEx]=true;
+  var ex = EXERCICES[currentEx];
+  var allOk=true;
+  exResults[currentEx]=[];
+
+  if(!ex.isQcm){
+    ex.qs.forEach(function(q,i){
+      var inp=$('inp-'+i);
+      var val=parseInt(inp.value, 10);
+      var ok=(val===q.an);
+      exResults[currentEx].push(ok);
+      if(!ok) allOk=false;
+      inp.disabled=true;
+      inp.className='ans-input '+(ok?'inp-ok':'inp-ko');
+      var fb=$('fb-'+i);
+      fb.textContent=ok?'\u2705':'\u274C';
+      fb.className='q-fb show '+(ok?'ok':'ko');
+    });
+  } else {
+    var qOk=(qcmSelected===ex.qcmAn);
+    exResults[currentEx].push(qOk);
+    document.querySelectorAll('.qcm-opt').forEach(function(o,i){
+      o.classList.add('locked'); o.classList.remove('selected');
+      if(i===ex.qcmAn) o.classList.add('correct');
+      else if(i===qcmSelected) o.classList.add('wrong');
+    });
+    var ci=$('inp-calc');
+    var cval=parseInt(ci.value, 10);
+    var cok=(cval===ex.calcAn);
+    exResults[currentEx].push(cok);
+    if(!qOk||!cok) allOk=false;
+    ci.disabled=true;
+    ci.className='ans-input '+(cok?'inp-ok':'inp-ko');
+    var fc=$('fb-calc');
+    fc.textContent=cok?'\u2705':'\u274C';
+    fc.className='q-fb show '+(cok?'ok':'ko');
+  }
+
+  $('btn-valider').disabled=true;
+  $('btnhint-ex').style.display='none';
+  $('hint-box-ex').classList.remove('show');
+  hintOpen[currentEx]=false;
+
+  var fb=$('ex-fb');
+  fb.className='ex-feedback show '+(allOk?'ok':'ko');
+  fb.innerHTML=allOk?ex.fbOk:ex.fbKo;
+
+  var delay=allOk?4500:6000;
+  setTimeout(function(){ var cw=$('corr-wrap'); if(cw) cw.style.display='block'; },delay);
+  setTimeout(function(){ updateNextBtn(); },delay);
+
+  updateProgress();
+  updateChips();
+};
+
+function updateNextBtn(){
+  var isLast=(currentEx===5);
+  $('btn-next').style.display=(!isLast)?'inline-flex':'none';
+  $('btn-bilan').style.display=isLast?'inline-flex':'none';
+}
+
+window.toggleHint=function(){
+  hintOpen[currentEx]=!hintOpen[currentEx];
+  var h=$('hint-box-ex'),b=$('btnhint-ex');
+  if(hintOpen[currentEx]){h.classList.add('show');b.textContent='Masquer l\u2019indice';}
+  else{h.classList.remove('show');b.textContent='Indice';}
+};
+
+window.toggleCorr=function(){
+  corrOpen[currentEx]=!corrOpen[currentEx];
+  var box=$('corr-box'),btn=$('btn-corr');
+  box.style.display=corrOpen[currentEx]?'block':'none';
+  btn.textContent=corrOpen[currentEx]?'Masquer la correction':'Voir la correction';
+};
+
+window.nextEx=function(){
+  var next=currentEx+1;
+  if(next===2){ showCard(false); showTransition(1); return; }
+  if(next===4){ showCard(false); showTransition(2); return; }
+  currentEx=next; renderEx();
+};
+
+window.startNiveau=function(n){
+  hideTransitions(); showCard(true);
+  if(n===2) currentEx=2;
+  if(n===3) currentEx=4;
+  renderEx();
+};
+
+function showCard(v){ $('ex-card').style.display=v?'block':'none'; }
+function showTransition(n){
+  $('trans-1').classList.remove('show'); $('trans-2').classList.remove('show');
+  $('trans-'+n).classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function hideTransitions(){
+  $('trans-1').classList.remove('show'); $('trans-2').classList.remove('show');
+}
+
+function updateProgress(){
+  var done=exValidated.filter(function(v){return v;}).length;
+  var pct=Math.round(done/6*100);
+  $('progress-bar').style.width=pct+'%';
+  $('prog-pct').textContent=pct+'\u00a0%';
+  $('prog-label').textContent='Exercice '+(currentEx+1)+' / 6';
+}
+function updateChips(){
+  var ok=getScore();
+  var answered=getAnswered();
+  $('count-ok').textContent=ok;
+  $('count-ko').textContent=answered-ok;
+  $('count-rem').textContent=TOTAL_QS-answered;
+}
+
+window.showBilan=function(){
+  showCard(false); hideTransitions();
+  var sc=getScore();
+  var rs=$('results-screen'); rs.classList.add('show');
+  $('score-num').textContent=sc;
+  var ratio=sc/TOTAL_QS;
+  var stars=ratio>=1?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:1;
+  $('stars-row').textContent='\u2B50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var msg;
+  if(sc===17) msg='\uD83C\uDF1F Excellent\u00a0! Tu ma\u00eetrises le calcul de la fraction d\u2019un nombre.';
+  else if(sc>=14) msg='\uD83D\uDC4F Tr\u00e8s bon travail\u00a0! Relis les corrections des exercices manqu\u00e9s.';
+  else if(sc>=10) msg='\uD83D\uDC4D Bon travail\u00a0! Quelques calculs restent \u00e0 consolider.';
+  else if(sc>=6) msg='\uD83D\uDCAA Continue tes efforts\u00a0! Relis les corrections et recommence.';
+  else msg='\uD83D\uDCDA Ne te d\u00e9courage pas\u00a0! Relis les corrections et refais les exercices.';
+  $('results-msg').textContent=msg;
+
+  var niveaux=[
+    {label:'Niveau 1 \u2014 Fractions unitaires',cls:'n1',exs:[0,1]},
+    {label:'Niveau 2 \u2014 Num\u00e9rateur > 1',cls:'n2',exs:[2,3]},
+    {label:'Niveau 3 \u2014 R\u00e9investissement',cls:'n3',exs:[4,5]}
+  ];
+  var recap=$('recap-niveaux'); recap.innerHTML='';
+  niveaux.forEach(function(nv){
+    var ok=0,tot=0;
+    nv.exs.forEach(function(ei){ exResults[ei].forEach(function(v){ tot++; if(v===true) ok++; }); });
+    var div=document.createElement('div');
+    div.className='recap-niveau '+nv.cls;
+    var ic=ok===tot?'\u2705':ok>=tot*0.6?'\uD83D\uDFE1':'\uD83D\uDD34';
+    div.innerHTML='<span style="font-size:1.1rem">'+ic+'</span><span><strong>'+nv.label+'</strong> \u2014 '+ok+' / '+tot+'</span>';
+    recap.appendChild(div);
+  });
+  $('progress-bar').style.width='100%';
+  $('prog-pct').textContent='100\u00a0%';
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+window.restart=function(){
+  currentEx=0;
+  exValidated=[false,false,false,false,false,false];
+  exResults=[[],[],[],[],[],[]];
+  qcmSelected=-1;
+  hintOpen=[false,false,false,false,false,false];
+  corrOpen=[false,false,false,false,false,false];
+  $('results-screen').classList.remove('show');
+  hideTransitions(); showCard(true);
+  $('count-ok').textContent='0';
+  $('count-ko').textContent='0';
+  $('count-rem').textContent=TOTAL_QS;
+  $('btn-next').style.display='none';
+  $('btn-bilan').style.display='none';
+  $('btn-valider').disabled=true;
+  renderEx();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+document.addEventListener('DOMContentLoaded',function(){ renderEx(); });
+})();
+</script>
+</body>
+</html>
