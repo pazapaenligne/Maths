@@ -453,6 +453,8 @@ var totalSec=0,totalInt=null;
 var gameRunning=false;
 var pickSel={};   // fiches 1-4 : index choisi (0=conforme,1=non conforme)
 var multiSel={};  // fiche 5 : set de labels choisis
+var savedFb={};
+var savedCorr={};
 
 function timerTick(){
   totalSec++;
@@ -490,12 +492,19 @@ function build(){
       +'<div class="step-meta"><div class="step-step">'+F.name+'</div><div class="step-comp">&#128203; '+F.comp+'</div></div>'
       +'</div><div class="step-body" id="body-'+fi+'">';
     if(fi===active||solved[fi]){
+      var isSolved=solved[fi];
       if(!F.multi){
         h+='<div class="intro">Cette commande respecte-t-elle la m&ecirc;me recette&#8201;?</div>';
         h+=ratioTable(F.lblX,F.x,F.lblY,F.y);
-        h+='<div class="opts">'
-          +'<div class="opt" id="opt-'+fi+'-0" onclick="pickBinary('+fi+',0)">&#128994; Conforme</div>'
-          +'<div class="opt" id="opt-'+fi+'-1" onclick="pickBinary('+fi+',1)">&#128308; Non conforme</div>'
+        h+='<div class="opts">';
+        var cls0="opt",cls1="opt";
+        if(isSolved){
+          if(F.correct){cls0+=" ok";}else{cls1+=" ok";}
+        }else{
+          if(pickSel[fi]===0)cls0+=" sel"; if(pickSel[fi]===1)cls1+=" sel";
+        }
+        h+='<div class="'+cls0+'" id="opt-'+fi+'-0" onclick="pickBinary('+fi+',0)">&#128994; Conforme</div>'
+          +'<div class="'+cls1+'" id="opt-'+fi+'-1" onclick="pickBinary('+fi+',1)">&#128308; Non conforme</div>'
           +'</div>';
       }else{
         F.cmds.forEach(function(cmd){
@@ -505,17 +514,25 @@ function build(){
         h+='<div class="qcm-q">Quelles commandes peuvent &ecirc;tre valid&eacute;es&#8201;?</div>';
         h+='<div class="opts">';
         F.cmds.forEach(function(cmd){
-          h+='<div class="opt opt-chip" id="chip-'+fi+'-'+cmd.lbl+'" onclick="toggleMulti('+fi+',\''+cmd.lbl+'\')">'+cmd.lbl+'</div>';
+          var cls="opt opt-chip";
+          if(isSolved){ cls+=(F.correctSet.indexOf(cmd.lbl)!==-1)?" ok":""; }
+          else if((multiSel[fi]||[]).indexOf(cmd.lbl)!==-1){ cls+=" sel"; }
+          h+='<div class="'+cls+'" id="chip-'+fi+'-'+cmd.lbl+'" onclick="toggleMulti('+fi+',\''+cmd.lbl+'\')">'+cmd.lbl+'</div>';
         });
         h+='</div>';
       }
-      h+='<div class="tools">'
-        +'<button class="btn btn-hint" id="hint-btn-'+fi+'" onclick="toggleHint('+fi+')">? Indice</button>'
-        +'<button class="btn btn-try" id="try-'+fi+'" onclick="tryStep('+fi+')">&#9989; Valider la fiche</button>'
-        +'</div>'
-        +'<div class="hint" id="hint-'+fi+'">'+HINTS[fi%HINTS.length]+'</div>'
-        +'<div class="correction" id="corr-'+fi+'"><div class="correction-t">&#9989; Correction</div><div class="correction-x" id="corrx-'+fi+'"></div></div>'
-        +'<div class="fb" id="fb-'+fi+'"><span id="fbi-'+fi+'"></span><div id="fbm-'+fi+'"></div></div>';
+      if(!isSolved){
+        h+='<div class="tools">'
+          +'<button class="btn btn-hint" id="hint-btn-'+fi+'" onclick="toggleHint('+fi+')">? Indice</button>'
+          +'<button class="btn btn-try" id="try-'+fi+'" onclick="tryStep('+fi+')">&#9989; Valider la fiche</button>'
+          +'</div>'
+          +'<div class="hint" id="hint-'+fi+'">'+HINTS[fi%HINTS.length]+'</div>'
+          +'<div class="correction" id="corr-'+fi+'"><div class="correction-t">&#9989; Correction</div><div class="correction-x" id="corrx-'+fi+'"></div></div>'
+          +'<div class="fb" id="fb-'+fi+'"><span id="fbi-'+fi+'"></span><div id="fbm-'+fi+'"></div></div>';
+      }else{
+        h+='<div class="correction show" id="corr-'+fi+'"><div class="correction-t">&#9989; Correction</div><div class="correction-x" id="corrx-'+fi+'">'+(savedCorr[fi]||'')+'</div></div>'
+          +'<div class="fb show ok" id="fb-'+fi+'"><span id="fbi-'+fi+'">\u2705</span><div id="fbm-'+fi+'">'+(savedFb[fi]||'')+'</div></div>';
+      }
     }else{
       h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine la fiche pr&eacute;c&eacute;dente pour d&eacute;bloquer celle-ci.</div>';
     }
@@ -618,11 +635,14 @@ function stepSuccess(fi){
         return "<b>Commande "+cmd.lbl+"&#8201;:</b> "+ratioCorrection(cmd.lblX,cmd.x,cmd.lblY,cmd.y,cmd.unit)+" &#8594; "+(isOk?"conforme":"non conforme");
       }).join("<br>");
     }
+    savedCorr[fi]=txt;
     $("corrx-"+fi).innerHTML=txt;
     corr.classList.add("show");
   }
+  var fbTxt="<b style='color:var(--green)'>"+OK_MSGS[fi%OK_MSGS.length]+"</b>";
+  savedFb[fi]=fbTxt;
   var fb=$("fb-"+fi);fb.className="fb show ok";$("fbi-"+fi).textContent="\u2705";
-  $("fbm-"+fi).innerHTML="<b style='color:var(--green)'>"+OK_MSGS[fi%OK_MSGS.length]+"</b>";
+  $("fbm-"+fi).innerHTML=fbTxt;
   showAgent("&#128203; Le chef&nbsp;:<br>"+F.frag+" "+(fi<N-1?"Fiche valid&eacute;e&#8201;! On continue.":"Derni&egrave;re fiche valid&eacute;e&#8201;!"));
   updateCrest();updateProg();
   var body=$("body-"+fi);
@@ -714,7 +734,7 @@ function restartAll(){
   gameRunning=false;
   clearInterval(totalInt);totalSec=0;
   solved=[];for(var i=0;i<N;i++)solved.push(false);
-  active=0;pickSel={};multiSel={};
+  active=0;pickSel={};multiSel={};savedFb={};savedCorr={};
   $("finale").classList.remove("show");
   var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
   $("hud-bar").classList.remove("show");
