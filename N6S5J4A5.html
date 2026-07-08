@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths — Semaine 5 Jour 4 — Le contrôle du chef</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--day-color:#3ab5d8;--day-dark:#1a6e88;--day-light:#e8f6fb;--day-border:#9dd4e8;--day-glow:rgba(58,181,216,.25);}
+:root{--bg:#fffdf7;--surface:#fff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;pointer-events:none;}
+.b1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.b2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+.progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+.progress-info{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;}
+.score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+.chip .dot{width:8px;height:8px;border-radius:50%;}
+.chip.correct .dot{background:var(--green);}
+.chip.wrong .dot{background:var(--pink);}
+.card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--day-border),var(--pink),var(--orange));}
+.q-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--day-dark);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;}
+.q-badge::before{content:'';display:inline-block;width:3px;height:14px;border-radius:2px;background:var(--day-color);}
+.q-num{display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem;border-radius:50%;background:var(--day-color);color:#fff;font-weight:800;font-size:.8rem;flex-shrink:0;}
+.q-text{font-size:1rem;font-weight:700;line-height:1.6;margin-bottom:1rem;color:var(--text);}
+.options{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1rem;}
+.option{display:flex;align-items:center;gap:.7rem;padding:.7rem 1rem;border:2px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;font-size:.92rem;transition:border-color .15s,background .15s;min-height:44px;line-height:1.5;}
+.option:hover:not(.locked){border-color:var(--day-border);background:var(--day-light);}
+.option.locked{cursor:default;}
+.opt-box{width:20px;height:20px;border:2px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;border-radius:50%;transition:background .15s,border-color .15s;}
+.option.selected .opt-box{background:var(--day-color);border-color:var(--day-color);}
+.option.selected{border-color:var(--day-color);background:var(--day-light);}
+.option.correct{border-color:var(--green);background:#f0faeb;}
+.option.correct .opt-box{background:var(--green);border-color:var(--green);}
+.option.wrong{border-color:#c0392b;background:#fff0ef;}
+.option.wrong .opt-box{background:#c0392b;border-color:#c0392b;}
+.option.missed{border-color:var(--orange);background:#fffbeb;}
+.opt-tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;margin-left:auto;padding:.1rem .45rem;border-radius:99px;display:none;white-space:nowrap;}
+.option.correct .opt-tag{display:inline;background:var(--green);color:#fff;}
+.option.wrong .opt-tag{display:inline;background:#c0392b;color:#fff;}
+.option.missed .opt-tag{display:inline;background:var(--orange);color:#fff;}
+.q-feedback{margin:.7rem 0 0;padding:.6rem .9rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;display:none;}
+.q-feedback.show{display:block;}
+.q-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.q-feedback.ko{background:#fff0ef;border:1.5px solid #c0392b;color:#c0392b;}
+.btn-corr-wrap{margin:.5rem 0 0;display:none;}
+.btn-corr{background:none;border:1.5px solid var(--border);border-radius:8px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;color:var(--muted);font-family:'JetBrains Mono',monospace;transition:border-color .15s,color .15s;min-height:36px;}
+.btn-corr:hover{border-color:var(--day-color);color:var(--day-dark);}
+.corr-box{display:none;margin-top:.6rem;background:#f0f4ff;border:1.5px solid #a0b4ff;border-radius:10px;padding:.7rem 1rem;font-size:.82rem;color:#1a2d6e;line-height:1.8;}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.6rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.38;cursor:default;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+.results.show{display:block;}
+.results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+.results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;color:var(--day-dark);}
+.stars{font-size:2rem;margin:.4rem 0 .6rem;letter-spacing:.1em;}
+.results-msg{color:var(--muted);font-size:.95rem;margin-bottom:1rem;font-weight:600;}
+.recap-list{text-align:left;display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem;}
+.recap-item{display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;border-radius:10px;font-size:.85rem;border:1.5px solid var(--border);}
+.recap-item.ok{background:#f0faeb;border-color:#b5e08a;}
+.recap-item.ko{background:#fff0ef;border-color:#f9c0bb;}
+.comp-box{text-align:left;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;}
+.comp-box h3{color:var(--day-dark);font-size:.9rem;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;}
+.comp-line{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.4rem;font-size:.85rem;line-height:1.8;color:var(--text);}
+.comp-line .arr{color:var(--day-dark);font-weight:800;flex-shrink:0;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.card,.results-card{padding:1.4rem;}.btn{font-size:.85rem;padding:.55rem 1rem;}}
+</style>
+</head>
+<body>
+<div class="b1"></div><div class="b2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 4</div>
+  <h1>Utiliser des proc&eacute;dures de proportionnalit&eacute;</h1>
+  <p class="subtitle">Je v&eacute;rifie ce que j&rsquo;ai retenu &middot; 6 questions</p>
+</header>
+<div class="progress-wrap" id="progress-wrap" style="display:none">
+  <div class="progress-info">
+    <span id="prog-label">Question 1 / 6</span>
+    <span id="chrono-disp" style="font-family:'JetBrains Mono',monospace;color:var(--day-dark);font-weight:700">0:00</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+</div>
+<div class="score-row" id="score-row" style="display:none">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+</div>
+<div class="card" id="intro-card">
+  <div class="card-stripe"></div>
+  <div style="text-align:center;padding:.5rem 0">
+    <div style="font-size:2.8rem;margin-bottom:.7rem">&#x1F4D6;</div>
+    <div style="font-size:1.2rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem">Je v&eacute;rifie ce que j&rsquo;ai retenu</div>
+    <div style="color:var(--muted);font-size:.9rem;line-height:1.8;margin-bottom:1.4rem">
+      Tu as termin&eacute; ton entra&icirc;nement. Le chef souhaite maintenant v&eacute;rifier que tu ma&icirc;trises les notions essentielles sur la proportionnalit&eacute;.<br>
+      R&eacute;ponds aux 6 questions pour valider tes connaissances.<br>
+      <strong>Une seule bonne r&eacute;ponse par question.</strong>
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()" style="margin:0 auto">Commencer &#8594;</button>
+  </div>
+</div>
+<div class="card" id="q-card" style="display:none">
+  <div class="card-stripe"></div>
+  <div class="q-badge"><span class="q-num" id="q-num-badge">1</span><span id="q-badge-txt">Question 1 / 6</span></div>
+  <div class="q-text" id="q-text"></div>
+  <div class="options" id="options"></div>
+  <div class="q-feedback" id="q-fb"></div>
+  <div class="btn-corr-wrap" id="corr-wrap"><button class="btn-corr" id="btn-corr" onclick="toggleCorr()">Voir la correction</button></div>
+  <div class="corr-box" id="corr-box"></div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()" style="display:none;">&#8592; Pr&eacute;c&eacute;dent</button>
+    <button class="btn btn-primary" id="btn-next" onclick="nextQ()" style="display:none;">Question suivante &#8594;</button>
+    <button class="btn btn-primary" id="btn-bilan" onclick="showBilan()" style="display:none;">Voir mes r&eacute;sultats &#8594;</button>
+  </div>
+</div>
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score"><span id="score-num">0</span>/6</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div id="defi-chrono"></div>
+    <div class="recap-list" id="recap-list"></div>
+    <div class="comp-box">
+      <h3>Ce que je retiens&nbsp;:</h3>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Le coefficient de proportionnalit&eacute; est le nombre par lequel on multiplie une grandeur pour obtenir l&rsquo;autre.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Dans un tableau proportionnel, le m&ecirc;me coefficient permet de passer d&rsquo;une ligne &agrave; l&rsquo;autre.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Pour compl&eacute;ter une situation de proportionnalit&eacute;, je peux choisir la m&eacute;thode qui me para&icirc;t la plus simple (coefficient, passage par l&rsquo;unit&eacute; ou autre proc&eacute;dure adapt&eacute;e).</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">&#128260;&nbsp;Recommencer</button>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+var TOTAL=6,currentQ=0,results=[],validated=[],corrOpen=[],selectedOpt=-1;
+var chronoSec=0,chronoTimer=null,startTime=null,selectedHistory=[];
+for(var i=0;i<TOTAL;i++){results.push(null);validated.push(false);corrOpen.push(false);selectedHistory.push(-1);}
+
+var QUESTIONS=[
+  {txt:"Qu\u2019est-ce qu\u2019un coefficient de proportionnalit\u00e9\u00a0?",
+   opts:[{txt:"C\u2019est le nombre par lequel on multiplie une grandeur pour obtenir l\u2019autre.",correct:true},
+         {txt:"C\u2019est un nombre fixe qui permet de passer d\u2019une grandeur \u00e0 l\u2019autre dans un tableau de proportionnalit\u00e9.",correct:false},
+         {txt:"C\u2019est le r\u00e9sultat de la deuxi\u00e8me grandeur divis\u00e9e par la premi\u00e8re, lorsqu\u2019il est identique pour toutes les colonnes.",correct:false}],
+   fbOk:"\u2705 Bravo\u00a0! Le coefficient de proportionnalit\u00e9 est le nombre par lequel on multiplie une grandeur pour obtenir l\u2019autre.",
+   fbKo:"Le coefficient de proportionnalit\u00e9 est le nombre par lequel on multiplie une grandeur pour obtenir l\u2019autre.",
+   corr:"Le <strong>coefficient de proportionnalit\u00e9</strong> est le nombre par lequel on multiplie une grandeur pour obtenir l\u2019autre."},
+  {txt:"Comment reconna\u00eetre qu\u2019un tableau est proportionnel\u00a0?",
+   opts:[{txt:"En v\u00e9rifiant que les points repr\u00e9sent\u00e9s dans un graphique sont align\u00e9s avec l\u2019origine.",correct:false},
+         {txt:"En v\u00e9rifiant qu\u2019il existe un m\u00eame coefficient pour passer d\u2019une ligne \u00e0 l\u2019autre.",correct:true},
+         {txt:"En v\u00e9rifiant que les divisions des valeurs de la deuxi\u00e8me ligne par celles de la premi\u00e8re donnent toujours le m\u00eame r\u00e9sultat.",correct:false}],
+   fbOk:"\u2705 Exact\u00a0! Dans un tableau de proportionnalit\u00e9, le m\u00eame coefficient permet de passer d\u2019une ligne \u00e0 l\u2019autre.",
+   fbKo:"Dans un tableau de proportionnalit\u00e9, on peut passer d\u2019une ligne \u00e0 l\u2019autre en utilisant toujours le m\u00eame coefficient.",
+   corr:"Dans un tableau proportionnel, il existe un <strong>m\u00eame coefficient</strong> pour passer d\u2019une ligne \u00e0 l\u2019autre."},
+  {txt:"1 kg d\u2019oranges co\u00fbte 1,20 \u20ac. Le coefficient de proportionnalit\u00e9 est 1,2.",
+   opts:[{txt:"Vrai",correct:true},{txt:"Faux",correct:false}],
+   fbOk:"\u2705 Bravo\u00a0! Le coefficient est bien \u00e9gal \u00e0 1,2.",
+   fbKo:"Le coefficient correspond au prix d\u2019un kilogramme d\u2019oranges. Ici, il est bien \u00e9gal \u00e0 1,2.",
+   corr:"Pour 1 kg = 1,20 \u20ac, le coefficient est <strong>1,2</strong>\u00a0: masse \u00d7 1,2 = prix."},
+  {txt:"Si 3 kg de pommes co\u00fbtent 2,10 \u20ac, combien co\u00fbtent 5 kg\u00a0?",
+   opts:[{txt:"3,50 \u20ac",correct:true},{txt:"5,70 \u20ac",correct:false},{txt:"31,50 \u20ac",correct:false}],
+   fbOk:"\u2705 Tr\u00e8s bien\u00a0! Tu as trouv\u00e9 le bon r\u00e9sultat.",
+   fbKo:"Commence par d\u00e9terminer le prix d\u2019un kilogramme, puis calcule le prix de 5 kg.",
+   corr:"1 kg \u2192 2,10 \u00f7 3 = 0,70 \u20ac.<br>5 kg \u2192 5 \u00d7 0,70 = <strong>3,50 \u20ac</strong>."},
+  {txt:"Si 4 cahiers co\u00fbtent 28 \u20ac, combien co\u00fbtent 10 cahiers\u00a0?",
+   opts:[{txt:"112 \u20ac",correct:false},{txt:"70 \u20ac",correct:true},{txt:"17 \u20ac",correct:false}],
+   fbOk:"\u2705 Bravo\u00a0! Tu as trouv\u00e9 le bon r\u00e9sultat.",
+   fbKo:"Tu peux commencer par calculer le prix d\u2019un cahier avant de chercher le prix de 10 cahiers.",
+   corr:"1 cahier \u2192 28 \u00f7 4 = 7 \u20ac.<br>10 cahiers \u2192 10 \u00d7 7 = <strong>70 \u20ac</strong>."},
+  {txt:"Une recette utilise 200 g de farine pour 4 cr\u00eapes et 350 g pour 7 cr\u00eapes. La situation est-elle proportionnelle\u00a0?",
+   opts:[{txt:"Vrai",correct:true},{txt:"Faux",correct:false}],
+   fbOk:"\u2705 Exact\u00a0! Les deux grandeurs \u00e9voluent dans la m\u00eame proportion.",
+   fbKo:"V\u00e9rifie si les deux grandeurs \u00e9voluent toujours dans la m\u00eame proportion.",
+   corr:"200 \u00f7 4 = 50 et 350 \u00f7 7 = 50. Le coefficient est identique\u00a0: la situation est <strong>proportionnelle</strong>."}
+];
+
+function startChrono(){startTime=Date.now();chronoTimer=setInterval(function(){chronoSec=Math.floor((Date.now()-startTime)/1000);var m=Math.floor(chronoSec/60),s=chronoSec%60;var el=$('chrono-disp');if(el)el.textContent=m+':'+(s<10?'0':'')+s;},1000);}
+function stopChrono(){if(chronoTimer){clearInterval(chronoTimer);chronoTimer=null;}}
+function formatTime(sec){var m=Math.floor(sec/60),s=sec%60;return m+'\u00a0min\u00a0'+(s<10?'0':'')+s+'\u00a0s';}
+
+window.startQuiz=function(){$('intro-card').style.display='none';$('q-card').style.display='block';$('progress-wrap').style.display='block';$('score-row').style.display='flex';startChrono();renderQ();};
+
+function renderQ(){
+  var q=QUESTIONS[currentQ];
+  $('q-num-badge').textContent=currentQ+1;
+  $('q-badge-txt').textContent='Question '+(currentQ+1)+' / '+TOTAL;
+  $('q-text').innerHTML=q.txt;
+  var opts=$('options');opts.innerHTML='';
+  q.opts.forEach(function(o,i){
+    var div=document.createElement('div');div.className='option';div.id='opt-'+i;
+    div.innerHTML="<span class='opt-box' id='box-"+i+"'></span><span style='flex:1;line-height:1.5'>"+o.txt+"</span><span class='opt-tag' id='tag-"+i+"'></span>";
+    div.addEventListener('click',function(){selectOpt(i);});
+    opts.appendChild(div);
+  });
+  $('q-fb').className='q-feedback';$('q-fb').textContent='';
+  $('corr-wrap').style.display='none';$('corr-box').style.display='none';$('corr-box').innerHTML=q.corr;
+  $('btn-prev').style.display=currentQ>0?'inline-flex':'none';
+  $('btn-next').style.display='none';$('btn-bilan').style.display='none';
+  selectedOpt=-1;
+  if(validated[currentQ])restoreState();
+  updateProgress();
+}
+
+function restoreState(){
+  var q=QUESTIONS[currentQ],ok=results[currentQ],si=selectedHistory[currentQ];
+  q.opts.forEach(function(o,i){
+    var opt=$('opt-'+i),tag=$('tag-'+i),box=$('box-'+i);
+    opt.classList.add('locked');
+    if(o.correct&&ok){opt.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';if(box)box.innerHTML='&#10003;';}
+    else if(!o.correct&&i===si){opt.classList.add('wrong');if(tag)tag.textContent='Incorrect';}
+    else if(o.correct&&!ok){opt.classList.add('missed');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+  });
+  var fb=$('q-fb');fb.className='q-feedback show '+(ok?'ok':'ko');fb.innerHTML=ok?q.fbOk:q.fbKo;
+  if(!ok)$('corr-wrap').style.display='block';
+  if(corrOpen[currentQ])$('corr-box').style.display='block';
+  var isLast=currentQ===TOTAL-1;
+  if(isLast)$('btn-bilan').style.display='inline-flex';else $('btn-next').style.display='inline-flex';
+}
+
+function selectOpt(i){
+  if(validated[currentQ])return;
+  selectedOpt=i;
+  document.querySelectorAll('.option').forEach(function(o,j){o.classList.toggle('selected',j===i);o.querySelector('.opt-box').innerHTML=j===i?'&#10003;':'';});
+  validerQ();
+}
+
+function validerQ(){
+  if(validated[currentQ]||selectedOpt<0)return;
+  validated[currentQ]=true;selectedHistory[currentQ]=selectedOpt;
+  var q=QUESTIONS[currentQ],ok=q.opts[selectedOpt].correct;results[currentQ]=ok;
+  document.querySelectorAll('.option').forEach(function(o,i){
+    o.classList.add('locked');o.classList.remove('selected');o.querySelector('.opt-box').innerHTML='';
+    var tag=$('tag-'+i);
+    if(q.opts[i].correct&&i===selectedOpt){o.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    else if(!q.opts[i].correct&&i===selectedOpt){o.classList.add('wrong');if(tag)tag.textContent='Incorrect';}
+    else if(q.opts[i].correct&&i!==selectedOpt){o.classList.add('missed');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+  });
+  var fb=$('q-fb');fb.className='q-feedback show '+(ok?'ok':'ko');fb.innerHTML=ok?q.fbOk:q.fbKo;
+  var delay=ok?2000:3000;
+  if(!ok){setTimeout(function(){$('corr-wrap').style.display='block';},delay);}
+  setTimeout(function(){var isLast=currentQ===TOTAL-1;if(isLast)$('btn-bilan').style.display='inline-flex';else $('btn-next').style.display='inline-flex';},delay);
+  updateProgress();updateChips();
+}
+
+window.toggleCorr=function(){corrOpen[currentQ]=!corrOpen[currentQ];$('corr-box').style.display=corrOpen[currentQ]?'block':'none';$('btn-corr').textContent=corrOpen[currentQ]?'Masquer la correction':'Voir la correction';};
+window.nextQ=function(){if(currentQ<TOTAL-1){currentQ++;renderQ();}};
+window.prevQ=function(){if(currentQ>0){currentQ--;renderQ();}};
+
+function updateProgress(){var done=validated.filter(function(v){return v;}).length;var pct=Math.round(done/TOTAL*100);$('progress-bar').style.width=pct+'%';$('prog-pct').textContent=pct+'\u00a0%';$('prog-label').textContent='Question '+(currentQ+1)+' / '+TOTAL;}
+function updateChips(){var ok=results.filter(function(v){return v===true;}).length;var ko=results.filter(function(v){return v===false;}).length;$('count-ok').textContent=ok;$('count-ko').textContent=ko;}
+
+window.showBilan=function(){
+  stopChrono();
+  $('q-card').style.display='none';$('progress-wrap').style.display='none';$('score-row').style.display='none';
+  var sc=results.filter(function(v){return v===true;}).length;
+  var rs=$('results-screen');rs.classList.add('show');
+  $('score-num').textContent=sc;
+  var ratio=sc/TOTAL,stars=ratio>=1?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:1;
+  $('stars-row').textContent='\u2B50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var msg;
+  if(sc===6)msg='\u2B50 Excellent\u00a0! Tu ma\u00eetrises toutes les notions essentielles sur la proportionnalit\u00e9.';
+  else if(sc>=5)msg='\u2705 Tr\u00e8s bien\u00a0! Relis la correction de la question manqu\u00e9e.';
+  else if(sc>=4)msg='\u2705 Bon travail\u00a0! Quelques notions restent \u00e0 revoir.';
+  else if(sc>=3)msg='\u2B50 Continue tes efforts\u00a0! Relis les corrections et recommence.';
+  else msg='\u2B50 Continue tes efforts\u00a0! Relis les corrections puis refais l\u2019activit\u00e9.';
+  $('results-msg').textContent=msg;
+
+  // DEFI CHRONO
+  var medal,defitxt,deficolor;
+  if(sc===6&&chronoSec<75){medal='\uD83E\uDD47';defitxt='Ma\u00eetre des proportions\u00a0! 6/6 en moins de 1\u00a0min\u00a015.';deficolor='#d4a000';}
+  else if(sc>=5&&chronoSec<105){medal='\uD83E\uDD48';defitxt='Chef confirm\u00e9\u00a0! '+sc+'/6 en moins de 1\u00a0min\u00a045.';deficolor='#888';}
+  else if(sc>=4&&chronoSec<135){medal='\uD83E\uDD49';defitxt='Apprenti efficace\u00a0! Tu as \u00e9t\u00e9 rapide, mais quelques r\u00e9ponses sont \u00e0 revoir.';deficolor='#a0522d';}
+  else if(sc>=4){medal='\u2B50';defitxt='Tu ma\u00eetrises les notions. Recommence pour am\u00e9liorer ton temps\u00a0!';deficolor='var(--day-dark)';}
+  else{medal='\u2B50';defitxt='Tu as termin\u00e9 rapidement. Reprends les corrections pour am\u00e9liorer ton score.';deficolor='var(--day-dark)';}
+  $('defi-chrono').innerHTML='<div style="background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1rem;text-align:left">'
+    +'<div style="font-size:1.3rem;margin-bottom:.3rem">'+medal+'</div>'
+    +'<div style="font-family:\'JetBrains Mono\',monospace;font-weight:700;color:var(--day-dark);font-size:.85rem;margin-bottom:.2rem">D\u00e9fi chrono</div>'
+    +'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.8rem;color:var(--muted);margin-bottom:.25rem">Ton temps\u00a0: <strong style="color:var(--day-dark)">'+formatTime(chronoSec)+'</strong></div>'
+    +'<div style="font-size:.82rem;font-weight:600;color:'+deficolor+'">'+defitxt+'</div>'
+    +'</div>';
+
+  var labels=['Coefficient','Tableau proportionnel','Oranges','Pommes','Cahiers','Recette'];
+  var list=$('recap-list');list.innerHTML='';
+  results.forEach(function(ok,i){var div=document.createElement('div');div.className='recap-item '+(ok?'ok':'ko');div.innerHTML='<span style="font-size:1rem">'+(ok?'\u2705':'\u274C')+'</span><span>'+labels[i]+'</span>';list.appendChild(div);});
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+window.restart=function(){
+  stopChrono();chronoSec=0;
+  for(var i=0;i<TOTAL;i++){results[i]=null;validated[i]=false;corrOpen[i]=false;selectedHistory[i]=-1;}
+  currentQ=0;selectedOpt=-1;
+  $('results-screen').classList.remove('show');
+  $('q-card').style.display='block';$('progress-wrap').style.display='block';$('score-row').style.display='flex';
+  $('count-ok').textContent='0';$('count-ko').textContent='0';
+  startChrono();renderQ();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+})();
+</script>
+</body>
+</html>
