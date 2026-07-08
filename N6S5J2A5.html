@@ -472,36 +472,49 @@ function build(){
       +'<div class="step-meta"><div class="step-step">'+R.name+'</div><div class="step-comp">&#128203; '+R.comp+'</div></div>'
       +'</div><div class="step-body" id="body-'+ri+'">';
     if(ri===active||solved[ri]){
+      var isSolved=solved[ri];
       h+='<div class="intro">Le chef pr&eacute;pare seulement <span class="frac-big">'+R.fracN+'/'+R.fracD+'</span> de cette recette. Adapte chaque quantit&eacute;.</div>';
       h+='<div class="recipe-table-wrap"><table class="recipe-table"><thead><tr><th>Ingr&eacute;dient</th><th class="num">Recette compl&egrave;te</th><th class="num">Nouvelle quantit&eacute;</th></tr></thead><tbody>';
       R.items.forEach(function(it,k){
-        h+='<tr><td class="ing">'+it.lbl+'</td><td class="base">'+it.base+' '+it.unit+'</td>'
-          +'<td class="ans"><div class="ans-row"><input class="cell-in" id="in-'+ri+'-'+k+'" placeholder="?" type="text" inputmode="numeric" autocomplete="off"/><span class="unit-lbl">'+it.unit+'</span></div></td></tr>';
+        h+='<tr><td class="ing">'+it.lbl+'</td><td class="base">'+it.base+' '+it.unit+'</td>';
+        if(isSolved){
+          h+='<td class="ans"><div class="ans-row"><span class="cell-in ok" style="display:inline-flex;align-items:center;justify-content:center;">'+it.ans+'</span><span class="unit-lbl">'+it.unit+'</span></div></td></tr>';
+        }else{
+          h+='<td class="ans"><div class="ans-row"><input class="cell-in" id="in-'+ri+'-'+k+'" placeholder="?" type="text" inputmode="numeric" autocomplete="off"/><span class="unit-lbl">'+it.unit+'</span></div></td></tr>';
+        }
       });
       h+='</tbody></table></div>';
       if(R.qcm){
         h+='<div class="qcm-box"><div class="qcm-q">'+R.qcm.q+'</div><div class="opts" id="qcm-'+ri+'">';
         R.qcm.opts.forEach(function(opt,oi){
-          h+='<div class="opt" id="qcmopt-'+ri+'-'+oi+'" onclick="pickQcm('+ri+','+oi+')">'+opt+'</div>';
+          var cls="opt";
+          if(isSolved){ cls+=(oi===R.qcm.correct)?" ok":""; }
+          else if(qcmSel[ri]===oi){ cls+=" sel"; }
+          h+='<div class="'+cls+'" id="qcmopt-'+ri+'-'+oi+'" onclick="pickQcm('+ri+','+oi+')">'+opt+'</div>';
         });
         h+='</div></div>';
       }
-      h+='<div class="tools">'
-        +'<button class="btn btn-hint" id="hint-btn-'+ri+'" onclick="toggleHint('+ri+')">? Indice</button>'
-        +'<button class="btn btn-try" id="try-'+ri+'" onclick="tryStep('+ri+')">&#9989; Valider la recette</button>'
-        +'</div>'
-        +'<div class="hint" id="hint-'+ri+'">'+HINTS[ri%HINTS.length]+'</div>'
-        +'<div class="correction" id="corr-'+ri+'"><div class="correction-t">&#9989; Correction</div><div class="correction-x" id="corrx-'+ri+'"></div></div>'
-        +'<div class="fb" id="fb-'+ri+'"><span id="fbi-'+ri+'"></span><div id="fbm-'+ri+'"></div></div>';
+      if(!isSolved){
+        h+='<div class="tools">'
+          +'<button class="btn btn-hint" id="hint-btn-'+ri+'" onclick="toggleHint('+ri+')">? Indice</button>'
+          +'<button class="btn btn-try" id="try-'+ri+'" onclick="tryStep('+ri+')">&#9989; Valider la recette</button>'
+          +'</div>'
+          +'<div class="hint" id="hint-'+ri+'">'+HINTS[ri%HINTS.length]+'</div>'
+          +'<div class="correction" id="corr-'+ri+'"><div class="correction-t">&#9989; Correction</div><div class="correction-x" id="corrx-'+ri+'"></div></div>'
+          +'<div class="fb" id="fb-'+ri+'"><span id="fbi-'+ri+'"></span><div id="fbm-'+ri+'"></div></div>';
+      }else{
+        h+='<div class="correction show" id="corr-'+ri+'"><div class="correction-t">&#9989; Correction</div><div class="correction-x" id="corrx-'+ri+'">'+(savedCorr[ri]||'')+'</div></div>'
+          +'<div class="fb show ok" id="fb-'+ri+'"><span id="fbi-'+ri+'">\u2705</span><div id="fbm-'+ri+'">'+(savedFb[ri]||'')+'</div></div>';
+      }
     }else{
       h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine la fiche pr&eacute;c&eacute;dente pour d&eacute;bloquer celle-ci.</div>';
     }
     h+='</div>';
     card.innerHTML=h;host.appendChild(card);
-    if(ri===active||solved[ri]){
+    if(ri===active && !solved[ri]){
       R.items.forEach(function(it,k){
         var el=$("in-"+ri+"-"+k);
-        if(el){el.addEventListener("input",function(){updBtn(ri);});if(solved[ri])el.disabled=true;}
+        if(el){el.addEventListener("input",function(){updBtn(ri);});}
       });
     }
   });
@@ -509,6 +522,8 @@ function build(){
 }
 
 var qcmSel={};
+var savedFb={};
+var savedCorr={};
 function pickQcm(ri,oi){
   if(solved[ri])return;
   sClick();
@@ -582,11 +597,15 @@ function stepSuccess(ri){
   var corr=$("corr-"+ri);
   if(corr){
     var lines=R.items.map(function(it){return it.lbl+"&#8201;: "+it.base+" "+it.unit+" &times; "+R.fracN+"/"+R.fracD+" = "+it.ans+" "+it.unit+".";});
-    $("corrx-"+ri).innerHTML=lines.join("<br>");
+    var corrTxt=lines.join("<br>");
+    savedCorr[ri]=corrTxt;
+    $("corrx-"+ri).innerHTML=corrTxt;
     corr.classList.add("show");
   }
+  var fbTxt="<b style='color:var(--green)'>"+OK_MSGS[ri%OK_MSGS.length]+"</b>";
+  savedFb[ri]=fbTxt;
   var fb=$("fb-"+ri);fb.className="fb show ok";$("fbi-"+ri).textContent="\u2705";
-  $("fbm-"+ri).innerHTML="<b style='color:var(--green)'>"+OK_MSGS[ri%OK_MSGS.length]+"</b>";
+  $("fbm-"+ri).innerHTML=fbTxt;
   showAgent("&#128203; Le chef&nbsp;:<br>"+R.frag+" "+(ri<N-1?"Fiche valid&eacute;e&#8201;! On continue.":"Derni&egrave;re fiche valid&eacute;e&#8201;!"));
   updateCrest();updateProg();
   var body=$("body-"+ri);
@@ -688,7 +707,7 @@ function restartAll(){
   gameRunning=false;
   clearInterval(totalInt);totalSec=0;
   solved=[];for(var i=0;i<N;i++)solved.push(false);
-  active=0;qcmSel={};
+  active=0;qcmSel={};savedFb={};savedCorr={};
   $("finale").classList.remove("show");
   var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
   $("hud-bar").classList.remove("show");
