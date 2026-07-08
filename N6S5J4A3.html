@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths — Semaine 5 Jour 4 — Utiliser des procédures de proportionnalité</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --day-color:#3ab5d8;--day-dark:#1a6e88;--day-light:#e8f6fb;
+    --day-border:#9dd4e8;--day-glow:rgba(58,181,216,.25);
+  }
+  :root{
+    --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+    --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+    --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    --n1:#8dc63f;--n2:#f5a623;--n3:#b94040;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+    position:relative;overflow-x:hidden;letter-spacing:.02em;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--yellow);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+  header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+  .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+  .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+  .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .5s ease;}
+
+  .score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+  .chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+  .chip .dot{width:8px;height:8px;border-radius:50%;}
+  .chip.correct .dot{background:var(--green);}
+  .chip.wrong .dot{background:var(--pink);}
+  .chip.remaining .dot{background:var(--muted);}
+
+  .card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--day-border),var(--pink),var(--orange));}
+  .theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;}
+  .consigne-bar{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;color:var(--day-dark);text-transform:uppercase;margin-bottom:1.4rem;display:flex;align-items:center;gap:.5rem;}
+  .consigne-bar::before{content:'';display:inline-block;width:3px;height:16px;border-radius:2px;background:var(--day-color);flex-shrink:0;}
+
+  .q-header{display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem;}
+  .q-num{display:inline-flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:50%;color:#fff;font-weight:800;font-size:.85rem;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+  .q-enonce{font-size:.98rem;line-height:1.7;margin-bottom:1rem;color:var(--text);}
+  .q-enonce strong{color:var(--day-dark);}
+
+  /* TABLEAU */
+  .table-wrap{overflow-x:auto;margin:0 0 1.2rem;}
+  table{border-collapse:collapse;font-size:.92rem;min-width:260px;}
+  th,td{border:1.5px solid var(--day-border);padding:.45rem .8rem;text-align:center;white-space:nowrap;}
+  th{background:var(--day-light);color:var(--day-dark);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.78rem;}
+  td{background:var(--surface);}
+
+  /* INPUT */
+  .ans-input{width:72px;height:38px;border:2px solid var(--border);border-radius:8px;text-align:center;font-size:1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text);background:#fff;outline:none;transition:border-color .15s;}
+  .ans-input:focus{border-color:var(--day-color);}
+  .ans-input.inp-ok{border-color:var(--green);background:#f0faeb;}
+  .ans-input.inp-ko{border-color:#c0392b;background:#fff0ef;}
+  .ans-input:disabled{opacity:1;}
+  .cell-input{width:56px;height:32px;border:2px solid var(--day-border);border-radius:6px;text-align:center;font-size:.95rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text);background:#fff;outline:none;transition:border-color .15s;}
+  .cell-input:focus{border-color:var(--day-color);}
+  .cell-input.inp-ok{border-color:var(--green);background:#f0faeb;}
+  .cell-input.inp-ko{border-color:#c0392b;background:#fff0ef;}
+
+  .input-row{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap;}
+  .input-label{font-size:.9rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+  /* VF OPTIONS */
+  .options{display:flex;flex-direction:row;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem;}
+  .option{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.1rem;border:2px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;font-size:.92rem;font-weight:600;transition:border-color .15s,background .15s;min-height:44px;}
+  .option:hover:not(.locked){border-color:var(--day-border);background:var(--day-light);}
+  .option.locked{cursor:default;}
+  .opt-box{width:20px;height:20px;border:2px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;border-radius:50%;}
+  .option.selected .opt-box{background:var(--day-color);border-color:var(--day-color);}
+  .option.selected{border-color:var(--day-color);background:var(--day-light);}
+  .option.correct{border-color:var(--green);background:#f0faeb;}
+  .option.correct .opt-box{background:var(--green);border-color:var(--green);}
+  .option.wrong{border-color:#c0392b;background:#fff0ef;}
+  .option.wrong .opt-box{background:#c0392b;border-color:#c0392b;}
+  .option.missed .opt-box{background:var(--orange);border-color:var(--orange);}
+  .opt-tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;margin-left:.3rem;padding:.1rem .4rem;border-radius:99px;display:none;}
+  .option.correct .opt-tag{display:inline;background:var(--green);color:#fff;}
+  .option.wrong .opt-tag{display:inline;background:#c0392b;color:#fff;}
+  .option.missed .opt-tag{display:inline;background:var(--orange);color:#fff;}
+
+  /* MULTI-INPUT (tableaux) */
+  .sub-fb{font-family:'JetBrains Mono',monospace;font-size:.75rem;display:none;margin-left:.3rem;}
+  .sub-fb.ok{color:var(--green);display:inline;}
+  .sub-fb.ko{color:#c0392b;display:inline;}
+
+  /* INDICE */
+  .hint-wrap{margin:.6rem 0 0;}
+  .btn-hint-inline{background:none;border:1.5px dashed var(--day-border);border-radius:8px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;color:var(--day-dark);font-family:'JetBrains Mono',monospace;transition:background .15s;min-height:36px;}
+  .btn-hint-inline:hover{background:var(--day-light);}
+  .hint-box{margin-top:.5rem;background:var(--day-light);border:1.5px dashed var(--day-border);border-radius:10px;padding:.6rem .9rem;font-size:.82rem;color:var(--day-dark);display:none;line-height:1.8;}
+  .hint-box.show{display:block;}
+
+  .q-feedback{margin:.7rem 0 0;padding:.6rem .9rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;display:none;}
+  .q-feedback.show{display:block;}
+  .q-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .q-feedback.ko{background:#fff0ef;border:1.5px solid #c0392b;color:#c0392b;}
+
+  .btn-corr-wrap{margin:.5rem 0 0;display:none;}
+  .btn-corr{background:none;border:1.5px solid var(--border);border-radius:8px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;color:var(--muted);font-family:'JetBrains Mono',monospace;transition:border-color .15s,color .15s;min-height:36px;}
+  .btn-corr:hover{border-color:var(--day-color);color:var(--day-dark);}
+  .corr-box{display:none;margin-top:.6rem;background:#f0f4ff;border:1.5px solid #a0b4ff;border-radius:10px;padding:.7rem 1rem;font-size:.82rem;color:#1a2d6e;line-height:1.8;}
+
+  .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.6rem;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+  .btn:active{transform:scale(.96);}
+  .btn:disabled{opacity:.38;cursor:default;}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+  .transition-screen{width:100%;max-width:680px;display:none;position:relative;z-index:1;}
+  .transition-screen.show{display:block;}
+  .transition-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;animation:fadeUp .4s ease both;}
+  .transition-icon{font-size:3rem;margin-bottom:.8rem;}
+  .transition-title{font-size:clamp(1.2rem,3vw,1.5rem);font-weight:800;margin-bottom:.6rem;}
+  .transition-msg{color:var(--muted);font-size:.95rem;line-height:1.8;margin-bottom:1.8rem;}
+  .niveau-pill{display:inline-block;padding:.4rem 1.2rem;border-radius:99px;font-weight:700;font-size:.85rem;margin-bottom:1.2rem;}
+
+  .results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+  .results.show{display:block;}
+  .results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+  .results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;color:var(--day-dark);}
+  .stars{font-size:2rem;margin:.4rem 0 1rem;letter-spacing:.1em;}
+  .results-msg{color:var(--muted);font-size:.95rem;margin-bottom:1.5rem;font-weight:600;}
+  .recap-niveaux{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;text-align:left;}
+  .recap-niveau{padding:.8rem 1rem;border-radius:10px;font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:.7rem;border:1.5px solid var(--border);}
+  .recap-niveau.n1{background:#f0faeb;border-color:var(--n1);color:#2d6a00;}
+  .recap-niveau.n2{background:#fff5e0;border-color:var(--n2);color:#7a3500;}
+  .recap-niveau.n3{background:#f7eded;border-color:var(--n3);color:#7a1f1f;}
+  .comp-box{text-align:left;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem;}
+  .comp-box h3{color:var(--day-dark);font-size:.9rem;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;}
+  .comp-line{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.4rem;font-size:.85rem;line-height:1.8;color:var(--text);}
+  .comp-line .arr{color:var(--day-dark);font-weight:800;flex-shrink:0;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    .card,.results-card,.transition-card{padding:1.4rem;}
+    .options{flex-direction:column;}
+    .btn{font-size:.85rem;padding:.55rem 1rem;}
+    th,td{padding:.35rem .5rem;font-size:.82rem;}
+  }
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 4</div>
+  <h1>Utiliser des proc&eacute;dures de proportionnalit&eacute;</h1>
+  <p class="subtitle">Je m&rsquo;entra&icirc;ne &middot; 15 r&eacute;ponses &middot; 3 niveaux</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Exercice 1 / 13</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">15</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="theme-badge" id="theme-badge"></div>
+  <div class="consigne-bar" id="consigne-bar"></div>
+  <div id="quiz-zone"></div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()" style="display:none;">&#8592; Pr&eacute;c&eacute;dent</button>
+    <button class="btn btn-primary" id="btn-valider" onclick="validerQ()" disabled>V&eacute;rifier</button>
+    <button class="btn btn-ghost" id="btn-next" onclick="nextQ()" style="display:none;">Exercice suivant &#8594;</button>
+    <button class="btn btn-primary" id="btn-bilan" onclick="showBilan()" style="display:none;">Voir le bilan &#8594;</button>
+  </div>
+</div>
+
+<div class="transition-screen" id="trans-1">
+  <div class="transition-card">
+    <div class="transition-icon">&#x1F7E2;</div>
+    <div class="niveau-pill" style="background:#f0faeb;color:#2d6a00;border:1.5px solid var(--n1);">Niveau 1 termin&eacute;&nbsp;!</div>
+    <div class="transition-title">Bien jou&eacute;&nbsp;!</div>
+    <div class="transition-msg">Tu sais trouver la valeur pour une unit&eacute;.<br>Dans le niveau suivant, tu vas compl&eacute;ter des tableaux de proportionnalit&eacute;.</div>
+    <button class="btn btn-primary" style="margin:0 auto" onclick="startNiveau(2)">&#9654;&nbsp;Commencer le niveau 2</button>
+  </div>
+</div>
+
+<div class="transition-screen" id="trans-2">
+  <div class="transition-card">
+    <div class="transition-icon">&#x1F7E1;</div>
+    <div class="niveau-pill" style="background:#fff5e0;color:#7a3500;border:1.5px solid var(--n2);">Niveau 2 termin&eacute;&nbsp;!</div>
+    <div class="transition-title">Excellent travail&nbsp;!</div>
+    <div class="transition-msg">Tu sais compl&eacute;ter des tableaux de proportionnalit&eacute;.<br>Dans le niveau suivant, tu vas r&eacute;soudre des probl&egrave;mes en choisissant librement ta m&eacute;thode.</div>
+    <button class="btn btn-primary" style="margin:0 auto" onclick="startNiveau(3)">&#9654;&nbsp;Commencer le niveau 3</button>
+  </div>
+</div>
+
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score" id="score-display">0/15</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-niveaux" id="recap-niveaux"></div>
+    <div class="comp-box">
+      <h3>Ce que je sais maintenant&nbsp;:</h3>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Dans une situation de proportionnalit&eacute;, plusieurs m&eacute;thodes sont possibles.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Je peux chercher la valeur pour une unit&eacute;, puis multiplier.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Je peux aussi utiliser la r&eacute;gularit&eacute; du tableau.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Je choisis toujours la m&eacute;thode la plus simple pour les nombres donn&eacute;s.</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">&#128260;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+
+// Validation décimale : accepte virgule et point
+function parseNum(s){
+  return parseFloat(s.trim().replace(',','.'));
+}
+function approxEq(a,b){ return Math.abs(a-b)<0.001; }
+
+var EXERCICES = [
+  // ── NIVEAU 1 ──
+  {
+    lvl:1, num:1, type:'input1',
+    enonce:'10 kiwis co\u00fbtent <strong>3 \u20ac</strong>.<br>Combien co\u00fbte <strong>1 kiwi</strong>\u00a0?',
+    unit:'\u20ac',
+    an:0.3,
+    hint:'Partage le prix total entre le nombre de kiwis.',
+    fbOk:'\u2705 Exact\u00a0! 3 \u00f7 10 = 0,30 \u20ac.',
+    fbKo:'Observe attentivement les donn\u00e9es.',
+    corr:'3 \u00f7 10 = <strong>0,30 \u20ac</strong> par kiwi.'
+  },
+  {
+    lvl:1, num:2, type:'input1',
+    enonce:'3 paires de chaussettes co\u00fbtent <strong>10,50 \u20ac</strong>.<br>Combien co\u00fbte <strong>1 paire</strong>\u00a0?',
+    unit:'\u20ac',
+    an:3.5,
+    hint:'Partage le prix total entre le nombre de paires.',
+    fbOk:'\u2705 Tr\u00e8s bien\u00a0! 10,50 \u00f7 3 = 3,50 \u20ac.',
+    fbKo:'V\u00e9rifie ton calcul.',
+    corr:'10,50 \u00f7 3 = <strong>3,50 \u20ac</strong> par paire.'
+  },
+  {
+    lvl:1, num:3, type:'input1',
+    enonce:'12 stylos co\u00fbtent <strong>18 \u20ac</strong>.<br>Combien co\u00fbte <strong>1 stylo</strong>\u00a0?',
+    unit:'\u20ac',
+    an:1.5,
+    hint:'Partage le prix total entre le nombre de stylos.',
+    fbOk:'\u2705 Bravo\u00a0! 18 \u00f7 12 = 1,50 \u20ac.',
+    fbKo:'V\u00e9rifie ton calcul.',
+    corr:'18 \u00f7 12 = <strong>1,50 \u20ac</strong> par stylo.'
+  },
+  {
+    lvl:1, num:4, type:'input1',
+    enonce:'8 bouteilles d\u2019eau co\u00fbtent <strong>12 \u20ac</strong>.<br>Combien co\u00fbte <strong>1 bouteille</strong>\u00a0?',
+    unit:'\u20ac',
+    an:1.5,
+    hint:'Partage le prix total entre le nombre de bouteilles.',
+    fbOk:'\u2705 Tu as trouv\u00e9 le bon r\u00e9sultat\u00a0! 12 \u00f7 8 = 1,50 \u20ac.',
+    fbKo:'Observe attentivement les donn\u00e9es.',
+    corr:'12 \u00f7 8 = <strong>1,50 \u20ac</strong> par bouteille.'
+  },
+  // ── NIVEAU 2 ──
+  {
+    lvl:2, num:5, type:'table',
+    enonce:'Compl\u00e8te le tableau de proportionnalit\u00e9.',
+    tableau:{
+      rows:[
+        {label:'Masse (g)',   vals:['24','48','?']},
+        {label:'Prix (\u20ac)', vals:['6', '12','18']}
+      ],
+      inputs:[{row:0,col:2,an:72}]
+    },
+    hint:'Cherche le rapport entre le prix et la masse.',
+    fbOk:'\u2705 Exact\u00a0! Le rapport est 6 \u00f7 24 = 0,25, donc 18 \u00f7 0,25 = 72 g.',
+    fbKo:'Contr\u00f4le ton r\u00e9sultat avant de valider.',
+    corr:'Le rapport est 6 \u00f7 24 = 0,25.<br>18 \u00f7 0,25 = <strong>72 g</strong>.'
+  },
+  {
+    lvl:2, num:6, type:'table',
+    enonce:'Compl\u00e8te le tableau de proportionnalit\u00e9.',
+    tableau:{
+      rows:[
+        {label:'Distance r\u00e9elle (m)',       vals:['100','?','500']},
+        {label:'Distance sur le plan (cm)', vals:['2',  '6','?'  ]}
+      ],
+      inputs:[{row:0,col:1,an:300},{row:1,col:2,an:10}]
+    },
+    hint:'Cherche le coefficient entre les deux grandeurs.',
+    fbOk:'\u2705 Tr\u00e8s bien\u00a0! 2 \u00f7 100 = 0,02, donc 6 \u00f7 0,02 = 300 m et 500 \u00d7 0,02 = 10 cm.',
+    fbKo:'V\u00e9rifie les deux cases s\u00e9par\u00e9ment.',
+    corr:'Le coefficient est 2 \u00f7 100 = 0,02.<br>6 \u00f7 0,02 = <strong>300 m</strong> et 500 \u00d7 0,02 = <strong>10 cm</strong>.'
+  },
+  {
+    lvl:2, num:7, type:'table',
+    enonce:'Compl\u00e8te le tableau de proportionnalit\u00e9.',
+    tableau:{
+      rows:[
+        {label:'Quantit\u00e9 (kg)', vals:['2','5', '?']},
+        {label:'Prix (\u20ac)',      vals:['4','10','16']}
+      ],
+      inputs:[{row:0,col:2,an:8}]
+    },
+    hint:'Plusieurs m\u00e9thodes sont possibles. Choisis celle qui te para\u00eet la plus simple.',
+    fbOk:'\u2705 Bravo\u00a0! Le rapport est 4 \u00f7 2 = 2, donc 16 \u00f7 2 = 8 kg.',
+    fbKo:'Plusieurs m\u00e9thodes sont possibles. Choisis celle qui te para\u00eet la plus simple.',
+    corr:'Le rapport est 4 \u00f7 2 = 2.<br>16 \u00f7 2 = <strong>8 kg</strong>.'
+  },
+  {
+    lvl:2, num:8, type:'table',
+    enonce:'Compl\u00e8te le tableau de proportionnalit\u00e9.',
+    tableau:{
+      rows:[
+        {label:'Lait (L)',    vals:['5',  '10','?'  ]},
+        {label:'Fromage (g)', vals:['100','200','300']}
+      ],
+      inputs:[{row:0,col:2,an:15}]
+    },
+    hint:'Cherche la valeur pour 1 litre de lait.',
+    fbOk:'\u2705 Exact\u00a0! 5 L \u2192 100 g, donc 1 L \u2192 20 g et 300 \u00f7 20 = 15 L.',
+    fbKo:'Observe attentivement les donn\u00e9es.',
+    corr:'1 L de lait donne 20 g de fromage.<br>300 \u00f7 20 = <strong>15 L</strong>.'
+  },
+  // ── NIVEAU 3 ──
+  {
+    lvl:3, num:9, type:'input1',
+    enonce:'5 cm\u00b3 d\u2019or p\u00e8sent <strong>100 g</strong>.<br>Calculer la masse de <strong>1,5 cm\u00b3</strong>.',
+    unit:'g',
+    an:30,
+    hint:'Plusieurs m\u00e9thodes sont possibles. Choisis celle qui te para\u00eet la plus simple.',
+    fbOk:'\u2705 Bravo\u00a0! 100 \u00f7 5 = 20 g par cm\u00b3, donc 1,5 \u00d7 20 = 30 g.',
+    fbKo:'V\u00e9rifie ton calcul.',
+    corr:'1 cm\u00b3 \u2192 100 \u00f7 5 = 20 g.<br>1,5 cm\u00b3 \u2192 1,5 \u00d7 20 = <strong>30 g</strong>.'
+  },
+  {
+    lvl:3, num:10, type:'input1',
+    enonce:'10 porte-cl\u00e9s co\u00fbtent <strong>28 \u20ac</strong>.<br>Calculer le prix de <strong>35 porte-cl\u00e9s</strong>.',
+    unit:'\u20ac',
+    an:98,
+    hint:'Plusieurs m\u00e9thodes sont possibles. Choisis celle qui te para\u00eet la plus simple.',
+    fbOk:'\u2705 Exact\u00a0! 28 \u00f7 10 = 2,80 \u20ac par porte-cl\u00e9s, donc 35 \u00d7 2,80 = 98 \u20ac.',
+    fbKo:'Observe attentivement les donn\u00e9es.',
+    corr:'1 porte-cl\u00e9s \u2192 28 \u00f7 10 = 2,80 \u20ac.<br>35 \u00d7 2,80 = <strong>98 \u20ac</strong>.'
+  },
+  {
+    lvl:3, num:11, type:'input1',
+    enonce:'Avec <strong>10 L</strong> de lait, on fabrique <strong>200 g</strong> de fromage.<br>Calculer la quantit\u00e9 de fromage obtenue avec <strong>2 L</strong>.',
+    unit:'g',
+    an:40,
+    hint:'Plusieurs m\u00e9thodes sont possibles. Choisis celle qui te para\u00eet la plus simple.',
+    fbOk:'\u2705 Tr\u00e8s bien\u00a0! 200 \u00f7 10 = 20 g par litre, donc 2 \u00d7 20 = 40 g.',
+    fbKo:'V\u00e9rifie ton calcul.',
+    corr:'1 L \u2192 200 \u00f7 10 = 20 g.<br>2 L \u2192 2 \u00d7 20 = <strong>40 g</strong>.'
+  },
+  {
+    lvl:3, num:12, type:'input1',
+    enonce:'Jade parcourt <strong>2,7 km</strong> en <strong>15 minutes</strong>.<br>Calculer la distance parcourue en <strong>1 heure</strong>.',
+    unit:'km',
+    an:10.8,
+    hint:'1 heure = 60 minutes. Plusieurs m\u00e9thodes sont possibles.',
+    fbOk:'\u2705 Exact\u00a0! 2,7 \u00f7 15 = 0,18 km/min, donc 60 \u00d7 0,18 = 10,8 km.',
+    fbKo:'Contr\u00f4le ton r\u00e9sultat. Pense \u00e0 convertir 1 heure en minutes.',
+    corr:'1 min \u2192 2,7 \u00f7 15 = 0,18 km.<br>60 min \u2192 60 \u00d7 0,18 = <strong>10,8 km</strong>.'
+  },
+  {
+    lvl:3, num:13, type:'vf+input',
+    enonce:'9 L de peinture couvrent <strong>63 m\u00b2</strong>.<br>Louis utilise <strong>5 L</strong> pour couvrir <strong>35 m\u00b2</strong>.<br>Ces deux situations sont-elles proportionnelles\u00a0?',
+    opts:[{txt:'Oui',correct:true},{txt:'Non',correct:false}],
+    showCoeff:true,
+    coeffAn:7,
+    coeffUnit:'m\u00b2/L',
+    hint:'Compare les deux rapports : 63 \u00f7 9 et 35 \u00f7 5.',
+    fbOk:'\u2705 Bravo\u00a0! Les deux rapports sont \u00e9gaux (7), donc les situations sont proportionnelles.',
+    fbKo:'Compare les deux rapports : 63 \u00f7 9 et 35 \u00f7 5. Sont-ils \u00e9gaux\u00a0?',
+    corr:'63 \u00f7 9 = 7 et 35 \u00f7 5 = 7.<br>Les deux rapports sont \u00e9gaux\u00a0: les situations sont proportionnelles.<br>Le coefficient est <strong>7 m\u00b2/L</strong>.'
+  }
+];
+
+var TOTAL_EX = EXERCICES.length;
+var currentEx = 0;
+var exValidated = [];
+var exResults = [];
+var hintOpen = [];
+var corrOpen = [];
+var selectedOpt = -1;
+var TOTAL_ANS = 15; // 4 + 5 cases(1+2+1+1) + 5 + 1VF+1coeff = 4+5+5+1 = 15... recalculé
+// N1: 4 inputs, N2: 5 cases (1+2+1+1), N3: 4 inputs + 1VF + 1coeff = 6 → total = 4+5+6 = 15
+
+for(var i=0;i<TOTAL_EX;i++){
+  exValidated.push(false);
+  exResults.push([]);
+  hintOpen.push(false);
+  corrOpen.push(false);
+}
+
+var BADGE={1:'background:#f0faeb;color:#2d6a00;border:1.5px solid var(--n1)',2:'background:#fff5e0;color:#7a3500;border:1.5px solid var(--n2)',3:'background:#f7eded;color:#7a1f1f;border:1.5px solid var(--n3)'};
+var BADGE_TXT={1:'Niveau 1 \u2014 Valeur \u00e0 l\u2019unit\u00e9',2:'Niveau 2 \u2014 Compl\u00e9ter un tableau',3:'Niveau 3 \u2014 Probl\u00e8mes'};
+var CONSIGNE={1:'Calcule la valeur pour une unit\u00e9.',2:'Compl\u00e8te les cases manquantes.',3:'Choisis librement ta m\u00e9thode.'};
+
+function renderEx(){
+  var ex = EXERCICES[currentEx];
+  $('theme-badge').textContent = BADGE_TXT[ex.lvl];
+  $('theme-badge').style.cssText = BADGE[ex.lvl];
+  $('consigne-bar').textContent = CONSIGNE[ex.lvl];
+
+  var html = '<div class="q-header">'
+    +'<span class="q-num" style="background:'+(ex.lvl===1?'var(--n1)':ex.lvl===2?'var(--n2)':'var(--n3)')+'">'+ex.num+'</span>'
+    +'<span style="font-weight:700;font-size:1rem">Exercice '+ex.num+'</span></div>'
+    +'<div class="q-enonce">'+ex.enonce+'</div>';
+
+  if(ex.type==='input1'){
+    html += '<div class="input-row">'
+      +'<input type="text" inputmode="decimal" class="ans-input" id="main-inp" placeholder="" oninput="checkMain()" onkeydown="handleEnterMain(event)"/>'
+      +'<span class="input-label">'+ex.unit+'</span>'
+      +'</div>';
+  } else if(ex.type==='table'){
+    html += renderTable(ex);
+  } else if(ex.type==='vf+input'){
+    html += '<div class="options" id="opts">';
+    ex.opts.forEach(function(o,i){
+      html += '<div class="option" id="opt-'+i+'" onclick="selectOpt('+i+')">'
+        +'<span class="opt-box" id="box-'+i+'"></span>'
+        +'<span>'+o.txt+'</span>'
+        +'<span class="opt-tag" id="tag-'+i+'"></span></div>';
+    });
+    html += '</div>'
+      +'<div id="coeff-wrap" style="display:none;margin:.5rem 0 1rem">'
+      +'<div class="input-row">'
+      +'<span class="input-label">Coefficient\u00a0:</span>'
+      +'<input type="text" inputmode="decimal" class="ans-input" id="coeff-inp" placeholder="" oninput="checkMain()" onkeydown="handleEnterMain(event)"/>'
+      +'<span class="input-label">'+ex.coeffUnit+'</span>'
+      +'</div></div>';
+  }
+
+  html += '<div class="hint-wrap">'
+    +'<button class="btn-hint-inline" id="btn-hint" onclick="toggleHint()">Indice</button>'
+    +'<div class="hint-box" id="hint-box">'+ex.hint+'</div></div>'
+    +'<div class="q-feedback" id="q-fb"></div>'
+    +'<div class="btn-corr-wrap" id="corr-wrap"><button class="btn-corr" onclick="toggleCorr()">Voir la correction</button></div>'
+    +'<div class="corr-box" id="corr-box">'+ex.corr+'</div>';
+
+  $('quiz-zone').innerHTML = html;
+  selectedOpt = -1;
+
+  if(exValidated[currentEx]) restoreState();
+
+  $('btn-prev').style.display = currentEx>0?'inline-flex':'none';
+  $('btn-next').style.display='none';
+  $('btn-bilan').style.display='none';
+  $('btn-valider').disabled = !exValidated[currentEx];
+
+  if(hintOpen[currentEx]){ var h=$('hint-box'); if(h){h.classList.add('show');} var b=$('btn-hint'); if(b)b.textContent='Masquer l\u2019indice'; }
+  if(corrOpen[currentEx]){ var cb=$('corr-box'); if(cb) cb.style.display='block'; }
+
+  updateProgress();
+}
+
+function renderTable(ex){
+  var t = ex.tableau;
+  var inputIdx = 0;
+  var html = '<div class="table-wrap"><table>';
+  t.rows.forEach(function(row,ri){
+    html += '<tr><th>'+row.label+'</th>';
+    row.vals.forEach(function(v,ci){
+      var inp = t.inputs.find(function(inp){ return inp.row===ri && inp.col===ci; });
+      if(inp){
+        html += '<td><input type="text" inputmode="decimal" class="cell-input" id="cell-'+ri+'-'+ci+'" placeholder="?" oninput="checkMain()" onkeydown="handleEnterMain(event)"/></td>';
+      } else {
+        html += '<td>'+v+'</td>';
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</table></div>';
+  return html;
+}
+
+window.checkMain = function(){
+  if(exValidated[currentEx]) return;
+  var ex = EXERCICES[currentEx];
+  var ok = false;
+  if(ex.type==='input1'){
+    var v=$('main-inp'); ok = v && v.value.trim()!=='';
+  } else if(ex.type==='table'){
+    ok = ex.tableau.inputs.every(function(inp){
+      var el=$('cell-'+inp.row+'-'+inp.col);
+      return el && el.value.trim()!=='';
+    });
+  } else if(ex.type==='vf+input'){
+    var hasOpt = selectedOpt>=0;
+    var cw=$('coeff-wrap');
+    if(hasOpt && ex.opts[selectedOpt].correct && cw){
+      cw.style.display='block';
+      var ci=$('coeff-inp');
+      ok = ci && ci.value.trim()!=='';
+    } else {
+      ok = hasOpt;
+    }
+  }
+  $('btn-valider').disabled = !ok;
+};
+
+window.handleEnterMain = function(e){ if(e.key==='Enter'&&!$('btn-valider').disabled) validerQ(); };
+
+window.selectOpt = function(i){
+  if(exValidated[currentEx]) return;
+  selectedOpt=i;
+  document.querySelectorAll('.option').forEach(function(o,j){
+    o.classList.toggle('selected',j===i);
+    o.querySelector('.opt-box').innerHTML=j===i?'&#10003;':'';
+  });
+  window.checkMain();
+};
+
+window.validerQ = function(){
+  if(exValidated[currentEx]) return;
+  exValidated[currentEx]=true;
+  var ex=EXERCICES[currentEx];
+  var allOk=true;
+  exResults[currentEx]=[];
+
+  if(ex.type==='input1'){
+    var v=$('main-inp');
+    var ok=approxEq(parseNum(v.value),ex.an);
+    exResults[currentEx].push(ok);
+    if(!ok) allOk=false;
+    v.disabled=true;
+    v.className='ans-input '+(ok?'inp-ok':'inp-ko');
+  } else if(ex.type==='table'){
+    ex.tableau.inputs.forEach(function(inp){
+      var el=$('cell-'+inp.row+'-'+inp.col);
+      var ok=approxEq(parseNum(el.value),inp.an);
+      exResults[currentEx].push(ok);
+      if(!ok) allOk=false;
+      el.disabled=true;
+      el.className='cell-input '+(ok?'inp-ok':'inp-ko');
+    });
+  } else if(ex.type==='vf+input'){
+    var vfOk=ex.opts[selectedOpt]&&ex.opts[selectedOpt].correct;
+    exResults[currentEx].push(vfOk);
+    if(!vfOk) allOk=false;
+    document.querySelectorAll('.option').forEach(function(o,i){
+      o.classList.add('locked'); o.classList.remove('selected');
+      o.querySelector('.opt-box').innerHTML='';
+      var tag=$('tag-'+i);
+      if(ex.opts[i].correct&&i===selectedOpt){o.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+      else if(!ex.opts[i].correct&&i===selectedOpt){o.classList.add('wrong');if(tag)tag.textContent='Incorrect';}
+      else if(ex.opts[i].correct&&i!==selectedOpt){o.classList.add('missed');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    });
+    if(vfOk){
+      var ci=$('coeff-inp');
+      var coeffOk=ci&&approxEq(parseNum(ci.value),ex.coeffAn);
+      exResults[currentEx].push(!!coeffOk);
+      if(!coeffOk) allOk=false;
+      if(ci){ci.disabled=true;ci.className='ans-input '+(coeffOk?'inp-ok':'inp-ko');}
+    } else {
+      exResults[currentEx].push(false);
+      allOk=false;
+    }
+  }
+
+  $('btn-valider').disabled=true;
+  var bh=$('btn-hint');if(bh)bh.style.display='none';
+  $('hint-box').classList.remove('show');
+
+  var fb=$('q-fb');
+  fb.className='q-feedback show '+(allOk?'ok':'ko');
+  fb.innerHTML=allOk?ex.fbOk:ex.fbKo;
+
+  var delay=allOk?2000:3000;
+  setTimeout(function(){ var cw=$('corr-wrap');if(cw)cw.style.display='block'; },delay);
+  setTimeout(function(){
+    var isLast=currentEx===TOTAL_EX-1;
+    if(isLast)$('btn-bilan').style.display='inline-flex';
+    else $('btn-next').style.display='inline-flex';
+  },delay);
+
+  updateProgress();
+  updateChips();
+};
+
+function restoreState(){
+  var ex=EXERCICES[currentEx];
+  var allOk=exResults[currentEx].length>0&&exResults[currentEx].every(function(v){return v;});
+  if(ex.type==='input1'){
+    var v=$('main-inp');
+    if(v){v.value=ex.an;v.disabled=true;v.className='ans-input '+(exResults[currentEx][0]?'inp-ok':'inp-ko');}
+  } else if(ex.type==='table'){
+    ex.tableau.inputs.forEach(function(inp,i){
+      var el=$('cell-'+inp.row+'-'+inp.col);
+      if(el){el.value=inp.an;el.disabled=true;el.className='cell-input '+(exResults[currentEx][i]?'inp-ok':'inp-ko');}
+    });
+  } else if(ex.type==='vf+input'){
+    document.querySelectorAll('.option').forEach(function(o,i){
+      o.classList.add('locked');
+      var tag=$('tag-'+i);
+      if(ex.opts[i].correct){o.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    });
+    var cw=$('coeff-wrap');if(cw)cw.style.display='block';
+    var ci=$('coeff-inp');
+    if(ci){ci.value=ex.coeffAn;ci.disabled=true;ci.className='ans-input '+(exResults[currentEx][1]?'inp-ok':'inp-ko');}
+  }
+  var fb=$('q-fb');
+  fb.className='q-feedback show '+(allOk?'ok':'ko');
+  fb.innerHTML=allOk?ex.fbOk:ex.fbKo;
+  $('btn-valider').disabled=true;
+  if(corrOpen[currentEx]){var cb=$('corr-box');if(cb)cb.style.display='block';}
+  var isLast=currentEx===TOTAL_EX-1;
+  if(isLast)$('btn-bilan').style.display='inline-flex';
+  else $('btn-next').style.display='inline-flex';
+}
+
+window.toggleHint=function(){
+  hintOpen[currentEx]=!hintOpen[currentEx];
+  var h=$('hint-box'),b=$('btn-hint');
+  if(hintOpen[currentEx]){h.classList.add('show');b.textContent='Masquer l\u2019indice';}
+  else{h.classList.remove('show');b.textContent='Indice';}
+};
+window.toggleCorr=function(){
+  corrOpen[currentEx]=!corrOpen[currentEx];
+  var box=$('corr-box'),btn=document.querySelector('#corr-wrap .btn-corr');
+  box.style.display=corrOpen[currentEx]?'block':'none';
+  if(btn)btn.textContent=corrOpen[currentEx]?'Masquer la correction':'Voir la correction';
+};
+
+window.nextQ=function(){
+  if(currentEx===3){showCard(false);showTransition(1);return;}
+  if(currentEx===7){showCard(false);showTransition(2);return;}
+  currentEx++;renderEx();
+};
+window.prevQ=function(){if(currentEx>0){currentEx--;renderEx();}};
+
+window.startNiveau=function(n){
+  hideTransitions();showCard(true);
+  if(n===2)currentEx=4;
+  if(n===3)currentEx=8;
+  renderEx();
+};
+
+function showCard(v){$('ex-card').style.display=v?'block':'none';}
+function showTransition(n){
+  $('trans-1').classList.remove('show');$('trans-2').classList.remove('show');
+  $('trans-'+n).classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function hideTransitions(){$('trans-1').classList.remove('show');$('trans-2').classList.remove('show');}
+
+function getScore(){
+  var ok=0;
+  exResults.forEach(function(r){r.forEach(function(v){if(v===true)ok++;});});
+  return ok;
+}
+function getAnswered(){
+  var n=0;
+  exResults.forEach(function(r){r.forEach(function(v){if(v!==null&&v!==undefined)n++;});});
+  return n;
+}
+
+function updateProgress(){
+  var done=exValidated.filter(function(v){return v;}).length;
+  var pct=Math.round(done/TOTAL_EX*100);
+  $('progress-bar').style.width=pct+'%';
+  $('prog-pct').textContent=pct+'\u00a0%';
+  $('prog-label').textContent='Exercice '+(currentEx+1)+' / '+TOTAL_EX;
+}
+function updateChips(){
+  var ok=getScore(),answered=getAnswered();
+  $('count-ok').textContent=ok;
+  $('count-ko').textContent=answered-ok;
+  $('count-rem').textContent=TOTAL_ANS-answered;
+}
+
+window.showBilan=function(){
+  showCard(false);hideTransitions();
+  var sc=getScore();
+  var rs=$('results-screen');rs.classList.add('show');
+  $('score-display').textContent=sc+'/'+TOTAL_ANS;
+  var ratio=sc/TOTAL_ANS;
+  var stars=ratio>=1?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:1;
+  $('stars-row').textContent='\u2B50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  var msg;
+  if(sc===TOTAL_ANS) msg='\uD83C\uDF1F Excellent\u00a0! Tu ma\u00eetrises toutes les proc\u00e9dures de proportionnalit\u00e9.';
+  else if(sc>=12) msg='\uD83D\uDC4F Tr\u00e8s bon travail\u00a0! Relis les corrections des exercices manqu\u00e9s.';
+  else if(sc>=9) msg='\uD83D\uDC4D Bon travail\u00a0! Quelques exercices restent \u00e0 consolider.';
+  else if(sc>=6) msg='\uD83D\uDCAA Continue tes efforts\u00a0! Relis les corrections et recommence.';
+  else msg='\uD83D\uDCDA Ne te d\u00e9courage pas\u00a0! Relis les corrections et refais les exercices.';
+  $('results-msg').textContent=msg;
+
+  var niveaux=[
+    {label:'Niveau 1 \u2014 Valeur \u00e0 l\u2019unit\u00e9',cls:'n1',exs:[0,1,2,3]},
+    {label:'Niveau 2 \u2014 Compl\u00e9ter un tableau',cls:'n2',exs:[4,5,6,7]},
+    {label:'Niveau 3 \u2014 Probl\u00e8mes',cls:'n3',exs:[8,9,10,11,12]}
+  ];
+  var recap=$('recap-niveaux');recap.innerHTML='';
+  niveaux.forEach(function(nv){
+    var ok=0,tot=0;
+    nv.exs.forEach(function(ei){exResults[ei].forEach(function(v){tot++;if(v===true)ok++;});});
+    var div=document.createElement('div');
+    div.className='recap-niveau '+nv.cls;
+    var ic=ok===tot?'\u2705':ok>=tot*0.5?'\uD83D\uDFE1':'\uD83D\uDD34';
+    div.innerHTML='<span style="font-size:1.1rem">'+ic+'</span><span><strong>'+nv.label+'</strong> \u2014 '+ok+' / '+tot+'</span>';
+    recap.appendChild(div);
+  });
+  $('progress-bar').style.width='100%';
+  $('prog-pct').textContent='100\u00a0%';
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+window.restart=function(){
+  currentEx=0;
+  for(var i=0;i<TOTAL_EX;i++){exValidated[i]=false;exResults[i]=[];hintOpen[i]=false;corrOpen[i]=false;}
+  $('results-screen').classList.remove('show');
+  hideTransitions();showCard(true);
+  $('count-ok').textContent='0';$('count-ko').textContent='0';$('count-rem').textContent=TOTAL_ANS;
+  renderEx();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+document.addEventListener('DOMContentLoaded',function(){renderEx();});
+})();
+</script>
+</body>
+</html>
