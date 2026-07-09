@@ -41,10 +41,10 @@ header{margin-bottom:1rem;border-bottom:1px solid var(--line);padding-bottom:.9r
 .status-dot.sync{background:var(--blue);box-shadow:0 0 6px rgba(59,130,246,.7);animation:pulse .8s ease-in-out infinite;}
 .status-dot.err{background:var(--red);box-shadow:0 0 6px rgba(239,68,68,.7);}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.hdr-path{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.5rem;}
+.hdr-path{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.5rem;text-align:center;}
 .hdr-path span{color:var(--accent);}
-.title{font-family:var(--sans);font-weight:700;font-size:clamp(1.15rem,4vw,1.7rem);line-height:1.2;margin-bottom:.3rem;color:var(--text);}
-.subtitle{font-family:var(--mono);color:var(--muted);font-size:clamp(.72rem,2vw,.82rem);letter-spacing:.02em;}
+.title{font-family:var(--sans);font-weight:700;font-size:clamp(1.15rem,4vw,1.7rem);line-height:1.2;margin-bottom:.3rem;color:var(--text);text-align:center;}
+.subtitle{font-family:var(--mono);color:var(--muted);font-size:clamp(.72rem,2vw,.82rem);letter-spacing:.02em;text-align:center;}
 .bonus-box{margin-top:.7rem;background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);padding:.5rem .8rem;font-family:var(--mono);font-size:.7rem;color:var(--muted);line-height:1.6;}
 .bonus-box b{color:var(--blue);}
 
@@ -289,10 +289,10 @@ header{margin-bottom:1rem;border-bottom:1px solid var(--line);padding-bottom:.9r
     <div class="finale-status"><span class="status-dot on"></span> MISSION TERMIN&Eacute;E</div>
     <div class="finale-title">Contr&ocirc;le de t&eacute;l&eacute;m&eacute;trie valid&eacute;</div>
     <div class="finale-time" id="finale-time">Temps&nbsp;: --:--</div>
-    <div class="finale-sub">Les variables du programme de surveillance enregistrent maintenant correctement la temp&eacute;rature, le niveau des batteries, la vitesse et le carburant du satellite. Le centre de contr&ocirc;le peut suivre la mission en temps r&eacute;el.</div>
+    <div class="finale-sub">Les informations envoy&eacute;es par le satellite sont d&eacute;sormais correctement prises en compte par le programme de surveillance. Le centre de contr&ocirc;le peut suivre l'&eacute;volution de la mission en temps r&eacute;el.</div>
     <div class="finale-reveal">
       <b>Carnet de l'ing&eacute;nieur</b>
-      Tu d&eacute;couvriras bient&ocirc;t comment une variable permet de m&eacute;moriser et de mettre &agrave; jour une information tout au long d'un programme.
+      Tu d&eacute;couvriras bient&ocirc;t comment un programme peut m&eacute;moriser et mettre &agrave; jour automatiquement ces informations gr&acirc;ce &agrave; une notion essentielle en algorithmique.
     </div>
     <button class="btn-restart" onclick="restartAll()">&#8635; RECOMMENCER</button>
   </div>
@@ -386,6 +386,10 @@ function sSuccess(){
   beep(1318,0.09,0.16,"square",0.1);
   beep(1760,0.22,0.22,"sine",0.11);
 }
+function sTelemetryTic(){ /* tic de télémétrie en fond, très discret (~-35dB) */
+  if(!soundOn)return;
+  beep(1900,0,0.035,"sine",0.018);
+}
 function sBad(){
   if(!soundOn)return;
   beep(300,0,0.14,"sine",0.07);
@@ -443,12 +447,24 @@ function timerTick(){
   var h=$("hud-timer");
   if(h)h.innerHTML='<span class="lbl">T+&nbsp;</span>'+fmt(totalSec);
 }
-function pauseTimer(){ clearInterval(totalInt); totalInt=null; }
+function pauseTimer(){ clearInterval(totalInt); totalInt=null; pauseTelemetryTic(); }
 function resumeTimer(){
   if(!gameRunning) return;
   clearInterval(totalInt);
   totalInt=setInterval(timerTick,1000);
+  scheduleTelemetryTic();
 }
+var telemetryTimeout=null;
+function scheduleTelemetryTic(){
+  clearTimeout(telemetryTimeout);
+  if(!gameRunning) return;
+  var delay=8000+Math.random()*4000;
+  telemetryTimeout=setTimeout(function(){
+    sTelemetryTic();
+    scheduleTelemetryTic();
+  },delay);
+}
+function pauseTelemetryTic(){ clearTimeout(telemetryTimeout); telemetryTimeout=null; }
 document.addEventListener("visibilitychange", function(){
   if(document.hidden){ pauseTimer(); }
   else{ resumeTimer(); }
@@ -554,6 +570,7 @@ function updateProg(){
 function openFinale(){
   gameRunning=false;
   clearInterval(totalInt);
+  pauseTelemetryTic();
   setTimeout(function(){
     $("finale-time").innerHTML="Temps&nbsp;: "+fmtLong(totalSec);
     $("finale").classList.add("show");
@@ -606,6 +623,7 @@ function beginGame(){
         if(cl)cl.textContent="CONNECT\u00c9";
         build();
         showAgent("<span class=\"tag\">Centre de contr&ocirc;le</span>Connexion &eacute;tablie. V&eacute;rifions les variables ensemble.");
+        scheduleTelemetryTic();
       },300);
     }else{ if(fill)fill.style.width=p+"%"; }
   },110);
@@ -613,6 +631,7 @@ function beginGame(){
 function restartAll(){
   gameRunning=false;
   clearInterval(totalInt);totalSec=0;
+  pauseTelemetryTic();
   solved=false;
   $("finale").classList.remove("show");
   var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
