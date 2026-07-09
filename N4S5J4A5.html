@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Mission Control – Instructions conditionnelles – S5 J4</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --accent:#8b5cf6; --accent-dark:#6d28d9; --accent-dim:#3b2467; --accent-glow:rgba(139,92,246,.18);
+  --blue:#3b82f6; --blue-dark:#1d4ed8;
+  --steel:#4a6fa5;
+  --green:#22c55e; --green-dim:#0f3d20;
+  --yellow:#eab308;
+  --red:#ef4444;
+  --bg:#0a0d12; --panel:#10141b; --panel2:#151b24;
+  --line:#232a35; --line-lt:#2e3646;
+  --text:#e7ecf2; --muted:#7a8699; --dim:#4b5568;
+  --radius:4px; --radius-lg:6px;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'IBM Plex Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#0a0d12 0%, #0b0e15 55%, #080a10 100%);color:var(--text);
+  font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.2rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.6;font-size:15px;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.035;
+  background-image:linear-gradient(var(--line-lt) 1px,transparent 1px),linear-gradient(90deg,var(--line-lt) 1px,transparent 1px);
+  background-size:32px 32px;}
+.wrap{width:100%;max-width:860px;position:relative;z-index:1;}
+
+header{margin-bottom:1rem;border-bottom:1px solid var(--line);padding-bottom:.9rem;}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.7rem;}
+.hdr-brand{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.hdr-brand b{color:var(--text);}
+.hdr-status{display:flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.68rem;color:var(--dim);}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--dim);display:inline-block;}
+.status-dot.on{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.7);animation:pulse 2s ease-in-out infinite;}
+.status-dot.analyse{background:var(--yellow);box-shadow:0 0 6px rgba(234,179,8,.7);animation:pulse 1s ease-in-out infinite;}
+.status-dot.sync{background:var(--blue);box-shadow:0 0 6px rgba(59,130,246,.7);animation:pulse .8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.hdr-path{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:.5rem;text-align:center;}
+.hdr-path span{color:var(--accent);}
+.title{font-family:var(--sans);font-weight:700;font-size:clamp(1.15rem,4vw,1.7rem);line-height:1.2;margin-bottom:.3rem;color:var(--text);text-align:center;}
+.subtitle{font-family:var(--mono);color:var(--muted);font-size:clamp(.72rem,2vw,.82rem);letter-spacing:.02em;text-align:center;}
+.bonus-box{margin-top:.7rem;background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);padding:.5rem .8rem;font-family:var(--mono);font-size:.7rem;color:var(--muted);line-height:1.6;}
+.bonus-box b{color:var(--accent);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.11;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#8b5cf6;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#a78bfa;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#6d28d9;top:42%;right:-70px;}
+
+.hud-carnet-btn{display:flex;align-items:center;gap:.35rem;background:var(--panel2);border:1px solid var(--steel);border-radius:var(--radius);padding:.35rem .7rem;font-family:var(--mono);font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--steel);cursor:pointer;white-space:nowrap;min-height:34px;}
+.hud-carnet-btn:hover{background:var(--steel);color:#fff;}
+@media(max-width:600px){.hud-carnet-btn span.lbl2{display:none;}}
+
+.carnet-overlay{position:fixed;inset:0;z-index:31;display:none;background:rgba(3,5,8,.6);}
+.carnet-overlay.show{display:block;}
+.carnet-panel{position:fixed;top:0;right:0;bottom:0;z-index:32;width:min(340px,86vw);background:var(--panel);border-left:1.5px solid var(--accent);box-shadow:-8px 0 30px rgba(0,0,0,.4);transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;padding:1rem;}
+.carnet-panel.show{transform:translateX(0);}
+.carnet-title{font-family:var(--mono);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:.5rem;border-bottom:1px solid var(--line);padding-bottom:.5rem;}
+.carnet-quote{font-family:var(--mono);font-size:.68rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;border-left:2px solid var(--line);padding-left:.5rem;}
+.carnet-text{flex:1;min-height:300px;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.7;padding:.6rem;resize:none;outline:none;}
+.carnet-text:focus{border-color:var(--accent);}
+.carnet-tools{display:flex;gap:.5rem;margin-top:.7rem;}
+.carnet-tools .btn{flex:1;font-size:.62rem;min-height:38px;}
+.btn-carnet-clear{background:transparent;color:var(--muted);border:1px solid var(--line);}
+.btn-carnet-close{background:var(--steel);color:#fff;border:1px solid var(--steel);}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:.9rem;
+  background:rgba(10,13,18,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:.5rem 1rem;}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.1rem;opacity:.8;}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;}
+.hud-prog-label{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:flex;gap:2px;width:100px;height:6px;}
+.hud-prog-seg{flex:1;background:var(--line);border-radius:1px;}
+.hud-prog-seg.on{background:var(--accent);}
+.hud-timer{font-family:var(--mono);font-weight:600;font-size:.85rem;letter-spacing:.03em;font-variant-numeric:tabular-nums;color:var(--text);
+  background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);padding:.22rem .5rem;white-space:nowrap;}
+@media(max-width:1024px){.wrap{max-width:700px;}}
+@media(max-width:600px){.hud-bar{gap:.5rem;padding:.4rem .5rem;}.hud-dial{display:none;}.hud-timer{font-size:.72rem;padding:.18rem .4rem;}.hud-timer .lbl{display:none;}
+  body.playing .sound-btn{top:52px;}
+  .tools{flex-direction:column;}
+  .btn{width:100%;}
+  .script-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .script-inner{min-width:420px;}
+}
+
+.start-screen{padding:0;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.panel{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1rem;position:relative;transition:box-shadow .2s;}
+.panel::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent);}
+.panel:hover{box-shadow:0 0 18px var(--accent-glow);}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:var(--panel2);border-bottom:1px solid var(--line);}
+.panel-label{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.panel-body{padding:1rem 1.1rem;font-size:clamp(.84rem,2.4vw,.92rem);color:var(--text);line-height:1.75;}
+.panel-body b{color:var(--accent);}
+.brief-note{margin-top:1rem;background:var(--bg);border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:var(--radius);padding:.7rem .85rem;font-family:var(--mono);font-size:.76rem;color:var(--muted);line-height:1.7;}
+.start-note{margin:.9rem 0 .2rem;background:var(--bg);border:1.5px dashed var(--accent);border-radius:10px;padding:.8rem;text-align:center;font-size:.86rem;color:var(--text);}
+.btn-start{display:inline-flex;align-items:center;gap:.5rem;background:var(--accent);color:#0d0715;
+  font-family:var(--mono);font-weight:700;font-size:clamp(.8rem,2.4vw,.88rem);letter-spacing:.08em;text-transform:uppercase;padding:.85rem 1.6rem;border:1px solid var(--accent);
+  border-radius:var(--radius);cursor:pointer;min-height:48px;transition:background .15s;width:100%;justify-content:center;}
+.btn-start:hover{background:var(--accent-dark);}
+.btn-start:active{transform:scale(.98);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius-lg);margin-bottom:1rem;overflow:hidden;position:relative;}
+.step-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent);}
+.step-head{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;background:var(--panel2);border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.15rem;flex-shrink:0;opacity:.85;}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);}
+.step-name{font-family:var(--sans);font-weight:600;font-size:clamp(.86rem,2.4vw,.98rem);color:var(--text);}
+.step-comp{font-family:var(--mono);font-size:.64rem;color:var(--accent);letter-spacing:.03em;margin-top:.1rem;}
+.step-body{padding:1rem 1.1rem;}
+.intro{font-family:var(--mono);font-size:clamp(.78rem,2.2vw,.86rem);color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:.7rem .85rem;margin-bottom:1rem;line-height:1.65;}
+.intro .scr{display:block;color:var(--muted);margin-top:.5rem;}
+
+.sprite-panel{display:inline-flex;align-items:center;gap:.5rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:.4rem .7rem;margin-bottom:1rem;position:relative;}
+.sprite-panel .sp-ico{font-size:1.3rem;}
+.sprite-panel .sp-name{font-family:var(--mono);font-size:.76rem;color:var(--text);font-weight:600;}
+.sprite-panel .sp-lbl{font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+
+/* ===== Script + repères ===== */
+.script-wrap{width:100%;margin-bottom:1.1rem;}
+.script-inner{position:relative;display:inline-block;}
+.zone-marker{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--panel2);border:2px solid var(--accent);color:var(--accent);font-family:var(--mono);font-weight:700;font-size:.72rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.zone-marker:hover{transform:scale(1.12);}
+.zone-marker.filled{background:var(--panel2);border-color:var(--muted);color:var(--text);width:auto;height:auto;min-width:22px;padding:2px 8px;border-radius:11px;font-size:.62rem;white-space:nowrap;}
+.zone-marker.ok{border-color:var(--green);background:var(--green-dim);color:#bbf7d0;}
+.zone-marker.ko{border-color:var(--red);background:rgba(239,68,68,.14);color:#fca5a5;}
+.zone-marker.pulse{animation:zonepulse .5s ease;}
+@keyframes zonepulse{0%{transform:scale(1);}50%{transform:scale(1.25);}100%{transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+
+/* ===== Étiquettes ===== */
+.label-bank{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);}
+.label-chip{font-family:var(--mono);font-size:.72rem;font-weight:600;padding:.45rem .8rem;border-radius:var(--radius);border:1.5px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer;transition:all .15s;min-height:38px;display:flex;align-items:center;}
+.label-chip:hover{border-color:var(--accent);}
+.label-chip.sel{border-color:var(--accent);background:var(--accent-dim);color:#e9d9ff;box-shadow:0 0 0 2px var(--accent-glow);}
+.label-chip.used{opacity:.25;pointer-events:none;}
+.bank-hint{font-family:var(--mono);font-size:.66rem;color:var(--dim);margin-bottom:.5rem;letter-spacing:.02em;}
+
+.tools{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:var(--radius);font-family:var(--mono);font-size:clamp(.66rem,2vw,.72rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:1px solid var(--line);min-height:44px;transition:all .15s;background:transparent;color:var(--text);}
+.btn:active:not(:disabled){transform:scale(.97);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:var(--accent);color:#0d0715;border-color:var(--accent);}
+.btn-try:hover:not(:disabled){background:var(--accent-dark);}
+.btn-hint{color:var(--muted);border-color:var(--accent-dim);}
+.btn-hint:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.hint{margin-top:.8rem;background:var(--bg);border:1px solid var(--accent-dim);border-left:2px solid var(--accent);border-radius:var(--radius);padding:.65rem .85rem;font-family:var(--mono);font-size:clamp(.72rem,2.1vw,.78rem);color:var(--muted);display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.65rem .85rem;border-radius:var(--radius);font-family:var(--mono);font-size:clamp(.76rem,2.1vw,.82rem);display:none;align-items:flex-start;gap:.55rem;line-height:1.6;border:1px solid var(--line);}
+.fb.show{display:flex;}
+.fb.ok{background:var(--green-dim);border-color:var(--green);color:#bbf7d0;}
+.fb.ko{background:rgba(239,68,68,.1);border-color:var(--red);color:#fca5a5;}
+.fb.warn{background:rgba(234,179,8,.1);border-color:var(--yellow);color:#e8d488;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);cursor:pointer;font-size:1rem;padding:.5rem .6rem;min-height:40px;min-width:40px;color:var(--text);}
+.sound-btn.off{opacity:.4;}
+
+.agent-msg{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-140%);z-index:30;background:var(--panel);border:1px solid var(--accent);border-radius:var(--radius);padding:.6rem 1rem;max-width:min(420px,92vw);text-align:left;font-family:var(--mono);font-size:.76rem;color:var(--text);box-shadow:0 6px 24px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
+.agent-msg.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.agent-msg .tag{display:block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.2rem;}
+
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;background:var(--bg);}
+.scan-overlay.show{display:flex;animation:fadeIn .2s ease;}
+.scan-box{text-align:center;padding:1.4rem;max-width:340px;width:100%;}
+.scan-text{font-family:var(--mono);font-weight:700;font-size:clamp(.9rem,3vw,1.05rem);color:var(--text);letter-spacing:.04em;margin-bottom:1rem;}
+.scan-bar{width:100%;height:4px;margin:0 auto .6rem;background:var(--line);border-radius:2px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:var(--accent);transition:width .12s linear;}
+.scan-sub{font-family:var(--mono);font-size:.68rem;color:var(--muted);letter-spacing:.03em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:var(--bg);}
+.finale.show{display:flex;animation:fadeIn .3s ease;}
+.finale-inner{width:100%;max-width:480px;margin:auto;}
+.finale-status{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:.8rem;}
+.finale-title{font-family:var(--sans);font-weight:700;font-size:clamp(1.15rem,4.6vw,1.6rem);color:var(--text);margin-bottom:.9rem;}
+.finale-time{font-family:var(--mono);font-size:.82rem;color:var(--muted);margin-bottom:1rem;}
+.finale-sub{font-family:var(--mono);color:var(--text);font-size:clamp(.78rem,2.3vw,.86rem);margin-bottom:1.2rem;line-height:1.75;}
+.finale-reveal{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:.9rem 1rem;margin-bottom:1.2rem;text-align:left;font-family:var(--mono);font-size:clamp(.74rem,2.1vw,.8rem);color:var(--muted);line-height:1.75;}
+.finale-reveal b{color:var(--text);display:block;margin-bottom:.35rem;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:transparent;color:var(--text);border:1px solid var(--line);font-family:var(--mono);font-weight:700;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;padding:.65rem 1.4rem;border-radius:var(--radius);cursor:pointer;min-height:42px;}
+.btn-restart:hover{border-color:var(--accent);color:var(--accent);}
+
+/* =====================================================================
+   BIBLIOTHÈQUE SCRATCH PAZAPA v2 — identique aux défis précédents.
+   Extension : bloc Si/Sinon (Contrôle) + opérateur booléen (Opérateurs).
+   ===================================================================== */
+.scratch-script{font-family:'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:14px;display:flex;flex-direction:column;gap:6px;width:fit-content;max-width:100%;}
+.scratch-block{position:relative;color:#fff;border-radius:4px;padding:6px 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;box-shadow:inset 0 -2px 0 rgba(0,0,0,.14),0 1px 0 rgba(0,0,0,.09);width:fit-content;}
+.scratch-flag-ico{width:19px;height:19px;flex-shrink:0;filter:drop-shadow(0 1px 0 rgba(0,0,0,.12));}
+.notch-tab,.notch-cut{position:absolute;left:14px;width:16px;height:6px;}
+.notch-tab{bottom:-6px;}
+.notch-cut{top:-6px;}
+.scratch-event{background:#FFBF00;box-shadow:inset 0 -3px 0 #E6A300,0 1px 0 rgba(0,0,0,.08);border-radius:16px 16px 4px 4px;padding:9px 12px 8px;}
+.scratch-event .notch-tab use{fill:#FFBF00;}
+.scratch-variable{background:#FF8C1A;box-shadow:inset 0 -3px 0 #DB7300,0 1px 0 rgba(0,0,0,.08);}
+.scratch-variable .notch-cut use{fill:var(--card-bg,var(--panel));}
+.scratch-variable .notch-tab use{fill:#FF8C1A;}
+.scratch-say{background:#8C5EFF;box-shadow:inset 0 -3px 0 #6B46C7,0 1px 0 rgba(0,0,0,.08);}
+.scratch-say .notch-cut use{fill:var(--card-bg,var(--panel));}
+.scratch-say .notch-tab use{fill:#8C5EFF;}
+.scratch-control{background:#FFAB19;box-shadow:inset 0 -3px 0 #CF8B17,0 1px 0 rgba(0,0,0,.08);}
+.scratch-c-top{border-radius:4px 4px 0 0;padding:6px 10px;position:relative;}
+.scratch-c-top .notch-cut use{fill:var(--card-bg,var(--panel));}
+.scratch-c-body{background:#FFAB19;padding:6px 6px 6px 22px;position:relative;}
+.scratch-c-arm{position:absolute;left:0;top:0;bottom:0;width:14px;background:#FFAB19;}
+.scratch-c-cavity{background:#D49832;border-radius:0 6px 6px 0;padding:4px 8px 14px 4px;min-height:44px;display:flex;flex-direction:column;justify-content:center;gap:6px;margin-left:0;}
+.scratch-c-cavity .scratch-variable .notch-cut use{fill:#D49832;}
+.scratch-c-cavity .scratch-say .notch-cut use{fill:#D49832;}
+.scratch-c-else{background:#FFAB19;padding:6px 10px;position:relative;font-weight:700;box-shadow:inset 0 -2px 0 rgba(0,0,0,.1);}
+.scratch-c-bottom{background:#FFAB19;border-radius:0 0 4px 4px;padding:8px 10px 9px;position:relative;box-shadow:inset 0 -3px 0 #CF8B17;}
+.scratch-c-bottom .notch-tab use{fill:#FFAB19;}
+.scratch-dd{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.15);border-radius:12px;padding:2px 9px 2px 10px;font-weight:700;}
+.scratch-dd::after{content:"\25BE";font-size:10px;opacity:.85;}
+.scratch-num{display:inline-block;background:#fff;color:#575E75;border-radius:10px;padding:2px 9px;font-weight:700;min-width:18px;text-align:center;}
+.scratch-txt{display:inline-block;background:#fff;color:#575E75;border-radius:10px;padding:2px 9px;font-weight:700;}
+.scratch-block,.scratch-c-top,.scratch-c-bottom,.scratch-c-arm,.scratch-c-else{background-image:linear-gradient(to bottom,rgba(255,255,255,.08),rgba(255,255,255,0) 35%);background-blend-mode:overlay;}
+/* Opérateurs (booléens) : #59C059 — forme hexagonale à pointes */
+.scratch-operator{display:inline-flex;align-items:center;gap:5px;background:#59C059;color:#fff;padding:4px 14px;
+  clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 50%,calc(100% - 9px) 100%,9px 100%,0 50%);
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.12));font-weight:700;}
+.scratch-reporter{display:inline-block;background:#FF8C1A;color:#fff;border-radius:999px;padding:2px 11px;font-weight:700;box-shadow:inset 0 -2px 0 #DB7300;}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute;overflow:hidden;">
+  <defs>
+    <symbol id="scratch-flag" viewBox="0 0 20 20">
+      <rect x="3.1" y="0.7" width="1.7" height="18.8" rx="0.85" fill="#3C3C3C"/>
+      <path d="M4.8 0.5 L15.3 0.5 C16.2 0.5 16.6 1.5 16 2.2 L13.1 5.5 C12.8 5.8 12.8 6.3 13.1 6.6 L16 9.9 C16.6 10.6 16.2 11.6 15.3 11.6 L4.8 11.6 Z"
+        fill="#4CBB17" stroke="#389612" stroke-width="0.6" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="scratch-notch-tab" viewBox="0 0 16 6" preserveAspectRatio="none">
+      <path d="M0,0 L4,0 C4.6,0 5,0.5 5,1.2 L5,1.6 C5,2.6 5.8,3.4 6.8,3.4 L9.2,3.4 C10.2,3.4 11,2.6 11,1.6 L11,1.2 C11,0.5 11.4,0 12,0 L16,0 L16,0 L0,0 Z"/>
+    </symbol>
+    <symbol id="scratch-notch-cut" viewBox="0 0 16 6" preserveAspectRatio="none">
+      <path d="M0,0 L4,0 C4.6,0 5,0.5 5,1.2 L5,1.6 C5,2.6 5.8,3.4 6.8,3.4 L9.2,3.4 C10.2,3.4 11,2.6 11,1.6 L11,1.2 C11,0.5 11.4,0 12,0 L16,0 L16,6 L0,6 Z"/>
+    </symbol>
+  </defs>
+</svg>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-text">CONNEXION AU SATELLITE</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub">Chargement du programme de contr&ocirc;le&#8230;</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial">&#9881;&#65039;</span>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">MISSION 0%</span>
+    <span class="hud-prog-gauge" id="hud-prog-gauge">
+      <span class="hud-prog-seg"></span><span class="hud-prog-seg"></span><span class="hud-prog-seg"></span><span class="hud-prog-seg"></span><span class="hud-prog-seg"></span>
+      <span class="hud-prog-seg"></span><span class="hud-prog-seg"></span><span class="hud-prog-seg"></span><span class="hud-prog-seg"></span><span class="hud-prog-seg"></span>
+    </span>
+  </div>
+  <button class="hud-carnet-btn" onclick="toggleCarnet()">&#128221; <span class="lbl2">CARNET</span></button>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">T+&nbsp;</span>00:00</span>
+</div>
+
+<div class="carnet-overlay" id="carnet-overlay" onclick="closeCarnet()"></div>
+<div class="carnet-panel" id="carnet-panel">
+  <div class="carnet-title">CARNET DE BORD</div>
+  <div class="carnet-quote">Note ici tes observations sur le script avant de valider.</div>
+  <textarea class="carnet-text" id="carnet-text" placeholder="..."></textarea>
+  <div class="carnet-tools">
+    <button class="btn btn-carnet-clear" onclick="clearCarnet()">EFFACER</button>
+    <button class="btn btn-carnet-close" onclick="closeCarnet()">FERMER</button>
+  </div>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-inner">
+    <div class="finale-status"><span class="status-dot on"></span> MISSION TERMIN&Eacute;E</div>
+    <div class="finale-title">Contr&ocirc;le logique valid&eacute;</div>
+    <div class="finale-time" id="finale-time">Temps&nbsp;: --:--</div>
+    <div class="finale-sub">Le programme de surveillance du satellite est correctement analys&eacute;. Chaque partie du script a &eacute;t&eacute; identifi&eacute;e&#8201;: l'&eacute;v&eacute;nement d&eacute;clencheur, la boucle, la condition, et les deux actions possibles.</div>
+    <div class="finale-reveal">
+      <b>Carnet de l'ing&eacute;nieur</b>
+      Une instruction conditionnelle permet &agrave; un programme de choisir automatiquement entre deux actions selon qu'une condition est vraie ou fausse.
+    </div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; RECOMMENCER</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hdr-top">
+      <div class="hdr-brand">&#9881;&#65039; <b>PAZAPA</b> / MATHS 4E</div>
+      <div class="hdr-status"><span class="status-dot" id="conn-dot"></span> <span id="conn-label">HORS LIGNE</span></div>
+    </div>
+    <div class="hdr-path">SEMAINE 05 &#8250; JOUR 04 &#8250; <span>CONDITIONS</span></div>
+    <div class="title">Centre de contr&ocirc;le satellite</div>
+    <div class="subtitle">Identifier une instruction conditionnelle</div>
+    <div class="bonus-box"><b>D&eacute;fi bonus&nbsp;:</b> termine le contr&ocirc;le le plus efficacement possible tout en restant pr&eacute;cis.</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-label">MISSION 04 &middot; BRIEFING</span></div>
+      <div class="panel-body">
+        Le programme du satellite surveille en permanence le niveau de batterie et adapte automatiquement son fonctionnement.
+        <br><br>
+        Avant de valider ce programme, le centre de contr&ocirc;le te demande d'analyser son script&#8201;: identifie chaque partie de l'instruction conditionnelle utilis&eacute;e.
+        <div class="start-note">&#128203; Aucune programmation &agrave; faire&#8201;: tu dois seulement observer et identifier.</div>
+      </div>
+    </div>
+    <button class="btn-start" onclick="beginGame()">&#9654; Se connecter au satellite</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div id="steps"></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ===== Moteur audio ===== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+0.03);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+dur-0.04);
+  g.gain.linearRampToValueAtTime(0.0001,t+dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+function sClick(){if(!soundOn)return;beep(920,0,0.04,"square",0.06);}
+function sConnect(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  beep(440,0,0.06,"square",0.05);
+  beep(660,0.08,0.06,"square",0.05);
+  var o=c.createOscillator(),g=c.createGain();
+  o.type="sine";o.frequency.setValueAtTime(300,now+0.2);o.frequency.exponentialRampToValueAtTime(1200,now+0.5);
+  g.gain.setValueAtTime(0.0001,now+0.2);g.gain.exponentialRampToValueAtTime(0.06,now+0.25);g.gain.exponentialRampToValueAtTime(0.0001,now+0.55);
+  o.connect(g);g.connect(c.destination);o.start(now+0.2);o.stop(now+0.56);
+  noise(0.08,0.05,4000,1500,now+0.6);
+}
+function sCardOpen(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.2,0.06,4800,1400,now);
+}
+function sCardClose(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.1,0.06,2000,600,now);
+}
+function sOk(){ /* petit bip électronique de validation */
+  if(!soundOn)return;
+  beep(880,0,0.08,"square",0.1);
+  beep(1318,0.09,0.16,"square",0.1);
+  beep(1760,0.22,0.22,"sine",0.11);
+}
+function sBad(){ /* grave discret */
+  if(!soundOn)return;
+  beep(300,0,0.14,"sine",0.07);
+}
+function sAttn(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.09,0.08,650,180,now);
+  beep(460,0.02,0.08,"sine",0.06);
+}
+function sHint(){
+  if(!soundOn)return;
+  beep(1500,0,0.05,"triangle",0.07);
+}
+function sPlace(){ /* petit clic d'assignation d'étiquette */
+  if(!soundOn)return;
+  beep(1100,0,0.045,"square",0.06);
+}
+function sTelemetryTic(){
+  if(!soundOn)return;
+  beep(1900,0,0.035,"sine",0.018);
+}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2800);}
+
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+
+var solved=false;
+var totalSec=0,totalInt=null;
+var gameRunning=false;
+
+function timerTick(){
+  totalSec++;
+  var h=$("hud-timer");
+  if(h)h.innerHTML='<span class="lbl">T+&nbsp;</span>'+fmt(totalSec);
+}
+function pauseTimer(){ clearInterval(totalInt); totalInt=null; pauseTelemetryTic(); }
+function resumeTimer(){
+  if(!gameRunning) return;
+  clearInterval(totalInt);
+  totalInt=setInterval(timerTick,1000);
+  scheduleTelemetryTic();
+}
+var telemetryTimeout=null;
+function scheduleTelemetryTic(){
+  clearTimeout(telemetryTimeout);
+  if(!gameRunning) return;
+  var delay=8000+Math.random()*4000;
+  telemetryTimeout=setTimeout(function(){
+    sTelemetryTic();
+    scheduleTelemetryTic();
+  },delay);
+}
+function pauseTelemetryTic(){ clearTimeout(telemetryTimeout); telemetryTimeout=null; }
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){ pauseTimer(); }
+  else{ resumeTimer(); }
+});
+window.addEventListener("blur", pauseTimer);
+window.addEventListener("focus", function(){
+  if(!document.hidden) resumeTimer();
+});
+
+/* ===== Le script Scratch à analyser (bibliothèque Pazapa) ===== */
+var TAB = '<svg class="notch-tab" viewBox="0 0 16 6"><use href="#scratch-notch-tab"></use></svg>';
+var CUT = '<svg class="notch-cut" viewBox="0 0 16 6"><use href="#scratch-notch-cut"></use></svg>';
+var FLAG_SVG = '<svg class="scratch-flag-ico" viewBox="0 0 20 20"><use href="#scratch-flag"></use></svg>';
+
+/* 6 zones à identifier */
+var ZONES = [
+  {id:1, label:"&Eacute;v&eacute;nement",              correct:"quand le drapeau est cliqu\u00e9"},
+  {id:2, label:"Boucle",                                correct:"r\u00e9p\u00e9ter ind\u00e9finiment"},
+  {id:3, label:"Condition",                             correct:"Batterie < 20"},
+  {id:4, label:"Action si la condition est vraie",      correct:"dire Mode \u00e9conomie"},
+  {id:5, label:"Action si la condition est fausse",     correct:"dire Mission normale"},
+  {id:6, label:"Sprite",                                correct:"Satellite"}
+];
+/* Étiquettes mélangées (texte affiché = la bonne réponse d'une zone, mais l'ordre est random) */
+var LABELS_ORDER=[3,1,6,4,2,5]; // ordre d'affichage volontairement mélangé
+
+var assign={}; // zoneId -> labelText assigné
+var selectedLabel=null; // texte de l'étiquette actuellement sélectionnée
+
+function scriptHTML(){
+  return '<div class="script-wrap"><div class="script-inner">'
+    +'<div class="scratch-script">'
+      +'<div class="scratch-block scratch-event" style="position:relative;">quand '+FLAG_SVG+' est cliqu&eacute;'+TAB
+        +'<span class="zone-marker" id="zm-1" onclick="placeAt(1)" style="right:-30px;top:-8px;">1</span>'
+      +'</div>'
+      +'<div class="scratch-control" style="position:relative;">'
+        +'<div class="scratch-block scratch-c-top">'+CUT+'r&eacute;p&eacute;ter ind&eacute;finiment'
+          +'<span class="zone-marker" id="zm-2" onclick="placeAt(2)" style="right:-30px;top:0;">2</span>'
+        +'</div>'
+        +'<div class="scratch-c-body"><div class="scratch-c-arm"></div><div class="scratch-c-cavity">'
+          +'<div class="scratch-control" style="position:relative;">'
+            +'<div class="scratch-block scratch-c-top" style="flex-wrap:nowrap;">si&nbsp;'
+              +'<span class="scratch-operator" style="position:relative;"><span class="scratch-reporter">Batterie</span>&nbsp;&lt;&nbsp;<span class="scratch-num">20</span>'
+                +'<span class="zone-marker" id="zm-3" onclick="placeAt(3)" style="right:-30px;top:-8px;">3</span>'
+              +'</span>&nbsp;alors'
+            +'</div>'
+            +'<div class="scratch-c-body"><div class="scratch-c-arm"></div><div class="scratch-c-cavity" style="position:relative;">'
+              +'<div class="scratch-block scratch-say" style="width:fit-content;">'+CUT+'dire <span class="scratch-txt">Mode &eacute;conomie</span>'+TAB+'</div>'
+              +'<span class="zone-marker" id="zm-4" onclick="placeAt(4)" style="right:-30px;top:4px;">4</span>'
+            +'</div></div>'
+            +'<div class="scratch-c-else" style="position:relative;">sinon</div>'
+            +'<div class="scratch-c-body"><div class="scratch-c-arm"></div><div class="scratch-c-cavity" style="position:relative;">'
+              +'<div class="scratch-block scratch-say" style="width:fit-content;">'+CUT+'dire <span class="scratch-txt">Mission normale</span>'+TAB+'</div>'
+              +'<span class="zone-marker" id="zm-5" onclick="placeAt(5)" style="right:-30px;top:4px;">5</span>'
+            +'</div></div>'
+            +'<div class="scratch-c-bottom">'+TAB+'</div>'
+          +'</div>'
+        +'</div></div>'
+        +'<div class="scratch-c-bottom">'+TAB+'</div>'
+      +'</div>'
+    +'</div>'
+  +'</div></div>'
+  +'<div class="sprite-panel" style="position:relative;">'
+    +'<span class="sp-ico">&#128752;&#65039;</span>'
+    +'<div><div class="sp-lbl">Sprite actuel</div><div class="sp-name">Satellite</div></div>'
+    +'<span class="zone-marker" id="zm-6" onclick="placeAt(6)" style="right:-10px;top:-10px;">6</span>'
+  +'</div>';
+}
+
+function labelBankHTML(){
+  var h='<div class="bank-hint">Clique une &eacute;tiquette, puis clique le rep&egrave;re num&eacute;rot&eacute; correspondant sur le sch&eacute;ma.</div><div class="label-bank" id="label-bank">';
+  LABELS_ORDER.forEach(function(zid){
+    var z=ZONES.find(function(zz){return zz.id===zid;});
+    var used=Object.values(assign).indexOf(z.correct)!==-1;
+    h+='<div class="label-chip'+(used?' used':'')+'" id="chip-'+zid+'" onclick="pickLabel('+zid+')">'+z.correct+'</div>';
+  });
+  h+='</div>';
+  return h;
+}
+
+function build(){
+  var host=$("steps");host.innerHTML="";
+  var card=document.createElement("div");
+  card.className="step-card";
+  card.id="step-0";
+  var h='<div class="step-head">'
+    +'<span class="step-ico">&#128225;</span>'
+    +'<div class="step-meta"><div class="step-step">MISSION 04</div><div class="step-name">Analyser le script de surveillance</div><div class="step-comp">Identifier une instruction conditionnelle</div></div>'
+    +'</div><div class="step-body" id="body-0">';
+  h+='<div class="intro">Le script ci-dessous g&egrave;re automatiquement le mode du satellite selon le niveau de sa batterie.<span class="scr">Associe chaque &eacute;tiquette au bon rep&egrave;re num&eacute;rot&eacute; (1 &agrave; 6).</span></div>';
+  h+=scriptHTML();
+  if(!solved){
+    h+=labelBankHTML();
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" id="hint-btn-0" onclick="toggleHint()">INDICE</button>'
+      +'<button class="btn btn-try" id="try-0" onclick="tryStep()" disabled>VALIDER LA MISSION</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-0">Une instruction conditionnelle commence toujours par un test (la <b>condition</b>). Si ce test est vrai, une action se d&eacute;clenche&#8201;; sinon, c\'est une autre action qui se d&eacute;clenche. Le <b>sprite</b> est l\'objet contr&ocirc;l&eacute; par le script&#8201;: regarde le panneau en bas du sch&eacute;ma.</div>'
+      +'<div class="fb" id="fb-0"><span id="fbi-0"></span><div id="fbm-0"></div></div>';
+  }else{
+    h+='<div class="fb show ok" id="fb-0"><span id="fbi-0">&#10003;</span><div id="fbm-0"><b>Contr&ocirc;le logique valid&eacute;</b><br>Toutes les parties du script sont correctement identifi&eacute;es.</div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="openFinale()">VOIR LE RAPPORT DE MISSION</button></div>';
+  }
+  h+='</div>';
+  card.innerHTML=h;host.appendChild(card);
+  renderZones();
+  updateProg();
+}
+
+function renderZones(){
+  ZONES.forEach(function(z){
+    var el=$("zm-"+z.id);
+    if(!el)return;
+    el.classList.remove("ok","ko","filled");
+    if(assign[z.id]!==undefined){
+      el.classList.add("filled");
+      el.textContent=z.id+") "+assign[z.id];
+    }else{
+      el.textContent=z.id;
+    }
+  });
+}
+
+function pickLabel(zid){
+  if(solved)return;
+  var z=ZONES.find(function(zz){return zz.id===zid;});
+  var text=z.correct;
+  if(Object.values(assign).indexOf(text)!==-1)return; // déjà utilisée
+  sClick();
+  document.querySelectorAll(".label-chip").forEach(function(c){c.classList.remove("sel");});
+  if(selectedLabel===text){ selectedLabel=null; return; }
+  selectedLabel=text;
+  var chip=$("chip-"+zid);
+  if(chip)chip.classList.add("sel");
+}
+
+function placeAt(zoneId){
+  if(solved)return;
+  if(!selectedLabel){
+    sAttn();
+    showAgent("<span class=\"tag\">Centre de contr&ocirc;le</span>S&eacute;lectionne d'abord une &eacute;tiquette.");
+    return;
+  }
+  sPlace();
+  // si cette zone contenait déjà une étiquette, on la relibère
+  var prevZid=null;
+  Object.keys(assign).forEach(function(k){ if(assign[k]===selectedLabel) prevZid=k; });
+  if(prevZid) delete assign[prevZid];
+  assign[zoneId]=selectedLabel;
+  selectedLabel=null;
+  build();
+}
+
+function toggleHint(){sClick();$("hint-0").classList.toggle("show");}
+
+function tryStep(){
+  if(solved)return;
+  if(Object.keys(assign).length<ZONES.length){
+    sAttn();
+    var fbw=$("fb-0");fbw.className="fb show warn";$("fbi-0").textContent="\u26A0";$("fbm-0").textContent="Compl\u00e8te les 6 rep\u00e8res avant de valider.";
+    return;
+  }
+  var allOk=true;
+  ZONES.forEach(function(z){
+    var el=$("zm-"+z.id);
+    var good=(assign[z.id]===z.correct);
+    if(el)el.classList.add(good?"ok":"ko");
+    if(!good) allOk=false;
+  });
+  if(!allOk){
+    sBad();
+    $("step-0").classList.add("shake");
+    setTimeout(function(){$("step-0").classList.remove("shake");},400);
+    var fb=$("fb-0");fb.className="fb show ko";
+    $("fbi-0").textContent="\u2715";
+    $("fbm-0").innerHTML="Certains rep&egrave;res ne correspondent pas encore. V&eacute;rifie les zones en rouge, puis clique une &eacute;tiquette suivie de son rep&egrave;re pour corriger.";
+    return;
+  }
+  solved=true;
+  sOk();
+  document.querySelectorAll(".zone-marker").forEach(function(el){el.classList.add("pulse");});
+  var cd=$("conn-dot"),cl=$("conn-label");
+  if(cd){cd.classList.remove("on");cd.classList.add("sync");}
+  if(cl)cl.textContent="SYNCHRONISATION";
+  setTimeout(function(){
+    if(cd){cd.classList.remove("sync");cd.classList.add("on");}
+    if(cl)cl.textContent="CONNECT\u00c9";
+  },900);
+  showAgent("<span class=\"tag\">Centre de contr&ocirc;le</span>Contr&ocirc;le logique confirm&eacute;. Bien jou&eacute;.");
+  build();
+  updateProg();
+}
+
+function updateProg(){
+  var got=Object.keys(assign).length;
+  var pct=solved?100:Math.round(got/ZONES.length*100);
+  var lab=$("hud-prog-label");
+  if(lab)lab.textContent="MISSION "+pct+"%";
+  var segs=document.querySelectorAll("#hud-prog-gauge .hud-prog-seg");
+  var on=Math.round(pct/10);
+  segs.forEach(function(s,i){s.classList.toggle("on", i<on);});
+}
+
+function openFinale(){
+  gameRunning=false;
+  clearInterval(totalInt);
+  pauseTelemetryTic();
+  setTimeout(function(){
+    $("finale-time").innerHTML="Temps&nbsp;: "+fmtLong(totalSec);
+    $("finale").classList.add("show");
+  },200);
+}
+
+function toggleCarnet(){
+  var p=$("carnet-panel");
+  if(p.classList.contains("show")) closeCarnet(); else openCarnet();
+}
+function openCarnet(){
+  sCardOpen();
+  $("carnet-panel").classList.add("show");
+  $("carnet-overlay").classList.add("show");
+}
+function closeCarnet(){
+  sCardClose();
+  $("carnet-panel").classList.remove("show");
+  $("carnet-overlay").classList.remove("show");
+}
+function clearCarnet(){
+  sClick();
+  var t=$("carnet-text");if(t)t.value="";
+}
+
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  $("start-screen").style.display="none";
+  $("game").style.display="";
+  $("hud-bar").classList.add("show");
+  document.body.classList.add("playing");
+  totalSec=0;clearInterval(totalInt);gameRunning=true;
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">T+&nbsp;</span>00:00';
+  totalInt=setInterval(timerTick,1000);
+  var ov=$("scan-overlay");
+  ov.classList.add("show");
+  sConnect();
+  var cd0=$("conn-dot"),cl0=$("conn-label");
+  if(cd0)cd0.classList.add("analyse");
+  if(cl0)cl0.textContent="ANALYSE";
+  var fill=$("scan-bar-fill"),p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*16+8;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){
+        ov.classList.remove("show");
+        var cd=$("conn-dot"),cl=$("conn-label");
+        if(cd){cd.classList.remove("analyse");cd.classList.add("on");}
+        if(cl)cl.textContent="CONNECT\u00c9";
+        build();
+        showAgent("<span class=\"tag\">Centre de contr&ocirc;le</span>Connexion &eacute;tablie. Analysons le script ensemble.");
+        scheduleTelemetryTic();
+      },300);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },110);
+}
+function restartAll(){
+  gameRunning=false;
+  clearInterval(totalInt);totalSec=0;
+  pauseTelemetryTic();
+  solved=false;
+  assign={};selectedLabel=null;
+  $("finale").classList.remove("show");
+  var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
+  $("hud-bar").classList.remove("show");
+  document.body.classList.remove("playing");
+  $("game").style.display="none";
+  $("start-screen").style.display="";
+  var cd=$("conn-dot"),cl=$("conn-label");
+  if(cd)cd.classList.remove("on");
+  if(cl)cl.textContent="HORS LIGNE";
+  var ht=$("hud-timer");if(ht)ht.innerHTML='<span class="lbl">T+&nbsp;</span>00:00';
+  closeCarnet();
+  var ct=$("carnet-text");if(ct)ct.value="";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
