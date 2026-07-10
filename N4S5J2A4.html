@@ -271,9 +271,9 @@ header{margin-bottom:1rem;border-bottom:1px solid var(--line);padding-bottom:.9r
   <div class="carnet-title">CARNET DE BORD</div>
   <div class="carnet-quote">Note ici tes observations avant de valider.</div>
   <div class="carnet-symbols">
-    <button class="carnet-sym-btn" onclick="insertCarnetSym('&#215;')" title="Multiplier">&#215;</button>
     <button class="carnet-sym-btn" onclick="insertCarnetSym('&#247;')" title="Diviser">&#247;</button>
-    <button class="carnet-sym-btn" onclick="insertCarnetSym('=')" title="Egal">=</button>
+    <button class="carnet-sym-btn" onclick="insertCarnetSym('360&#176;')" title="Tour complet">360&#176;</button>
+    <button class="carnet-sym-btn" onclick="insertCarnetSym('&#8635;')" title="Rotation">&#8635;</button>
   </div>
   <textarea class="carnet-text" id="carnet-text" placeholder="..."></textarea>
   <div class="carnet-tools">
@@ -290,7 +290,7 @@ header{margin-bottom:1rem;border-bottom:1px solid var(--line);padding-bottom:.9r
     <div class="finale-sub">Les boucles permettent de r&eacute;p&eacute;ter automatiquement une s&eacute;rie d'instructions sans avoir &agrave; les recopier plusieurs fois. Le centre de contr&ocirc;le peut maintenant programmer les syst&egrave;mes automatiques du satellite.</div>
     <div class="finale-reveal">
       <b>Carnet de l'ing&eacute;nieur</b>
-      Tu approfondiras bient&ocirc;t comment choisir le bon nombre de r&eacute;p&eacute;titions et le bon angle pour construire n'importe quelle figure g&eacute;om&eacute;trique r&eacute;guli&egrave;re.
+      Tu sais maintenant utiliser le nombre de r&eacute;p&eacute;titions et l'angle de rotation pour construire une figure g&eacute;om&eacute;trique r&eacute;guli&egrave;re avec une boucle.
     </div>
     <button class="btn-restart" onclick="restartAll()">&#8635; RECOMMENCER</button>
   </div>
@@ -413,7 +413,11 @@ function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add(
 
 function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
 function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
-function normNum(s){var n=parseFloat(String(s).trim().replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
+function normNum(s){
+  var value=String(s).trim().replace(/\s/g,'');
+  if(!/^\d+$/.test(value)) return null;
+  return Number(value);
+}
 
 var totalSec=0,totalInt=null;
 var gameRunning=false;
@@ -516,8 +520,8 @@ function buildDefi1(isSolved){
     +'<div class="scratch-control" style="width:fit-content;">'
       +'<div class="scratch-block scratch-c-top">'+CUT+'r&eacute;p&eacute;ter <span class="scratch-num">'+D1_N+'</span> fois</div>'
       +'<div class="scratch-c-body"><div class="scratch-c-arm"></div><div class="scratch-c-cavity">'
-        +'<div class="scratch-block scratch-motion" style="width:fit-content;">'+CUT+'avancer <span class="scratch-num">100</span> pas'+TAB+'</div>'
-        +'<div class="scratch-block scratch-motion stacked-in-cavity" style="width:fit-content;">'+CUT+'tourner &#8635; <span class="scratch-num">'+D1_A+'</span> degr&eacute;s</div>'
+        +'<div class="scratch-block scratch-motion" style="width:fit-content;">'+CUT+'avancer de <span class="scratch-num">100</span> pas'+TAB+'</div>'
+        +'<div class="scratch-block scratch-motion stacked-in-cavity" style="width:fit-content;">'+CUT+'tourner &#8635; de <span class="scratch-num">'+D1_A+'</span> degr&eacute;s</div>'
       +'</div></div>'
       +'<div class="scratch-c-bottom">'+TAB+'</div>'
     +'</div>'
@@ -547,7 +551,7 @@ function pickD1(i){
   if(solved[0])return;
   sClick();
   d1Pick=i;
-  D1_OPTS.forEach(function(_,k){var el=$("d1-opt-"+k);if(el)el.classList.remove("sel");});
+  D1_OPTS.forEach(function(_,k){var el=$("d1-opt-"+k);if(el)el.classList.remove("sel","ok","ko");});
   var el=$("d1-opt-"+i);if(el)el.classList.add("sel");
   var btn=$("try-0");if(btn)btn.disabled=false;
 }
@@ -566,14 +570,14 @@ function tryDefi1(){
 
 /* ===== Défi 2 ===== */
 function buildDefi2(isSolved){
-  var h='<div class="intro">Ce script est presque termin&eacute;&#8201;: il manque le nombre de r&eacute;p&eacute;titions de la boucle.</div>';
+  var h='<div class="intro">Le satellite doit tracer un hexagone r&eacute;gulier. Il avance de 80 pas puis tourne de 60&#176; &agrave; chaque r&eacute;p&eacute;tition. Quel nombre faut-il &eacute;crire dans le bloc &laquo;&nbsp;r&eacute;p&eacute;ter ... fois&nbsp;&raquo; pour que la figure se referme exactement&nbsp;?</div>';
   h+='<div class="scratch-script" style="margin-bottom:1rem;">'
     +'<div class="scratch-block scratch-pen">stylo en position d\'&eacute;criture'+TAB+'</div>'
     +'<div class="scratch-control" style="width:fit-content;">'
       +'<div class="scratch-block scratch-c-top">'+CUT+'r&eacute;p&eacute;ter '+(isSolved?'<span class="scratch-num" style="background:#bbf7d0;">'+D2_N+'</span>':'<span class="scratch-num-blank"><input id="in-d2" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="?"/></span>')+' fois</div>'
       +'<div class="scratch-c-body"><div class="scratch-c-arm"></div><div class="scratch-c-cavity">'
-        +'<div class="scratch-block scratch-motion" style="width:fit-content;">'+CUT+'avancer <span class="scratch-num">80</span> pas'+TAB+'</div>'
-        +'<div class="scratch-block scratch-motion stacked-in-cavity" style="width:fit-content;">'+CUT+'tourner &#8635; <span class="scratch-num">'+D2_A+'</span> degr&eacute;s</div>'
+        +'<div class="scratch-block scratch-motion" style="width:fit-content;">'+CUT+'avancer de <span class="scratch-num">80</span> pas'+TAB+'</div>'
+        +'<div class="scratch-block scratch-motion stacked-in-cavity" style="width:fit-content;">'+CUT+'tourner &#8635; de <span class="scratch-num">'+D2_A+'</span> degr&eacute;s</div>'
       +'</div></div>'
       +'<div class="scratch-c-bottom">'+TAB+'</div>'
     +'</div>'
@@ -583,19 +587,21 @@ function buildDefi2(isSolved){
       +'<button class="btn btn-hint" onclick="toggleHint(1)">INDICE</button>'
       +'<button class="btn btn-try" id="try-1" onclick="tryDefi2()" disabled>VALIDER</button>'
       +'</div>'
-      +'<div class="hint" id="hint-1">Pour que la figure se referme exactement, la somme de tous les angles doit faire 360&#176;. Le satellite tourne de '+D2_A+'&#176; &agrave; chaque r&eacute;p&eacute;tition.</div>'
+      +'<div class="hint" id="hint-1">Pour revenir &agrave; sa direction de d&eacute;part et fermer la figure, le lutin doit effectuer au total un tour complet, soit 360&#176;. Il tourne de '+D2_A+'&#176; &agrave; chaque r&eacute;p&eacute;tition.</div>'
       +'<div class="fb" id="fb-1"><span id="fbi-1"></span><div id="fbm-1"></div></div>';
   }else{
-    h+='<div class="correction show"><div class="correction-t">Correction</div><div class="correction-x">La figure se referme lorsque la somme des angles atteint 360&#176;.<br>360&#176; &divide; '+D2_A+'&#176; = '+D2_N+'&#8201;: il faut donc '+D2_N+' r&eacute;p&eacute;titions pour obtenir un hexagone r&eacute;gulier.</div></div>';
+    h+='<div class="correction show"><div class="correction-t">Correction</div><div class="correction-x">La figure se referme lorsque la somme des angles de rotation du lutin atteint 360&#176;.<br>360&#176; &divide; '+D2_A+'&#176; = '+D2_N+'&#8201;: il faut donc '+D2_N+' r&eacute;p&eacute;titions pour obtenir un hexagone r&eacute;gulier.</div></div>';
     h+='<div class="fb show ok"><span>&#10003;</span><div><b>D&eacute;fi valid&eacute;.</b></div></div>';
-    h+='<div class="tools"><button class="btn btn-try" onclick="openFinale()">VOIR LA CORRECTION FINALE</button></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="openFinale()">TERMINER LA MISSION</button></div>';
   }
   return h;
 }
 function updBtn2(){
   var el=$("in-d2"),btn=$("try-1");
   if(!el||!btn)return;
-  btn.disabled=!el.value.trim();
+  el.parentNode.style.outline="none";
+  var value=el.value.trim();
+  btn.disabled=!/^\d+$/.test(value);
 }
 function tryDefi2(){
   if(solved[1])return;
@@ -606,11 +612,15 @@ function tryDefi2(){
   else{
     sBad();$("step-1").classList.add("shake");setTimeout(function(){$("step-1").classList.remove("shake");},400);
     var fb=$("fb-1");fb.className="fb show ko";$("fbi-1").textContent="\u2715";
-    $("fbm-1").innerHTML="V&eacute;rifie le fonctionnement de la boucle avant de recommencer.";
+    $("fbm-1").innerHTML="Le lutin doit effectuer un tour complet de 360&#176;. Divise 360&#176; par l'angle de rotation de "+D2_A+"&#176; pour trouver le nombre de r&eacute;p&eacute;titions.";
   }
 }
 
-function toggleHint(mi){sClick();var el=$("hint-"+mi);if(el)el.classList.toggle("show");}
+function toggleHint(mi){
+  sHint();
+  var el=$("hint-"+mi);
+  if(el)el.classList.toggle("show");
+}
 
 function missionSuccess(mi){
   solved[mi]=true;
@@ -708,6 +718,7 @@ function restartAll(){
   active=0;d1Pick=null;
   $("finale").classList.remove("show");
   var ov=$("scan-overlay");if(ov)ov.classList.remove("show");
+  var fill=$("scan-bar-fill");if(fill)fill.style.width="0%";
   $("hud-bar").classList.remove("show");
   document.body.classList.remove("playing");
   $("game").style.display="none";
