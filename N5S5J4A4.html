@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa — Je m'entraîne — Tester une égalité ou une inégalité</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --day-color:#3ab5d8; --day-dark:#1a6e88; --day-light:#e8f6fb;
+    --day-border:#9dd4e8; --day-glow:rgba(58,181,216,.3);
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.7;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--blue);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--orange);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--yellow);top:200px;left:-30px;pointer-events:none;}
+
+  header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;
+    font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.25rem,3.5vw,1.8rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.86rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+  /* HUD */
+  .hud{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;
+    margin-bottom:1.1rem;position:relative;z-index:1;}
+  .hud-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;
+    border-radius:99px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;
+    border:1.5px solid var(--border);background:var(--surface);}
+  .hud-chip.stars{border-color:var(--day-border);background:var(--day-light);
+    color:var(--day-dark);font-size:1rem;}
+
+  /* Nav niveaux */
+  .level-nav{display:flex;gap:.5rem;justify-content:center;margin-bottom:1.2rem;
+    flex-wrap:wrap;position:relative;z-index:1;}
+  .lv-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.8rem;
+    padding:.5rem 1rem;border-radius:10px;border:2px solid var(--border);
+    background:var(--surface);color:var(--muted);min-height:2.4rem;
+    display:inline-flex;align-items:center;transition:.15s;}
+  .lv-btn.active{background:var(--day-color);color:#fff;border-color:var(--day-dark);}
+  .lv-btn.done{background:#f0faeb;color:var(--green);border-color:var(--green);}
+  .lv-btn.locked{opacity:.45;}
+
+  .level-banner{width:100%;max-width:680px;font-weight:800;
+    font-size:clamp(.95rem,2.8vw,1.1rem);margin-bottom:.4rem;
+    position:relative;z-index:1;}
+  .level-mission{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted);
+    font-weight:600;width:100%;max-width:680px;margin-bottom:1rem;position:relative;z-index:1;}
+
+  /* Valeurs données */
+  .val-box{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;
+    padding:.65rem 1.1rem;margin-bottom:1rem;font-family:'JetBrains Mono',monospace;
+    font-size:.95rem;font-weight:700;color:var(--day-dark);max-width:680px;width:100%;
+    position:relative;z-index:1;}
+
+  /* Card */
+  .card{width:100%;max-width:680px;background:var(--surface);
+    border:2px solid var(--border);border-radius:var(--radius);
+    padding:1.8rem 1.8rem 1.4rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;margin-bottom:1.2rem;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+    border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--blue),var(--orange));}
+
+  /* Bloc question */
+  .q-block{padding:1.1rem 0;border-bottom:1.5px solid var(--border);}
+  .q-block:last-child{border-bottom:none;padding-bottom:0;}
+  .q-num{display:inline-flex;align-items:center;justify-content:center;
+    width:1.6rem;height:1.6rem;border-radius:50%;background:var(--day-color);color:#fff;
+    font-weight:800;font-size:.8rem;font-family:'JetBrains Mono',monospace;
+    margin-right:.5rem;flex-shrink:0;}
+  .q-row{display:flex;align-items:center;margin-bottom:.7rem;flex-wrap:wrap;gap:.4rem;}
+  .q-expr{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.1rem;
+    color:var(--day-dark);background:var(--day-light);border:1.5px solid var(--day-border);
+    border-radius:8px;padding:.3rem .8rem;}
+  .q-ctx-inline{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);
+    font-weight:600;}
+
+  /* N1 : saisie numérique */
+  .input-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.2rem;}
+  .eq-sign{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--day-dark);font-size:1rem;}
+  .num-input{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;
+    color:var(--day-dark);background:var(--bg);border:2px solid var(--border);border-radius:8px;
+    padding:.4rem .7rem;text-align:center;width:90px;height:2.8rem;outline:none;
+    transition:border-color .2s,background .2s;}
+  .num-input:focus{border-color:var(--day-color);background:#fff;}
+  .num-input:disabled{cursor:default;}
+  .num-input.ok{background:#f0faeb;border-color:var(--green);color:#2f6e10;}
+  .num-input.ko{background:#fff0ef;border-color:var(--pink);color:#c0392b;}
+
+  /* N2/N3 : boutons Vrai/Faux */
+  .vf-row{display:flex;gap:.6rem;margin-top:.5rem;flex-wrap:wrap;}
+  .vf-btn{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;
+    padding:.55rem 1.2rem;border-radius:10px;border:2px solid var(--day-border);
+    background:var(--day-light);color:var(--day-dark);cursor:pointer;min-height:44px;
+    transition:.15s;}
+  .vf-btn:hover:not([disabled]){border-color:var(--day-color);background:#d0eef8;}
+  .vf-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+  .vf-btn[disabled]{cursor:default;}
+  .vf-btn.ok{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+  .vf-btn.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+  .vf-btn.reveal{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+  .vf-btn.selected{border-color:var(--day-color);background:#d0eef8;}
+
+  .q-feedback{margin-top:.6rem;padding:.55rem .85rem;border-radius:8px;
+    font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;display:none;}
+  .q-feedback.show{display:block;}
+  .q-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .q-feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+
+  .corr-box{display:none;margin-top:.6rem;background:#fffbeb;
+    border:1.5px solid var(--yellow);border-radius:8px;padding:.65rem .9rem;
+    font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#5a4000;
+    line-height:1.9;white-space:pre-line;}
+  .corr-box.show{display:block;}
+
+  /* Boutons action */
+  .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.4rem;
+    width:100%;max-width:680px;position:relative;z-index:1;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;
+    border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;
+    cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+  /* Succès niveau */
+  .level-success{background:linear-gradient(135deg,#f0faeb,#e8f5d0);
+    border:2px solid var(--green);border-radius:var(--radius);
+    padding:1.6rem;text-align:center;margin-top:1rem;
+    width:100%;max-width:680px;position:relative;z-index:1;
+    display:none;animation:fadeUp .4s ease both;}
+  .level-success.show{display:block;}
+  .ls-star{font-size:2.4rem;margin-bottom:.4rem;}
+  .ls-title{font-size:1.1rem;font-weight:800;color:#2f6e10;margin-bottom:.4rem;}
+  .ls-msg{font-size:.9rem;color:#2f6e10;margin-bottom:1rem;line-height:1.7;}
+
+  /* Écran final */
+  .final-screen{width:100%;max-width:680px;display:none;position:relative;z-index:1;}
+  .final-screen.show{display:block;animation:fadeUp .4s ease both;}
+  .final-card{background:var(--surface);border:2px solid var(--day-border);
+    border-radius:var(--radius);padding:2.4rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+  .final-title{font-size:1.2rem;font-weight:800;color:var(--day-dark);
+    text-align:center;margin-bottom:.8rem;}
+  .final-stars{font-size:2rem;text-align:center;margin-bottom:1.2rem;letter-spacing:.1em;}
+  .skills-box{background:var(--day-light);border:1.5px solid var(--day-border);
+    border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;}
+  .skills-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.6rem;}
+  .skill-item{display:flex;align-items:flex-start;gap:.5rem;font-size:.9rem;
+    line-height:1.7;color:var(--text);margin-bottom:.2rem;}
+  .retenir-box{background:#fff;border:2px solid var(--day-border);border-radius:12px;
+    padding:1.2rem 1.4rem;margin-bottom:1.4rem;}
+  .retenir-title{font-weight:800;color:var(--day-dark);font-size:.95rem;margin-bottom:.7rem;}
+  .retenir-steps{font-size:.88rem;line-height:2;color:var(--text);
+    font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+  .final-goal{background:var(--day-color);color:#fff;border-radius:12px;
+    padding:.9rem 1.2rem;font-size:.95rem;font-weight:700;text-align:center;
+    line-height:1.6;margin-bottom:1.4rem;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.4rem .75rem 3rem;}
+    .card,.final-card{padding:1.2rem;}
+    .btn{font-size:.85rem;padding:.5rem .9rem;}
+    .vf-row{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 4</div>
+  <h1><span class="hl">Je m&rsquo;entra&icirc;ne pour progresser</span></h1>
+  <p class="subtitle">Tester une &eacute;galit&eacute; ou une in&eacute;galit&eacute; &middot; 3 niveaux</p>
+</header>
+
+<div class="hud">
+  <div class="hud-chip stars" id="hud-stars">&#11088; 0 / 3</div>
+</div>
+
+<div class="level-nav" id="level-nav">
+  <div class="lv-btn active" id="lv1-btn">Niveau 1</div>
+  <div class="lv-btn locked" id="lv2-btn">Niveau 2</div>
+  <div class="lv-btn locked" id="lv3-btn">Niveau 3</div>
+</div>
+
+<div class="level-banner" id="level-banner"></div>
+<div class="level-mission" id="level-mission"></div>
+<div id="main-zone"></div>
+
+<div class="final-screen" id="final-screen">
+  <div class="final-card">
+    <div class="logo-badge" style="margin:0 auto 1rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Entra&icirc;nement termin&eacute;&nbsp;!
+    </div>
+    <div class="final-title">Tu sais tester une &eacute;galit&eacute; ou une in&eacute;galit&eacute;&nbsp;!</div>
+    <div class="final-stars" id="final-stars"></div>
+    <div class="skills-box">
+      <div class="skills-title">&#10003; Comp&eacute;tences valid&eacute;es</div>
+      <div class="skill-item">&#10004; Calculer la valeur de chaque membre</div>
+      <div class="skill-item">&#10004; V&eacute;rifier une &eacute;galit&eacute;</div>
+      <div class="skill-item">&#10004; V&eacute;rifier une in&eacute;galit&eacute;</div>
+      <div class="skill-item">&#10004; Comparer deux expressions avec deux lettres</div>
+    </div>
+    <div class="retenir-box">
+      <div class="retenir-title">&#128218; &Agrave; retenir</div>
+      <div class="retenir-steps">Pour tester une &eacute;galit&eacute; ou une in&eacute;galit&eacute; :
+1. Je remplace chaque lettre par la valeur donn&eacute;e.
+2. Je calcule s&eacute;par&eacute;ment le membre gauche et le membre droit.
+3. Je compare les deux r&eacute;sultats.</div>
+    </div>
+    <div class="final-goal">&#127919; Je remplace, je calcule, je compare.</div>
+    <div style="text-align:center;">
+      <button class="btn btn-primary" onclick="restartAll()">&#8635; Recommencer l&rsquo;entra&icirc;nement</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Vérification maths :
+// N1 y=2 : 10-2y=6, 3y-2.5=3.5, 4y+1=9, y²+3=7, 5y-6=4, 20/y=10, 3y+y=8, y²-y=2
+// N2 : 5x-1=19(V), 3a+6=18(V), 2m+7=15(V), x²-x=10(F,12≠10), 4a-2=3a+4(F,14≠16), 3m-1=2m+5(F,11≠13)
+// N3 : x+y<2x-y(V,5<7), a²-b=3a+8(V,23=23), 2m-1>m+3(F,5>6), 2x+y>x+3(V,9>7), a+b>2b+4(F,7>8)
+
+var $=function(id){return document.getElementById(id);};
+
+var LEVELS=[
+  {
+    id:1,
+    title:"Niveau 1 \u2014 Je calcule",
+    mission:"Calculer la valeur de chaque expression pour y\u00a0= 2",
+    valBox:"Pour <strong>y\u00a0= 2</strong>",
+    unlocked:true, done:false,
+    fbSuccess:"Bravo\u00a0! Tu sais calculer la valeur d\u2019une expression litt\u00e9rale.",
+    questions:[
+      {expr:"10 \u2212 2y", answer:6, corr:"10 \u2212 2 \u00d7 2 = 10 \u2212 4 = 6",
+        fbOk:"10 \u2212 2 \u00d7 2 = 6.", fbKo:"Remplace y par 2\u00a0: 10 \u2212 2 \u00d7 2 = 10 \u2212 4 = 6."},
+      {expr:"3y \u2212 2,5", answer:3.5, corr:"3 \u00d7 2 \u2212 2,5 = 6 \u2212 2,5 = 3,5",
+        fbOk:"3 \u00d7 2 \u2212 2,5 = 3,5.", fbKo:"Remplace y par 2\u00a0: 3 \u00d7 2 \u2212 2,5 = 6 \u2212 2,5 = 3,5."},
+      {expr:"4y + 1", answer:9, corr:"4 \u00d7 2 + 1 = 8 + 1 = 9",
+        fbOk:"4 \u00d7 2 + 1 = 9.", fbKo:"Remplace y par 2\u00a0: 4 \u00d7 2 + 1 = 8 + 1 = 9."},
+      {expr:"y\u00b2 + 3", answer:7, corr:"2\u00b2 + 3 = 4 + 3 = 7",
+        fbOk:"2\u00b2 + 3 = 4 + 3 = 7.", fbKo:"Remplace y par 2\u00a0: y\u00b2 = 2 \u00d7 2 = 4, donc 4 + 3 = 7."},
+      {expr:"5y \u2212 6", answer:4, corr:"5 \u00d7 2 \u2212 6 = 10 \u2212 6 = 4",
+        fbOk:"5 \u00d7 2 \u2212 6 = 4.", fbKo:"Remplace y par 2\u00a0: 5 \u00d7 2 \u2212 6 = 10 \u2212 6 = 4."},
+      {expr:"20 \u00f7 y", answer:10, corr:"20 \u00f7 2 = 10",
+        fbOk:"20 \u00f7 2 = 10.", fbKo:"Remplace y par 2\u00a0: 20 \u00f7 2 = 10."},
+      {expr:"3y + y", answer:8, corr:"3 \u00d7 2 + 2 = 6 + 2 = 8",
+        fbOk:"3 \u00d7 2 + 2 = 8.", fbKo:"Remplace y par 2\u00a0: 3 \u00d7 2 + 2 = 6 + 2 = 8."},
+      {expr:"y\u00b2 \u2212 y", answer:2, corr:"2\u00b2 \u2212 2 = 4 \u2212 2 = 2",
+        fbOk:"2\u00b2 \u2212 2 = 4 \u2212 2 = 2.", fbKo:"Remplace y par 2\u00a0: 2\u00b2 = 4, donc 4 \u2212 2 = 2."}
+    ]
+  },
+  {
+    id:2,
+    title:"Niveau 2 \u2014 Je v\u00e9rifie une \u00e9galit\u00e9",
+    mission:"V\u00e9rifier si l\u2019\u00e9galit\u00e9 est vraie ou fausse",
+    unlocked:false, done:false,
+    fbSuccess:"Tr\u00e8s bien\u00a0! Tu sais v\u00e9rifier une \u00e9galit\u00e9 en rempla\u00e7ant la lettre.",
+    questions:[
+      {expr:"5x \u2212 1 = 19", ctx:"x = 4", ans:true,
+        corr:"5 \u00d7 4 \u2212 1 = 20 \u2212 1 = 19. \u00c9galit\u00e9 vraie.",
+        fbOk:"5 \u00d7 4 \u2212 1 = 19. L\u2019\u00e9galit\u00e9 est vraie.",
+        fbKo:"5 \u00d7 4 \u2212 1 = 20 \u2212 1 = 19. L\u2019\u00e9galit\u00e9 est bien vraie."},
+      {expr:"3a + 6 = 18", ctx:"a = 4", ans:true,
+        corr:"3 \u00d7 4 + 6 = 12 + 6 = 18. \u00c9galit\u00e9 vraie.",
+        fbOk:"3 \u00d7 4 + 6 = 18. L\u2019\u00e9galit\u00e9 est vraie.",
+        fbKo:"3 \u00d7 4 + 6 = 12 + 6 = 18. L\u2019\u00e9galit\u00e9 est bien vraie."},
+      {expr:"2m + 7 = 15", ctx:"m = 4", ans:true,
+        corr:"2 \u00d7 4 + 7 = 8 + 7 = 15. \u00c9galit\u00e9 vraie.",
+        fbOk:"2 \u00d7 4 + 7 = 15. L\u2019\u00e9galit\u00e9 est vraie.",
+        fbKo:"2 \u00d7 4 + 7 = 8 + 7 = 15. L\u2019\u00e9galit\u00e9 est bien vraie."},
+      {expr:"x\u00b2 \u2212 x = 10", ctx:"x = 4", ans:false,
+        corr:"4\u00b2 \u2212 4 = 16 \u2212 4 = 12 \u2260 10. \u00c9galit\u00e9 fausse.",
+        fbOk:"4\u00b2 \u2212 4 = 12 \u2260 10. L\u2019\u00e9galit\u00e9 est fausse.",
+        fbKo:"4\u00b2 \u2212 4 = 16 \u2212 4 = 12 et non 10. L\u2019\u00e9galit\u00e9 est fausse."},
+      {expr:"4a \u2212 2 = 3a + 4", ctx:"a = 4", ans:false,
+        corr:"4 \u00d7 4 \u2212 2 = 14 et 3 \u00d7 4 + 4 = 16. Or 14 \u2260 16. \u00c9galit\u00e9 fausse.",
+        fbOk:"4 \u00d7 4 \u2212 2 = 14 et 3 \u00d7 4 + 4 = 16. Or 14 \u2260 16. Fausse.",
+        fbKo:"4 \u00d7 4 \u2212 2 = 14 et 3 \u00d7 4 + 4 = 16. Or 14 \u2260 16. L\u2019\u00e9galit\u00e9 est fausse."},
+      {expr:"3m \u2212 1 = 2m + 5", ctx:"m = 4", ans:false,
+        corr:"3 \u00d7 4 \u2212 1 = 11 et 2 \u00d7 4 + 5 = 13. Or 11 \u2260 13. \u00c9galit\u00e9 fausse.",
+        fbOk:"3 \u00d7 4 \u2212 1 = 11 et 2 \u00d7 4 + 5 = 13. Or 11 \u2260 13. Fausse.",
+        fbKo:"3 \u00d7 4 \u2212 1 = 11 et 2 \u00d7 4 + 5 = 13. Or 11 \u2260 13. L\u2019\u00e9galit\u00e9 est fausse."}
+    ]
+  },
+  {
+    id:3,
+    title:"Niveau 3 \u2014 \u00c9galit\u00e9 ou in\u00e9galit\u00e9",
+    mission:"M\u00e9lange d\u2019\u00e9galit\u00e9s et d\u2019in\u00e9galit\u00e9s",
+    unlocked:false, done:false,
+    fbSuccess:"Excellent\u00a0! Tu sais tester une \u00e9galit\u00e9 ou une in\u00e9galit\u00e9.",
+    questions:[
+      {expr:"x + y < 2x \u2212 y", ctx:"x = 4, y = 1", ans:true,
+        corr:"Membre gauche\u00a0: 4 + 1 = 5\nMembre droit\u00a0: 2 \u00d7 4 \u2212 1 = 7\n5 < 7 \u2192 Vraie",
+        fbOk:"5 < 7. L\u2019in\u00e9galit\u00e9 est vraie.",
+        fbKo:"x + y = 4 + 1 = 5 et 2x \u2212 y = 8 \u2212 1 = 7. Or 5 < 7. C\u2019est vrai."},
+      {expr:"a\u00b2 \u2212 b = 3a + 8", ctx:"a = 5, b = 2", ans:true,
+        corr:"Membre gauche\u00a0: 5\u00b2 \u2212 2 = 25 \u2212 2 = 23\nMembre droit\u00a0: 3 \u00d7 5 + 8 = 23\n23 = 23 \u2192 Vraie",
+        fbOk:"25 \u2212 2 = 23 et 3 \u00d7 5 + 8 = 23. L\u2019\u00e9galit\u00e9 est vraie.",
+        fbKo:"a\u00b2 \u2212 b = 25 \u2212 2 = 23 et 3a + 8 = 15 + 8 = 23. Les deux membres sont \u00e9gaux."},
+      {expr:"2m \u2212 1 > m + 3", ctx:"m = 3", ans:false,
+        corr:"Membre gauche\u00a0: 2 \u00d7 3 \u2212 1 = 5\nMembre droit\u00a0: 3 + 3 = 6\n5 > 6 \u2192 Fausse",
+        fbOk:"2 \u00d7 3 \u2212 1 = 5 et 3 + 3 = 6. Or 5 n\u2019est pas > 6. L\u2019in\u00e9galit\u00e9 est fausse.",
+        fbKo:"2 \u00d7 3 \u2212 1 = 5 et 3 + 3 = 6. Or 5 < 6, donc 5 > 6 est faux."},
+      {expr:"2x + y > x + 3", ctx:"x = 4, y = 1", ans:true,
+        corr:"Membre gauche\u00a0: 2 \u00d7 4 + 1 = 9\nMembre droit\u00a0: 4 + 3 = 7\n9 > 7 \u2192 Vraie",
+        fbOk:"9 > 7. L\u2019in\u00e9galit\u00e9 est vraie.",
+        fbKo:"2x + y = 8 + 1 = 9 et x + 3 = 4 + 3 = 7. Or 9 > 7. C\u2019est vrai."},
+      {expr:"a + b > 2b + 4", ctx:"a = 5, b = 2", ans:false,
+        corr:"Membre gauche\u00a0: 5 + 2 = 7\nMembre droit\u00a0: 2 \u00d7 2 + 4 = 8\n7 > 8 \u2192 Fausse",
+        fbOk:"7 > 8 est faux. L\u2019in\u00e9galit\u00e9 est fausse.",
+        fbKo:"a + b = 5 + 2 = 7 et 2b + 4 = 4 + 4 = 8. Or 7 < 8, donc 7 > 8 est faux."}
+    ]
+  }
+];
+
+var currentLevel=0, starsEarned=0;
+var userAnswers={}, validated={}, levelAttempts=[0,0,0];
+
+function checkAnswer(val,expected){
+  var s=String(val||"").trim().replace(",",".");
+  if(!/^-?[0-9]+(\.[0-9]+)?$/.test(s)) return false;
+  return Math.abs(Number(s)-expected)<1e-6;
+}
+function escapeHTML(v){
+  return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function updateHUD(){
+  $("hud-stars").innerHTML="\u2b50 "+starsEarned+" / 3";
+  LEVELS.forEach(function(lv,i){
+    var btn=$("lv"+(i+1)+"-btn");
+    if(btn) btn.className="lv-btn"+(i===currentLevel?" active":lv.done?" done":lv.unlocked?"":" locked");
+  });
+  $("level-banner").textContent=LEVELS[currentLevel].title;
+  $("level-mission").innerHTML="\uD83C\uDFAF Objectif : "+LEVELS[currentLevel].mission;
+}
+
+function renderLevel(){
+  updateHUD();
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  var zone=$("main-zone"); zone.innerHTML="";
+  if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+
+  if(lv.id===1){
+    renderN1(lv,lvIdx,zone);
+  } else {
+    renderVF(lv,lvIdx,zone);
+  }
+}
+
+// ── Niveau 1 : saisie numérique ──
+function renderN1(lv,lvIdx,zone){
+  var vb=document.createElement("div"); vb.className="val-box";
+  vb.innerHTML=lv.valBox; zone.appendChild(vb);
+  var card=document.createElement("div"); card.className="card";
+  card.innerHTML="<div class='card-stripe'></div>";
+  lv.questions.forEach(function(q,qi){
+    var block=document.createElement("div"); block.className="q-block";
+    var row=document.createElement("div"); row.className="q-row";
+    var num=document.createElement("span"); num.className="q-num"; num.textContent=qi+1;
+    var expr=document.createElement("span"); expr.className="q-expr"; expr.textContent=q.expr;
+    row.appendChild(num); row.appendChild(expr); block.appendChild(row);
+    var irow=document.createElement("div"); irow.className="input-row";
+    var eq=document.createElement("span"); eq.className="eq-sign"; eq.textContent="= ";
+    var inp=document.createElement("input");
+    inp.type="text"; inp.className="num-input"; inp.id="inp-"+lvIdx+"-"+qi;
+    inp.setAttribute("inputmode","numeric"); inp.setAttribute("autocomplete","off");
+    inp.setAttribute("aria-label","Valeur de l\u2019expression"); inp.placeholder="?";
+    if(userAnswers[lvIdx][qi]!==undefined) inp.value=userAnswers[lvIdx][qi];
+    if(validated[lvIdx]){
+      var ok=checkAnswer(userAnswers[lvIdx][qi],q.answer);
+      inp.disabled=true; inp.className="num-input "+(ok?"ok":"ko");
+    }
+    inp.addEventListener("input",function(){userAnswers[lvIdx][qi]=inp.value;});
+    inp.addEventListener("keydown",function(e){if(e.key==="Enter")verifyLevel();});
+    irow.appendChild(eq); irow.appendChild(inp); block.appendChild(irow);
+    var fb=document.createElement("div"); fb.className="q-feedback"; fb.id="fb-"+lvIdx+"-"+qi;
+    fb.setAttribute("role","status"); fb.setAttribute("aria-live","polite");
+    if(validated[lvIdx]){
+      var ok=checkAnswer(userAnswers[lvIdx][qi],q.answer);
+      fb.className="q-feedback show "+(ok?"ok":"ko");
+      fb.innerHTML=ok?"\u2705 "+q.fbOk:"\u274c "+q.fbKo;
+    }
+    block.appendChild(fb);
+    var corr=document.createElement("div"); corr.className="corr-box"; corr.id="corr-"+lvIdx+"-"+qi;
+    corr.textContent=q.corr;
+    if(validated[lvIdx]&&!checkAnswer(userAnswers[lvIdx][qi],q.answer)&&levelAttempts[lvIdx]>=2)
+      corr.classList.add("show");
+    block.appendChild(corr);
+    card.appendChild(block);
+  });
+  zone.appendChild(card);
+  renderSuccessOrButtons(lv,lvIdx,zone);
+}
+
+// ── Niveaux 2 et 3 : Vrai/Faux ──
+function renderVF(lv,lvIdx,zone){
+  var card=document.createElement("div"); card.className="card";
+  card.innerHTML="<div class='card-stripe'></div>";
+  lv.questions.forEach(function(q,qi){
+    var block=document.createElement("div"); block.className="q-block";
+    var row=document.createElement("div"); row.className="q-row";
+    var num=document.createElement("span"); num.className="q-num"; num.textContent=qi+1;
+    var expr=document.createElement("span"); expr.className="q-expr"; expr.textContent=q.expr;
+    var ctx=document.createElement("span"); ctx.className="q-ctx-inline";
+    ctx.textContent="\u00a0\u2192 "+q.ctx;
+    row.appendChild(num); row.appendChild(expr); row.appendChild(ctx); block.appendChild(row);
+    var vfrow=document.createElement("div"); vfrow.className="vf-row";
+    var chosen=userAnswers[lvIdx][qi];
+    var locked=validated[lvIdx]||(chosen!==undefined&&levelAttempts[lvIdx]===0);
+    ["Vrai","Faux"].forEach(function(label,ji){
+      var isVrai=(ji===0);
+      var btn=document.createElement("button"); btn.type="button"; btn.className="vf-btn";
+      btn.innerHTML=(isVrai?"\uD83D\uDFE2":"&#128308;")+" "+label;
+      btn.id="vf-"+lvIdx+"-"+qi+"-"+ji;
+      if(validated[lvIdx]){
+        btn.disabled=true;
+        var isAns=(q.ans===isVrai);
+        var wasChosen=(chosen===isVrai);
+        if(isAns) btn.classList.add(wasChosen?"ok":"reveal");
+        else if(wasChosen) btn.classList.add("ko");
+      } else if(chosen!==undefined){
+        if(chosen===isVrai) btn.classList.add("selected");
+        btn.onclick=function(){chooseVF(lvIdx,qi,isVrai,q);};
+      } else {
+        btn.onclick=function(){chooseVF(lvIdx,qi,isVrai,q);};
+      }
+      vfrow.appendChild(btn);
+    });
+    block.appendChild(vfrow);
+    var fb=document.createElement("div"); fb.className="q-feedback"; fb.id="fb-"+lvIdx+"-"+qi;
+    fb.setAttribute("role","status"); fb.setAttribute("aria-live","polite");
+    if(validated[lvIdx]&&chosen!==undefined){
+      var ok=(chosen===q.ans);
+      fb.className="q-feedback show "+(ok?"ok":"ko");
+      fb.innerHTML=ok?"\u2705 "+q.fbOk:"\u274c "+q.fbKo;
+    }
+    block.appendChild(fb);
+    var corr=document.createElement("div"); corr.className="corr-box"; corr.id="corr-"+lvIdx+"-"+qi;
+    corr.textContent=q.corr;
+    if(validated[lvIdx]&&chosen!==undefined&&chosen!==q.ans&&levelAttempts[lvIdx]>=2)
+      corr.classList.add("show");
+    block.appendChild(corr);
+    card.appendChild(block);
+  });
+  zone.appendChild(card);
+  renderSuccessOrButtons(lv,lvIdx,zone);
+}
+
+function chooseVF(lvIdx,qi,val,q){
+  if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+  if(validated[lvIdx]) return;
+  userAnswers[lvIdx][qi]=val;
+  // Mettre à jour visuellement
+  ["vf-"+lvIdx+"-"+qi+"-0","vf-"+lvIdx+"-"+qi+"-1"].forEach(function(id,ji){
+    var b=$(id); if(!b) return;
+    b.className="vf-btn"+(userAnswers[lvIdx][qi]===(ji===0)?" selected":"");
+  });
+}
+
+function renderSuccessOrButtons(lv,lvIdx,zone){
+  var suc=document.createElement("div"); suc.className="level-success"; suc.id="level-success-"+lvIdx;
+  if(lv.done){
+    suc.classList.add("show");
+    suc.innerHTML="<div class='ls-star'>\u2b50</div><div class='ls-title'>\u00c9toile obtenue\u00a0!</div>"
+      +"<div class='ls-msg'>"+lv.fbSuccess+"</div>"
+      +(currentLevel<2?"<button class='btn btn-primary' onclick='goNextLevel()'>Niveau "+(currentLevel+2)+" \u2192</button>"
+        :"<button class='btn btn-primary' onclick='showFinal()'>Voir le bilan final \u2192</button>");
+  }
+  zone.appendChild(suc);
+  if(!lv.done){
+    var btnRow=document.createElement("div"); btnRow.className="btn-row";
+    var vbtn=document.createElement("button"); vbtn.className="btn btn-primary";
+    vbtn.innerHTML=(levelAttempts[lvIdx]>0&&!validated[lvIdx])?"\u21bb V\u00e9rifier \u00e0 nouveau":"\u2713 V\u00e9rifier";
+    vbtn.onclick=function(){verifyLevel();};
+    btnRow.appendChild(vbtn);
+    var rbtn=document.createElement("button"); rbtn.className="btn btn-ghost";
+    rbtn.innerHTML="\u21bb Recommencer"; rbtn.onclick=function(){restartLevel();};
+    btnRow.appendChild(rbtn);
+    zone.appendChild(btnRow);
+  }
+}
+
+function isAllAnswered(){
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  if(!userAnswers[lvIdx]) return false;
+  return lv.questions.every(function(q,qi){return userAnswers[lvIdx][qi]!==undefined;});
+}
+
+function isAllCorrect(){
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  if(lv.id===1){
+    return lv.questions.every(function(q,qi){return checkAnswer(userAnswers[lvIdx][qi],q.answer);});
+  }
+  return lv.questions.every(function(q,qi){return userAnswers[lvIdx][qi]===q.ans;});
+}
+
+function verifyLevel(){
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+  if(!isAllAnswered()){
+    var rows=document.querySelectorAll("#main-zone .btn-row");
+    rows.forEach(function(row){
+      if(!row.querySelector(".msg-vide")){
+        var msg=document.createElement("div"); msg.className="msg-vide";
+        msg.style.cssText="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#1a6e88;padding:.4rem .2rem;";
+        msg.textContent="\u270F\uFE0F R\u00e9ponds \u00e0 toutes les questions avant de valider.";
+        row.insertBefore(msg,row.firstChild);
+      }
+    });
+    return;
+  }
+  levelAttempts[lvIdx]++;
+  var attempt=levelAttempts[lvIdx];
+  var allOk=isAllCorrect();
+  if(allOk){
+    validated[lvIdx]=true;
+    if(!lv.done){lv.done=true;starsEarned++;}
+    if(currentLevel<2) LEVELS[currentLevel+1].unlocked=true;
+    renderLevel(); updateHUD(); return;
+  }
+  // Afficher feedbacks
+  lv.questions.forEach(function(q,qi){
+    var ok=(lv.id===1)?checkAnswer(userAnswers[lvIdx][qi],q.answer):(userAnswers[lvIdx][qi]===q.ans);
+    var fb=$("fb-"+lvIdx+"-"+qi);
+    if(fb&&!ok){
+      if(attempt===1){
+        fb.className="q-feedback show ko";
+        fb.innerHTML="\u274c Pas tout \u00e0 fait. V\u00e9rifie ton calcul et r\u00e9essaie.";
+      } else {
+        fb.className="q-feedback show ko"; fb.innerHTML="\u274c "+q.fbKo;
+        var corr=$("corr-"+lvIdx+"-"+qi); if(corr) corr.classList.add("show");
+        if(lv.id===1){var inp=$("inp-"+lvIdx+"-"+qi);if(inp){inp.disabled=true;inp.className="num-input ko";}}
+        else {
+          document.querySelectorAll(".vf-btn").forEach(function(b){b.disabled=true;});
+          // Colorer les boutons N2/N3
+          var b0=$(lv.id&&"vf-"+lvIdx+"-"+qi+"-0"), b1=$(lv.id&&"vf-"+lvIdx+"-"+qi+"-1");
+          // Déjà géré au rendu suivant
+        }
+      }
+    }
+  });
+  var rows=document.querySelectorAll("#main-zone .btn-row");
+  if(attempt===1){
+    rows.forEach(function(row){
+      row.innerHTML="<button class='btn btn-primary' onclick='verifyLevel()'>\u21bb V\u00e9rifier \u00e0 nouveau</button>"
+        +"<button class='btn btn-ghost' onclick='restartLevel()'>\u21bb Recommencer</button>";
+    });
+  } else {
+    validated[lvIdx]=true;
+    document.querySelectorAll(".vf-btn").forEach(function(b){b.disabled=true;});
+    rows.forEach(function(row){
+      row.innerHTML="<button class='btn btn-ghost' onclick='restartLevel()'>\u21bb Recommencer</button>";
+    });
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function goNextLevel(){
+  if(currentLevel<2){currentLevel++;renderLevel();window.scrollTo({top:0,behavior:"smooth"});}
+}
+function restartLevel(){
+  var lvIdx=currentLevel;
+  userAnswers[lvIdx]={}; levelAttempts[lvIdx]=0; validated[lvIdx]=false;
+  if(LEVELS[lvIdx].done){starsEarned=Math.max(0,starsEarned-1);LEVELS[lvIdx].done=false;}
+  renderLevel(); window.scrollTo({top:0,behavior:"smooth"});
+}
+function showFinal(){
+  $("main-zone").style.display="none"; $("level-nav").style.display="none";
+  $("level-banner").style.display="none"; $("level-mission").style.display="none";
+  $("hud-stars").parentElement.style.display="none";
+  $("final-screen").classList.add("show");
+  $("final-stars").textContent="\u2b50".repeat(starsEarned)+"\u2606".repeat(3-starsEarned)+" ("+starsEarned+"/3)";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function restartAll(){
+  currentLevel=0; starsEarned=0; userAnswers={}; validated={}; levelAttempts=[0,0,0];
+  LEVELS.forEach(function(lv,i){lv.unlocked=(i===0);lv.done=false;});
+  $("final-screen").classList.remove("show");
+  ["main-zone","level-nav","level-banner","level-mission"].forEach(function(id){$(id).style.display="";});
+  $("hud-stars").parentElement.style.display="";
+  renderLevel(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+renderLevel();
+</script>
+</body>
+</html>
