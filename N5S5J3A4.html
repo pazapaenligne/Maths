@@ -153,7 +153,7 @@
     padding:1.2rem 1.4rem;margin-bottom:1.4rem;}
   .retenir-title{font-weight:800;color:var(--day-dark);font-size:.95rem;margin-bottom:.7rem;}
   .retenir-steps{font-size:.88rem;line-height:2;color:var(--text);
-    font-family:'JetBrains Mono',monospace;}
+    font-family:'JetBrains Mono',monospace;white-space:pre-line;}
   .retenir-ex{background:var(--day-light);border-radius:8px;padding:.6rem 1rem;
     margin-top:.6rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;
     color:var(--day-dark);line-height:1.9;white-space:pre-line;}
@@ -454,6 +454,25 @@ function renderLevel(){
 function verifyLevel(){
   var lv=LEVELS[currentLevel], lvIdx=currentLevel;
   if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+  // Vérifier qu'au moins une réponse a été saisie
+  var auMoinsUne=lv.questions.some(function(q,qi){
+    var v=String(userAnswers[lvIdx][qi]||"").trim();
+    return v!=="";
+  });
+  if(!auMoinsUne){
+    var rows=document.querySelectorAll("#main-zone .btn-row");
+    rows.forEach(function(row){
+      var msg=row.querySelector(".msg-vide");
+      if(!msg){
+        msg=document.createElement("div");
+        msg.className="msg-vide";
+        msg.style.cssText="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#8f2f2f;padding:.4rem .2rem;";
+        msg.textContent="✏️ Saisis au moins une réponse avant de valider.";
+        row.insertBefore(msg,row.firstChild);
+      }
+    });
+    return;
+  }
   levelAttempts[lvIdx]++;
   var attempt=levelAttempts[lvIdx];
   var allOk=true;
