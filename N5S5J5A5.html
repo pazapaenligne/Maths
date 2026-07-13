@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>L'atelier de badges – S5 J5 – 5e</title>
+<style>
+:root{
+  --bg:#101820; --bg2:#172630;
+  --panel:#1f323d; --panel2:#233947;
+  --work:#f7f3e8;
+  --accent:#c98a1c; --accent-dark:#8f5f0f; --accent-light:#faf0d9;
+  --orange:#4a6fa5; --orange-dark:#345277;
+  --yellow:#facc15;
+  --green:#35b56f; --green-dark:#268c56; --green-dim:#e3f7ec;
+  --red:#e8665a; --red-dim:#fce6e3;
+  --line:#2c4250; --line-lt:#3a5261;
+  --text:#f5f7f8; --text-dark:#24313a; --muted:#9eb0ba; --dim:#5c7482;
+  --radius:14px; --radius-sm:10px;
+  --title-font:"Trebuchet MS",Arial,sans-serif;
+  --sans:Arial,Helvetica,sans-serif;
+  --mono:"Courier New",Courier,monospace;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.35);
+  --shadow-md:0 10px 28px rgba(0,0,0,.5);
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:
+    radial-gradient(circle at 12% 8%, rgba(74,111,165,.12), transparent 30%),
+    radial-gradient(circle at 90% 15%, rgba(201,138,28,.25), transparent 38%),
+    radial-gradient(circle at 70% 90%, rgba(53,181,111,.1), transparent 35%),
+    linear-gradient(160deg,#0d141b 0%,#101820 45%,#0c1319 100%);
+  color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;line-height:1.6;
+  display:flex;flex-direction:column;align-items:center;}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
+
+.hud{position:fixed;top:0;left:0;right:0;z-index:25;display:flex;align-items:center;justify-content:center;gap:.9rem;
+  background:rgba(16,24,32,.9);backdrop-filter:blur(8px);border-bottom:2px solid var(--accent);padding:.45rem .8rem;box-shadow:var(--shadow-sm);}
+.hud-stars{font-size:.95rem;letter-spacing:.05em;color:var(--line-lt);white-space:nowrap;}
+.hud-stars .on{color:var(--yellow);text-shadow:0 0 8px rgba(250,204,21,.7);}
+.hud-count{font-weight:700;font-size:.72rem;color:var(--accent);white-space:nowrap;}
+.hud-timer{font-family:var(--mono);font-weight:700;font-size:.85rem;color:var(--yellow);background:#05090c;border:1.5px solid var(--line-lt);border-radius:8px;padding:.2rem .5rem;white-space:nowrap;text-shadow:0 0 8px rgba(250,204,21,.5);}
+.hud-btn{background:var(--panel);border:1.5px solid var(--line-lt);border-radius:8px;cursor:pointer;font-size:1rem;padding:.35rem .55rem;min-height:38px;min-width:38px;color:var(--text);}
+.hud-btn.off{opacity:.4;}
+@media(max-width:600px){.hud{gap:.5rem;padding:.4rem .5rem;}.hud-stars{font-size:.8rem;}.hud-count{font-size:.62rem;}.hud-timer{font-size:.7rem;}}
+
+.topspacer{height:52px;}
+
+.titlebar{width:100%;max-width:900px;text-align:center;padding:.6rem 1rem .3rem;}
+.titlebar .t1{font-family:var(--title-font);font-weight:800;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--text);letter-spacing:.01em;text-shadow:0 0 18px rgba(201,138,28,.35);}
+.titlebar .t1 .hl{color:var(--accent);}
+.titlebar .t2{font-size:.74rem;color:var(--muted);margin-top:.15rem;}
+
+.scene-wrap{width:100%;max-width:900px;padding:.6rem 1rem 2rem;position:relative;}
+.scene{position:relative;background:linear-gradient(180deg,var(--bg2),var(--bg));border:1.5px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:1.2rem 1rem 1.4rem;overflow:hidden;}
+.scene::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:30px 30px;mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 30%,transparent 85%);}
+
+.workbench-litter{position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.5;}
+.wl{position:absolute;font-size:1.3rem;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4));}
+.wl1{top:6%;left:4%;transform:rotate(-18deg);}
+.wl2{top:8%;right:6%;transform:rotate(12deg);font-size:1.1rem;}
+.wl3{top:38%;left:2%;transform:rotate(-8deg);font-size:1rem;}
+.wl4{bottom:8%;left:6%;transform:rotate(15deg);animation:gearspin 8s linear infinite;transform-origin:center;}
+.wl5{bottom:5%;right:4%;transform:rotate(-20deg);}
+.wl6{top:44%;right:3%;font-size:1rem;transform:rotate(10deg);}
+.wl7{bottom:36%;left:44%;font-size:.9rem;transform:rotate(-25deg);}
+.wl8{top:5%;left:42%;font-size:1rem;transform:rotate(6deg);}
+.wl9{bottom:14%;left:20%;font-size:.85rem;transform:rotate(-14deg);}
+.wl10{top:22%;right:12%;font-size:.8rem;transform:rotate(30deg);}
+.wl11{bottom:10%;right:22%;font-size:1.05rem;transform:rotate(-8deg);}
+.wl12{top:16%;left:14%;font-size:.7rem;transform:rotate(0deg);opacity:.7;}
+.wl13{bottom:40%;right:16%;font-size:.85rem;transform:rotate(18deg);}
+.wl14{top:30%;left:22%;font-size:.95rem;transform:rotate(-30deg);}
+@keyframes gearspin{to{transform:rotate(375deg);}}
+
+.prod-line{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.1rem;background:#0d151c;border:1.5px solid var(--line);border-radius:12px;padding:1rem;}
+.machine{display:flex;flex-direction:column;align-items:center;gap:.35rem;position:relative;}
+.machine-body{width:9rem;height:8.4rem;position:relative;}
+.machine-lamp{position:absolute;top:-.3rem;right:1.6rem;width:.55rem;height:.55rem;border-radius:50%;background:var(--yellow);box-shadow:0 0 8px rgba(250,204,21,.8);animation:lampblink 2.6s ease-in-out infinite;z-index:2;}
+@keyframes lampblink{0%,100%{opacity:1;}50%{opacity:.25;}}
+.machine-lamp.flash{background:var(--green);box-shadow:0 0 14px rgba(53,181,111,1);animation:none;}
+#press-arm{transform-origin:70px 60px;animation:armidle 3.2s ease-in-out infinite;}
+@keyframes armidle{0%,80%,100%{transform:translateY(0);}88%{transform:translateY(9px);}94%{transform:translateY(0);}}
+#press-arm.pressing{animation:armpress .5s ease-in-out 3;}
+@keyframes armpress{0%,100%{transform:translateY(0);}50%{transform:translateY(16px);}}
+#press-arm.pulse-once{animation:armpulseonce .5s cubic-bezier(.36,.1,.4,1.4);}
+@keyframes armpulseonce{0%{transform:translateY(0);}35%{transform:translateY(18px);}55%{transform:translateY(14px);}75%{transform:translateY(2px);}100%{transform:translateY(0);}}
+.machine-body.vibrate{animation:vibrate .4s ease;}
+@keyframes vibrate{0%,100%{transform:translate(0,0);}20%{transform:translate(-2px,1px);}40%{transform:translate(2px,-1px);}60%{transform:translate(-1px,1px);}80%{transform:translate(1px,-1px);}}
+.voyant-strip{display:flex;gap:.4rem;}
+.voyant{width:.65rem;height:.65rem;border-radius:50%;background:var(--accent);box-shadow:0 0 6px rgba(201,138,28,.7);transition:background .5s,box-shadow .5s;animation:voyantidle 2.4s ease-in-out infinite;}
+.voyant:nth-child(2){animation-delay:.2s;}
+.voyant:nth-child(3){animation-delay:.4s;}
+.voyant:nth-child(4){animation-delay:.6s;}
+.voyant:nth-child(5){animation-delay:.8s;}
+@keyframes voyantidle{0%,100%{opacity:1;}50%{opacity:.55;}}
+.voyant.off{background:#3a5261;box-shadow:none;animation:none;opacity:1;}
+.voyant.on{background:var(--green);box-shadow:0 0 9px rgba(53,181,111,.9);animation:none;opacity:1;}
+.machine-lbl{font-family:var(--title-font);font-size:.68rem;color:var(--muted);font-weight:800;letter-spacing:.05em;text-transform:uppercase;}
+
+.btn-launch{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;width:6.4rem;height:6.4rem;border-radius:50%;border:5px solid #7a1f16;background:radial-gradient(circle at 35% 30%,#c73a2a,#8a2318);color:#fff;cursor:not-allowed;opacity:.5;filter:grayscale(.55);transition:all .3s;box-shadow:inset 0 4px 8px rgba(255,255,255,.15),inset 0 -5px 10px rgba(0,0,0,.4);flex-shrink:0;}
+.btn-launch .bl-ico{font-size:1.7rem;}
+.btn-launch .bl-txt{font-family:var(--title-font);font-weight:800;font-size:.6rem;letter-spacing:.03em;line-height:1.15;text-align:center;}
+.btn-launch.ready{cursor:pointer;opacity:1;filter:none;background:radial-gradient(circle at 35% 30%,#e0a92e,#8f5f0f);border-color:#c98a1c;animation:launchpulse 1.5s ease-in-out infinite;}
+.btn-launch.activate-flash{animation:launchactivate .7s ease-out;}
+@keyframes launchactivate{0%{box-shadow:0 0 0 0 rgba(53,181,111,.9);transform:scale(1);}30%{box-shadow:0 0 0 16px rgba(53,181,111,0);transform:scale(1.12);}100%{box-shadow:0 0 0 0 rgba(53,181,111,0);transform:scale(1);}}
+@keyframes launchpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,138,28,.6),inset 0 4px 8px rgba(255,255,255,.25),inset 0 -5px 10px rgba(0,0,0,.4);}50%{box-shadow:0 0 0 14px rgba(201,138,28,0),inset 0 4px 8px rgba(255,255,255,.25),inset 0 -5px 10px rgba(0,0,0,.4);}}
+.btn-launch:active.ready{transform:scale(.94);}
+
+.line-flow{display:flex;flex-direction:column;gap:.6rem;flex:1;min-width:220px;}
+.conveyor{position:relative;background:#1a2530;border:1.5px solid var(--line);border-radius:10px;padding:.5rem .7rem;}
+.conveyor-lbl{font-size:.58rem;font-weight:700;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:.3rem;}
+.conveyor-belt{height:2.8rem;background-image:repeating-linear-gradient(90deg,#2c3e4a,#2c3e4a 14px,#233240 14px,#233240 28px);background-size:56px 100%;border-radius:6px;display:flex;align-items:center;gap:.5rem;padding:0 .6rem;overflow:hidden;position:relative;animation:beltscroll 1.4s linear infinite;}
+@keyframes beltscroll{from{background-position-x:0;}to{background-position-x:-56px;}}
+.conveyor-badge{position:absolute;top:50%;left:-10%;width:1.8rem;height:1.8rem;margin-top:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;box-shadow:0 0 8px rgba(0,0,0,.35);animation:beltTravel 1.2s cubic-bezier(.45,0,.6,1) forwards;}
+@keyframes beltTravel{0%{left:-10%;opacity:0;transform:translateY(-50%) scale(.7);}10%{opacity:1;transform:translateY(-50%) scale(1);}80%{left:90%;opacity:1;transform:translateY(-50%) scale(1);}100%{left:102%;opacity:0;transform:translateY(10%) scale(.55) rotate(20deg);}}
+.crate{display:flex;align-items:center;gap:.6rem;background:#1a2530;border:1.5px solid var(--line);border-radius:10px;padding:.5rem .7rem;}
+.crate-box{width:5.4rem;height:3.6rem;border:4px solid #6b4a2c;border-radius:5px;background:#3a2a18;position:relative;overflow:hidden;flex-shrink:0;display:flex;flex-wrap:wrap;align-content:flex-end;justify-content:center;gap:3px;padding:5px;transition:transform .18s ease;}
+.crate-box::before{content:"";position:absolute;inset:3px;border:1.5px dashed rgba(255,255,255,.12);border-radius:3px;pointer-events:none;z-index:0;}
+.crate-badge{width:.65rem;height:.65rem;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.25);position:relative;z-index:1;animation:cratedrop .35s cubic-bezier(.36,.1,.4,1.5) both;}
+@keyframes cratedrop{0%{transform:translateY(-14px) scale(.4);opacity:0;}70%{transform:translateY(2px) scale(1.05);opacity:1;}100%{transform:translateY(0) scale(1);opacity:1;}}
+.crate-count{position:absolute;bottom:2px;right:4px;z-index:2;font-family:var(--title-font);font-weight:800;font-size:.7rem;color:rgba(255,255,255,.55);text-shadow:0 1px 2px rgba(0,0,0,.6);}
+.crate-lbl{font-size:.62rem;font-weight:700;letter-spacing:.04em;color:var(--dim);text-transform:uppercase;}
+@media(max-width:640px){.prod-line{flex-direction:column;}.line-flow{width:100%;}}
+
+.table{position:relative;z-index:1;background:#2a2015;border:2px solid #4a3a26;border-radius:10px;padding:1rem .9rem;}
+.table::before{content:"\1F4CB TABLE DE CONTR\00D4LE";display:block;font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.1em;color:#a5906a;margin-bottom:.7rem;}
+.fiches-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;}
+@media(max-width:640px){.fiches-row{grid-template-columns:repeat(2,1fr);}}
+
+.fiche-obj{position:relative;background:#fffdf7;background-image:linear-gradient(#f0e6cc 1px,transparent 1px);background-size:100% 10px;border:1.5px solid #d8cca8;border-radius:2px;padding:.9rem .6rem .6rem;text-align:center;cursor:pointer;transition:all .2s;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;box-shadow:2px 3px 0 rgba(0,0,0,.15),0 4px 10px rgba(0,0,0,.25);}
+.fiche-obj::before{content:"";position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 16px 16px 0;border-color:transparent #e3d7b8 transparent transparent;}
+.fiche-obj::after{content:"\1F4CE";position:absolute;top:-.5rem;left:.6rem;font-size:1.1rem;transform:rotate(-25deg);filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));}
+.fiche-obj .fo-ico{font-size:1.5rem;}
+.fiche-obj .fo-lbl{font-family:var(--title-font);font-weight:800;font-size:.72rem;color:var(--text-dark);}
+.fiche-obj .fo-status{font-size:.6rem;font-weight:700;letter-spacing:.03em;color:var(--dim);}
+.fiche-obj:hover{transform:translateY(-3px) rotate(-1deg);box-shadow:2px 5px 0 rgba(0,0,0,.15),0 10px 18px rgba(0,0,0,.35);}
+.fiche-obj.locked{cursor:default;filter:grayscale(.7);opacity:.55;}
+.fiche-obj.locked:hover{transform:none;box-shadow:2px 3px 0 rgba(0,0,0,.15),0 4px 10px rgba(0,0,0,.25);}
+.fiche-obj.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,138,28,.3),2px 3px 0 rgba(0,0,0,.15),0 8px 16px rgba(0,0,0,.3);animation:fichepulse 1.8s ease-in-out infinite;}
+@keyframes fichepulse{0%,100%{box-shadow:0 0 0 3px rgba(201,138,28,.28),2px 3px 0 rgba(0,0,0,.15),0 8px 16px rgba(0,0,0,.3);}50%{box-shadow:0 0 0 7px rgba(201,138,28,.08),2px 3px 0 rgba(0,0,0,.15),0 8px 16px rgba(0,0,0,.3);}}
+.fiche-obj.active .fo-status{color:var(--accent-dark);}
+.fiche-obj.validated{cursor:pointer;transform:rotate(-2deg);box-shadow:1px 4px 0 rgba(0,0,0,.18),0 6px 14px rgba(0,0,0,.3);}
+.fiche-obj.validated:hover{transform:rotate(-2deg) translateY(-3px);}
+.fiche-obj.validated .fo-status{color:var(--green-dark);}
+.fiche-stamp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.fiche-stamp span{border:3px solid var(--green);color:var(--green-dark);font-family:var(--title-font);font-weight:800;font-size:.68rem;letter-spacing:.03em;padding:.15rem .5rem;border-radius:6px;transform:rotate(-9deg);background:rgba(227,247,236,.88);opacity:0;}
+.fiche-obj.validated .fiche-stamp span{animation:stampin .4s ease forwards;}
+@keyframes stampin{0%{opacity:0;transform:rotate(-9deg) scale(1.8);}60%{opacity:1;}100%{opacity:1;transform:rotate(-9deg) scale(1);}}
+
+.start-veil{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(8,12,16,.82);backdrop-filter:blur(3px);padding:1.2rem;}
+.start-veil.hidden{display:none;}
+.start-box{max-width:440px;width:100%;background:var(--panel);border:1.5px solid var(--line);border-top:4px solid var(--accent);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:1.5rem 1.4rem;text-align:center;animation:pop .5s cubic-bezier(.18,.89,.32,1.3);}
+@keyframes pop{0%{transform:scale(.85);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.start-box .s-ico{font-size:2.6rem;margin-bottom:.5rem;}
+.start-box .s-title{font-family:var(--title-font);font-weight:800;font-size:clamp(1.2rem,4.4vw,1.6rem);color:var(--accent);margin-bottom:.5rem;text-shadow:0 0 18px rgba(201,138,28,.4);}
+.start-box .s-txt{font-size:.86rem;color:var(--text);line-height:1.7;text-align:left;margin-bottom:1rem;}
+.start-box .s-txt b{color:var(--accent);}
+.btn-start{display:inline-flex;align-items:center;gap:.5rem;background:var(--accent);color:#fff;font-weight:800;font-size:1rem;letter-spacing:.02em;padding:.9rem 1.8rem;border:none;border-radius:var(--radius-sm);cursor:pointer;box-shadow:0 8px 22px rgba(201,138,28,.4);width:100%;justify-content:center;min-height:52px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.modal-overlay{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(20,15,8,.4);backdrop-filter:blur(2px);padding:1rem;border-radius:inherit;}
+.modal-overlay.show{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-panel{width:100%;max-width:520px;max-height:min(600px,80%);overflow-y:auto;background:#fffdf7;background-image:linear-gradient(#f0e6cc 1px,transparent 1px);background-size:100% 26px;border:1.5px solid #d8cca8;border-top:6px solid var(--accent);border-radius:6px;box-shadow:0 24px 50px rgba(0,0,0,.55);transform:scale(.15);opacity:0;transform-origin:50% 50%;transition:transform .4s cubic-bezier(.2,.85,.25,1.15),opacity .3s ease;}
+.modal-panel.show{transform:scale(1);opacity:1;}
+.modal-head{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;background:var(--bg2);border-bottom:2px solid var(--accent);position:sticky;top:0;z-index:2;}
+.modal-ico{font-size:1.4rem;width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;background:#101820;border-radius:9px;border:1.5px solid var(--line-lt);flex-shrink:0;}
+.modal-meta{flex:1;min-width:0;}
+.modal-name{font-family:var(--title-font);font-weight:800;font-size:1rem;color:var(--text);}
+.modal-comp{font-size:.68rem;color:var(--accent);font-weight:600;margin-top:.1rem;}
+.modal-close{background:transparent;border:1.5px solid var(--line-lt);color:var(--muted);border-radius:8px;font-size:1rem;min-width:38px;min-height:38px;cursor:pointer;flex-shrink:0;}
+.modal-close:hover{border-color:var(--accent);color:var(--accent);}
+.modal-body{padding:1.1rem;background:var(--work);border-radius:0 0 var(--radius) var(--radius);}
+.modal-body::before{content:"FICHE DE PRODUCTION";display:block;font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.1em;color:#9aa4ab;margin-bottom:.7rem;opacity:.65;}
+
+.intro{font-weight:700;font-size:clamp(.84rem,2.3vw,.94rem);color:var(--accent-dark);background:var(--accent-light);border:1px solid #e6c98a;border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.6;}
+.sticky-vals{position:sticky;z-index:1;box-shadow:0 4px 8px -4px rgba(0,0,0,.15);}
+.intro .norm{font-weight:400;color:var(--text-dark);}
+.fiche-card{background:#fffdf7;border:1.5px solid #e3d7b8;border-radius:var(--radius-sm);padding:.8rem .95rem;margin-bottom:.9rem;position:relative;}
+.fiche-card::before{content:"";position:absolute;left:0;top:.6rem;bottom:.6rem;width:4px;background:var(--accent);border-radius:2px;}
+.fiche-txt{font-size:clamp(.84rem,2.3vw,.92rem);color:var(--text-dark);line-height:1.6;padding-left:.5rem;}
+.seq-target{min-height:52px;background:#fff;border:2px dashed #d8cca8;border-radius:8px;padding:.6rem;margin-bottom:.8rem;}
+.seq-target.empty::before{content:"Aucune étape placée pour l'instant.";font-family:var(--mono);font-size:.7rem;color:#a99878;}
+.seq-target .fiche-card{cursor:pointer;margin-bottom:.5rem;}
+.seq-target .fiche-card:last-child{margin-bottom:0;}
+.bank-hint{font-family:var(--mono);font-size:.68rem;color:#7a6d4f;margin-bottom:.5rem;}
+.step-chip{cursor:pointer;background:#fff;border:2px solid #d8cca8;border-radius:8px;padding:.55rem .8rem;font-family:var(--mono);font-weight:700;font-size:.86rem;color:var(--text-dark);margin-bottom:.5rem;box-shadow:0 2px 4px rgba(36,49,58,.08);transition:all .15s;}
+.step-chip:hover{border-color:var(--accent);transform:translateY(-1px);}
+.m5-progress{display:flex;justify-content:center;gap:.5rem;margin-bottom:1rem;}
+.m5-dot{width:.7rem;height:.7rem;border-radius:50%;background:#d8cca8;transition:all .3s;}
+.m5-dot.current{background:var(--orange);box-shadow:0 0 0 3px rgba(74,111,165,.3);animation:m5dotpulse 1.4s ease-in-out infinite;}
+@keyframes m5dotpulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.m5-dot.done{background:var(--green);}
+.qcm-q{font-weight:700;font-size:clamp(.84rem,2.3vw,.92rem);color:var(--text-dark);margin:.9rem 0 .7rem;line-height:1.6;}
+.opts{display:flex;flex-wrap:wrap;gap:.5rem;}
+.opt{cursor:pointer;text-align:center;background:#fff;border:2px solid #d8cca8;border-radius:var(--radius-sm);padding:.65rem 1rem;font-family:var(--mono);font-weight:700;font-size:clamp(.8rem,2.3vw,.9rem);color:var(--text-dark);transition:all .18s;min-height:44px;display:flex;align-items:center;justify-content:center;gap:.4rem;flex:1;min-width:110px;box-shadow:0 2px 4px rgba(36,49,58,.08);}
+.opt:hover{border-color:var(--accent);transform:translateY(-1px);}
+.opt.sel{background:var(--accent-light);border-color:var(--accent);color:var(--accent-dark);}
+.opt.ok{border-color:var(--green);background:var(--green-dim);color:var(--green-dark);}
+.opt.ok::before{content:"\2713";}
+.opt.ko{border-color:var(--red);background:var(--red-dim);color:#a83426;}
+.opt.ko::before{content:"\2715";}
+.q-item{margin-top:1rem;padding-top:.9rem;border-top:1px dashed #d8cca8;}
+.q-item:first-of-type{border-top:none;margin-top:0;}
+.q-text{font-size:clamp(.84rem,2.3vw,.92rem);color:var(--text-dark);margin-bottom:.6rem;line-height:1.6;font-weight:600;}
+.ans-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.cell-in{border:3px solid #d8cca8;border-radius:8px;background:#fff;color:var(--text-dark);font-family:var(--mono);font-size:16px;font-weight:700;text-align:center;padding:.45rem;outline:none;min-height:44px;width:125px;}
+.cell-in:focus{border-color:var(--accent);}
+.cell-in.ok{border-color:var(--green);background:var(--green-dim);color:var(--green-dark);}
+.cell-in.ko{border-color:var(--red);background:var(--red-dim);color:#a83426;}
+.unit-lbl{font-size:.82rem;color:#7a6d4f;font-weight:600;}
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.3rem;border-radius:var(--radius-sm);font-weight:700;font-size:clamp(.74rem,2.2vw,.8rem);letter-spacing:.02em;cursor:pointer;border:none;min-height:46px;}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-try{background:var(--accent);color:#fff;}
+.btn-try:hover:not(:disabled){background:var(--accent-dark);}
+.btn-hint{background:#fff;color:#7a6d4f;border:1.5px solid #d8cca8;}
+.hint{margin-top:.8rem;background:#fff8e6;border:1.5px dashed var(--orange);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.78rem,2.2vw,.84rem);color:#6b4c05;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:1.1rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.82rem,2.3vw,.9rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;position:relative;}
+.fb.show{display:flex;}
+.fb.ok{background:var(--green-dim);border:2px solid var(--green);color:var(--green-dark);}
+.fb.ok::before{content:"FICHE VALID\00C9E";display:block;position:absolute;top:-.6rem;left:.8rem;background:var(--green);color:#fff;font-size:.6rem;font-weight:700;letter-spacing:.06em;padding:.12rem .5rem;border-radius:99px;}
+.fb.ko{background:var(--red-dim);border:2px solid var(--red);color:#a83426;}
+.fb.ko::before{content:"CONTR\00D4LE \00C0 REPRENDRE";display:block;position:absolute;top:-.6rem;left:.8rem;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;letter-spacing:.05em;padding:.12rem .5rem;border-radius:99px;}
+.correction{margin-top:.8rem;background:var(--accent-light);border:1.5px solid #e6c98a;border-radius:var(--radius-sm);padding:.8rem 1rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-weight:700;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:.4rem;}
+.correction-x{font-size:clamp(.8rem,2.2vw,.88rem);color:var(--text-dark);line-height:1.85;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-4px);}40%,80%{transform:translateX(4px);}}
+.shake{animation:shake .3s;}
+
+.carnet-overlay{position:fixed;inset:0;z-index:31;display:none;background:rgba(4,8,11,.6);}
+.carnet-overlay.show{display:block;}
+.carnet-panel{position:fixed;top:0;right:0;bottom:0;z-index:32;width:min(340px,86vw);background:var(--work);border-left:3px solid var(--accent);box-shadow:-10px 0 30px rgba(0,0,0,.5);transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;padding:0;}
+.carnet-panel.show{transform:translateX(0);}
+.carnet-band{background:var(--accent);color:#fff;padding:1rem;font-weight:700;font-size:.9rem;}
+.carnet-inner{flex:1;display:flex;flex-direction:column;padding:1rem;overflow:hidden;}
+.carnet-quote{font-size:.76rem;color:var(--text-dark);opacity:.75;line-height:1.6;margin-bottom:.9rem;font-style:italic;border-left:2px solid var(--accent);padding-left:.6rem;}
+.carnet-symbols{display:flex;gap:.4rem;margin-bottom:.6rem;flex-wrap:wrap;}
+.carnet-sym-btn{min-width:40px;min-height:40px;background:#fff;border:1.5px solid #ddd0ac;border-radius:8px;color:var(--accent-dark);font-family:var(--mono);font-size:1.05rem;font-weight:700;cursor:pointer;}
+.carnet-sym-btn:active{transform:scale(.92);background:#fff3dd;}
+.carnet-text{flex:1;min-height:280px;background:#fffdf7;border:1.5px solid #ddd0ac;border-radius:8px;color:var(--text-dark);font-family:var(--mono);font-size:15px;line-height:1.8;padding:.7rem;resize:none;outline:none;
+  background-image:repeating-linear-gradient(transparent,transparent calc(1.8em - 1px),#e3d7b8 calc(1.8em - 1px),#e3d7b8 1.8em);}
+.carnet-text:focus{border-color:var(--accent);}
+.carnet-tools{display:flex;gap:.5rem;margin-top:.8rem;}
+.carnet-tools .btn{flex:1;font-size:.7rem;min-height:42px;}
+.btn-carnet-clear{background:#fff;color:var(--text-dark);border:1.5px solid #ddd0ac;}
+.btn-carnet-close{background:var(--accent);color:#fff;}
+
+.agent-msg{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:33;background:var(--panel);border:2px solid var(--accent);border-radius:var(--radius-sm);padding:.7rem 1.1rem;max-width:min(420px,90%);text-align:center;font-size:.86rem;color:var(--text);box-shadow:var(--shadow-md);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.finale-overlay{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;background:rgba(4,10,7,.5);backdrop-filter:blur(3px);padding:1.2rem;}
+.finale-overlay.show{display:flex;animation:fadeIn .4s ease;}
+.finale-box{max-width:480px;width:100%;max-height:88vh;overflow-y:auto;background:var(--panel);border:2px solid var(--green);border-radius:var(--radius);box-shadow:0 0 40px rgba(53,181,111,.35),var(--shadow-md);padding:1.6rem 1.4rem;text-align:center;animation:pop .55s cubic-bezier(.18,.89,.32,1.3);}
+.finale-stamp{display:inline-block;border:5px solid var(--green);color:var(--green);font-family:var(--title-font);font-weight:900;font-size:clamp(1.3rem,5vw,1.8rem);letter-spacing:.03em;padding:.5rem 1.2rem;border-radius:10px;transform:rotate(-6deg);margin-bottom:1rem;animation:stampbig .5s cubic-bezier(.18,.89,.32,1.4) both;}
+.mission-title{text-align:center;font-family:var(--title-font);font-weight:800;font-size:clamp(1.05rem,4vw,1.4rem);color:#fff;letter-spacing:.02em;margin-bottom:1rem;opacity:0;animation:missiontitlein .5s ease .35s both;}
+@keyframes missiontitlein{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes stampbig{0%{transform:rotate(-6deg) scale(2.2);opacity:0;}60%{opacity:1;}100%{transform:rotate(-6deg) scale(1);opacity:1;}}
+.finale-badges{display:flex;justify-content:center;gap:.5rem;margin-bottom:.8rem;flex-wrap:wrap;}
+.finale-badges .fbg{width:2.4rem;height:2.4rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 0 10px rgba(53,181,111,.6);animation:pop .5s both;border:2px solid rgba(255,255,255,.3);}
+.finale-time{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--yellow);margin-bottom:.5rem;}
+.finale-grade{display:inline-block;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;padding:.35rem 1.2rem;border-radius:99px;margin-bottom:1rem;}
+.finale-sub{color:var(--text);font-size:.88rem;line-height:1.7;margin-bottom:1.1rem;}
+.finale-list{text-align:left;background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:1.1rem;font-size:.82rem;color:var(--text);line-height:1.95;}
+.finale-reveal{background:var(--bg2);border:1.5px solid var(--accent);border-radius:var(--radius-sm);padding:.9rem 1.1rem;margin-bottom:1.1rem;text-align:left;font-size:.82rem;color:var(--accent-light);line-height:1.7;}
+.finale-reveal b{color:var(--accent);display:block;margin-bottom:.35rem;font-size:.66rem;letter-spacing:.04em;text-transform:uppercase;}
+.btn-restart{background:var(--accent);color:#fff;font-weight:700;font-size:.82rem;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:46px;}
+.btn-restart:hover{background:var(--accent-dark);}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-stars" id="hud-stars">&#9734;&#9734;&#9734;&#9734;&#9734;</div>
+  <div class="hud-count" id="hud-count">0 / 5 CONTR&Ocirc;LES</div>
+  <div class="hud-timer" id="hud-timer">&#9201; 00:00</div>
+  <button class="hud-btn" onclick="toggleCarnet()" aria-label="Ouvrir le carnet de contr&ocirc;le">&#128221;</button>
+  <button class="hud-btn" id="sound-btn" onclick="toggleSound()" aria-label="Activer ou couper le son">&#128266;</button>
+</div>
+<div class="topspacer"></div>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="titlebar">
+  <div class="t1">&#127991;&#65039; L'atelier de <span class="hl">badges</span></div>
+  <div class="t2">Semaine 5 &middot; Jour 5 &middot; Utiliser un programme de calcul</div>
+</div>
+
+<div class="scene-wrap">
+  <div class="scene">
+    <div class="workbench-litter" aria-hidden="true">
+      <span class="wl wl1">&#9999;&#65039;</span>
+      <span class="wl wl2">&#128203;</span>
+      <span class="wl wl3">&#128204;</span>
+      <span class="wl wl4">&#9881;&#65039;</span>
+      <span class="wl wl5">&#128295;</span>
+      <span class="wl wl6">&#127991;&#65039;</span>
+      <span class="wl wl7">&#127991;&#65039;</span>
+      <span class="wl wl8">&#128230;</span>
+      <span class="wl wl9">&#128207;</span>
+      <span class="wl wl10">&#9880;</span>
+      <span class="wl wl11">&#128736;&#65039;</span>
+      <span class="wl wl12">&#9898;</span>
+      <span class="wl wl13">&#127991;&#65039;</span>
+      <span class="wl wl14">&#128736;&#65039;</span>
+    </div>
+
+    <div class="prod-line">
+      <div class="machine">
+        <div class="machine-lamp" id="machine-lamp"></div>
+        <div class="machine-body">
+          <svg viewBox="0 0 140 130" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="6" y="6" width="128" height="118" rx="14" fill="#233947" stroke="#3a5261" stroke-width="3"/>
+            <rect x="16" y="16" width="108" height="4" rx="2" fill="#3a5261"/>
+            <rect x="30" y="26" width="80" height="38" rx="8" fill="#c98a1c"/>
+            <rect x="30" y="26" width="80" height="10" rx="5" fill="#e0a92e"/>
+            <g id="press-arm">
+              <rect x="52" y="64" width="36" height="10" rx="3" fill="#8f5f0f"/>
+              <rect x="60" y="74" width="20" height="16" rx="3" fill="#8f5f0f"/>
+            </g>
+            <circle cx="70" cy="104" r="15" fill="#101820" stroke="#3a5261" stroke-width="3"/>
+            <circle cx="70" cy="104" r="6" fill="#233947"/>
+            <circle cx="22" cy="98" r="6" fill="#3a5261"/>
+            <circle cx="118" cy="98" r="6" fill="#3a5261"/>
+          </svg>
+        </div>
+        <div class="voyant-strip" id="voyant-strip">
+          <span class="voyant off" id="voyant-0"></span>
+          <span class="voyant off" id="voyant-1"></span>
+          <span class="voyant off" id="voyant-2"></span>
+          <span class="voyant off" id="voyant-3"></span>
+          <span class="voyant off" id="voyant-4"></span>
+        </div>
+        <div class="machine-lbl">Presse &agrave; badges</div>
+      </div>
+
+      <button class="btn-launch" id="btn-launch" onclick="tryLaunch()" disabled aria-label="Lancer la production">
+        <span class="bl-ico">&#128721;</span>
+        <span class="bl-txt" id="launch-lbl">VERROUILL&Eacute;</span>
+      </button>
+
+      <div class="line-flow">
+        <div class="conveyor">
+          <div class="conveyor-lbl">&#8595; Tapis roulant</div>
+          <div class="conveyor-belt" id="conveyor-belt"></div>
+        </div>
+        <div class="crate">
+          <div class="crate-box" id="crate-box">
+            <div class="crate-count" id="crate-count">0</div>
+          </div>
+          <div class="crate-lbl">Caisse de badges</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table">
+      <div class="fiches-row" id="fiches-row"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal();">
+    <div class="modal-panel" id="modal-panel">
+      <div class="modal-head">
+        <span class="modal-ico" id="modal-ico">&#128203;</span>
+        <div class="modal-meta">
+          <div class="modal-name" id="modal-name">Fiche</div>
+          <div class="modal-comp" id="modal-comp">Comp&eacute;tence</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()" aria-label="Fermer la fiche">&#10006;&#65039;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<div class="carnet-overlay" id="carnet-overlay" onclick="closeCarnet()"></div>
+<div class="carnet-panel" id="carnet-panel">
+  <div class="carnet-band">&#128221; Carnet de contr&ocirc;le</div>
+  <div class="carnet-inner">
+    <div class="carnet-quote">Tu peux noter tes calculs avant de r&eacute;pondre.</div>
+    <div class="carnet-symbols">
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('&#215;')" title="Multiplier" aria-label="Ins&eacute;rer le symbole multiplier">&#215;</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('&#247;')" title="Diviser" aria-label="Ins&eacute;rer le symbole diviser">&#247;</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('+')" title="Plus" aria-label="Ins&eacute;rer le symbole plus">+</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('x')" title="Lettre x" aria-label="Ins&eacute;rer la lettre x">x</button>
+    </div>
+    <textarea class="carnet-text" id="carnet-text" placeholder="Tu peux &eacute;crire ici tes calculs..." aria-label="Zone de brouillon"></textarea>
+    <div class="carnet-tools">
+      <button class="btn btn-carnet-clear" onclick="clearCarnet()">&#128465;&#65039; Effacer</button>
+      <button class="btn btn-carnet-close" onclick="closeCarnet()">&#10006;&#65039; Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="start-veil" id="start-veil">
+  <div class="start-box">
+    <div class="s-ico">&#127991;&#65039;</div>
+    <div class="s-title">L'atelier de badges</div>
+    <div class="s-txt">
+      L'atelier re&ccedil;oit une nouvelle presse enti&egrave;rement automatis&eacute;e. Contrairement aux anciennes machines, elle ne comprend pas les consignes &eacute;crites&#8201;: elle n'accepte que des programmes de calcul optimis&eacute;s. Avant le lancement de la nouvelle collection, tu dois programmer correctement la machine.
+      <br><br>
+      R&egrave;gle les <b>quatre premiers programmes</b> pos&eacute;s sur la table. La programmation finale de la presse d&eacute;finitive sera demand&eacute;e juste avant le lancement de la production.
+    </div>
+    <button class="btn-start" onclick="beginGame()">&#9654;&#65039; Ouvrir l'atelier</button>
+  </div>
+</div>
+
+<div class="finale-overlay" id="finale-overlay">
+  <div class="finale-box">
+    <div class="finale-stamp">PRODUCTION<br>VALID&Eacute;E</div>
+    <div class="mission-title">MISSION ACCOMPLIE&#8201;!</div>
+    <div class="finale-badges" id="finale-badges"></div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub">Toutes les presses ont &eacute;t&eacute; programm&eacute;es avec succ&egrave;s. La nouvelle collection de badges peut maintenant &ecirc;tre fabriqu&eacute;e.</div>
+    <div class="finale-list">
+      &#9989; Tu sais traduire un programme de calcul.<br>
+      &#9989; Tu sais &eacute;crire une expression litt&eacute;rale.<br>
+      &#9989; Tu sais reconna&icirc;tre deux programmes de calcul &eacute;quivalents.
+    </div>
+    <div class="finale-reveal">
+      <b>Bilan de la semaine</b>
+      Tu as manipul&eacute; les expressions litt&eacute;rales sous toutes leurs formes&#8201;: reconna&icirc;tre, simplifier, calculer, tester, programmer.
+      <br><br>
+      &#127919; Je traduis un programme de calcul en expression litt&eacute;rale et je reconnais deux programmes de calcul &eacute;quivalents.
+    </div>
+    <button class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+0.03);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+dur-0.04);
+  g.gain.linearRampToValueAtTime(0.0001,t+dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+function sClick(){if(!soundOn)return;beep(700,0,0.05,"square",0.07);}
+function sStart(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.3,0.06,1500,400,now);
+  beep(520,0.1,0.14,"triangle",0.08);
+  noise(0.06,0.09,3200,900,now+0.32);
+}
+function sOk(){
+  if(!soundOn)return;
+  beep(880,0,0.08,"sine",0.11);
+  beep(1320,0.07,0.13,"sine",0.1);
+}
+function sBad(){
+  if(!soundOn)return;
+  beep(280,0,0.13,"sine",0.08);
+}
+function sAttn(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.09,0.08,700,200,now);
+  beep(470,0.02,0.08,"sine",0.06);
+}
+function sHint(){
+  if(!soundOn)return;
+  beep(1550,0,0.06,"triangle",0.07);
+}
+function sCardOpen(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.22,0.06,4600,1300,now);
+}
+function sCardClose(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.1,0.06,2000,600,now);
+}
+function sStamp(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.06,0.11,900,250,now);
+  beep(200,0,0.1,"triangle",0.09);
+}
+function sJingle(){
+  if(!soundOn)return;
+  beep(659,0,0.12,"sine",0.12);
+  beep(880,0.1,0.14,"sine",0.12);
+  beep(1174,0.22,0.24,"sine",0.13);
+}
+function sPress(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.4,0.09,1200,300,now);
+  beep(180,0.1,0.3,"sawtooth",0.09);
+}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2600);}
+
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+function normNum(s){var value=String(s).trim().replace(/\s/g,'');if(!/^\d+$/.test(value))return null;return Number(value);}
+function shuffleOrder(n){
+  var a=[];for(var i=0;i<n;i++)a.push(i);
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+var totalSec=0,totalInt=null;
+var gameRunning=false;
+function timerTick(){
+  totalSec++;
+  var h=$("hud-timer");
+  if(h)h.innerHTML="&#9201; "+fmt(totalSec);
+}
+function pauseTimer(){ clearInterval(totalInt); totalInt=null; pauseTelemetryTic(); }
+function resumeTimer(){
+  if(!gameRunning) return;
+  clearInterval(totalInt);
+  totalInt=setInterval(timerTick,1000);
+  scheduleTelemetryTic();
+}
+var telemetryTimeout=null;
+function scheduleTelemetryTic(){
+  clearTimeout(telemetryTimeout);
+  if(!gameRunning) return;
+  var delay=8000+Math.random()*4000;
+  telemetryTimeout=setTimeout(function(){
+    if(soundOn) beep(1800,0,0.03,"sine",0.015);
+    scheduleTelemetryTic();
+  },delay);
+}
+function pauseTelemetryTic(){ clearTimeout(telemetryTimeout); telemetryTimeout=null; }
+document.addEventListener("visibilitychange", function(){ if(document.hidden){ pauseTimer(); } else{ resumeTimer(); } });
+window.addEventListener("blur", pauseTimer);
+window.addEventListener("focus", function(){ if(!document.hidden) resumeTimer(); });
+
+var MISSIONS=[
+ {ico:"&#9654;&#65039;", name:"Ex&eacute;cuter le programme", comp:"Suivre les &eacute;tapes d'un programme"},
+ {ico:"&#128260;", name:"Compl&eacute;ter le programme", comp:"Retrouver une &eacute;tape manquante"},
+ {ico:"&#128221;", name:"Traduire en expression", comp:"&Eacute;crire l'expression litt&eacute;rale d'un programme"},
+ {ico:"&#9881;&#65039;", name:"Optimiser la machine", comp:"Reconna&icirc;tre un programme &eacute;quivalent"},
+ {ico:"&#128721;", name:"Programmation finale", comp:"Construire un programme complet"}
+];
+var N=MISSIONS.length;
+var solved=[false,false,false,false,false];
+var openMi=null;
+
+/* Mission 1 : Exécuter le programme — 5 programmes à calculer pas à pas */
+var M1_ITEMS=[
+  {steps:"&#215;5, +8", val:4, ans:28},
+  {steps:"+3, &#215;2", val:5, ans:16},
+  {steps:"&#215;4, &minus;7", val:6, ans:17},
+  {steps:"&minus;2, &#215;3", val:9, ans:21},
+  {steps:"&#215;6, +1", val:3, ans:19}
+];
+
+/* Mission 2 : Compléter le programme — une étape manquante par programme */
+var M2_ITEMS=[
+  {steps:"&#215;7, ?", target:"7x + 8", opts:["Ajouter 8","Multiplier par 8","Soustraire 8"], correct:0},
+  {steps:"+4, ?", target:"2x + 8", opts:["Multiplier par 2","Ajouter 2","Diviser par 2"], correct:0},
+  {steps:"?, +5", target:"3x + 5", opts:["Multiplier par 3","Ajouter 3","Diviser par 3"], correct:0}
+];
+
+/* Mission 3 : Traduire en expression littérale (4 choix, distracteurs crédibles) */
+var M3_ITEMS=[
+  {steps:"&#215;11, +3, &#215;3", opts:["33x + 9","33(x + 9)","3(11x + 3)","11x + 9","33 + x"], correct:0},
+  {steps:"+4, &#215;2", opts:["2x + 8","2(x + 8)","2x + 4","x + 8"], correct:0},
+  {steps:"&#215;5, &minus;2, &#215;2", opts:["10x &minus; 4","10(x &minus; 2)","10x &minus; 2","5x &minus; 4"], correct:0}
+];
+
+/* Mission 4 : Optimiser la machine — avec expression intermédiaire affichée */
+var M4_ITEMS=[
+  {steps:"&#215;7, +8, &minus;2x", expr:"7x + 8 &minus; 2x", opts:["Multiplier par 5 puis ajouter 8","Multiplier par 7 puis ajouter 6","Multiplier par 5 puis ajouter 6"], correct:0},
+  {steps:"&#215;3, +10, +2x", expr:"3x + 10 + 2x", opts:["Multiplier par 5 puis ajouter 10","Multiplier par 3 puis ajouter 12","Multiplier par 5 puis soustraire 10"], correct:0},
+  {steps:"&#215;8, &minus;3, &minus;3x", expr:"8x &minus; 3 &minus; 3x", opts:["Multiplier par 5 puis soustraire 3","Multiplier par 8 puis soustraire 6","Multiplier par 5 puis ajouter 3"], correct:0}
+];
+var m4Picks=[null,null,null];
+var m2Order=null, m3Order=null, m4Order=null;
+
+/* Mission 5 : Programmation finale — vraie console, 5 blocs dont 2 distracteurs */
+var M5_TARGET="12x + 6";
+var M5_CHIPS=["Multiplier par 9","Ajouter 6","Ajouter le triple du nombre de d&eacute;part","Multiplier par 5","Ajouter 12"];
+var M5_ORDER=[0,2,1];
+var m5seq=[];
+
+function buildFiches(){
+  var row=$("fiches-row");row.innerHTML="";
+  for(var mi=0;mi<4;mi++){
+    var M=MISSIONS[mi];
+    var state = solved[mi] ? "validated" : ((mi===0||solved[mi-1]) ? "active" : "locked");
+    var div=document.createElement("div");
+    div.className="fiche-obj "+state;
+    div.id="fiche-"+mi;
+    if(state!=="locked") div.onclick=(function(idx){return function(){openFiche(idx);};})(mi);
+    var statusTxt = solved[mi]?"Valid&eacute;e":(state==="locked"?"&Agrave; v&eacute;rifier":"&Agrave; contr&ocirc;ler");
+    div.innerHTML='<span class="fo-ico">'+M.ico+'</span><span class="fo-lbl">'+M.name+'</span><span class="fo-status">'+statusTxt+'</span>'
+      +(solved[mi]?'<div class="fiche-stamp"><span>&#10003; VALID&Eacute;</span></div>':'');
+    row.appendChild(div);
+  }
+}
+function refreshLaunchButton(){
+  var allDone =
+    solved[0] &&
+    solved[1] &&
+    solved[2] &&
+    solved[3];
+
+  var productionDone=solved[4];
+
+  var btn=$("btn-launch");
+  var lbl=$("launch-lbl");
+
+  if(!btn || !lbl) return;
+
+  btn.disabled=!allDone || productionDone;
+
+  var wasReady=btn.classList.contains("ready");
+  var nowReady=allDone && !productionDone;
+  btn.classList.toggle("ready", nowReady);
+  if(nowReady && !wasReady){
+    btn.classList.add("activate-flash");
+    setTimeout(function(){ btn.classList.remove("activate-flash"); },700);
+  }
+
+  if(productionDone){
+    lbl.textContent="Production lanc\u00e9e";
+  }else if(allDone){
+    lbl.textContent="Pr\u00eat";
+  }else{
+    lbl.textContent="Verrouill\u00e9";
+  }
+
+  lbl.classList.toggle(
+    "ready",
+    allDone && !productionDone
+  );
+}
+function updateVoyant(mi,on){
+  var v=$("voyant-"+mi);if(!v)return;
+  v.classList.toggle("off",!on);
+  v.classList.toggle("on",on);
+}
+function updateCrate(){
+  var got=solved.filter(Boolean).length;
+  var box=$("crate-box");
+  if(box){
+    var colors=["#c98a1c","#e0a92e","#8f5f0f","#35b56f","#c98a1c"];
+    var existing=box.querySelectorAll(".crate-badge").length;
+    for(var i=existing;i<got;i++){
+      var d=document.createElement("div");
+      d.className="crate-badge";
+      d.style.background=colors[i%colors.length];
+      d.style.animationDelay=(i*0.05)+"s";
+      box.insertBefore(d, $("crate-count"));
+    }
+  }
+  var cnt=$("crate-count");if(cnt)cnt.textContent=got;
+}
+function addConveyorBadge(mi,onArrival){
+  var belt=$("conveyor-belt");
+  if(!belt) return;
+  var colors=["#c98a1c","#e0a92e","#8f5f0f","#35b56f","#c98a1c"];
+  var d=document.createElement("div");
+  d.className="conveyor-badge";
+  d.style.background=colors[mi%colors.length];
+  d.innerHTML="&#127991;&#65039;";
+  belt.appendChild(d);
+  d.addEventListener("animationend", function(){
+    d.remove();
+    if(typeof onArrival==="function"){
+      onArrival();
+    }
+  }, {once:true});
+}
+function updateHud(){
+  var got=solved.filter(Boolean).length;
+  var stars="";
+  for(var i=0;i<5;i++) stars+= i<got ? '<span class="on">&#9733;</span>' : "&#9734;";
+  $("hud-stars").innerHTML=stars;
+  $("hud-count").textContent=got+" / 5 CONTR\u00d4LES";
+}
+
+function openFiche(mi){
+  if(mi<4 && mi>0 && !solved[mi-1] && !solved[mi]) return;
+  sCardOpen();
+  openMi=mi;
+  var M=MISSIONS[mi];
+  $("modal-ico").innerHTML=M.ico;
+  $("modal-name").innerHTML=M.name;
+  $("modal-comp").innerHTML=M.comp;
+  renderModalBody(mi);
+
+  /* La fiche (ou le bouton rouge) "se soulève" et grandit depuis sa position exacte */
+  var srcEl = mi<4 ? $("fiche-"+mi) : $("btn-launch");
+  var overlay=$("modal-overlay"), panel=$("modal-panel");
+  if(srcEl){
+    var wrapRect=overlay.parentElement.getBoundingClientRect();
+    var srcRect=srcEl.getBoundingClientRect();
+    var originX=((srcRect.left+srcRect.width/2)-wrapRect.left)/wrapRect.width*100;
+    var originY=((srcRect.top+srcRect.height/2)-wrapRect.top)/wrapRect.height*100;
+    panel.style.transformOrigin=originX+"% "+originY+"%";
+    srcEl.style.transition="opacity .15s ease, transform .15s ease";
+    srcEl.style.opacity="0";
+    srcEl.style.transform="scale(.85)";
+  }
+  overlay.classList.add("show");
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ panel.classList.add("show"); }); });
+}
+function closeModal(){
+  sCardClose();
+  var overlay=$("modal-overlay"), panel=$("modal-panel");
+  panel.classList.remove("show");
+  var mi=openMi;
+  setTimeout(function(){
+    overlay.classList.remove("show");
+    var srcEl = (mi!==null && mi<4) ? $("fiche-"+mi) : $("btn-launch");
+    if(srcEl){ srcEl.style.opacity=""; srcEl.style.transform=""; }
+  },320);
+  openMi=null;
+}
+function renderModalBody(mi){
+  var body=$("modal-body");
+  if(mi===0) body.innerHTML=buildMission1(solved[0]);
+  else if(mi===1) body.innerHTML=buildMission2(solved[1]);
+  else if(mi===2) body.innerHTML=buildMission3(solved[2]);
+  else if(mi===3) body.innerHTML=buildMission4(solved[3]);
+  else body.innerHTML=buildMission5(solved[4]);
+  if(mi===0){ M1_ITEMS.forEach(function(it,k){var el=$("in-m1-"+k);if(el)el.addEventListener("input",updBtnM1);}); }
+}
+
+/* ===== Mission 1 : Exécuter le programme ===== */
+function buildMission1(isSolved){
+  var h='<div class="intro">La presse affiche un programme de calcul.<span class="norm"><br>Ex&eacute;cute chaque programme, dans l\'ordre, sur le nombre de d&eacute;part.</span></div>';
+  M1_ITEMS.forEach(function(it,k){
+    h+='<div class="fiche-card"><div class="fiche-txt">Choisir un nombre<br>&#8595; '+it.steps.replace(/, /g,'<br>&#8595; ')+'<br><br>Nombre de d&eacute;part&#8201;: <b>'+it.val+'</b></div></div>';
+    h+='<div class="q-item"><div class="q-text">R&eacute;sultat&#8201;:</div><div class="ans-row">';
+    if(isSolved){
+      h+='<span class="cell-in ok" style="display:inline-flex;align-items:center;justify-content:center;">'+it.ans+'</span>';
+    }else{
+      h+='<input class="cell-in" id="in-m1-'+k+'" placeholder="?" type="text" inputmode="numeric" autocomplete="off"/>';
+    }
+    h+='</div></div>';
+  });
+  if(!isSolved){
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(0)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-0" onclick="tryMission1()" disabled>&#9989; Valider le contr&ocirc;le</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-0">Applique les &eacute;tapes du programme dans l\'ordre, une par une, en partant du nombre de d&eacute;part.</div>'
+      +'<div class="fb" id="fb-0"><span id="fbi-0"></span><div id="fbm-0"></div></div>';
+  }else{
+    var lines=M1_ITEMS.map(function(it){return it.steps.replace(/&#215;/g,"&#215;").replace(/, /g," puis ")+" sur "+it.val+" &#8594; "+it.ans+".";});
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+lines.join("<br>")+'</div></div>';
+    h+='<div class="fb show ok"><span id="fbi-0">&#9989;</span><div><b style="color:var(--green-dark)">Contr&ocirc;le valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeModal()">Fermer la fiche</button></div>';
+  }
+  return h;
+}
+function updBtnM1(){
+  var btn=$("try-0");if(!btn)return;
+  var allFilled=M1_ITEMS.every(function(it,k){var el=$("in-m1-"+k);return el&&el.value.trim()!=="";});
+  btn.disabled=!allFilled;
+}
+function tryMission1(){
+  if(solved[0])return;
+  var allOk=true;
+  M1_ITEMS.forEach(function(it,k){
+    var el=$("in-m1-"+k);
+    var v=normNum(el.value);
+    var good=(v===it.ans);
+    el.classList.remove("ok","ko");el.classList.add(good?"ok":"ko");
+    if(!good) allOk=false;
+  });
+  if(allOk){ missionSuccess(0); }
+  else{
+    sBad();$("modal-panel").classList.add("shake");setTimeout(function(){$("modal-panel").classList.remove("shake");},400);
+    var fb=$("fb-0");fb.className="fb show ko";$("fbi-0").textContent="\u274C";
+    $("fbm-0").innerHTML="Reprends chaque programme &eacute;tape par &eacute;tape, dans l\'ordre indiqu&eacute;.";
+  }
+}
+
+/* ===== Mission 2 : Compléter le programme ===== */
+function buildMission2(isSolved){
+  if(!m2Order) m2Order=M2_ITEMS.map(function(it){return shuffleOrder(it.opts.length);});
+  var h='<div class="intro">Cette fois, la machine a perdu une &eacute;tape. Retrouve celle qui manque pour obtenir le r&eacute;sultat attendu.</div>';
+  M2_ITEMS.forEach(function(it,k){
+    h+='<div class="fiche-card"><div class="fiche-txt">Choisir x<br>&#8595; '+it.steps.replace(/, /g,'<br>&#8595; ')+'<br><br>R&eacute;sultat attendu&#8201;: <b>'+it.target+'</b></div></div>';
+    h+='<div class="q-item"><div class="opts" id="m2-opts-'+k+'">';
+    m2Order[k].forEach(function(i){
+      var o=it.opts[i];
+      var cls="opt"+(isSolved&&i===it.correct?" ok":"");
+      h+='<div class="'+cls+'" id="m2-opt-'+k+'-'+i+'" '+(isSolved?'':'onclick="pickM2('+k+','+i+')"')+'>'+o+'</div>';
+    });
+    h+='</div></div>';
+  });
+  if(!isSolved){
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(1)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-1" onclick="tryMission2()" disabled>&#9989; Valider le contr&ocirc;le</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-1">Ex&eacute;cute les &eacute;tapes connues, puis cherche quelle op&eacute;ration permet d\'atteindre exactement le r&eacute;sultat attendu.</div>'
+      +'<div class="fb" id="fb-1"><span id="fbi-1"></span><div id="fbm-1"></div></div>';
+  }else{
+    var lines=M2_ITEMS.map(function(it){return it.steps.replace("?", "<b>"+it.opts[it.correct]+"</b>")+" &#8594; "+it.target+".";});
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+lines.join("<br>")+'</div></div>';
+    h+='<div class="fb show ok"><span id="fbi-1">&#9989;</span><div><b style="color:var(--green-dark)">Contr&ocirc;le valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeModal()">Fermer la fiche</button></div>';
+  }
+  return h;
+}
+function pickM2(k,i){
+  if(solved[1])return;
+  sClick();
+  M2_ITEMS[k].opts.forEach(function(_,j){var el=$("m2-opt-"+k+"-"+j);if(el)el.classList.remove("sel","ok","ko");});
+  var el=$("m2-opt-"+k+"-"+i);if(el)el.classList.add("sel");
+  M2_ITEMS[k].pick=i;
+  var btn=$("try-1");if(btn)btn.disabled=!M2_ITEMS.every(function(it){return it.pick!==undefined;});
+}
+function tryMission2(){
+  if(solved[1])return;
+  if(!M2_ITEMS.every(function(it){return it.pick!==undefined;})){ sAttn(); return; }
+  var allOk=true;
+  M2_ITEMS.forEach(function(it,k){
+    var good=(it.pick===it.correct);
+    it.opts.forEach(function(_,i){var el=$("m2-opt-"+k+"-"+i);if(el)el.classList.remove("sel","ok","ko");});
+    var el=$("m2-opt-"+k+"-"+it.pick);if(el)el.classList.add(good?"ok":"ko");
+    if(!good) allOk=false;
+  });
+  if(allOk){ missionSuccess(1); }
+  else{
+    sBad();$("modal-panel").classList.add("shake");setTimeout(function(){$("modal-panel").classList.remove("shake");},400);
+    var fb=$("fb-1");fb.className="fb show ko";$("fbi-1").textContent="\u274C";
+    $("fbm-1").innerHTML="Ex&eacute;cute les &eacute;tapes connues, puis v&eacute;rifie quelle op&eacute;ration compl&egrave;te exactement le r&eacute;sultat attendu.";
+  }
+}
+
+/* ===== Mission 3 : Traduire en expression littérale ===== */
+function buildMission3(isSolved){
+  if(!m3Order) m3Order=M3_ITEMS.map(function(it){return shuffleOrder(it.opts.length);});
+  var h='<div class="intro">Traduis chaque programme en expression litt&eacute;rale, en partant de x.</div>';
+  M3_ITEMS.forEach(function(it,k){
+    h+='<div class="fiche-card"><div class="fiche-txt">Choisir x<br>&#8595; '+it.steps.replace(/, /g,'<br>&#8595; ')+'</div></div>';
+    h+='<div class="q-item"><div class="q-text">Expression obtenue&#8201;:</div><div class="opts" id="m3-opts-'+k+'">';
+    m3Order[k].forEach(function(i){
+      var o=it.opts[i];
+      var cls="opt"+(isSolved&&i===it.correct?" ok":"");
+      h+='<div class="'+cls+'" id="m3-opt-'+k+'-'+i+'" '+(isSolved?'':'onclick="pickM3('+k+','+i+')"')+'>'+o+'</div>';
+    });
+    h+='</div></div>';
+  });
+  if(!isSolved){
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(2)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-2" onclick="tryMission3()" disabled>&#9989; Valider le contr&ocirc;le</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-2">Remplace le nombre de d&eacute;part par x, puis applique chaque &eacute;tape du programme comme un calcul litt&eacute;ral.</div>'
+      +'<div class="fb" id="fb-2"><span id="fbi-2"></span><div id="fbm-2"></div></div>';
+  }else{
+    var lines=[
+      "x, &#215;11, +3, &#215;3 &#8594; 3(11x + 3) = 33x + 9.",
+      "x, +4, &#215;2 &#8594; 2(x + 4) = 2x + 8.",
+      "x, &#215;5, &minus;2, &#215;2 &#8594; 2(5x &minus; 2) = 10x &minus; 4."
+    ];
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+lines.join("<br>")+'</div></div>';
+    h+='<div class="fb show ok"><span id="fbi-2">&#9989;</span><div><b style="color:var(--green-dark)">Contr&ocirc;le valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeModal()">Fermer la fiche</button></div>';
+  }
+  return h;
+}
+function pickM3(k,i){
+  if(solved[2])return;
+  sClick();
+  M3_ITEMS[k].opts.forEach(function(_,j){var el=$("m3-opt-"+k+"-"+j);if(el)el.classList.remove("sel","ok","ko");});
+  var el=$("m3-opt-"+k+"-"+i);if(el)el.classList.add("sel");
+  M3_ITEMS[k].pick=i;
+  var btn=$("try-2");if(btn)btn.disabled=!M3_ITEMS.every(function(it){return it.pick!==undefined;});
+}
+function tryMission3(){
+  if(solved[2])return;
+  if(!M3_ITEMS.every(function(it){return it.pick!==undefined;})){ sAttn(); return; }
+  var allOk=true;
+  M3_ITEMS.forEach(function(it,k){
+    var good=(it.pick===it.correct);
+    it.opts.forEach(function(_,i){var el=$("m3-opt-"+k+"-"+i);if(el)el.classList.remove("sel","ok","ko");});
+    var el=$("m3-opt-"+k+"-"+it.pick);if(el)el.classList.add(good?"ok":"ko");
+    if(!good) allOk=false;
+  });
+  if(allOk){ missionSuccess(2); }
+  else{
+    sBad();$("modal-panel").classList.add("shake");setTimeout(function(){$("modal-panel").classList.remove("shake");},400);
+    var fb=$("fb-2");fb.className="fb show ko";$("fbi-2").textContent="\u274C";
+    $("fbm-2").innerHTML="Remplace le nombre de d&eacute;part par x, puis applique chaque &eacute;tape dans l\'ordre du programme.";
+  }
+}
+
+/* ===== Mission 4 : Optimiser la machine ===== */
+function buildMission4(isSolved){
+  if(!m4Order) m4Order=M4_ITEMS.map(function(it){return shuffleOrder(it.opts.length);});
+  var h='<div class="intro">La machine ex&eacute;cute un programme trop long. Reconnais le programme &eacute;quivalent, simplifi&eacute;.</div>';
+  M4_ITEMS.forEach(function(it,k){
+    h+='<div class="fiche-card"><div class="fiche-txt">Choisir un nombre<br>&#8595; '+it.steps.replace(/, /g,'<br>&#8595; ')+'</div></div>';
+    h+='<div class="q-text" style="margin:.6rem 0;">Expression obtenue&#8201;: <b>'+it.expr+'</b></div>';
+    h+='<div class="q-item"><div class="q-text">Quel programme est exactement &eacute;quivalent&#8201;?</div><div class="opts" id="m4-opts-'+k+'">';
+    m4Order[k].forEach(function(i){
+      var o=it.opts[i];
+      var cls="opt"+(isSolved&&i===it.correct?" ok":"");
+      h+='<div class="'+cls+'" id="m4-opt-'+k+'-'+i+'" '+(isSolved?'':'onclick="pickM4('+k+','+i+')"')+'>'+o+'</div>';
+    });
+    h+='</div></div>';
+  });
+  if(!isSolved){
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(3)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-3" onclick="tryMission4()" disabled>&#9989; Valider le contr&ocirc;le</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-3">Traduis le programme en expression litt&eacute;rale, puis compare-la &agrave; chaque proposition.</div>'
+      +'<div class="fb" id="fb-3"><span id="fbi-3"></span><div id="fbm-3"></div></div>';
+  }else{
+    var lines=[
+      "&#215;7, +8, &minus;2x &#8594; 7x + 8 &minus; 2x = 5x + 8 &#8594; Multiplier par 5 puis ajouter 8.",
+      "&#215;3, +10, +2x &#8594; 3x + 10 + 2x = 5x + 10 &#8594; Multiplier par 5 puis ajouter 10.",
+      "&#215;8, &minus;3, &minus;3x &#8594; 8x &minus; 3 &minus; 3x = 5x &minus; 3 &#8594; Multiplier par 5 puis soustraire 3."
+    ];
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+lines.join("<br>")+'</div></div>';
+    h+='<div class="fb show ok"><span id="fbi-3">&#9989;</span><div><b style="color:var(--green-dark)">Contr&ocirc;le valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeModal()">Fermer la fiche</button></div>';
+  }
+  return h;
+}
+function pickM4(k,i){
+  if(solved[3])return;
+  sClick();
+  [0,1,2].forEach(function(j){var el=$("m4-opt-"+k+"-"+j);if(el)el.classList.remove("sel","ok","ko");});
+  var el=$("m4-opt-"+k+"-"+i);if(el)el.classList.add("sel");
+  m4Picks[k]=i;
+  var btn=$("try-3");if(btn)btn.disabled=!m4Picks.every(function(p){return p!==null;});
+}
+function tryMission4(){
+  if(solved[3])return;
+  if(!m4Picks.every(function(p){return p!==null;})){ sAttn(); return; }
+  var allOk=true;
+  M4_ITEMS.forEach(function(it,k){
+    var good=(m4Picks[k]===it.correct);
+    [0,1,2].forEach(function(j){var el=$("m4-opt-"+k+"-"+j);if(el)el.classList.remove("sel","ok","ko");});
+    var el=$("m4-opt-"+k+"-"+m4Picks[k]);if(el)el.classList.add(good?"ok":"ko");
+    if(!good) allOk=false;
+  });
+  if(allOk){ missionSuccess(3); }
+  else{
+    sBad();$("modal-panel").classList.add("shake");setTimeout(function(){$("modal-panel").classList.remove("shake");},400);
+    var fb=$("fb-3");fb.className="fb show ko";$("fbi-3").textContent="\u274C";
+    $("fbm-3").innerHTML="Traduis d\'abord le programme en expression litt&eacute;rale, puis compare-la &agrave; chaque proposition.";
+  }
+}
+
+/* ===== Mission 5 : Programmation finale — construire un programme à 3 étapes ===== */
+function buildMission5(isSolved){
+  var h='<div class="intro">Le responsable apporte la presse d&eacute;finitive. Construis le programme de calcul qui produit exactement l\'expression <b>'+M5_TARGET+'</b>.</div>';
+  if(isSolved){
+    h+='<div class="seq-target">';
+    M5_ORDER.forEach(function(id,i){
+      h+='<div class="fiche-card" style="cursor:default;"><div class="fiche-txt">'+(i+1)+'. '+M5_CHIPS[id]+'</div></div>';
+    });
+    h+='</div>';
+  }else{
+    h+='<div class="seq-target'+(m5seq.length===0?' empty':'')+'" id="seq-target">';
+    m5seq.forEach(function(id,i){
+      h+='<div class="fiche-card" onclick="removeM5StepAt('+i+')"><div class="fiche-txt">'+(i+1)+'. '+M5_CHIPS[id]+'</div></div>';
+    });
+    h+='</div>';
+    h+='<div class="bank-hint">Clique sur les &eacute;tapes ci-dessous dans l\'ordre. Clique sur une &eacute;tape d&eacute;j&agrave; plac&eacute;e pour la retirer.</div>';
+    h+='<div id="step-bank">';
+    M5_CHIPS.forEach(function(chip,id){
+      if(m5seq.indexOf(id)!==-1) return;
+      h+='<div class="step-chip" onclick="addM5Step('+id+')">'+chip+'</div>';
+    });
+    h+='</div>';
+  }
+  h+='<div class="q-text" style="margin-top:.8rem;">Sortie&#8201;: <b>'+M5_TARGET+'</b></div>';
+  if(!isSolved){
+    var ready=(m5seq.length===M5_ORDER.length);
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(4)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-4" onclick="tryMission5()" '+(ready?'':'disabled')+'>&#9989; Valider le contr&ocirc;le</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-4">L\'ordre compte&#8201;: teste chaque &eacute;tape sur x avant de valider. &laquo;&nbsp;Le triple du nombre de d&eacute;part&nbsp;&raquo; d&eacute;signe toujours x, pas le r&eacute;sultat interm&eacute;diaire.</div>'
+      +'<div class="fb" id="fb-4"><span id="fbi-4"></span><div id="fbm-4"></div></div>';
+  }else{
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">x &#8594; &#215;9 &#8594; 9x &#8594; +3x (le triple du nombre de d&eacute;part) &#8594; 12x &#8594; +6 &#8594; 12x + 6.</div></div>';
+    h+='<div class="fb show ok"><span id="fbi-4">&#9989;</span><div><b style="color:var(--green-dark)">Toutes les presses ont &eacute;t&eacute; programm&eacute;es avec succ&egrave;s.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeModal()">Fermer la fiche</button></div>';
+  }
+  return h;
+}
+function addM5Step(id){
+  if(solved[4])return;
+  if(m5seq.indexOf(id)!==-1)return;
+  if(m5seq.length>=M5_ORDER.length)return;
+  sClick();
+  m5seq.push(id);
+  renderModalBody(4);
+}
+function removeM5StepAt(i){
+  if(solved[4])return;
+  sClick();
+  m5seq.splice(i,1);
+  renderModalBody(4);
+}
+function tryMission5(){
+  if(solved[4])return;
+  if(m5seq.length<M5_ORDER.length){ sAttn(); return; }
+  var good=true;
+  for(var k=0;k<M5_ORDER.length;k++){ if(m5seq[k]!==M5_ORDER[k]) good=false; }
+  if(good){ missionSuccess(4); }
+  else{
+    sBad();$("modal-panel").classList.add("shake");setTimeout(function(){$("modal-panel").classList.remove("shake");},400);
+    var fb=$("fb-4");fb.className="fb show ko";$("fbi-4").textContent="\u274C";
+    $("fbm-4").innerHTML="L\'ordre ou le choix des &eacute;tapes n\'est pas correct. Teste ton programme sur x avant de valider&#8201;: le r&eacute;sultat doit &ecirc;tre exactement "+M5_TARGET+".";
+  }
+}
+
+function toggleHint(mi){sHint();var el=$("hint-"+mi);if(el)el.classList.toggle("show");}
+
+function missionSuccess(mi){
+  solved[mi]=true;
+  sStamp();
+  setTimeout(function(){sOk();},180);
+  showAgent("&#127991;&#65039; Le responsable&nbsp;:<br>Contr&ocirc;le "+(mi+1)+" valid&eacute;. Bien jou&eacute;.");
+  pulsePress();
+  updateVoyant(mi,true);
+  updateHud();
+  if(mi<4){
+    addConveyorBadge(mi,function(){
+      updateCrate();
+      var box=$("crate-box");
+      if(box){
+        box.style.transform="scale(1.08)";
+        setTimeout(function(){
+          box.style.transform="";
+        },180);
+      }
+    });
+    buildFiches();
+    refreshLaunchButton();
+    renderModalBody(mi);
+  }else{
+    refreshLaunchButton();
+    renderModalBody(mi);
+    closeModal();
+    setTimeout(function(){
+      runFinaleScene();
+    },350);
+  }
+}
+function pulsePress(){
+  var arm=$("press-arm");if(arm){arm.classList.remove("pressing");void arm.offsetWidth;arm.classList.add("pulse-once");}
+  var body=document.querySelector(".machine-body");if(body){body.classList.remove("vibrate");void body.offsetWidth;body.classList.add("vibrate");}
+  var lamp=$("machine-lamp");if(lamp){lamp.classList.add("flash");setTimeout(function(){lamp.classList.remove("flash");},450);}
+  if(soundOn){
+    var c=ac();if(c){var now=c.currentTime;
+      noise(0.08,0.1,1400,350,now);
+      beep(140,0.05,0.12,"square",0.08);
+    }
+  }
+  setTimeout(function(){ if(arm) arm.classList.remove("pulse-once"); },500);
+}
+
+function tryLaunch(){
+  var allDone=solved[0]&&solved[1]&&solved[2]&&solved[3];
+  if(!allDone || solved[4]) return;
+  sClick();
+  var btn=$("btn-launch");
+  if(btn){btn.style.transform="scale(.88)";setTimeout(function(){btn.style.transform="";},150);}
+  openFiche(4);
+}
+
+function clearCrateBadges(){
+  var box=$("crate-box");
+  if(!box) return;
+  box.querySelectorAll(".crate-badge").forEach(function(badge){
+    badge.remove();
+  });
+  var cnt=$("crate-count");
+  if(cnt){
+    cnt.textContent="0";
+  }
+}
+function addBadgeToCrate(color,count){
+  var box=$("crate-box");
+  if(!box) return;
+  var badge=document.createElement("div");
+  badge.className="crate-badge";
+  badge.style.background=color;
+  box.insertBefore(badge, $("crate-count"));
+  var cnt=$("crate-count");
+  if(cnt){
+    cnt.textContent=count;
+  }
+  box.style.transform="scale(1.08)";
+  setTimeout(function(){
+    box.style.transform="";
+  },180);
+}
+function runFinaleScene(){
+  gameRunning=false;
+  clearInterval(totalInt);
+  pauseTelemetryTic();
+  sPress();
+  var arm=$("press-arm");if(arm)arm.classList.add("pressing");
+  for(var vi=0;vi<5;vi++){ (function(idx){ setTimeout(function(){ updateVoyant(idx,true); },idx*160); })(vi); }
+  var fo=document.querySelectorAll(".fiche-obj");
+  fo.forEach(function(f){f.style.filter="none";});
+
+  /* 5 badges défilent réellement sur le tapis jusqu'à la caisse, un par un */
+  clearCrateBadges();
+  var extraColors=["#c98a1c","#e0a92e","#8f5f0f","#35b56f","#c98a1c"];
+  var i=0;
+  function sendNextBadge(){
+    if(i>=extraColors.length){
+      afterFlow();
+      return;
+    }
+    var badgeIndex=i;
+    addConveyorBadge(badgeIndex,function(){
+      addBadgeToCrate(extraColors[badgeIndex], badgeIndex+1);
+      if(soundOn){
+        beep(500+badgeIndex*60,0,0.06,"triangle",0.06);
+      }
+      i++;
+      setTimeout(function(){
+        sendNextBadge();
+      },180);
+    });
+  }
+  sendNextBadge();
+
+  function afterFlow(){
+    if(arm)arm.classList.remove("pressing");
+    var bg=$("finale-badges");bg.innerHTML="";
+    extraColors.forEach(function(c,k){
+      var d=document.createElement("div");d.className="fbg";
+      d.style.background=c;d.style.animationDelay=(k*0.14)+"s";d.innerHTML="&#127991;&#65039;";
+      bg.appendChild(d);
+    });
+    $("finale-time").innerHTML="&#9201; Temps utilis&eacute;&#8201;: "+fmtLong(totalSec);
+    $("finale-grade").innerHTML=computeReward(totalSec);
+    $("finale-overlay").classList.add("show");
+    sJingle();
+  }
+}
+function computeReward(sec){
+  if(sec<=180) return "&#127942; Ma&icirc;tre contr&ocirc;leur";
+  if(sec<=300) return "&#127942; Responsable qualit&eacute;";
+  if(sec<=480) return "&#127942; Concepteur confirm&eacute;";
+  return "&#127942; Apprenti rigoureux";
+}
+
+function toggleCarnet(){
+  var p=$("carnet-panel");
+  if(p.classList.contains("show")) closeCarnet(); else openCarnet();
+}
+function openCarnet(){ sCardOpen(); $("carnet-panel").classList.add("show"); $("carnet-overlay").classList.add("show"); }
+function closeCarnet(){ sCardClose(); $("carnet-panel").classList.remove("show"); $("carnet-overlay").classList.remove("show"); }
+function clearCarnet(){ sClick(); var t=$("carnet-text");if(t)t.value=""; }
+function insertCarnetSym(sym){
+  sClick();
+  var t=$("carnet-text");if(!t)return;
+  var start=t.selectionStart, end=t.selectionEnd;
+  var val=t.value;
+  t.value=val.slice(0,start)+sym+val.slice(end);
+  var pos=start+sym.length;
+  t.focus();t.setSelectionRange(pos,pos);
+}
+
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  $("start-veil").classList.add("hidden");
+  totalSec=0;clearInterval(totalInt);gameRunning=true;
+  $("hud-timer").innerHTML="&#9201; 00:00";
+  totalInt=setInterval(timerTick,1000);
+  sStart();
+  buildFiches();
+  refreshLaunchButton();
+  updateHud();
+  showAgent("&#127991;&#65039; Le responsable&nbsp;:<br>Bienvenue&#8201;! Commence par la premi&egrave;re fiche sur la table.");
+  scheduleTelemetryTic();
+}
+function restartAll(){
+  gameRunning=false;
+  clearInterval(totalInt);totalSec=0;
+  pauseTelemetryTic();
+  solved=[false,false,false,false,false];
+  M2_ITEMS.forEach(function(it){delete it.pick;});
+  M3_ITEMS.forEach(function(it){delete it.pick;});
+  m4Picks=[null,null,null];m5seq=[];
+  m2Order=null;m3Order=null;m4Order=null;
+  openMi=null;
+  $("finale-overlay").classList.remove("show");
+  $("modal-overlay").classList.remove("show");
+  for(var i=0;i<5;i++) updateVoyant(i,false);
+  clearCrateBadges();
+  var box=$("crate-box");if(box){box.style.transform="";}
+  var arm=$("press-arm");if(arm)arm.classList.remove("pressing");
+  $("conveyor-belt").innerHTML="";
+  $("hud-timer").innerHTML="&#9201; 00:00";
+  closeCarnet();
+  var ct=$("carnet-text");if(ct)ct.value="";
+  $("start-veil").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
