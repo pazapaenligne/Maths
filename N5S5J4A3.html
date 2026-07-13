@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa — Flash Défi — Tester une égalité ou une inégalité</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --day-color:#3ab5d8; --day-dark:#1a6e88; --day-light:#e8f6fb;
+    --day-border:#9dd4e8; --day-glow:rgba(58,181,216,.3);
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.7;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--blue);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--orange);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--yellow);top:200px;left:-30px;pointer-events:none;}
+  header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;
+    font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+  h1{font-size:clamp(1.2rem,3.5vw,1.7rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.84rem;margin-top:.3rem;font-family:'JetBrains Mono',monospace;}
+  .chrono-wrap{width:100%;max-width:480px;position:relative;z-index:1;margin-bottom:1.2rem;}
+  .chrono-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;}
+  .chrono-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);}
+  .chrono-val{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.4rem;
+    color:var(--day-dark);transition:color .3s;}
+  .chrono-val.urgent{color:#c0392b;animation:pulse .5s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+  .chrono-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+  .chrono-bar{height:100%;background:linear-gradient(90deg,var(--day-color),var(--blue));
+    border-radius:99px;transition:width .9s linear;}
+  .chrono-bar.urgent{background:linear-gradient(90deg,#c0392b,#e74c3c);}
+  .stage{width:100%;max-width:520px;position:relative;z-index:1;}
+  .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+    padding:1.6rem 1.6rem 1.4rem;position:relative;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+    border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--blue),var(--orange));}
+  .q-badge{display:inline-block;background:var(--day-color);color:#fff;
+    font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.2rem .65rem;border-radius:99px;margin-bottom:.75rem;
+    font-family:'JetBrains Mono',monospace;}
+  .q-context{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;
+    padding:.5rem 1rem;text-align:center;font-family:'JetBrains Mono',monospace;
+    font-size:.9rem;font-weight:700;color:var(--day-dark);margin-bottom:.6rem;}
+  .q-expr{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;
+    padding:.65rem 1rem;text-align:center;font-family:'JetBrains Mono',monospace;
+    font-size:1.25rem;font-weight:800;color:var(--day-dark);margin-bottom:.85rem;}
+  .q-text{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.9rem;line-height:1.6;}
+  /* Boutons Vrai / Faux */
+  .vf-row{display:flex;gap:.8rem;}
+  .vf-btn{flex:1;display:flex;align-items:center;justify-content:center;
+    padding:1rem;border-radius:14px;border:2px solid var(--day-border);
+    background:var(--day-light);cursor:pointer;min-height:56px;
+    font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:800;
+    color:var(--day-dark);transition:border-color .12s,background .12s,transform .1s;}
+  .vf-btn:hover:not([disabled]){border-color:var(--day-color);background:#d0eef8;
+    box-shadow:0 2px 8px var(--day-glow);}
+  .vf-btn:active:not([disabled]){transform:scale(.96);}
+  .vf-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+  .vf-btn[disabled]{cursor:default;}
+  .vf-btn.ok{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+  .vf-btn.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+  .vf-btn.reveal{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+  .feedback{margin-top:.85rem;padding:.65rem .9rem;border-radius:10px;
+    font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.7;
+    display:none;align-items:flex-start;gap:.5rem;}
+  .feedback.show{display:flex;}
+  .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .feedback.ko{background:#fce4e4;border:1.5px solid #c0392b;color:#8f2f2f;}
+  .feedback .fi{font-size:1.1rem;flex-shrink:0;margin-top:.05rem;}
+  .final{width:100%;max-width:520px;display:none;position:relative;z-index:1;}
+  .final.show{display:block;animation:fadeUp .4s ease both;}
+  .final-card{background:var(--surface);border:2px solid var(--day-border);
+    border-radius:var(--radius);padding:2rem 1.6rem;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+  .final-icon{font-size:3rem;margin-bottom:.6rem;}
+  .final-title{font-size:1.2rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+  .final-msg{font-size:.95rem;color:var(--text);line-height:1.8;margin-bottom:1.4rem;}
+  .btn-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;
+    border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;
+    cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+  .btn:active{transform:scale(.96);}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.2rem .75rem 3rem;}
+    .card,.final-card{padding:1.2rem;}
+    .vf-row{gap:.5rem;}
+  }
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 4</div>
+  <h1>&#9889; Flash <span class="hl">D&eacute;fi</span></h1>
+  <p class="subtitle">Tester une &eacute;galit&eacute; ou une in&eacute;galit&eacute; &middot; 3 questions &middot; 20 secondes</p>
+</header>
+
+<div class="chrono-wrap" id="chrono-wrap">
+  <div class="chrono-top">
+    <span class="chrono-label">&#8987; Temps restant</span>
+    <span class="chrono-val" id="chrono-val">20</span>
+  </div>
+  <div class="chrono-bar-bg"><div class="chrono-bar" id="chrono-bar" style="width:100%"></div></div>
+</div>
+
+<div class="stage">
+  <div class="card" id="card">
+    <div class="card-stripe"></div>
+    <div class="q-badge" id="q-badge">Question 1 / 3</div>
+    <div class="q-context" id="q-context"></div>
+    <div class="q-expr" id="q-expr"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="vf-row" id="vf-row" role="group" aria-label="Vrai ou Faux">
+      <button class="vf-btn" id="btn-vrai" type="button"
+        onclick="choose(true)"
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();choose(true);}">
+        &#10003; Vrai
+      </button>
+      <button class="vf-btn" id="btn-faux" type="button"
+        onclick="choose(false)"
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();choose(false);}">
+        &#10007; Faux
+      </button>
+    </div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite">
+      <span class="fi" id="fb-icon"></span>
+      <div id="fb-text"></div>
+    </div>
+  </div>
+
+  <div class="final" id="final">
+    <div class="final-card">
+      <div class="logo-badge" style="margin:0 auto .7rem;display:flex;width:fit-content;">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#3ab5d8"></span>
+      </div>
+      <div class="final-icon">&#9889;</div>
+      <div class="final-title" id="final-title">Flash D&eacute;fi termin&eacute;&nbsp;!</div>
+      <div class="final-msg" id="final-msg"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="restart()">&#8635; Recommencer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Vérification : x=4
+// Q1 : 5×4-1 = 19 → VRAI
+// Q2 : 2×4+3=11 ≠ 3×4-2=10 → FAUX
+// Q3 : 3×4 + 2 = 14 et 14 > 10 → VRAI
+var QS=[
+  {
+    ctx:"Pour x = 4",
+    expr:"5x − 1 = 19",
+    exprDev:"5 × 4 − 1 = 19",
+    q:"Cette égalité est-elle vraie ?",
+    ans:true,
+    fbV:"Bravo ! 5 × 4 − 1 = 20 − 1 = 19. L’égalité est vraie.",
+    fbF:"5 × 4 − 1 = 20 − 1 = 19. L’égalité est bien vraie."
+  },
+  {
+    ctx:"Pour x = 4",
+    expr:"2x + 3 = 3x − 2",
+    exprDev:"2 × 4 + 3 = 3 × 4 − 2",
+    q:"Cette égalité est-elle vraie ?",
+    ans:false,
+    fbV:"2 × 4 + 3 = 11 et 3 × 4 − 2 = 10. Or 11 ≠ 10 : l’égalité est fausse.",
+    fbF:"Bravo ! 2 × 4 + 3 = 11 et 3 × 4 − 2 = 10. Or 11 ≠ 10."
+  },
+  {
+    ctx:"Pour x = 4",
+    expr:"3x + 2 > 10",
+    exprDev:"3 × 4 + 2 > 10",
+    q:"Cette inégalité est-elle vraie ?",
+    ans:true,
+    fbV:"Bravo ! 3 × 4 + 2 = 14 et 14 > 10. L’inégalité est vraie.",
+    fbF:"3 × 4 + 2 = 14 et 14 > 10. L’inégalité est bien vraie."
+  }
+];
+
+var TOTAL=QS.length, DUREE=20;
+var cur=0, timerID=null, tempsRestant=DUREE, fini=false;
+var $=function(id){return document.getElementById(id);};
+
+function render(){
+  var q=QS[cur];
+  $("q-badge").textContent="Question "+(cur+1)+" / "+TOTAL;
+  $("q-context").textContent=q.ctx;
+  $("q-expr").textContent=q.expr;
+  $("q-text").textContent=q.q;
+  $("feedback").className="feedback";
+  $("btn-vrai").className="vf-btn"; $("btn-vrai").disabled=false;
+  $("btn-faux").className="vf-btn"; $("btn-faux").disabled=false;
+}
+
+function updateChrono(){
+  var pct=tempsRestant/DUREE*100;
+  $("chrono-val").textContent=tempsRestant;
+  $("chrono-bar").style.width=pct+"%";
+  var urgent=tempsRestant<=5;
+  $("chrono-val").className="chrono-val"+(urgent?" urgent":"");
+  $("chrono-bar").className="chrono-bar"+(urgent?" urgent":"");
+}
+
+function startTimer(){
+  timerID=setInterval(function(){
+    tempsRestant--;
+    updateChrono();
+    if(tempsRestant<=0){clearInterval(timerID);timerID=null;if(!fini)showFin();}
+  },1000);
+}
+
+function choose(val){
+  if(fini) return;
+  var q=QS[cur], ok=(val===q.ans);
+  $("btn-vrai").disabled=true; $("btn-faux").disabled=true;
+  if(val===true){
+    $("btn-vrai").classList.add(ok?"ok":"ko");
+    if(!ok) $("btn-faux").classList.add("reveal");
+  } else {
+    $("btn-faux").classList.add(ok?"ok":"ko");
+    if(!ok) $("btn-vrai").classList.add("reveal");
+  }
+  var fb=$("feedback");
+  fb.className="feedback show "+(ok?"ok":"ko");
+  $("fb-icon").textContent=ok?"\u2705":"\u274c";
+  $("fb-text").innerHTML="<strong>"+(ok?"Bravo\u00a0!":"Ce n\u2019est pas la bonne r\u00e9ponse.")+"</strong> "+(val?q.fbV:q.fbF);
+  setTimeout(function(){
+    if(fini) return;
+    if(cur<TOTAL-1){cur++;render();}
+    else showFin();
+  },1400);
+}
+
+function showFin(){
+  fini=true;
+  clearInterval(timerID);timerID=null;
+  $("card").style.display="none";
+  $("chrono-wrap").style.opacity=".4";
+  $("final").classList.add("show");
+  var tempsEcoule=(tempsRestant<=0);
+  $("final-title").textContent=tempsEcoule?"Temps \u00e9coul\u00e9\u00a0!":"Flash D\u00e9fi termin\u00e9\u00a0!";
+  $("final-msg").innerHTML=tempsEcoule
+    ?"Ce n\u2019est pas grave.<br>Tu peux recommencer ou passer directement aux niveaux pour t\u2019entra\u00eener."
+    :"Bravo\u00a0! Tu viens de r\u00e9activer les notions essentielles.<br>Les niveaux vont maintenant te permettre de t\u2019entra\u00eener pas \u00e0 pas.";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  clearInterval(timerID);timerID=null;
+  cur=0;fini=false;tempsRestant=DUREE;
+  $("final").classList.remove("show");
+  $("card").style.display="";
+  $("chrono-wrap").style.opacity="";
+  updateChrono();render();startTimer();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+render();startTimer();
+</script>
+</body>
+</html>
