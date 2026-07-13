@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa — Quiz — Évaluer une expression littérale</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --day-color:#8dc63f; --day-dark:#3d7a10; --day-light:#f0f7e6;
+    --day-border:#bde08a; --day-glow:rgba(141,198,63,.3);
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.7;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--green);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+  header{text-align:center;margin-bottom:1.6rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--day-color);color:#fff;
+    font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+  .chrono-row{display:flex;justify-content:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+  .chrono-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;
+    border-radius:99px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.95rem;
+    border:2px solid var(--day-border);background:var(--day-light);color:var(--day-dark);}
+
+  .progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+  .progress-info{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);
+    font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+  .progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--green));
+    border-radius:99px;transition:width .5s ease;}
+
+  .card{width:100%;max-width:680px;background:var(--surface);
+    border:2px solid var(--border);border-radius:var(--radius);
+    padding:2rem 2rem 1.6rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+    border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--green),var(--blue));}
+
+  .q-badge{display:inline-block;background:var(--day-color);color:#fff;
+    font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.25rem .7rem;border-radius:99px;margin-bottom:.8rem;
+    font-family:'JetBrains Mono',monospace;}
+  .q-context{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;
+    padding:.75rem 1rem;margin-bottom:1rem;font-size:.95rem;line-height:1.8;}
+  .q-context .expr{font-family:'JetBrains Mono',monospace;font-weight:800;
+    color:var(--day-dark);font-size:1.1rem;}
+  .q-context .val{color:var(--orange);font-weight:700;}
+  .q-text{font-size:1rem;font-weight:700;line-height:1.7;margin-bottom:1rem;color:var(--text);}
+
+  .options{display:flex;flex-direction:column;gap:.55rem;}
+  .opt{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;
+    border:2px solid var(--border);border-radius:12px;background:var(--day-light);
+    cursor:pointer;min-height:48px;font-size:1rem;font-weight:600;
+    transition:border-color .15s,background .15s,box-shadow .15s;
+    width:100%;font-family:Arial,sans-serif;color:var(--day-dark);text-align:left;}
+  .opt:hover:not([disabled]){border-color:var(--day-color);background:#e8f5d0;
+    box-shadow:0 2px 8px var(--day-glow);}
+  .opt:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+  .opt[disabled]{cursor:default;}
+  .opt-code{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.05rem;}
+  .opt.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;font-weight:700;
+    box-shadow:0 2px 8px rgba(141,198,63,.25);}
+  .opt.chosen-wrong{border-color:var(--pink);background:#fff0ef;color:#c0392b;font-weight:700;}
+  .opt.reveal-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+
+  .feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.92rem;
+    display:none;align-items:flex-start;gap:.6rem;line-height:1.75;
+    font-family:'JetBrains Mono',monospace;}
+  .feedback.show{display:flex;}
+  .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+  .feedback .fi{font-size:1.2rem;flex-shrink:0;}
+
+  .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.6rem;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.4rem;border-radius:10px;
+    font-family:Arial,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+    transition:transform .12s,box-shadow .15s;min-height:44px;}
+  .btn:active{transform:scale(.96);}
+  .btn:disabled{opacity:.4;cursor:default;}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+
+  /* Écran final quiz */
+  .final{width:100%;max-width:680px;display:none;position:relative;z-index:1;}
+  .final.show{display:block;animation:fadeUp .4s ease both;}
+  .final-card{background:var(--surface);border:2px solid var(--day-border);
+    border-radius:var(--radius);padding:2.4rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);
+    text-align:center;}
+  .final-icon{font-size:2.8rem;margin-bottom:.8rem;}
+  .final-title{font-size:1.3rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;}
+  .final-msg{font-size:.97rem;color:var(--text);line-height:1.8;margin-bottom:1.4rem;}
+  .retry-list{text-align:left;background:var(--day-light);border:1.5px solid var(--day-border);
+    border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.4rem;
+    font-family:'JetBrains Mono',monospace;font-size:.85rem;line-height:2;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.4rem .75rem 3rem;}
+    .card{padding:1.4rem;}
+    .btn{padding:.55rem 1rem;font-size:.88rem;}
+  }
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge" style="background:#f5c518;color:#000;">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    <span class="logo-dot" style="background:#f5a623"></span>
+    Pazapa &middot; Maths &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 3</div>
+  <h1><span class="hl">Évaluer une expression litt&eacute;rale</span></h1>
+  <p class="subtitle">Quiz rapide &middot; Je v&eacute;rifie que j&rsquo;ai compris la d&eacute;marche</p>
+</header>
+
+<div class="chrono-row">
+  <div class="chrono-chip">&#8987; <span id="chrono">0:00</span></div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Question 1 / 3</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar" style="width:0%"></div></div>
+</div>
+
+<div class="card" id="card">
+  <div class="card-stripe"></div>
+  <div id="q-zone"></div>
+  <div class="feedback" id="feedback" role="status" aria-live="polite">
+    <span class="fi" id="fb-icon"></span>
+    <div id="fb-text"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-next" onclick="nextQ()" style="display:none;">
+      Continuer &#8594;
+    </button>
+  </div>
+</div>
+
+<div class="final" id="final">
+  <div class="final-card">
+    <div class="logo-badge" style="margin-bottom:.8rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Quiz termin&eacute;&nbsp;!
+    </div>
+    <div class="final-icon" id="final-icon">&#127881;</div>
+    <div class="final-title" id="final-title"></div>
+    <div class="final-msg" id="final-msg"></div>
+    <div class="retry-list" id="retry-list" style="display:none;"></div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn btn-ghost" onclick="restart()">&#8635; Recommencer le quiz</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var QS=[
+  {
+    expr:"3x",val:"x = 4",
+    q:"Quelle \u00e9criture obtient-on apr\u00e8s avoir remplac\u00e9 x par 4\u00a0?",
+    opts:["3 \u00d7 4","3 + 4","4x"],
+    ans:0,
+    fbOk:"Dans 3x, le signe \u00d7 est sous-entendu. Avec x = 4, on obtient 3 \u00d7 4.",
+    fbKo:"Dans 3x, le signe \u00d7 est invisible. Remplacer x par 4 donne 3 \u00d7 4, pas 3 + 4."
+  },
+  {
+    expr:"x + 7",val:"x = 5",
+    q:"Quelle \u00e9criture obtient-on apr\u00e8s le remplacement\u00a0?",
+    opts:["5 + 7","x + 5","7 \u00d7 5"],
+    ans:0,
+    fbOk:"On remplace uniquement la lettre x par la valeur 5.",
+    fbKo:"On remplace uniquement la lettre x par 5. La valeur du nombre 7 ne change pas."
+  },
+  {
+    expr:"2 \u00d7 (x + 3)",val:"x = 4",
+    q:"Quelle op\u00e9ration faut-il calculer en premier apr\u00e8s le remplacement\u00a0?",
+    opts:["4 + 3","2 \u00d7 4","2 \u00d7 3"],
+    ans:0,
+    fbOk:"Apr\u00e8s le remplacement, on respecte les priorit\u00e9s : on calcule d\u2019abord l\u2019int\u00e9rieur des parenth\u00e8ses.",
+    fbKo:"Les parenth\u00e8ses sont prioritaires. Il faut d\u2019abord calculer 4 + 3, puis multiplier par 2."
+  }
+];
+
+var TOTAL=QS.length, cur=0, answers=[], timerID=null, tempsEcoule=0, started=false;
+var $=function(id){return document.getElementById(id);};
+
+function formatTime(s){
+  var m=Math.floor(s/60),sec=s%60;
+  return m+":"+(sec<10?"0":"")+sec;
+}
+function startTimer(){
+  if(timerID) return;
+  timerID=setInterval(function(){
+    tempsEcoule++;
+    $("chrono").textContent=formatTime(tempsEcoule);
+  },1000);
+}
+
+function render(){
+  var q=QS[cur];
+  $("prog-label").textContent="Question "+(cur+1)+" / "+TOTAL;
+  $("prog-pct").textContent=Math.round((cur+1)/TOTAL*100)+"\u00a0%";
+  $("prog-bar").style.width=Math.round((cur+1)/TOTAL*100)+"%";
+
+  var z=$("q-zone"); z.innerHTML="";
+  // Badge
+  var badge=document.createElement("div");
+  badge.className="q-badge";
+  badge.textContent="Question "+(cur+1)+" / "+TOTAL;
+  z.appendChild(badge);
+  // Contexte
+  var ctx=document.createElement("div"); ctx.className="q-context";
+  ctx.innerHTML="Expression : <span class='expr'>"+q.expr+"</span>"
+    +"&emsp;&mdash;&emsp;Valeur donn\u00e9e : <span class='val'>"+q.val+"</span>";
+  z.appendChild(ctx);
+  // Question
+  var qt=document.createElement("div"); qt.className="q-text";
+  qt.textContent=q.q;
+  z.appendChild(qt);
+  // Options
+  var opts=document.createElement("div"); opts.className="options";
+  q.opts.forEach(function(o,i){
+    var btn=document.createElement("button");
+    btn.type="button"; btn.className="opt";
+    btn.innerHTML="<span class='opt-code'>"+o+"</span>";
+    btn.onclick=function(){choose(i);};
+    btn.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();choose(i);}});
+    opts.appendChild(btn);
+  });
+  z.appendChild(opts);
+
+  $("feedback").className="feedback";
+  $("btn-next").style.display="none";
+}
+
+function choose(i){
+  if(answers[cur]!==undefined) return;
+  if(!started){started=true;startTimer();}
+  answers[cur]=i;
+  var q=QS[cur], ok=(i===q.ans);
+  // Colorer les options
+  var btns=document.querySelectorAll(".opt");
+  btns.forEach(function(b,j){
+    b.disabled=true;
+    if(j===q.ans) b.classList.add(ok&&j===i?"chosen-correct":"reveal-correct");
+    else if(j===i) b.classList.add("chosen-wrong");
+  });
+  // Feedback
+  var fb=$("feedback");
+  fb.className="feedback show "+(ok?"ok":"ko");
+  $("fb-icon").textContent=ok?"\u2705":"\u274c";
+  $("fb-text").innerHTML="<strong>"+(ok?"Bonne r\u00e9ponse\u00a0!":"Pas tout \u00e0 fait.")+"</strong> "+(ok?q.fbOk:q.fbKo);
+  // Bouton Continuer
+  var isLast=(cur===TOTAL-1);
+  $("btn-next").style.display="inline-flex";
+  $("btn-next").textContent=isLast?"Voir le r\u00e9sultat \u2192":"Question suivante \u2192";
+}
+
+function nextQ(){
+  if(cur<TOTAL-1){
+    cur++;
+    render();
+    window.scrollTo({top:0,behavior:"smooth"});
+  } else {
+    showFinal();
+  }
+}
+
+function showFinal(){
+  clearInterval(timerID);timerID=null;
+  $("card").style.display="none";
+  $("prog-bar").style.width="100%";
+  $("prog-pct").textContent="100\u00a0%";
+  $("prog-label").textContent="Quiz termin\u00e9";
+  $("final").classList.add("show");
+
+  var score=answers.filter(function(a,i){return a===QS[i].ans;}).length;
+  var allOk=(score===TOTAL);
+
+  $("final-icon").textContent=allOk?"\uD83C\uDF89":"\uD83D\uDCAA";
+  $("final-title").textContent=allOk
+    ?"Quiz r\u00e9ussi\u00a0! Tu peux commencer l\u2019entra\u00eenement."
+    :"Quiz termin\u00e9 \u2014 "+score+" / "+TOTAL+" bonnes r\u00e9ponses.";
+  $("final-msg").textContent=allOk
+    ?"Tu sais remplacer une lettre par sa valeur et respecter les priorit\u00e9s. Lance-toi dans les niveaux\u00a0!"
+    :"Relis les feedbacks ci-dessous, puis recommence le quiz avant de passer aux niveaux.";
+
+  if(!allOk){
+    var rl=$("retry-list");
+    rl.style.display="block";
+    var html="<strong>Points \u00e0 revoir\u00a0:</strong><br>";
+    QS.forEach(function(q,i){
+      if(answers[i]!==q.ans){
+        html+="\u2022 "+q.expr+" ("+q.val+") \u2014 "+q.fbKo+"<br>";
+      }
+    });
+    rl.innerHTML=html;
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  clearInterval(timerID);timerID=null;
+  cur=0;answers=[];tempsEcoule=0;started=false;
+  $("chrono").textContent="0:00";
+  $("final").classList.remove("show");
+  $("card").style.display="block";
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+render();
+</script>
+</body>
+</html>
