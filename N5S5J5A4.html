@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa — Je m'entraîne — Utiliser un programme de calcul</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --day-color:#f5c518; --day-dark:#8a6000; --day-light:#fffbeb;
+    --day-border:#f5e08a; --day-glow:rgba(245,197,24,.3);
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.7;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--orange);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--green);top:200px;left:-30px;pointer-events:none;}
+
+  header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;
+    font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.25rem,3.5vw,1.8rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.86rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+  .hud{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;
+    margin-bottom:1.1rem;position:relative;z-index:1;}
+  .hud-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;
+    border-radius:99px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;
+    border:1.5px solid var(--border);background:var(--surface);}
+  .hud-chip.stars{border-color:var(--day-border);background:var(--day-light);
+    color:var(--day-dark);font-size:1rem;}
+
+  .level-nav{display:flex;gap:.5rem;justify-content:center;margin-bottom:1.2rem;
+    flex-wrap:wrap;position:relative;z-index:1;}
+  .lv-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.8rem;
+    padding:.5rem 1rem;border-radius:10px;border:2px solid var(--border);
+    background:var(--surface);color:var(--muted);min-height:2.4rem;
+    display:inline-flex;align-items:center;transition:.15s;}
+  .lv-btn.active{background:var(--day-color);color:#000;border-color:var(--day-dark);}
+  .lv-btn.done{background:#f0faeb;color:var(--green);border-color:var(--green);}
+  .lv-btn.locked{opacity:.45;}
+
+  .level-banner{width:100%;max-width:720px;font-weight:800;
+    font-size:clamp(.95rem,2.8vw,1.1rem);margin-bottom:.4rem;position:relative;z-index:1;}
+  .level-mission{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted);
+    font-weight:600;width:100%;max-width:720px;margin-bottom:1rem;position:relative;z-index:1;}
+
+  /* Programme visuel */
+  .prog-wrap{display:flex;flex-direction:column;align-items:center;gap:.25rem;
+    background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;
+    padding:.75rem 1.1rem;margin-bottom:.8rem;width:fit-content;min-width:160px;}
+  .prog-start-lbl{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;
+    color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+  .prog-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:800;
+    color:var(--day-dark);}
+  .prog-arrow{color:var(--muted);font-size:.85rem;}
+  .prog-op{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;
+    color:var(--day-dark);}
+
+  /* Card */
+  .card{width:100%;max-width:720px;background:var(--surface);
+    border:2px solid var(--border);border-radius:var(--radius);
+    padding:1.8rem 1.8rem 1.4rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;margin-bottom:1.2rem;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+    border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--orange),var(--green));}
+
+  .q-block{padding:1.1rem 0;border-bottom:1.5px solid var(--border);}
+  .q-block:last-child{border-bottom:none;padding-bottom:0;}
+  .q-header{display:flex;align-items:flex-start;gap:.7rem;margin-bottom:.7rem;flex-wrap:wrap;}
+  .q-num{display:inline-flex;align-items:center;justify-content:center;
+    width:1.6rem;height:1.6rem;border-radius:50%;background:var(--day-color);color:#000;
+    font-weight:800;font-size:.8rem;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+
+  /* N1 : saisie numérique */
+  .input-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;}
+  .eq-sign{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--day-dark);}
+  .num-input{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;
+    color:var(--day-dark);background:var(--bg);border:2px solid var(--border);border-radius:8px;
+    padding:.4rem .7rem;text-align:center;width:90px;height:2.8rem;outline:none;
+    transition:border-color .2s,background .2s;}
+  .num-input:focus{border-color:var(--day-color);background:#fff;}
+  .num-input:disabled{cursor:default;}
+  .num-input.ok{background:#f0faeb;border-color:var(--green);color:#2f6e10;}
+  .num-input.ko{background:#fff0ef;border-color:var(--pink);color:#c0392b;}
+
+  /* N2/N3 : QCM cartes */
+  .opts-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem;}
+  .opt-card{font-family:'JetBrains Mono',monospace;font-size:.92rem;font-weight:700;
+    padding:.55rem 1rem;border:2px solid var(--day-border);border-radius:10px;
+    background:var(--day-light);color:var(--day-dark);cursor:pointer;min-height:44px;
+    transition:.15s;}
+  .opt-card:hover:not([disabled]){border-color:var(--day-color);background:#fff3d6;
+    box-shadow:0 2px 8px var(--day-glow);}
+  .opt-card:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+  .opt-card[disabled]{cursor:default;}
+  .opt-card.selected{border-color:var(--day-color);background:#fff3d6;}
+  .opt-card.chosen-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+  .opt-card.chosen-wrong{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+  .opt-card.reveal-correct{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+
+  .q-feedback{margin-top:.6rem;padding:.55rem .85rem;border-radius:8px;
+    font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;display:none;}
+  .q-feedback.show{display:block;}
+  .q-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .q-feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+
+  .corr-box{display:none;margin-top:.6rem;background:#fffbeb;
+    border:1.5px solid var(--yellow);border-radius:8px;padding:.65rem .9rem;
+    font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#5a4000;
+    line-height:1.9;white-space:pre-line;}
+  .corr-box.show{display:block;}
+
+  .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.4rem;
+    width:100%;max-width:720px;position:relative;z-index:1;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;
+    border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;
+    cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:var(--day-color);color:#000;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+  .level-success{background:linear-gradient(135deg,#f0faeb,#e8f5d0);
+    border:2px solid var(--green);border-radius:var(--radius);
+    padding:1.6rem;text-align:center;margin-top:1rem;
+    width:100%;max-width:720px;position:relative;z-index:1;
+    display:none;animation:fadeUp .4s ease both;}
+  .level-success.show{display:block;}
+  .ls-star{font-size:2.4rem;margin-bottom:.4rem;}
+  .ls-title{font-size:1.1rem;font-weight:800;color:#2f6e10;margin-bottom:.4rem;}
+  .ls-msg{font-size:.9rem;color:#2f6e10;margin-bottom:1rem;line-height:1.7;}
+
+  .final-screen{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+  .final-screen.show{display:block;animation:fadeUp .4s ease both;}
+  .final-card{background:var(--surface);border:2px solid var(--day-border);
+    border-radius:var(--radius);padding:2.4rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+  .final-title{font-size:1.2rem;font-weight:800;color:var(--day-dark);text-align:center;margin-bottom:.8rem;}
+  .final-stars{font-size:2rem;text-align:center;margin-bottom:1.2rem;letter-spacing:.1em;}
+  .skills-box{background:var(--day-light);border:1.5px solid var(--day-border);
+    border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;}
+  .skills-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.6rem;}
+  .skill-item{display:flex;align-items:flex-start;gap:.5rem;font-size:.9rem;
+    line-height:1.7;color:var(--text);margin-bottom:.2rem;}
+  .retenir-box{background:#fff;border:2px solid var(--day-border);border-radius:12px;
+    padding:1.2rem 1.4rem;margin-bottom:1.4rem;}
+  .retenir-title{font-weight:800;color:var(--day-dark);font-size:.95rem;margin-bottom:.7rem;}
+  .retenir-steps{font-size:.88rem;line-height:2;color:var(--text);
+    font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+  .final-goal{background:var(--day-color);color:#000;border-radius:12px;
+    padding:.9rem 1.2rem;font-size:.95rem;font-weight:700;text-align:center;
+    line-height:1.6;margin-bottom:1.4rem;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.4rem .75rem 3rem;}
+    .card,.final-card{padding:1.2rem;}
+    .btn{font-size:.85rem;padding:.5rem .9rem;}
+    .opts-row{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 5</div>
+  <h1><span class="hl">Je m&rsquo;entra&icirc;ne pour progresser</span></h1>
+  <p class="subtitle">Utiliser un programme de calcul &middot; 3 niveaux</p>
+</header>
+
+<div class="hud">
+  <div class="hud-chip stars" id="hud-stars">&#11088; 0 / 3</div>
+</div>
+<div class="level-nav" id="level-nav">
+  <div class="lv-btn active" id="lv1-btn">Niveau 1</div>
+  <div class="lv-btn locked" id="lv2-btn">Niveau 2</div>
+  <div class="lv-btn locked" id="lv3-btn">Niveau 3</div>
+</div>
+<div class="level-banner" id="level-banner"></div>
+<div class="level-mission" id="level-mission"></div>
+<div id="main-zone"></div>
+
+<div class="final-screen" id="final-screen">
+  <div class="final-card">
+    <div class="logo-badge" style="margin:0 auto 1rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Entra&icirc;nement termin&eacute;&nbsp;!
+    </div>
+    <div class="final-title">Tu sais utiliser un programme de calcul&nbsp;!</div>
+    <div class="final-stars" id="final-stars"></div>
+    <div class="skills-box">
+      <div class="skills-title">&#10003; Comp&eacute;tences valid&eacute;es</div>
+      <div class="skill-item">&#10004; Ex&eacute;cuter un programme avec un nombre donn&eacute;</div>
+      <div class="skill-item">&#10004; Traduire un programme en expression litt&eacute;rale</div>
+      <div class="skill-item">&#10004; Reconnaître deux programmes de calcul équivalents</div>
+    </div>
+    <div class="retenir-box">
+      <div class="retenir-title">&#128218; &Agrave; retenir</div>
+      <div class="retenir-steps">Un programme de calcul d&eacute;crit une suite d&rsquo;op&eacute;rations appliqu&eacute;es &agrave; un nombre.
+On peut traduire un programme par une expression litt&eacute;rale.
+Deux programmes de calcul sont &eacute;quivalents lorsqu&rsquo;ils donnent le m&ecirc;me r&eacute;sultat pour toutes les valeurs du nombre choisi.</div>
+    </div>
+    <div class="final-goal">&#127919; Lire un programme, le traduire, et reconnaître des programmes équivalents.</div>
+    <div style="text-align:center;">
+      <button class="btn btn-primary" onclick="restartAll()">&#8635; Recommencer l&rsquo;entra&icirc;nement</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Maths vérifiées Python :
+// N1 y=2: 10-2y=6, 3y-2.5=3.5... (voir commentaires inline)
+// N2 : tous vérifiés pour x/y/t/a spécifiques
+// N3 : tous équivalents vérifiés
+
+var $=function(id){return document.getElementById(id);};
+
+function makeProgHTML(steps){
+  var html='<div class="prog-wrap">';
+  steps.forEach(function(s,i){
+    if(s.type==='start'){
+      html+='<div class="prog-start-lbl">'+s.txt+'</div>';
+    } else if(s.type==='val'){
+      html+='<div class="prog-val">'+s.txt+'</div>';
+    } else {
+      html+='<div class="prog-arrow">\u2193</div><div class="prog-op">'+s.txt+'</div>';
+    }
+  });
+  html+='</div>';
+  return html;
+}
+
+var LEVELS=[
+  {
+    id:1,
+    title:"Niveau 1 \u2014 Ex\u00e9cuter un programme",
+    mission:"Applique les \u00e9tapes et calcule le r\u00e9sultat",
+    unlocked:true, done:false,
+    fbSuccess:"Bravo\u00a0! Tu sais suivre les \u00e9tapes d\u2019un programme de calcul.",
+    questions:[
+      // 6 → ×4 → +5 = 29
+      {prog:[{type:'start',txt:'D\u00e9part'},{type:'val',txt:'6'},{type:'op',txt:'\u00d7 4'},{type:'op',txt:'+ 5'}],
+       answer:29,corr:'6 \u00d7 4 = 24, puis 24 + 5 = 29',
+       fbOk:'6 \u00d7 4 = 24, puis 24 + 5 = 29.',fbKo:'Applique les \u00e9tapes dans l\u2019ordre\u00a0: 6 \u00d7 4 = 24, puis 24 + 5.'},
+      // 3 → ×3 → −2 = 7
+      {prog:[{type:'start',txt:'D\u00e9part'},{type:'val',txt:'3'},{type:'op',txt:'\u00d7 3'},{type:'op',txt:'\u2212 2'}],
+       answer:7,corr:'3 \u00d7 3 = 9, puis 9 \u2212 2 = 7',
+       fbOk:'3 \u00d7 3 = 9, puis 9 \u2212 2 = 7.',fbKo:'D\u2019abord 3 \u00d7 3 = 9, ensuite 9 \u2212 2 = 7.'},
+      // 10 → +7 → ×2 = 34
+      {prog:[{type:'start',txt:'D\u00e9part'},{type:'val',txt:'10'},{type:'op',txt:'+ 7'},{type:'op',txt:'\u00d7 2'}],
+       answer:34,corr:'10 + 7 = 17, puis 17 \u00d7 2 = 34',
+       fbOk:'10 + 7 = 17, puis 17 \u00d7 2 = 34.',fbKo:'D\u2019abord 10 + 7 = 17, puis 17 \u00d7 2 = 34.'},
+      // 5 → ×5 → −8 = 17
+      {prog:[{type:'start',txt:'D\u00e9part'},{type:'val',txt:'5'},{type:'op',txt:'\u00d7 5'},{type:'op',txt:'\u2212 8'}],
+       answer:17,corr:'5 \u00d7 5 = 25, puis 25 \u2212 8 = 17',
+       fbOk:'5 \u00d7 5 = 25, puis 25 \u2212 8 = 17.',fbKo:'D\u2019abord 5 \u00d7 5 = 25, puis 25 \u2212 8 = 17.'},
+      // 8 → −3 → ×4 = 20
+      {prog:[{type:'start',txt:'D\u00e9part'},{type:'val',txt:'8'},{type:'op',txt:'\u2212 3'},{type:'op',txt:'\u00d7 4'}],
+       answer:20,corr:'8 \u2212 3 = 5, puis 5 \u00d7 4 = 20',
+       fbOk:'8 \u2212 3 = 5, puis 5 \u00d7 4 = 20.',fbKo:'D\u2019abord 8 \u2212 3 = 5, puis 5 \u00d7 4 = 20.'},
+      // 2 → ×6 → +1 = 13
+      {prog:[{type:'start',txt:'D\u00e9part'},{type:'val',txt:'2'},{type:'op',txt:'\u00d7 6'},{type:'op',txt:'+ 1'}],
+       answer:13,corr:'2 \u00d7 6 = 12, puis 12 + 1 = 13',
+       fbOk:'2 \u00d7 6 = 12, puis 12 + 1 = 13.',fbKo:'D\u2019abord 2 \u00d7 6 = 12, puis 12 + 1 = 13.'},
+      // 12 → ÷4 → ×3 = 9
+      {prog:[{type:'start',txt:'D\u00e9part'},{type:'val',txt:'12'},{type:'op',txt:'\u00f7 4'},{type:'op',txt:'\u00d7 3'}],
+       answer:9,corr:'12 \u00f7 4 = 3, puis 3 \u00d7 3 = 9',
+       fbOk:'12 \u00f7 4 = 3, puis 3 \u00d7 3 = 9.',fbKo:'D\u2019abord 12 \u00f7 4 = 3, puis 3 \u00d7 3 = 9.'},
+      // 7 → ×2 → −5 = 9
+      {prog:[{type:'start',txt:'D\u00e9part'},{type:'val',txt:'7'},{type:'op',txt:'\u00d7 2'},{type:'op',txt:'\u2212 5'}],
+       answer:9,corr:'7 \u00d7 2 = 14, puis 14 \u2212 5 = 9',
+       fbOk:'7 \u00d7 2 = 14, puis 14 \u2212 5 = 9.',fbKo:'D\u2019abord 7 \u00d7 2 = 14, puis 14 \u2212 5 = 9.'}
+    ]
+  },
+  {
+    id:2,
+    title:"Niveau 2 \u2014 Traduire en expression litt\u00e9rale",
+    mission:"Trouve l\u2019expression litt\u00e9rale correspondant au programme",
+    unlocked:false, done:false,
+    fbSuccess:"Tr\u00e8s bien\u00a0! Tu sais traduire un programme en expression litt\u00e9rale.",
+    questions:[
+      // y → ×11 → +3 → ×3 = 33y+9
+      {prog:[{type:'start',txt:'Choisir y'},{type:'op',txt:'\u00d7 11'},{type:'op',txt:'+ 3'},{type:'op',txt:'\u00d7 3'}],
+       opts:['33y + 9','11y + 9','33y + 3'],ans:0,
+       fbs:['11y + 3, puis \u00d7 3 donne 3(11y+3) = 33y + 9.','Le \u00d7 3 final s\u2019applique \u00e0 tout\u00a0: 3 \u00d7 (11y + 3) = 33y + 9.','Le + 3 est \u00e0 l\u2019int\u00e9rieur de la parenth\u00e8se\u00a0: 3 \u00d7 (11y + 3) = 33y + 9.'],
+       corr:'y \u2192 \u00d7 11 \u2192 11y\n11y \u2192 + 3 \u2192 11y + 3\n11y + 3 \u2192 \u00d7 3 \u2192 3(11y + 3) = 33y + 9'},
+      // t → ×4 → +7 → +3t = 7t+7
+      {prog:[{type:'start',txt:'Choisir t'},{type:'op',txt:'\u00d7 4'},{type:'op',txt:'+ 7'},{type:'op',txt:'+ 3t'}],
+       opts:['7t + 7','4t + 7','7t + 3'],ans:0,
+       fbs:['4t + 7 + 3t = 7t + 7.','+3t s\u2019ajoute au r\u00e9sultat\u00a0: 4t + 7 + 3t = 7t + 7.','On ajoute 3t au r\u00e9sultat 4t + 7\u00a0: 4t + 7 + 3t = 7t + 7.'],
+       corr:'t \u2192 \u00d7 4 \u2192 4t\n4t \u2192 + 7 \u2192 4t + 7\n4t + 7 \u2192 + 3t \u2192 7t + 7'},
+      // a → ×10 → +5 → −2a = 8a+5
+      {prog:[{type:'start',txt:'Choisir a'},{type:'op',txt:'\u00d7 10'},{type:'op',txt:'+ 5'},{type:'op',txt:'\u2212 2a'}],
+       opts:['8a + 5','10a + 5','8a \u2212 5'],ans:0,
+       fbs:['10a + 5 \u2212 2a = 8a + 5.','\u2212 2a s\u2019applique apr\u00e8s\u00a0: 10a + 5 \u2212 2a = 8a + 5.','Le + 5 reste positif\u00a0: 10a + 5 \u2212 2a = 8a + 5.'],
+       corr:'a \u2192 \u00d7 10 \u2192 10a\n10a \u2192 + 5 \u2192 10a + 5\n10a + 5 \u2192 \u2212 2a \u2192 8a + 5'},
+      // x → ×7 → +8 → −2x = 5x+8
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 7'},{type:'op',txt:'+ 8'},{type:'op',txt:'\u2212 2x'}],
+       opts:['5x + 8','7x + 8','5x \u2212 8'],ans:0,
+       fbs:['7x + 8 \u2212 2x = 5x + 8.','\u2212 2x final\u00a0: 7x + 8 \u2212 2x = 5x + 8.','Le + 8 reste positif\u00a0: 7x + 8 \u2212 2x = 5x + 8.'],
+       corr:'x \u2192 \u00d7 7 \u2192 7x\n7x \u2192 + 8 \u2192 7x + 8\n7x + 8 \u2192 \u2212 2x \u2192 5x + 8'},
+      // x → +5 → ×3 = 3x+15
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'+ 5'},{type:'op',txt:'\u00d7 3'}],
+       opts:['3x + 15','3x + 5','x + 15'],ans:0,
+       fbs:['(x + 5) \u00d7 3 = 3x + 15.','Le \u00d7 3 s\u2019applique \u00e0 tout\u00a0: (x + 5) \u00d7 3 = 3x + 15.','Le \u00d7 3 porte sur les deux termes\u00a0: 3x + 15.'],
+       corr:'x \u2192 + 5 \u2192 x + 5\nx + 5 \u2192 \u00d7 3 \u2192 3(x + 5) = 3x + 15'},
+      // x → ×4 → −6 = 4x−6
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 4'},{type:'op',txt:'\u2212 6'}],
+       opts:['4x + 6','4x \u2212 6','x \u2212 6'],ans:1,
+       fbs:['L\u2019op\u00e9ration est \u2212 6, pas + 6.','4x puis \u2212 6 : l\u2019expression est 4x \u2212 6.','Le \u00d7 4 est bien appliqu\u00e9 \u00e0 x d\u2019abord.'],
+       corr:'x \u2192 \u00d7 4 \u2192 4x\n4x \u2192 \u2212 6 \u2192 4x \u2212 6'},
+      // x → −3 → ×4 = 4x−12
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u2212 3'},{type:'op',txt:'\u00d7 4'}],
+       opts:['4x \u2212 12','4x \u2212 3','x \u2212 12'],ans:0,
+       fbs:['(x \u2212 3) \u00d7 4 = 4x \u2212 12.','Le \u00d7 4 s\u2019applique \u00e0 tout\u00a0: 4 \u00d7 (x \u2212 3) = 4x \u2212 12.','Le \u00d7 4 porte aussi sur le \u2212 3.'],
+       corr:'x \u2192 \u2212 3 \u2192 x \u2212 3\nx \u2212 3 \u2192 \u00d7 4 \u2192 4(x \u2212 3) = 4x \u2212 12'},
+      // x → ×2 → +x → ×3 = 9x
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 2'},{type:'op',txt:'+ x'},{type:'op',txt:'\u00d7 3'}],
+       opts:['9x','6x + 3','3x + 3'],ans:0,
+       fbs:['2x + x = 3x, puis 3x \u00d7 3 = 9x.','2x + x = 3x, puis 3x \u00d7 3 = 9x.','2x + x = 3x, et non 2x + 1.'],
+       corr:'x \u2192 \u00d7 2 \u2192 2x\n2x \u2192 + x \u2192 3x\n3x \u2192 \u00d7 3 \u2192 9x'}
+    ]
+  },
+  {
+    id:3,
+    title:"Niveau 3 \u2014 Programmes \u00e9quivalents",
+    mission:"Trouve le programme de calcul équivalent",
+    unlocked:false, done:false,
+    fbSuccess:"Excellent\u00a0! Tu sais reconna\u00eetre des programmes \u00e9quivalents.",
+    questions:[
+      // x→×7→+8→−2x = 5x+8 ≡ ×5→+8
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 7'},{type:'op',txt:'+ 8'},{type:'op',txt:'\u2212 2x'}],
+       opts:['\u00d7 5 puis + 6','\u00d7 5 puis + 8','\u00d7 9 puis + 8'],ans:1,
+       fbs:['7x + 8 \u2212 2x = 5x + 8. Le programme \u00e9quivalent est \u00d7 5 puis + 8. Les deux programmes donnent toujours le même résultat.','7x + 8 \u2212 2x = 5x + 8, pas 5x + 6.','7x \u2212 2x = 5x, pas 9x.'],
+       corr:'7x + 8 \u2212 2x = 5x + 8\nProgramme \u00e9quivalent\u00a0: \u00d7 5 puis + 8'},
+      // x→×6→+6→×3 = 18x+18 ≡ ×18→+18
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 6'},{type:'op',txt:'+ 6'},{type:'op',txt:'\u00d7 3'}],
+       opts:['\u00d7 18 puis + 6','\u00d7 9 puis + 18','\u00d7 18 puis + 18'],ans:2,
+       fbs:['3 \u00d7 6 = 18 pour le coefficient, et 3 \u00d7 6 = 18 pour la constante.','6 \u00d7 3 = 18, pas 9.','3(6x + 6) = 18x + 18. Le programme \u00e9quivalent est \u00d7 18 puis + 18. Les deux programmes donnent toujours le même résultat.'],
+       corr:'(6x + 6) \u00d7 3 = 18x + 18\nProgramme \u00e9quivalent\u00a0: \u00d7 18 puis + 18'},
+      // x→×11→+10→×5 = 55x+50 ≡ ×55→+50
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 11'},{type:'op',txt:'+ 10'},{type:'op',txt:'\u00d7 5'}],
+       opts:['\u00d7 55 puis + 50','\u00d7 55 puis + 10','\u00d7 16 puis + 50'],ans:0,
+       fbs:['5(11x + 10) = 55x + 50. Le programme \u00e9quivalent est \u00d7 55 puis + 50. Les deux programmes donnent toujours le même résultat.','La constante est aussi multipli\u00e9e par 5\u00a0: 10 \u00d7 5 = 50.','11 \u00d7 5 = 55, pas 16.'],
+       corr:'(11x + 10) \u00d7 5 = 55x + 50\nProgramme \u00e9quivalent\u00a0: \u00d7 55 puis + 50'},
+      // x→×4→+6→−x = 3x+6 ≡ ×3→+6
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 4'},{type:'op',txt:'+ 6'},{type:'op',txt:'\u2212 x'}],
+       opts:['\u00d7 3 puis + 2','\u00d7 3 puis + 6','\u00d7 5 puis + 6'],ans:1,
+       fbs:['La constante + 6 ne change pas.','4x + 6 \u2212 x = 3x + 6. Le programme \u00e9quivalent est \u00d7 3 puis + 6. Les deux programmes donnent toujours le même résultat.','4x \u2212 x = 3x, pas 5x.'],
+       corr:'4x + 6 \u2212 x = 3x + 6\nProgramme \u00e9quivalent\u00a0: \u00d7 3 puis + 6'},
+      // x→×3→−2→+x = 4x−2 ≡ ×4→−2
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 3'},{type:'op',txt:'\u2212 2'},{type:'op',txt:'+ x'}],
+       opts:['\u00d7 4 puis + 2','\u00d7 2 puis \u2212 2','\u00d7 4 puis \u2212 2'],ans:2,
+       fbs:['La constante est \u2212 2, pas + 2.','3x + x = 4x, pas 2x.','3x \u2212 2 + x = 4x \u2212 2. Le programme \u00e9quivalent est \u00d7 4 puis \u2212 2. Les deux programmes donnent toujours le même résultat.'],
+       corr:'3x \u2212 2 + x = 4x \u2212 2\nProgramme \u00e9quivalent\u00a0: \u00d7 4 puis \u2212 2'},
+      // x→×6→−x→−5 = 5x−5 ≡ ×5→−5
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 6'},{type:'op',txt:'\u2212 x'},{type:'op',txt:'\u2212 5'}],
+       opts:['\u00d7 5 puis \u2212 5','\u00d7 5 puis + 5','\u00d7 7 puis \u2212 5'],ans:0,
+       fbs:['6x \u2212 x \u2212 5 = 5x \u2212 5. Le programme \u00e9quivalent est \u00d7 5 puis \u2212 5. Les deux programmes donnent toujours le même résultat.','La constante est \u2212 5, pas + 5.','6x \u2212 x = 5x, pas 7x.'],
+       corr:'6x \u2212 x \u2212 5 = 5x \u2212 5\nProgramme \u00e9quivalent\u00a0: \u00d7 5 puis \u2212 5'},
+      // x→×9→+4→−4x = 5x+4 ≡ ×5→+4
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 9'},{type:'op',txt:'+ 4'},{type:'op',txt:'\u2212 4x'}],
+       opts:['\u00d7 5 puis \u2212 4','\u00d7 5 puis + 4','\u00d7 13 puis + 4'],ans:1,
+       fbs:['La constante est + 4, pas \u2212 4.','9x + 4 \u2212 4x = 5x + 4. Le programme \u00e9quivalent est \u00d7 5 puis + 4. Les deux programmes donnent toujours le même résultat.','9x \u2212 4x = 5x, pas 13x.'],
+       corr:'9x + 4 \u2212 4x = 5x + 4\nProgramme \u00e9quivalent\u00a0: \u00d7 5 puis + 4'},
+      // x→×5→+3→×2 = 10x+6 ≡ ×10→+6
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 5'},{type:'op',txt:'+ 3'},{type:'op',txt:'\u00d7 2'}],
+       opts:['\u00d7 10 puis + 3','\u00d7 7 puis + 6','\u00d7 10 puis + 6'],ans:2,
+       fbs:['La constante est aussi multipli\u00e9e par 2\u00a0: 3 \u00d7 2 = 6.','5 \u00d7 2 = 10, pas 7.','2(5x + 3) = 10x + 6. Le programme \u00e9quivalent est \u00d7 10 puis + 6. Les deux programmes donnent toujours le même résultat.'],
+       corr:'(5x + 3) \u00d7 2 = 10x + 6\nProgramme \u00e9quivalent\u00a0: \u00d7 10 puis + 6'},
+      // x→×8→+2→−3x = 5x+2 ≡ ×5→+2
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 8'},{type:'op',txt:'+ 2'},{type:'op',txt:'\u2212 3x'}],
+       opts:['\u00d7 5 puis + 2','\u00d7 5 puis \u2212 2','\u00d7 11 puis + 2'],ans:0,
+       fbs:['8x + 2 \u2212 3x = 5x + 2. Le programme \u00e9quivalent est \u00d7 5 puis + 2. Les deux programmes donnent toujours le même résultat.','La constante est + 2, pas \u2212 2.','8x \u2212 3x = 5x, pas 11x.'],
+       corr:'8x + 2 \u2212 3x = 5x + 2\nProgramme \u00e9quivalent\u00a0: \u00d7 5 puis + 2'},
+      // x→×4→+3→×2 = 8x+6 ≡ ×8→+6
+      {prog:[{type:'start',txt:'Choisir x'},{type:'op',txt:'\u00d7 4'},{type:'op',txt:'+ 3'},{type:'op',txt:'\u00d7 2'}],
+       opts:['\u00d7 8 puis + 3','\u00d7 8 puis + 6','\u00d7 6 puis + 6'],ans:1,
+       fbs:['La constante est aussi multipli\u00e9e par 2\u00a0: 3 \u00d7 2 = 6.','2(4x + 3) = 8x + 6. Le programme \u00e9quivalent est \u00d7 8 puis + 6. Les deux programmes donnent toujours le même résultat.','4 \u00d7 2 = 8, pas 6.'],
+       corr:'(4x + 3) \u00d7 2 = 8x + 6\nProgramme \u00e9quivalent\u00a0: \u00d7 8 puis + 6'}
+    ]
+  }
+];
+
+var currentLevel=0, starsEarned=0;
+var userAnswers={}, validated={}, levelAttempts=[0,0,0];
+
+function checkNum(val,expected){
+  var s=String(val||"").trim().replace(",",".");
+  if(!/^-?[0-9]+(\.[0-9]+)?$/.test(s)) return false;
+  return Math.abs(Number(s)-expected)<1e-6;
+}
+
+function updateHUD(){
+  $("hud-stars").innerHTML="\u2b50 "+starsEarned+" / 3";
+  LEVELS.forEach(function(lv,i){
+    var btn=$("lv"+(i+1)+"-btn");
+    if(btn) btn.className="lv-btn"+(i===currentLevel?" active":lv.done?" done":lv.unlocked?"":" locked");
+  });
+  $("level-banner").textContent=LEVELS[currentLevel].title;
+  $("level-mission").innerHTML="\uD83C\uDFAF Objectif : "+LEVELS[currentLevel].mission;
+}
+
+function renderLevel(){
+  updateHUD();
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  var zone=$("main-zone"); zone.innerHTML="";
+  if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+  if(lv.id===1) renderN1(lv,lvIdx,zone);
+  else renderQCM(lv,lvIdx,zone);
+}
+
+function renderN1(lv,lvIdx,zone){
+  var card=document.createElement("div"); card.className="card";
+  card.innerHTML="<div class='card-stripe'></div>";
+  lv.questions.forEach(function(q,qi){
+    var block=document.createElement("div"); block.className="q-block";
+    var hdr=document.createElement("div"); hdr.className="q-header";
+    var num=document.createElement("span"); num.className="q-num"; num.textContent=qi+1;
+    var progDiv=document.createElement("div"); progDiv.innerHTML=makeProgHTML(q.prog);
+    hdr.appendChild(num); hdr.appendChild(progDiv); block.appendChild(hdr);
+    var irow=document.createElement("div"); irow.className="input-row";
+    var eq=document.createElement("span"); eq.className="eq-sign"; eq.textContent="R\u00e9sultat =";
+    var inp=document.createElement("input");
+    inp.type="text"; inp.className="num-input"; inp.id="inp-"+lvIdx+"-"+qi;
+    inp.setAttribute("inputmode","numeric"); inp.setAttribute("autocomplete","off");
+    inp.placeholder="?"; inp.style.width="80px";
+    if(userAnswers[lvIdx][qi]!==undefined) inp.value=userAnswers[lvIdx][qi];
+    if(validated[lvIdx]){
+      inp.disabled=true;
+      inp.className="num-input "+(checkNum(userAnswers[lvIdx][qi],q.answer)?"ok":"ko");
+    }
+    inp.addEventListener("input",function(){userAnswers[lvIdx][qi]=inp.value;});
+    inp.addEventListener("keydown",function(e){if(e.key==="Enter")verifyLevel();});
+    irow.appendChild(eq); irow.appendChild(inp); block.appendChild(irow);
+    var fb=document.createElement("div"); fb.className="q-feedback"; fb.id="fb-"+lvIdx+"-"+qi;
+    fb.setAttribute("role","status"); fb.setAttribute("aria-live","polite");
+    var corr=document.createElement("div"); corr.className="corr-box"; corr.id="corr-"+lvIdx+"-"+qi;
+    corr.textContent=q.corr;
+    if(validated[lvIdx]){
+      var ok=checkNum(userAnswers[lvIdx][qi],q.answer);
+      fb.className="q-feedback show "+(ok?"ok":"ko");
+      fb.innerHTML=ok?"\u2705 "+q.fbOk:"\u274c "+q.fbKo;
+      if(!ok&&levelAttempts[lvIdx]>=2) corr.classList.add("show");
+    }
+    block.appendChild(fb); block.appendChild(corr);
+    card.appendChild(block);
+  });
+  zone.appendChild(card);
+  appendSuccessOrButtons(lv,lvIdx,zone);
+}
+
+function renderQCM(lv,lvIdx,zone){
+  var card=document.createElement("div"); card.className="card";
+  card.innerHTML="<div class='card-stripe'></div>";
+  lv.questions.forEach(function(q,qi){
+    var block=document.createElement("div"); block.className="q-block";
+    var hdr=document.createElement("div"); hdr.className="q-header";
+    var num=document.createElement("span"); num.className="q-num"; num.textContent=qi+1;
+    var progDiv=document.createElement("div"); progDiv.innerHTML=makeProgHTML(q.prog);
+    hdr.appendChild(num); hdr.appendChild(progDiv); block.appendChild(hdr);
+    var orow=document.createElement("div"); orow.className="opts-row";
+    var chosen=userAnswers[lvIdx][qi];
+    q.opts.forEach(function(o,oi){
+      var btn=document.createElement("button"); btn.type="button"; btn.className="opt-card";
+      btn.textContent=o; btn.id="opt-"+lvIdx+"-"+qi+"-"+oi;
+      if(validated[lvIdx]){
+        btn.disabled=true;
+        if(oi===q.ans) btn.classList.add(chosen===oi?"chosen-correct":"reveal-correct");
+        else if(chosen===oi) btn.classList.add("chosen-wrong");
+      } else {
+        if(chosen===oi) btn.classList.add("selected");
+        btn.onclick=function(){chooseOpt(lvIdx,qi,oi,q);};
+      }
+      orow.appendChild(btn);
+    });
+    block.appendChild(orow);
+    var fb=document.createElement("div"); fb.className="q-feedback"; fb.id="fb-"+lvIdx+"-"+qi;
+    fb.setAttribute("role","status"); fb.setAttribute("aria-live","polite");
+    var corr=document.createElement("div"); corr.className="corr-box"; corr.id="corr-"+lvIdx+"-"+qi;
+    corr.textContent=q.corr;
+    if(validated[lvIdx]&&chosen!==undefined){
+      var ok=(chosen===q.ans);
+      fb.className="q-feedback show "+(ok?"ok":"ko");
+      fb.innerHTML=ok?"\u2705 "+q.fbs[q.ans]:"\u274c "+q.fbs[chosen];
+      if(!ok&&levelAttempts[lvIdx]>=2) corr.classList.add("show");
+    }
+    block.appendChild(fb); block.appendChild(corr);
+    card.appendChild(block);
+  });
+  zone.appendChild(card);
+  appendSuccessOrButtons(lv,lvIdx,zone);
+}
+
+function chooseOpt(lvIdx,qi,oi,q){
+  if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+  if(validated[lvIdx]) return;
+  userAnswers[lvIdx][qi]=oi;
+  q.opts.forEach(function(o,j){
+    var b=$("opt-"+lvIdx+"-"+qi+"-"+j);
+    if(b) b.className="opt-card"+(j===oi?" selected":"");
+  });
+}
+
+function appendSuccessOrButtons(lv,lvIdx,zone){
+  var suc=document.createElement("div"); suc.className="level-success"; suc.id="level-success-"+lvIdx;
+  if(lv.done){
+    suc.classList.add("show");
+    suc.innerHTML="<div class='ls-star'>\u2b50</div><div class='ls-title'>\u00c9toile obtenue\u00a0!</div>"
+      +"<div class='ls-msg'>"+lv.fbSuccess+"</div>"
+      +(currentLevel<2?"<button class='btn btn-primary' onclick='goNextLevel()'>Niveau "+(currentLevel+2)+" \u2192</button>"
+        :"<button class='btn btn-primary' onclick='showFinal()'>Voir le bilan final \u2192</button>");
+  }
+  zone.appendChild(suc);
+  if(!lv.done){
+    var btnRow=document.createElement("div"); btnRow.className="btn-row";
+    var vbtn=document.createElement("button"); vbtn.className="btn btn-primary";
+    vbtn.innerHTML=(levelAttempts[lvIdx]>0&&!validated[lvIdx])?"\u21bb V\u00e9rifier \u00e0 nouveau":"\u2713 V\u00e9rifier";
+    vbtn.onclick=function(){verifyLevel();};
+    btnRow.appendChild(vbtn);
+    var rbtn=document.createElement("button"); rbtn.className="btn btn-ghost";
+    rbtn.innerHTML="\u21bb Recommencer"; rbtn.onclick=function(){restartLevel();};
+    btnRow.appendChild(rbtn);
+    zone.appendChild(btnRow);
+  }
+}
+
+function isAllAnswered(){
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  if(!userAnswers[lvIdx]) return false;
+  return lv.questions.every(function(q,qi){return userAnswers[lvIdx][qi]!==undefined;});
+}
+function isAllCorrect(){
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  if(lv.id===1) return lv.questions.every(function(q,qi){return checkNum(userAnswers[lvIdx][qi],q.answer);});
+  return lv.questions.every(function(q,qi){return userAnswers[lvIdx][qi]===q.ans;});
+}
+
+function verifyLevel(){
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+  if(!isAllAnswered()){
+    var rows=document.querySelectorAll("#main-zone .btn-row");
+    rows.forEach(function(row){
+      if(!row.querySelector(".msg-vide")){
+        var msg=document.createElement("div"); msg.className="msg-vide";
+        msg.style.cssText="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#8a6000;padding:.4rem .2rem;";
+        msg.textContent="\u270F\uFE0F R\u00e9ponds \u00e0 toutes les questions avant de valider.";
+        row.insertBefore(msg,row.firstChild);
+      }
+    });
+    return;
+  }
+  levelAttempts[lvIdx]++;
+  var attempt=levelAttempts[lvIdx];
+  var allOk=isAllCorrect();
+  if(allOk){
+    validated[lvIdx]=true;
+    if(!lv.done){lv.done=true;starsEarned++;}
+    if(currentLevel<2) LEVELS[currentLevel+1].unlocked=true;
+    renderLevel(); updateHUD(); return;
+  }
+  lv.questions.forEach(function(q,qi){
+    var ok=(lv.id===1)?checkNum(userAnswers[lvIdx][qi],q.answer):(userAnswers[lvIdx][qi]===q.ans);
+    var fb=$("fb-"+lvIdx+"-"+qi);
+    var corr=$("corr-"+lvIdx+"-"+qi);
+    if(fb&&!ok){
+      if(attempt===1){
+        fb.className="q-feedback show ko";
+        fb.innerHTML="\u274c Pas tout \u00e0 fait. V\u00e9rifie et r\u00e9essaie.";
+      } else {
+        var chosen=userAnswers[lvIdx][qi];
+        fb.className="q-feedback show ko";
+        fb.innerHTML="\u274c "+(lv.id===1?q.fbKo:q.fbs[chosen]);
+        if(lv.id===1){var inp=$("inp-"+lvIdx+"-"+qi);if(inp){inp.disabled=true;inp.className="num-input ko";}}
+        else{
+          q.opts.forEach(function(o,oi){
+            var b=$("opt-"+lvIdx+"-"+qi+"-"+oi);
+            if(!b) return;
+            b.disabled=true;
+            if(oi===q.ans) b.classList.add(chosen===oi?"chosen-correct":"reveal-correct");
+            else if(chosen===oi) b.classList.add("chosen-wrong");
+            else b.className="opt-card";
+          });
+        }
+        if(corr) corr.classList.add("show");
+      }
+    }
+  });
+  var rows=document.querySelectorAll("#main-zone .btn-row");
+  if(attempt===1){
+    rows.forEach(function(row){
+      row.innerHTML="<button class='btn btn-primary' onclick='verifyLevel()'>\u21bb V\u00e9rifier \u00e0 nouveau</button>"
+        +"<button class='btn btn-ghost' onclick='restartLevel()'>\u21bb Recommencer</button>";
+    });
+  } else {
+    validated[lvIdx]=true;
+    document.querySelectorAll(".opt-card").forEach(function(b){b.disabled=true;});
+    rows.forEach(function(row){
+      row.innerHTML="<button class='btn btn-ghost' onclick='restartLevel()'>\u21bb Recommencer</button>";
+    });
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function goNextLevel(){
+  if(currentLevel<2){currentLevel++;renderLevel();window.scrollTo({top:0,behavior:"smooth"});}
+}
+function restartLevel(){
+  var lvIdx=currentLevel;
+  userAnswers[lvIdx]={}; levelAttempts[lvIdx]=0; validated[lvIdx]=false;
+  if(LEVELS[lvIdx].done){starsEarned=Math.max(0,starsEarned-1);LEVELS[lvIdx].done=false;}
+  renderLevel(); window.scrollTo({top:0,behavior:"smooth"});
+}
+function showFinal(){
+  $("main-zone").style.display="none"; $("level-nav").style.display="none";
+  $("level-banner").style.display="none"; $("level-mission").style.display="none";
+  $("hud-stars").parentElement.style.display="none";
+  $("final-screen").classList.add("show");
+  $("final-stars").textContent="\u2b50".repeat(starsEarned)+"\u2606".repeat(3-starsEarned)+" ("+starsEarned+"/3)";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function restartAll(){
+  currentLevel=0; starsEarned=0; userAnswers={}; validated={}; levelAttempts=[0,0,0];
+  LEVELS.forEach(function(lv,i){lv.unlocked=(i===0);lv.done=false;});
+  $("final-screen").classList.remove("show");
+  ["main-zone","level-nav","level-banner","level-mission"].forEach(function(id){$(id).style.display="";});
+  $("hud-stars").parentElement.style.display="";
+  renderLevel(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+renderLevel();
+</script>
+</body>
+</html>
