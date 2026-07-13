@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa — Je m'entraîne — Évaluer une expression littérale</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --day-color:#8dc63f; --day-dark:#3d7a10; --day-light:#f0f7e6;
+    --day-border:#bde08a; --day-glow:rgba(141,198,63,.3);
+    --bg:#fffdf7; --surface:#ffffff; --border:#e8e4d9;
+    --yellow:#f5c518; --green:#8dc63f; --blue:#3ab5d8;
+    --pink:#f28b82; --orange:#f5a623;
+    --text:#1a1d23; --muted:#8a8f9a; --radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;word-spacing:.06em;line-height:1.7;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--green);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--orange);top:200px;left:-30px;pointer-events:none;}
+
+  header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;
+    font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+  h1{font-size:clamp(1.25rem,3.5vw,1.8rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.86rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+
+  /* HUD */
+  .hud{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;
+    margin-bottom:1.1rem;position:relative;z-index:1;}
+  .hud-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;
+    border-radius:99px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;
+    border:1.5px solid var(--border);background:var(--surface);}
+  .hud-chip.stars{border-color:var(--day-border);background:var(--day-light);
+    color:var(--day-dark);font-size:1rem;}
+
+  /* Niveaux nav */
+  .level-nav{display:flex;gap:.5rem;justify-content:center;margin-bottom:1.2rem;
+    flex-wrap:wrap;position:relative;z-index:1;}
+  .lv-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.8rem;
+    padding:.5rem 1rem;border-radius:10px;border:2px solid var(--border);
+    background:var(--surface);color:var(--muted);min-height:2.4rem;
+    display:inline-flex;align-items:center;gap:.4rem;transition:.15s;}
+  .lv-btn.active{background:var(--day-color);color:#fff;border-color:var(--day-dark);}
+  .lv-btn.done{background:#f0faeb;color:var(--green);border-color:var(--green);}
+  .lv-btn.locked{opacity:.45;}
+
+  .level-banner{width:100%;max-width:680px;font-weight:800;
+    font-size:clamp(.95rem,2.8vw,1.1rem);margin-bottom:.4rem;
+    position:relative;z-index:1;display:flex;align-items:center;gap:.5rem;}
+  .level-mission{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted);
+    font-weight:600;width:100%;max-width:680px;margin-bottom:1rem;position:relative;z-index:1;}
+
+  /* Valeurs données */
+  .val-box{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;
+    padding:.7rem 1.1rem;margin-bottom:1.2rem;font-family:'JetBrains Mono',monospace;
+    font-size:.95rem;font-weight:700;color:var(--day-dark);max-width:680px;width:100%;
+    position:relative;z-index:1;}
+
+  /* Card niveau */
+  .card{width:100%;max-width:680px;background:var(--surface);
+    border:2px solid var(--border);border-radius:var(--radius);
+    padding:1.8rem 1.8rem 1.4rem;position:relative;z-index:1;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;
+    margin-bottom:1.2rem;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+    border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--green),var(--blue));}
+
+  /* Questions */
+  .q-block{padding:1rem 0;border-bottom:1.5px solid var(--border);}
+  .q-block:last-child{border-bottom:none;padding-bottom:0;}
+  .q-label{font-size:.78rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+    color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;}
+  .q-expr{font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:.6rem;
+    font-family:'JetBrains Mono',monospace;}
+  .input-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;}
+  .eq-sign{font-size:1.05rem;font-weight:800;color:var(--day-dark);
+    font-family:'JetBrains Mono',monospace;}
+  .num-input{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;
+    color:var(--day-dark);background:var(--bg);border:2px solid var(--border);border-radius:8px;
+    padding:.4rem .7rem;text-align:center;width:100px;height:2.8rem;outline:none;
+    transition:border-color .2s,background .2s;}
+  .num-input:focus{border-color:var(--day-color);background:#fff;}
+  .num-input:disabled{cursor:default;}
+  .num-input.ok{background:#f0faeb;border-color:var(--green);color:#2f6e10;}
+  .num-input.ko{background:#fff0ef;border-color:var(--pink);color:#c0392b;}
+
+  .q-feedback{margin-top:.6rem;padding:.55rem .85rem;border-radius:8px;
+    font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;display:none;}
+  .q-feedback.show{display:block;}
+  .q-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .q-feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+
+  .corr-box{display:none;margin-top:.6rem;background:#fffbeb;
+    border:1.5px solid var(--yellow);border-radius:8px;padding:.65rem .9rem;
+    font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#5a4000;line-height:1.9;
+    white-space:pre-line;}
+  .corr-box.show{display:block;}
+
+  /* Boutons */
+  .btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.4rem;
+    width:100%;max-width:680px;position:relative;z-index:1;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;
+    border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;
+    cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+  .btn:active{transform:scale(.96);}
+  .btn:disabled{opacity:.4;cursor:default;}
+  .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+  .btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+  /* Succès niveau */
+  .level-success{background:linear-gradient(135deg,#f0faeb,#e8f5d0);
+    border:2px solid var(--green);border-radius:var(--radius);
+    padding:1.6rem;text-align:center;margin-top:1rem;
+    width:100%;max-width:680px;position:relative;z-index:1;
+    display:none;animation:fadeUp .4s ease both;}
+  .level-success.show{display:block;}
+  .ls-star{font-size:2.4rem;margin-bottom:.4rem;}
+  .ls-title{font-size:1.1rem;font-weight:800;color:var(--day-dark);margin-bottom:.4rem;}
+  .ls-msg{font-size:.9rem;color:#2f6e10;margin-bottom:1rem;line-height:1.7;}
+
+  /* Écran final */
+  .final-screen{width:100%;max-width:680px;display:none;position:relative;z-index:1;}
+  .final-screen.show{display:block;animation:fadeUp .4s ease both;}
+  .final-card{background:var(--surface);border:2px solid var(--day-border);
+    border-radius:var(--radius);padding:2.4rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+  .final-title{font-size:1.2rem;font-weight:800;color:var(--day-dark);
+    text-align:center;margin-bottom:.8rem;}
+  .final-stars{font-size:2rem;text-align:center;margin-bottom:1.2rem;letter-spacing:.1em;}
+  .skills-box{background:var(--day-light);border:1.5px solid var(--day-border);
+    border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;}
+  .skills-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);margin-bottom:.6rem;}
+  .skill-item{display:flex;align-items:flex-start;gap:.5rem;font-size:.9rem;
+    line-height:1.7;color:var(--text);margin-bottom:.2rem;}
+  .retenir-box{background:#fff;border:2px solid var(--day-border);border-radius:12px;
+    padding:1.2rem 1.4rem;margin-bottom:1.4rem;}
+  .retenir-title{font-weight:800;color:var(--day-dark);font-size:.95rem;margin-bottom:.7rem;}
+  .retenir-steps{font-size:.88rem;line-height:2;color:var(--text);
+    font-family:'JetBrains Mono',monospace;}
+  .retenir-ex{background:var(--day-light);border-radius:8px;padding:.6rem 1rem;
+    margin-top:.6rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;
+    color:var(--day-dark);line-height:1.9;white-space:pre-line;}
+  .final-goal{background:var(--day-color);color:#fff;border-radius:12px;
+    padding:.9rem 1.2rem;font-size:.95rem;font-weight:700;text-align:center;
+    line-height:1.6;margin-bottom:1.4rem;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.4rem .75rem 3rem;}
+    .card,.final-card{padding:1.2rem;}
+    .btn{font-size:.85rem;padding:.5rem .9rem;}
+  }
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 5 &ndash; Jour 3</div>
+  <h1><span class="hl">Évaluer une expression litt&eacute;rale</span></h1>
+  <p class="subtitle">Je m&rsquo;entra&icirc;ne pour progresser &middot; 3 niveaux</p>
+</header>
+
+<div class="hud">
+  <div class="hud-chip stars" id="hud-stars">&#11088; 0 / 3</div>
+</div>
+
+<div class="level-nav" id="level-nav">
+  <div class="lv-btn active" id="lv1-btn">Niveau 1</div>
+  <div class="lv-btn locked" id="lv2-btn">Niveau 2</div>
+  <div class="lv-btn locked" id="lv3-btn">Niveau 3</div>
+</div>
+
+<div class="level-banner" id="level-banner"></div>
+<div class="level-mission" id="level-mission"></div>
+
+<div id="main-zone"></div>
+
+<div class="final-screen" id="final-screen">
+  <div class="final-card">
+    <div class="logo-badge" style="margin:0 auto 1rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Entra&icirc;nement termin&eacute;&nbsp;!
+    </div>
+    <div class="final-title">Tu sais calculer la valeur d&rsquo;une expression litt&eacute;rale&nbsp;!</div>
+    <div class="final-stars" id="final-stars"></div>
+    <div class="skills-box">
+      <div class="skills-title">&#10003; Comp&eacute;tences valid&eacute;es</div>
+      <div class="skill-item">&#10004; Remplacer une lettre par une valeur</div>
+      <div class="skill-item">&#10004; Utiliser une valeur n&eacute;gative</div>
+      <div class="skill-item">&#10004; Remplacer deux lettres</div>
+      <div class="skill-item">&#10004; Respecter les parenth&egrave;ses et les priorit&eacute;s op&eacute;ratoires</div>
+    </div>
+    <div class="retenir-box">
+      <div class="retenir-title">&#128218; Pour calculer la valeur d&rsquo;une expression litt&eacute;rale</div>
+      <div class="retenir-steps">1. Je rep&egrave;re la valeur donn&eacute;e pour chaque lettre.
+2. Je remplace chaque lettre par sa valeur.
+3. Je rends visibles les multiplications implicites si n&eacute;cessaire.
+4. J&rsquo;effectue le calcul en respectant les parenth&egrave;ses et les priorit&eacute;s.</div>
+      <div class="retenir-ex">Pour p = 6 :
+2p + 1
+= 2 &times; 6 + 1
+= 12 + 1
+= 13</div>
+    </div>
+    <div class="final-goal">&#127919; Je remplace chaque lettre par sa valeur, puis je calcule en respectant les priorit&eacute;s op&eacute;ratoires.</div>
+    <div style="text-align:center;">
+      <button class="btn btn-primary" onclick="restartAll()">&#8635; Recommencer l&rsquo;entra&icirc;nement</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var $=function(id){return document.getElementById(id);};
+
+var LEVELS=[
+  {
+    id:1,
+    title:"Niveau 1 \u2014 Je remplace une lettre",
+    mission:"Substitution directe avec x = 6",
+    valBoxHTML:"Pour <strong>x\u00a0= 6</strong>",
+    unlocked:true, done:false, stars:0,
+    fbSuccess:"Bravo\u00a0! Tu sais remplacer une lettre par une valeur et calculer l\u2019expression obtenue.",
+    questions:[
+      {name:"A",expr:"x + 7",answer:13,
+        fbOk:"6 + 7 = 13.",
+        fbKo:"Remplace x par 6 : 6 + 7 = ?",
+        corr:"A = x + 7\n= 6 + 7\n= 13"},
+      {name:"B",expr:"3x",answer:18,
+        fbOk:"3x signifie 3 \u00d7 x. Avec x = 6 : 3 \u00d7 6 = 18.",
+        fbKo:"Dans 3x, le signe \u00d7 est invisible. Avec x = 6 : 3 \u00d7 6 = ?",
+        corr:"B = 3x\n= 3 \u00d7 6\n= 18"},
+      {name:"C",expr:"2x \u2212 5",answer:7,
+        fbOk:"2 \u00d7 6 \u2212 5 = 12 \u2212 5 = 7.",
+        fbKo:"Remplace x par 6 : 2 \u00d7 6 \u2212 5. Effectue la multiplication avant la soustraction.",
+        corr:"C = 2x \u2212 5\n= 2 \u00d7 6 \u2212 5\n= 12 \u2212 5\n= 7"},
+      {name:"D",expr:"x\u00b2",answer:36,
+        fbOk:"x\u00b2 signifie x \u00d7 x. Avec x = 6 : 6 \u00d7 6 = 36.",
+        fbKo:"x\u00b2 signifie x \u00d7 x. Ici, calcule 6 \u00d7 6.",
+        corr:"D = x\u00b2 = x \u00d7 x\n= 6 \u00d7 6\n= 36"}
+    ]
+  },
+  {
+    id:2,
+    title:"Niveau 2 \u2014 Valeurs n\u00e9gatives et deux lettres",
+    mission:"x = \u22123, puis a = 5 et b = \u22122",
+    unlocked:false, done:false, stars:0,
+    fbSuccess:"Tr\u00e8s bien\u00a0! Tu sais remplacer une lettre par une valeur n\u00e9gative et utiliser deux valeurs diff\u00e9rentes.",
+    partA:{valBoxHTML:"Partie A \u2014 Pour <strong>x\u00a0= \u22123</strong>"},
+    partB:{valBoxHTML:"Partie B \u2014 Pour <strong>a\u00a0= 5</strong> et <strong>b\u00a0= \u22122</strong>"},
+    questions:[
+      {name:"E",expr:"x + 8",valCtx:"x = \u22123",answer:5,
+        fbOk:"\u22123 + 8 = 5.",fbKo:"Remplace x par \u22123 : \u22123 + 8 = ?",
+        corr:"E = x + 8\n= \u22123 + 8\n= 5"},
+      {name:"F",expr:"5x",valCtx:"x = \u22123",answer:-15,
+        fbOk:"5 \u00d7 (\u22123) = \u221215.",fbKo:"Lorsqu\u2019une valeur n\u00e9gative remplace une lettre dans un produit, \u00e9cris-la entre parenth\u00e8ses : 5 \u00d7 (\u22123).",
+        corr:"F = 5x\n= 5 \u00d7 (\u22123)\n= \u221215"},
+      {name:"G",expr:"\u22122x + 1",valCtx:"x = \u22123",answer:7,
+        fbOk:"\u22122 \u00d7 (\u22123) + 1 = 6 + 1 = 7. Le produit de deux n\u00e9gatifs est positif.",fbKo:"Attention au produit de deux nombres n\u00e9gatifs : \u22122 \u00d7 (\u22123) est positif.",
+        corr:"G = \u22122x + 1\n= \u22122 \u00d7 (\u22123) + 1\n= 6 + 1\n= 7"},
+      {name:"H",expr:"x\u00b2",valCtx:"x = \u22123",answer:9,
+        fbOk:"(\u22123) \u00d7 (\u22123) = 9. Le carr\u00e9 d\u2019un nombre n\u00e9gatif est positif.",fbKo:"x\u00b2 = x \u00d7 x = (\u22123) \u00d7 (\u22123). Le produit de deux n\u00e9gatifs est positif.",
+        corr:"H = x\u00b2 = x \u00d7 x\n= (\u22123) \u00d7 (\u22123)\n= 9"},
+      {name:"I",expr:"a + b",valCtx:"a = 5, b = \u22122",answer:3,
+        fbOk:"5 + (\u22122) = 3.",fbKo:"Remplace a par 5 et b par \u22122 : 5 + (\u22122) = ?",
+        corr:"I = a + b\n= 5 + (\u22122)\n= 3"},
+      {name:"J",expr:"3a \u2212 b",valCtx:"a = 5, b = \u22122",answer:17,
+        fbOk:"3 \u00d7 5 \u2212 (\u22122) = 15 + 2 = 17. Soustraire \u22122 revient \u00e0 ajouter 2.",fbKo:"Remplace a par 5 et b par \u22122. Attention\u00a0: soustraire \u22122 revient \u00e0 ajouter 2.",
+        corr:"J = 3a \u2212 b\n= 3 \u00d7 5 \u2212 (\u22122)\n= 15 + 2\n= 17"},
+      {name:"K",expr:"ab",valCtx:"a = 5, b = \u22122",answer:-10,
+        fbOk:"ab signifie a \u00d7 b. 5 \u00d7 (\u22122) = \u221210.",fbKo:"ab signifie a \u00d7 b. Ici, calcule 5 \u00d7 (\u22122).",
+        corr:"K = ab = a \u00d7 b\n= 5 \u00d7 (\u22122)\n= \u221210"},
+      {name:"L",expr:"2a + 3b",valCtx:"a = 5, b = \u22122",answer:4,
+        fbOk:"2 \u00d7 5 + 3 \u00d7 (\u22122) = 10 \u2212 6 = 4.",fbKo:"Remplace a par 5 et b par \u22122, puis calcule les deux produits avant l\u2019addition.",
+        corr:"L = 2a + 3b\n= 2 \u00d7 5 + 3 \u00d7 (\u22122)\n= 10 \u2212 6\n= 4"}
+    ]
+  },
+  {
+    id:3,
+    title:"Niveau 3 \u2014 Parenth\u00e8ses et priorit\u00e9s",
+    mission:"Substitution puis respect des priorit\u00e9s op\u00e9ratoires",
+    unlocked:false, done:false, stars:0,
+    fbSuccess:"Excellent\u00a0! Tu sais remplacer la lettre puis respecter les parenth\u00e8ses et les priorit\u00e9s.",
+    questions:[
+      {name:"A",expr:"12 \u00d7 (x \u2212 8)",valCtx:"x = 10",answer:24,
+        fbOk:"12 \u00d7 (10 \u2212 8) = 12 \u00d7 2 = 24.",fbKo:"Calcule d\u2019abord l\u2019int\u00e9rieur des parenth\u00e8ses : 10 \u2212 8.",
+        corr:"A = 12 \u00d7 (x \u2212 8)\n= 12 \u00d7 (10 \u2212 8)\n= 12 \u00d7 2\n= 24"},
+      {name:"B",expr:"3 \u00d7 x \u2212 16",valCtx:"x = 8",answer:8,
+        fbOk:"3 \u00d7 8 \u2212 16 = 24 \u2212 16 = 8.",fbKo:"Effectue la multiplication avant la soustraction : 3 \u00d7 8 d\u2019abord.",
+        corr:"B = 3 \u00d7 x \u2212 16\n= 3 \u00d7 8 \u2212 16\n= 24 \u2212 16\n= 8"},
+      {name:"C",expr:"x \u00d7 x + 7 \u00d7 x",valCtx:"x = 3",answer:30,
+        fbOk:"3 \u00d7 3 + 7 \u00d7 3 = 9 + 21 = 30.",fbKo:"Remplace chaque x par 3, puis effectue les deux multiplications avant l\u2019addition.",
+        corr:"C = x \u00d7 x + 7 \u00d7 x\n= 3 \u00d7 3 + 7 \u00d7 3\n= 9 + 21\n= 30"},
+      {name:"D",expr:"7 \u00d7 (x + 2)",valCtx:"x = 9",answer:77,
+        fbOk:"7 \u00d7 (9 + 2) = 7 \u00d7 11 = 77.",fbKo:"Calcule d\u2019abord 9 + 2, car cette op\u00e9ration est entre parenth\u00e8ses.",
+        corr:"D = 7 \u00d7 (x + 2)\n= 7 \u00d7 (9 + 2)\n= 7 \u00d7 11\n= 77"}
+    ]
+  }
+];
+
+var currentLevel=0, starsEarned=0;
+var userAnswers={}, validated={}, levelAttempts=[0,0,0];
+
+function escapeHTML(v){
+  return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function checkAnswer(val,expected){
+  var s=String(val||"").trim().replace(",",".");
+  if(!/^-?[0-9]+(\.[0-9]+)?$/.test(s)) return false;
+  return Math.abs(Number(s)-expected)<1e-6;
+}
+
+function updateHUD(){
+  $("hud-stars").innerHTML="\u2b50 "+starsEarned+" / 3";
+  LEVELS.forEach(function(lv,i){
+    var btn=$("lv"+(i+1)+"-btn");
+    if(btn) btn.className="lv-btn"+(i===currentLevel?" active":lv.done?" done":lv.unlocked?"":" locked");
+  });
+  $("level-banner").textContent=LEVELS[currentLevel].title;
+  $("level-mission").innerHTML="\uD83C\uDFAF Objectif : "+LEVELS[currentLevel].mission;
+}
+
+function makeValBox(html){
+  var d=document.createElement("div"); d.className="val-box"; d.innerHTML=html; return d;
+}
+
+function makeQBlock(lv,lvIdx,q,qi){
+  var block=document.createElement("div"); block.className="q-block";
+  var label=document.createElement("div"); label.className="q-label";
+  label.textContent="Expression "+q.name+(q.valCtx?" \u2192 "+q.valCtx:"");
+  block.appendChild(label);
+  var expr=document.createElement("div"); expr.className="q-expr";
+  expr.textContent=q.name+" = "+q.expr;
+  block.appendChild(expr);
+  var row=document.createElement("div"); row.className="input-row";
+  var eq=document.createElement("span"); eq.className="eq-sign"; eq.textContent=q.name+" =";
+  var inp=document.createElement("input");
+  inp.type="text"; inp.className="num-input"; inp.id="inp-"+lvIdx+"-"+qi;
+  inp.setAttribute("inputmode","numeric"); inp.setAttribute("autocomplete","off");
+  inp.setAttribute("aria-label","Valeur de "+q.name); inp.placeholder="?";
+  if(userAnswers[lvIdx]&&userAnswers[lvIdx][qi]!==undefined) inp.value=userAnswers[lvIdx][qi];
+  if(validated[lvIdx]&&checkAnswer(userAnswers[lvIdx]&&userAnswers[lvIdx][qi],q.answer)){
+    inp.disabled=true; inp.className="num-input ok";
+  }
+  inp.addEventListener("input",function(){
+    if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+    userAnswers[lvIdx][qi]=inp.value;
+  });
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter") verifyLevel();});
+  row.appendChild(eq); row.appendChild(inp); block.appendChild(row);
+  var fb=document.createElement("div"); fb.className="q-feedback"; fb.id="fb-"+lvIdx+"-"+qi;
+  fb.setAttribute("role","status"); fb.setAttribute("aria-live","polite");
+  block.appendChild(fb);
+  var corr=document.createElement("div"); corr.className="corr-box"; corr.id="corr-"+lvIdx+"-"+qi;
+  corr.textContent=q.corr;
+  block.appendChild(corr);
+  return block;
+}
+
+function renderLevel(){
+  updateHUD();
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  var zone=$("main-zone"); zone.innerHTML="";
+
+  if(lv.id===2){
+    // Partie A
+    zone.appendChild(makeValBox(lv.partA.valBoxHTML));
+    var cardA=document.createElement("div"); cardA.className="card";
+    cardA.innerHTML="<div class='card-stripe'></div>";
+    lv.questions.slice(0,4).forEach(function(q,qi){cardA.appendChild(makeQBlock(lv,lvIdx,q,qi));});
+    zone.appendChild(cardA);
+    // Partie B
+    var vbB=makeValBox(lv.partB.valBoxHTML); vbB.style.marginTop="1.2rem";
+    zone.appendChild(vbB);
+    var cardB=document.createElement("div"); cardB.className="card";
+    cardB.innerHTML="<div class='card-stripe'></div>";
+    lv.questions.slice(4).forEach(function(q,qi){cardB.appendChild(makeQBlock(lv,lvIdx,q,qi+4));});
+    zone.appendChild(cardB);
+  } else {
+    if(lv.valBoxHTML) zone.appendChild(makeValBox(lv.valBoxHTML));
+    var card=document.createElement("div"); card.className="card";
+    card.innerHTML="<div class='card-stripe'></div>";
+    lv.questions.forEach(function(q,qi){card.appendChild(makeQBlock(lv,lvIdx,q,qi));});
+    zone.appendChild(card);
+  }
+
+  // Re-afficher feedbacks si déjà validé
+  if(validated[lvIdx]){
+    lv.questions.forEach(function(q,qi){
+      var ok=checkAnswer(userAnswers[lvIdx]&&userAnswers[lvIdx][qi],q.answer);
+      var fb=$("fb-"+lvIdx+"-"+qi);
+      var inp=$("inp-"+lvIdx+"-"+qi);
+      var corr=$("corr-"+lvIdx+"-"+qi);
+      if(fb&&ok){fb.className="q-feedback show ok";fb.innerHTML="\u2705 "+q.fbOk;}
+      if(inp&&ok){inp.disabled=true;inp.className="num-input ok";}
+      if(fb&&!ok&&levelAttempts[lvIdx]>=2){
+        fb.className="q-feedback show ko";fb.innerHTML="\u274c "+q.fbKo;
+        if(inp){inp.disabled=true;inp.className="num-input ko";}
+        if(corr) corr.classList.add("show");
+      }
+    });
+  }
+
+  // Succès
+  var suc=document.createElement("div"); suc.className="level-success"; suc.id="level-success-"+lvIdx;
+  if(lv.done){
+    suc.classList.add("show");
+    suc.innerHTML="<div class='ls-star'>\u2b50</div><div class='ls-title'>\u00c9toile obtenue\u00a0!</div>"
+      +"<div class='ls-msg'>"+lv.fbSuccess+"</div>"
+      +(currentLevel<2?"<button class='btn btn-primary' onclick='goNextLevel()'>Niveau "+(currentLevel+2)+" \u2192</button>"
+        :"<button class='btn btn-primary' onclick='showFinal()'>Voir le bilan final \u2192</button>");
+  }
+  zone.appendChild(suc);
+
+  if(!lv.done){
+    var btnRow=document.createElement("div"); btnRow.className="btn-row";
+    var vbtn=document.createElement("button"); vbtn.className="btn btn-primary";
+    vbtn.innerHTML=(levelAttempts[lvIdx]>0&&!validated[lvIdx])?"\u21bb V\u00e9rifier \u00e0 nouveau":"\u2713 V\u00e9rifier mes r\u00e9ponses";
+    vbtn.onclick=function(){verifyLevel();};
+    btnRow.appendChild(vbtn);
+    var rbtn=document.createElement("button"); rbtn.className="btn btn-ghost";
+    rbtn.innerHTML="\u21bb Recommencer le niveau"; rbtn.onclick=function(){restartLevel();};
+    btnRow.appendChild(rbtn);
+    zone.appendChild(btnRow);
+  }
+}
+
+function verifyLevel(){
+  var lv=LEVELS[currentLevel], lvIdx=currentLevel;
+  if(!userAnswers[lvIdx]) userAnswers[lvIdx]={};
+  levelAttempts[lvIdx]++;
+  var attempt=levelAttempts[lvIdx];
+  var allOk=true;
+  lv.questions.forEach(function(q,qi){
+    var val=userAnswers[lvIdx][qi];
+    var ok=checkAnswer(val,q.answer);
+    if(!ok) allOk=false;
+    var fb=$("fb-"+lvIdx+"-"+qi);
+    var inp=$("inp-"+lvIdx+"-"+qi);
+    var corr=$("corr-"+lvIdx+"-"+qi);
+    if(ok){
+      if(fb){fb.className="q-feedback show ok";fb.innerHTML="\u2705 "+q.fbOk;}
+      if(inp){inp.disabled=true;inp.className="num-input ok";}
+      if(corr) corr.classList.remove("show");
+    } else if(attempt===1){
+      if(fb){fb.className="q-feedback show ko";fb.innerHTML="\u274c "+q.fbKo+" Corrige puis v\u00e9rifie \u00e0 nouveau.";}
+      if(inp) inp.className="num-input ko";
+      if(corr) corr.classList.remove("show");
+    } else {
+      if(fb){fb.className="q-feedback show ko";fb.innerHTML="\u274c "+q.fbKo;}
+      if(inp){inp.disabled=true;inp.className="num-input ko";}
+      if(corr) corr.classList.add("show");
+    }
+  });
+  if(allOk){
+    validated[lvIdx]=true;
+    if(!lv.done){lv.done=true;lv.stars=1;starsEarned++;}
+    if(currentLevel<2) LEVELS[currentLevel+1].unlocked=true;
+    renderLevel(); updateHUD(); return;
+  }
+  if(attempt===1){
+    validated[lvIdx]=false;
+    var rows=document.querySelectorAll("#main-zone .btn-row");
+    rows.forEach(function(row){
+      row.innerHTML="<button class='btn btn-primary' onclick='verifyLevel()'>\u21bb V\u00e9rifier \u00e0 nouveau</button>"
+        +"<button class='btn btn-ghost' onclick='restartLevel()'>\u21bb Recommencer le niveau</button>";
+    });
+  } else {
+    validated[lvIdx]=true;
+    var rows2=document.querySelectorAll("#main-zone .btn-row");
+    rows2.forEach(function(row){
+      row.innerHTML="<button class='btn btn-ghost' onclick='restartLevel()'>\u21bb Recommencer le niveau</button>";
+    });
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function goNextLevel(){
+  if(currentLevel<2){currentLevel++;renderLevel();window.scrollTo({top:0,behavior:"smooth"});}
+}
+function restartLevel(){
+  var lvIdx=currentLevel;
+  userAnswers[lvIdx]={}; validated[lvIdx]=false; levelAttempts[lvIdx]=0;
+  if(LEVELS[lvIdx].done){starsEarned=Math.max(0,starsEarned-1);LEVELS[lvIdx].done=false;LEVELS[lvIdx].stars=0;}
+  renderLevel(); window.scrollTo({top:0,behavior:"smooth"});
+}
+function showFinal(){
+  $("main-zone").style.display="none";
+  $("level-nav").style.display="none";
+  $("level-banner").style.display="none";
+  $("level-mission").style.display="none";
+  $("hud-stars").parentElement.style.display="none";
+  $("final-screen").classList.add("show");
+  $("final-stars").textContent="\u2b50".repeat(starsEarned)+"\u2606".repeat(3-starsEarned)+" ("+starsEarned+"/3)";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function restartAll(){
+  currentLevel=0; starsEarned=0;
+  userAnswers={}; validated={}; levelAttempts=[0,0,0];
+  LEVELS.forEach(function(lv,i){lv.unlocked=(i===0);lv.done=false;lv.stars=0;});
+  $("final-screen").classList.remove("show");
+  $("main-zone").style.display="";
+  $("level-nav").style.display="";
+  $("level-banner").style.display="";
+  $("level-mission").style.display="";
+  $("hud-stars").parentElement.style.display="";
+  renderLevel(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+renderLevel();
+</script>
+</body>
+</html>
