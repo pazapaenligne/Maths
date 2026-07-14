@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa — Flash Défi — Définir la médiatrice</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --day-color:#f5a623;--day-dark:#7a4a00;--day-light:#fff5e0;
+    --day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+    --bg:#fffdf7;--surface:#ffffff;--border:#e8e4d9;
+    --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;
+    --pink:#f28b82;--orange:#f5a623;
+    --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+  body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;
+    letter-spacing:.02em;line-height:1.7;}
+  body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:340px;height:340px;background:var(--orange);top:-80px;right:-80px;pointer-events:none;}
+  body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+    width:260px;height:260px;background:var(--day-color);bottom:-60px;left:-60px;pointer-events:none;}
+  .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+    background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+  .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+    background:var(--green);top:200px;left:-30px;pointer-events:none;}
+
+  header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+  .logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;
+    font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+  h1{font-size:clamp(1.2rem,3.5vw,1.7rem);font-weight:800;line-height:1.3;}
+  h1 .hl{color:var(--day-dark);}
+  .subtitle{color:var(--muted);font-size:.84rem;margin-top:.3rem;font-family:'JetBrains Mono',monospace;}
+
+  .chrono-wrap{width:100%;max-width:480px;position:relative;z-index:1;margin-bottom:1.2rem;}
+  .chrono-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;}
+  .chrono-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+  .chrono-val{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.5rem;color:var(--day-dark);}
+  .chrono-val.urgent{color:#c0392b;animation:pulse .5s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+  .chrono-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+  .chrono-bar{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+    border-radius:99px;transition:width .9s linear;}
+  .chrono-bar.urgent{background:linear-gradient(90deg,#c0392b,#e74c3c);}
+
+  .stage{width:100%;max-width:540px;position:relative;z-index:1;}
+  .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+    padding:1.6rem 1.6rem 1.4rem;position:relative;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+  .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+    border-radius:var(--radius) var(--radius) 0 0;
+    background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+  .q-badge{display:inline-block;background:var(--day-color);color:#000;
+    font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:.2rem .65rem;border-radius:99px;margin-bottom:.75rem;
+    font-family:'JetBrains Mono',monospace;}
+
+  .fig-wrap{background:var(--day-light);border:1.5px solid var(--day-border);
+    border-radius:12px;padding:.8rem;margin-bottom:.9rem;
+    display:flex;justify-content:center;}
+  .fig-wrap svg{max-width:100%;height:auto;display:block;}
+
+  .q-text{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.9rem;line-height:1.6;}
+
+  .options{display:flex;flex-direction:column;gap:.5rem;}
+  .opt{display:flex;align-items:flex-start;padding:.8rem 1rem;gap:.65rem;
+    border-radius:12px;border:2px solid var(--day-border);background:var(--day-light);
+    cursor:pointer;min-height:48px;font-size:.97rem;font-weight:600;
+    transition:border-color .12s,background .12s,transform .1s;
+    width:100%;text-align:left;}
+  .opt:hover:not([disabled]){border-color:var(--day-color);background:#ffe8b0;}
+  .opt:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+  .opt[disabled]{cursor:default;}
+  .opt.ok{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+  .opt.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+  .opt.reveal{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+  .opt-letter{font-family:'JetBrains Mono',monospace;font-weight:800;min-width:1.3rem;flex-shrink:0;}
+
+  .feedback{margin-top:.85rem;padding:.7rem .95rem;border-radius:10px;
+    font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.75;
+    display:none;align-items:flex-start;gap:.5rem;}
+  .feedback.show{display:flex;}
+  .feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+  .feedback.ko{background:#fce4e4;border:1.5px solid #c0392b;color:#8f2f2f;}
+  .feedback .fi{font-size:1.1rem;flex-shrink:0;margin-top:.05rem;}
+
+  .regle-box{display:none;margin-top:.75rem;background:var(--day-light);
+    border:2px solid var(--day-border);border-radius:10px;
+    padding:.6rem 1rem;font-family:'JetBrains Mono',monospace;
+    font-size:.88rem;font-weight:700;color:var(--day-dark);text-align:center;}
+  .regle-box.show{display:block;}
+
+  /* OUI/NON buttons */
+  .yn-row{display:flex;gap:.8rem;}
+  .yn-btn{flex:1;display:flex;align-items:center;justify-content:center;
+    padding:1rem;border-radius:14px;border:2px solid var(--day-border);
+    background:var(--day-light);cursor:pointer;min-height:56px;
+    font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:800;
+    color:var(--day-dark);transition:border-color .12s,background .12s,transform .1s;}
+  .yn-btn:hover:not([disabled]){border-color:var(--day-color);background:#ffe8b0;}
+  .yn-btn:active:not([disabled]){transform:scale(.96);}
+  .yn-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+  .yn-btn[disabled]{cursor:default;}
+  .yn-btn.ok{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+  .yn-btn.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+  .yn-btn.reveal{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+
+  /* Écran final */
+  .final{width:100%;max-width:540px;display:none;position:relative;z-index:1;}
+  .final.show{display:block;animation:fadeUp .4s ease both;}
+  .final-card{background:var(--surface);border:2px solid var(--day-border);
+    border-radius:var(--radius);padding:2rem 1.6rem;
+    box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+  .final-icon{font-size:3rem;margin-bottom:.6rem;}
+  .final-title{font-size:1.2rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+  .final-msg{font-size:.95rem;color:var(--text);line-height:1.8;margin-bottom:1.4rem;}
+  .btn-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;
+    border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;
+    cursor:pointer;border:none;transition:transform .12s;min-height:44px;}
+  .btn:active{transform:scale(.96);}
+  .btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:480px){
+    body{padding:1.2rem .75rem 3rem;}
+    .card,.final-card{padding:1.2rem;}
+    .yn-row{gap:.5rem;}
+  }
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 6 &ndash; Jour 1</div>
+  <h1>&#9889; Flash <span class="hl">D&eacute;fi</span></h1>
+  <p class="subtitle">M&eacute;diatrice &middot; 3 questions &middot; 20 secondes</p>
+</header>
+
+<div class="chrono-wrap" id="chrono-wrap">
+  <div class="chrono-top">
+    <span class="chrono-label">Temps restant</span>
+    <span class="chrono-val" id="chrono-val">20 s</span>
+  </div>
+  <div class="chrono-bar-bg"><div class="chrono-bar" id="chrono-bar" style="width:100%"></div></div>
+</div>
+
+<div class="stage">
+  <div class="card" id="card">
+    <div class="card-stripe"></div>
+    <div class="q-badge" id="q-badge">Question 1 / 3</div>
+    <div class="fig-wrap" id="fig-wrap" style="display:none;"></div>
+    <div class="q-text" id="q-text"></div>
+    <div id="choices-zone"></div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite">
+      <span class="fi" id="fb-icon"></span>
+      <div id="fb-text"></div>
+    </div>
+    <div class="regle-box" id="regle-box">M&eacute;diatrice = milieu + perpendiculaire</div>
+  </div>
+
+  <div class="final" id="final">
+    <div class="final-card">
+      <div class="logo-badge" style="margin:0 auto .7rem;display:flex;width:fit-content;">
+        <span class="logo-dot" style="background:#f5c518"></span>
+        <span class="logo-dot" style="background:#8dc63f"></span>
+        <span class="logo-dot" style="background:#3ab5d8"></span>
+      </div>
+      <div class="final-icon" id="final-icon"></div>
+      <div class="final-title" id="final-title"></div>
+      <div class="final-msg" id="final-msg"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="restart()">&#8635; Recommencer le Flash D&eacute;fi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Figures SVG ──
+var FIG1 = '<svg viewBox="0 0 300 120" width="300" height="120" xmlns="http://www.w3.org/2000/svg"'
+  +' role="img" aria-label="Segment AB avec milieu M codé AM = MB">'
+  // Segment [AB]
+  +'<line x1="40" y1="60" x2="260" y2="60" stroke="#1a1d23" stroke-width="2.5"/>'
+  // Points A et B
+  +'<circle cx="40" cy="60" r="4" fill="#1a1d23"/>'
+  +'<circle cx="260" cy="60" r="4" fill="#1a1d23"/>'
+  +'<text x="24" y="56" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" fill="#1a1d23">A</text>'
+  +'<text x="266" y="56" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" fill="#1a1d23">B</text>'
+  // Milieu M
+  +'<circle cx="150" cy="60" r="4" fill="#f5a623"/>'
+  +'<text x="155" y="52" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#7a4a00">M</text>'
+  // Codage AM = MB (double trait sur chaque moitié)
+  +'<line x1="85" y1="53" x2="85" y2="67" stroke="#1a1d23" stroke-width="1.8"/>'
+  +'<line x1="91" y1="53" x2="91" y2="67" stroke="#1a1d23" stroke-width="1.8"/>'
+  +'<line x1="209" y1="53" x2="209" y2="67" stroke="#1a1d23" stroke-width="1.8"/>'
+  +'<line x1="215" y1="53" x2="215" y2="67" stroke="#1a1d23" stroke-width="1.8"/>'
+  // Label AM = MB
+  +'<text x="55" y="95" font-family="JetBrains Mono,monospace" font-size="12" fill="#7a4a00">AM</text>'
+  +'<text x="82" y="95" font-family="JetBrains Mono,monospace" font-size="12" fill="#1a1d23"> = </text>'
+  +'<text x="103" y="95" font-family="JetBrains Mono,monospace" font-size="12" fill="#7a4a00">MB</text>'
+  +'</svg>';
+
+var FIG2 = '<svg viewBox="0 0 280 170" width="280" height="170" xmlns="http://www.w3.org/2000/svg"'
+  +' role="img" aria-label="Deux droites perpendiculaires (d1) et (d2) avec angle droit">'
+  // Droite verticale (d₁)
+  +'<line x1="140" y1="10" x2="140" y2="160" stroke="#3ab5d8" stroke-width="2.2"/>'
+  // Droite horizontale (d₂)
+  +'<line x1="20" y1="90" x2="260" y2="90" stroke="#f5a623" stroke-width="2.2"/>'
+  // Angle droit
+  +'<rect x="140" y="90" width="13" height="13" fill="none" stroke="#c0392b" stroke-width="2"/>'
+  // Labels : (d₁) en haut de la verticale, (d₂) à droite de l'horizontale
+  +'<text x="148" y="26" font-family="JetBrains Mono,monospace" font-size="13" font-style="italic" fill="#1a6e88">(d\u2081)</text>'
+  +'<text x="222" y="85" font-family="JetBrains Mono,monospace" font-size="13" font-style="italic" fill="#7a4a00">(d\u2082)</text>'
+  +'</svg>';
+
+var FIG3 = '<svg viewBox="0 0 300 200" width="300" height="200" xmlns="http://www.w3.org/2000/svg"'
+  +' role="img" aria-label="Segment AB, milieu M, droite d perpendiculaire en M">'
+  // Droite (d) verticale
+  +'<line x1="150" y1="8" x2="150" y2="192" stroke="#3ab5d8" stroke-width="2.2" stroke-dasharray="6,3"/>'
+  // Segment [AB]
+  +'<line x1="40" y1="100" x2="260" y2="100" stroke="#1a1d23" stroke-width="2.5"/>'
+  // Points A et B
+  +'<circle cx="40" cy="100" r="4" fill="#1a1d23"/>'
+  +'<circle cx="260" cy="100" r="4" fill="#1a1d23"/>'
+  +'<text x="24" y="96" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" fill="#1a1d23">A</text>'
+  +'<text x="266" y="96" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" fill="#1a1d23">B</text>'
+  // Milieu M
+  +'<circle cx="150" cy="100" r="4" fill="#f5a623"/>'
+  +'<text x="156" y="92" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#7a4a00">M</text>'
+  // Codage AM = MB
+  +'<line x1="84" y1="93" x2="84" y2="107" stroke="#1a1d23" stroke-width="1.8"/>'
+  +'<line x1="90" y1="93" x2="90" y2="107" stroke="#1a1d23" stroke-width="1.8"/>'
+  +'<line x1="210" y1="93" x2="210" y2="107" stroke="#1a1d23" stroke-width="1.8"/>'
+  +'<line x1="216" y1="93" x2="216" y2="107" stroke="#1a1d23" stroke-width="1.8"/>'
+  // Angle droit
+  +'<rect x="150" y="100" width="12" height="12" fill="none" stroke="#c0392b" stroke-width="1.8"/>'
+  // Label (d)
+  +'<text x="158" y="22" font-family="JetBrains Mono,monospace" font-size="14" font-style="italic" fill="#1a6e88">(d)</text>'
+  +'</svg>';
+
+// ── Questions ──
+// Q1 ans:0 (A), Q2 ans:1 (B), Q3 ans:1 (OUI = 2e bouton)
+var QS=[
+  {
+    type:'qcm',
+    fig:FIG1,
+    q:"Que permet d\u2019affirmer ce codage\u00a0?",
+    opts:[
+      {l:"A",t:"M est le milieu du segment [AB]."},
+      {l:"B",t:"M est perpendiculaire au segment [AB]."},
+      {l:"C",t:"AB\u00a0=\u00a0AM."}
+    ],
+    ans:0,
+    fbOk:"Exact\u00a0! AM\u00a0=\u00a0MB et M appartient au segment [AB]\u00a0: M est le milieu de [AB].",
+    fbKo:"Observe le codage\u00a0: les deux parties du segment ont la m\u00eame longueur. M est le milieu de [AB].",
+    regle:false
+  },
+  {
+    type:'qcm',
+    fig:FIG2,
+    q:"Que signifie le petit carr\u00e9\u00a0?",
+    opts:[
+      {l:"A",t:"Les droites sont parall\u00e8les."},
+      {l:"B",t:"Les droites sont perpendiculaires."},
+      {l:"C",t:"Les droites ont la m\u00eame longueur."}
+    ],
+    ans:1,
+    fbOk:"Exact\u00a0! Le petit carr\u00e9 code un angle droit\u00a0: les deux droites sont perpendiculaires.",
+    fbKo:"Le petit carr\u00e9 indique un angle droit. Les deux droites sont donc perpendiculaires.",
+    regle:false
+  },
+  {
+    type:'yn', // NON en 1er, OUI en 2e → bonne réponse = OUI = index 1
+    fig:FIG3,
+    q:"La droite (d) est-elle la m\u00e9diatrice du segment [AB]\u00a0?",
+    yn:["NON","OUI"],
+    ans:1,
+    fbOk:"Exact\u00a0! La droite passe par le milieu de [AB] et elle est perpendiculaire \u00e0 [AB]. C\u2019est bien sa m\u00e9diatrice.",
+    fbKo:"Observe les deux codages\u00a0: M est le milieu de [AB] et la droite (d) est perpendiculaire \u00e0 [AB]. Les deux conditions sont r\u00e9unies.",
+    regle:true
+  }
+];
+
+var TOTAL=QS.length, DUREE=20;
+var cur=0, timerID=null, tempsRestant=DUREE, fini=false, answered=false;
+var $=function(id){return document.getElementById(id);};
+
+function updateChrono(){
+  $("chrono-val").textContent=tempsRestant+" s";
+  $("chrono-bar").style.width=(tempsRestant/DUREE*100)+"%";
+  var urgent=tempsRestant<=5;
+  $("chrono-val").className="chrono-val"+(urgent?" urgent":"");
+  $("chrono-bar").className="chrono-bar"+(urgent?" urgent":"");
+}
+
+function startTimer(){
+  if(timerID) clearInterval(timerID);
+  timerID=setInterval(function(){
+    tempsRestant--;
+    updateChrono();
+    if(tempsRestant<=0){clearInterval(timerID);timerID=null;if(!fini)showTempsEcoule();}
+  },1000);
+}
+
+function render(){
+  var q=QS[cur];
+  $("q-badge").textContent="Question "+(cur+1)+" / "+TOTAL;
+  var fw=$("fig-wrap");
+  if(q.fig){fw.innerHTML=q.fig;fw.style.display="";}
+  else{fw.innerHTML="";fw.style.display="none";}
+  $("q-text").textContent=q.q;
+  $("feedback").className="feedback";
+  $("regle-box").className="regle-box";
+  var zone=$("choices-zone"); zone.innerHTML="";
+  if(q.type==='qcm'){
+    var opts=document.createElement("div"); opts.className="options";
+    opts.setAttribute("role","group"); opts.setAttribute("aria-label","Choix de r\u00e9ponse");
+    q.opts.forEach(function(o,i){
+      var btn=document.createElement("button"); btn.type="button"; btn.className="opt";
+      btn.innerHTML="<span class='opt-letter'>"+o.l+".</span><span>"+o.t+"</span>";
+      btn.onclick=function(){if(!answered)choose(i);};
+      btn.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&!answered){e.preventDefault();choose(i);}});
+      opts.appendChild(btn);
+    });
+    zone.appendChild(opts);
+  } else {
+    var ynrow=document.createElement("div"); ynrow.className="yn-row";
+    ynrow.setAttribute("role","group"); ynrow.setAttribute("aria-label","Oui ou Non");
+    q.yn.forEach(function(label,i){
+      var btn=document.createElement("button"); btn.type="button"; btn.className="yn-btn";
+      btn.textContent=label;
+      btn.onclick=function(){if(!answered)choose(i);};
+      btn.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&!answered){e.preventDefault();choose(i);}});
+      ynrow.appendChild(btn);
+    });
+    zone.appendChild(ynrow);
+  }
+}
+
+function choose(i){
+  if(fini||answered) return;
+  answered=true;
+  var q=QS[cur], ok=(i===q.ans);
+  // Colorer les boutons
+  var btns=$("choices-zone").querySelectorAll(".opt,.yn-btn");
+  btns.forEach(function(b,j){
+    b.disabled=true;
+    if(j===q.ans) b.classList.add(ok&&j===i?"ok":"reveal");
+    else if(j===i) b.classList.add("ko");
+  });
+  // Feedback
+  var fb=$("feedback");
+  fb.className="feedback show "+(ok?"ok":"ko");
+  $("fb-icon").textContent=ok?"\u2705":"\u274c";
+  $("fb-text").textContent=ok?q.fbOk:q.fbKo;
+  if(q.regle) $("regle-box").classList.add("show");
+  // Auto-avance
+  setTimeout(function(){
+    if(fini) return;
+    if(cur<TOTAL-1){cur++;answered=false;render();}
+    else showFini();
+  },1100);
+}
+
+function showFini(){
+  fini=true;
+  clearInterval(timerID);timerID=null;
+  $("card").style.display="none";
+  $("chrono-wrap").style.opacity=".4";
+  $("final").classList.add("show");
+  $("final-icon").textContent="\u26a1";
+  $("final-title").textContent="Flash D\u00e9fi termin\u00e9\u00a0!";
+  $("final-msg").innerHTML="Bravo\u00a0! Tu as r\u00e9activ\u00e9 les deux rep\u00e8res essentiels.<br>Tu peux maintenant commencer les niveaux et progresser pas \u00e0 pas.";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function showTempsEcoule(){
+  fini=true;
+  $("card").style.display="none";
+  $("chrono-wrap").style.opacity=".4";
+  $("final").classList.add("show");
+  $("final-icon").textContent="\u23f0";
+  $("final-title").textContent="Temps \u00e9coul\u00e9\u00a0!";
+  $("final-msg").innerHTML="Ce n\u2019est pas grave. Rep\u00e8re bien les codages du milieu et de l\u2019angle droit.<br>Tu peux recommencer ou passer aux niveaux pour t\u2019entra\u00eener.";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restart(){
+  clearInterval(timerID);timerID=null;
+  cur=0;fini=false;answered=false;tempsRestant=DUREE;
+  $("final").classList.remove("show");
+  $("card").style.display="";
+  $("chrono-wrap").style.opacity="";
+  updateChrono();render();startTimer();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+updateChrono();render();startTimer();
+</script>
+</body>
+</html>
