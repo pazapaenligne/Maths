@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>L'axe des deux refuges – S6 J1 – 5e</title>
+<style>
+:root{
+  --ivoire:#f3ecda; --carte:#e9dfc4; --carte-line:#c9b98f;
+  --brun:#3d2f22; --brun-dark:#2a2018;
+  --ardoise:#4a5560; --ardoise-dark:#333c44;
+  --vert:#2f6b3f; --vert-dark:#1f4a2a; --vert-light:#dcebe0;
+  --orange:#d9772e; --orange-dark:#a85a1f;
+  --rouge:#b3402f;
+  --text-dark:#2a2018; --muted:#6b5f4d;
+  --radius:12px; --radius-sm:8px;
+  --title-font:"Trebuchet MS",Arial,sans-serif;
+  --sans:Arial,Helvetica,sans-serif;
+  --mono:"Courier New",Courier,monospace;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.25);
+  --shadow-md:0 10px 26px rgba(0,0,0,.35);
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:linear-gradient(160deg,#241c15,#161009);color:var(--ivoire);font-family:var(--sans);min-height:100vh;overflow-x:hidden;line-height:1.55;display:flex;flex-direction:column;align-items:center;}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+
+/* ===== Barre supérieure ===== */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:.8rem;
+  background:rgba(20,15,10,.92);backdrop-filter:blur(8px);border-bottom:2px solid var(--orange);padding:.55rem 1rem;box-shadow:var(--shadow-sm);}
+.topbar-left{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.04em;color:var(--orange);text-transform:uppercase;white-space:nowrap;}
+.topbar-center{font-family:var(--title-font);font-weight:800;font-size:clamp(.9rem,3vw,1.25rem);letter-spacing:.01em;text-align:center;flex:1;text-shadow:0 0 14px rgba(217,119,46,.35);}
+.topbar-sub{font-size:.66rem;font-weight:600;color:var(--orange);letter-spacing:.02em;margin-top:.1rem;opacity:.9;}
+.topbar-right{display:flex;align-items:center;gap:.5rem;}
+.hud-timer{font-family:var(--mono);font-weight:700;font-size:.85rem;color:var(--orange);background:#0f0b07;border:1.5px solid var(--brun);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;}
+.hud-btn{background:var(--ardoise-dark);border:1.5px solid var(--ardoise);border-radius:8px;cursor:pointer;font-size:1rem;padding:.35rem .55rem;min-height:38px;min-width:38px;color:var(--ivoire);}
+.hud-btn.off{opacity:.4;}
+@media(max-width:640px){.topbar-left{display:none;}.topbar{padding:.45rem .6rem;gap:.4rem;}}
+.topspacer{height:76px;}
+
+/* ===== Zone carte ===== */
+.map-wrap{width:100%;max-width:1000px;padding:.8rem .8rem 2rem;position:relative;}
+.map-frame{position:relative;background:var(--brun-dark);border:3px solid var(--brun);border-radius:16px;box-shadow:var(--shadow-md);padding:14px;}
+.map-frame::before{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:inset 0 0 40px rgba(0,0,0,.5);}
+.table-edge{position:absolute;left:-3px;right:-3px;bottom:-22px;height:26px;background:linear-gradient(180deg,#2a2018,#161009);border-radius:0 0 16px 16px;z-index:-1;}
+
+.map-svg-wrap{position:relative;border-radius:10px;overflow:hidden;background:var(--carte);}
+.map-svg-wrap svg{display:block;width:100%;height:auto;}
+.map-dim{position:absolute;inset:0;background:rgba(20,15,10,.55);transition:opacity .5s ease;z-index:5;pointer-events:none;}
+.map-dim.hidden{opacity:0;pointer-events:none;}
+
+/* décor topographique */
+.contour{fill:none;stroke:var(--carte-line);stroke-width:1.4;opacity:.55;}
+.relief{fill:#d8c9a0;opacity:.5;}
+.tool-deco{opacity:.65;}
+
+/* repères de mission */
+.map-marker{cursor:pointer;}
+.map-marker circle.ring{fill:#8a7a58;stroke:var(--brun);stroke-width:2;transition:all .3s;}
+.map-marker.locked circle.ring{fill:#9c9082;opacity:.55;}
+.map-marker.active circle.ring{fill:var(--orange);stroke:var(--orange-dark);animation:markerpulse 1.7s ease-in-out infinite;}
+.map-marker.done circle.ring{fill:var(--vert);stroke:var(--vert-dark);}
+@keyframes markerpulse{0%,100%{filter:drop-shadow(0 0 0px rgba(217,119,46,.7));}50%{filter:drop-shadow(0 0 8px rgba(217,119,46,.9));}}
+.map-marker text.num{font-family:var(--mono);font-weight:700;fill:#fff;font-size:11px;text-anchor:middle;pointer-events:none;}
+.map-marker text.lbl{font-family:var(--title-font);font-weight:700;fill:var(--brun);font-size:9.5px;text-anchor:middle;pointer-events:none;}
+.map-marker .check{opacity:0;transform-origin:center;}
+.map-marker.done .check{opacity:1;animation:checkpop .35s ease both;}
+@keyframes checkpop{0%{opacity:0;transform:scale(2);}100%{opacity:1;transform:scale(1);}}
+.itin-path{fill:none;stroke:#b3a582;stroke-width:2;stroke-dasharray:5 5;}
+.itin-path.revealed{stroke:var(--vert);stroke-dasharray:none;}
+
+/* ===== Fiche d'ouverture (mission brief) ===== */
+.brief-overlay{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;transition:opacity .5s ease;}
+.brief-overlay.hidden{opacity:0;pointer-events:none;}
+.brief-card{max-width:540px;width:100%;max-height:90vh;overflow-y:auto;background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius);box-shadow:var(--shadow-md);padding:2.1rem 2rem;text-align:center;color:var(--text-dark);animation:pop .5s cubic-bezier(.18,.89,.32,1.3);position:relative;}
+.brief-card::before{content:"";position:absolute;top:0;right:24px;width:26px;height:40px;background:rgba(217,119,46,.35);border:1px solid rgba(168,90,31,.4);transform:rotate(4deg);}
+@keyframes pop{0%{transform:scale(.9);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.brief-ico{font-size:2.9rem;margin-bottom:.6rem;}
+.brief-title{font-family:var(--title-font);font-weight:800;font-size:clamp(1.3rem,4.4vw,1.65rem);color:var(--vert-dark);margin-bottom:.9rem;letter-spacing:.02em;}
+.brief-txt{font-size:1rem;line-height:1.75;margin-bottom:1.5rem;color:var(--text-dark);}
+.btn-brief{display:inline-flex;align-items:center;gap:.55rem;background:var(--orange);color:#2a1704;font-weight:800;font-size:1.08rem;letter-spacing:.02em;padding:1.05rem 1.9rem;border:none;border-radius:var(--radius-sm);cursor:pointer;box-shadow:0 6px 18px rgba(217,119,46,.4);width:100%;justify-content:center;min-height:58px;}
+.btn-brief:active{transform:scale(.97);}
+
+/* ===== Fiche de relevé (mission) ===== */
+.releve-overlay{position:fixed;inset:0;z-index:35;display:none;pointer-events:none;}
+.releve-overlay.show{display:block;}
+.releve-panel{position:absolute;top:80px;bottom:14px;right:14px;width:min(420px,92vw);background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius) 0 0 var(--radius);box-shadow:-8px 0 26px rgba(0,0,0,.4);color:var(--text-dark);overflow-y:auto;transform:translateX(105%);transition:transform .4s cubic-bezier(.2,.85,.25,1.05);pointer-events:auto;}
+.releve-panel.show{transform:translateX(0);}
+.releve-head{position:sticky;top:0;z-index:2;background:var(--ardoise-dark);color:#fff;padding:.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;border-bottom:3px solid var(--orange);}
+.releve-head-txt .rn{font-family:var(--mono);font-size:.65rem;letter-spacing:.06em;color:var(--orange);text-transform:uppercase;}
+.releve-head-txt .rt{font-family:var(--title-font);font-weight:800;font-size:1rem;}
+.releve-close{background:transparent;border:1.5px solid #6b7680;color:#fff;border-radius:8px;font-size:.85rem;padding:.35rem .6rem;cursor:pointer;white-space:nowrap;}
+.releve-close:hover{border-color:var(--orange);color:var(--orange);}
+.releve-body{padding:1.1rem;}
+
+.intro{font-weight:700;font-size:.86rem;color:var(--vert-dark);background:var(--vert-light);border:1px solid #b7d6bf;border-radius:var(--radius-sm);padding:.75rem .9rem;margin-bottom:1rem;line-height:1.6;}
+.intro .norm{font-weight:400;color:var(--text-dark);}
+.fiche-card{background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);padding:.75rem .9rem;margin-bottom:.85rem;position:relative;}
+.fiche-card::before{content:"";position:absolute;left:0;top:.6rem;bottom:.6rem;width:4px;background:var(--orange);border-radius:2px;}
+.fiche-txt{font-size:.84rem;color:var(--text-dark);line-height:1.6;padding-left:.5rem;}
+
+.opts{display:flex;flex-wrap:wrap;gap:.5rem;}
+.opt{cursor:pointer;text-align:center;background:#fff;border:2px solid #d8cca8;border-radius:var(--radius-sm);padding:.6rem .9rem;font-family:var(--mono);font-weight:700;font-size:.84rem;color:var(--text-dark);transition:all .15s;min-height:44px;display:flex;align-items:center;justify-content:center;gap:.4rem;flex:1;min-width:100px;}
+.opt:hover{border-color:var(--vert);transform:translateY(-1px);}
+.opt.sel{background:var(--vert-light);border-color:var(--vert);color:var(--vert-dark);}
+.opt.ok{border-color:var(--vert);background:var(--vert-light);color:var(--vert-dark);}
+.opt.ok::before{content:"\2713 ";}
+.opt.ko{border-color:var(--rouge);background:#fbe6e2;color:#8a2f21;}
+.opt.ko::before{content:"\2715 ";}
+
+.tools{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.1rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:var(--radius-sm);font-weight:700;font-size:.76rem;letter-spacing:.02em;cursor:pointer;border:none;min-height:44px;}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-try{background:var(--vert);color:#fff;}
+.btn-try:hover:not(:disabled){background:var(--vert-dark);}
+.btn-hint{background:#fff;color:var(--muted);border:1.5px solid #d8cca8;}
+.hint{margin-top:.7rem;background:#fff6e6;border:1.5px dashed var(--orange);border-radius:var(--radius-sm);padding:.65rem .9rem;font-size:.76rem;color:#6b4c05;display:none;line-height:1.65;}
+.hint.show{display:block;}
+.fb{margin-top:1rem;padding:.65rem .9rem;border-radius:var(--radius-sm);font-size:.8rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;position:relative;}
+.fb.show{display:flex;}
+.fb.ok{background:var(--vert-light);border:2px solid var(--vert);color:var(--vert-dark);}
+.fb.ko{background:#fbe6e2;border:2px solid var(--rouge);color:#8a2f21;}
+.correction{margin-top:.75rem;background:var(--vert-light);border:1.5px solid #b7d6bf;border-radius:var(--radius-sm);padding:.7rem .9rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-weight:700;font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;color:var(--vert-dark);margin-bottom:.35rem;}
+.correction-x{font-size:.78rem;color:var(--text-dark);line-height:1.75;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-4px);}40%,80%{transform:translateX(4px);}}
+.shake{animation:shake .3s;}
+
+/* Mission 1/5 : mini-carte segment */
+.segment-svg{width:100%;height:auto;background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);margin-bottom:.9rem;}
+.seg-pt{cursor:pointer;}
+.seg-pt circle{fill:#fff;stroke:var(--ardoise);stroke-width:2;transition:all .15s;}
+.seg-pt:hover circle{stroke:var(--orange);}
+.seg-pt.sel circle{fill:var(--orange);stroke:var(--orange-dark);}
+.seg-pt.ok circle{fill:var(--vert);stroke:var(--vert-dark);}
+.seg-pt.ko circle{fill:var(--rouge);stroke:#8a2f21;}
+.seg-pt text{font-family:var(--mono);font-size:10px;font-weight:700;fill:var(--text-dark);text-anchor:middle;pointer-events:none;}
+
+/* Mission 2 : mini-cartes cliquables */
+.map-choice{cursor:pointer;border:2px solid #d8cca8;border-radius:var(--radius-sm);background:#fffdf6;padding:.5rem;transition:all .15s;text-align:center;}
+.map-choice:hover{border-color:var(--vert);transform:translateY(-2px);}
+.map-choice.sel{border-color:var(--orange);box-shadow:0 0 0 3px rgba(217,119,46,.2);}
+.map-choice.ok{border-color:var(--vert);box-shadow:0 0 0 3px rgba(47,107,63,.2);}
+.map-choice.ko{border-color:var(--rouge);box-shadow:0 0 0 3px rgba(179,64,47,.2);}
+.map-choice svg{width:100%;height:auto;display:block;}
+.map-choice .mc-label{font-family:var(--mono);font-weight:700;font-size:.7rem;margin-top:.3rem;color:var(--text-dark);}
+.map-choices-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;}
+@media(max-width:420px){.map-choices-row{grid-template-columns:1fr;}}
+
+/* Mission 3 : instruments sur la table */
+.instr-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.instr{cursor:pointer;background:#fffdf6;border:1.5px solid #e3d7b8;border-radius:var(--radius-sm);padding:.7rem .5rem;text-align:center;min-width:82px;transition:all .2s;box-shadow:0 2px 4px rgba(0,0,0,.12);}
+.instr .ic{font-size:1.6rem;display:block;margin-bottom:.25rem;}
+.instr .nm{font-size:.66rem;font-weight:700;color:var(--text-dark);}
+.instr:hover{transform:translateY(-3px);}
+.instr.sel{transform:translateY(-8px);box-shadow:0 10px 16px rgba(0,0,0,.25);border-color:var(--orange);}
+.instr.ok{border-color:var(--vert);}
+.instr.ko{border-color:var(--rouge);}
+
+/* Mission 4 : bandes de papier, séquence par clic */
+.strip-target{min-height:56px;background:#fffdf6;border:2px dashed #d8cca8;border-radius:var(--radius-sm);padding:.55rem;margin-bottom:.7rem;}
+.strip-target.empty::before{content:"Clique sur les bandes ci-dessous, dans l'ordre.";font-family:var(--mono);font-size:.66rem;color:#a99878;}
+.paper-strip{background:#fffdf6;border:1px solid #e3d7b8;border-left:5px solid var(--orange);border-radius:4px;padding:.5rem .7rem;margin-bottom:.4rem;font-size:.78rem;color:var(--text-dark);cursor:pointer;box-shadow:0 2px 3px rgba(0,0,0,.1);transition:all .15s;}
+.paper-strip:hover{transform:translateX(2px);}
+.strip-bank .paper-strip{border-left-color:var(--ardoise);}
+.bank-hint{font-family:var(--mono);font-size:.66rem;color:var(--muted);margin-bottom:.5rem;}
+
+/* ===== Mission 5 : construction directe sur la carte ===== */
+.m5-toolbar{position:absolute;left:14px;bottom:14px;z-index:8;display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;}
+.m5-instr-btn{cursor:pointer;background:var(--ivoire);border:1.5px solid #d8c9a0;border-radius:8px;padding:.5rem .6rem;text-align:center;box-shadow:var(--shadow-sm);transition:all .2s;}
+.m5-instr-btn .ic{font-size:1.3rem;display:block;}
+.m5-instr-btn .nm{font-size:.6rem;font-weight:700;color:var(--text-dark);}
+.m5-instr-btn.active{border-color:var(--orange);box-shadow:0 0 0 3px rgba(217,119,46,.25);transform:translateY(-4px);}
+.m5-instr-btn.disabled{opacity:.4;cursor:not-allowed;}
+.m5-panel{position:absolute;right:14px;bottom:14px;z-index:8;background:var(--ivoire);border:1.5px solid #d8c9a0;border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);padding:.7rem .8rem;max-width:230px;}
+.m5-panel .pt{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.35rem;}
+.m5-panel input[type=range]{width:100%;accent-color:var(--orange);}
+.m5-angle-val{font-family:var(--mono);font-weight:700;font-size:.85rem;color:var(--vert-dark);text-align:center;margin-top:.2rem;}
+.m5-status{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:8;background:rgba(255,253,246,.95);border:1px solid #d8c9a0;border-radius:99px;padding:.35rem 1rem;font-size:.72rem;font-weight:700;color:var(--text-dark);box-shadow:var(--shadow-sm);text-align:center;max-width:90%;}
+.btn-trace{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:8;background:var(--vert);color:#fff;font-weight:800;font-size:.85rem;padding:.75rem 1.6rem;border:none;border-radius:99px;cursor:pointer;box-shadow:var(--shadow-md);}
+.btn-trace:disabled{opacity:.4;cursor:not-allowed;}
+.btn-trace.ready{animation:tracepulse 1.6s ease-in-out infinite;}
+@keyframes tracepulse{0%,100%{box-shadow:0 0 0 0 rgba(47,107,63,.5),var(--shadow-md);}50%{box-shadow:0 0 0 10px rgba(47,107,63,0),var(--shadow-md);}}
+.m5-equerre{opacity:0;transition:opacity .2s;}
+.m5-equerre.show{opacity:1;}
+.m5-median-line{stroke:var(--vert);stroke-width:0;stroke-dasharray:400;stroke-dashoffset:400;transition:stroke-dashoffset 1s ease, stroke-width .3s;}
+.m5-median-line.draw{stroke-width:3;stroke-dashoffset:0;}
+.m5-stamp{opacity:0;transform:scale(2) rotate(-8deg);transform-origin:center;transition:all .5s cubic-bezier(.2,.8,.3,1.3);}
+.m5-stamp.show{opacity:1;transform:scale(1) rotate(-8deg);}
+
+/* ===== Fiche finale ===== */
+.finale-overlay{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;background:rgba(20,15,10,.6);padding:1.2rem;}
+.finale-overlay.show{display:flex;}
+.finale-box{max-width:440px;width:100%;max-height:88vh;overflow-y:auto;background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius);box-shadow:var(--shadow-md);padding:1.6rem 1.4rem;text-align:center;color:var(--text-dark);animation:pop .5s cubic-bezier(.18,.89,.32,1.3);}
+.finale-stamp{display:inline-block;border:4px solid var(--vert);color:var(--vert);font-family:var(--title-font);font-weight:900;font-size:clamp(1.1rem,4.4vw,1.5rem);letter-spacing:.03em;padding:.4rem 1rem;border-radius:8px;transform:rotate(-5deg);margin-bottom:1rem;}
+.finale-title{font-family:var(--title-font);font-weight:800;font-size:1.05rem;color:var(--vert-dark);margin-bottom:.7rem;}
+.finale-time{font-family:var(--mono);font-weight:700;font-size:1rem;color:var(--orange-dark);margin-bottom:.6rem;}
+.finale-sub{font-size:.84rem;line-height:1.65;margin-bottom:1rem;}
+.finale-list{text-align:left;background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);padding:.8rem .95rem;margin-bottom:1rem;font-size:.78rem;line-height:1.85;}
+.finale-reveal{background:var(--vert-light);border:1.5px solid #b7d6bf;border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:1.1rem;text-align:left;font-size:.78rem;line-height:1.65;}
+.finale-reveal b{color:var(--vert-dark);display:block;margin-bottom:.3rem;font-size:.64rem;letter-spacing:.03em;text-transform:uppercase;}
+.finale-btns{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn-finale{flex:1;min-width:140px;background:var(--vert);color:#fff;font-weight:700;font-size:.78rem;padding:.65rem 1rem;border:none;border-radius:var(--radius-sm);cursor:pointer;}
+.btn-finale.secondary{background:#fff;color:var(--text-dark);border:1.5px solid #d8cca8;}
+
+/* ===== Carnet ===== */
+.carnet-overlay{position:fixed;inset:0;z-index:31;display:none;background:rgba(10,7,4,.55);}
+.carnet-overlay.show{display:block;}
+.carnet-panel{position:fixed;top:0;left:0;bottom:0;z-index:32;width:min(320px,86vw);background:var(--ivoire);border-right:3px solid var(--ardoise);box-shadow:8px 0 26px rgba(0,0,0,.4);transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;color:var(--text-dark);}
+.carnet-panel.show{transform:translateX(0);}
+.carnet-band{background:var(--ardoise-dark);color:#fff;padding:1rem;font-weight:700;font-size:.86rem;}
+.carnet-inner{flex:1;display:flex;flex-direction:column;padding:1rem;overflow:hidden;}
+.carnet-quote{font-size:.72rem;opacity:.75;line-height:1.55;margin-bottom:.8rem;font-style:italic;border-left:2px solid var(--orange);padding-left:.55rem;}
+.carnet-symbols{display:flex;gap:.4rem;margin-bottom:.55rem;flex-wrap:wrap;}
+.carnet-sym-btn{min-width:38px;min-height:38px;background:#fff;border:1.5px solid #ddd0ac;border-radius:8px;color:var(--vert-dark);font-family:var(--mono);font-size:1rem;font-weight:700;cursor:pointer;}
+.carnet-text{flex:1;min-height:250px;background:#fffdf6;border:1.5px solid #ddd0ac;border-radius:8px;color:var(--text-dark);font-family:var(--mono);font-size:14px;line-height:1.75;padding:.65rem;resize:none;outline:none;background-image:repeating-linear-gradient(transparent,transparent calc(1.75em - 1px),#e3d7b8 calc(1.75em - 1px),#e3d7b8 1.75em);}
+.carnet-tools{display:flex;gap:.5rem;margin-top:.75rem;}
+.carnet-tools .btn{flex:1;font-size:.66rem;min-height:40px;}
+.btn-carnet-clear{background:#fff;color:var(--text-dark);border:1.5px solid #ddd0ac;}
+.btn-carnet-close{background:var(--orange);color:#2a1704;}
+
+.agent-msg{position:fixed;top:84px;left:50%;transform:translateX(-50%) translateY(-16px);z-index:33;background:var(--ardoise-dark);border:2px solid var(--orange);border-radius:var(--radius-sm);padding:.6rem 1rem;max-width:min(380px,90%);text-align:center;font-size:.8rem;color:#fff;box-shadow:var(--shadow-md);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left" id="topbar-left">EXP&Eacute;DITION HIMALAYA &middot; RELEV&Eacute; 01</div>
+  <div class="topbar-center">L'AXE DES DEUX REFUGES<div class="topbar-sub">Pazapa Maths 5e &middot; Semaine 6 &middot; Jour 1 &middot; D&eacute;finir et construire la m&eacute;diatrice &agrave; l'&eacute;querre</div></div>
+  <div class="topbar-right">
+    <div class="hud-timer" id="hud-timer">&#9201; 00:00</div>
+    <button class="hud-btn" onclick="toggleCarnet()" aria-label="Ouvrir le carnet de terrain">&#128221;</button>
+    <button class="hud-btn" id="sound-btn" onclick="toggleSound()" aria-label="Activer ou couper le son">&#128266;</button>
+  </div>
+</div>
+<div class="topspacer"></div>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="map-wrap">
+  <div class="map-frame">
+    <div class="table-edge"></div>
+    <div class="map-svg-wrap" id="map-svg-wrap">
+      <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" id="main-map">
+        <rect width="600" height="380" fill="#e9dfc4"/>
+        <path class="contour" d="M20,60 Q150,20 300,55 T580,50"/>
+        <path class="contour" d="M10,100 Q160,60 320,95 T590,90"/>
+        <path class="contour" d="M30,320 Q200,360 380,325 T580,340"/>
+        <path class="contour" d="M0,300 Q180,340 360,305 T600,318"/>
+        <polygon class="relief" points="60,140 100,80 150,140"/>
+        <polygon class="relief" points="130,150 175,95 225,150"/>
+        <polygon class="relief" points="430,150 480,85 535,150"/>
+        <text x="300" y="28" text-anchor="middle" font-family="Trebuchet MS" font-size="10.5" font-weight="700" fill="#6b5f4d" letter-spacing="2.5" opacity=".4">SECTEUR HIMALAYA &mdash; RELEV&Eacute; TOPOGRAPHIQUE</text>
+
+        <g id="itin-lines"></g>
+
+        <g id="refuge-a" transform="translate(150,210)">
+          <circle r="7" fill="#b3402f" stroke="#3d2f22" stroke-width="2"/>
+          <text y="-14" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">A</text>
+          <text y="24" text-anchor="middle" font-family="Courier New" font-size="9" fill="#6b5f4d">refuge Nord</text>
+        </g>
+        <g id="refuge-b" transform="translate(450,210)">
+          <circle r="7" fill="#b3402f" stroke="#3d2f22" stroke-width="2"/>
+          <text y="-14" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">B</text>
+          <text y="24" text-anchor="middle" font-family="Courier New" font-size="9" fill="#6b5f4d">refuge Sud</text>
+        </g>
+        <line x1="150" y1="210" x2="450" y2="210" stroke="#8a7a58" stroke-width="1.5" stroke-dasharray="4 3" opacity=".6"/>
+
+        <g id="markers-layer"></g>
+      </svg>
+      <div class="map-dim" id="map-dim"></div>
+      <div class="brief-overlay" id="brief-overlay">
+        <div class="brief-card">
+          <div class="brief-ico">&#128506;&#65039;</div>
+          <div class="brief-title">MISSION CARTOGRAPHIQUE</div>
+          <div class="brief-txt">
+            La carte du secteur est ouverte sur la table de cartographie. Les refuges A et B sont rep&eacute;r&eacute;s, mais la droite de rep&eacute;rage n'a toujours pas &eacute;t&eacute; valid&eacute;e.
+            <br><br>
+            En tant que g&eacute;om&egrave;tre-explorateur, analyse les relev&eacute;s et &eacute;tablis l'axe correct avant le d&eacute;part de l'&eacute;quipe.
+          </div>
+          <button class="btn-brief" onclick="beginGame()">&#128506;&#65039; Ouvrir la carte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="releve-overlay" id="releve-overlay">
+  <div class="releve-panel" id="releve-panel">
+    <div class="releve-head">
+      <div class="releve-head-txt">
+        <div class="rn" id="releve-num">RELEV&Eacute; 01 / 05</div>
+        <div class="rt" id="releve-title">Examiner les balises</div>
+      </div>
+      <button class="releve-close" onclick="closeReleve()">&#10006; Fermer le relev&eacute;</button>
+    </div>
+    <div class="releve-body" id="releve-body"></div>
+  </div>
+</div>
+
+<div class="carnet-overlay" id="carnet-overlay" onclick="closeCarnet()"></div>
+<div class="carnet-panel" id="carnet-panel">
+  <div class="carnet-band">&#128221; Carnet de terrain</div>
+  <div class="carnet-inner">
+    <div class="carnet-quote">Tu peux noter tes observations avant de r&eacute;pondre.</div>
+    <div class="carnet-symbols">
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('&#8869;')" title="Perpendiculaire" aria-label="Ins&eacute;rer le symbole perpendiculaire">&#8869;</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('=')" title="Egal" aria-label="Ins&eacute;rer le symbole &eacute;gal">=</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('M')" title="Milieu" aria-label="Ins&eacute;rer la lettre M">M</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('&#176;')" title="Degr&eacute;" aria-label="Ins&eacute;rer le symbole degr&eacute;">&#176;</button>
+    </div>
+    <textarea class="carnet-text" id="carnet-text" placeholder="Tu peux &eacute;crire ici tes observations..." aria-label="Zone de brouillon"></textarea>
+    <div class="carnet-tools">
+      <button class="btn btn-carnet-clear" onclick="clearCarnet()">&#128465;&#65039; Effacer</button>
+      <button class="btn btn-carnet-close" onclick="closeCarnet()">&#10006;&#65039; Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="finale-overlay" id="finale-overlay">
+  <div class="finale-box">
+    <div class="finale-stamp">RELEV&Eacute;<br>VALID&Eacute;</div>
+    <div class="finale-title">RELEV&Eacute; CARTOGRAPHIQUE VALID&Eacute;</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-sub">Le trac&eacute; entre les deux refuges est maintenant correctement &eacute;tabli. Gr&acirc;ce &agrave; ton relev&eacute;, l'&eacute;quipe peut organiser pr&eacute;cis&eacute;ment le secteur.</div>
+    <div class="finale-list">
+      &#9989; Je v&eacute;rifie qu'elle passe par le milieu.<br>
+      &#9989; Je v&eacute;rifie qu'elle est perpendiculaire.<br>
+      &#9989; Je peux construire cette droite avec une r&egrave;gle gradu&eacute;e et une &eacute;querre.
+    </div>
+    <div class="finale-reveal">
+      <b>Bilan de la mission</b>
+      &#127919; Je reconnais et je construis la m&eacute;diatrice d'un segment.
+    </div>
+    <div class="finale-btns">
+      <button class="btn-finale secondary" onclick="closeFinale()">&#128506;&#65039; Revoir la carte</button>
+      <button class="btn-finale" onclick="restartAll()">&#8635; Recommencer le relev&eacute;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ===== Moteur audio (conservé, réadapté à l'ambiance cartographique) ===== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  var volume = vol || 0.08;
+  var attack = Math.min(0.02, dur * 0.25);
+  var release = Math.min(0.03, dur * 0.35);
+  var sustainEnd = Math.max(t + attack, t + dur - release);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(volume, t + attack);
+  g.gain.setValueAtTime(volume, sustainEnd);
+  g.gain.linearRampToValueAtTime(0.0001, t + dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+/* Grande feuille dépliée sur la table : papier épais -> froissement léger -> feuille posée (~0,7s) */
+function soundMapOpen(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.18,0.07,3800,700,now);
+  noise(0.15,0.05,5500,2000,now+0.17);
+  noise(0.18,0.045,1200,300,now+0.34);
+}
+/* Fiche de relevé qui glisse sur la carte */
+function soundPaperSlide(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.22,0.045,3000,900,c.currentTime);
+}
+/* Fermeture d'un relevé / bande qui retourne dans la banque : feuille déplacée ou retournée */
+function soundPaperClose(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.13,0.05,5000,1800,c.currentTime);
+}
+/* Clic sur un point ou une réponse : pointe de crayon, tic sec et mat */
+function soundPencilTap(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.035,0.06,2200,500,c.currentTime);
+}
+/* Sélection d'un instrument : contact règle (plus feutré) ou équerre (plus sec) */
+function soundToolPlace(type){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  if(type==="equerre"){ noise(0.06,0.065,2600,600,now); }
+  else{ noise(0.09,0.06,1400,300,now); }
+}
+/* Bande de papier déposée dans la séquence : léger frottement */
+function soundPaperDrop(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.11,0.05,3200,900,c.currentTime);
+}
+/* Indice : crayon traçant un petit trait sur le papier (~0,2s max) */
+function soundHintPencil(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.16,0.04,3000,1200,c.currentTime);
+}
+/* Erreur : gomme qui frotte rapidement puis s'arrête, jamais punitif */
+function soundErase(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.09,0.05,2500,900,now);
+  noise(0.09,0.045,2500,900,now+0.1);
+}
+/* Trait de crayon continu, durée alignée sur l'animation visuelle (itinéraire ou médiatrice) */
+function soundPencilLine(duration){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(duration||1,0.04,2200,700,c.currentTime);
+}
+/* Tampon encreur : contact mat + très légère résonance de table (unique oscillateur grave, non mélodique) */
+function soundStamp(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.07,0.09,700,150,now);
+  beep(95,0,0.09,"sine",0.05);
+}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2600);}
+
+/* ===== Chronomètre (conservé) ===== */
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+var totalSec=0,totalInt=null;
+var gameRunning=false;
+function timerTick(){ totalSec++; var h=$("hud-timer"); if(h)h.innerHTML="&#9201; "+fmt(totalSec); }
+function pauseTimer(){ clearInterval(totalInt); totalInt=null; }
+function resumeTimer(){ if(!gameRunning) return; clearInterval(totalInt); totalInt=setInterval(timerTick,1000); }
+document.addEventListener("visibilitychange", function(){ if(document.hidden){ pauseTimer(); } else{ resumeTimer(); } });
+window.addEventListener("blur", pauseTimer);
+window.addEventListener("focus", function(){ if(!document.hidden) resumeTimer(); });
+
+function shuffleOrder(n){
+  var a=[];for(var i=0;i<n;i++)a.push(i);
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+/* ===== Données des 5 missions ===== */
+var MISSIONS=[
+ {name:"Balises", full:"Examiner les balises"},
+ {name:"Trac&eacute;s", full:"Contr&ocirc;ler les trac&eacute;s"},
+ {name:"Mat&eacute;riel", full:"Pr&eacute;parer le mat&eacute;riel"},
+ {name:"Protocole", full:"Reconstituer le protocole"},
+ {name:"Axe final", full:"Tracer l'axe final"}
+];
+var solved=[false,false,false,false,false];
+var openMi=null;
+
+var M1_AB=12;
+var M1_OPTS=[{name:"M",dist:6},{name:"N",dist:5},{name:"P",dist:7}];
+var M1_CORRECT=0;
+var m1Pick=null;
+
+var M2_CORRECT=2; // Carte C
+var m2Pick=null;
+
+var M3_TOOLS=[
+  {name:"R&egrave;gle gradu&eacute;e", ico:"&#128207;", correct:true},
+  {name:"&Eacute;querre", ico:"&#128296;", correct:true},
+  {name:"Gomme", ico:"&#129529;", correct:false},
+  {name:"Crayon", ico:"&#9999;&#65039;", correct:false},
+  {name:"Feuille transparente", ico:"&#128443;&#65039;", correct:false}
+];
+var m3Sel=[];
+
+var M4_STEPS=[
+  {id:1, txt:"Mesurer [AB]"},
+  {id:2, txt:"Placer son milieu M"},
+  {id:3, txt:"Placer l'&eacute;querre perpendiculairement au milieu M"},
+  {id:4, txt:"Tracer la droite"}
+];
+var M4_ORDER=[1,2,3,4];
+var M4_SHUFFLE=[3,1,4,2];
+var m4seq=[];
+
+var m5Placed=null;   // km de A où M a été placé (0..12)
+var m5EquerreOn=false;
+var m5Angle=45;       // 0-180, 90 = perpendiculaire
+
+/* ===== Repères et itinéraire sur la carte ===== */
+var MK_POS=[[110,300],[220,330],[330,300],[440,330],[520,270]];
+function buildMarkers(){
+  var layer=$("markers-layer");layer.innerHTML="";
+  for(var i=0;i<5;i++){
+    var st = solved[i] ? "done" : (i===0||solved[i-1]) ? "active" : "locked";
+    var g=document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.setAttribute("class","map-marker "+st);
+    g.setAttribute("transform","translate("+MK_POS[i][0]+","+MK_POS[i][1]+")");
+    g.setAttribute("id","marker-"+i);
+    if(st!=="locked") g.onclick=(function(idx){return function(){openReleve(idx);};})(i);
+    g.innerHTML='<circle class="ring" r="15"></circle>'
+      +'<text class="num" y="4">'+(i+1)+'</text>'
+      +'<text class="lbl" y="28">'+MISSIONS[i].name+'</text>'
+      +'<g class="check" transform="translate(0,0)"><circle r="15" fill="none"/><path d="M-6,0 L-2,5 L7,-6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>';
+    layer.appendChild(g);
+  }
+  var lines=$("itin-lines");lines.innerHTML="";
+  for(var i=0;i<4;i++){
+    var p1=MK_POS[i], p2=MK_POS[i+1];
+    var path=document.createElementNS("http://www.w3.org/2000/svg","path");
+    var mx=(p1[0]+p2[0])/2, my=Math.min(p1[1],p2[1])-18;
+    path.setAttribute("d","M"+p1[0]+","+p1[1]+" Q"+mx+","+my+" "+p2[0]+","+p2[1]);
+    path.setAttribute("class","itin-path"+(solved[i]?" revealed":""));
+    lines.appendChild(path);
+  }
+}
+function updateTopbar(){
+  var got=solved.filter(Boolean).length;
+  var next=Math.min(got+1,5);
+  $("topbar-left").innerHTML="EXP&Eacute;DITION HIMALAYA &middot; RELEV&Eacute; "+(next<10?"0"+next:next);
+}
+
+/* ===== Ouverture / fermeture de la fiche de relevé ===== */
+function openReleve(mi){
+  if(mi>0 && !solved[mi-1] && !solved[mi]) return;
+  soundPaperSlide();
+  openMi=mi;
+  $("releve-num").innerHTML="RELEV&Eacute; 0"+(mi+1)+" / 05";
+  $("releve-title").innerHTML=MISSIONS[mi].full;
+  renderReleveBody(mi);
+  $("releve-overlay").classList.add("show");
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ $("releve-panel").classList.add("show"); }); });
+}
+function closeReleve(){
+  soundPaperClose();
+  $("releve-panel").classList.remove("show");
+  setTimeout(function(){ $("releve-overlay").classList.remove("show"); },420);
+  openMi=null;
+}
+function renderReleveBody(mi){
+  var body=$("releve-body");
+  if(mi===0) body.innerHTML=buildMission1(solved[0]);
+  else if(mi===1) body.innerHTML=buildMission2(solved[1]);
+  else if(mi===2) body.innerHTML=buildMission3(solved[2]);
+  else if(mi===3) body.innerHTML=buildMission4(solved[3]);
+}
+
+/* ===== Mission 1 : Examiner les balises (carte réelle cliquable) ===== */
+function buildMission1(isSolved){
+  var scale=25, xA=40, xB=xA+M1_AB*scale;
+  var h='<div class="intro">La carte montre les refuges A et B, reli&eacute;s par un segment de <b>'+M1_AB+' km</b>.<span class="norm"><br>Clique directement sur le point que tu penses &ecirc;tre le milieu.</span></div>';
+  h+='<svg class="segment-svg" viewBox="0 0 380 90" id="m1-svg">';
+  h+='<line x1="'+xA+'" y1="45" x2="'+xB+'" y2="45" stroke="#3d2f22" stroke-width="2.5"/>';
+  h+='<circle cx="'+xA+'" cy="45" r="5" fill="#b3402f" stroke="#3d2f22" stroke-width="1.5"/><text x="'+xA+'" y="30" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">A</text>';
+  h+='<circle cx="'+xB+'" cy="45" r="5" fill="#b3402f" stroke="#3d2f22" stroke-width="1.5"/><text x="'+xB+'" y="30" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">B</text>';
+  M1_OPTS.forEach(function(o,i){
+    var x=xA+o.dist*scale;
+    var cls="seg-pt"+(isSolved&&i===M1_CORRECT?" ok":"");
+    h+='<g class="'+cls+'" id="m1-pt-'+i+'" transform="translate('+x+',45)" '+(isSolved?'':'onclick="pickM1('+i+')"')+'>'
+      +'<circle r="7"/><text y="24">'+o.name+'</text><text y="-12" font-size="9" fill="#6b5f4d">'+o.dist+' km</text></g>';
+  });
+  h+='</svg>';
+  if(!isSolved){
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(0)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-0" onclick="tryMission1()" disabled>&#9989; Valider le relev&eacute;</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-0">Le milieu partage le segment en deux parties &eacute;gales&#8201;: calcule '+M1_AB+' &#247; 2.</div>'
+      +'<div class="fb" id="fb-0"><span id="fbi-0"></span><div id="fbm-0"></div></div>';
+  }else{
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+M1_AB+' &#247; 2 = '+(M1_AB/2)+'. Le point M partage [AB] en deux parties &eacute;gales.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+  }
+  return h;
+}
+function pickM1(i){
+  if(solved[0])return;
+  soundPencilTap();
+  M1_OPTS.forEach(function(_,k){var el=$("m1-pt-"+k);if(el)el.classList.remove("sel","ok","ko");});
+  var el=$("m1-pt-"+i);if(el)el.classList.add("sel");
+  m1Pick=i;
+  var btn=$("try-0");if(btn)btn.disabled=false;
+  var fb=$("fb-0");if(fb)fb.className="fb";
+}
+function tryMission1(){
+  if(solved[0])return;
+  if(m1Pick===null){ soundPencilTap(); return; }
+  var good=(m1Pick===M1_CORRECT);
+  M1_OPTS.forEach(function(_,k){var el=$("m1-pt-"+k);if(el)el.classList.remove("sel","ok","ko");});
+  var el=$("m1-pt-"+m1Pick);if(el)el.classList.add(good?"ok":"ko");
+  if(good){ missionSuccess(0); }
+  else{
+    soundErase();$("releve-panel").classList.add("shake");setTimeout(function(){$("releve-panel").classList.remove("shake");},400);
+    var fb=$("fb-0");fb.className="fb show ko";$("fbi-0").textContent="\u274C";
+    $("fbm-0").innerHTML="Calcule "+M1_AB+" &#247; 2 pour trouver la distance entre A et le milieu du segment.";
+  }
+}
+
+/* ===== Mission 2 : Contrôler les tracés (3 mini-cartes SVG réelles) ===== */
+function tickMark(x,double){
+  var s='<line x1="'+(x-4)+'" y1="49" x2="'+(x+4)+'" y2="61" stroke="#3d2f22" stroke-width="1.6"/>';
+  if(double) s+='<line x1="'+(x-9)+'" y1="49" x2="'+(x-1)+'" y2="61" stroke="#3d2f22" stroke-width="1.6"/>';
+  return s;
+}
+function svgMiniCard(kind){
+  // kind: 'A' incliné (passe par le milieu, pas d'angle droit), 'B' perpendiculaire mais décalé, 'C' correct (milieu + angle droit)
+  var s='<svg viewBox="0 0 140 90">'
+    +'<rect width="140" height="90" fill="#fffdf6"/>'
+    +'<line x1="20" y1="55" x2="120" y2="55" stroke="#3d2f22" stroke-width="2"/>'
+    +'<circle cx="20" cy="55" r="3.5" fill="#b3402f"/><text x="20" y="70" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="10" fill="#3d2f22">A</text>'
+    +'<circle cx="120" cy="55" r="3.5" fill="#b3402f"/><text x="120" y="70" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="10" fill="#3d2f22">B</text>';
+  if(kind==='A'){
+    // droite inclinée passant exactement par le milieu (70,55) : mêmes codages, aucun angle droit
+    s+='<line x1="45" y1="85" x2="95" y2="25" stroke="#4a5560" stroke-width="2.2"/>';
+    s+=tickMark(45,false)+tickMark(95,false);
+  }else if(kind==='B'){
+    // droite perpendiculaire mais décalée (intersection en x=50, pas au milieu) : codages différents
+    s+='<line x1="50" y1="10" x2="50" y2="80" stroke="#4a5560" stroke-width="2.2"/>';
+    s+='<rect x="46" y="51" width="8" height="8" fill="none" stroke="#2f6b3f" stroke-width="1.4"/>';
+    s+=tickMark(35,false)+tickMark(85,true);
+  }else{
+    // droite perpendiculaire ET passant par le milieu : mêmes codages + angle droit
+    s+='<line x1="70" y1="10" x2="70" y2="80" stroke="#4a5560" stroke-width="2.2"/>';
+    s+='<rect x="66" y="51" width="8" height="8" fill="none" stroke="#2f6b3f" stroke-width="1.4"/>';
+    s+=tickMark(45,false)+tickMark(95,false);
+  }
+  s+='</svg>';
+  return s;
+}
+function buildMission2(isSolved){
+  var h='<div class="intro">Trois fiches cartographiques apparaissent. Une seule carte respecte les deux contraintes du relev&eacute;&#8201;: passer par le milieu <b>et</b> &ecirc;tre perpendiculaire.</div>';
+  h+='<div class="map-choices-row">';
+  ["A","B","C"].forEach(function(k,i){
+    var cls="map-choice"+(isSolved&&i===M2_CORRECT?" ok":"");
+    h+='<div class="'+cls+'" id="m2-opt-'+i+'" '+(isSolved?'':'onclick="pickM2('+i+')"')+'>'+svgMiniCard(k)+'<div class="mc-label">Carte '+k+'</div></div>';
+  });
+  h+='</div>';
+  if(!isSolved){
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(1)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-1" onclick="tryMission2()" disabled>&#9989; Valider le relev&eacute;</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-1">Observe les petits traits sur chaque moiti&eacute;&#8201;: s\'ils sont identiques, la droite passe par le milieu. Observe aussi le petit carr&eacute;&#8201;: il indique un angle droit.</div>'
+      +'<div class="fb" id="fb-1"><span id="fbi-1"></span><div id="fbm-1"></div></div>';
+  }else{
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">Les codages (petits traits) indiquent des longueurs &eacute;gales&#8201;: sur les cartes A et C, les deux moiti&eacute;s sont marqu&eacute;es de la m&ecirc;me fa&ccedil;on&#8201;; sur la carte B, les codages sont diff&eacute;rents. Seule la Carte C cumule les deux conditions&#8201;: passer par le milieu (codages identiques) ET former un angle droit avec [AB] (petit carr&eacute;)&#8201;: c\'est la seule m&eacute;diatrice correcte.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+  }
+  return h;
+}
+function pickM2(i){
+  if(solved[1])return;
+  soundPencilTap();
+  [0,1,2].forEach(function(k){var el=$("m2-opt-"+k);if(el)el.classList.remove("sel","ok","ko");});
+  var el=$("m2-opt-"+i);if(el)el.classList.add("sel");
+  m2Pick=i;
+  var btn=$("try-1");if(btn)btn.disabled=false;
+}
+function tryMission2(){
+  if(solved[1])return;
+  if(m2Pick===null){ soundPencilTap(); return; }
+  var good=(m2Pick===M2_CORRECT);
+  [0,1,2].forEach(function(k){var el=$("m2-opt-"+k);if(el)el.classList.remove("sel","ok","ko");});
+  var el=$("m2-opt-"+m2Pick);if(el)el.classList.add(good?"ok":"ko");
+  if(good){ missionSuccess(1); }
+  else{
+    soundErase();$("releve-panel").classList.add("shake");setTimeout(function(){$("releve-panel").classList.remove("shake");},400);
+    var fb=$("fb-1");fb.className="fb show ko";$("fbi-1").textContent="\u274C";
+    $("fbm-1").innerHTML="V&eacute;rifie les deux conditions s&eacute;par&eacute;ment&#8201;: passage par le milieu, puis perpendicularit&eacute;.";
+  }
+}
+
+/* ===== Mission 3 : Préparer le matériel (objets sur la table) ===== */
+function buildMission3(isSolved){
+  var h='<div class="intro">Objets visibles sur la table&#8201;: r&egrave;gle gradu&eacute;e, &eacute;querre, gomme, crayon et feuille transparente.<span class="norm"><br>S&eacute;lectionne les deux instruments n&eacute;cessaires pour construire la m&eacute;diatrice selon le protocole du jour.</span></div>';
+  h+='<div class="instr-row" id="m3-row">';
+  M3_TOOLS.forEach(function(t,i){
+    var cls="instr"+(isSolved&&t.correct?" ok":"");
+    h+='<div class="'+cls+'" id="m3-opt-'+i+'" '+(isSolved?'':'onclick="pickM3('+i+')"')+'><span class="ic">'+t.ico+'</span><span class="nm">'+t.name+'</span></div>';
+  });
+  h+='</div>';
+  if(!isSolved){
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(2)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-2" onclick="tryMission3()" disabled>&#9989; Valider le relev&eacute;</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-2">Il te faut un instrument pour mesurer et placer le milieu, et un instrument pour tracer un angle droit.</div>'
+      +'<div class="fb" id="fb-2"><span id="fbi-2"></span><div id="fbm-2"></div></div>';
+  }else{
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">La r&egrave;gle gradu&eacute;e sert &agrave; mesurer [AB] et &agrave; placer son milieu. L\'&eacute;querre sert &agrave; tracer l\'angle droit. Les autres objets ne sont pas n&eacute;cessaires pour cette construction.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+  }
+  return h;
+}
+function pickM3(i){
+  if(solved[2])return;
+  var nm=M3_TOOLS[i].name;
+  if(nm.indexOf("querre")!==-1) soundToolPlace("equerre");
+  else if(nm.indexOf("gle")!==-1) soundToolPlace("regle");
+  else soundPencilTap();
+  var idx=m3Sel.indexOf(i);
+  var el=$("m3-opt-"+i);
+  if(idx===-1){ m3Sel.push(i); if(el)el.classList.add("sel"); }
+  else{ m3Sel.splice(idx,1); if(el)el.classList.remove("sel"); }
+  var btn=$("try-2");if(btn)btn.disabled=(m3Sel.length===0);
+  var fb=$("fb-2");if(fb)fb.className="fb";
+}
+function tryMission3(){
+  if(solved[2])return;
+  if(m3Sel.length===0){ soundPencilTap(); return; }
+  var correctSet=[];
+  M3_TOOLS.forEach(function(t,i){if(t.correct)correctSet.push(i);});
+  var sortedSel=m3Sel.slice().sort();
+  var sortedCorrect=correctSet.slice().sort();
+  var good=(sortedSel.length===sortedCorrect.length)&&sortedSel.every(function(v,i){return v===sortedCorrect[i];});
+  M3_TOOLS.forEach(function(t,i){
+    var el=$("m3-opt-"+i);if(!el)return;
+    el.classList.remove("sel","ok","ko");
+    var wasSel=m3Sel.indexOf(i)!==-1;
+    if(wasSel) el.classList.add(t.correct?"ok":"ko");
+    else if(t.correct && !good) el.classList.add("ko");
+  });
+  if(good){ missionSuccess(2); }
+  else{
+    soundErase();$("releve-panel").classList.add("shake");setTimeout(function(){$("releve-panel").classList.remove("shake");},400);
+    var fb=$("fb-2");fb.className="fb show ko";$("fbi-2").textContent="\u274C";
+    $("fbm-2").innerHTML="V&eacute;rifie ta s&eacute;lection&#8201;: il faut exactement deux instruments.";
+  }
+}
+
+/* ===== Mission 4 : Reconstituer le protocole (bandes de papier, séquence par clic) ===== */
+function buildMission4(isSolved){
+  var h='<div class="intro">Quatre bandes de papier cartographique ont &eacute;t&eacute; m&eacute;lang&eacute;es. Remets le protocole dans le bon ordre.</div>';
+  if(isSolved){
+    h+='<div class="strip-target">';
+    M4_ORDER.forEach(function(id,i){
+      var st=M4_STEPS.find(function(s){return s.id===id;});
+      h+='<div class="paper-strip" style="cursor:default;">'+(i+1)+'. '+st.txt+'</div>';
+    });
+    h+='</div>';
+  }else{
+    h+='<div class="strip-target'+(m4seq.length===0?' empty':'')+'" id="strip-target">';
+    m4seq.forEach(function(id,i){
+      var st=M4_STEPS.find(function(s){return s.id===id;});
+      h+='<div class="paper-strip" onclick="removeM4StepAt('+i+')">'+(i+1)+'. '+st.txt+'</div>';
+    });
+    h+='</div>';
+    h+='<div class="bank-hint">Clique sur les bandes ci-dessous, dans l\'ordre. Clique sur une bande d&eacute;j&agrave; plac&eacute;e pour la retirer.</div>';
+    h+='<div class="strip-bank" id="strip-bank">';
+    M4_SHUFFLE.forEach(function(id){
+      if(m4seq.indexOf(id)!==-1) return;
+      var st=M4_STEPS.find(function(s){return s.id===id;});
+      h+='<div class="paper-strip" onclick="addM4Step('+id+')">'+st.txt+'</div>';
+    });
+    h+='</div>';
+  }
+  if(!isSolved){
+    var ready=(m4seq.length===M4_ORDER.length);
+    h+='<div class="tools">'
+      +'<button class="btn btn-hint" onclick="toggleHint(3)">? Indice</button>'
+      +'<button class="btn btn-try" id="try-3" onclick="tryMission4()" '+(ready?'':'disabled')+'>&#9989; Valider le relev&eacute;</button>'
+      +'</div>'
+      +'<div class="hint" id="hint-3">On mesure toujours avant de placer un point, et on positionne l\'instrument avant de tracer.</div>'
+      +'<div class="fb" id="fb-3"><span id="fbi-3"></span><div id="fbm-3"></div></div>';
+  }else{
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">1. Mesurer [AB]&#8201;; 2. Placer son milieu M&#8201;; 3. Placer l\'&eacute;querre perpendiculairement au milieu M&#8201;; 4. Tracer la droite.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+  }
+  return h;
+}
+function addM4Step(id){
+  if(solved[3])return;
+  if(m4seq.indexOf(id)!==-1)return;
+  soundPaperDrop();
+  m4seq.push(id);
+  renderReleveBody(3);
+}
+function removeM4StepAt(i){
+  if(solved[3])return;
+  soundPaperClose();
+  m4seq.splice(i,1);
+  renderReleveBody(3);
+}
+function tryMission4(){
+  if(solved[3])return;
+  if(m4seq.length<M4_ORDER.length){ soundPencilTap(); return; }
+  var good=true;
+  for(var k=0;k<M4_ORDER.length;k++){ if(m4seq[k]!==M4_ORDER[k]) good=false; }
+  if(good){ missionSuccess(3); }
+  else{
+    soundErase();$("releve-panel").classList.add("shake");setTimeout(function(){$("releve-panel").classList.remove("shake");},400);
+    var fb=$("fb-3");fb.className="fb show ko";$("fbi-3").textContent="\u274C";
+    $("fbm-3").innerHTML="L\'ordre n\'est pas correct. On mesure, on place le milieu, on positionne l\'instrument, puis on trace.";
+  }
+}
+
+function toggleHint(mi){soundHintPencil();var el=$("hint-"+mi);if(el)el.classList.toggle("show");}
+
+/* ===== Mission 5 : construction directe sur la carte principale ===== */
+var M5_XA=150, M5_XB=450, M5_Y=210, M5_SCALE=(450-150)/M1_AB;
+function enterMission5(){
+  soundPaperClose();
+  var ov=$("releve-overlay");ov.classList.remove("show");
+  $("releve-panel").classList.remove("show");
+  buildMission5Overlay();
+  showAgent("&#128506;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Place d\'abord le milieu M sur le segment, puis utilise l\'&eacute;querre pour tracer l\'axe.");
+}
+function buildMission5Overlay(){
+  var svg=$("main-map");
+  var old=$("m5-layer");if(old)old.remove();
+  var g=document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.setAttribute("id","m5-layer");
+  var ticksHtml="";
+  for(var km=0;km<=M1_AB;km++){
+    var x=M5_XA+km*M5_SCALE;
+    ticksHtml+='<g class="seg-pt" id="m5-tick-'+km+'" transform="translate('+x+','+M5_Y+')" onclick="placeM5('+km+')">'
+      +'<circle r="6" fill="#fffdf6" stroke="#4a5560" stroke-width="1.6"/></g>';
+  }
+  g.innerHTML =
+    '<line x1="'+M5_XA+'" y1="'+M5_Y+'" x2="'+M5_XB+'" y2="'+M5_Y+'" stroke="#3d2f22" stroke-width="2.5"/>'
+    + ticksHtml
+    + '<line id="m5-median" class="m5-median-line" x1="'+((M5_XA+M5_XB)/2)+'" y1="'+(M5_Y-70)+'" x2="'+((M5_XA+M5_XB)/2)+'" y2="'+(M5_Y+70)+'"/>'
+    + '<g id="m5-equerre" class="m5-equerre" transform="translate('+((M5_XA+M5_XB)/2)+','+M5_Y+')"><line id="m5-eq-line" x1="0" y1="-45" x2="0" y2="45" stroke="#d9772e" stroke-width="3" stroke-dasharray="3 3"/></g>'
+    + '<g id="m5-rightangle" style="opacity:0;"><rect x="-9" y="-9" width="9" height="9" fill="none" stroke="#2f6b3f" stroke-width="1.6"/></g>'
+    + '<g id="m5-stamp-grp" class="m5-stamp" transform="translate(300,120)"><rect x="-55" y="-20" width="110" height="40" rx="6" fill="none" stroke="#2f6b3f" stroke-width="3"/><text y="6" text-anchor="middle" font-family="Trebuchet MS" font-weight="900" font-size="15" fill="#2f6b3f">AXE VALID&Eacute;</text></g>';
+  svg.appendChild(g);
+
+  var wrap=$("map-svg-wrap");
+  var old2=$("m5-ui");if(old2)old2.remove();
+  var ui=document.createElement("div");
+  ui.id="m5-ui";
+  ui.innerHTML =
+    '<div class="m5-status" id="m5-status">Clique sur la graduation qui correspond au milieu du segment [AB]</div>'
+    + '<div class="m5-toolbar">'
+    +   '<div class="m5-instr-btn active" style="cursor:default;"><span class="ic">&#128207;</span><span class="nm">R&egrave;gle</span></div>'
+    +   '<div class="m5-instr-btn disabled" id="m5-btn-equerre" onclick="toggleEquerre()"><span class="ic">&#128296;</span><span class="nm">&Eacute;querre</span></div>'
+    + '</div>'
+    + '<div class="m5-panel" id="m5-angle-panel" style="display:none;">'
+    +   '<div class="pt">Orientation de l\'&eacute;querre</div>'
+    +   '<input type="range" min="0" max="180" step="15" value="45" id="m5-angle-slider" oninput="onAngleChange(this.value)"/>'
+    +   '<div class="m5-angle-val" id="m5-angle-val">45&deg;</div>'
+    + '</div>'
+    + '<button class="btn-trace" id="btn-trace" onclick="tryTraceAxe()" disabled>&#9989; Tracer l\'axe</button>';
+  wrap.appendChild(ui);
+}
+function placeM5(km){
+  if(solved[4])return;
+  soundPencilTap();
+  for(var k=0;k<=M1_AB;k++){ var el=$("m5-tick-"+k);if(el)el.querySelector("circle").setAttribute("fill","#fffdf6"); }
+  var chosen=$("m5-tick-"+km);if(chosen)chosen.querySelector("circle").setAttribute("fill","#d9772e");
+  m5Placed=km;
+  var med=$("m5-median");
+  var x=M5_XA+km*M5_SCALE;
+  med.setAttribute("x1",x);med.setAttribute("x2",x);
+  var eq=$("m5-equerre");eq.setAttribute("transform","translate("+x+","+M5_Y+")");
+  $("m5-btn-equerre").classList.remove("disabled");
+  $("m5-status").innerHTML="M plac&eacute; &agrave; "+km+" km de A. Choisis maintenant l\'&eacute;querre.";
+  updateTraceBtn();
+}
+var m5AngleTouched=false;
+function toggleEquerre(){
+  if(solved[4])return;
+  if(m5Placed===null){ soundPencilTap(); return; }
+  soundToolPlace("equerre");
+  m5EquerreOn=!m5EquerreOn;
+  $("m5-btn-equerre").classList.toggle("active",m5EquerreOn);
+  $("m5-equerre").classList.toggle("show",m5EquerreOn);
+  $("m5-angle-panel").style.display=m5EquerreOn?"block":"none";
+  if(m5EquerreOn){
+    onAngleChange(45);
+    $("m5-angle-slider").value=45;
+    m5AngleTouched=false;
+    $("m5-status").innerHTML="Ajuste l\'orientation de l\'&eacute;querre pour obtenir un angle droit.";
+  }else{
+    $("m5-status").innerHTML="M plac&eacute;. Choisis l\'&eacute;querre pour continuer.";
+  }
+  updateTraceBtn();
+}
+function onAngleChange(v){
+  if(!m5AngleTouched){ m5AngleTouched=true; if(soundOn){var c=ac();if(c)noise(0.08,0.035,2000,600,c.currentTime);} }
+  m5Angle=parseInt(v,10);
+  $("m5-angle-val").innerHTML=m5Angle+"&deg;";
+  var eqLine=$("m5-eq-line");
+  var rad=(m5Angle-90)*Math.PI/180;
+  var dx=45*Math.sin(rad), dy=45*Math.cos(rad);
+  eqLine.setAttribute("x1",-dx);eqLine.setAttribute("y1",-dy);
+  eqLine.setAttribute("x2",dx);eqLine.setAttribute("y2",dy);
+}
+function updateTraceBtn(){
+  var btn=$("btn-trace");if(!btn)return;
+  var ready=(m5Placed!==null && m5EquerreOn);
+  btn.disabled=!ready;
+  btn.classList.toggle("ready",ready);
+}
+function tryTraceAxe(){
+  if(solved[4])return;
+  if(m5Placed===null || !m5EquerreOn){ soundPencilTap(); return; }
+  var okMid=(m5Placed===M1_AB/2);
+  var okAngle=(m5Angle===90);
+  if(okMid && okAngle){
+    soundPencilLine(1);
+    var med=$("m5-median");med.classList.add("draw");
+    $("m5-rightangle").style.opacity="1";
+    var x=M5_XA+m5Placed*M5_SCALE;
+    $("m5-rightangle").setAttribute("transform","translate("+x+","+M5_Y+")");
+    setTimeout(function(){
+      $("m5-stamp-grp").classList.add("show");
+      soundStamp();
+    },1500);
+    $("m5-status").innerHTML="Axe trac&eacute; et valid&eacute;&#8201;!";
+    $("btn-trace").disabled=true;
+    setTimeout(function(){ missionSuccess(4); },2200);
+  }else{
+    soundErase();
+    var msg = !okMid ? "Le milieu partage le segment en deux parties &eacute;gales&#8201;: v&eacute;rifie la position de M." : "La m&eacute;diatrice forme un angle droit avec le segment&#8201;: ajuste l\'orientation de l\'&eacute;querre.";
+    $("m5-status").innerHTML=msg;
+    var wrap=$("map-svg-wrap");wrap.classList.add("shake");setTimeout(function(){wrap.classList.remove("shake");},400);
+  }
+}
+
+/* ===== Réussite d'une mission ===== */
+function missionSuccess(mi){
+  solved[mi]=true;
+  if(mi<4){
+    soundHintPencil();
+    setTimeout(function(){soundStamp();},180);
+  }
+  showAgent("&#128506;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Relev&eacute; "+(mi+1)+" valid&eacute;. Bien jou&eacute;.");
+  buildMarkers();
+  animateItinReveal(mi);
+  updateTopbar();
+  if(mi<4){
+    renderReleveBody(mi);
+  }else{
+    var m5ui=$("m5-ui");if(m5ui)m5ui.remove();
+    document.querySelectorAll("#m5-layer .seg-pt").forEach(function(el){ el.style.pointerEvents="none"; });
+    setTimeout(openFinale,300);
+  }
+}
+function animateItinReveal(mi){
+  if(mi>3)return;
+  var lines=document.querySelectorAll("#itin-lines path");
+  var path=lines[mi];if(!path)return;
+  var len=path.getTotalLength();
+  path.style.strokeDasharray=len;
+  path.style.strokeDashoffset=len;
+  path.getBoundingClientRect();
+  path.style.transition="stroke-dashoffset .9s ease";
+  soundPencilLine(0.9);
+  requestAnimationFrame(function(){ path.style.strokeDashoffset=0; });
+}
+
+/* ===== Écran final ===== */
+function openFinale(){
+  gameRunning=false;
+  clearInterval(totalInt);
+  $("finale-time").innerHTML="&#9201; Temps utilis&eacute;&#8201;: "+fmtLong(totalSec);
+  $("finale-overlay").classList.add("show");
+}
+function closeFinale(){
+  $("finale-overlay").classList.remove("show");
+}
+
+/* ===== Carnet ===== */
+function toggleCarnet(){
+  var p=$("carnet-panel");
+  if(p.classList.contains("show")) closeCarnet(); else openCarnet();
+}
+function openCarnet(){ soundPaperSlide(); $("carnet-panel").classList.add("show"); $("carnet-overlay").classList.add("show"); }
+function closeCarnet(){ soundPaperClose(); $("carnet-panel").classList.remove("show"); $("carnet-overlay").classList.remove("show"); }
+function clearCarnet(){ soundPencilTap(); var t=$("carnet-text");if(t)t.value=""; }
+function insertCarnetSym(sym){
+  soundPencilTap();
+  var t=$("carnet-text");if(!t)return;
+  var start=t.selectionStart, end=t.selectionEnd;
+  var val=t.value;
+  t.value=val.slice(0,start)+sym+val.slice(end);
+  var pos=start+sym.length;
+  t.focus();t.setSelectionRange(pos,pos);
+}
+
+/* ===== Démarrage / redémarrage ===== */
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  soundMapOpen();
+  $("brief-overlay").classList.add("hidden");
+  $("map-dim").classList.add("hidden");
+  totalSec=0;clearInterval(totalInt);gameRunning=true;
+  $("hud-timer").innerHTML="&#9201; 00:00";
+  totalInt=setInterval(timerTick,1000);
+  buildMarkers();
+  updateTopbar();
+  showAgent("&#128506;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Bienvenue&#8201;! Clique sur le premier rep&egrave;re pour commencer.");
+}
+function restartAll(){
+  gameRunning=false;
+  clearInterval(totalInt);totalSec=0;
+  solved=[false,false,false,false,false];
+  openMi=null;
+  m1Pick=null;m2Pick=null;m3Sel=[];m4seq=[];
+  m5Placed=null;m5EquerreOn=false;m5Angle=45;
+  $("finale-overlay").classList.remove("show");
+  $("releve-overlay").classList.remove("show");
+  $("releve-panel").classList.remove("show");
+  var m5layer=$("m5-layer");if(m5layer)m5layer.remove();
+  var m5ui=$("m5-ui");if(m5ui)m5ui.remove();
+  $("hud-timer").innerHTML="&#9201; 00:00";
+  closeCarnet();
+  var ct=$("carnet-text");if(ct)ct.value="";
+  $("brief-overlay").classList.remove("hidden");
+  $("map-dim").classList.remove("hidden");
+  buildMarkers();
+  updateTopbar();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ===== Interception spéciale : mission 5 s'ouvre directement sur la carte ===== */
+var _origOpenReleve=openReleve;
+openReleve=function(mi){
+  if(mi===4){
+    if(solved[4]){
+      openFinale();
+      return;
+    }
+    if(!solved[3]){
+      return;
+    }
+    enterMission5();
+    return;
+  }
+  _origOpenReleve(mi);
+};
+
+buildMarkers();
+</script>
+</body>
+</html>
