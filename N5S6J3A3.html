@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa — Flash Défi — Les hauteurs d'un triangle</title>
+<style>
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+:root{
+  --day-color:#8dc63f;--day-dark:#3d7a10;--day-light:#f0f7e6;
+  --day-border:#bde08a;--day-glow:rgba(141,198,63,.3);
+  --bg:#f6faf0;--surface:#fff;--border:#dce8cc;
+  --green:#8dc63f;--blue:#3ab5d8;--yellow:#f5c518;--red:#b94040;
+  --text:#1a1d23;--muted:#7a8a6a;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem 1rem 4rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:'';position:fixed;inset:0;z-index:0;opacity:.035;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,#8dc63f 20px,#8dc63f 21px);
+  pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:280px;height:280px;
+  background:var(--day-color);top:-70px;right:-50px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.07;width:200px;height:200px;
+  background:var(--blue);bottom:-50px;left:-40px;pointer-events:none;}
+header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;
+  font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:monospace;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+h1{font-size:clamp(1.2rem,3.5vw,1.7rem);font-weight:800;line-height:1.3;color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:.84rem;margin-top:.3rem;font-family:monospace;}
+.chrono-wrap{width:100%;max-width:560px;position:relative;z-index:1;margin-bottom:.8rem;}
+.chrono-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;}
+.chrono-label{font-family:monospace;font-size:.78rem;color:var(--muted);text-transform:uppercase;}
+.chrono-val{font-family:monospace;font-weight:800;font-size:1.5rem;color:var(--day-dark);}
+.chrono-val.urgent{color:#c0392b;animation:pulse .5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.chrono-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.chrono-bar{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+  border-radius:99px;transition:width .9s linear;}
+.chrono-bar.urgent{background:linear-gradient(90deg,#c0392b,#e74c3c);}
+.prog-dots{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;position:relative;z-index:1;}
+.prog-dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:.3s;}
+.prog-dot.done{background:var(--green);}.prog-dot.active{background:var(--day-color);}
+#start-screen{width:100%;max-width:560px;position:relative;z-index:1;}
+.start-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);
+  padding:2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.stripe{height:4px;border-radius:4px;margin-bottom:1.2rem;
+  background:linear-gradient(90deg,#8dc63f,#f5c518,#3ab5d8);}
+.start-title{font-size:1.1rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;}
+.start-desc{font-size:.92rem;color:var(--muted);line-height:1.7;margin-bottom:1.4rem;}
+#flash-zone{width:100%;max-width:560px;position:relative;z-index:1;display:none;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:1.6rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--blue));}
+.q-badge{display:inline-block;background:var(--day-color);color:#fff;font-size:.7rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .65rem;
+  border-radius:99px;margin-bottom:.7rem;font-family:monospace;}
+.q-text{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.8rem;line-height:1.6;}
+.fig-wrap{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;
+  padding:.5rem;margin-bottom:.8rem;display:flex;justify-content:center;}
+.fig-wrap svg{max-width:100%;height:auto;}
+.opts-col{display:flex;flex-direction:column;gap:.45rem;margin-top:.5rem;}
+.opt-btn{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-radius:10px;
+  border:2px solid var(--day-border);background:var(--day-light);cursor:pointer;
+  min-height:44px;font-size:.93rem;font-weight:600;transition:.15s;text-align:left;width:100%;}
+.opt-btn:hover:not([disabled]){border-color:var(--day-color);background:#e8f5d0;}
+.opt-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.opt-btn[disabled]{cursor:default;}
+.opt-btn.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-btn.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.opt-btn.reveal{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-letter{font-family:monospace;font-weight:800;min-width:1.3rem;color:var(--day-dark);}
+.vf-row{display:flex;gap:.5rem;margin-top:.4rem;}
+.vf-btn{padding:.55rem 1.1rem;border-radius:8px;border:2px solid var(--day-border);
+  background:var(--day-light);cursor:pointer;font-weight:700;font-size:.9rem;min-height:44px;transition:.15s;}
+.vf-btn:hover:not([disabled]){border-color:var(--day-color);}
+.vf-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.vf-btn[disabled]{cursor:default;}
+.vf-btn.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.vf-btn.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.vf-btn.reveal{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.vf-btn.selected{border-color:var(--day-color);background:#e8f5d0;font-weight:900;}
+.assoc-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem .8rem;align-items:center;margin:.6rem 0;}
+.assoc-left{font-weight:800;font-family:monospace;color:var(--day-dark);}
+.assoc-arrow{color:var(--muted);}
+.assoc-sel{padding:.45rem .7rem;border-radius:8px;border:2px solid var(--day-border);
+  background:var(--day-light);font-size:.88rem;font-family:monospace;font-weight:700;cursor:pointer;min-height:44px;}
+.assoc-sel:focus-visible{outline:3px solid var(--day-color);}
+.assoc-sel.ok{border-color:var(--green);background:#eefad8;}
+.assoc-sel.ko{border-color:#c0392b;background:#fce4e4;}
+.feedback{margin-top:.8rem;padding:.65rem .9rem;border-radius:10px;
+  font-family:monospace;font-size:.82rem;line-height:1.75;display:none;}
+.feedback.show{display:block;}
+.feedback.ok{background:#eefad8;border:1.5px solid var(--green);color:#3d7a10;}
+.feedback.ko{background:#fce4e4;border:1.5px solid #c0392b;color:#8f2f2f;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;
+  border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;
+  cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+#final-screen{width:100%;max-width:560px;display:none;position:relative;z-index:1;}
+.final-card{background:var(--surface);border:2px solid var(--day-border);
+  border-radius:var(--radius);padding:2rem 1.6rem;
+  box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+.final-icon{font-size:2.5rem;margin-bottom:.5rem;}
+.final-title{font-size:1.2rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+.final-msg{font-size:.93rem;color:var(--text);line-height:1.8;margin-bottom:1rem;}
+.btn-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem;}
+.d-btn{fill:#3ab5d8;stroke:#fff;stroke-width:1.5;cursor:pointer;transition:fill .15s;}
+.d-btn:hover{fill:var(--day-color);}
+.d-btn.selected-pt{fill:var(--day-color);}
+.d-btn.ok-pt{fill:var(--green);}
+.d-btn.ko-pt{fill:#c0392b;}
+svg [role="button"]:focus-visible{outline:3px solid var(--day-color);outline-offset:3px;}
+@media(max-width:480px){body{padding:1rem .75rem 3rem;}.card{padding:1.2rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 6 &ndash; Jour 3</div>
+  <h1>&#9889; Flash D&eacute;fi</h1>
+  <p class="subtitle">Hauteurs d&rsquo;un triangle &middot; 3 questions &middot; 20 secondes</p>
+</header>
+
+<div id="start-screen">
+  <div class="start-card">
+    <div class="stripe"></div>
+    <div class="start-title">Flash D&eacute;fi &mdash; Hauteurs</div>
+    <div class="start-desc"><strong>20 secondes &mdash; 3 questions</strong></div>
+    <button class="btn btn-primary" id="btn-start" style="font-size:1.05rem;padding:.8rem 2rem;">&#9654; Commencer</button>
+  </div>
+</div>
+
+<div id="flash-zone" style="display:none;">
+  <div class="chrono-wrap">
+    <div class="chrono-top">
+      <span class="chrono-label">&#8987; Temps restant</span>
+      <span class="chrono-val" id="chrono-val">20 s</span>
+    </div>
+    <div class="chrono-bar-bg"><div class="chrono-bar" id="chrono-bar" style="width:100%"></div></div>
+  </div>
+  <div class="prog-dots">
+    <div class="prog-dot active" id="pd0"></div>
+    <div class="prog-dot" id="pd1"></div>
+    <div class="prog-dot" id="pd2"></div>
+  </div>
+  <div class="card" id="card">
+    <div class="card-stripe"></div>
+    <div class="q-badge" id="q-badge">Question 1 / 3</div>
+    <div id="q-content"></div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="final-screen" style="display:none;">
+  <div class="final-card">
+    <div class="stripe"></div>
+    <div class="logo-badge" style="margin:0 auto .7rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+    </div>
+    <div class="final-icon" id="final-icon"></div>
+    <div class="final-title" id="final-title"></div>
+    <div class="final-msg" id="final-msg"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btn-restart">&#8635; Recommencer le Flash D&eacute;fi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+var DUREE=20,TOTAL=3;
+var tempsRestant=DUREE,timerID=null,transitionID=null,fini=false,answered=false,qIdx=0;
+
+function el(id){return document.getElementById(id);}
+
+function updateChrono(){
+  el('chrono-val').textContent=tempsRestant+' s';
+  el('chrono-bar').style.width=(tempsRestant/DUREE*100)+'%';
+  var urgent=(tempsRestant<=5);
+  el('chrono-val').className='chrono-val'+(urgent?' urgent':'');
+  el('chrono-bar').className='chrono-bar'+(urgent?' urgent':'');
+}
+
+function startTimer(){
+  if(timerID){clearInterval(timerID);}
+  timerID=setInterval(function(){
+    tempsRestant--;
+    updateChrono();
+    if(tempsRestant<=0){
+      clearInterval(timerID);timerID=null;
+      clearTimeout(transitionID);transitionID=null;
+      if(!fini) showFin(false);
+    }
+  },1000);
+}
+
+function pauseChrono(){
+  if(timerID){clearInterval(timerID);timerID=null;}
+}
+
+function startFlash(){
+  el('start-screen').style.display='none';
+  el('flash-zone').style.display='block';
+  qIdx=0;fini=false;answered=false;tempsRestant=DUREE;
+  updateChrono();render();startTimer();
+}
+
+// ── Q1 : Vrai/Faux — est-ce une hauteur ? ──
+// Figure : droite passant par A mais pas perpendiculaire à BC
+function buildQ1(){
+  // Triangle A=(60,130) B=(210,130) C=(150,30)
+  // Droite tracée : de A(60,130) vers (185,30) — PAS perpendiculaire à BC
+  // La droite rouge passe par A mais n'est pas perpendiculaire à [BC].
+  var svg='<svg viewBox="0 0 280 170" width="280" height="170" xmlns="http://www.w3.org/2000/svg">'
+    +'<rect width="280" height="170" fill="#f0f7e6" rx="6"/>'
+    // Triangle
+    +'<polygon points="60,130 210,130 150,30" fill="none" stroke="#3d7a10" stroke-width="2"/>'
+    // Labels sommets
+    +'<text x="44" y="134" font-family="monospace" font-size="13" font-weight="700" fill="#3d7a10">A</text>'
+    +'<text x="214" y="134" font-family="monospace" font-size="13" font-weight="700" fill="#3d7a10">B</text>'
+    +'<text x="148" y="24" font-family="monospace" font-size="13" font-weight="700" fill="#3d7a10">C</text>'
+    // Droite tracée (pas une hauteur) de A vers (190,25) — traversant BC
+    +'<line x1="60" y1="130" x2="185" y2="32" stroke="#b94040" stroke-width="2.5" stroke-dasharray="5,3"/>'
+    // Petit carré pour montrer l'angle — PAS droit (on l'omet volontairement)
+    +'<text x="100" y="105" font-family="monospace" font-size="11" fill="#b94040" font-style="italic">d</text>'
+    +'<\/svg>';
+  return '<div class="q-text">La droite rouge est-elle une hauteur du triangle&nbsp;?</div>'
+    +'<div class="fig-wrap">'+svg+'</div>'
+    +'<div class="vf-row"><button class="vf-btn" id="vf-v" tabindex="0">VRAI</button>'
+    +'<button class="vf-btn" id="vf-f" tabindex="0">FAUX</button></div>';
+}
+
+function attachQ1(){
+  var bv=el('vf-v'),bf=el('vf-f');
+  if(bv) bv.addEventListener('click',function(){answerVF('VRAI');});
+  if(bf) bf.addEventListener('click',function(){answerVF('FAUX');});
+  if(bv) bv.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();answerVF('VRAI');}});
+  if(bf) bf.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();answerVF('FAUX');}});
+}
+
+function answerVF(label){
+  if(answered) return;
+  answered=true;
+  pauseChrono();
+  var ok=(label==='FAUX');
+  var bv=el('vf-v'),bf=el('vf-f');
+  if(bv){bv.disabled=true;bv.className='vf-btn'+(ok?'':label==='VRAI'?' ko':' reveal');}
+  if(bf){bf.disabled=true;bf.className='vf-btn'+(ok&&label==='FAUX'?' ok':label==='FAUX'?' ko':' reveal');}
+  var fb=el('feedback');
+  fb.className='feedback show '+(ok?'ok':'ko');
+  fb.textContent=ok
+    ?'\u2705 Exact\u00a0! Cette droite passe par A mais n\u2019est pas perpendiculaire \u00e0 [BC]. Ce n\u2019est donc pas une hauteur.'
+    :'\u274c Une hauteur doit v\u00e9rifier deux conditions\u00a0: passer par un sommet ET \u00eatre perpendiculaire au c\u00f4t\u00e9 oppos\u00e9. La droite rouge ne l\u2019est pas.';
+  scheduleNext();
+}
+
+// ── Q2 : QCM — identifier la vraie hauteur ──
+function makeMiniTriSVG(type){
+  // Triangle fixe : A=(55,82) B=(145,82) C=(100,15)
+  var s='<svg viewBox="0 0 160 100" width="130" height="80" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="160" height="100" fill="#f8fff0" rx="4"/>';
+  s+='<polygon points="55,82 145,82 100,15" fill="none" stroke="#3d7a10" stroke-width="1.8"/>';
+  s+='<text x="44" y="88" font-family="monospace" font-size="11" fill="#3d7a10">A</text>';
+  s+='<text x="147" y="88" font-family="monospace" font-size="11" fill="#3d7a10">B</text>';
+  s+='<text x="97" y="12" font-family="monospace" font-size="11" fill="#3d7a10">C</text>';
+  if(type==='ok'){
+    s+='<line x1="100" y1="15" x2="100" y2="82" stroke="#8dc63f" stroke-width="2.5" stroke-dasharray="4,2"/>';
+    s+='<rect x="100" y="76" width="6" height="6" fill="none" stroke="#8dc63f" stroke-width="1.5"/>';
+  } else if(type==='oblique'){
+    s+='<line x1="100" y1="15" x2="130" y2="82" stroke="#3ab5d8" stroke-width="2.5" stroke-dasharray="4,2"/>';
+  } else {
+    s+='<line x1="55" y1="82" x2="100" y2="15" stroke="#f5a623" stroke-width="2.5" stroke-dasharray="4,2"/>';
+  }
+  s+='<\/svg>';
+  return s;
+}
+
+
+function buildQ2(){
+  var svgs=[
+    makeMiniTriSVG('ok'),
+    makeMiniTriSVG('oblique'),
+    makeMiniTriSVG('cote')
+  ];
+  var labels=['A','B','C'];
+  var html='<div class="q-text">Laquelle de ces droites est la hauteur issue de C&nbsp;?</div>'
+    +'<div class="opts-col">';
+  svgs.forEach(function(s,i){
+    html+='<button class="opt-btn" data-q2="'+i+'" tabindex="0">'
+      +'<span class="opt-letter">'+labels[i]+'.</span>'
+      +'<span>'+s+'</span></button>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function attachQ2(){
+  el('q-content').querySelectorAll('.opt-btn[data-q2]').forEach(function(b){
+    var i=parseInt(b.getAttribute('data-q2'));
+    b.addEventListener('click',function(){answerQ2(i);});
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();answerQ2(i);}});
+  });
+}
+
+function answerQ2(i){
+  if(answered) return;
+  answered=true;
+  pauseChrono();
+  var ok=(i===0);
+  el('q-content').querySelectorAll('.opt-btn[data-q2]').forEach(function(b,j){
+    b.disabled=true;
+    if(j===0) b.classList.add(ok&&j===i?'ok':'reveal');
+    else if(j===i) b.classList.add('ko');
+  });
+  var fb=el('feedback');
+  fb.className='feedback show '+(ok?'ok':'ko');
+  fb.textContent=ok
+    ?'\u2705 Exact\u00a0! La hauteur issue de C est perpendiculaire \u00e0 [AB]. Comme [AB] est horizontal, elle est verticale et passe par C.'
+    :'\u274c La hauteur issue de C doit \u00eatre perpendiculaire \u00e0 [AB]. [AB] \u00e9tant horizontal, la hauteur est la verticale passant par C.';
+  scheduleNext();
+}
+
+// ── Q3 : Associer sommet → côté opposé ──
+var ASSOC_ANS={'A':'[BC]','B':'[AC]','C':'[AB]'};
+var assocState={};
+
+function buildQ3(){
+  var sommets=['A','B','C'];
+  var cotes=['[AB]','[AC]','[BC]'];
+  // Figure triangle de référence
+  var svgTri='<svg viewBox="0 0 200 120" width="180" height="108" xmlns="http://www.w3.org/2000/svg">'
+    +'<rect width="200" height="120" fill="#f0f7e6" rx="6"/>'
+    +'<polygon points="30,100 170,100 105,15" fill="none" stroke="#3d7a10" stroke-width="2"/>'
+    +'<text x="14" y="106" font-family="monospace" font-size="14" font-weight="700" fill="#3d7a10">A</text>'
+    +'<text x="173" y="106" font-family="monospace" font-size="14" font-weight="700" fill="#3d7a10">B</text>'
+    +'<text x="100" y="12" font-family="monospace" font-size="14" font-weight="700" fill="#3d7a10">C</text>'
+    +'<\/svg>';
+  var html='<div class="q-text">Associe chaque sommet \u00e0 son c\u00f4t\u00e9 oppos\u00e9.</div>'
+    +'<div style="display:flex;justify-content:center;margin-bottom:.6rem;">'+svgTri+'</div>'
+    +'<div class="assoc-grid">';
+  sommets.forEach(function(s){
+    var cur=assocState[s]||'';
+    html+='<span class="assoc-left">'+s+'</span>'
+      +'<span class="assoc-arrow">\u2192</span>'
+      +'<select class="assoc-sel" id="as-'+s+'" aria-label="C\u00f4t\u00e9 oppos\u00e9 de '+s+'">'
+      +'<option value="">-- choisir --</option>';
+    cotes.forEach(function(c){html+='<option value="'+c+'"'+(cur===c?' selected':'')+'>'+c+'</option>';});
+    html+='</select>';
+  });
+  html+='</div>'
+    +'<div style="margin-top:.7rem;"><button class="btn btn-primary" id="btn-q3-ok" style="font-size:.9rem;">&#10003; V\u00e9rifier</button></div>';
+  return html;
+}
+
+function attachQ3(){
+  ['A','B','C'].forEach(function(s){
+    var sel=el('as-'+s);
+    if(sel) sel.addEventListener('change',function(){assocState[s]=sel.value;});
+  });
+  var btn=el('btn-q3-ok');
+  if(btn) btn.addEventListener('click',validerQ3);
+}
+
+function validerQ3(){
+  if(answered) return;
+  var complet=['A','B','C'].every(function(s){return assocState[s]&&assocState[s]!=='';});
+  if(!complet){
+    var fb=el('feedback');
+    fb.className='feedback show ko';
+    fb.textContent='✏️ Associe les trois sommets à leur côté opposé avant de vérifier.';
+    return;
+  }
+  answered=true;
+  pauseChrono();
+  var ok=true;
+  ['A','B','C'].forEach(function(s){
+    var sel=el('as-'+s);if(!sel) return;
+    sel.disabled=true;
+    var correct=(sel.value===ASSOC_ANS[s]);
+    sel.className='assoc-sel '+(correct?'ok':'ko');
+    if(!correct) ok=false;
+  });
+  var fb=el('feedback');
+  fb.className='feedback show '+(ok?'ok':'ko');
+  fb.textContent=ok
+    ?'✅ Exact ! A est opposé à [BC], B à [AC] et C à [AB]. La hauteur issue d’un sommet est perpendiculaire à la droite portant le côté opposé.'
+    :'❌ Le côté opposé à un sommet est celui qui ne le contient pas. A est opposé à [BC], B à [AC], C à [AB].';
+  scheduleNext();
+}
+
+function scheduleNext(){
+  clearTimeout(transitionID);
+  pauseChrono();
+  if(qIdx===TOTAL-1){
+    transitionID=setTimeout(function(){
+      transitionID=null;
+      if(!fini) showFin(true);
+    },1800);
+    return;
+  }
+  transitionID=setTimeout(function(){
+    transitionID=null;
+    if(fini) return;
+    qIdx++;render();
+    startTimer();
+  },1800);
+}
+
+function render(){
+  answered=false;
+  for(var i=0;i<3;i++) el('pd'+i).className='prog-dot'+(i<qIdx?' done':i===qIdx?' active':'');
+  el('q-badge').textContent='Question '+(qIdx+1)+' / '+TOTAL;
+  el('feedback').className='feedback';
+  el('feedback').innerHTML='';
+  if(qIdx===0){el('q-content').innerHTML=buildQ1();attachQ1();}
+  else if(qIdx===1){el('q-content').innerHTML=buildQ2();attachQ2();}
+  else{el('q-content').innerHTML=buildQ3();attachQ3();}
+}
+
+function showFin(normal){
+  fini=true;
+  clearInterval(timerID);timerID=null;
+  clearTimeout(transitionID);transitionID=null;
+  el('flash-zone').style.display='none';
+  el('final-screen').style.display='block';
+  if(normal){
+    el('final-icon').textContent='\u26a1';
+    el('final-title').textContent='Flash D\u00e9fi termin\u00e9\u00a0!';
+    el('final-msg').innerHTML='Bravo\u00a0! Tu as r\u00e9activ\u00e9 les notions essentielles sur les hauteurs d\u2019un triangle.<br>Tu peux maintenant commencer les niveaux et progresser pas \u00e0 pas.';
+  } else {
+    el('final-icon').textContent='\u23f0';
+    el('final-title').textContent='Temps \u00e9coul\u00e9\u00a0!';
+    el('final-msg').innerHTML='Ce n\u2019est pas grave. Les niveaux vont te permettre de revoir les hauteurs d\u2019un triangle pas \u00e0 pas.';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restart(){
+  clearInterval(timerID);timerID=null;
+  clearTimeout(transitionID);transitionID=null;
+  fini=false;answered=false;qIdx=0;assocState={};tempsRestant=DUREE;
+  el('final-screen').style.display='none';
+  el('start-screen').style.display='';
+  updateChrono();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+el('btn-start').addEventListener('click',startFlash);
+el('btn-restart').addEventListener('click',restart);
+updateChrono();
+})();
+</script>
+</body>
+</html>
