@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>V&eacute;rifier un camp d'altitude – S6 J4 – 5e</title>
+<style>
+:root{
+  --sky:#dff5ff; --sky2:#bfe8ff; --snow:#ffffff; --snow2:#f8fcff;
+  --ivoire:#fff9ef; --carte:#f8f3e6; --carte-line:#b7caa0;
+  --brun:#746d63; --brun-dark:#8a8074;
+  --ardoise:#5bb7ff; --ardoise-dark:#3d95dc;
+  --wood:#c68d55; --wood-dark:#a8713e;
+  --vert:#78be43; --vert-dark:#5d9d32; --vert-light:#eefbe8;
+  --prairie:#88c96b; --prairie-dark:#5c9b45; --prairie-light:#dff3d4;
+  --orange:#f39c34; --orange-dark:#c97820;
+  --blue:#5bb7ff; --blue-dark:#3d95dc;
+  --rouge:#e0824a;
+  --text-dark:#463c30; --muted:#7a7266;
+  --radius:12px; --radius-sm:8px;
+  --title-font:"Trebuchet MS",Arial,sans-serif;
+  --sans:"Segoe UI",Verdana,Arial,sans-serif;
+  --mono:"Courier New",Courier,monospace;
+  --shadow-sm:0 2px 8px rgba(70,90,110,.16);
+  --shadow-md:0 10px 26px rgba(70,90,110,.24);
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:linear-gradient(180deg,#d9f4ff,#c2ebff,#f2fbff);color:var(--text-dark);font-family:var(--sans);min-height:100vh;overflow-x:hidden;line-height:1.55;display:flex;flex-direction:column;align-items:center;}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+
+/* ===== Barre supérieure ===== */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:.8rem;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:3px solid #8bc34a;padding:.55rem 1rem;box-shadow:var(--shadow-sm);}
+.topbar-left{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.04em;color:var(--orange-dark);text-transform:uppercase;white-space:nowrap;}
+.topbar-center{font-family:var(--title-font);font-weight:800;font-size:clamp(.9rem,3vw,1.25rem);letter-spacing:.01em;text-align:center;flex:1;color:#305b2b;text-shadow:none;}
+.topbar-sub{font-size:.66rem;font-weight:600;color:#5c9b45;letter-spacing:.02em;margin-top:.1rem;opacity:.9;}
+.topbar-right{display:flex;align-items:center;gap:.5rem;}
+.hud-btn{background:#fff;border:1.5px solid #cfe0d4;border-radius:8px;cursor:pointer;font-size:1rem;padding:.35rem .55rem;min-height:38px;min-width:38px;color:#305b2b;}
+.hud-btn.off{opacity:.4;}
+.hud-stars{font-size:1rem;letter-spacing:.1em;color:#e0a92e;background:#fffaf0;border:1.5px solid #f0dca8;border-radius:8px;padding:.3rem .5rem;white-space:nowrap;display:flex;flex-direction:column;align-items:center;line-height:1.1;}
+.hud-stars-detail{font-size:.55rem;letter-spacing:0;font-weight:700;color:#a98a4a;margin-top:.1rem;}
+@media(max-width:640px){.topbar-left{display:none;}.topbar{padding:.45rem .6rem;gap:.4rem;}}
+.topspacer{height:76px;}
+
+/* ===== Zone carte ===== */
+.map-wrap{width:100%;max-width:1000px;padding:.8rem .8rem 2rem;position:relative;}
+.map-frame{position:relative;background:var(--wood);border:3px solid var(--wood-dark);border-radius:16px;box-shadow:var(--shadow-md);padding:14px;}
+.map-frame::before{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:inset 0 0 30px rgba(120,90,50,.18);}
+.table-edge{position:absolute;left:-3px;right:-3px;bottom:-22px;height:26px;background:linear-gradient(180deg,#a8713e,#8a5a2e);border-radius:0 0 16px 16px;z-index:-1;}
+
+.map-svg-wrap{position:relative;border-radius:10px;overflow:hidden;background:var(--carte);}
+.map-svg-wrap svg{display:block;width:100%;height:auto;}
+.map-dim{position:absolute;inset:0;background:rgba(60,90,110,.32);transition:opacity .5s ease;z-index:5;pointer-events:none;}
+.map-dim.hidden{opacity:0;pointer-events:none;}
+
+/* décor topographique */
+.contour{fill:none;stroke:var(--carte-line);stroke-width:1.4;opacity:.55;}
+.relief{fill:#c8dbc0;opacity:.55;}
+.tool-deco{opacity:.65;}
+
+/* repères de mission */
+.map-marker{cursor:pointer;}
+.map-marker circle.ring{fill:#8a7a58;stroke:var(--brun);stroke-width:2;transition:all .3s;}
+.map-marker.locked circle.ring{fill:#cbd5d9;opacity:.75;}
+.map-marker.active circle.ring{fill:#49a8ff;stroke:#3d95dc;animation:markerpulse 1.7s ease-in-out infinite;}
+.map-marker.done circle.ring{fill:#67bf4d;stroke:#4f9c3a;}
+@keyframes markerpulse{0%,100%{filter:drop-shadow(0 0 0px rgba(73,168,255,.7));}50%{filter:drop-shadow(0 0 8px rgba(73,168,255,.9));}}
+.map-marker text.num{font-family:var(--mono);font-weight:700;fill:#fff;font-size:11px;text-anchor:middle;pointer-events:none;}
+.map-marker text.lbl{font-family:var(--title-font);font-weight:700;fill:#463c30;font-size:9.5px;text-anchor:middle;pointer-events:none;}
+.map-marker .check{opacity:0;transform-origin:center;}
+.map-marker.done .check{opacity:1;animation:checkpop .35s ease both;}
+@keyframes checkpop{0%{opacity:0;transform:scale(2);}100%{opacity:1;transform:scale(1);}}
+.itin-path{fill:none;stroke:#b3a582;stroke-width:2;stroke-dasharray:5 5;}
+.itin-path.revealed{stroke:var(--vert);stroke-dasharray:none;}
+
+/* ===== Fiche d'ouverture (mission brief) ===== */
+.brief-overlay{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;transition:opacity .5s ease;}
+.brief-overlay.hidden{opacity:0;pointer-events:none;}
+.brief-card{max-width:540px;width:100%;max-height:90vh;overflow-y:auto;background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius);box-shadow:var(--shadow-md);padding:2.1rem 2rem;text-align:center;color:var(--text-dark);animation:pop .5s cubic-bezier(.18,.89,.32,1.3);position:relative;}
+.brief-card::before{content:"";position:absolute;top:0;right:24px;width:26px;height:40px;background:rgba(217,119,46,.35);border:1px solid rgba(168,90,31,.4);transform:rotate(4deg);}
+@keyframes pop{0%{transform:scale(.9);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.brief-ico{font-size:2.9rem;margin-bottom:.6rem;}
+.brief-title{font-family:var(--title-font);font-weight:800;font-size:clamp(1.3rem,4.4vw,1.65rem);color:var(--vert-dark);margin-bottom:.9rem;letter-spacing:.02em;}
+.brief-txt{font-size:1rem;line-height:1.75;margin-bottom:1.5rem;color:var(--text-dark);}
+.btn-brief{display:inline-flex;align-items:center;gap:.55rem;background:var(--orange);color:#2a1704;font-weight:800;font-size:1.08rem;letter-spacing:.02em;padding:1.05rem 1.9rem;border:none;border-radius:var(--radius-sm);cursor:pointer;box-shadow:0 6px 18px rgba(217,119,46,.4);width:100%;justify-content:center;min-height:58px;}
+.btn-brief:active{transform:scale(.97);}
+
+/* ===== Fiche de relevé (mission) ===== */
+.releve-overlay{position:fixed;inset:0;z-index:35;display:none;pointer-events:none;}
+.releve-overlay.show{display:block;}
+.releve-panel{position:absolute;top:80px;bottom:14px;right:14px;width:min(420px,92vw);background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius) 0 0 var(--radius);box-shadow:-8px 0 26px rgba(70,90,110,.28);color:var(--text-dark);overflow-y:auto;transform:translateX(105%);transition:transform .4s cubic-bezier(.2,.85,.25,1.05);pointer-events:auto;}
+.releve-panel.show{transform:translateX(0);}
+.releve-head{position:sticky;top:0;z-index:2;background:var(--ardoise-dark);color:#fff;padding:.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;border-bottom:3px solid var(--orange);}
+.releve-head-txt .rn{font-family:var(--mono);font-size:.65rem;letter-spacing:.06em;color:var(--orange);text-transform:uppercase;}
+.releve-head-txt .rt{font-family:var(--title-font);font-weight:800;font-size:1rem;}
+.releve-close{background:transparent;border:1.5px solid #6b7680;color:#fff;border-radius:8px;font-size:.85rem;padding:.35rem .6rem;cursor:pointer;white-space:nowrap;}
+.releve-close:hover{border-color:var(--orange);color:var(--orange);}
+.releve-body{padding:1.1rem;}
+
+.intro{font-weight:700;font-size:.86rem;color:var(--vert-dark);background:var(--vert-light);border:1px solid #b7d6bf;border-radius:var(--radius-sm);padding:.75rem .9rem;margin-bottom:1rem;line-height:1.6;}
+.intro .norm{font-weight:400;color:var(--text-dark);}
+.fiche-card{background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);padding:.75rem .9rem;margin-bottom:.85rem;position:relative;}
+.fiche-card::before{content:"";position:absolute;left:0;top:.6rem;bottom:.6rem;width:4px;background:var(--orange);border-radius:2px;}
+.fiche-txt{font-size:.84rem;color:var(--text-dark);line-height:1.6;padding-left:.5rem;}
+
+.opts{display:flex;flex-wrap:wrap;gap:.5rem;}
+.opt{cursor:pointer;text-align:center;background:#fff;border:2px solid #d8cca8;border-radius:var(--radius-sm);padding:.6rem .9rem;font-family:var(--mono);font-weight:700;font-size:.84rem;color:var(--text-dark);transition:all .15s;min-height:44px;display:flex;align-items:center;justify-content:center;gap:.4rem;flex:1;min-width:100px;}
+.opt:hover{border-color:var(--vert);transform:translateY(-1px);}
+.opt.sel{background:var(--vert-light);border-color:var(--vert);color:var(--vert-dark);}
+.opt.ok{border-color:var(--vert);background:var(--vert-light);color:var(--vert-dark);}
+.opt.ok::before{content:"\2713 ";}
+.opt.ko{border-color:var(--rouge);background:#fff5ea;color:#a8551f;}
+.opt.ko::before{content:"\2715 ";}
+
+.tools{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.1rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:var(--radius-sm);font-weight:700;font-size:.76rem;letter-spacing:.02em;cursor:pointer;border:none;min-height:44px;}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-try{background:var(--vert);color:#fff;}
+.btn-try:hover:not(:disabled){background:var(--vert-dark);}
+.btn-hint{background:#fff;color:var(--muted);border:1.5px solid #d8cca8;}
+.hint{margin-top:.7rem;background:#fff6e6;border:1.5px dashed var(--orange);border-radius:var(--radius-sm);padding:.65rem .9rem;font-size:.76rem;color:#6b4c05;display:none;line-height:1.65;}
+.hint.show{display:block;}
+.fb{margin-top:1rem;padding:.65rem .9rem;border-radius:var(--radius-sm);font-size:.8rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;position:relative;}
+.fb.show{display:flex;}
+.fb.ok{background:var(--vert-light);border:2px solid var(--vert);color:var(--vert-dark);}
+.fb.ko{background:#fff5ea;border:2px solid var(--rouge);color:#a8551f;}
+.correction{margin-top:.75rem;background:var(--vert-light);border:1.5px solid #b7d6bf;border-radius:var(--radius-sm);padding:.7rem .9rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-weight:700;font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;color:var(--vert-dark);margin-bottom:.35rem;}
+.correction-x{font-size:.78rem;color:var(--text-dark);line-height:1.75;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-4px);}40%,80%{transform:translateX(4px);}}
+.shake{animation:shake .3s;}
+
+/* Mission 1/5 : mini-carte segment */
+.segment-svg{width:100%;height:auto;background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);margin-bottom:.9rem;}
+.seg-pt{cursor:pointer;}
+.seg-pt circle{fill:#fff;stroke:var(--ardoise);stroke-width:2;transition:all .15s;}
+.seg-pt:hover circle{stroke:var(--orange);}
+.seg-pt.sel circle{fill:var(--orange);stroke:var(--orange-dark);}
+.seg-pt.ok circle{fill:var(--vert);stroke:var(--vert-dark);}
+.seg-pt.ko circle{fill:var(--rouge);stroke:#a8551f;}
+.seg-pt text{font-family:var(--mono);font-size:10px;font-weight:700;fill:var(--text-dark);text-anchor:middle;pointer-events:none;}
+
+/* Mission 2 : mini-cartes cliquables */
+.map-choice{cursor:pointer;border:2px solid #d8cca8;border-radius:var(--radius-sm);background:#fffdf6;padding:.5rem;transition:all .15s;text-align:center;}
+.map-choice:hover{border-color:var(--vert);transform:translateY(-2px);}
+.map-choice.sel{border-color:var(--orange);box-shadow:0 0 0 3px rgba(217,119,46,.2);}
+.map-choice.ok{border-color:var(--vert);box-shadow:0 0 0 3px rgba(47,107,63,.2);}
+.map-choice.ko{border-color:var(--rouge);box-shadow:0 0 0 3px rgba(224,130,74,.25);}
+.map-choice svg{width:100%;height:auto;display:block;}
+.map-choice .mc-label{font-family:var(--mono);font-weight:700;font-size:.7rem;margin-top:.3rem;color:var(--text-dark);}
+.map-choices-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;}
+@media(max-width:420px){.map-choices-row{grid-template-columns:1fr;}}
+
+/* Mission 3 : instruments sur la table */
+.instr-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.instr{cursor:pointer;background:#fffdf6;border:1.5px solid #e3d7b8;border-radius:var(--radius-sm);padding:.7rem .5rem;text-align:center;min-width:82px;transition:all .2s;box-shadow:0 2px 4px rgba(70,90,110,.14);}
+.instr .ic{font-size:1.6rem;display:block;margin-bottom:.25rem;}
+.instr .nm{font-size:.66rem;font-weight:700;color:var(--text-dark);}
+.instr:hover{transform:translateY(-3px);}
+.instr.sel{transform:translateY(-8px);box-shadow:0 10px 16px rgba(70,90,110,.22);border-color:var(--orange);}
+.instr.ok{border-color:var(--vert);}
+.instr.ko{border-color:var(--rouge);}
+
+/* Mission 4 : bandes de papier, séquence par clic */
+.strip-target{min-height:56px;background:#fffdf6;border:2px dashed #d8cca8;border-radius:var(--radius-sm);padding:.55rem;margin-bottom:.7rem;}
+.strip-target.empty::before{content:"Clique sur les bandes ci-dessous, dans l'ordre.";font-family:var(--mono);font-size:.66rem;color:#a99878;}
+.paper-strip{background:#fffdf6;border:1px solid #e3d7b8;border-left:5px solid var(--orange);border-radius:4px;padding:.5rem .7rem;margin-bottom:.4rem;font-size:.78rem;color:var(--text-dark);cursor:pointer;box-shadow:0 2px 3px rgba(70,90,110,.12);transition:all .15s;}
+.paper-strip:hover{transform:translateX(2px);}
+.strip-bank .paper-strip{border-left-color:var(--ardoise);}
+.bank-hint{font-family:var(--mono);font-size:.66rem;color:var(--muted);margin-bottom:.5rem;}
+
+/* ===== Mission 5 : construction directe sur la carte ===== */
+.m5-toolbar{position:absolute;left:14px;bottom:14px;z-index:8;display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;}
+.m5-instr-btn{cursor:pointer;background:var(--ivoire);border:1.5px solid #d8c9a0;border-radius:8px;padding:.5rem .6rem;text-align:center;box-shadow:var(--shadow-sm);transition:all .2s;}
+.m5-instr-btn .ic{font-size:1.3rem;display:block;}
+.m5-instr-btn .nm{font-size:.6rem;font-weight:700;color:var(--text-dark);}
+.m5-instr-btn.active{border-color:var(--orange);box-shadow:0 0 0 3px rgba(217,119,46,.25);transform:translateY(-4px);}
+.m5-instr-btn.disabled{opacity:.4;cursor:not-allowed;}
+.m5-panel{position:absolute;right:14px;bottom:14px;z-index:8;background:var(--ivoire);border:1.5px solid #d8c9a0;border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);padding:.7rem .8rem;max-width:230px;}
+.m5-panel .pt{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.35rem;}
+.m5-panel input[type=range]{width:100%;accent-color:var(--orange);}
+.m5-angle-val{font-family:var(--mono);font-weight:700;font-size:.85rem;color:var(--vert-dark);text-align:center;margin-top:.2rem;}
+.m5-status{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:8;background:rgba(255,253,246,.95);border:1px solid #d8c9a0;border-radius:16px;padding:.4rem 1.1rem;font-size:.72rem;font-weight:700;color:var(--text-dark);box-shadow:var(--shadow-sm);text-align:center;max-width:min(94%,420px);line-height:1.4;pointer-events:none;}
+.btn-trace{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:8;background:var(--vert);color:#fff;font-weight:800;font-size:.85rem;padding:.75rem 1.6rem;border:none;border-radius:99px;cursor:pointer;box-shadow:var(--shadow-md);}
+.btn-trace:disabled{opacity:.4;cursor:not-allowed;}
+.btn-trace.ready{animation:tracepulse 1.6s ease-in-out infinite;}
+@keyframes tracepulse{0%,100%{box-shadow:0 0 0 0 rgba(47,107,63,.5),var(--shadow-md);}50%{box-shadow:0 0 0 10px rgba(47,107,63,0),var(--shadow-md);}}
+.m5-equerre{opacity:0;transition:opacity .2s;}
+.m5-equerre.show{opacity:1;}
+.m5-median-line{stroke:var(--vert);stroke-width:0;stroke-dasharray:400;stroke-dashoffset:400;transition:stroke-dashoffset 1s ease, stroke-width .3s;}
+.m5-median-line.draw{stroke-width:3;stroke-dashoffset:0;}
+.m5-stamp{opacity:0;transform:scale(1.3) rotate(-8deg);transform-origin:center;transition:all .5s cubic-bezier(.2,.8,.3,1.15);}
+.m5-stamp.show{opacity:1;transform:scale(1) rotate(-8deg);}
+
+/* ===== Fiche finale ===== */
+.finale-overlay{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;background:rgba(50,75,95,.4);padding:1.2rem;}
+.finale-overlay.show{display:flex;}
+.finale-box{max-width:440px;width:100%;max-height:88vh;overflow-y:auto;background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius);box-shadow:var(--shadow-md);padding:1.6rem 1.4rem;text-align:center;color:var(--text-dark);animation:pop .5s cubic-bezier(.18,.89,.32,1.3);}
+.finale-stamp{display:inline-block;border:4px solid var(--vert);color:var(--vert);font-family:var(--title-font);font-weight:900;font-size:clamp(1.1rem,4.4vw,1.5rem);letter-spacing:.03em;padding:.4rem 1rem;border-radius:8px;transform:rotate(-5deg);margin-bottom:1rem;}
+.finale-title{font-family:var(--title-font);font-weight:800;font-size:1.05rem;color:var(--vert-dark);margin-bottom:.7rem;}
+.finale-sub{font-size:.84rem;line-height:1.65;margin-bottom:1rem;}
+.finale-list{text-align:left;background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);padding:.8rem .95rem;margin-bottom:1rem;font-size:.78rem;line-height:1.85;}
+.finale-reveal{background:var(--vert-light);border:1.5px solid #b7d6bf;border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:1.1rem;text-align:left;font-size:.78rem;line-height:1.65;}
+.finale-reveal b{color:var(--vert-dark);display:block;margin-bottom:.3rem;font-size:.64rem;letter-spacing:.03em;text-transform:uppercase;}
+.finale-btns{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn-finale{flex:1;min-width:140px;background:var(--vert);color:#fff;font-weight:700;font-size:.78rem;padding:.65rem 1rem;border:none;border-radius:var(--radius-sm);cursor:pointer;}
+.btn-finale.secondary{background:#fff;color:var(--text-dark);border:1.5px solid #d8cca8;}
+
+/* ===== Carnet ===== */
+.carnet-overlay{position:fixed;inset:0;z-index:31;display:none;background:rgba(50,75,95,.38);}
+.carnet-overlay.show{display:block;}
+.carnet-panel{position:fixed;top:0;left:0;bottom:0;z-index:32;width:min(320px,86vw);background:var(--ivoire);border-right:3px solid var(--ardoise);box-shadow:8px 0 26px rgba(70,90,110,.28);transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;color:var(--text-dark);}
+.carnet-panel.show{transform:translateX(0);}
+.carnet-band{background:var(--ardoise-dark);color:#fff;padding:1rem;font-weight:700;font-size:.86rem;}
+.carnet-inner{flex:1;display:flex;flex-direction:column;padding:1rem;overflow:hidden;}
+.carnet-quote{font-size:.72rem;opacity:.75;line-height:1.55;margin-bottom:.8rem;font-style:italic;border-left:2px solid var(--orange);padding-left:.55rem;}
+.carnet-symbols{display:flex;gap:.4rem;margin-bottom:.55rem;flex-wrap:wrap;}
+.carnet-sym-btn{min-width:38px;min-height:38px;background:#fff;border:1.5px solid #ddd0ac;border-radius:8px;color:var(--vert-dark);font-family:var(--mono);font-size:1rem;font-weight:700;cursor:pointer;}
+.carnet-text{flex:1;min-height:250px;background:#fffdf6;border:1.5px solid #ddd0ac;border-radius:8px;color:var(--text-dark);font-family:var(--mono);font-size:14px;line-height:1.75;padding:.65rem;resize:none;outline:none;background-image:repeating-linear-gradient(transparent,transparent calc(1.75em - 1px),#e3d7b8 calc(1.75em - 1px),#e3d7b8 1.75em);}
+.carnet-tools{display:flex;gap:.5rem;margin-top:.75rem;}
+.carnet-tools .btn{flex:1;font-size:.66rem;min-height:40px;}
+.btn-carnet-clear{background:#fff;color:var(--text-dark);border:1.5px solid #ddd0ac;}
+.btn-carnet-close{background:var(--orange);color:#2a1704;}
+
+.agent-msg{position:fixed;top:84px;left:50%;transform:translateX(-50%) translateY(-16px);z-index:33;background:var(--ardoise-dark);border:2px solid var(--orange);border-radius:var(--radius-sm);padding:.6rem 1rem;max-width:min(380px,90%);text-align:center;font-size:.8rem;color:#fff;box-shadow:var(--shadow-md);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left" id="topbar-left">EXP&Eacute;DITION HIMALAYA &middot; RELEV&Eacute; 01</div>
+  <div class="topbar-center">V&Eacute;RIFIER UN CAMP D'ALTITUDE<div class="topbar-sub">Pazapa Maths 5e &middot; Semaine 6 &middot; Jour 4 &middot; V&eacute;rifier si un triangle est constructible</div></div>
+  <div class="topbar-right">
+    <div class="hud-stars" id="hud-stars"><span id="hud-stars-glyphs">&#9733;&#9733;&#9733;</span><span class="hud-stars-detail" id="hud-stars-detail"></span></div>
+    <button class="hud-btn" onclick="toggleCarnet()" aria-label="Ouvrir le carnet de terrain">&#128221;</button>
+    <button class="hud-btn" id="sound-btn" onclick="toggleSound()" aria-label="Activer ou couper le son">&#128266;</button>
+  </div>
+</div>
+<div class="topspacer"></div>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="map-wrap">
+  <div class="map-frame">
+    <div class="table-edge"></div>
+    <div class="map-svg-wrap" id="map-svg-wrap">
+      <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" id="main-map">
+        <rect width="600" height="380" fill="#f8f3e6"/>
+        <path class="contour" d="M20,60 Q150,20 300,55 T580,50"/>
+        <path class="contour" d="M10,100 Q160,60 320,95 T590,90"/>
+        <path class="contour" d="M30,320 Q200,360 380,325 T580,340"/>
+        <path class="contour" d="M0,300 Q180,340 360,305 T600,318"/>
+        <polygon class="relief" points="60,140 100,80 150,140"/>
+        <polygon class="relief" points="130,150 175,95 225,150"/>
+        <polygon class="relief" points="430,150 480,85 535,150"/>
+        <text x="300" y="28" text-anchor="middle" font-family="Trebuchet MS" font-size="10.5" font-weight="700" fill="#8a9585" letter-spacing="2.5" opacity=".4">SECTEUR HIMALAYA &mdash; RELEV&Eacute; TOPOGRAPHIQUE</text>
+
+        <g id="itin-lines"></g>
+
+        <g id="markers-layer"></g>
+      </svg>
+      <div class="map-dim" id="map-dim"></div>
+      <div class="brief-overlay" id="brief-overlay">
+        <div class="brief-card">
+          <div class="brief-ico">&#9968;&#65039;</div>
+          <div class="brief-title">MISSION CAMP D'ALTITUDE</div>
+          <div class="brief-txt">
+            L'&eacute;quipe d'exp&eacute;dition doit installer un nouveau camp d'altitude. Sur la carte, la zone du camp est mod&eacute;lis&eacute;e par un triangle reliant trois balises.
+            <br><br>
+            Plusieurs emplacements ont &eacute;t&eacute; relev&eacute;s, mais certaines longueurs propos&eacute;es ne permettent pas de former un v&eacute;ritable triangle. Contr&ocirc;le chaque relev&eacute; avant l'installation du mat&eacute;riel.
+          </div>
+          <button class="btn-brief" onclick="beginGame()">&#9968;&#65039; Ouvrir la carte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="releve-overlay" id="releve-overlay">
+  <div class="releve-panel" id="releve-panel">
+    <div class="releve-head">
+      <div class="releve-head-txt">
+        <div class="rn" id="releve-num">RELEV&Eacute; 01 / 05</div>
+        <div class="rt" id="releve-title">Examiner les balises</div>
+      </div>
+      <button class="releve-close" onclick="closeReleve()">&#10006; Fermer le relev&eacute;</button>
+    </div>
+    <div class="releve-body" id="releve-body"></div>
+  </div>
+</div>
+
+<div class="carnet-overlay" id="carnet-overlay" onclick="closeCarnet()"></div>
+<div class="carnet-panel" id="carnet-panel">
+  <div class="carnet-band">&#128221; Carnet de terrain</div>
+  <div class="carnet-inner">
+    <div class="carnet-quote">Tu peux noter tes calculs avant de r&eacute;pondre.</div>
+    <div class="carnet-symbols">
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('+')" title="Plus" aria-label="Ins&eacute;rer le symbole plus">+</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('<')" title="Inf&eacute;rieur" aria-label="Ins&eacute;rer le symbole inf&eacute;rieur">&lt;</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('>')" title="Sup&eacute;rieur" aria-label="Ins&eacute;rer le symbole sup&eacute;rieur">&gt;</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('=')" title="Egal" aria-label="Ins&eacute;rer le symbole &eacute;gal">=</button>
+      <button class="carnet-sym-btn" style="min-width:118px;font-size:.68rem;" onclick="insertCarnetSym('plus grande longueur')" title="Plus grande longueur" aria-label="Ins&eacute;rer plus grande longueur">Plus grande longueur</button>
+      <button class="carnet-sym-btn" style="min-width:118px;font-size:.68rem;" onclick="insertCarnetSym('somme des deux autres')" title="Somme des deux autres" aria-label="Ins&eacute;rer somme des deux autres">Somme des deux autres</button>
+    </div>
+    <textarea class="carnet-text" id="carnet-text" placeholder="Tu peux &eacute;crire ici tes calculs..." aria-label="Zone de brouillon"></textarea>
+    <div class="carnet-tools">
+      <button class="btn btn-carnet-clear" onclick="clearCarnet()">&#128465;&#65039; Effacer</button>
+      <button class="btn btn-carnet-close" onclick="closeCarnet()">&#10006;&#65039; Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="finale-overlay" id="finale-overlay">
+  <div class="finale-box">
+    <div class="finale-stamp">TRIANGLE<br>CONSTRUCTIBLE</div>
+    <div class="finale-title">MISSION ACCOMPLIE&#8201;!</div>
+    <div class="finale-stars" id="finale-stars" style="font-size:1.6rem;letter-spacing:.15em;color:#e0a92e;margin-bottom:.7rem;"></div>
+    <div class="finale-sub">Gr&acirc;ce &agrave; tes v&eacute;rifications, un emplacement permettant de former un v&eacute;ritable camp triangulaire a &eacute;t&eacute; identifi&eacute;. L'&eacute;quipe peut pr&eacute;parer l'installation du camp d'altitude.</div>
+    <div class="finale-list">
+      &#9989; Je rep&egrave;re la plus grande longueur parmi trois mesures.<br>
+      &#9989; Je la compare &agrave; la somme des deux autres.<br>
+      &#9989; Je sais reconna&icirc;tre le cas d'&eacute;galit&eacute;&#8201;: les points sont align&eacute;s, il n'y a pas de triangle.
+    </div>
+    <div class="finale-reveal">
+      <b>Bilan de la mission</b>
+      &#127919; Je sais v&eacute;rifier si trois longueurs permettent de construire un triangle en comparant la plus grande longueur &agrave; la somme des deux autres.
+    </div>
+    <div class="finale-btns">
+      <button class="btn-finale secondary" onclick="closeFinale()">&#128506;&#65039; Revoir la carte</button>
+      <button class="btn-finale" onclick="restartAll()">&#8635; Recommencer le relev&eacute;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ===== Moteur audio (conservé, réadapté à l'ambiance cartographique) ===== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  var volume = vol || 0.08;
+  var attack = Math.min(0.02, dur * 0.25);
+  var release = Math.min(0.03, dur * 0.35);
+  var sustainEnd = Math.max(t + attack, t + dur - release);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(volume, t + attack);
+  g.gain.setValueAtTime(volume, sustainEnd);
+  g.gain.linearRampToValueAtTime(0.0001, t + dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+/* Grande feuille dépliée sur la table : papier épais -> froissement léger -> feuille posée (~0,7s) */
+/* Ouverture de la carte : léger souffle de vent (0,5s) puis la carte qui se déplie */
+function soundMapOpen(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.5,0.045,2600,300,now);
+  noise(0.16,0.06,3800,700,now+0.5);
+  noise(0.12,0.04,5200,1800,now+0.62);
+}
+/* Fiche de relevé qui glisse sur la carte */
+function soundPaperSlide(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.2,0.04,3000,900,c.currentTime);
+}
+/* Fermeture d'un relevé / bande qui retourne dans la banque : feuille déplacée ou retournée */
+function soundPaperClose(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.12,0.045,5000,1800,c.currentTime);
+}
+/* Sélection d'un point sur la carte : petit "toc" de bois, comme un pion de randonnée qu'on pose */
+function soundPencilTap(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.045,0.055,1200,300,c.currentTime);
+}
+/* Sélection d'un instrument : contact règle (plus feutré) ou équerre (plus sec) */
+function soundToolPlace(type){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  if(type==="equerre"){ noise(0.06,0.065,2600,600,now); }
+  else{ noise(0.09,0.06,1400,300,now); }
+}
+/* Bande de papier déposée dans la séquence : léger frottement */
+function soundPaperDrop(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.11,0.05,3200,900,c.currentTime);
+}
+/* Indice : crayon traçant un petit trait sur le papier (~0,2s max) */
+function soundHintPencil(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.16,0.035,2000,500,c.currentTime);
+}
+/* Erreur : toute petite gomme, jamais punitive (0,15s) */
+function soundErase(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.15,0.032,2200,800,c.currentTime);
+}
+/* Trait de crayon gras, doux, continu sur la durée de l'animation visuelle */
+function soundPencilLine(duration){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(duration||1,0.03,1700,350,c.currentTime);
+}
+/* Pointe métallique du compas qui griffe légèrement le papier, en continu pendant tout l'arc */
+function soundCompassArc(duration){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(duration||0.8,0.036,4600,2600,c.currentTime);
+}
+/* Bonne réponse / fin du défi : petit "clac" mat suivi d'une très discrète cloche de refuge (jamais une sonnerie) */
+function soundStamp(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.055,0.08,850,140,now);
+  noise(0.09,0.025,1500,500,now+0.035);
+}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2600);}
+
+/* ===== Chronomètre (conservé) ===== */
+
+function shuffleOrder(n){
+  var a=[];for(var i=0;i<n;i++)a.push(i);
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+/* ===== Données des 5 missions ===== */
+var MISSIONS=[
+ {name:"Camp 1", full:"Le premier camp"},
+ {name:"Passage", full:"Le passage impossible"},
+ {name:"Cas limite", full:"Le cas limite"},
+ {name:"Cartes", full:"Contr&ocirc;le des cartes"},
+ {name:"Final", full:"Installation finale du camp"}
+];
+var solved=[false,false,false,false,false];
+var errorsCount=0;
+var hintsCount=0;
+var hintsOpened=[false,false,false,false,false];
+var openMi=null;
+
+/* Mission 1 : Le premier camp — AB=5, AC=7, BC=9 -> constructible (9<12) */
+var M1_LEN={a:5, b:7, c:9}; // notés génériquement, plus grande = 9
+var m1Step=0; // 0=possible?,1=plus grande,2=somme,3=comparaison
+var m1MaxPick=null, m1SumInput=null, m1CompPick=null;
+
+/* Mission 2 : Le passage impossible — 4,6,12 -> non constructible (12>10) */
+var M2_LEN={a:4, b:6, c:12};
+var m2Step=0;
+var m2MaxPick=null, m2SumInput=null, m2CompPick=null, m2ConclusionPick=null;
+
+/* Mission 3 : Le cas limite — 4,6,10 -> égalité (10=10), alignés */
+var M3_LEN={a:4, b:6, c:10};
+var m3Step=0;
+var m3MaxPick=null, m3SumInput=null, m3CompPick=null, m3ConclusionPick=null;
+
+/* Mission 4 : Contrôle des cartes — 4 cartes, l'élève classe CONSTRUCTIBLE / NON CONSTRUCTIBLE */
+var M4_CARDS=[
+  {id:"A", lens:[6,8,11], correct:true},   // 6+8=14, 11<14
+  {id:"B", lens:[3,5,9], correct:false},   // 3+5=8, 9>8
+  {id:"C", lens:[7,7,12], correct:true},   // 7+7=14, 12<14
+  {id:"D", lens:[5,8,13], correct:false}   // 5+8=13, 13=13 (égalité, non constructible)
+];
+var m4CardIdx=0;
+var m4CardStep=0; // 0=max,1=somme,2=conclusion
+var m4Picks=[null,null,null,null]; // suivi de complétion par carte
+
+/* Mission 5 : Installation finale — 3 zones, une seule constructible */
+var M5_ZONES=[
+  {name:"Zone Nord", lens:[8,10,15], correct:true},     // 8+10=18, 15<18
+  {name:"Zone Glacier", lens:[5,7,12], correct:false},  // 5+7=12, 12=12 (égalité)
+  {name:"Zone Cr&ecirc;te", lens:[6,9,17], correct:false} // 6+9=15, 17>15
+];
+var m5ZonePick=null;
+var m5Step=0; // 0=choix zone, 1=plus grande, 2=somme, 3=comparaison, 4=conclusion
+var m5MaxPick=null, m5SumInput=null, m5CompPick=null, m5ConclusionPick=null;
+
+/* ===== Repères et itinéraire sur la carte ===== */
+var MK_POS=[[110,300],[220,330],[330,300],[440,330],[520,270]];
+function buildMarkers(){
+  var layer=$("markers-layer");layer.innerHTML="";
+  for(var i=0;i<5;i++){
+    var st = solved[i] ? "done" : (i===0||solved[i-1]) ? "active" : "locked";
+    var g=document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.setAttribute("class","map-marker "+st);
+    g.setAttribute("transform","translate("+MK_POS[i][0]+","+MK_POS[i][1]+")");
+    g.setAttribute("id","marker-"+i);
+    if(st!=="locked"){
+      g.onclick=(function(idx){return function(){openReleve(idx);};})(i);
+      g.setAttribute("role","button");
+      g.setAttribute("tabindex","0");
+      g.setAttribute("aria-label","Ouvrir le relev&eacute; "+(i+1)+" : "+MISSIONS[i].name.replace(/&[^;]+;/g,""));
+      g.onkeydown = (function(idx){
+        return function(event){
+          if(event.key==="Enter" || event.key===" "){
+            event.preventDefault();
+            openReleve(idx);
+          }
+        };
+      })(i);
+    }else{
+      g.setAttribute("aria-disabled","true");
+    }
+    g.innerHTML='<circle class="ring" r="15"></circle>'
+      +'<text class="num" y="4">'+(i+1)+'</text>'
+      +'<text class="lbl" y="28">'+MISSIONS[i].name+'</text>'
+      +'<g class="check" transform="translate(0,0)"><circle r="15" fill="none"/><path d="M-6,0 L-2,5 L7,-6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>';
+    layer.appendChild(g);
+  }
+  var lines=$("itin-lines");lines.innerHTML="";
+  for(var i=0;i<4;i++){
+    var p1=MK_POS[i], p2=MK_POS[i+1];
+    var path=document.createElementNS("http://www.w3.org/2000/svg","path");
+    var mx=(p1[0]+p2[0])/2, my=Math.min(p1[1],p2[1])-18;
+    path.setAttribute("d","M"+p1[0]+","+p1[1]+" Q"+mx+","+my+" "+p2[0]+","+p2[1]);
+    path.setAttribute("class","itin-path"+(solved[i]?" revealed":""));
+    lines.appendChild(path);
+  }
+}
+function updateTopbar(){
+  var got=solved.filter(Boolean).length;
+  var next=Math.min(got+1,5);
+  $("topbar-left").innerHTML="EXP&Eacute;DITION HIMALAYA &middot; RELEV&Eacute; "+(next<10?"0"+next:next);
+}
+
+/* ===== Ouverture / fermeture de la fiche de relevé ===== */
+function openReleve(mi){
+  if(mi>0 && !solved[mi-1] && !solved[mi]) return;
+  soundPaperSlide();
+  openMi=mi;
+  $("releve-num").innerHTML="RELEV&Eacute; 0"+(mi+1)+" / 05";
+  $("releve-title").innerHTML=MISSIONS[mi].full;
+  renderReleveBody(mi);
+  $("releve-overlay").classList.add("show");
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ $("releve-panel").classList.add("show"); }); });
+}
+function closeReleve(){
+  soundPaperClose();
+  $("releve-panel").classList.remove("show");
+  setTimeout(function(){ $("releve-overlay").classList.remove("show"); },420);
+  openMi=null;
+}
+function renderReleveBody(mi){
+  var body=$("releve-body");
+  if(mi===0) body.innerHTML=buildMission1(solved[0]);
+  else if(mi===1) body.innerHTML=buildMission2(solved[1]);
+  else if(mi===2) body.innerHTML=buildMission3(solved[2]);
+  else if(mi===3) body.innerHTML=buildMission4(solved[3]);
+}
+
+/* ===== Utilitaires géométriques SVG ===== */
+function drawTriangleSVG(A,B,C,labels){
+  labels = labels!==false;
+  var s='<polygon points="'+A.x+','+A.y+' '+B.x+','+B.y+' '+C.x+','+C.y+'" fill="#eaf6ff" fill-opacity="0.4" stroke="#3d2f22" stroke-width="3"/>';
+  if(labels){
+    s+='<circle cx="'+A.x+'" cy="'+A.y+'" r="3.5" fill="#3d2f22"/><text x="'+A.x+'" y="'+(A.y+18)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">A</text>';
+    s+='<circle cx="'+B.x+'" cy="'+B.y+'" r="3.5" fill="#3d2f22"/><text x="'+B.x+'" y="'+(B.y+18)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">B</text>';
+    s+='<circle cx="'+C.x+'" cy="'+C.y+'" r="3.5" fill="#3d2f22"/><text x="'+C.x+'" y="'+(C.y-10)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">C</text>';
+  }
+  return s;
+}
+/* Construit un triangle à 3 côtés donnés (ou une figure ouverte si non constructible), pour illustration */
+function triangleFromLengths(a,b,c,scale){
+  scale = scale||14;
+  var Ax=40, Ay=170, Bx=Ax+c*scale, By=170;
+  var cosA = (b*b+c*c-a*a)/(2*b*c);
+  cosA = Math.max(-1,Math.min(1,cosA));
+  var angA = Math.acos(cosA);
+  var Cx = Ax + b*scale*Math.cos(angA);
+  var Cy = Ay - b*scale*Math.sin(angA);
+  return {A:{x:Ax,y:Ay}, B:{x:Bx,y:By}, C:{x:Cx,y:Cy}};
+}
+
+/* ===== Mission 1 : Le premier camp (5,7,9 -> constructible) ===== */
+function buildMission1(isSolved){
+  var L=M1_LEN;
+  var h='<div class="intro">Trois pistes relient les balises A, B et C.<span class="norm"><br>V&eacute;rifie si elles peuvent d&eacute;limiter un camp triangulaire.</span></div>';
+  h+='<div class="fiche-card"><div class="fiche-txt">AB = '+L.a+' km &#8226; AC = '+L.b+' km &#8226; BC = '+L.c+' km</div></div>';
+  if(isSolved){
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">Plus grande longueur&#8201;: '+L.c+' km.<br>'+L.a+' + '+L.b+' = '+(L.a+L.b)+'.<br>'+L.c+' &lt; '+(L.a+L.b)+'&#8201;: le triangle est constructible. Le premier emplacement peut former un camp triangulaire.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button type="button" class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+    return h;
+  }
+  if(m1Step===0){
+    h+='<div class="q-item"><div class="q-text">Quelle est la plus grande longueur&#8201;?</div><div class="opts">';
+    [L.a,L.b,L.c].forEach(function(v){ h+='<button type="button" class="opt" onclick="pickM1Step(\'max\','+v+')">'+v+' km</button>'; });
+    h+='</div></div>';
+  }else if(m1Step===1){
+    h+='<div class="q-item"><div class="q-text">Calcule la somme des deux autres longueurs.<br>'+L.a+' + '+L.b+' = <input type="text" id="m1-sum" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM1Sum();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM1Sum()">Valider</button></div></div>';
+  }else if(m1Step===2){
+    h+='<div class="q-item"><div class="q-text">'+L.c+' <span id="m1-comp-blank">?</span> '+(L.a+L.b)+'</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM1Step(\'comp\',\'<\')">&lt;</button>'
+      +'<button type="button" class="opt" onclick="pickM1Step(\'comp\',\'=\')">=</button>'
+      +'<button type="button" class="opt" onclick="pickM1Step(\'comp\',\'>\')">&gt;</button>'
+      +'</div></div>';
+  }
+  h+='<div class="tools"><button type="button" class="btn btn-hint" onclick="toggleHint(0)">? Indice</button></div>'
+    +'<div class="hint" id="hint-0">Pour v&eacute;rifier trois longueurs, je commence par rep&eacute;rer la plus grande. Je la compare &agrave; la somme des deux autres.</div>'
+    +'<div class="fb" id="fb-0"><span id="fbi-0"></span><div id="fbm-0"></div></div>';
+  return h;
+}
+function pickM1Step(kind,val){
+  if(solved[0])return;
+  soundPencilTap();
+  if(kind==="max"){
+    if(val===M1_LEN.c){ m1Step=1; renderReleveBody(0); }
+    else{ m1Err(0,"Cherche la plus grande des trois longueurs affich&eacute;es."); }
+  }else if(kind==="comp"){
+    if(val==="<"){ m1Step=3; missionSuccess(0); }
+    else{ m1Err(0,"Compare bien "+M1_LEN.c+" &agrave; "+(M1_LEN.a+M1_LEN.b)+"."); }
+  }
+}
+function checkM1Sum(){
+  if(solved[0])return;
+  soundPencilTap();
+  var v=parseInt($("m1-sum").value,10);
+  if(v===M1_LEN.a+M1_LEN.b){ m1Step=2; renderReleveBody(0); }
+  else{ m1Err(0,"Additionne les deux plus petites longueurs&#8201;: "+M1_LEN.a+" + "+M1_LEN.b+"."); }
+}
+function m1Err(mi,msg){
+  registerError();
+  soundErase();$("releve-panel").classList.add("shake");setTimeout(function(){$("releve-panel").classList.remove("shake");},400);
+  var fb=$("fb-"+mi);if(fb){fb.className="fb show ko";$("fbi-"+mi).textContent="\u274C";$("fbm-"+mi).innerHTML=msg;}
+}
+
+/* ===== Mission 2 : Le passage impossible (4,6,12 -> non constructible) ===== */
+function buildMission2(isSolved){
+  var L=M2_LEN;
+  var h='<div class="intro">Contr&ocirc;le les trois relev&eacute;s avant de valider la zone.</div>';
+  h+='<div class="fiche-card"><div class="fiche-txt">'+L.a+' km &#8226; '+L.b+' km &#8226; '+L.c+' km</div></div>';
+  if(isSolved){
+    h+='<svg class="segment-svg" viewBox="0 0 300 160" id="m2-anim"><g id="m2-anim-g"></g></svg>';
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">La plus grande longueur est sup&eacute;rieure &agrave; la somme des deux autres&#8201;: '+L.c+' &gt; '+L.a+' + '+L.b+'. Les segments ne peuvent pas se rejoindre.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button type="button" class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+    return h;
+  }
+  if(m2Step===0){
+    h+='<div class="q-item"><div class="q-text">Quelle est la plus grande longueur&#8201;?</div><div class="opts">';
+    [L.a,L.b,L.c].forEach(function(v){ h+='<button type="button" class="opt" onclick="pickM2Step(\'max\','+v+')">'+v+' km</button>'; });
+    h+='</div></div>';
+  }else if(m2Step===1){
+    h+='<div class="q-item"><div class="q-text">'+L.a+' + '+L.b+' = <input type="text" id="m2-sum" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM2Sum();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM2Sum()">Valider</button></div></div>';
+  }else if(m2Step===2){
+    h+='<div class="q-item"><div class="q-text">'+L.c+' <span>?</span> '+(L.a+L.b)+'</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM2Step(\'comp\',\'<\')">&lt;</button>'
+      +'<button type="button" class="opt" onclick="pickM2Step(\'comp\',\'=\')">=</button>'
+      +'<button type="button" class="opt" onclick="pickM2Step(\'comp\',\'>\')">&gt;</button>'
+      +'</div></div>';
+  }else if(m2Step===3){
+    h+='<div class="q-item"><div class="q-text">Peut-on construire le triangle&#8201;?</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM2Step(\'concl\',true)">OUI</button>'
+      +'<button type="button" class="opt" onclick="pickM2Step(\'concl\',false)">NON</button>'
+      +'</div></div>';
+  }
+  h+='<div class="tools"><button type="button" class="btn btn-hint" onclick="toggleHint(1)">? Indice</button></div>'
+    +'<div class="hint" id="hint-1">Additionne les deux plus petites longueurs, puis compare cette somme &agrave; la plus grande longueur.</div>'
+    +'<div class="fb" id="fb-1"><span id="fbi-1"></span><div id="fbm-1"></div></div>';
+  return h;
+}
+function pickM2Step(kind,val){
+  if(solved[1])return;
+  soundPencilTap();
+  if(kind==="max"){
+    if(val===M2_LEN.c){ m2Step=1; renderReleveBody(1); }
+    else{ m1Err(1,"Cherche la plus grande des trois longueurs affich&eacute;es."); }
+  }else if(kind==="comp"){
+    if(val===">"){ m2Step=3; renderReleveBody(1); }
+    else{ m1Err(1,"Compare bien "+M2_LEN.c+" &agrave; "+(M2_LEN.a+M2_LEN.b)+"."); }
+  }else if(kind==="concl"){
+    if(val===false){ animateM2Fail(); }
+    else{ m1Err(1,"La plus grande longueur d&eacute;passe la somme des deux autres&#8201;: le triangle n\'est pas constructible."); }
+  }
+}
+function checkM2Sum(){
+  if(solved[1])return;
+  soundPencilTap();
+  var v=parseInt($("m2-sum").value,10);
+  if(v===M2_LEN.a+M2_LEN.b){ m2Step=2; renderReleveBody(1); }
+  else{ m1Err(1,"Additionne les deux plus petites longueurs&#8201;: "+M2_LEN.a+" + "+M2_LEN.b+"."); }
+}
+function animateM2Fail(){
+  soundPencilLine(0.6);
+  missionSuccess(1);
+  setTimeout(function(){
+    var g=$("m2-anim-g");if(!g)return;
+    var Ax=40,Ay=130,Bx=260,By=130;
+    g.innerHTML='<circle cx="'+Ax+'" cy="'+Ay+'" r="4" fill="#b3402f"/><text x="'+Ax+'" y="115" text-anchor="middle" font-weight="800">A</text>'
+      +'<circle cx="'+Bx+'" cy="'+By+'" r="4" fill="#b3402f"/><text x="'+Bx+'" y="115" text-anchor="middle" font-weight="800">B</text>'
+      +'<line id="m2-seg1" x1="'+Ax+'" y1="'+Ay+'" x2="120" y2="130" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>'
+      +'<line id="m2-seg2" x1="'+Bx+'" y1="'+By+'" x2="180" y2="130" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>';
+    var s1=$("m2-seg1"), s2=$("m2-seg2");
+    s1.style.transformOrigin=Ax+"px "+Ay+"px"; s2.style.transformOrigin=Bx+"px "+By+"px";
+    s1.style.transition="transform 1s ease"; s2.style.transition="transform 1s ease";
+    requestAnimationFrame(function(){ s1.style.transform="rotate(-18deg)"; s2.style.transform="rotate(18deg)"; });
+  },150);
+}
+
+/* ===== Mission 3 : Le cas limite (4,6,10 -> égalité, alignés) ===== */
+function buildMission3(isSolved){
+  var L=M3_LEN;
+  var h='<div class="intro">Le responsable pense que le camp peut &ecirc;tre install&eacute;.<span class="norm"><br>V&eacute;rifie son relev&eacute;.</span></div>';
+  h+='<div class="fiche-card"><div class="fiche-txt">'+L.a+' km &#8226; '+L.b+' km &#8226; '+L.c+' km</div></div>';
+  if(isSolved){
+    h+='<svg class="segment-svg" viewBox="0 0 300 140" id="m3-anim"><g id="m3-anim-g"></g></svg>';
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">Lorsque la plus grande longueur est &eacute;gale &agrave; la somme des deux autres, les trois points sont align&eacute;s. On n\'obtient pas un triangle.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button type="button" class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+    return h;
+  }
+  if(m3Step===0){
+    h+='<div class="q-item"><div class="q-text">Quelle est la plus grande longueur&#8201;?</div><div class="opts">';
+    [L.a,L.b,L.c].forEach(function(v){ h+='<button type="button" class="opt" onclick="pickM3Step(\'max\','+v+')">'+v+' km</button>'; });
+    h+='</div></div>';
+  }else if(m3Step===1){
+    h+='<div class="q-item"><div class="q-text">'+L.a+' + '+L.b+' = <input type="text" id="m3-sum" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM3Sum();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM3Sum()">Valider</button></div></div>';
+  }else if(m3Step===2){
+    h+='<div class="q-item"><div class="q-text">'+L.c+' <span>?</span> '+(L.a+L.b)+'</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM3Step(\'comp\',\'<\')">&lt;</button>'
+      +'<button type="button" class="opt" onclick="pickM3Step(\'comp\',\'=\')">=</button>'
+      +'<button type="button" class="opt" onclick="pickM3Step(\'comp\',\'>\')">&gt;</button>'
+      +'</div></div>';
+  }else if(m3Step===3){
+    h+='<div class="q-item"><div class="q-text">Obtient-on un triangle&#8201;?</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM3Step(\'concl\',true)">OUI</button>'
+      +'<button type="button" class="opt" onclick="pickM3Step(\'concl\',false)">NON</button>'
+      +'</div></div>';
+  }
+  h+='<div class="tools"><button type="button" class="btn btn-hint" onclick="toggleHint(2)">? Indice</button></div>'
+    +'<div class="hint" id="hint-2">Attention&#8201;: en cas d\'&eacute;galit&eacute;, les trois points sont align&eacute;s. On n\'obtient pas un triangle.</div>'
+    +'<div class="fb" id="fb-2"><span id="fbi-2"></span><div id="fbm-2"></div></div>';
+  return h;
+}
+function pickM3Step(kind,val){
+  if(solved[2])return;
+  soundPencilTap();
+  if(kind==="max"){
+    if(val===M3_LEN.c){ m3Step=1; renderReleveBody(2); }
+    else{ m1Err(2,"Cherche la plus grande des trois longueurs affich&eacute;es."); }
+  }else if(kind==="comp"){
+    if(val==="="){ m3Step=3; renderReleveBody(2); }
+    else{ m1Err(2,"Recalcule et compare bien "+M3_LEN.c+" &agrave; "+(M3_LEN.a+M3_LEN.b)+"."); }
+  }else if(kind==="concl"){
+    if(val===false){ animateM3Align(); }
+    else{ m1Err(2,"Attention&#8201;: en cas d\'&eacute;galit&eacute;, les trois points sont align&eacute;s. On n\'obtient pas un triangle."); }
+  }
+}
+function checkM3Sum(){
+  if(solved[2])return;
+  soundPencilTap();
+  var v=parseInt($("m3-sum").value,10);
+  if(v===M3_LEN.a+M3_LEN.b){ m3Step=2; renderReleveBody(2); }
+  else{ m1Err(2,"Additionne les deux plus petites longueurs&#8201;: "+M3_LEN.a+" + "+M3_LEN.b+"."); }
+}
+function animateM3Align(){
+  soundPencilLine(0.6);
+  missionSuccess(2);
+  setTimeout(function(){
+    var g=$("m3-anim-g");if(!g)return;
+    g.innerHTML='<circle id="m3-ptA" cx="40" cy="50" r="4" fill="#b3402f"/><text x="40" y="35" text-anchor="middle" font-weight="800">A</text>'
+      +'<circle id="m3-ptC" cx="150" cy="90" r="4" fill="#b3402f"/><text x="150" y="105" text-anchor="middle" font-weight="800">C</text>'
+      +'<circle id="m3-ptB" cx="260" cy="50" r="4" fill="#b3402f"/><text x="260" y="35" text-anchor="middle" font-weight="800">B</text>'
+      +'<line id="m3-line" x1="40" y1="50" x2="260" y2="50" stroke="#78be43" stroke-width="0" opacity="0"/>';
+    var ptC=$("m3-ptC");
+    ptC.style.transition="cy 1s ease";
+    requestAnimationFrame(function(){ ptC.setAttribute("cy","50"); });
+    setTimeout(function(){
+      var ln=$("m3-line"); ln.style.transition="all .4s ease"; ln.setAttribute("stroke-width","2"); ln.setAttribute("opacity","1");
+    },1050);
+  },150);
+}
+
+/* ===== Mission 4 : Contrôle des cartes (4 cartes) ===== */
+function buildMission4(isSolved){
+  var h='<div class="intro">Pour chaque carte, applique la m&ecirc;me d&eacute;marche&#8201;: rep&egrave;re la plus grande longueur, calcule la somme des deux autres, puis conclus.</div>';
+  if(isSolved){
+    M4_CARDS.forEach(function(c,i){
+      var lens=c.lens, mx=Math.max.apply(null,lens), others=lens.slice().sort(function(a,b){return a-b;}).slice(0,2);
+      var sum=others[0]+others[1];
+      var sign = mx<sum?"&lt;":(mx===sum?"=":"&gt;");
+      h+='<div class="fiche-card"><div class="fiche-txt"><b>Carte '+c.id+'</b>&#8201;: '+lens.join(" km &#8226; ")+' km<br>'+mx+' '+sign+' '+others[0]+' + '+others[1]+' ('+sum+')&#8201;: '+(c.correct?"constructible.":"non constructible.")+'</div></div>';
+    });
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">Deux cartes permettent de former un triangle&#8201;: A et C.<br>A&#8201;: 11 &lt; 6 + 8<br>C&#8201;: 12 &lt; 7 + 7</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button type="button" class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+    return h;
+  }
+  var c=M4_CARDS[m4CardIdx];
+  var lens=c.lens, mx=Math.max.apply(null,lens), others=lens.slice().sort(function(a,b){return a-b;}).slice(0,2);
+  var sum=others[0]+others[1];
+  h+='<div class="fiche-card"><div class="fiche-txt"><b>Carte '+c.id+'</b> <span class="norm">('+(m4CardIdx+1)+'/4)</span>&#8201;: '+lens.join(" km &#8226; ")+' km</div></div>';
+  if(m4CardStep===0){
+    h+='<div class="q-item"><div class="q-text">Quelle est la plus grande longueur&#8201;?</div><div class="opts">';
+    lens.forEach(function(v){ h+='<button type="button" class="opt" onclick="pickM4Step(\'max\','+v+')">'+v+' km</button>'; });
+    h+='</div></div>';
+  }else if(m4CardStep===1){
+    h+='<div class="q-item"><div class="q-text">'+others[0]+' + '+others[1]+' = <input type="text" id="m4-sum" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM4Sum();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM4Sum()">Valider</button></div></div>';
+  }else if(m4CardStep===2){
+    h+='<div class="q-item"><div class="q-text">Conclusion&#8201;: le camp est-il possible&#8201;?</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM4Step(\'concl\',true)">CAMP POSSIBLE</button>'
+      +'<button type="button" class="opt" onclick="pickM4Step(\'concl\',false)">CAMP IMPOSSIBLE</button>'
+      +'</div></div>';
+  }
+  h+='<div class="tools"><button type="button" class="btn btn-hint" onclick="toggleHint(3)">? Indice</button></div>'
+    +'<div class="hint" id="hint-3">Rep&egrave;re la plus grande longueur, additionne les deux autres, puis compare.</div>'
+    +'<div class="fb" id="fb-3"><span id="fbi-3"></span><div id="fbm-3"></div></div>';
+  return h;
+}
+function pickM4Step(kind,val){
+  if(solved[3])return;
+  soundPencilTap();
+  var c=M4_CARDS[m4CardIdx];
+  var mx=Math.max.apply(null,c.lens);
+  if(kind==="max"){
+    if(val===mx){ m4CardStep=1; renderReleveBody(3); }
+    else{ m1Err(3,"Cherche la plus grande des trois longueurs de cette carte."); }
+  }else if(kind==="concl"){
+    var others=c.lens.slice().sort(function(a,b){return a-b;}).slice(0,2);
+    var actualConstructible = mx<others[0]+others[1];
+    if(val===actualConstructible){
+      m4Picks[m4CardIdx]=true;
+      if(m4CardIdx<3){
+        soundHintPencil();
+        setTimeout(function(){ m4CardIdx++; m4CardStep=0; renderReleveBody(3); },600);
+        showAgent("&#9989; Carte "+c.id+" valid&eacute;e.<br>Carte suivante.");
+      }else{
+        missionSuccess(3);
+      }
+    }else{ m1Err(3,"Recompare bien "+mx+" &agrave; "+(others[0]+others[1])+" avant de conclure."); }
+  }
+}
+function checkM4Sum(){
+  if(solved[3])return;
+  soundPencilTap();
+  var c=M4_CARDS[m4CardIdx];
+  var others=c.lens.slice().sort(function(a,b){return a-b;}).slice(0,2);
+  var v=parseInt($("m4-sum").value,10);
+  if(v===others[0]+others[1]){ m4CardStep=2; renderReleveBody(3); }
+  else{ m1Err(3,"Additionne les deux plus petites longueurs de cette carte."); }
+}
+
+/* ===== Mission 5 : Installation finale (3 zones) ===== */
+function enterMission5(){
+  soundPaperClose();
+  var ov=$("releve-overlay");ov.classList.remove("show");
+  $("releve-panel").classList.remove("show");
+  buildMission5Overlay();
+  showAgent("&#9968;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Choisis une zone, puis v&eacute;rifie si elle permet de construire un camp triangulaire.");
+}
+function buildMission5Overlay(){
+  var svg=$("main-map");
+  var old=$("m5-layer");if(old)old.remove();
+  var g=document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.setAttribute("id","m5-layer");
+  g.innerHTML = '<g id="m5-zones"></g><g id="m5-triangle-final" style="opacity:0;"></g><g id="m5-stamp-grp" class="m5-stamp" transform="translate(300,190)"><rect x="-80" y="-24" width="160" height="48" rx="6" fill="none" stroke="#2f6b3f" stroke-width="3"/><text y="-2" text-anchor="middle" font-family="Trebuchet MS" font-weight="900" font-size="13" fill="#2f6b3f">TRIANGLE</text><text y="15" text-anchor="middle" font-family="Trebuchet MS" font-weight="900" font-size="13" fill="#2f6b3f">CONSTRUCTIBLE</text></g>';
+  svg.appendChild(g);
+  renderM5Zones();
+  var wrap=$("map-svg-wrap");
+  var old2=$("m5-ui");if(old2)old2.remove();
+  var ui=document.createElement("div");
+  ui.id="m5-ui";
+  ui.innerHTML='<div class="m5-status" id="m5-status">Choisis une zone &agrave; contr&ocirc;ler.</div>';
+  wrap.appendChild(ui);
+}
+function renderM5Zones(){
+  var g=$("m5-zones");
+  var positions=[[220,150],[350,150],[480,150]];
+  var html="";
+  M5_ZONES.forEach(function(z,i){
+    var pos=positions[i];
+    html+='<g class="seg-pt" id="m5-zone-'+i+'" transform="translate('+pos[0]+','+pos[1]+')" role="button" tabindex="0" aria-label="Choisir '+z.name+'" onclick="pickM5Zone('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();pickM5Zone('+i+');}">'
+      +'<circle r="10" fill="#fffdf6" stroke="#4a5560" stroke-width="1.8"/>'
+      +'<text y="4" text-anchor="middle" font-size="9" font-weight="700" fill="#3d2f22">'+(i+1)+'</text>'
+      +'<text y="24" text-anchor="middle" font-size="9" fill="#4a5560">'+z.name+'</text>'
+      +'</g>';
+  });
+  g.innerHTML=html;
+}
+function pickM5Zone(i){
+  if(solved[4])return;
+  soundPencilTap();
+  m5ZonePick=i; m5Step=1; m5MaxPick=null; m5SumInput=null; m5CompPick=null;
+  showM5Panel();
+}
+function showM5Panel(){
+  var z=M5_ZONES[m5ZonePick];
+  var old=$("m5-verif-panel");if(old)old.remove();
+  var wrap=$("map-svg-wrap");
+  var panel=document.createElement("div");
+  panel.id="m5-verif-panel";
+  panel.style.cssText="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:9;background:#fffdf6;border:1.5px solid #d8c9a0;border-radius:10px;padding:.7rem 1rem;max-width:min(92%,360px);box-shadow:var(--shadow-md);text-align:center;";
+  var h='<div style="font-weight:700;font-size:.8rem;margin-bottom:.4rem;">'+z.name+'&#8201;: '+z.lens.join(" km &#8226; ")+' km</div>';
+  if(m5Step===1){
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">Quelle est la plus grande longueur&#8201;?</div><div class="opts">';
+    z.lens.forEach(function(v){ h+='<button type="button" class="opt" onclick="pickM5Step(\'max\','+v+')">'+v+' km</button>'; });
+    h+='</div>';
+  }else if(m5Step===2){
+    var others=z.lens.slice().sort(function(a,b){return a-b;}).slice(0,2);
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">'+others[0]+' + '+others[1]+' = <input type="text" id="m5-sum" inputmode="numeric" class="cell-in" style="width:60px;" onkeydown="if(event.key===\'Enter\')checkM5Sum();"/></div>'
+      +'<button type="button" class="btn btn-try" onclick="checkM5Sum()">Valider</button>';
+  }else if(m5Step===3){
+    var others=z.lens.slice().sort(function(a,b){return a-b;}).slice(0,2);
+    var sum=others[0]+others[1];
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">'+m5MaxPick+' <span>?</span> '+sum+'</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM5Step(\'comp\',\'<\')">&lt;</button>'
+      +'<button type="button" class="opt" onclick="pickM5Step(\'comp\',\'=\')">=</button>'
+      +'<button type="button" class="opt" onclick="pickM5Step(\'comp\',\'>\')">&gt;</button>'
+      +'</div>';
+  }
+  h+='<div class="fb" id="fb-m5v" style="margin-top:.4rem;"></div>';
+  panel.innerHTML=h;
+  wrap.appendChild(panel);
+}
+function pickM5Step(kind,val){
+  if(solved[4])return;
+  soundPencilTap();
+  var z=M5_ZONES[m5ZonePick];
+  if(kind==="max"){
+    var mx=Math.max.apply(null,z.lens);
+    if(val===mx){ m5MaxPick=val; m5Step=2; showM5Panel(); }
+    else{ m5vErr("Cherche la plus grande des trois longueurs de cette zone."); }
+  }else if(kind==="comp"){
+    var others=z.lens.slice().sort(function(a,b){return a-b;}).slice(0,2);
+    var sum=others[0]+others[1];
+    var actualSign = m5MaxPick<sum?"<":(m5MaxPick===sum?"=":">");
+    if(val!==actualSign){ m5vErr("Recalcule et compare bien "+m5MaxPick+" &agrave; "+sum+"."); return; }
+    if(actualSign==="<" && z.correct){
+      $("m5-verif-panel").remove();
+      soundPencilLine(0.8);
+      $("m5-status").innerHTML="Zone valid&eacute;e. Le camp peut &ecirc;tre install&eacute;.";
+      animateM5FinalTriangle();
+    }else{
+      soundErase();
+      $("m5-status").innerHTML="Cette zone ne permet pas de construire un camp triangulaire. Choisis-en une autre.";
+      $("m5-verif-panel").remove();
+      m5Step=0;
+    }
+  }
+}
+function checkM5Sum(){
+  if(solved[4])return;
+  soundPencilTap();
+  var z=M5_ZONES[m5ZonePick];
+  var others=z.lens.slice().sort(function(a,b){return a-b;}).slice(0,2);
+  var v=parseInt($("m5-sum").value,10);
+  if(v===others[0]+others[1]){ m5Step=3; showM5Panel(); }
+  else{ m5vErr("Additionne les deux plus petites longueurs de cette zone."); }
+}
+function m5vErr(msg){
+  registerError();
+  soundErase();
+  var wrap=$("map-svg-wrap");wrap.classList.add("shake");setTimeout(function(){wrap.classList.remove("shake");},400);
+  var fb=$("fb-m5v");if(fb){fb.innerHTML='<span style="color:#c0392b;font-size:.72rem;">&#10060; '+msg+'</span>';}
+}
+function animateM5FinalTriangle(){
+  var zones=$("m5-zones");
+  if(zones){
+    zones.style.transition="opacity .6s ease";
+    zones.style.opacity="0";
+    zones.style.pointerEvents="none";
+  }
+  var g=$("m5-triangle-final");
+  var Ax=220,Ay=250,Bx=420,By=250,Cx=320,Cy=110;
+  g.innerHTML='<circle cx="'+Ax+'" cy="'+Ay+'" r="4" fill="#78be43"/>'
+    +'<circle cx="'+Bx+'" cy="'+By+'" r="4" fill="#78be43"/>'
+    +'<circle cx="'+Cx+'" cy="'+Cy+'" r="4" fill="#78be43"/>'
+    +'<polygon points="'+Ax+','+Ay+' '+Bx+','+By+' '+Cx+','+Cy+'" fill="#dcebe0" fill-opacity="0.5" stroke="#78be43" stroke-width="3"/>';
+  g.style.opacity="1";
+  var poly=g.querySelector("polygon");
+  var AB=Math.hypot(Bx-Ax,By-Ay), BC=Math.hypot(Cx-Bx,Cy-By), CA=Math.hypot(Ax-Cx,Ay-Cy);
+  var perim=AB+BC+CA;
+  poly.style.strokeDasharray=perim;
+  poly.style.strokeDashoffset=perim;
+  poly.getBoundingClientRect();
+  poly.style.transition="stroke-dashoffset 1.2s ease";
+  requestAnimationFrame(function(){ poly.style.strokeDashoffset="0"; });
+  setTimeout(function(){
+    $("m5-stamp-grp").classList.add("show");
+    soundStamp();
+  },1400);
+  setTimeout(function(){ missionSuccess(4); },2200);
+}
+
+
+function toggleHint(mi){
+  soundHintPencil();
+  var el=$("hint-"+mi);
+  if(el)el.classList.toggle("show");
+  if(!hintsOpened[mi]){ hintsOpened[mi]=true; hintsCount++; }
+  updateStars();
+}
+function registerError(){ errorsCount++; updateStars(); }
+function computeStars(){
+  var total=errorsCount+hintsCount;
+  if(total===0) return 3;
+  if(total<=3) return 2;
+  return 1;
+}
+function starsHTML(n){
+  var s="";
+  for(var i=0;i<3;i++){ s += (i<n ? "\u2605" : "\u2606"); }
+  return s;
+}
+function updateStars(){
+  var glyphs=$("hud-stars-glyphs");
+  var det=$("hud-stars-detail");
+  if(glyphs){ glyphs.textContent=starsHTML(computeStars()); }
+  if(det){ det.textContent="err\u00a0"+errorsCount+" \u00b7 ind\u00a0"+hintsCount; }
+}
+
+/* ===== Réussite d'une mission ===== */
+function missionSuccess(mi){
+  solved[mi]=true;
+  if(mi<4){
+    soundHintPencil();
+    setTimeout(function(){soundStamp();},180);
+  }
+  if(mi<4){
+    showAgent("&#9989; Relev&eacute; valid&eacute;.<br>Clique sur le rep&egrave;re suivant.");
+  }else{
+    showAgent("&#128506;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Relev&eacute; "+(mi+1)+" valid&eacute;. Bien jou&eacute;.");
+  }
+  buildMarkers();
+  animateItinReveal(mi);
+  updateTopbar();
+  if(mi<4){
+    renderReleveBody(mi);
+  }else{
+    var m5ui=$("m5-ui");if(m5ui)m5ui.remove();
+    document.querySelectorAll("#m5-layer .seg-pt").forEach(function(el){ el.style.pointerEvents="none"; });
+    setTimeout(openFinale,300);
+  }
+}
+function animateItinReveal(mi){
+  if(mi>3)return;
+  var lines=document.querySelectorAll("#itin-lines path");
+  var path=lines[mi];if(!path)return;
+  var len=path.getTotalLength();
+  path.style.strokeDasharray=len;
+  path.style.strokeDashoffset=len;
+  path.getBoundingClientRect();
+  path.style.transition="stroke-dashoffset .9s ease";
+  soundPencilLine(0.9);
+  requestAnimationFrame(function(){ path.style.strokeDashoffset=0; });
+}
+
+/* ===== Écran final ===== */
+function openFinale(){
+  var s=$("finale-stars");if(s)s.textContent=starsHTML(computeStars());
+  $("finale-overlay").classList.add("show");
+}
+function closeFinale(){
+  $("finale-overlay").classList.remove("show");
+}
+
+/* ===== Carnet ===== */
+function toggleCarnet(){
+  var p=$("carnet-panel");
+  if(p.classList.contains("show")) closeCarnet(); else openCarnet();
+}
+function openCarnet(){ soundPaperSlide(); $("carnet-panel").classList.add("show"); $("carnet-overlay").classList.add("show"); }
+function closeCarnet(){ soundPaperClose(); $("carnet-panel").classList.remove("show"); $("carnet-overlay").classList.remove("show"); }
+function clearCarnet(){ soundPencilTap(); var t=$("carnet-text");if(t)t.value=""; }
+function insertCarnetSym(sym){
+  soundPencilTap();
+  var t=$("carnet-text");if(!t)return;
+  var start=t.selectionStart, end=t.selectionEnd;
+  var val=t.value;
+  t.value=val.slice(0,start)+sym+val.slice(end);
+  var pos=start+sym.length;
+  t.focus();t.setSelectionRange(pos,pos);
+}
+
+/* ===== Démarrage / redémarrage ===== */
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  soundMapOpen();
+  $("brief-overlay").classList.add("hidden");
+  $("map-dim").classList.add("hidden");
+  buildMarkers();
+  updateTopbar();
+  updateStars();
+  showAgent("&#128506;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Bienvenue&#8201;! Clique sur le premier rep&egrave;re pour commencer.");
+}
+function restartAll(){
+  solved=[false,false,false,false,false];
+  errorsCount=0;hintsCount=0;hintsOpened=[false,false,false,false,false];
+  updateStars();
+  openMi=null;
+  m1Step=0;m1MaxPick=null;m1SumInput=null;m1CompPick=null;
+  m2Step=0;m2MaxPick=null;m2SumInput=null;m2CompPick=null;m2ConclusionPick=null;
+  m3Step=0;m3MaxPick=null;m3SumInput=null;m3CompPick=null;m3ConclusionPick=null;
+  m4CardIdx=0;m4CardStep=0;m4Picks=[null,null,null,null];
+  m5ZonePick=null;m5Step=0;m5MaxPick=null;m5SumInput=null;m5CompPick=null;m5ConclusionPick=null;
+  var m5vp=$("m5-verif-panel");if(m5vp)m5vp.remove();
+  $("finale-overlay").classList.remove("show");
+  $("releve-overlay").classList.remove("show");
+  $("releve-panel").classList.remove("show");
+  var m5layer=$("m5-layer");if(m5layer)m5layer.remove();
+  var m5ui=$("m5-ui");if(m5ui)m5ui.remove();
+  closeCarnet();
+  var ct=$("carnet-text");if(ct)ct.value="";
+  $("brief-overlay").classList.remove("hidden");
+  $("map-dim").classList.remove("hidden");
+  buildMarkers();
+  updateTopbar();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ===== Interception spéciale : mission 5 s'ouvre directement sur la carte ===== */
+var _origOpenReleve=openReleve;
+openReleve=function(mi){
+  if(mi===4){
+    if(solved[4]){
+      openFinale();
+      return;
+    }
+    if(!solved[3]){
+      return;
+    }
+    enterMission5();
+    return;
+  }
+  _origOpenReleve(mi);
+};
+
+buildMarkers();
+</script>
+</body>
+</html>
