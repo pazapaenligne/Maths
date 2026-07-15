@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Valider la carte topographique – S6 J5 – 5e</title>
+<style>
+:root{
+  --sky:#dff5ff; --sky2:#bfe8ff; --snow:#ffffff; --snow2:#f8fcff;
+  --ivoire:#fff9ef; --carte:#f8f3e6; --carte-line:#b7caa0;
+  --brun:#746d63; --brun-dark:#8a8074;
+  --ardoise:#5bb7ff; --ardoise-dark:#3d95dc;
+  --wood:#c68d55; --wood-dark:#a8713e;
+  --vert:#78be43; --vert-dark:#5d9d32; --vert-light:#eefbe8;
+  --prairie:#88c96b; --prairie-dark:#5c9b45; --prairie-light:#dff3d4;
+  --orange:#f39c34; --orange-dark:#c97820;
+  --blue:#5bb7ff; --blue-dark:#3d95dc;
+  --rouge:#e0824a;
+  --text-dark:#463c30; --muted:#7a7266;
+  --radius:12px; --radius-sm:8px;
+  --title-font:"Trebuchet MS",Arial,sans-serif;
+  --sans:"Segoe UI",Verdana,Arial,sans-serif;
+  --mono:"Courier New",Courier,monospace;
+  --shadow-sm:0 2px 8px rgba(70,90,110,.16);
+  --shadow-md:0 10px 26px rgba(70,90,110,.24);
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:linear-gradient(180deg,#d9f4ff,#c2ebff,#f2fbff);color:var(--text-dark);font-family:var(--sans);min-height:100vh;overflow-x:hidden;line-height:1.55;display:flex;flex-direction:column;align-items:center;}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+
+/* ===== Barre supérieure ===== */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:.8rem;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:3px solid #8bc34a;padding:.55rem 1rem;box-shadow:var(--shadow-sm);}
+.topbar-left{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.04em;color:var(--orange-dark);text-transform:uppercase;white-space:nowrap;}
+.topbar-center{font-family:var(--title-font);font-weight:800;font-size:clamp(.9rem,3vw,1.25rem);letter-spacing:.01em;text-align:center;flex:1;color:#305b2b;text-shadow:none;}
+.topbar-sub{font-size:.66rem;font-weight:600;color:#5c9b45;letter-spacing:.02em;margin-top:.1rem;opacity:.9;}
+.topbar-right{display:flex;align-items:center;gap:.5rem;}
+.hud-btn{background:#fff;border:1.5px solid #cfe0d4;border-radius:8px;cursor:pointer;font-size:1rem;padding:.35rem .55rem;min-height:38px;min-width:38px;color:#305b2b;}
+.hud-btn.off{opacity:.4;}
+.hud-stars{font-size:1rem;letter-spacing:.1em;color:#e0a92e;background:#fffaf0;border:1.5px solid #f0dca8;border-radius:8px;padding:.3rem .5rem;white-space:nowrap;display:flex;flex-direction:column;align-items:center;line-height:1.1;}
+.hud-stars-detail{font-size:.55rem;letter-spacing:0;font-weight:700;color:#a98a4a;margin-top:.1rem;}
+@media(max-width:640px){.topbar-left{display:none;}.topbar{padding:.45rem .6rem;gap:.4rem;}}
+.topspacer{height:76px;}
+
+/* ===== Zone carte ===== */
+.map-wrap{width:100%;max-width:1000px;padding:.8rem .8rem 2rem;position:relative;}
+.map-frame{position:relative;background:var(--wood);border:3px solid var(--wood-dark);border-radius:16px;box-shadow:var(--shadow-md);padding:14px;}
+.map-frame::before{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:inset 0 0 30px rgba(120,90,50,.18);}
+.table-edge{position:absolute;left:-3px;right:-3px;bottom:-22px;height:26px;background:linear-gradient(180deg,#a8713e,#8a5a2e);border-radius:0 0 16px 16px;z-index:-1;}
+
+.map-svg-wrap{position:relative;border-radius:10px;overflow:hidden;background:var(--carte);}
+.map-svg-wrap svg{display:block;width:100%;height:auto;}
+.map-dim{position:absolute;inset:0;background:rgba(60,90,110,.32);transition:opacity .5s ease;z-index:5;pointer-events:none;}
+.map-dim.hidden{opacity:0;pointer-events:none;}
+
+/* décor topographique */
+.contour{fill:none;stroke:var(--carte-line);stroke-width:1.4;opacity:.55;}
+.relief{fill:#c8dbc0;opacity:.55;}
+.tool-deco{opacity:.65;}
+
+/* repères de mission */
+.map-marker{cursor:pointer;}
+.map-marker circle.ring{fill:#8a7a58;stroke:var(--brun);stroke-width:2;transition:all .3s;}
+.map-marker.locked circle.ring{fill:#cbd5d9;opacity:.75;}
+.map-marker.active circle.ring{fill:#49a8ff;stroke:#3d95dc;animation:markerpulse 1.7s ease-in-out infinite;}
+.map-marker.done circle.ring{fill:#67bf4d;stroke:#4f9c3a;}
+@keyframes markerpulse{0%,100%{filter:drop-shadow(0 0 0px rgba(73,168,255,.7));}50%{filter:drop-shadow(0 0 8px rgba(73,168,255,.9));}}
+.map-marker text.num{font-family:var(--mono);font-weight:700;fill:#fff;font-size:11px;text-anchor:middle;pointer-events:none;}
+.map-marker text.lbl{font-family:var(--title-font);font-weight:700;fill:#463c30;font-size:9.5px;text-anchor:middle;pointer-events:none;}
+.map-marker .check{opacity:0;transform-origin:center;}
+.map-marker.done .check{opacity:1;animation:checkpop .35s ease both;}
+@keyframes checkpop{0%{opacity:0;transform:scale(2);}100%{opacity:1;transform:scale(1);}}
+.itin-path{fill:none;stroke:#b3a582;stroke-width:2;stroke-dasharray:5 5;}
+.itin-path.revealed{stroke:var(--vert);stroke-dasharray:none;}
+
+/* ===== Fiche d'ouverture (mission brief) ===== */
+.brief-overlay{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;transition:opacity .5s ease;}
+.brief-overlay.hidden{opacity:0;pointer-events:none;}
+.brief-card{max-width:540px;width:100%;max-height:90vh;overflow-y:auto;background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius);box-shadow:var(--shadow-md);padding:2.1rem 2rem;text-align:center;color:var(--text-dark);animation:pop .5s cubic-bezier(.18,.89,.32,1.3);position:relative;}
+.brief-card::before{content:"";position:absolute;top:0;right:24px;width:26px;height:40px;background:rgba(217,119,46,.35);border:1px solid rgba(168,90,31,.4);transform:rotate(4deg);}
+@keyframes pop{0%{transform:scale(.9);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.brief-ico{font-size:2.9rem;margin-bottom:.6rem;}
+.brief-title{font-family:var(--title-font);font-weight:800;font-size:clamp(1.3rem,4.4vw,1.65rem);color:var(--vert-dark);margin-bottom:.9rem;letter-spacing:.02em;}
+.brief-txt{font-size:1rem;line-height:1.75;margin-bottom:1.5rem;color:var(--text-dark);}
+.btn-brief{display:inline-flex;align-items:center;gap:.55rem;background:var(--orange);color:#2a1704;font-weight:800;font-size:1.08rem;letter-spacing:.02em;padding:1.05rem 1.9rem;border:none;border-radius:var(--radius-sm);cursor:pointer;box-shadow:0 6px 18px rgba(217,119,46,.4);width:100%;justify-content:center;min-height:58px;}
+.btn-brief:active{transform:scale(.97);}
+
+/* ===== Fiche de relevé (mission) ===== */
+.releve-overlay{position:fixed;inset:0;z-index:35;display:none;pointer-events:none;}
+.releve-overlay.show{display:block;}
+.releve-panel{position:absolute;top:80px;bottom:14px;right:14px;width:min(420px,92vw);background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius) 0 0 var(--radius);box-shadow:-8px 0 26px rgba(70,90,110,.28);color:var(--text-dark);overflow-y:auto;transform:translateX(105%);transition:transform .4s cubic-bezier(.2,.85,.25,1.05);pointer-events:auto;}
+.releve-panel.show{transform:translateX(0);}
+.releve-head{position:sticky;top:0;z-index:2;background:var(--ardoise-dark);color:#fff;padding:.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;border-bottom:3px solid var(--orange);}
+.releve-head-txt .rn{font-family:var(--mono);font-size:.65rem;letter-spacing:.06em;color:var(--orange);text-transform:uppercase;}
+.releve-head-txt .rt{font-family:var(--title-font);font-weight:800;font-size:1rem;}
+.releve-close{background:transparent;border:1.5px solid #6b7680;color:#fff;border-radius:8px;font-size:.85rem;padding:.35rem .6rem;cursor:pointer;white-space:nowrap;}
+.releve-close:hover{border-color:var(--orange);color:var(--orange);}
+.releve-body{padding:1.1rem;}
+
+.intro{font-weight:700;font-size:.86rem;color:var(--vert-dark);background:var(--vert-light);border:1px solid #b7d6bf;border-radius:var(--radius-sm);padding:.75rem .9rem;margin-bottom:1rem;line-height:1.6;}
+.intro .norm{font-weight:400;color:var(--text-dark);}
+.fiche-card{background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);padding:.75rem .9rem;margin-bottom:.85rem;position:relative;}
+.fiche-card::before{content:"";position:absolute;left:0;top:.6rem;bottom:.6rem;width:4px;background:var(--orange);border-radius:2px;}
+.fiche-txt{font-size:.84rem;color:var(--text-dark);line-height:1.6;padding-left:.5rem;}
+
+.opts{display:flex;flex-wrap:wrap;gap:.5rem;}
+.opt{cursor:pointer;text-align:center;background:#fff;border:2px solid #d8cca8;border-radius:var(--radius-sm);padding:.6rem .9rem;font-family:var(--mono);font-weight:700;font-size:.84rem;color:var(--text-dark);transition:all .15s;min-height:44px;display:flex;align-items:center;justify-content:center;gap:.4rem;flex:1;min-width:100px;}
+.opt:hover{border-color:var(--vert);transform:translateY(-1px);}
+.opt.sel{background:var(--vert-light);border-color:var(--vert);color:var(--vert-dark);}
+.opt.ok{border-color:var(--vert);background:var(--vert-light);color:var(--vert-dark);}
+.opt.ok::before{content:"\2713 ";}
+.opt.ko{border-color:var(--rouge);background:#fff5ea;color:#a8551f;}
+.opt.ko::before{content:"\2715 ";}
+
+.tools{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.1rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:var(--radius-sm);font-weight:700;font-size:.76rem;letter-spacing:.02em;cursor:pointer;border:none;min-height:44px;}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-try{background:var(--vert);color:#fff;}
+.btn-try:hover:not(:disabled){background:var(--vert-dark);}
+.btn-hint{background:#fff;color:var(--muted);border:1.5px solid #d8cca8;}
+.hint{margin-top:.7rem;background:#fff6e6;border:1.5px dashed var(--orange);border-radius:var(--radius-sm);padding:.65rem .9rem;font-size:.76rem;color:#6b4c05;display:none;line-height:1.65;}
+.hint.show{display:block;}
+.fb{margin-top:1rem;padding:.65rem .9rem;border-radius:var(--radius-sm);font-size:.8rem;display:none;align-items:flex-start;gap:.5rem;line-height:1.5;position:relative;}
+.fb.show{display:flex;}
+.fb.ok{background:var(--vert-light);border:2px solid var(--vert);color:var(--vert-dark);}
+.fb.ko{background:#fff5ea;border:2px solid var(--rouge);color:#a8551f;}
+.correction{margin-top:.75rem;background:var(--vert-light);border:1.5px solid #b7d6bf;border-radius:var(--radius-sm);padding:.7rem .9rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-weight:700;font-size:.68rem;letter-spacing:.03em;text-transform:uppercase;color:var(--vert-dark);margin-bottom:.35rem;}
+.correction-x{font-size:.78rem;color:var(--text-dark);line-height:1.75;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-4px);}40%,80%{transform:translateX(4px);}}
+.shake{animation:shake .3s;}
+
+/* Mission 1/5 : mini-carte segment */
+.segment-svg{width:100%;height:auto;background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);margin-bottom:.9rem;}
+.seg-pt{cursor:pointer;}
+.seg-pt circle{fill:#fff;stroke:var(--ardoise);stroke-width:2;transition:all .15s;}
+.seg-pt:hover circle{stroke:var(--orange);}
+.seg-pt.sel circle{fill:var(--orange);stroke:var(--orange-dark);}
+.seg-pt.ok circle{fill:var(--vert);stroke:var(--vert-dark);}
+.seg-pt.ko circle{fill:var(--rouge);stroke:#a8551f;}
+.seg-pt text{font-family:var(--mono);font-size:10px;font-weight:700;fill:var(--text-dark);text-anchor:middle;pointer-events:none;}
+
+/* Mission 2 : mini-cartes cliquables */
+.map-choice{cursor:pointer;border:2px solid #d8cca8;border-radius:var(--radius-sm);background:#fffdf6;padding:.5rem;transition:all .15s;text-align:center;}
+.map-choice:hover{border-color:var(--vert);transform:translateY(-2px);}
+.map-choice.sel{border-color:var(--orange);box-shadow:0 0 0 3px rgba(217,119,46,.2);}
+.map-choice.ok{border-color:var(--vert);box-shadow:0 0 0 3px rgba(47,107,63,.2);}
+.map-choice.ko{border-color:var(--rouge);box-shadow:0 0 0 3px rgba(224,130,74,.25);}
+.map-choice svg{width:100%;height:auto;display:block;}
+.map-choice .mc-label{font-family:var(--mono);font-weight:700;font-size:.7rem;margin-top:.3rem;color:var(--text-dark);}
+.map-choices-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;}
+@media(max-width:420px){.map-choices-row{grid-template-columns:1fr;}}
+
+/* Mission 3 : instruments sur la table */
+.instr-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;}
+.instr{cursor:pointer;background:#fffdf6;border:1.5px solid #e3d7b8;border-radius:var(--radius-sm);padding:.7rem .5rem;text-align:center;min-width:82px;transition:all .2s;box-shadow:0 2px 4px rgba(70,90,110,.14);}
+.instr .ic{font-size:1.6rem;display:block;margin-bottom:.25rem;}
+.instr .nm{font-size:.66rem;font-weight:700;color:var(--text-dark);}
+.instr:hover{transform:translateY(-3px);}
+.instr.sel{transform:translateY(-8px);box-shadow:0 10px 16px rgba(70,90,110,.22);border-color:var(--orange);}
+.instr.ok{border-color:var(--vert);}
+.instr.ko{border-color:var(--rouge);}
+
+/* Mission 4 : bandes de papier, séquence par clic */
+.strip-target{min-height:56px;background:#fffdf6;border:2px dashed #d8cca8;border-radius:var(--radius-sm);padding:.55rem;margin-bottom:.7rem;}
+.strip-target.empty::before{content:"Clique sur les bandes ci-dessous, dans l'ordre.";font-family:var(--mono);font-size:.66rem;color:#a99878;}
+.paper-strip{background:#fffdf6;border:1px solid #e3d7b8;border-left:5px solid var(--orange);border-radius:4px;padding:.5rem .7rem;margin-bottom:.4rem;font-size:.78rem;color:var(--text-dark);cursor:pointer;box-shadow:0 2px 3px rgba(70,90,110,.12);transition:all .15s;}
+.paper-strip:hover{transform:translateX(2px);}
+.strip-bank .paper-strip{border-left-color:var(--ardoise);}
+.bank-hint{font-family:var(--mono);font-size:.66rem;color:var(--muted);margin-bottom:.5rem;}
+
+/* ===== Mission 5 : construction directe sur la carte ===== */
+.m5-toolbar{position:absolute;left:14px;bottom:14px;z-index:8;display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;}
+.m5-instr-btn{cursor:pointer;background:var(--ivoire);border:1.5px solid #d8c9a0;border-radius:8px;padding:.5rem .6rem;text-align:center;box-shadow:var(--shadow-sm);transition:all .2s;}
+.m5-instr-btn .ic{font-size:1.3rem;display:block;}
+.m5-instr-btn .nm{font-size:.6rem;font-weight:700;color:var(--text-dark);}
+.m5-instr-btn.active{border-color:var(--orange);box-shadow:0 0 0 3px rgba(217,119,46,.25);transform:translateY(-4px);}
+.m5-instr-btn.disabled{opacity:.4;cursor:not-allowed;}
+.m5-panel{position:absolute;right:14px;bottom:14px;z-index:8;background:var(--ivoire);border:1.5px solid #d8c9a0;border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);padding:.7rem .8rem;max-width:230px;}
+.m5-panel .pt{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.35rem;}
+.m5-panel input[type=range]{width:100%;accent-color:var(--orange);}
+.m5-angle-val{font-family:var(--mono);font-weight:700;font-size:.85rem;color:var(--vert-dark);text-align:center;margin-top:.2rem;}
+.m5-status{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:8;background:rgba(255,253,246,.95);border:1px solid #d8c9a0;border-radius:16px;padding:.4rem 1.1rem;font-size:.72rem;font-weight:700;color:var(--text-dark);box-shadow:var(--shadow-sm);text-align:center;max-width:min(94%,420px);line-height:1.4;pointer-events:none;}
+.btn-trace{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:8;background:var(--vert);color:#fff;font-weight:800;font-size:.85rem;padding:.75rem 1.6rem;border:none;border-radius:99px;cursor:pointer;box-shadow:var(--shadow-md);}
+.btn-trace:disabled{opacity:.4;cursor:not-allowed;}
+.btn-trace.ready{animation:tracepulse 1.6s ease-in-out infinite;}
+@keyframes tracepulse{0%,100%{box-shadow:0 0 0 0 rgba(47,107,63,.5),var(--shadow-md);}50%{box-shadow:0 0 0 10px rgba(47,107,63,0),var(--shadow-md);}}
+.m5-equerre{opacity:0;transition:opacity .2s;}
+.m5-equerre.show{opacity:1;}
+.m5-median-line{stroke:var(--vert);stroke-width:0;stroke-dasharray:400;stroke-dashoffset:400;transition:stroke-dashoffset 1s ease, stroke-width .3s;}
+.m5-median-line.draw{stroke-width:3;stroke-dashoffset:0;}
+.m5-stamp{opacity:0;transform:scale(1.3) rotate(-8deg);transform-origin:center;transition:all .5s cubic-bezier(.2,.8,.3,1.15);}
+.m5-stamp.show{opacity:1;transform:scale(1) rotate(-8deg);}
+
+/* ===== Fiche finale ===== */
+.finale-overlay{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;background:rgba(50,75,95,.4);padding:1.2rem;}
+.finale-overlay.show{display:flex;}
+.finale-box{max-width:440px;width:100%;max-height:88vh;overflow-y:auto;background:var(--ivoire);border:1px solid #d8c9a0;border-radius:var(--radius);box-shadow:var(--shadow-md);padding:1.6rem 1.4rem;text-align:center;color:var(--text-dark);animation:pop .5s cubic-bezier(.18,.89,.32,1.3);}
+.finale-stamp{display:inline-block;border:4px solid var(--vert);color:var(--vert);font-family:var(--title-font);font-weight:900;font-size:clamp(1.1rem,4.4vw,1.5rem);letter-spacing:.03em;padding:.4rem 1rem;border-radius:8px;transform:rotate(-5deg);margin-bottom:1rem;}
+.finale-title{font-family:var(--title-font);font-weight:800;font-size:1.05rem;color:var(--vert-dark);margin-bottom:.7rem;}
+.finale-sub{font-size:.84rem;line-height:1.65;margin-bottom:1rem;}
+.finale-list{text-align:left;background:#fffdf6;border:1px solid #e3d7b8;border-radius:var(--radius-sm);padding:.8rem .95rem;margin-bottom:1rem;font-size:.78rem;line-height:1.85;}
+.finale-reveal{background:var(--vert-light);border:1.5px solid #b7d6bf;border-radius:var(--radius-sm);padding:.85rem 1rem;margin-bottom:1.1rem;text-align:left;font-size:.78rem;line-height:1.65;}
+.finale-reveal b{color:var(--vert-dark);display:block;margin-bottom:.3rem;font-size:.64rem;letter-spacing:.03em;text-transform:uppercase;}
+.finale-btns{display:flex;gap:.6rem;flex-wrap:wrap;}
+.btn-finale{flex:1;min-width:140px;background:var(--vert);color:#fff;font-weight:700;font-size:.78rem;padding:.65rem 1rem;border:none;border-radius:var(--radius-sm);cursor:pointer;}
+.btn-finale.secondary{background:#fff;color:var(--text-dark);border:1.5px solid #d8cca8;}
+
+/* ===== Carnet ===== */
+.carnet-overlay{position:fixed;inset:0;z-index:31;display:none;background:rgba(50,75,95,.38);}
+.carnet-overlay.show{display:block;}
+.carnet-panel{position:fixed;top:0;left:0;bottom:0;z-index:32;width:min(320px,86vw);background:var(--ivoire);border-right:3px solid var(--ardoise);box-shadow:8px 0 26px rgba(70,90,110,.28);transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;color:var(--text-dark);}
+.carnet-panel.show{transform:translateX(0);}
+.carnet-band{background:var(--ardoise-dark);color:#fff;padding:1rem;font-weight:700;font-size:.86rem;}
+.carnet-inner{flex:1;display:flex;flex-direction:column;padding:1rem;overflow:hidden;}
+.carnet-quote{font-size:.72rem;opacity:.75;line-height:1.55;margin-bottom:.8rem;font-style:italic;border-left:2px solid var(--orange);padding-left:.55rem;}
+.carnet-symbols{display:flex;gap:.4rem;margin-bottom:.55rem;flex-wrap:wrap;}
+.carnet-sym-btn{min-width:38px;min-height:38px;background:#fff;border:1.5px solid #ddd0ac;border-radius:8px;color:var(--vert-dark);font-family:var(--mono);font-size:1rem;font-weight:700;cursor:pointer;}
+.carnet-text{flex:1;min-height:250px;background:#fffdf6;border:1.5px solid #ddd0ac;border-radius:8px;color:var(--text-dark);font-family:var(--mono);font-size:14px;line-height:1.75;padding:.65rem;resize:none;outline:none;background-image:repeating-linear-gradient(transparent,transparent calc(1.75em - 1px),#e3d7b8 calc(1.75em - 1px),#e3d7b8 1.75em);}
+.carnet-tools{display:flex;gap:.5rem;margin-top:.75rem;}
+.carnet-tools .btn{flex:1;font-size:.66rem;min-height:40px;}
+.btn-carnet-clear{background:#fff;color:var(--text-dark);border:1.5px solid #ddd0ac;}
+.btn-carnet-close{background:var(--orange);color:#2a1704;}
+
+.agent-msg{position:fixed;top:84px;left:50%;transform:translateX(-50%) translateY(-16px);z-index:33;background:var(--ardoise-dark);border:2px solid var(--orange);border-radius:var(--radius-sm);padding:.6rem 1rem;max-width:min(380px,90%);text-align:center;font-size:.8rem;color:#fff;box-shadow:var(--shadow-md);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left" id="topbar-left">EXP&Eacute;DITION HIMALAYA &middot; RELEV&Eacute; 01</div>
+  <div class="topbar-center">VALIDER LA CARTE TOPOGRAPHIQUE<div class="topbar-sub">Pazapa Maths 5e &middot; Semaine 6 &middot; Jour 5 &middot; Utiliser la somme des angles d'un triangle</div></div>
+  <div class="topbar-right">
+    <div class="hud-stars" id="hud-stars"><span id="hud-stars-glyphs">&#9733;&#9733;&#9733;</span><span class="hud-stars-detail" id="hud-stars-detail"></span></div>
+    <button class="hud-btn" onclick="toggleCarnet()" aria-label="Ouvrir le carnet de terrain">&#128221;</button>
+    <button class="hud-btn" id="sound-btn" onclick="toggleSound()" aria-label="Activer ou couper le son">&#128266;</button>
+  </div>
+</div>
+<div class="topspacer"></div>
+<div class="agent-msg" id="agent-msg"></div>
+
+<div class="map-wrap">
+  <div class="map-frame">
+    <div class="table-edge"></div>
+    <div class="map-svg-wrap" id="map-svg-wrap">
+      <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" id="main-map">
+        <rect width="600" height="380" fill="#f8f3e6"/>
+        <path class="contour" d="M20,60 Q150,20 300,55 T580,50"/>
+        <path class="contour" d="M10,100 Q160,60 320,95 T590,90"/>
+        <path class="contour" d="M30,320 Q200,360 380,325 T580,340"/>
+        <path class="contour" d="M0,300 Q180,340 360,305 T600,318"/>
+        <polygon class="relief" points="60,140 100,80 150,140"/>
+        <polygon class="relief" points="130,150 175,95 225,150"/>
+        <polygon class="relief" points="430,150 480,85 535,150"/>
+        <text x="300" y="28" text-anchor="middle" font-family="Trebuchet MS" font-size="10.5" font-weight="700" fill="#8a9585" letter-spacing="2.5" opacity=".4">SECTEUR HIMALAYA &mdash; RELEV&Eacute; TOPOGRAPHIQUE</text>
+
+        <g id="itin-lines"></g>
+
+        <g id="markers-layer"></g>
+      </svg>
+      <div class="map-dim" id="map-dim"></div>
+      <div class="brief-overlay" id="brief-overlay">
+        <div class="brief-card">
+          <div class="brief-ico">&#128506;&#65039;</div>
+          <div class="brief-title">MISSION CARTE FINALE</div>
+          <div class="brief-txt">
+            Les g&eacute;om&egrave;tres de l'exp&eacute;dition terminent la derni&egrave;re carte de l'Himalaya. Chaque sommet a &eacute;t&eacute; mesur&eacute;.
+            <br><br>
+            Avant de remettre la carte au chef d'exp&eacute;dition, il faut v&eacute;rifier que tous les triangles sont coh&eacute;rents et compl&eacute;ter les mesures manquantes.
+          </div>
+          <button class="btn-brief" onclick="beginGame()">&#128506;&#65039; Ouvrir la carte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="releve-overlay" id="releve-overlay">
+  <div class="releve-panel" id="releve-panel">
+    <div class="releve-head">
+      <div class="releve-head-txt">
+        <div class="rn" id="releve-num">RELEV&Eacute; 01 / 05</div>
+        <div class="rt" id="releve-title">Examiner les balises</div>
+      </div>
+      <button class="releve-close" onclick="closeReleve()">&#10006; Fermer le relev&eacute;</button>
+    </div>
+    <div class="releve-body" id="releve-body"></div>
+  </div>
+</div>
+
+<div class="carnet-overlay" id="carnet-overlay" onclick="closeCarnet()"></div>
+<div class="carnet-panel" id="carnet-panel">
+  <div class="carnet-band">&#128221; Carnet de terrain</div>
+  <div class="carnet-inner">
+    <div class="carnet-quote">Tu peux noter tes calculs avant de r&eacute;pondre.</div>
+    <div class="carnet-symbols">
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('&#176;')" title="Degr&eacute;" aria-label="Ins&eacute;rer le symbole degr&eacute;">&#176;</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('+')" title="Plus" aria-label="Ins&eacute;rer le symbole plus">+</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('&#8722;')" title="Moins" aria-label="Ins&eacute;rer le symbole moins">&#8722;</button>
+      <button class="carnet-sym-btn" onclick="insertCarnetSym('=')" title="Egal" aria-label="Ins&eacute;rer le symbole &eacute;gal">=</button>
+      <button class="carnet-sym-btn" style="min-width:52px;font-size:.68rem;" onclick="insertCarnetSym('&#247; 2')" title="Diviser par 2" aria-label="Ins&eacute;rer diviser par 2">&#247; 2</button>
+      <button class="carnet-sym-btn" style="min-width:52px;font-size:.68rem;" onclick="insertCarnetSym('&#247; 3')" title="Diviser par 3" aria-label="Ins&eacute;rer diviser par 3">&#247; 3</button>
+      <button class="carnet-sym-btn" style="min-width:60px;font-size:.68rem;" onclick="insertCarnetSym('90&#176;')" title="90 degr&eacute;s" aria-label="Ins&eacute;rer 90 degr&eacute;s">90&#176;</button>
+      <button class="carnet-sym-btn" style="min-width:78px;font-size:.68rem;" onclick="insertCarnetSym('180&#176;')" title="180 degr&eacute;s" aria-label="Ins&eacute;rer 180 degr&eacute;s">180&#176;</button>
+      <button class="carnet-sym-btn" style="min-width:78px;font-size:.68rem;" onclick="insertCarnetSym('isoc&egrave;le')" title="Isoc&egrave;le" aria-label="Ins&eacute;rer isoc&egrave;le">isoc&egrave;le</button>
+      <button class="carnet-sym-btn" style="min-width:90px;font-size:.68rem;" onclick="insertCarnetSym('&eacute;quilat&eacute;ral')" title="&Eacute;quilat&eacute;ral" aria-label="Ins&eacute;rer &eacute;quilat&eacute;ral">&eacute;quilat&eacute;ral</button>
+      <button class="carnet-sym-btn" style="min-width:78px;font-size:.68rem;" onclick="insertCarnetSym('rectangle')" title="Rectangle" aria-label="Ins&eacute;rer rectangle">rectangle</button>
+    </div>
+    <textarea class="carnet-text" id="carnet-text" placeholder="Tu peux &eacute;crire ici tes calculs..." aria-label="Zone de brouillon"></textarea>
+    <div class="carnet-tools">
+      <button class="btn btn-carnet-clear" onclick="clearCarnet()">&#128465;&#65039; Effacer</button>
+      <button class="btn btn-carnet-close" onclick="closeCarnet()">&#10006;&#65039; Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="finale-overlay" id="finale-overlay">
+  <div class="finale-box">
+    <div class="finale-stamp">CARTE<br>VALID&Eacute;E</div>
+    <div class="finale-title">MISSION ACCOMPLIE&#8201;!</div>
+    <div class="finale-stars" id="finale-stars" style="font-size:1.6rem;letter-spacing:.15em;color:#e0a92e;margin-bottom:.7rem;"></div>
+    <div class="finale-sub">Gr&acirc;ce &agrave; tes calculs et &agrave; tes v&eacute;rifications, la carte topographique est maintenant compl&egrave;te et fiable. L'exp&eacute;dition peut poursuivre son ascension.</div>
+    <div class="finale-list">
+      &#9989; Je sais que la somme des angles d'un triangle vaut 180&#176;.<br>
+      &#9989; Je calcule un angle manquant &agrave; partir des deux autres.<br>
+      &#9989; Je reconnais les triangles particuliers (isoc&egrave;le, &eacute;quilat&eacute;ral, rectangle).
+    </div>
+    <div class="finale-reveal">
+      <b>Bilan de la mission</b>
+      &#127919; Je sais utiliser la somme des angles d'un triangle pour calculer un angle manquant et reconna&icirc;tre des triangles particuliers.
+    </div>
+    <div class="finale-btns">
+      <button class="btn-finale secondary" onclick="closeFinale()">&#128506;&#65039; Revoir la carte</button>
+      <button class="btn-finale" onclick="restartAll()">&#8635; Recommencer le relev&eacute;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+/* ===== Moteur audio (conservé, réadapté à l'ambiance cartographique) ===== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  var volume = vol || 0.08;
+  var attack = Math.min(0.02, dur * 0.25);
+  var release = Math.min(0.03, dur * 0.35);
+  var sustainEnd = Math.max(t + attack, t + dur - release);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(volume, t + attack);
+  g.gain.setValueAtTime(volume, sustainEnd);
+  g.gain.linearRampToValueAtTime(0.0001, t + dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+
+/* Grande feuille dépliée sur la table : papier épais -> froissement léger -> feuille posée (~0,7s) */
+/* Ouverture de la carte : léger souffle de vent (0,5s) puis la carte qui se déplie */
+function soundMapOpen(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.5,0.045,2600,300,now);
+  noise(0.16,0.06,3800,700,now+0.5);
+  noise(0.12,0.04,5200,1800,now+0.62);
+}
+/* Fiche de relevé qui glisse sur la carte */
+function soundPaperSlide(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.2,0.04,3000,900,c.currentTime);
+}
+/* Fermeture d'un relevé / bande qui retourne dans la banque : feuille déplacée ou retournée */
+function soundPaperClose(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.12,0.045,5000,1800,c.currentTime);
+}
+/* Sélection d'un point sur la carte : petit "toc" de bois, comme un pion de randonnée qu'on pose */
+function soundPencilTap(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.045,0.055,1200,300,c.currentTime);
+}
+/* Indice : crayon traçant un petit trait sur le papier (~0,2s max) */
+function soundHintPencil(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.16,0.035,2000,500,c.currentTime);
+}
+/* Erreur : toute petite gomme, jamais punitive (0,15s) */
+function soundErase(){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(0.15,0.032,2200,800,c.currentTime);
+}
+/* Trait de crayon gras, doux, continu sur la durée de l'animation visuelle */
+function soundPencilLine(duration){
+  if(!soundOn)return;var c=ac();if(!c)return;
+  noise(duration||1,0.03,1700,350,c.currentTime);
+}
+/* Bonne réponse / fin du défi : petit "clac" mat suivi d'une très discrète cloche de refuge (jamais une sonnerie) */
+function soundStamp(){
+  if(!soundOn)return;var c=ac();if(!c)return;var now=c.currentTime;
+  noise(0.055,0.08,850,140,now);
+  noise(0.09,0.025,1500,500,now+0.035);
+}
+
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2600);}
+
+/* ===== Données des 5 missions ===== */
+var MISSIONS=[
+ {name:"Relev&eacute; 1", full:"Premier relev&eacute;"},
+ {name:"Relev&eacute; 2", full:"Deuxi&egrave;me relev&eacute;"},
+ {name:"Triangles", full:"Contr&ocirc;le des triangles particuliers"},
+ {name:"NET", full:"Triangle NET"},
+ {name:"Final", full:"Triangle YOU"}
+];
+var solved=[false,false,false,false,false];
+var errorsCount=0;
+var hintsCount=0;
+var hintsOpened=[false,false,false,false,false];
+var openMi=null;
+
+/* Mission 1 : Premier relevé — 80°, 30° -> angle manquant 70° */
+var M1_ANG={a:80, b:30};
+var m1Step=0; // 0=somme,1=soustraction(réponse finale)
+var m1SumInput=null;
+
+/* Mission 2 : Deuxième relevé — 110°, 50° -> angle manquant 20° */
+var M2_ANG={a:110, b:50};
+var m2Step=0;
+var m2SumInput=null;
+
+/* Mission 3 : Triangles particuliers — 4 cartes à associer à leurs mesures */
+var M3_CARDS=[
+  {id:"c1", label:"Isoc&egrave;le (54&#176; &agrave; la base)", angles:[54,54,72]},
+  {id:"c2", label:"Isoc&egrave;le (102&#176; au sommet)", angles:[102,39,39]},
+  {id:"c3", label:"Rectangle isoc&egrave;le", angles:[90,45,45]},
+  {id:"c4", label:"&Eacute;quilat&eacute;ral", angles:[60,60,60]}
+];
+var M3_OPTIONS=[
+  [54,54,72],[102,39,39],[90,45,45],[60,60,60]
+];
+var m3CardIdx=0;
+var m3Picks=[null,null,null,null];
+
+/* Mission 4 : Triangle NET, isocèle en E, angle en N (ENT) = 24° -> angle en E (NET) = 132° */
+var M4_ANG_N=24;
+var m4Step=0; // 0=angle en T,1=somme finale
+var m4TPick=null, m4SumInput=null;
+
+/* Mission 5 : Triangle YOU — YO=5,6cm, angle O=32°, angle Y=58° -> angle U=90°, rectangle en U */
+var M5_YO=5.6, M5_ANGLE_O=32, M5_ANGLE_Y=58;
+var m5Step=0; // 0=tracer YO,1=placer angles,2=construire U,3=calculer angle U,4=nature
+var m5SumInput=null, m5NaturePick=null;
+var m5TraceDone=false, m5AnglesDone=false, m5UDone=false;
+
+/* ===== Repères et itinéraire sur la carte ===== */
+var MK_POS=[[110,300],[220,330],[330,300],[440,330],[520,270]];
+function buildMarkers(){
+  var layer=$("markers-layer");layer.innerHTML="";
+  for(var i=0;i<5;i++){
+    var st = solved[i] ? "done" : (i===0||solved[i-1]) ? "active" : "locked";
+    var g=document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.setAttribute("class","map-marker "+st);
+    g.setAttribute("transform","translate("+MK_POS[i][0]+","+MK_POS[i][1]+")");
+    g.setAttribute("id","marker-"+i);
+    if(st!=="locked"){
+      g.onclick=(function(idx){return function(){openReleve(idx);};})(i);
+      g.setAttribute("role","button");
+      g.setAttribute("tabindex","0");
+      g.setAttribute("aria-label","Ouvrir le relev&eacute; "+(i+1)+" : "+MISSIONS[i].name.replace(/&[^;]+;/g,""));
+      g.onkeydown = (function(idx){
+        return function(event){
+          if(event.key==="Enter" || event.key===" "){
+            event.preventDefault();
+            openReleve(idx);
+          }
+        };
+      })(i);
+    }else{
+      g.setAttribute("aria-disabled","true");
+    }
+    g.innerHTML='<circle class="ring" r="15"></circle>'
+      +'<text class="num" y="4">'+(i+1)+'</text>'
+      +'<text class="lbl" y="28">'+MISSIONS[i].name+'</text>'
+      +'<g class="check" transform="translate(0,0)"><circle r="15" fill="none"/><path d="M-6,0 L-2,5 L7,-6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>';
+    layer.appendChild(g);
+  }
+  var lines=$("itin-lines");lines.innerHTML="";
+  for(var i=0;i<4;i++){
+    var p1=MK_POS[i], p2=MK_POS[i+1];
+    var path=document.createElementNS("http://www.w3.org/2000/svg","path");
+    var mx=(p1[0]+p2[0])/2, my=Math.min(p1[1],p2[1])-18;
+    path.setAttribute("d","M"+p1[0]+","+p1[1]+" Q"+mx+","+my+" "+p2[0]+","+p2[1]);
+    path.setAttribute("class","itin-path"+(solved[i]?" revealed":""));
+    lines.appendChild(path);
+  }
+}
+function updateTopbar(){
+  var got=solved.filter(Boolean).length;
+  var next=Math.min(got+1,5);
+  $("topbar-left").innerHTML="EXP&Eacute;DITION HIMALAYA &middot; RELEV&Eacute; "+(next<10?"0"+next:next);
+}
+
+/* ===== Ouverture / fermeture de la fiche de relevé ===== */
+function openReleve(mi){
+  if(mi>0 && !solved[mi-1] && !solved[mi]) return;
+  soundPaperSlide();
+  openMi=mi;
+  $("releve-num").innerHTML="RELEV&Eacute; 0"+(mi+1)+" / 05";
+  $("releve-title").innerHTML=MISSIONS[mi].full;
+  renderReleveBody(mi);
+  $("releve-overlay").classList.add("show");
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ $("releve-panel").classList.add("show"); }); });
+}
+function closeReleve(){
+  soundPaperClose();
+  $("releve-panel").classList.remove("show");
+  setTimeout(function(){ $("releve-overlay").classList.remove("show"); },420);
+  openMi=null;
+}
+function renderReleveBody(mi){
+  var body=$("releve-body");
+  if(mi===0) body.innerHTML=buildMission1(solved[0]);
+  else if(mi===1) body.innerHTML=buildMission2(solved[1]);
+  else if(mi===2) body.innerHTML=buildMission3(solved[2]);
+  else if(mi===3) body.innerHTML=buildMission4(solved[3]);
+}
+
+/* ===== Utilitaires géométriques SVG ===== */
+/* Petit trait de codage (côtés égaux), perpendiculaire au segment, au milieu */
+function tickMark(x1,y1,x2,y2,n){
+  n = n||1;
+  var dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+  var ux=dx/len, uy=dy/len, px=-uy, py=ux;
+  var mx=(x1+x2)/2, my=(y1+y2)/2;
+  var s='', spacing=5;
+  for(var i=0;i<n;i++){
+    var offset=(i-(n-1)/2)*spacing;
+    var cx=mx+ux*offset, cy=my+uy*offset;
+    s+='<line x1="'+(cx-px*5).toFixed(1)+'" y1="'+(cy-py*5).toFixed(1)+'" x2="'+(cx+px*5).toFixed(1)+'" y2="'+(cy+py*5).toFixed(1)+'" stroke="#3d2f22" stroke-width="2"/>';
+  }
+  return s;
+}
+/* Codage d'angle droit orienté selon deux vecteurs issus du sommet (pas horizontal/vertical figé) */
+function rightAngleMark(vx,vy,dx1,dy1,dx2,dy2,size){
+  size = size||10;
+  var p1x=vx+dx1*size, p1y=vy+dy1*size;
+  var p2x=p1x+dx2*size, p2y=p1y+dy2*size;
+  var p3x=vx+dx2*size, p3y=vy+dy2*size;
+  return '<path d="M '+p1x.toFixed(1)+' '+p1y.toFixed(1)+' L '+p2x.toFixed(1)+' '+p2y.toFixed(1)+' L '+p3x.toFixed(1)+' '+p3y.toFixed(1)+'" fill="none" stroke="#2f6b3f" stroke-width="1.6"/>';
+}
+
+function drawTriangleSVG(A,B,C,labels){
+  labels = labels!==false;
+  var s='<polygon points="'+A.x+','+A.y+' '+B.x+','+B.y+' '+C.x+','+C.y+'" fill="#eaf6ff" fill-opacity="0.4" stroke="#3d2f22" stroke-width="3"/>';
+  if(labels){
+    s+='<circle cx="'+A.x+'" cy="'+A.y+'" r="3.5" fill="#3d2f22"/><text x="'+A.x+'" y="'+(A.y+18)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">A</text>';
+    s+='<circle cx="'+B.x+'" cy="'+B.y+'" r="3.5" fill="#3d2f22"/><text x="'+B.x+'" y="'+(B.y+18)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">B</text>';
+    s+='<circle cx="'+C.x+'" cy="'+C.y+'" r="3.5" fill="#3d2f22"/><text x="'+C.x+'" y="'+(C.y-10)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">C</text>';
+  }
+  return s;
+}
+/* Construit un triangle à 3 côtés donnés (hérité, non utilisé au Jour 5) */
+/* ===== Mission 1 : Premier relevé (80°, 30° -> angle manquant) ===== */
+function triangleFigure(leftVal,rightVal,apexVal,unknownPos,Lx,Ly,Rx,Ry,Ax,Ay,isSolved){
+  var L={x:Lx,y:Ly}, R={x:Rx,y:Ry}, A={x:Ax,y:Ay};
+  var s=drawTriangleSVG(A,L,R,false);
+  var lv = (unknownPos==="left" && !isSolved) ? "?" : leftVal+"&#176;";
+  var rv = (unknownPos==="right" && !isSolved) ? "?" : rightVal+"&#176;";
+  var av = (unknownPos==="apex" && !isSolved) ? "?" : apexVal+"&#176;";
+  s+='<text x="'+(Lx+18)+'" y="'+(Ly-10)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+lv+'</text>';
+  s+='<text x="'+(Rx-18)+'" y="'+(Ry-10)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+rv+'</text>';
+  s+='<text x="'+Ax+'" y="'+(Ay+(Ay>150?28:26))+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+av+'</text>';
+  return s;
+}
+function buildMission1(isSolved){
+  var A=M1_ANG.a, B=M1_ANG.b;
+  var h='<div class="intro">Un triangle a &eacute;t&eacute; relev&eacute; sur le terrain, avec un angle manquant.</div>';
+  h+='<svg class="segment-svg" viewBox="0 0 330 260" id="m1-svg">';
+  h+=triangleFigure(A,B,180-A-B,"apex", 55,225, 275,225, 75.3,109.7, isSolved);
+  h+='</svg>';
+  if(isSolved){
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+A+'&#176; + '+B+'&#176; = '+(A+B)+'&#176;.<br>180&#176; &#8722; '+(A+B)+'&#176; = '+(180-A-B)+'&#176;.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button type="button" class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+    return h;
+  }
+  if(m1Step===0){
+    h+='<div class="q-item"><div class="q-text">Additionne les deux angles connus.<br>'+A+'&#176; + '+B+'&#176; = <input type="text" id="m1-sum" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM1Sum();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM1Sum()">Valider</button></div></div>';
+  }else if(m1Step===1){
+    h+='<div class="q-item"><div class="q-text">La somme des angles d\'un triangle vaut 180&#176;.<br>180&#176; &#8722; '+(A+B)+'&#176; = <input type="text" id="m1-final" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM1Final();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM1Final()">Valider</button></div></div>';
+  }
+  h+='<div class="tools"><button type="button" class="btn btn-hint" onclick="toggleHint(0)">? Indice</button></div>'
+    +'<div class="hint" id="hint-0">Dans un triangle, la somme des trois angles vaut toujours 180&#176;.</div>'
+    +'<div class="fb" id="fb-0"><span id="fbi-0"></span><div id="fbm-0"></div></div>';
+  return h;
+}
+function checkM1Sum(){
+  if(solved[0])return;
+  soundPencilTap();
+  var v=parseInt($("m1-sum").value,10);
+  if(v===M1_ANG.a+M1_ANG.b){ m1Step=1; renderReleveBody(0); }
+  else{ genErr(0,"Additionne bien "+M1_ANG.a+"&#176; et "+M1_ANG.b+"&#176;."); }
+}
+function checkM1Final(){
+  if(solved[0])return;
+  soundPencilTap();
+  var v=parseInt($("m1-final").value,10);
+  if(v===180-M1_ANG.a-M1_ANG.b){ missionSuccess(0); }
+  else{ genErr(0,"Recalcule 180&#176; moins la somme des deux angles connus."); }
+}
+function genErr(mi,msg){
+  registerError();
+  soundErase();$("releve-panel").classList.add("shake");setTimeout(function(){$("releve-panel").classList.remove("shake");},400);
+  var fb=$("fb-"+mi);if(fb){fb.className="fb show ko";$("fbi-"+mi).textContent="\u274C";$("fbm-"+mi).innerHTML=msg;}
+}
+
+/* ===== Mission 2 : Deuxième relevé (110°, 50° -> ?) ===== */
+function buildMission2(isSolved){
+  var A=M2_ANG.a, B=M2_ANG.b;
+  var h='<div class="intro">Un second triangle a &eacute;t&eacute; relev&eacute;, avec un angle manquant.</div>';
+  h+='<svg class="segment-svg" viewBox="0 0 330 260" id="m2-svg">';
+  h+=triangleFigure(B,180-A-B,A,"right", 55,225, 275,225, 106.5,163.7, isSolved);
+  h+='</svg>';
+  if(isSolved){
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">'+A+'&#176; + '+B+'&#176; = '+(A+B)+'&#176;.<br>180&#176; &#8722; '+(A+B)+'&#176; = '+(180-A-B)+'&#176;.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button type="button" class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+    return h;
+  }
+  if(m2Step===0){
+    h+='<div class="q-item"><div class="q-text">Additionne les deux angles connus.<br>'+A+'&#176; + '+B+'&#176; = <input type="text" id="m2-sum" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM2Sum();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM2Sum()">Valider</button></div></div>';
+  }else if(m2Step===1){
+    h+='<div class="q-item"><div class="q-text">180&#176; &#8722; '+(A+B)+'&#176; = <input type="text" id="m2-final" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM2Final();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM2Final()">Valider</button></div></div>';
+  }
+  h+='<div class="tools"><button type="button" class="btn btn-hint" onclick="toggleHint(1)">? Indice</button></div>'
+    +'<div class="hint" id="hint-1">Dans un triangle, la somme des trois angles vaut toujours 180&#176;.</div>'
+    +'<div class="fb" id="fb-1"><span id="fbi-1"></span><div id="fbm-1"></div></div>';
+  return h;
+}
+function checkM2Sum(){
+  if(solved[1])return;
+  soundPencilTap();
+  var v=parseInt($("m2-sum").value,10);
+  if(v===M2_ANG.a+M2_ANG.b){ m2Step=1; renderReleveBody(1); }
+  else{ genErr(1,"Additionne bien "+M2_ANG.a+"&#176; et "+M2_ANG.b+"&#176;."); }
+}
+function checkM2Final(){
+  if(solved[1])return;
+  soundPencilTap();
+  var v=parseInt($("m2-final").value,10);
+  if(v===180-M2_ANG.a-M2_ANG.b){ missionSuccess(1); }
+  else{ genErr(1,"Recalcule 180&#176; moins la somme des deux angles connus."); }
+}
+
+/* ===== Mission 3 : Triangles particuliers (association) ===== */
+function buildM3Figure(cardIdx, isCardSolved){
+  var s='';
+  if(cardIdx===0){ // isocèle, base 54° -> A=72°,B=54°,C=54°
+    var IA={x:165,y:76}, IB={x:60,y:220}, IC={x:270,y:220};
+    s+=drawTriangleSVG(IA,IB,IC,false);
+    s+=tickMark(IA.x,IA.y,IB.x,IB.y,1)+tickMark(IA.x,IA.y,IC.x,IC.y,1);
+    s+='<text x="'+IB.x+'" y="'+(IB.y-14)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">54&#176;</text>';
+    s+='<text x="'+IC.x+'" y="'+(IC.y-14)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(isCardSolved?"54&#176;":"?")+'</text>';
+    s+='<text x="'+IA.x+'" y="'+(IA.y+30)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(isCardSolved?"72&#176;":"?")+'</text>';
+  }else if(cardIdx===1){ // isocèle, sommet 102° -> A=102°,B=39°,C=39°
+    var IA={x:165,y:135}, IB={x:60,y:220}, IC={x:270,y:220};
+    s+=drawTriangleSVG(IA,IB,IC,false);
+    s+=tickMark(IA.x,IA.y,IB.x,IB.y,1)+tickMark(IA.x,IA.y,IC.x,IC.y,1);
+    s+='<text x="'+IA.x+'" y="'+(IA.y+30)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">102&#176;</text>';
+    s+='<text x="'+IB.x+'" y="'+(IB.y-14)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(isCardSolved?"39&#176;":"?")+'</text>';
+    s+='<text x="'+IC.x+'" y="'+(IC.y-14)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(isCardSolved?"39&#176;":"?")+'</text>';
+  }else if(cardIdx===2){ // rectangle isocèle
+    var RA={x:80,y:220}, RB={x:80,y:80}, RC={x:220,y:220};
+    s+=drawTriangleSVG(RA,RB,RC,false);
+    s+=tickMark(RA.x,RA.y,RB.x,RB.y,1)+tickMark(RA.x,RA.y,RC.x,RC.y,1);
+    s+=rightAngleMark(RA.x,RA.y,0,-1,1,0,14);
+    s+='<text x="'+(RB.x-16)+'" y="'+(RB.y+10)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(isCardSolved?"45&#176;":"?")+'</text>';
+    s+='<text x="'+(RC.x+16)+'" y="'+(RC.y-6)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(isCardSolved?"45&#176;":"?")+'</text>';
+  }else{ // équilatéral, véritablement équilatéral
+    var IA={x:165,y:38}, IB={x:60,y:220}, IC={x:270,y:220};
+    s+=drawTriangleSVG(IA,IB,IC,false);
+    s+=tickMark(IA.x,IA.y,IB.x,IB.y,1)+tickMark(IA.x,IA.y,IC.x,IC.y,1)+tickMark(IB.x,IB.y,IC.x,IC.y,1);
+    [[IA,IA.y+30],[IB,IB.y-14],[IC,IC.y-14]].forEach(function(pair){
+      s+='<text x="'+pair[0].x+'" y="'+pair[1]+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(isCardSolved?"60&#176;":"?")+'</text>';
+    });
+  }
+  return s;
+}
+function buildMission3(isSolved){
+  var h='<div class="intro">Associe chaque triangle particulier &agrave; ses trois mesures d\'angles.</div>';
+  if(isSolved){
+    var demarches=[
+      "Isoc&egrave;le, angle &agrave; la base 54&#176;&#8201;:<br>54&#176; + 54&#176; = 108&#176;<br>180&#176; &#8722; 108&#176; = 72&#176;",
+      "Isoc&egrave;le, angle au sommet 102&#176;&#8201;:<br>180&#176; &#8722; 102&#176; = 78&#176;<br>78&#176; &#247; 2 = 39&#176;",
+      "Rectangle isoc&egrave;le&#8201;:<br>180&#176; &#8722; 90&#176; = 90&#176;<br>90&#176; &#247; 2 = 45&#176;",
+      "&Eacute;quilat&eacute;ral&#8201;:<br>180&#176; &#247; 3 = 60&#176;"
+    ];
+    M3_CARDS.forEach(function(c,i){
+      h+='<div class="fiche-card"><svg viewBox="0 0 330 260" style="width:100%;height:auto;display:block;">'+buildM3Figure(i,true)+'</svg></div>';
+      h+='<div class="q-text" style="margin:.2rem 0 .8rem;font-size:.76rem;color:var(--muted);"><b>'+c.label+'</b><br>'+demarches[i]+'</div>';
+    });
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button type="button" class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+    return h;
+  }
+  var c=M3_CARDS[m3CardIdx];
+  h+='<div class="fiche-card"><svg viewBox="0 0 330 260" style="width:100%;height:auto;display:block;">'+buildM3Figure(m3CardIdx,false)+'</svg></div>';
+  h+='<div class="fiche-card"><div class="fiche-txt"><b>'+c.label+'</b> <span class="norm">('+(m3CardIdx+1)+'/4)</span></div></div>';
+  h+='<div class="q-item"><div class="q-text">Quelles sont ses trois mesures d\'angles&#8201;?</div><div class="opts" style="flex-wrap:wrap;">';
+  M3_OPTIONS.forEach(function(opt,i){
+    h+='<button type="button" class="opt" onclick="pickM3(' + i + ')">'+opt.join("&#176; &#8226; ")+'&#176;</button>';
+  });
+  h+='</div></div>';
+  h+='<div class="tools"><button type="button" class="btn btn-hint" onclick="toggleHint(2)">? Indice</button></div>'
+    +'<div class="hint" id="hint-2">Un triangle isoc&egrave;le a deux angles &eacute;gaux. Un triangle &eacute;quilat&eacute;ral a ses trois angles &eacute;gaux (60&#176; chacun). La somme fait toujours 180&#176;.</div>'
+    +'<div class="fb" id="fb-2"><span id="fbi-2"></span><div id="fbm-2"></div></div>';
+  return h;
+}
+function pickM3(i){
+  if(solved[2])return;
+  soundPencilTap();
+  if(i===m3CardIdx){
+    m3Picks[m3CardIdx]=true;
+    if(m3CardIdx<3){
+      soundHintPencil();
+      setTimeout(function(){ m3CardIdx++; renderReleveBody(2); },600);
+      showAgent("&#9989; Carte valid&eacute;e.<br>Triangle suivant.");
+    }else{
+      missionSuccess(2);
+    }
+  }else{ genErr(2,"Ce n\'est pas la bonne association. V&eacute;rifie la somme des trois angles (180&#176;) et les propri&eacute;t&eacute;s du triangle."); }
+}
+
+/* ===== Mission 4 : Triangle NET (isocèle en E) ===== */
+function buildNETFigure(isSolved, showTPick){
+  var E={x:160,y:169}, N={x:45,y:220}, T={x:275,y:220};
+  var s=drawTriangleSVG(E,N,T,false);
+  s+=tickMark(E.x,E.y,N.x,N.y,1)+tickMark(E.x,E.y,T.x,T.y,1);
+  s+='<circle cx="'+E.x+'" cy="'+E.y+'" r="3.5" fill="#3d2f22"/><text x="'+E.x+'" y="'+(E.y-10)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">E</text>';
+  s+='<circle cx="'+N.x+'" cy="'+N.y+'" r="3.5" fill="#3d2f22"/><text x="'+N.x+'" y="'+(N.y+18)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">N</text>';
+  s+='<circle cx="'+T.x+'" cy="'+T.y+'" r="3.5" fill="#3d2f22"/><text x="'+T.x+'" y="'+(T.y+18)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="13" fill="#3d2f22">T</text>';
+  s+='<text x="'+N.x+'" y="'+(N.y-14)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">24&#176;</text>';
+  s+='<text x="'+T.x+'" y="'+(T.y-14)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(showTPick?"24&#176;":"?")+'</text>';
+  s+='<text x="'+E.x+'" y="'+(E.y+30)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="15" fill="#d9772e">'+(isSolved?"132&#176;":"?")+'</text>';
+  return s;
+}
+function buildMission4(isSolved){
+  var h='<div class="intro">Le triangle NET est isoc&egrave;le en E.<span class="norm"><br>L\'angle en N mesure 24&#176;.</span></div>';
+  h+='<svg class="segment-svg" viewBox="0 0 330 260" id="m4-svg">';
+  h+=buildNETFigure(isSolved, m4Step>=1||isSolved);
+  h+='</svg>';
+  if(isSolved){
+    h+='<div class="correction show"><div class="correction-t">&#9989; Correction</div><div class="correction-x">Isoc&egrave;le en E&#8201;: l\'angle en T = l\'angle en N = '+M4_ANG_N+'&#176;.<br>Angle en E = 180&#176; &#8722; '+M4_ANG_N+'&#176; &#8722; '+M4_ANG_N+'&#176; = '+(180-2*M4_ANG_N)+'&#176;.</div></div>';
+    h+='<div class="fb show ok"><span>&#9989;</span><div><b style="color:var(--vert-dark)">Relev&eacute; valid&eacute;.</b></div></div>';
+    h+='<div class="tools"><button type="button" class="btn btn-try" onclick="closeReleve()">Fermer le relev&eacute;</button></div>';
+    return h;
+  }
+  if(m4Step===0){
+    h+='<div class="q-item"><div class="q-text">Le triangle est isoc&egrave;le en E&#8201;: quel est l\'angle en T&#8201;?</div><div class="opts">';
+    [M4_ANG_N, 180-2*M4_ANG_N, 90].forEach(function(v){ h+='<button type="button" class="opt" onclick="pickM4T('+v+')">'+v+'&#176;</button>'; });
+    h+='</div></div>';
+  }else if(m4Step===1){
+    h+='<div class="q-item"><div class="q-text">Angle en E = 180&#176; &#8722; '+M4_ANG_N+'&#176; &#8722; '+M4_ANG_N+'&#176; = <input type="text" id="m4-sum" inputmode="numeric" class="cell-in" style="width:70px;" onkeydown="if(event.key===\'Enter\')checkM4Sum();"/></div>'
+      +'<div class="tools"><button type="button" class="btn btn-try" onclick="checkM4Sum()">Valider</button></div></div>';
+  }
+  h+='<div class="tools"><button type="button" class="btn btn-hint" onclick="toggleHint(3)">? Indice</button></div>'
+    +'<div class="hint" id="hint-3">Isoc&egrave;le en E signifie que les deux c&ocirc;t&eacute;s issus de E sont &eacute;gaux, donc les angles &agrave; la base (en N et en T) sont &eacute;gaux.</div>'
+    +'<div class="fb" id="fb-3"><span id="fbi-3"></span><div id="fbm-3"></div></div>';
+  return h;
+}
+function pickM4T(v){
+  if(solved[3])return;
+  soundPencilTap();
+  if(v===M4_ANG_N){ m4TPick=v; m4Step=1; renderReleveBody(3); }
+  else{ genErr(3,"Isoc&egrave;le en E&#8201;: les angles &agrave; la base (N et T) sont &eacute;gaux entre eux."); }
+}
+function checkM4Sum(){
+  if(solved[3])return;
+  soundPencilTap();
+  var v=parseInt($("m4-sum").value,10);
+  if(v===180-2*M4_ANG_N){ missionSuccess(3); }
+  else{ genErr(3,"Recalcule 180&#176; moins deux fois "+M4_ANG_N+"&#176;."); }
+}
+
+/* ===== Mission 5 : Triangle YOU (construction complète) ===== */
+function enterMission5(){
+  soundPaperClose();
+  var ov=$("releve-overlay");ov.classList.remove("show");
+  $("releve-panel").classList.remove("show");
+  buildMission5Overlay();
+  showAgent("&#128506;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Construis le triangle YOU &eacute;tape par &eacute;tape, puis calcule le troisi&egrave;me angle.");
+}
+var M5_Yx=150, M5_Yy=280, M5_Ox=362.8, M5_Oy=280, M5_Ux=209.8, M5_Uy=184.4;
+var M5_U_DISTRACTORS=[{x:227.7,y:155.7},{x:255.7,y:213.1}];
+var m5LenPick=null, m5AnglePlacement={}, m5UPick=null;
+function buildMission5Overlay(){
+  var svg=$("main-map");
+  var old=$("m5-layer");if(old)old.remove();
+  var g=document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.setAttribute("id","m5-layer");
+  g.innerHTML =
+    '<g id="m5-YO" style="opacity:0;"><line x1="'+M5_Yx+'" y1="'+M5_Yy+'" x2="'+M5_Ox+'" y2="'+M5_Oy+'" stroke="#3d2f22" stroke-width="3" stroke-linecap="round"/>'
+    + '<text x="'+M5_Yx+'" y="'+(M5_Yy+22)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="14" fill="#3d2f22">Y</text>'
+    + '<text x="'+M5_Ox+'" y="'+(M5_Oy+22)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="14" fill="#3d2f22">O</text></g>'
+    + '<g id="m5-anglines" style="opacity:0;"></g>'
+    + '<g id="m5-Ucandidates" style="opacity:0;"></g>'
+    + '<g id="m5-Upoint" style="opacity:0;"><circle cx="'+M5_Ux+'" cy="'+M5_Uy+'" r="4" fill="#3d2f22"/><text x="'+M5_Ux+'" y="'+(M5_Uy-12)+'" text-anchor="middle" font-family="Trebuchet MS" font-weight="800" font-size="14" fill="#3d2f22">U</text></g>'
+    + '<g id="m5-sides" style="opacity:0;"></g>'
+    + '<g id="m5-rightangle" style="opacity:0;"></g>'
+    + '<g id="m5-map-reveal" style="opacity:0;"></g>'
+    + '<g id="m5-stamp-grp" class="m5-stamp" transform="translate(300,190)"><rect x="-70" y="-22" width="140" height="44" rx="6" fill="none" stroke="#2f6b3f" stroke-width="3"/><text y="6" text-anchor="middle" font-family="Trebuchet MS" font-weight="900" font-size="14" fill="#2f6b3f">CARTE VALID&Eacute;E</text></g>';
+  svg.appendChild(g);
+  var wrap=$("map-svg-wrap");
+  var old2=$("m5-ui");if(old2)old2.remove();
+  var ui=document.createElement("div");
+  ui.id="m5-ui";
+  ui.innerHTML='<div class="m5-status" id="m5-status">&Eacute;tape 1&#8201;: quelle est la longueur du segment [YO]&#8201;?</div>';
+  wrap.appendChild(ui);
+  showM5CalcPanel();
+}
+function showM5CalcPanel(){
+  var old=$("m5-verif-panel");if(old)old.remove();
+  var wrap=$("map-svg-wrap");
+  var panel=document.createElement("div");
+  panel.id="m5-verif-panel";
+  panel.style.cssText="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:9;background:#fffdf6;border:1.5px solid #d8c9a0;border-radius:10px;padding:.7rem 1rem;max-width:min(92%,380px);box-shadow:var(--shadow-md);text-align:center;";
+  var h="";
+  if(m5Step===0){
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">Longueur du segment [YO]&#8201;?</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM5Len(5.2)">5,2 cm</button>'
+      +'<button type="button" class="opt" onclick="pickM5Len(5.6)">5,6 cm</button>'
+      +'<button type="button" class="opt" onclick="pickM5Len(6.5)">6,5 cm</button>'
+      +'</div>';
+  }else if(m5Step===1){
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">O&ugrave; placer l\'angle de 32&#176;&#8201;?</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM5AnglePos(32,\'Y\')">Au sommet Y</button>'
+      +'<button type="button" class="opt" onclick="pickM5AnglePos(32,\'O\')">Au sommet O</button>'
+      +'</div>';
+  }else if(m5Step===2){
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">O&ugrave; placer l\'angle de 58&#176;&#8201;?</div><div class="opts">'
+      +'<button type="button" class="opt" onclick="pickM5AnglePos(58,\'Y\')">Au sommet Y</button>'
+      +'<button type="button" class="opt" onclick="pickM5AnglePos(58,\'O\')">Au sommet O</button>'
+      +'</div>';
+  }else if(m5Step===3){
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">Clique sur le point U&#8201;: l\'intersection des deux demi-droites issues de Y et de O.</div>';
+  }else if(m5Step===4){
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">Angle en U&#8201;: 180&#176; &#8722; 58&#176; &#8722; 32&#176; = <input type="text" id="m5-sum" inputmode="numeric" class="cell-in" style="width:60px;" onkeydown="if(event.key===\'Enter\')checkM5Sum();"/></div>'
+      +'<button type="button" class="btn btn-try" onclick="checkM5Sum()">Valider</button>';
+  }else if(m5Step===5){
+    h+='<div style="font-size:.76rem;margin-bottom:.4rem;">Quelle est la nature de ce triangle&#8201;?</div><div class="opts" style="flex-wrap:wrap;">'
+      +'<button type="button" class="opt" onclick="pickM5Nature(\'isoU\')">Triangle isoc&egrave;le en U</button>'
+      +'<button type="button" class="opt" onclick="pickM5Nature(\'rectU\')">Triangle rectangle en U</button>'
+      +'<button type="button" class="opt" onclick="pickM5Nature(\'equi\')">Triangle &eacute;quilat&eacute;ral</button>'
+      +'<button type="button" class="opt" onclick="pickM5Nature(\'rectY\')">Triangle rectangle en Y</button>'
+      +'</div>';
+  }
+  h+='<div class="fb" id="fb-m5v" style="margin-top:.4rem;"></div>';
+  panel.innerHTML=h;
+  wrap.appendChild(panel);
+}
+function pickM5Len(v){
+  if(solved[4])return;
+  soundPencilTap();
+  if(v===M5_YO){
+    m5LenPick=v; m5Step=1;
+    soundPencilLine(0.7);
+    var g=$("m5-YO"); g.style.transition="opacity .4s"; g.style.opacity="1";
+    $("m5-status").innerHTML="&Eacute;tape 2&#8201;: place les deux angles donn&eacute;s.";
+    showM5CalcPanel();
+  }else{ m5vErr("Le segment [YO] mesure 5,6 cm."); }
+}
+function pickM5AnglePos(deg,vertex){
+  if(solved[4])return;
+  soundPencilTap();
+  var correctVertex = (deg===32) ? "O" : "Y";
+  if(vertex!==correctVertex){ m5vErr("Relis l\'&eacute;nonc&eacute;&#8201;: l\'angle de "+deg+"&#176; n\'est pas &agrave; ce sommet."); return; }
+  m5AnglePlacement[deg]=vertex;
+  drawM5AngleLine(deg,vertex);
+  if(m5Step===1){ m5Step=2; $("m5-status").innerHTML="Place le second angle."; showM5CalcPanel(); }
+  else{
+    m5Step=3;
+    $("m5-status").innerHTML="&Eacute;tape 3&#8201;: clique sur le point U.";
+    showM5CalcPanel();
+    showM5UCandidates();
+  }
+}
+function drawM5AngleLine(deg,vertex){
+  soundPencilLine(0.5);
+  var g=$("m5-anglines");
+  var Vx = vertex==="Y"?M5_Yx:M5_Ox, Vy = vertex==="Y"?M5_Yy:M5_Oy;
+  var ext = 1.15;
+  var ex = Vx+(M5_Ux-Vx)*ext, ey = Vy+(M5_Uy-Vy)*ext;
+  g.innerHTML += '<line x1="'+Vx+'" y1="'+Vy+'" x2="'+ex+'" y2="'+ey+'" stroke="#7a92a3" stroke-width="2" stroke-dasharray="4 4"/>'
+    +'<text x="'+(Vx+(vertex==="Y"?34:-34))+'" y="'+(Vy-14)+'" font-family="Trebuchet MS" font-weight="800" font-size="12" fill="#d9772e">'+deg+'&#176;</text>';
+  g.style.transition="opacity .4s"; g.style.opacity="1";
+}
+function showM5UCandidates(){
+  var g=$("m5-Ucandidates");
+  var pts=[{x:M5_Ux,y:M5_Uy,correct:true}, M5_U_DISTRACTORS[0], M5_U_DISTRACTORS[1]];
+  var order=[1,0,2];
+  var html="";
+  order.forEach(function(i){
+    var p=pts[i];
+    html+='<g class="seg-pt" id="m5-ucand-'+i+'" transform="translate('+p.x+','+p.y+')" role="button" tabindex="0" aria-label="Choisir ce point d\'intersection" onclick="pickM5U('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();pickM5U('+i+');}"><circle r="8" fill="#fffdf6" stroke="#4a5560" stroke-width="1.8"/></g>';
+  });
+  g.innerHTML=html;
+  g.style.transition="opacity .4s"; g.style.opacity="1";
+}
+function pickM5U(i){
+  if(solved[4])return;
+  soundPencilTap();
+  var pts=[{x:M5_Ux,y:M5_Uy,correct:true}, M5_U_DISTRACTORS[0], M5_U_DISTRACTORS[1]];
+  if(pts[i].correct){
+    m5UPick=i;
+    $("m5-Ucandidates").style.opacity="0";
+    $("m5-Upoint").style.transition="opacity .4s";$("m5-Upoint").style.opacity="1";
+    var sides=$("m5-sides");
+    sides.innerHTML='<line x1="'+M5_Yx+'" y1="'+M5_Yy+'" x2="'+M5_Ux+'" y2="'+M5_Uy+'" stroke="#3d2f22" stroke-width="3" stroke-linecap="round"/>'
+      +'<line x1="'+M5_Ox+'" y1="'+M5_Oy+'" x2="'+M5_Ux+'" y2="'+M5_Uy+'" stroke="#3d2f22" stroke-width="3" stroke-linecap="round"/>';
+    sides.style.transition="opacity .4s";sides.style.opacity="1";
+    m5UDone=true;
+    m5Step=4;
+    $("m5-status").innerHTML="&Eacute;tape 4&#8201;: calcule le troisi&egrave;me angle.";
+    showM5CalcPanel();
+  }else{ m5vErr("Ce point n\'est pas sur les deux demi-droites &agrave; la fois. Cherche leur v&eacute;ritable intersection."); }
+}
+function checkM5Sum(){
+  if(solved[4])return;
+  soundPencilTap();
+  var v=parseInt($("m5-sum").value,10);
+  if(v===180-M5_ANGLE_Y-M5_ANGLE_O){ m5Step=5; showM5CalcPanel(); }
+  else{ m5vErr("Recalcule 180&#176; moins 58&#176; moins 32&#176;."); }
+}
+function pickM5Nature(val){
+  if(solved[4])return;
+  soundPencilTap();
+  if(val==="rectU"){
+    $("m5-verif-panel").remove();
+    $("m5-status").innerHTML="Triangle valid&eacute;&#8201;! Finalisation de la carte...";
+    animateM5Complete();
+  }else{ m5vErr("Un angle de 180&#176;&#8722;58&#176;&#8722;32&#176;=90&#176; est un angle droit&#8201;: le triangle est rectangle, et cet angle est en U."); }
+}
+function m5vErr(msg){
+  registerError();
+  soundErase();
+  var wrap=$("map-svg-wrap");wrap.classList.add("shake");setTimeout(function(){wrap.classList.remove("shake");},400);
+  var fb=$("fb-m5v");if(fb){fb.innerHTML='<span style="color:#c0392b;font-size:.72rem;">&#10060; '+msg+'</span>';}
+}
+function animateM5Complete(){
+  soundPencilTap();
+  var rg=$("m5-rightangle");
+  var ux1=(M5_Yx-M5_Ux), uy1=(M5_Yy-M5_Uy), len1=Math.hypot(ux1,uy1);
+  var ux2=(M5_Ox-M5_Ux), uy2=(M5_Oy-M5_Uy), len2=Math.hypot(ux2,uy2);
+  rg.innerHTML=rightAngleMark(M5_Ux,M5_Uy, ux1/len1,uy1/len1, ux2/len2,uy2/len2, 14);
+  rg.style.transition="opacity .4s";rg.style.opacity="1";
+  setTimeout(function(){
+    var reveal=$("m5-map-reveal");
+    reveal.innerHTML='<text x="300" y="60" text-anchor="middle" font-family="Courier New" font-size="11" fill="#5a6b5a" opacity="0.7">CARTE TOPOGRAPHIQUE COMPL&Egrave;TE</text>';
+    reveal.style.transition="opacity .8s";reveal.style.opacity="1";
+    soundStamp();
+  },700);
+  setTimeout(function(){ $("m5-stamp-grp").classList.add("show"); },1300);
+  setTimeout(function(){
+    $("m5-status").innerHTML="&#8736;YOU = 32&#176; (sommet O) &#8226; &#8736;OYU = 58&#176; (sommet Y) &#8226; &#8736;YUO = 180&#176;&#8722;32&#176;&#8722;58&#176; = 90&#176; (sommet U)&#8201;: le triangle YOU est rectangle en U.";
+  },1400);
+  setTimeout(function(){ missionSuccess(4); },3200);
+}
+
+
+function toggleHint(mi){
+  soundHintPencil();
+  var el=$("hint-"+mi);
+  if(el)el.classList.toggle("show");
+  if(!hintsOpened[mi]){ hintsOpened[mi]=true; hintsCount++; }
+  updateStars();
+}
+function registerError(){ errorsCount++; updateStars(); }
+function computeStars(){
+  var total=errorsCount+hintsCount;
+  if(total===0) return 3;
+  if(total<=3) return 2;
+  return 1;
+}
+function starsHTML(n){
+  var s="";
+  for(var i=0;i<3;i++){ s += (i<n ? "\u2605" : "\u2606"); }
+  return s;
+}
+function updateStars(){
+  var glyphs=$("hud-stars-glyphs");
+  var det=$("hud-stars-detail");
+  if(glyphs){ glyphs.textContent=starsHTML(computeStars()); }
+  if(det){ det.textContent="err\u00a0"+errorsCount+" \u00b7 ind\u00a0"+hintsCount; }
+}
+
+/* ===== Réussite d'une mission ===== */
+function missionSuccess(mi){
+  solved[mi]=true;
+  if(mi<4){
+    soundHintPencil();
+    setTimeout(function(){soundStamp();},180);
+  }
+  if(mi<4){
+    showAgent("&#9989; Relev&eacute; valid&eacute;.<br>Clique sur le rep&egrave;re suivant.");
+  }else{
+    showAgent("&#128506;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Relev&eacute; "+(mi+1)+" valid&eacute;. Bien jou&eacute;.");
+  }
+  buildMarkers();
+  animateItinReveal(mi);
+  updateTopbar();
+  if(mi<4){
+    renderReleveBody(mi);
+  }else{
+    var m5ui=$("m5-ui");if(m5ui)m5ui.remove();
+    document.querySelectorAll("#m5-layer .seg-pt").forEach(function(el){ el.style.pointerEvents="none"; });
+    setTimeout(openFinale,300);
+  }
+}
+function animateItinReveal(mi){
+  if(mi>3)return;
+  var lines=document.querySelectorAll("#itin-lines path");
+  var path=lines[mi];if(!path)return;
+  var len=path.getTotalLength();
+  path.style.strokeDasharray=len;
+  path.style.strokeDashoffset=len;
+  path.getBoundingClientRect();
+  path.style.transition="stroke-dashoffset .9s ease";
+  soundPencilLine(0.9);
+  requestAnimationFrame(function(){ path.style.strokeDashoffset=0; });
+}
+
+/* ===== Écran final ===== */
+function openFinale(){
+  var s=$("finale-stars");if(s)s.textContent=starsHTML(computeStars());
+  $("finale-overlay").classList.add("show");
+}
+function closeFinale(){
+  $("finale-overlay").classList.remove("show");
+}
+
+/* ===== Carnet ===== */
+function toggleCarnet(){
+  var p=$("carnet-panel");
+  if(p.classList.contains("show")) closeCarnet(); else openCarnet();
+}
+function openCarnet(){ soundPaperSlide(); $("carnet-panel").classList.add("show"); $("carnet-overlay").classList.add("show"); }
+function closeCarnet(){ soundPaperClose(); $("carnet-panel").classList.remove("show"); $("carnet-overlay").classList.remove("show"); }
+function clearCarnet(){ soundPencilTap(); var t=$("carnet-text");if(t)t.value=""; }
+function insertCarnetSym(sym){
+  soundPencilTap();
+  var t=$("carnet-text");if(!t)return;
+  var start=t.selectionStart, end=t.selectionEnd;
+  var val=t.value;
+  t.value=val.slice(0,start)+sym+val.slice(end);
+  var pos=start+sym.length;
+  t.focus();t.setSelectionRange(pos,pos);
+}
+
+/* ===== Démarrage / redémarrage ===== */
+function beginGame(){
+  var c=ac();if(c&&c.state==="suspended")c.resume();
+  soundMapOpen();
+  $("brief-overlay").classList.add("hidden");
+  $("map-dim").classList.add("hidden");
+  buildMarkers();
+  updateTopbar();
+  updateStars();
+  showAgent("&#128506;&#65039; Le g&eacute;om&egrave;tre-chef&nbsp;:<br>Bienvenue&#8201;! Clique sur le premier rep&egrave;re pour commencer.");
+}
+function restartAll(){
+  solved=[false,false,false,false,false];
+  errorsCount=0;hintsCount=0;hintsOpened=[false,false,false,false,false];
+  updateStars();
+  openMi=null;
+  m1Step=0;m1SumInput=null;
+  m2Step=0;m2SumInput=null;
+  m3CardIdx=0;m3Picks=[null,null,null,null];
+  m4Step=0;m4TPick=null;m4SumInput=null;
+  m5Step=0;m5SumInput=null;m5NaturePick=null;m5TraceDone=false;m5AnglesDone=false;m5UDone=false;
+  m5LenPick=null;m5AnglePlacement={};m5UPick=null;
+  var m5vp=$("m5-verif-panel");if(m5vp)m5vp.remove();
+  $("finale-overlay").classList.remove("show");
+  $("releve-overlay").classList.remove("show");
+  $("releve-panel").classList.remove("show");
+  var m5layer=$("m5-layer");if(m5layer)m5layer.remove();
+  var m5ui=$("m5-ui");if(m5ui)m5ui.remove();
+  closeCarnet();
+  var ct=$("carnet-text");if(ct)ct.value="";
+  $("brief-overlay").classList.remove("hidden");
+  $("map-dim").classList.remove("hidden");
+  buildMarkers();
+  updateTopbar();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ===== Interception spéciale : mission 5 s'ouvre directement sur la carte ===== */
+var _origOpenReleve=openReleve;
+openReleve=function(mi){
+  if(mi===4){
+    if(solved[4]){
+      openFinale();
+      return;
+    }
+    if(!solved[3]){
+      return;
+    }
+    enterMission5();
+    return;
+  }
+  _origOpenReleve(mi);
+};
+
+buildMarkers();
+</script>
+</body>
+</html>
