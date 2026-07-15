@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa — Flash Défi — Équidistance et médiatrice</title>
+<style>
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+:root{--day-color:#b94040;--day-dark:#7a1f1f;--day-light:#f7eded;--day-border:#e3b3b3;--day-glow:rgba(185,64,64,.3);--bg:#fdf8f8;--surface:#fff;--border:#e8e0e0;--green:#8dc63f;--blue:#3ab5d8;--yellow:#f5c518;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.5rem 1rem 4rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:'';position:fixed;inset:0;z-index:0;opacity:.04;background:repeating-linear-gradient(0deg,transparent,transparent 30px,#b94040 30px,#b94040 31px),repeating-linear-gradient(90deg,transparent,transparent 30px,#b94040 30px,#b94040 31px);pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:300px;height:300px;background:var(--day-color);top:-80px;right:-60px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:200px;height:200px;background:var(--blue);bottom:-50px;left:-40px;pointer-events:none;}
+header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:monospace;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+h1{font-size:clamp(1.2rem,3.5vw,1.7rem);font-weight:800;line-height:1.3;color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:.84rem;margin-top:.3rem;font-family:monospace;}
+.chrono-wrap{width:100%;max-width:560px;position:relative;z-index:1;margin-bottom:.8rem;}
+.chrono-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;}
+.chrono-label{font-family:monospace;font-size:.78rem;color:var(--muted);text-transform:uppercase;}
+.chrono-val{font-family:monospace;font-weight:800;font-size:1.5rem;color:var(--day-dark);}
+.chrono-val.urgent{color:#c0392b;animation:pulse .5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.chrono-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.chrono-bar{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));border-radius:99px;transition:width .9s linear;}
+.chrono-bar.urgent{background:linear-gradient(90deg,#c0392b,#e74c3c);}
+.prog-dots{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;position:relative;z-index:1;}
+.prog-dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:.3s;}
+.prog-dot.done{background:var(--green);}.prog-dot.active{background:var(--day-color);}
+#start-screen{width:100%;max-width:560px;position:relative;z-index:1;}
+.start-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.stripe{height:4px;border-radius:4px;margin-bottom:1.2rem;background:linear-gradient(90deg,#b94040,#f5a623,#f5c518);}
+.start-title{font-size:1.15rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;}
+.start-desc{font-size:.92rem;color:var(--muted);line-height:1.7;margin-bottom:1.4rem;}
+#flash-zone{width:100%;max-width:560px;position:relative;z-index:1;display:none;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.6rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--yellow));}
+.q-badge{display:inline-block;background:var(--day-color);color:#fff;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .65rem;border-radius:99px;margin-bottom:.7rem;font-family:monospace;}
+.q-text{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.9rem;line-height:1.6;}
+.fig-wrap{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:.6rem;margin-bottom:.8rem;display:flex;justify-content:center;}
+.fig-wrap svg{max-width:100%;height:auto;}
+.options{display:flex;flex-direction:column;gap:.5rem;}
+.opt{display:flex;align-items:center;gap:.7rem;padding:.8rem 1rem;border-radius:12px;border:2px solid var(--day-border);background:var(--day-light);cursor:pointer;min-height:48px;font-size:.95rem;font-weight:600;transition:.15s;text-align:left;width:100%;}
+.opt:hover:not([disabled]){border-color:var(--day-color);background:#fde8e8;}
+.opt:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.opt[disabled]{cursor:default;}
+.opt.ok{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+.opt.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.opt.reveal{border-color:var(--green);background:#f0faeb;color:#2f6e10;}
+.constructions{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.5rem;}
+.cc{background:var(--day-light);border:2px solid var(--day-border);border-radius:10px;padding:.5rem;cursor:pointer;transition:.15s;text-align:center;}
+.cc:hover:not([disabled]){border-color:var(--day-color);}
+.cc:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.cc[disabled]{cursor:default;}.cc.ok{border-color:var(--green);background:#f0faeb;}
+.cc.ko{border-color:#c0392b;background:#fce4e4;}.cc.reveal{border-color:var(--green);background:#f0faeb;}
+.cc-label{font-family:monospace;font-size:.75rem;margin-top:.3rem;color:var(--muted);}
+.feedback{margin-top:.8rem;padding:.65rem .9rem;border-radius:10px;font-family:monospace;font-size:.82rem;line-height:1.75;display:none;}
+.feedback.show{display:block;}
+.feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.feedback.ko{background:#fce4e4;border:1.5px solid #c0392b;color:#8f2f2f;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+#final-screen{width:100%;max-width:560px;display:none;position:relative;z-index:1;}
+.final-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+.final-icon{font-size:3rem;margin-bottom:.6rem;}
+.final-title{font-size:1.2rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+.final-msg{font-size:.95rem;color:var(--text);line-height:1.8;margin-bottom:1.2rem;}
+.btn-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem;}
+@media(max-width:480px){body{padding:1rem .75rem 3rem;}.card{padding:1.2rem;}.constructions{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 6 &ndash; Jour 2</div>
+  <h1>&#9889; Flash D&eacute;fi</h1>
+  <p class="subtitle">&Eacute;quidistance et m&eacute;diatrice &middot; 3 questions &middot; 20 secondes</p>
+</header>
+
+<div id="start-screen">
+  <div class="start-card">
+    <div class="stripe"></div>
+    <div class="start-title">Flash D&eacute;fi &mdash; &Eacute;quidistance</div>
+    <div class="start-desc">3 questions sur l&rsquo;&eacute;quidistance et la m&eacute;diatrice.<br><strong>20 secondes &mdash; 3 questions</strong></div>
+    <button class="btn btn-primary" id="btn-start" style="font-size:1.05rem;padding:.8rem 2rem;">&#9654; Commencer</button>
+  </div>
+</div>
+
+<div id="flash-zone" style="display:none;">
+  <div class="chrono-wrap">
+    <div class="chrono-top">
+      <span class="chrono-label">&#8987; Temps restant</span>
+      <span class="chrono-val" id="chrono-val">20 s</span>
+    </div>
+    <div class="chrono-bar-bg"><div class="chrono-bar" id="chrono-bar" style="width:100%"></div></div>
+  </div>
+  <div class="prog-dots">
+    <div class="prog-dot active" id="pd0"></div>
+    <div class="prog-dot" id="pd1"></div>
+    <div class="prog-dot" id="pd2"></div>
+  </div>
+  <div class="card" id="card">
+    <div class="card-stripe"></div>
+    <div class="q-badge" id="q-badge">Question 1 / 3</div>
+    <div id="q-content"></div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="final-screen" style="display:none;">
+  <div class="final-card">
+    <div class="stripe"></div>
+    <div class="logo-badge" style="margin:0 auto .7rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+    </div>
+    <div class="final-icon" id="final-icon"></div>
+    <div class="final-title" id="final-title"></div>
+    <div class="final-msg" id="final-msg"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btn-restart">&#8635; Recommencer le Flash D&eacute;fi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+var DUREE=20,TOTAL=3;
+var tempsRestant=DUREE,timerID=null,transitionID=null,fini=false,answered=false,qIdx=0;
+var m1Selected=[];
+
+function el(id){return document.getElementById(id);}
+
+function updateChrono(){
+  el('chrono-val').textContent=tempsRestant+' s';
+  el('chrono-bar').style.width=(tempsRestant/DUREE*100)+'%';
+  var urgent=(tempsRestant<=5);
+  el('chrono-val').className='chrono-val'+(urgent?' urgent':'');
+  el('chrono-bar').className='chrono-bar'+(urgent?' urgent':'');
+}
+
+function startTimer(){
+  if(timerID) clearInterval(timerID);
+  timerID=setInterval(function(){
+    tempsRestant--;
+    updateChrono();
+    if(tempsRestant<=0){
+      clearInterval(timerID);timerID=null;
+      clearTimeout(transitionID);transitionID=null;
+      if(!fini) showFin(false);
+    }
+  },1000);
+}
+
+function startFlash(){
+  el('start-screen').style.display='none';
+  el('flash-zone').style.display='block';
+  qIdx=0;fini=false;answered=false;m1Selected=[];
+  tempsRestant=DUREE;
+  updateChrono();
+  render();
+  startTimer();
+}
+
+// Q1 — QCM distances : identifier les points sur la médiatrice
+// M(dA=5,dB=5)✅ N(dA=7,dB=4)❌ P(dA=9,dB=9)✅ Q(dA=6,dB=8)❌
+var Q1ROWS=[
+  {id:'M',da:5,db:5,ok:true},
+  {id:'N',da:7,db:4,ok:false},
+  {id:'P',da:9,db:9,ok:true},
+  {id:'Q',da:6,db:8,ok:false}
+];
+var q1chosen=[];
+
+function buildQ1(){
+  var rows='';
+  Q1ROWS.forEach(function(r){
+    rows+='<tr><td style="font-weight:800;font-family:monospace;">'+r.id+'</td>'
+      +'<td>'+r.da+' cm</td><td>'+r.db+' cm</td></tr>';
+  });
+  return '<div class="q-text">Parmi ces quatre points, lesquels appartiennent à la médiatrice de [AB] ?</div>'
+    +'<table style="width:100%;border-collapse:collapse;margin:.6rem 0;font-size:.92rem;">'
+    +'<tr style="background:var(--day-light);font-family:monospace;font-size:.8rem;">'
+    +'<th style="padding:.4rem .7rem;border:1px solid var(--day-border);">Point</th>'
+    +'<th style="padding:.4rem .7rem;border:1px solid var(--day-border);">d(A)</th>'
+    +'<th style="padding:.4rem .7rem;border:1px solid var(--day-border);">d(B)</th></tr>'
+    +rows+'</table>'
+    +'<div class="options" role="group" style="margin-top:.5rem;">'
+    +'<button class="opt" data-q1="0" tabindex="0">A.  M et P</button>'
+    +'<button class="opt" data-q1="1" tabindex="0">B.  M et N</button>'
+    +'<button class="opt" data-q1="2" tabindex="0">C.  N et Q</button>'
+    +'<button class="opt" data-q1="3" tabindex="0">D.  M, N, P et Q</button>'
+    +'</div>';
+}
+
+function attachQ1(){
+  el('q-content').querySelectorAll('.opt[data-q1]').forEach(function(b){
+    var i=parseInt(b.getAttribute('data-q1'));
+    b.addEventListener('click',function(){answerQ1(i);});
+    b.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();answerQ1(i);}});
+  });
+}
+
+function answerQ1(i){
+  if(answered) return;
+  answered=true;
+  var ok=(i===0);
+  el('q-content').querySelectorAll('.opt[data-q1]').forEach(function(b,j){
+    b.disabled=true;
+    if(j===0) b.classList.add(ok&&j===i?'ok':'reveal');
+    else if(j===i) b.classList.add('ko');
+  });
+  var fb=el('feedback');
+  fb.className='feedback show '+(ok?'ok':'ko');
+  fb.textContent=ok
+    ?'✅ Exact ! M et P : d(A) = d(B). Ce sont les deux points équidistants de A et de B, ils appartiennent à la médiatrice.'
+    :'❌ M et P sont les bons : MA = MB = 5 et PA = PB = 9. Pour N et Q, les distances sont différentes.';
+  scheduleNext();
+}
+
+
+// Q2
+var Q2OPTS=['M appartient \u00e0 la m\u00e9diatrice de [AB].','M est n\u00e9cessairement le milieu de [AB].','M appartient n\u00e9cessairement au segment [AB].'];
+var Q2ANS=0;
+var Q2FB=[
+  '\u2705 Exact\u00a0! Un point \u00e0 \u00e9gale distance de A et de B appartient \u00e0 la m\u00e9diatrice de [AB].',
+  '\u274c MA\u00a0=\u00a0MB indique que M est \u00e0 \u00e9gale distance de A et de B. M appartient \u00e0 la m\u00e9diatrice de [AB], sans \u00eatre n\u00e9cessairement sur le segment.',
+  '\u274c MA\u00a0=\u00a0MB indique que M est \u00e0 \u00e9gale distance de A et de B. M appartient \u00e0 la m\u00e9diatrice de [AB], sans \u00eatre n\u00e9cessairement sur le segment.'
+];
+
+function buildQ2(){
+  var html='<div class="q-text">On sait que MA\u00a0=\u00a0MB. Que peut-on conclure\u00a0?</div><div class="options" role="group">';
+  Q2OPTS.forEach(function(o,i){
+    html+='<button class="opt" data-i="'+i+'" tabindex="0">'+String.fromCharCode(65+i)+'.\u00a0 '+o+'</button>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function attachQ2(){
+  el('q-content').querySelectorAll('.opt').forEach(function(b){
+    var i=parseInt(b.getAttribute('data-i'));
+    b.addEventListener('click',function(){answerQ2(i);});
+    b.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();answerQ2(i);}});
+  });
+}
+
+function answerQ2(i){
+  if(answered) return;
+  answered=true;
+  var ok=(i===Q2ANS);
+  el('q-content').querySelectorAll('.opt').forEach(function(b,j){
+    b.disabled=true;
+    if(j===Q2ANS) b.classList.add(ok&&j===i?'ok':'reveal');
+    else if(j===i) b.classList.add('ko');
+  });
+  var fb=el('feedback');
+  fb.className='feedback show '+(ok?'ok':'ko');
+  fb.textContent=Q2FB[i];
+  scheduleNext();
+}
+
+// Q3 — constructions
+function constrSVG(correct,err){
+  var w=130,h=110,ax=25,ay=55,bx=105,by=55,half=40;
+  var r1=correct?48:(err==='diff'?35:err==='small'?28:48);
+  var r2=correct?48:(err==='diff'?55:err==='small'?28:48);
+  var mx=(ax+bx)/2;
+  var s='<svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="'+w+'" height="'+h+'" fill="#fff9f9" rx="4"/>';
+  s+='<line x1="'+ax+'" y1="'+ay+'" x2="'+bx+'" y2="'+by+'" stroke="#7a1f1f" stroke-width="2"/>';
+  s+='<circle cx="'+ax+'" cy="'+ay+'" r="4" fill="#b94040"/><circle cx="'+bx+'" cy="'+by+'" r="4" fill="#b94040"/>';
+  s+='<text x="'+(ax-10)+'" y="'+(ay+4)+'" font-family="monospace" font-size="11" fill="#7a1f1f">A</text>';
+  s+='<text x="'+(bx+4)+'" y="'+(by+4)+'" font-family="monospace" font-size="11" fill="#7a1f1f">B</text>';
+  s+='<circle cx="'+ax+'" cy="'+ay+'" r="'+r1+'" fill="none" stroke="#b94040" stroke-width="1.5" stroke-dasharray="3,2"/>';
+  s+='<circle cx="'+bx+'" cy="'+by+'" r="'+r2+'" fill="none" stroke="#b94040" stroke-width="1.5" stroke-dasharray="3,2"/>';
+  if(r1>half && r2>half){
+    var dy=Math.sqrt(r1*r1-half*half);
+    var iy1=ay-dy,iy2=ay+dy;
+    s+='<circle cx="'+mx+'" cy="'+iy1.toFixed(1)+'" r="3" fill="#8dc63f"/>';
+    s+='<circle cx="'+mx+'" cy="'+iy2.toFixed(1)+'" r="3" fill="#8dc63f"/>';
+    if(correct){
+      s+='<line x1="'+mx+'" y1="5" x2="'+mx+'" y2="'+(h-5)+'" stroke="#8dc63f" stroke-width="2"/>';
+    } else if(err==='wrongline'){
+      s+='<line x1="20" y1="10" x2="110" y2="'+(h-5)+'" stroke="#c0392b" stroke-width="2"/>';
+    }
+  }
+  s+='<\/svg>';
+  return s;
+}
+
+function buildQ3(){
+  var configs=[true,false,false,false];
+  var errs=['','diff','small','wrongline'];
+  var labels=['Construction A','Construction B','Construction C','Construction D'];
+  var html='<div class="q-text">Clique sur la construction correcte de la m\u00e9diatrice de [AB].</div><div class="constructions">';
+  configs.forEach(function(c,i){
+    html+='<div class="cc" data-ci="'+i+'" tabindex="0" role="button" aria-label="'+labels[i]+'">'+constrSVG(c,errs[i])+'<div class="cc-label">'+labels[i]+'</div></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function attachQ3(){
+  el('q-content').querySelectorAll('.cc').forEach(function(b){
+    var i=parseInt(b.getAttribute('data-ci'));
+    b.addEventListener('click',function(){answerQ3(i);});
+    b.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();answerQ3(i);}});
+  });
+}
+
+function answerQ3(i){
+  if(answered) return;
+  answered=true;
+  var ok=(i===0);
+  el('q-content').querySelectorAll('.cc').forEach(function(b,j){
+    b.removeAttribute('tabindex');b.style.cursor='default';
+    if(j===0) b.classList.add(ok&&j===i?'ok':'reveal');
+    else if(j===i) b.classList.add('ko');
+  });
+  var fb=el('feedback');
+  fb.className='feedback show '+(ok?'ok':'ko');
+  fb.textContent=ok
+    ?'\u2705 Exact\u00a0! Les arcs sont trac\u00e9s avec la m\u00eame ouverture et se coupent en deux points. La droite passant par ces deux intersections est la m\u00e9diatrice.'
+    :'\u274c La bonne construction utilise la m\u00eame ouverture depuis A et B. Les arcs se coupent en deux points, puis on trace la droite passant par ces deux intersections.';
+  scheduleNext();
+}
+
+function scheduleNext(){
+  clearTimeout(transitionID);
+  transitionID=setTimeout(function(){
+    transitionID=null;
+    if(fini) return;
+    if(qIdx<TOTAL-1){qIdx++;render();}
+    else showFin(true);
+  },1100);
+}
+
+function render(){
+  answered=false;
+  for(var i=0;i<3;i++) el('pd'+i).className='prog-dot'+(i<qIdx?' done':i===qIdx?' active':'');
+  el('q-badge').textContent='Question '+(qIdx+1)+' / '+TOTAL;
+  el('feedback').className='feedback';
+  el('feedback').innerHTML='';
+  if(qIdx===0){el('q-content').innerHTML=buildQ1();attachQ1();}
+  else if(qIdx===1){el('q-content').innerHTML=buildQ2();attachQ2();}
+  else{el('q-content').innerHTML=buildQ3();attachQ3();}
+}
+
+function showFin(normal){
+  fini=true;
+  clearInterval(timerID);timerID=null;
+  clearTimeout(transitionID);transitionID=null;
+  el('flash-zone').style.display='none';
+  el('final-screen').style.display='block';
+  if(normal){
+    el('final-icon').textContent='\u26a1';
+    el('final-title').textContent='Flash D\u00e9fi termin\u00e9\u00a0!';
+    el('final-msg').innerHTML='Bravo\u00a0! Tu as r\u00e9activ\u00e9 les notions essentielles sur la m\u00e9diatrice.<br>Tu peux maintenant commencer les niveaux et progresser pas \u00e0 pas.';
+  } else {
+    el('final-icon').textContent='\u23f0';
+    el('final-title').textContent='Temps \u00e9coul\u00e9\u00a0!';
+    el('final-msg').innerHTML='Ce n\u2019est pas grave. Les niveaux vont te permettre de revoir l\u2019\u00e9quidistance et la construction au compas.<br>Tu peux recommencer ou poursuivre avec Je m\u2019entra\u00eene.';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restart(){
+  clearInterval(timerID);timerID=null;
+  clearTimeout(transitionID);transitionID=null;
+  fini=false;answered=false;qIdx=0;m1Selected=[];tempsRestant=DUREE;
+  el('final-screen').style.display='none';
+  el('start-screen').style.display='';
+  updateChrono();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+el('btn-start').addEventListener('click',startFlash);
+el('btn-restart').addEventListener('click',restart);
+updateChrono();
+})();
+</script>
+</body>
+</html>
