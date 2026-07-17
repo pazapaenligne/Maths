@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths 4e &ndash; Calculer des fr&eacute;quences et des moyennes &ndash; Niveau 2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#f5a623;--day-dark:#c47a10;--day-light:#fff5e0;--day-border:#f5d080;
+  --day-glow:rgba(245,166,35,.3);
+  --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+  position:relative;overflow-x:hidden;letter-spacing:.03em;line-height:1.6;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+  width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+  width:260px;height:260px;background:var(--blue);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+  background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+  background:var(--yellow);top:200px;left:-30px;pointer-events:none;}
+/* HEAD */
+.head-card{width:100%;max-width:680px;background:var(--day-light);border:2px solid var(--day-border);
+  border-radius:var(--radius);padding:1.9rem 1.5rem 1.6rem;text-align:center;
+  position:relative;z-index:1;margin-bottom:1.3rem;}
+.logo-badge{background:var(--yellow);color:#000;font-size:14px;letter-spacing:.09em;
+  display:inline-flex;align-items:center;gap:.5rem;font-weight:700;text-transform:uppercase;
+  padding:.35rem 1.1rem;border-radius:99px;margin-bottom:.6rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{color:var(--day-dark);font-size:.88rem;margin:.5rem 0;font-family:'JetBrains Mono',monospace;}
+.head-card h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--text);margin:.3rem 0;}
+.head-card h1 .hl{color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:.97rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+/* NIVEAU BTNS */
+.level-row{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.3rem;}
+.level-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.92rem;
+  letter-spacing:.06em;text-transform:uppercase;padding:.65rem 1.35rem;border-radius:12px;
+  border:2px solid var(--day-border);background:var(--surface);color:var(--day-dark);
+  min-height:2.9rem;display:inline-flex;align-items:center;text-decoration:none;
+  cursor:default;transition:all .18s;}
+.level-btn.active{background:var(--day-color);color:#000;border-color:var(--day-color);
+  box-shadow:0 3px 12px var(--day-glow);}
+/* STATS */
+.stats-card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);
+  border-radius:var(--radius);padding:1.1rem;margin-bottom:1.7rem;z-index:1;
+  box-shadow:0 4px 20px rgba(0,0,0,.05);}
+.stats-row{display:flex;gap:.8rem;}
+.stat-box{flex:1;background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:12px;padding:.9rem .5rem;text-align:center;}
+.stat-num{font-size:1.7rem;font-weight:800;color:var(--day-dark);
+  font-family:'JetBrains Mono',monospace;line-height:1.1;}
+.stat-label{font-size:.86rem;color:var(--muted);margin-top:.25rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:1rem;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+  border-radius:99px;transition:width .5s ease;}
+.prog-text{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.95rem;
+  color:var(--muted);margin-top:.6rem;}
+/* CARDS */
+#cards{width:100%;max-width:680px;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:1.8rem 1.7rem 1.5rem;position:relative;z-index:1;
+  box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:1.5rem;animation:fadeUp .4s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+.q-num{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;}
+.q-consigne{font-size:1.05rem;font-weight:700;color:var(--text);line-height:1.75;margin-bottom:.9rem;}
+.fig-wrap{background:#fff;border:1.5px solid var(--day-border);border-radius:12px;
+  padding:.5rem;margin:.2rem 0 .9rem;}
+/* TABLEAU */
+.tbl-wrap{overflow-x:auto;margin:.6rem 0 1rem;}
+.tbl{border-collapse:collapse;width:100%;font-size:.95rem;}
+.tbl th{background:var(--day-light);color:var(--day-dark);font-weight:700;padding:.6rem .9rem;
+  border:1.5px solid var(--day-border);font-family:'JetBrains Mono',monospace;font-size:.82rem;text-align:center;}
+.tbl td{border:1.5px solid var(--day-border);padding:.55rem .9rem;text-align:center;font-weight:600;font-size:1rem;}
+.tbl td.hl{background:var(--day-light);color:var(--day-dark);font-weight:800;}
+.tbl td input.ci{width:72px;text-align:center;border:2px solid var(--day-border);border-radius:8px;
+  padding:.35rem .3rem;font-size:.97rem;font-family:Arial,sans-serif;font-weight:700;outline:none;transition:border-color .15s;}
+.tbl td input.ci:focus{border-color:var(--day-color);}
+.tbl td input.ci.ok{border-color:var(--green);background:#eef7e9;color:#2f6e10;}
+.tbl td input.ci.ko{border-color:var(--pink);background:#fdeeee;color:#c0392b;}
+/* SAISIE */
+.aw{display:flex;align-items:center;gap:.8rem;margin:.8rem 0;flex-wrap:wrap;}
+.ai{border:2px solid var(--day-border);border-radius:12px;padding:.75rem 1rem;
+  font-size:clamp(1rem,2.8vw,1.1rem);font-family:Arial,sans-serif;font-weight:700;
+  outline:none;transition:border-color .2s;min-width:140px;text-align:center;}
+.ai:focus{border-color:var(--day-color);}
+.ai.ok{border-color:var(--green);background:#eef7e9;color:#2f6e10;}
+.ai.ko{border-color:var(--pink);background:#fdeeee;color:#c0392b;}
+.al{font-size:.9rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+/* ÉTAPES */
+.sb{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;
+  padding:1rem 1.2rem;margin:.8rem 0;}
+.sb h4{font-size:.78rem;font-family:'JetBrains Mono',monospace;color:var(--day-dark);
+  text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:.8rem;}
+.sr{display:flex;align-items:center;gap:.75rem;margin-bottom:.55rem;flex-wrap:wrap;}
+.sd{width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);
+  font-size:.75rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-family:'JetBrains Mono',monospace;transition:background .3s,color .3s;}
+.sd.done{background:var(--green);color:#fff;}.sd.active{background:var(--day-color);color:#000;}
+.st{font-size:.9rem;color:var(--text);line-height:1.55;flex:1;min-width:0;}
+/* METHOD */
+.method-box{display:none;background:var(--day-light);border:1.5px solid var(--day-border);
+  border-left:4px solid var(--day-color);border-radius:8px;padding:.95rem 1.15rem;
+  margin-top:.8rem;font-size:.97rem;font-family:'JetBrains Mono',monospace;
+  color:var(--day-dark);line-height:1.85;white-space:pre-line;}
+.method-box.reveal{display:block;}
+/* BOUTONS */
+.btn-row{display:flex;gap:.7rem;margin-top:1rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem 1.5rem;border-radius:12px;font-family:Arial,sans-serif;font-size:clamp(.95rem,2.5vw,1.05rem);font-weight:800;cursor:pointer;border:none;transition:transform .12s;min-height:3rem;flex:1;}
+.btn:active{transform:scale(.96);}.btn:disabled{opacity:.38;cursor:default;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 4px 12px var(--day-glow);}
+.hint-btn{background:var(--day-color);color:#fff;border:none;border-radius:12px;padding:.75rem 1.5rem;font-family:Arial,sans-serif;font-size:clamp(.95rem,2.5vw,1.05rem);font-weight:800;cursor:pointer;min-height:3rem;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;transition:transform .12s;flex:1;box-shadow:0 4px 12px var(--day-glow);}
+.hint-btn:active{transform:scale(.96);}
+/* INDICE */
+.hint-box{margin-top:.7rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;
+  padding:.75rem 1rem;font-size:.97rem;color:#7a6010;display:none;line-height:1.75;
+  font-family:'JetBrains Mono',monospace;white-space:pre-line;}
+.hint-box.show{display:block;}
+/* FEEDBACK */
+.feedback{margin-top:.8rem;padding:.7rem 1rem;border-radius:10px;font-size:1rem;
+  display:none;align-items:flex-start;gap:.6rem;line-height:1.7;}
+.feedback.show{display:flex;}
+.feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.feedback.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.feedback-icon{font-size:1.5rem;flex-shrink:0;}
+/* RÉSULTATS */
+.results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+.results.show{display:block;}
+.results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.results-score{font-size:clamp(3rem,11vw,4.8rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;}
+.results-score .s-num{color:var(--day-color);}
+.stars{font-size:2.2rem;margin:.4rem 0 1rem;}
+.results-msg{color:var(--muted);font-size:1.05rem;margin-bottom:1rem;line-height:1.7;}
+.bilan-list{list-style:none;text-align:left;display:inline-block;margin-bottom:1.5rem;font-size:.95rem;line-height:2;}
+.bilan-list li.oki::before{content:'\2714  ';color:var(--green);}
+.bilan-list li.koi::before{content:'\2718  ';color:var(--pink);}
+/* CHIPS / COEF */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0;}
+.chip{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:8px;
+  padding:.4rem .9rem;font-size:1.05rem;font-weight:700;color:var(--day-dark);font-family:'JetBrains Mono',monospace;}
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.8rem;margin:.8rem 0;}
+.cc{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.9rem 1rem;text-align:center;}
+.ccl{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;}
+.ccn{font-size:1.8rem;font-weight:900;color:var(--day-dark);}
+.ccc{font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-top:.2rem;}
+.cc.unk{border-color:var(--orange);background:#fff7ed;}.cc.unk .ccn{color:var(--orange);}
+/* CALCULATRICE */
+.fxc-trigger{position:fixed;right:14px;bottom:14px;z-index:9998;display:flex;flex-direction:column;
+  align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:0;}
+.fxc-trigger svg{filter:drop-shadow(0 4px 10px rgba(0,0,0,.25));}
+.fxc-pill{background:var(--day-dark);color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;
+  font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.04em;}
+.fxc-hidden{display:none!important;}
+.fxc-panel{position:fixed;right:14px;bottom:14px;z-index:9999;width:300px;max-width:94vw;
+  background:#2f343b;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.45);
+  font-family:'JetBrains Mono',monospace;overflow:hidden;border:2px solid var(--day-color);}
+.fxc-bar{background:#23272d;color:#cfd6de;font-size:12.5px;font-weight:700;padding:9px 10px;
+  cursor:move;touch-action:none;user-select:none;display:flex;align-items:center;gap:6px;}
+.fxc-bar .fxc-sp{flex:1;}
+.fxc-icon{background:#3a4049;color:#fff;border:none;width:26px;height:26px;border-radius:7px;
+  font-size:13px;cursor:pointer;line-height:1;}
+.fxc-icon:hover{background:var(--day-color);color:#000;}
+.fxc-help{background:#23272d;color:#aeb6bf;font-size:11.5px;line-height:1.7;padding:8px 12px;
+  border-top:1px solid #3a4049;}
+.fxc-screen{background:#d7e3c8;margin:10px;border-radius:8px;padding:8px 10px;min-height:64px;
+  display:flex;flex-direction:column;justify-content:center;border:2px solid #aab79a;}
+.fxc-expr{font-size:13px;color:#4a5340;text-align:right;min-height:16px;word-break:break-all;line-height:1.4;}
+.fxc-res{font-size:24px;font-weight:800;color:#222;text-align:right;word-break:break-all;line-height:1.2;}
+.fxc-keys{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 10px 12px;}
+.fxc-k{background:#454c55;color:#fff;border:none;border-radius:9px;padding:11px 0;
+  font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;cursor:pointer;
+  min-height:42px;transition:transform .08s;}
+.fxc-k:active{transform:scale(.94);}.fxc-k:hover{background:#525a64;}
+.fxc-k.fn{background:#3a4049;font-size:12px;color:#8dc63f;}
+.fxc-k.op{color:#8dc63f;}.fxc-k.eq{background:#3a7bd5;color:#fff;}.fxc-k.red{background:#c0392b;color:#fff;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){
+  .cg{grid-template-columns:1fr 1fr;}.aw{flex-direction:column;align-items:flex-start;}
+  .btn-row{flex-direction:column;}.btn,.hint-btn{width:100%;}
+}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+<div class="head-card">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    PAZAPA &middot; MATHS &middot; 4&Egrave;ME
+  </div>
+  <div class="week-label">Semaine&nbsp;7 &ndash; Jour&nbsp;1</div>
+  <h1><span class="hl">&#128202; Calculer des fr&eacute;quences et des moyennes</span></h1>
+  <p class="subtitle">Moyennes</p>
+  <div class="level-row">
+    <a class="level-btn" href="S7J1_Nv1_Frequences.html">Niveau&nbsp;1</a>
+    <span class="level-btn active">Niveau&nbsp;2</span>
+    <a class="level-btn" href="S7J1_Nv3_MoyennePonderee.html">Niveau&nbsp;3</a>
+    
+  </div>
+</div>
+<p style="max-width:680px;margin:0 auto 14px;text-align:center;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:1rem;position:relative;z-index:1;">
+  Compl&egrave;te chaque &eacute;tape, puis clique sur <strong>V&eacute;rifier</strong>.
+</p>
+<div class="stats-card"><div class="stats-row">
+  <div class="stat-box"><div class="stat-num" id="st-ok">0</div><div class="stat-label">R&eacute;ussies</div></div>
+  <div class="stat-box"><div class="stat-num" id="st-rem">3</div><div class="stat-label">Restantes</div></div>
+  <div class="stat-box"><div class="stat-num" id="st-err">0</div><div class="stat-label">&Eacute;chou&eacute;es</div></div>
+</div>
+<div class="prog-bg"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+<div class="prog-text" id="prog-text">0 / 3</div></div>
+<div id="cards"></div>
+<section class="results" id="results"><div class="results-card">
+  <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;">R&eacute;sultats</div>
+  <div class="results-score"><span class="s-num" id="res-score">0 / 3</span></div>
+  <div class="stars" id="stars"></div>
+  <p class="results-msg" id="res-msg"></p>
+  <ul class="bilan-list" id="bilan"></ul>
+  <button class="btn btn-primary" onclick="restart()">&#8635; Recommencer</button>
+</div></section>
+<script>
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[rand(0,a.length-1)];}
+function shuffle(a){var r=[].concat(a);for(var i=r.length-1;i>0;i--){var j=rand(0,i);var t=r[i];r[i]=r[j];r[j]=t;}return r;}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+function roundN(x,n){var f=Math.pow(10,n);return Math.round(x*f)/f;}
+function lireNombre(v){return Number(String(v).replace(/,/g,'.').trim());}
+function fracR(n,d){var g=gcd(n,d);return (n/g)+'/'+(d/g);}
+function fracOk(raw,n,d){var g=gcd(n,d);var nr=n/g,dr=d/g;var m=String(raw).trim().match(/^(\d+)\s*\/\s*(\d+)$/);if(!m)return false;return parseInt(m[1])===nr&&parseInt(m[2])===dr;}
+function genNotes(pool,n){return shuffle(pool).slice(0,n).sort(function(a,b){return a-b;});}
+function sdot(id,c){var e=document.getElementById(id);if(e)e.className='sd '+c;}
+function enInp(id){var e=document.getElementById(id);if(e){e.disabled=false;setTimeout(function(){e.focus();},50);}}
+function sic(id,c){var e=document.getElementById(id);if(e)e.className='ai '+c;}
+function showFb(i,t,ic,tx){var f=document.getElementById('fb'+i);f.className='feedback show '+t;document.getElementById('fbi'+i).textContent=ic;document.getElementById('fbt'+i).textContent=tx;}
+function escH(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var TOTAL=0,ST=[],QS=[],pOk={},pOkC={};
+function buildCards(){
+  TOTAL=QS.length;ST=QS.map(function(){return{done:false,ok:false,err:false,hl:0};});pOk={};pOkC={};
+  var h='';for(var i=0;i<TOTAL;i++)h+=oneCard(i,QS[i]);
+  document.getElementById('cards').innerHTML=h;update();
+}
+function oneCard(i,q){
+  var fig=q.figFn?q.figFn():'';var fh=fig?'<div class="fig-wrap">'+fig+'</div>':'';
+  return '<div class="card" id="card'+i+'"><div class="card-stripe"></div>'
+    +'<div class="q-num">Question '+(i+1)+'\u00a0/\u00a0'+TOTAL+'</div>'
+    +'<div class="q-consigne">'+q.cons+'</div>'+fh+inter(i,q)
+    +'<div class="btn-row"><button class="btn btn-primary" id="vb'+i+'" onclick="check('+i+')">&#10003; V\u00e9rifier</button>'
+    +'<button class="hint-btn" id="hb'+i+'" onclick="cycHint('+i+')">&#128161; Indice</button></div>'
+    +'<div class="hint-box" id="hx'+i+'"></div>'
+    +'<div class="method-box" id="mb'+i+'">'+escH(q.method)+'</div>'
+    +'<div class="feedback" id="fb'+i+'"><span class="feedback-icon" id="fbi'+i+'"></span><div><span id="fbt'+i+'"></span></div></div>'
+    +'</div>';
+}
+function cycHint(i){
+  if(ST[i].done)return;var q=QS[i];
+  ST[i].hl=Math.min((ST[i].hl||0)+1,2);
+  var txt=ST[i].hl===1?q.h1:q.h2;
+  var hx=document.getElementById('hx'+i);hx.textContent=txt;hx.classList.add('show');
+  document.getElementById('hb'+i).innerHTML='&#128161; Indice '+ST[i].hl+'/2';
+}
+function applyR(i,ok,tx){
+  if(ok){ST[i].done=true;ST[i].ok=true;document.getElementById('mb'+i).className='method-box reveal';
+    showFb(i,'ok','\u2713',tx);dis(i);update();}
+  else if(!ST[i].err){ST[i].err=true;document.getElementById('vb'+i).innerHTML='\u21bb R\u00e9essayer';showFb(i,'ko','\u2717',tx);}
+  else{ST[i].done=true;ST[i].ok=false;document.getElementById('mb'+i).className='method-box reveal';
+    showFb(i,'ko','\u2717',tx+' Correction ci-dessous.');dis(i);update();}
+}
+function dis(i){document.getElementById('card'+i).querySelectorAll('input').forEach(function(e){e.disabled=true;});var v=document.getElementById('vb'+i);if(v)v.disabled=true;}
+function update(){
+  var done=0,ok=0;for(var i=0;i<TOTAL;i++){if(ST[i].done){done++;if(ST[i].ok)ok++;}}
+  document.getElementById('st-ok').textContent=ok;
+  document.getElementById('st-err').textContent=done-ok;
+  document.getElementById('st-rem').textContent=TOTAL-done;
+  document.getElementById('pfill').style.width=Math.round(done/TOTAL*100)+'%';
+  document.getElementById('prog-text').textContent=done+' / '+TOTAL;
+  if(done===TOTAL)showRes(ok);
+}
+function showRes(ok){
+  var st='';var s=(ok===TOTAL)?5:Math.max(1,Math.round(ok/TOTAL*5));
+  for(var i=0;i<5;i++)st+=(i<s?'\u2b50':'\u2606');
+  document.getElementById('stars').textContent=st;
+  document.getElementById('res-score').textContent=ok+' / '+TOTAL;
+  var e=TOTAL-ok,msg;
+  if(e===0)msg=MSG_OK;else if(e===1)msg='Tr\u00e8s bien\u00a0! Une erreur\u00a0: relis la correction.';
+  else msg='\u00c0 retravailler\u00a0: relis chaque correction et recommence.';
+  document.getElementById('res-msg').textContent=msg;
+  var ul=document.getElementById('bilan');ul.innerHTML='';
+  for(var i=0;i<TOTAL;i++){var li=document.createElement('li');li.className=ST[i].ok?'oki':'koi';li.textContent=QS[i].nom;ul.appendChild(li);}
+  document.getElementById('results').className='results show';
+}
+function restart(){pOk={};pOkC={};document.getElementById('results').className='results';QS=genLevel();buildCards();window.scrollTo({top:0,behavior:'smooth'});}
+
+
+var MSG_OK='Excellent\u00a0! Tu sais calculer une moyenne.';
+function genLevel(){
+  var qs=[];
+  /* Q1 — série brute : moyenne entière ou demi-entière
+     On génère n valeurs dont la somme est un multiple de n */
+  var n=rand(4,6);
+  var moy1=rand(8,14); /* moyenne entière cible */
+  var vals=[];
+  var som1=moy1*n;
+  /* Distribuer som1 en n valeurs entre 5 et 18 */
+  var reste1=som1;
+  for(var k=0;k<n-1;k++){
+    var lo=Math.max(5,reste1-(n-1-k)*18);
+    var hi=Math.min(18,reste1-(n-1-k)*5);
+    var v=rand(lo,hi);
+    vals.push(v);reste1-=v;
+  }
+  vals.push(reste1);
+  vals=shuffle(vals);
+  qs.push({nom:'Moyenne d\u2019une s\u00e9rie brute',type:'brute',figFn:null,
+    cons:'Calcule la moyenne de cette s\u00e9rie de '+n+' valeurs.',
+    h1:'M\u00e9thode\u00a0:\n1. Additionne toutes les valeurs.\n2. Divise par le nombre de valeurs.',
+    h2:'Somme = '+vals.join('+')+' = '+som1+'.\nNombre de valeurs = '+n+'.\nMoyenne = '+som1+' \u00f7 '+n+'.',
+    method:'Somme = '+vals.join(' + ')+' = '+som1+'\nNombre de valeurs = '+n+'\nMoyenne = '+som1+' \u00f7 '+n+' = '+moy1,
+    answer:{som:som1,n:n,moy:moy1},ex:{vals:vals,n:n,som:som1,moy:moy1}});
+  /* Q2 — tableau d'effectifs : moyenne entière
+     On choisit les notes et effectifs pour que somme(note×eff) soit multiple du total */
+  var notes2,effs2,tot2,pr2,som2,moy2,att2=0;
+  do {
+    var pool2=[5,6,7,8,9,10,11,12,13,14,15];
+    notes2=genNotes(pool2,4);
+    effs2=notes2.map(function(){return rand(2,6);});
+    tot2=effs2.reduce(function(s,e){return s+e;},0);
+    pr2=notes2.map(function(nn,j){return nn*effs2[j];});
+    som2=pr2.reduce(function(s,p){return s+p;},0);
+    moy2=som2/tot2;
+    att2++;
+  } while(att2<200 && (moy2!==Math.round(moy2) && moy2*2!==Math.round(moy2*2)));
+  moy2=roundN(moy2,2);
+  qs.push({nom:'Moyenne d\u2019un tableau d\u2019effectifs',type:'tab',figFn:null,
+    cons:'Calcule la moyenne \u00e0 partir de ce tableau d\u2019effectifs.',
+    h1:'M\u00e9thode\u00a0:\n1. Calcule note \u00d7 effectif pour chaque colonne.\n2. Additionne tous les produits.\n3. Divise par l\u2019effectif total.',
+    h2:'Produits\u00a0: '+notes2.map(function(nn,j){return nn+'\u00d7'+effs2[j]+'='+pr2[j];}).join(', ')+'.\nSomme = '+som2+', effectif total = '+tot2+'.',
+    method:'Produits\u00a0: '+notes2.map(function(nn,j){return nn+'\u00d7'+effs2[j]+'='+pr2[j];}).join(', ')+'\nSomme des produits = '+som2+'\nEffectif total = '+tot2+'\nMoyenne = '+som2+' \u00f7 '+tot2+' = '+moy2,
+    answer:{prods:pr2,som:som2,tot:tot2,moy:moy2},ex:{notes:notes2,effs:effs2,prods:pr2,som:som2,tot:tot2,moy:moy2}});
+  /* Q3 — classes : centres entiers, moyenne propre */
+  var starts=[0,2,4,6,8],cls=starts.map(function(s){return [s,s+2];}),ctr=cls.map(function(c){return (c[0]+c[1])/2;});
+  var ef3,tot3,pr3,som3,moy3,att3=0;
+  do {
+    ef3=cls.map(function(){return rand(2,8);});
+    tot3=ef3.reduce(function(s,e){return s+e;},0);
+    pr3=ctr.map(function(c,j){return c*ef3[j];});
+    som3=pr3.reduce(function(s,p){return s+p;},0);
+    moy3=som3/tot3;
+    att3++;
+  } while(att3<200 && moy3!==Math.round(moy3) && moy3*2!==Math.round(moy3*2));
+  moy3=roundN(moy3,2);
+  qs.push({nom:'Moyenne par classes (centres)',type:'cls',figFn:null,
+    cons:'Calcule la moyenne \u00e0 partir de ce tableau de classes. Utilise les <strong>centres de classes</strong>.',
+    h1:'M\u00e9thode\u00a0:\n1. Centre d\u2019une classe [a\u00a0; b[ = (a+b)\u00f72.\n2. Calcule centre \u00d7 effectif pour chaque classe.\n3. Additionne, puis divise par l\u2019effectif total.',
+    h2:'Centres\u00a0: '+ctr.join(', ')+'.\nProduits\u00a0: '+ctr.map(function(c,j){return c+'\u00d7'+ef3[j]+'='+pr3[j];}).join(', ')+'.\nSomme = '+som3+', total = '+tot3+'.',
+    method:'Centres\u00a0: '+ctr.join(', ')+'\nProduits\u00a0: '+ctr.map(function(c,j){return c+'\u00d7'+ef3[j]+'='+pr3[j];}).join(', ')+'\nSomme = '+som3+'\nMoyenne = '+som3+' \u00f7 '+tot3+' = '+moy3,
+    answer:{prods:pr3,som:som3,tot:tot3,moy:moy3},ex:{cls:cls,ctr:ctr,effs:ef3,prods:pr3,som:som3,tot:tot3,moy:moy3}});
+  return qs;
+}
+function inter(i,q){
+  if(q.type==='brute'){
+    var d=q.ex;
+    return '<div class="chips">'+d.vals.map(function(v){return '<span class="chip">'+v+'</span>';}).join('')+'</div>'
+      +'<div class="sb"><h4>D\u00e9marche guid\u00e9e</h4>'
+      +'<div class="sr"><div class="sd active" id="sd'+i+'_1">1</div><div class="st"><strong>\u00c9tape\u00a01</strong>\u00a0\u2014 Calcule la somme des valeurs.</div>'
+      +'<input class="ai" id="a'+i+'_1" type="text" style="width:90px;" autocomplete="off" onchange="cb('+i+',1)"></div>'
+      +'<div class="sr"><div class="sd" id="sd'+i+'_2">2</div><div class="st"><strong>\u00c9tape\u00a02</strong>\u00a0\u2014 Combien y a-t-il de valeurs\u00a0?</div>'
+      +'<input class="ai" id="a'+i+'_2" type="text" style="width:90px;" autocomplete="off" disabled onchange="cb('+i+',2)"></div>'
+      +'<div class="sr"><div class="sd" id="sd'+i+'_3">3</div><div class="st"><strong>\u00c9tape\u00a03</strong>\u00a0\u2014 Calcule la moyenne.</div>'
+      +'<input class="ai" id="a'+i+'_3" type="text" style="width:90px;" autocomplete="off" disabled onchange="check('+i+')"></div>'
+      +'</div>';
+  }
+  if(q.type==='tab'){
+    var d=q.ex;
+    return '<div class="tbl-wrap"><table class="tbl"><tr><th>Notes</th>'+d.notes.map(function(n){return '<th>'+n+'</th>';}).join('')+'<th>Total</th></tr>'
+      +'<tr><th>Effectifs</th>'+d.effs.map(function(e){return '<td>'+e+'</td>';}).join('')+'<td><strong>'+d.tot+'</strong></td></tr>'
+      +'<tr><th>Note\u00a0\u00d7\u00a0Effectif</th>'+d.notes.map(function(_,j){return '<td><input class="ci" id="p'+i+'_'+j+'" type="text" autocomplete="off" oninput="chkP('+i+','+j+')"></td>';}).join('')
+      +'<td><input class="ci" id="so'+i+'" type="text" autocomplete="off" disabled oninput="chkS('+i+')"></td></tr></table></div>'
+      +'<div class="sr" style="margin-top:.6rem;"><div class="sd" id="sd'+i+'_m">\u2192</div>'
+      +'<div class="st"><strong>\u00c9tape\u00a04</strong>\u00a0\u2014 Calcule la moyenne.</div>'
+      +'<input class="ai" id="a'+i+'_m" type="text" style="width:90px;" autocomplete="off" disabled onchange="check('+i+')"></div>';
+  }
+  if(q.type==='cls'){
+    var d=q.ex;
+    return '<div class="tbl-wrap"><table class="tbl"><tr><th>Classes</th>'+d.cls.map(function(c){return '<th>['+c[0]+'\u00a0;\u00a0'+c[1]+'[</th>';}).join('')+'<th>Total</th></tr>'
+      +'<tr><th>Centres</th>'+d.ctr.map(function(c){return '<td class="hl">'+c+'</td>';}).join('')+'<td>\u2014</td></tr>'
+      +'<tr><th>Effectifs</th>'+d.effs.map(function(e){return '<td>'+e+'</td>';}).join('')+'<td><strong>'+d.tot+'</strong></td></tr>'
+      +'<tr><th>Centre\u00a0\u00d7\u00a0Effectif</th>'+d.ctr.map(function(_,j){return '<td><input class="ci" id="pc'+i+'_'+j+'" type="text" autocomplete="off" oninput="chkPC('+i+','+j+')"></td>';}).join('')
+      +'<td><input class="ci" id="sc'+i+'" type="text" autocomplete="off" disabled oninput="chkSC('+i+')"></td></tr></table></div>'
+      +'<div class="sr" style="margin-top:.6rem;"><div class="sd" id="sdc'+i+'_m">\u2192</div>'
+      +'<div class="st"><strong>\u00c9tape\u00a04</strong>\u00a0\u2014 Calcule la moyenne.</div>'
+      +'<input class="ai" id="ac'+i+'_m" type="text" style="width:90px;" autocomplete="off" disabled onchange="check('+i+')"></div>';
+  }
+  return '';
+}
+function cb(i,s){
+  if(ST[i].done)return;var d=QS[i].ex;var el=document.getElementById('a'+i+'_'+s);
+  if(!el||el.value.trim()==='')return;var v=lireNombre(el.value);
+  if(s===1){var ok=(v===d.som);el.className='ai '+(ok?'ok':'ko');
+    if(ok){sdot('sd'+i+'_1','done');sdot('sd'+i+'_2','active');enInp('a'+i+'_2');}
+    else showFb(i,'ko','\u2717','Tu as trouv\u00e9 la somme\u00a0? La somme de '+d.vals.join('+')+' est '+d.som+'. V\u00e9rifie ton addition.');}
+  else if(s===2){var ok=(v===d.n);el.className='ai '+(ok?'ok':'ko');
+    if(ok){sdot('sd'+i+'_2','done');sdot('sd'+i+'_3','active');enInp('a'+i+'_3');}
+    else showFb(i,'ko','\u2717','Il y a '+d.n+' valeurs dans la liste. Compte-les soigneusement.');}
+}
+function chkP(i,j){
+  if(ST[i].done)return;if(!pOk[i])pOk[i]={};var d=QS[i].ex;
+  var el=document.getElementById('p'+i+'_'+j);if(!el||el.value.trim()==='')return;
+  var v=lireNombre(el.value);var ok=(v===d.prods[j]);
+  el.className='ci '+(ok?'ok':'ko');
+  if(!ok)showFb(i,'ko','\u2717',d.notes[j]+'\u00a0\u00d7\u00a0'+d.effs[j]+' = '+d.prods[j]+'. V\u00e9rifie ce produit.');
+  if(ok)pOk[i][j]=true;
+  if(Object.keys(pOk[i]).length===d.notes.length)enInp('so'+i);
+}
+function chkS(i){
+  if(ST[i].done)return;var d=QS[i].ex;var el=document.getElementById('so'+i);
+  if(!el||el.value.trim()==='')return;var v=lireNombre(el.value);var ok=(v===d.som);
+  el.className='ci '+(ok?'ok':'ko');
+  if(ok)enInp('a'+i+'_m');
+  else showFb(i,'ko','\u2717','La somme des produits est '+d.som+'. Additionne bien toutes les cases note\u00d7effectif.');
+}
+function chkPC(i,j){
+  if(ST[i].done)return;if(!pOkC[i])pOkC[i]={};var d=QS[i].ex;
+  var el=document.getElementById('pc'+i+'_'+j);if(!el||el.value.trim()==='')return;
+  var v=lireNombre(el.value);var ok=Math.abs(v-d.prods[j])<0.005;
+  el.className='ci '+(ok?'ok':'ko');
+  if(!ok)showFb(i,'ko','\u2717',d.ctr[j]+'\u00a0\u00d7\u00a0'+d.effs[j]+' = '+d.prods[j]+'. V\u00e9rifie ce produit.');
+  if(ok)pOkC[i][j]=true;
+  if(Object.keys(pOkC[i]).length===d.ctr.length)enInp('sc'+i);
+}
+function chkSC(i){
+  if(ST[i].done)return;var d=QS[i].ex;var el=document.getElementById('sc'+i);
+  if(!el||el.value.trim()==='')return;var v=lireNombre(el.value);var ok=Math.abs(v-d.som)<0.005;
+  el.className='ci '+(ok?'ok':'ko');
+  if(ok)enInp('ac'+i+'_m');
+  else showFb(i,'ko','\u2717','La somme des produits est '+d.som+'. Additionne bien toutes les cases.');
+}
+function check(i){
+  if(ST[i].done)return;var q=QS[i],ok=false,fb='';
+  if(q.type==='brute'){
+    var r=(document.getElementById('a'+i+'_3').value||'').trim();
+    if(!r){showFb(i,'ko','\u2717','Compl\u00e8te l\u2019\u00e9tape\u00a03 avant de valider.');return;}
+    var v=lireNombre(r);ok=Math.abs(v-q.answer.moy)<=0.005;sic('a'+i+'_3',ok?'ok':'ko');
+    fb=ok?'Bravo\u00a0! La moyenne est bien '+q.answer.moy+'.':'La moyenne attendue est '+q.answer.moy+'. V\u00e9rifie\u00a0: '+q.answer.som+' \u00f7 '+q.answer.n+'.';}
+  else if(q.type==='tab'){
+    var r=(document.getElementById('a'+i+'_m').value||'').trim();
+    if(!r){showFb(i,'ko','\u2717','Compl\u00e8te la case Moyenne avant de valider.');return;}
+    var v=lireNombre(r);ok=Math.abs(v-q.answer.moy)<=0.005;sic('a'+i+'_m',ok?'ok':'ko');
+    fb=ok?'Excellent\u00a0! Moyenne = '+q.answer.moy+'.':'La moyenne attendue est '+q.answer.moy+'. Somme des produits = '+q.answer.som+', effectif total = '+q.answer.tot+'.';}
+  else if(q.type==='cls'){
+    var r=(document.getElementById('ac'+i+'_m').value||'').trim();
+    if(!r){showFb(i,'ko','\u2717','Compl\u00e8te la case Moyenne avant de valider.');return;}
+    var v=lireNombre(r);ok=Math.abs(v-q.answer.moy)<=0.005;sic('ac'+i+'_m',ok?'ok':'ko');
+    fb=ok?'Excellent\u00a0! Moyenne \u2248 '+q.answer.moy+'.':'La moyenne attendue est '+q.answer.moy+'. Somme = '+q.answer.som+', total = '+q.answer.tot+'.';}
+  applyR(i,ok,fb);
+}
+
+(function(){var e=[];for(var t=0;t<100;t++){try{genLevel();}catch(err){e.push(err);}}if(e.length)console.warn('PAZAPA selfTest:',e);})();
+QS=genLevel();buildCards();
+</script>
+<!-- CALCULATRICE fx-92 -->
+<button id="fxc-open" class="fxc-trigger" onclick="fxcOpen()" aria-label="Ouvrir la calculatrice">
+  <svg width="62" height="86" viewBox="0 0 62 86" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="fxcBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcefe8"/><stop offset="1" stop-color="#bcdcd5"/></linearGradient></defs>
+    <rect x="1" y="1" width="60" height="84" rx="9" fill="url(#fxcBody)" stroke="#8fb3aa" stroke-width="1.5"/>
+    <text x="9" y="13" font-family="Arial" font-size="7" font-weight="bold" fill="#2f5d52">CASIO</text>
+    <text x="40" y="13" font-family="Arial" font-size="6" font-weight="bold" fill="#2f5d52">fx-92</text>
+    <rect x="8" y="17" width="46" height="6" rx="2" fill="#26323a"/>
+    <rect x="8" y="26" width="46" height="17" rx="2" fill="#c4d3a6" stroke="#9aa985"/>
+    <circle cx="15" cy="54" r="7" fill="#7fb8ac" stroke="#5e948a"/><circle cx="15" cy="54" r="2.5" fill="#3a4f49"/>
+    <g fill="#5a6b66"><rect x="27" y="49" width="7" height="4" rx="1"/><rect x="37" y="49" width="7" height="4" rx="1"/><rect x="47" y="49" width="7" height="4" rx="1"/><rect x="27" y="56" width="7" height="4" rx="1"/><rect x="37" y="56" width="7" height="4" rx="1"/><rect x="47" y="56" width="7" height="4" rx="1"/></g>
+    <g fill="#7a8b86"><rect x="8" y="64" width="7" height="4" rx="1"/><rect x="18" y="64" width="7" height="4" rx="1"/><rect x="28" y="64" width="7" height="4" rx="1"/><rect x="8" y="71" width="7" height="4" rx="1"/><rect x="18" y="71" width="7" height="4" rx="1"/><rect x="28" y="71" width="7" height="4" rx="1"/></g>
+    <rect x="40" y="64" width="14" height="4" rx="1" fill="#c0392b"/>
+    <rect x="40" y="71" width="14" height="6" rx="1.5" fill="#3a7bd5"/>
+  </svg>
+  <span class="fxc-pill">Calculatrice</span>
+</button>
+<div id="fxc-panel" class="fxc-panel fxc-hidden">
+  <div class="fxc-bar" id="fxc-bar">&#9776; fx-92 &middot; glisse pour d&eacute;placer<span class="fxc-sp"></span>
+    <button class="fxc-icon" id="fxc-help-btn" type="button">?</button>
+    <button class="fxc-icon" id="fxc-close-btn" type="button">&#10005;</button>
+  </div>
+  <div class="fxc-help fxc-hidden" id="fxc-help">&divide;R reste &middot; FACT &middot; PGCD &middot; PPCM &middot; a/b simplifier &middot; &radic; x&sup2; ^</div>
+  <div class="fxc-screen"><div class="fxc-expr" id="fxc-expr"></div><div class="fxc-res" id="fxc-res">0</div></div>
+  <div class="fxc-keys" id="fxc-keys"></div>
+</div>
+<script>
+(function(){
+var expr="";var E=function(id){return document.getElementById(id);};
+var KEYS=[["FACT(","fn","FACT("],["PGCD(","fn","PGCD("],["PPCM(","fn","PPCM("],["a/b","fn","SIMP("],["AC","red","AC"],["DEL","fn","DEL"],["(","op","("],[")","op",")"],[";","op",";"],["÷R","op","÷R"],["7","","7"],["8","","8"],["9","","9"],["÷","op","÷"],["√(","op","√("],["4","","4"],["5","","5"],["6","","6"],["×","op","×"],["x²","op","²"],["1","","1"],["2","","2"],["3","","3"],["−","op","−"],["^","op","^"],["0","","0"],[",","",","],["(−)","op","(−)"],["+","op","+"],["=","eq","="]];
+function render(){E("fxc-expr").textContent=expr;}
+function press(v){if(v==="AC"){expr="";E("fxc-res").textContent="0";render();return;}if(v==="DEL"){del();return;}if(v==="="){E("fxc-res").textContent=evaluate(expr);return;}expr+=v;render();}
+function del(){var toks=["FACT(","PGCD(","PPCM(","SIMP(","√(","÷R","(−)"];for(var i=0;i<toks.length;i++){if(expr.slice(-toks[i].length)===toks[i]){expr=expr.slice(0,-toks[i].length);render();return;}}expr=expr.slice(0,-1);render();}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+function sup(n){var m={"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};return String(n).split("").map(function(c){return m[c]||c;}).join("");}
+function factString(n){n=Math.round(n);if(n<1)return"Erreur";if(n===1)return"1";var f=[],d=2,x=n;while(d*d<=x){while(x%d===0){f.push(d);x/=d;}d++;}if(x>1)f.push(x);var out=[],i=0;while(i<f.length){var p=f[i],c=0;while(i<f.length&&f[i]===p){c++;i++;}out.push(c>1?(p+sup(c)):(""+p));}if(f.length===1&&f[0]===n)return n+" (premier)";return out.join("×");}
+function calc(str){var s=str.replace(/×/g,"*").replace(/÷/g,"/").replace(/²/g,"^2").replace(/√/g,"sqrt").replace(/(−)/g,"-").replace(/−/g,"-").replace(/,/g,".").replace(/\s+/g,"");var pos=0;function pk(){return s.charAt(pos);}function ex(){var v=tm();while(pk()==="+"||pk()==="-"){var o=s.charAt(pos++);var t=tm();v=(o==="+")?v+t:v-t;}return v;}function tm(){var v=fc();while(pk()==="*"||pk()==="/"){var o=s.charAt(pos++);var f=fc();if(o==="*")v*=f;else{if(f===0)throw 0;v/=f;}}return v;}function fc(){var b=ba();if(pk()==="^"){pos++;var e=fc();return Math.pow(b,e);}return b;}function ba(){if(pk()==="-"){pos++;return -ba();}if(pk()==="("){pos++;var v=ex();if(s.charAt(pos)!==")")throw 0;pos++;return v;}if(s.substr(pos,5)==="sqrt("){pos+=5;var v=ex();if(s.charAt(pos)!==")")throw 0;pos++;if(v<0)throw 0;return Math.sqrt(v);}var st=pos;while(pos<s.length&&/[0-9.]/.test(s.charAt(pos)))pos++;if(pos===st)throw 0;return parseFloat(s.substr(st,pos-st));}var r=ex();if(pos!==s.length)throw 0;return r;}
+function args(inner){return inner.split(/[;,]/);}
+function evaluate(raw){var s=(raw||"").trim();if(s==="")return"0";try{if(s.indexOf("÷R")>=0){var p=s.split("÷R");if(p.length!==2)throw 0;var a=Math.round(calc(p[0])),b=Math.round(calc(p[1]));if(b===0)throw 0;var q=Math.floor(a/b),r=a-q*b;return"quotient "+q+" · reste "+r;}var m;if((m=s.match(/^FACT\((.+)\)$/i)))return factString(calc(m[1]));if((m=s.match(/^PGCD\((.+)\)$/i))){var g=args(m[1]);return""+gcd(Math.round(calc(g[0])),Math.round(calc(g[1])));}if((m=s.match(/^PPCM\((.+)\)$/i))){var l=args(m[1]);var A=Math.round(calc(l[0])),B=Math.round(calc(l[1]));if(A===0||B===0)throw 0;return""+(Math.abs(A*B)/gcd(A,B));}if((m=s.match(/^SIMP\((.+)\)$/i))){var z=args(m[1]);var pp=Math.round(calc(z[0])),qq=Math.round(calc(z[1]));if(qq===0)throw 0;var d=gcd(pp,qq)||1;pp/=d;qq/=d;if(qq<0){pp=-pp;qq=-qq;}return qq===1?(""+pp):(pp+"/"+qq);}var v=calc(s);if(!isFinite(v))throw 0;var rv=Math.round(v*1e10)/1e10;return String(rv).replace(".",",");}catch(e){return"Erreur";}}
+var kc=E("fxc-keys");KEYS.forEach(function(k){var btn=document.createElement("button");btn.type="button";btn.className="fxc-k "+(k[1]||"");btn.textContent=k[0];btn.addEventListener("click",function(){press(k[2]);});kc.appendChild(btn);});
+window.fxcOpen=function(){E("fxc-open").classList.add("fxc-hidden");E("fxc-panel").classList.remove("fxc-hidden");};
+window.fxcClose=function(){E("fxc-panel").classList.add("fxc-hidden");E("fxc-open").classList.remove("fxc-hidden");};
+window.fxcHelp=function(){E("fxc-help").classList.toggle("fxc-hidden");};
+E("fxc-close-btn").addEventListener("click",function(e){e.stopPropagation();fxcClose();});
+E("fxc-help-btn").addEventListener("click",function(e){e.stopPropagation();fxcHelp();});
+var bar=E("fxc-bar"),panel=E("fxc-panel"),drag=false,sx,sy,ox,oy,conv=false;
+bar.addEventListener("pointerdown",function(e){if(e.target.classList.contains("fxc-icon"))return;drag=true;conv=false;sx=e.clientX;sy=e.clientY;var r=panel.getBoundingClientRect();ox=r.left;oy=r.top;bar.setPointerCapture(e.pointerId);});
+bar.addEventListener("pointermove",function(e){if(!drag)return;if(!conv){panel.style.right="auto";panel.style.bottom="auto";panel.style.left=ox+"px";panel.style.top=oy+"px";conv=true;}var nx=ox+(e.clientX-sx),ny=oy+(e.clientY-sy);var w=panel.offsetWidth,h=panel.offsetHeight;nx=Math.max(4,Math.min(window.innerWidth-w-4,nx));ny=Math.max(4,Math.min(window.innerHeight-h-4,ny));panel.style.left=nx+"px";panel.style.top=ny+"px";});
+bar.addEventListener("pointerup",function(e){drag=false;try{bar.releasePointerCapture(e.pointerId);}catch(_){}});
+})();
+</script>
+</body>
+</html>
