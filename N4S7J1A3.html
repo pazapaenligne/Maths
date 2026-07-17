@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths – Mission Océan · Je relève le défi · Semaine 7 Jour 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================================
+   COQUILLE PERMANENTE — SEMAINE 7 — MISSION OCÉAN
+   ⚠️ INTÉGRALEMENT IDENTIQUE À MAQUETTE_MissionOcean.html VALIDÉE.
+   NE PAS MODIFIER CE BLOC.
+   ============================================================================ */
+:root{
+  --abyss:#051b2c; --panel:#0b2e46; --panel-2:#123a56; --panel-line:rgba(46,230,214,.18);
+  --turquoise:#2ee6d6; --turquoise-dim:#16897d; --sand:#e8d9b5; --foam:#eaf6f4; --green:#4be38a;
+  --coral:#ff6b5c; --radius:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(46,230,214,.10), transparent 45%),
+    radial-gradient(ellipse at 100% 110%, rgba(46,230,214,.07), transparent 50%),
+    var(--abyss);
+  color:var(--foam); font-family:'JetBrains Mono',monospace; min-height:100vh;
+  padding:1.4rem 1.2rem 3rem; display:flex; flex-direction:column; align-items:center;
+}
+.app{width:100%;max-width:1180px;}
+
+button:focus-visible{ outline:2px solid var(--turquoise); outline-offset:2px; }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:1rem 1.3rem;background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius);
+  margin-bottom:1.1rem;position:relative;overflow:hidden;}
+.topbar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(46,230,214,.06),transparent);
+  animation:sheen 7s linear infinite;pointer-events:none;}
+@keyframes sheen{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+.brand-plate{background:#f5c518;color:#1a1400;font-size:.68rem;letter-spacing:.09em;font-weight:700;
+  padding:.32rem .7rem;border-radius:99px;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;}
+.brand-plate .dot{width:6px;height:6px;border-radius:50%;background:#1a1400;display:inline-block;}
+.mission-title{text-align:center;flex:1;}
+.mission-eyebrow{font-size:.68rem;letter-spacing:.28em;color:var(--sand);opacity:.8;}
+.mission-title h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(1.5rem,4.5vw,2.3rem);
+  letter-spacing:.06em;color:var(--foam);text-shadow:0 0 18px rgba(46,230,214,.35);}
+.day-topic{font-size:.72rem;letter-spacing:.05em;color:var(--sand);opacity:.78;margin-top:.4rem;
+  font-family:'JetBrains Mono',monospace;}
+.sound-toggle{background:var(--panel-2);border:1px solid var(--panel-line);color:var(--turquoise);
+  width:2.5rem;height:2.5rem;border-radius:50%;font-size:1.05rem;cursor:pointer;flex-shrink:0;}
+
+@media(max-width:600px){
+  .topbar{flex-wrap:wrap;justify-content:center;}
+  .mission-title{order:3;flex-basis:100%;}
+  .brand-plate{font-size:.61rem;}
+}
+
+.grid{display:grid;grid-template-columns:280px 1fr;grid-template-areas:"dash scanner" "journal radar";gap:1rem;}
+@media(max-width:860px){.grid{grid-template-columns:1fr;grid-template-areas:"dash" "scanner" "journal" "radar";}}
+
+.panel{background:var(--panel);border:1px solid var(--panel-line);border-radius:var(--radius);
+  padding:1.1rem 1.1rem 1.2rem;position:relative;}
+.panel-title{font-size:.72rem;letter-spacing:.18em;color:var(--turquoise);margin-bottom:.9rem;
+  padding-bottom:.5rem;border-bottom:1px solid var(--panel-line);font-weight:700;}
+
+.dashboard{grid-area:dash;display:flex;flex-direction:column;gap:.75rem;}
+.gauge{background:var(--panel-2);border:1px solid var(--panel-line);border-radius:10px;padding:.65rem .8rem;}
+.gauge-label{display:block;font-size:.66rem;letter-spacing:.1em;color:var(--sand);opacity:.85;margin-bottom:.3rem;}
+.gauge-value{font-size:1.15rem;font-weight:700;color:var(--foam);}
+.gauge-value.accent{color:var(--turquoise);}
+.gauge-value.timer-digits{font-size:1.7rem;color:var(--turquoise);text-shadow:0 0 12px rgba(46,230,214,.5);}
+.gauge-value.timer-digits.low{color:var(--coral);text-shadow:0 0 12px rgba(255,107,92,.5);}
+.gauge-bar-bg{background:rgba(255,255,255,.08);border-radius:99px;height:6px;overflow:hidden;margin-top:.4rem;}
+.gauge-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--turquoise-dim),var(--turquoise));border-radius:99px;transition:width .5s ease;}
+@media(max-width:860px){.dashboard{flex-direction:row;flex-wrap:wrap;}.gauge{flex:1 1 130px;}}
+
+.scanner{grid-area:scanner;min-height:320px;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;padding:1.4rem;background:
+    repeating-linear-gradient(0deg, rgba(46,230,214,.05) 0, rgba(46,230,214,.05) 1px, transparent 1px, transparent 34px),
+    repeating-linear-gradient(90deg, rgba(46,230,214,.05) 0, rgba(46,230,214,.05) 1px, transparent 1px, transparent 34px),
+    var(--panel);
+  transition:box-shadow .35s ease;}
+.scanner-sweep{position:absolute;top:0;bottom:0;width:120px;z-index:1;
+  background:linear-gradient(90deg, transparent, rgba(46,230,214,.10), transparent);
+  animation:sweep 5.5s ease-in-out infinite;}
+@keyframes sweep{0%{left:-15%;}50%{left:100%;}100%{left:-15%;}}
+.scanner-inner{position:relative;z-index:2;width:100%;}
+.scanner-msg{text-align:center;padding:1.5rem;max-width:480px;margin:0 auto;}
+.scanner-icon{font-size:2.6rem;color:var(--turquoise);opacity:.85;animation:pulse 2.6s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.08);}}
+.scanner-msg p{margin-top:.6rem;letter-spacing:.12em;font-size:.85rem;color:var(--sand);}
+.scanner-sub{font-size:.72rem !important;color:var(--foam) !important;opacity:.55;margin-top:.3rem !important;letter-spacing:.04em !important;}
+
+.journal{grid-area:journal;}
+.journal-log{font-size:.78rem;line-height:1.9;color:var(--green);max-height:180px;overflow-y:auto;}
+.log-time{color:var(--turquoise-dim);margin-right:.5rem;}
+.log-line{opacity:.9;}
+.cursor{display:inline-block;width:8px;background:var(--green);animation:blink 1s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+
+.radar{grid-area:radar;display:flex;flex-direction:column;align-items:center;}
+.radar-face{position:relative;width:170px;height:170px;border-radius:50%;
+  border:1px solid var(--panel-line);background:radial-gradient(circle, rgba(46,230,214,.04) 0%, transparent 70%);
+  margin-top:.3rem;}
+.radar-face::before,.radar-face::after{content:'';position:absolute;border:1px solid var(--panel-line);border-radius:50%;z-index:1;}
+.radar-face::before{inset:22px;}
+.radar-face::after{inset:44px;}
+.radar-ring3{position:absolute;inset:66px;border:1px solid var(--panel-line);border-radius:50%;z-index:1;}
+.radar-sweep{position:absolute;inset:0;border-radius:50%;z-index:2;opacity:.45;
+  background:conic-gradient(from 0deg, rgba(46,230,214,.55), transparent 32%);
+  animation:spin 4s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.blip{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);
+  z-index:3;animation:ping 2.4s ease-in-out infinite;}
+@keyframes ping{0%,100%{opacity:.4;}50%{opacity:1;}}
+.radar-extra{display:flex;gap:.5rem;margin-top:1rem;width:100%;flex-wrap:wrap;justify-content:center;}
+.mini-stat{background:var(--panel-2);border:1px solid var(--panel-line);border-radius:8px;
+  padding:.4rem .55rem;text-align:center;flex:1 1 90px;}
+.mini-stat span{display:block;font-size:.58rem;letter-spacing:.08em;color:var(--sand);opacity:.8;margin-bottom:.2rem;}
+.mini-stat strong{font-size:.82rem;color:var(--foam);}
+.mini-stat strong.ok{color:var(--green);}
+
+/* ============================================================================
+   CSS DU MODULE DU JOUR — JOUR 1 : moyennes et étendues
+   Seule cette section (+ le script du module) change les jours suivants.
+   Ajouts additifs uniquement — aucune règle de la coquille ci-dessus modifiée.
+   ============================================================================ */
+.obs-eyebrow{font-size:.68rem;letter-spacing:.18em;color:var(--turquoise-dim);text-align:center;margin-bottom:.6rem;text-transform:uppercase;}
+.consigne{font-size:clamp(1.02rem,3vw,1.18rem);font-weight:700;color:var(--foam);text-align:center;
+  margin-bottom:1.2rem;line-height:1.6;}
+.consigne .kw{color:var(--turquoise);}
+.zones{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+@media(max-width:520px){.zones{grid-template-columns:1fr;}}
+.zone{border-radius:12px;border:1.5px solid;padding:.9rem .8rem;cursor:pointer;transition:transform .12s;text-align:center;
+  background:var(--panel-2);}
+.zone:active{transform:scale(.98);}
+.zone.z-green{border-color:rgba(125,209,92,.5);box-shadow:inset 0 0 0 1px rgba(125,209,92,.12);}
+.zone.z-red{border-color:rgba(255,107,92,.5);box-shadow:inset 0 0 0 1px rgba(255,107,92,.12);}
+.zone.z-yellow{border-color:rgba(245,197,24,.5);box-shadow:inset 0 0 0 1px rgba(245,197,24,.12);}
+.zone.z-blue{border-color:rgba(46,230,214,.5);box-shadow:inset 0 0 0 1px rgba(46,230,214,.12);}
+.zone.correctZ{box-shadow:0 0 0 3px var(--green);}
+.zone.wrongZ{box-shadow:0 0 0 3px var(--coral);}
+.zone.dimmed{opacity:.45;}
+.zone.locked{cursor:default;}
+.pastilles{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;align-items:center;min-height:56px;}
+.pas{background:var(--panel);border:1px solid rgba(255,255,255,.16);border-radius:50%;width:48px;height:48px;display:flex;
+  align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85rem;color:var(--foam);}
+
+/* Q4 — quatre affirmations (variante en liste, mêmes couleurs de zone) */
+.statement-list{display:flex;flex-direction:column;gap:.6rem;}
+.zone.zone-row{text-align:left;font-size:.92rem;line-height:1.55;padding:.8rem .95rem;}
+.zone.zone-row strong{color:var(--turquoise);}
+.zone.zone-row.correctZ strong,.zone.zone-row.wrongZ strong{color:var(--foam);}
+
+.stage-feedback{margin-top:1.1rem;padding:.85rem 1rem;border-radius:12px;font-size:.94rem;display:none;line-height:1.7;}
+.stage-feedback.show{display:block;}
+.stage-feedback.ok{background:rgba(75,227,138,.10);border:1.5px solid var(--green);color:var(--green);}
+.stage-feedback.ko{background:rgba(255,107,92,.10);border:1.5px solid var(--coral);color:var(--coral);}
+.stage-feedback .fb-title{font-weight:800;margin-bottom:.3rem;}
+.stage-feedback strong{color:var(--foam);}
+
+.stage-next{margin-top:1rem;display:none;justify-content:flex-end;}
+.stage-next.show{display:flex;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.3rem;border-radius:10px;font-family:'JetBrains Mono',monospace;
+  font-size:.92rem;font-weight:700;cursor:pointer;border:1px solid var(--panel-line);transition:transform .12s;min-height:2.9rem;
+  background:var(--turquoise);color:#04222a;}
+.btn:active{transform:scale(.96);}
+
+/* Réactions discrètes du laboratoire après une réponse (ajouts additifs) */
+.scanner.flash-ok{box-shadow:inset 0 0 0 3px rgba(75,227,138,.6);}
+.scanner.flash-ko{box-shadow:inset 0 0 0 3px rgba(255,107,92,.6);}
+.blip.ping-react{animation-duration:.6s;}
+
+/* Rapport de mission (remplace le contenu de .scanner-inner) */
+.bilan{text-align:center;padding:.4rem .6rem;}
+.bilan-title{font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.08em;font-size:clamp(1.3rem,4vw,1.7rem);
+  color:var(--turquoise);text-shadow:0 0 14px rgba(46,230,214,.35);margin-bottom:1.1rem;}
+.bilan-lines{display:flex;flex-direction:column;gap:.45rem;max-width:340px;margin:0 auto 1rem;}
+.bilan-line{display:flex;justify-content:space-between;gap:.6rem;background:var(--panel-2);border:1px solid var(--panel-line);
+  border-radius:8px;padding:.5rem .75rem;font-size:.82rem;}
+.bilan-line span{color:var(--sand);opacity:.85;}
+.bilan-line strong{color:var(--foam);}
+.status-ok{color:var(--green) !important;}
+.status-mid{color:var(--turquoise) !important;}
+.status-low{color:var(--coral) !important;}
+.bilan-stars{font-size:1.9rem;margin-bottom:.7rem;}
+.bilan-msg{color:var(--foam);font-size:.96rem;margin-bottom:1.4rem;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand-plate"><span class="dot"></span>PAZAPA · MATHS 4E</div>
+    <div class="mission-title">
+      <div class="mission-eyebrow">LABORATOIRE OCÉANOGRAPHIQUE — SEMAINE 7</div>
+      <h1>MISSION OCÉAN</h1>
+      <div class="day-topic">SEMAINE 7 – STATISTIQUES ET PROBABILITÉS · Jour 1 — Calculer des fréquences et des moyennes</div>
+    </div>
+    <button
+      class="sound-toggle"
+      type="button"
+      id="soundBtn"
+      aria-label="Désactiver le son"
+      aria-pressed="false"
+      onclick="toggleSound()">🔊</button>
+  </header>
+
+  <main class="grid">
+
+    <aside class="panel dashboard">
+      <div class="gauge"><span class="gauge-label">JOUR</span><span class="gauge-value accent" id="dashJour">1 / 5</span></div>
+      <div class="gauge">
+        <span class="gauge-label">PROGRESSION</span>
+        <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="dashProgFill" style="width:0%"></div></div>
+      </div>
+      <div class="gauge"><span class="gauge-label">QUESTIONS</span><span class="gauge-value" id="dashQuestions">1 / 5</span></div>
+      <div class="gauge"><span class="gauge-label">SCORE</span><span class="gauge-value accent" id="dashScore">0</span></div>
+      <div class="gauge gauge-timer"><span class="gauge-label">TEMPS RESTANT</span><span class="gauge-value timer-digits" id="dashTimer">02:00</span></div>
+    </aside>
+
+    <section class="panel scanner" id="scannerPanel">
+      <div class="scanner-sweep"></div>
+      <div class="scanner-inner" id="scannerInner">
+        <div class="scanner-msg">
+          <div class="scanner-icon">◎</div>
+          <p>INITIALISATION</p>
+          <p class="scanner-sub">Chargement du premier exercice…</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel journal">
+      <div class="panel-title">JOURNAL DE MISSION</div>
+      <div class="journal-log" id="journalLog">
+        <div class="log-line"><span class="log-time">[08:14:02]</span>Connexion établie au laboratoire.</div>
+        <div class="log-line"><span class="log-time">[08:14:05]</span>Systèmes de mesure activés.</div>
+        <div class="log-line" id="journalCursorLine"><span class="cursor">_</span></div>
+      </div>
+    </section>
+
+    <section class="panel radar">
+      <div class="panel-title">SONAR</div>
+      <div class="radar-face">
+        <div class="radar-ring3"></div>
+        <div class="radar-sweep"></div>
+        <div class="blip" style="top:38%;left:62%;"></div>
+        <div class="blip" style="top:64%;left:34%;animation-delay:.8s;"></div>
+        <div class="blip" style="top:50%;left:50%;animation-delay:1.6s;"></div>
+      </div>
+      <div class="radar-extra">
+        <div class="mini-stat"><span>PROFONDEUR</span><strong>−214 m</strong></div>
+        <div class="mini-stat"><span>TEMPÉRATURE</span><strong>4,2&nbsp;°C</strong></div>
+        <div class="mini-stat"><span>CONNEXION</span><strong class="ok" id="connexionState">● Stable</strong></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* ============================================================================
+   COQUILLE — MOTEUR GÉNÉRIQUE (dashboard, chrono, score, journal, sons)
+   Structure inchangée. Seuls les TEXTES (journal, libellés de bouton, bilan)
+   ont été rendus plus variés / scientifiques, à la demande explicite du 17/07.
+   ============================================================================ */
+const SEMAINE_NUM = 7;
+const JOUR_ACTUEL = 1;
+const TOTAL_JOURS = 5;
+const TEMPS_PAR_QUESTION = 120;
+
+let qIndex = 0, score = 0, timeUsedTotal = 0;
+let currentData = null, currentController = null, answered = false, timeLeft = TEMPS_PAR_QUESTION, timerHandle = null;
+let soundOn = true;
+let missionClock = 8*3600 + 14*60 + 9;
+
+function $(id){ return document.getElementById(id); }
+function pad(n){ return n<10 ? "0"+n : ""+n; }
+function fmtClock(sec){ const h=Math.floor(sec/3600)%24, m=Math.floor((sec%3600)/60), s=sec%60; return pad(h)+":"+pad(m)+":"+pad(s); }
+function fmtMMSS(sec){ const m=Math.floor(sec/60), s=sec%60; return pad(m)+":"+pad(s); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function formatTempsTotal(sec){
+  const min = Math.floor(sec / 60);
+  const secondes = sec % 60;
+  if(min === 0){ return secondes + " s"; }
+  return min + " min " + pad(secondes) + " s";
+}
+
+function addLog(text){
+  missionClock += 2 + Math.floor(Math.random()*5);
+  const line = document.createElement("div");
+  line.className = "log-line";
+  line.innerHTML = '<span class="log-time">['+fmtClock(missionClock)+']</span>'+text;
+  const log = $("journalLog"), cursor = $("journalCursorLine");
+  log.insertBefore(line, cursor);
+  log.scrollTop = log.scrollHeight;
+}
+
+/* Réaction discrète du scanner et du sonar après une réponse (immersion) */
+function reactLab(success){
+  const panel = $("scannerPanel");
+  const cls = success ? "flash-ok" : "flash-ko";
+  panel.classList.add(cls);
+  setTimeout(function(){ panel.classList.remove(cls); }, 550);
+  document.querySelectorAll(".blip").forEach(function(b){
+    b.classList.add("ping-react");
+    setTimeout(function(){ b.classList.remove("ping-react"); }, 900);
+  });
+}
+
+function initShell(){
+  $("dashJour").textContent = JOUR_ACTUEL + " / " + TOTAL_JOURS;
+  startQuestion();
+}
+
+function startQuestion(){
+  answered = false;
+  timeLeft = TEMPS_PAR_QUESTION;
+  currentData = DAY_EXERCISE.buildQuestion(qIndex);
+  addLog(pick([
+    "Nouvel échantillon chargé — observation "+(qIndex+1)+".",
+    "Connexion au capteur "+(qIndex+1)+" établie.",
+    "Chargement des données de l'observation "+(qIndex+1)+"…"
+  ]));
+  renderScanner();
+  startTimer();
+  updateDashboard();
+}
+
+function renderScanner(){
+  const inner = $("scannerInner");
+  inner.innerHTML =
+    '<div class="obs-eyebrow">OBSERVATION '+(qIndex+1)+' / '+DAY_EXERCISE.totalQuestions+'</div>'
+    + '<div class="consigne">'+currentData.consigne+'</div>'
+    + '<div id="stageBody"></div>'
+    + '<div class="stage-feedback" id="stageFeedback"></div>'
+    + '<div class="stage-next" id="stageNext"><button class="btn" type="button" id="nextBtn" onclick="nextQuestion()"></button></div>';
+  currentController = DAY_EXERCISE.render(currentData, $("stageBody"), submitAnswer);
+}
+
+function nextButtonLabel(){
+  if(qIndex+1>=DAY_EXERCISE.totalQuestions) return "Voir le rapport de mission \u2192";
+  return pick(["Nouvelle analyse \u2192","Observation suivante \u2192","Échantillon suivant \u2192"]);
+}
+
+function startTimer(){
+  clearInterval(timerHandle);
+  updateTimerDisplay();
+  timerHandle = setInterval(function(){
+    if(timeLeft > 0){ timeLeft--; }
+    updateTimerDisplay();
+    if(timeLeft === 0){
+      clearInterval(timerHandle);
+      if(!answered && currentController && currentController.forceTimeout) currentController.forceTimeout();
+    }
+  },1000);
+}
+function updateTimerDisplay(){
+  const t = $("dashTimer");
+  t.textContent = fmtMMSS(Math.max(0,timeLeft));
+  t.className = "gauge-value timer-digits"+(timeLeft<=20 ? " low" : "");
+}
+function updateDashboard(){
+  $("dashQuestions").textContent = (qIndex+1)+" / "+DAY_EXERCISE.totalQuestions;
+  $("dashScore").textContent = score;
+  $("dashProgFill").style.width = Math.round((qIndex+1)/DAY_EXERCISE.totalQuestions*100)+"%";
+}
+
+function submitAnswer(result){
+  if(answered) return;
+  answered = true;
+  clearInterval(timerHandle);
+  timeUsedTotal += (TEMPS_PAR_QUESTION-Math.max(0,timeLeft));
+  if(result.correct) score++;
+
+  const fb = $("stageFeedback");
+  const text = DAY_EXERCISE.feedbackHTML(currentData, result);
+  fb.className = "stage-feedback show " + (result.correct ? "ok" : "ko");
+  fb.innerHTML = '<div class="fb-title">'+text.title+'</div>'+text.body;
+
+  reactLab(result.correct);
+
+  if(result.correct){
+    addLog(pick(["Analyse validée : série identifiée avec succès.","Observation confirmée par le système.","Corrélation confirmée entre les données."]));
+    playCorrect();
+  } else if(result.timeout){
+    addLog(pick(["Signal perdu : temps de mesure écoulé.","Fenêtre d'analyse expirée.","Capteur en veille : délai dépassé."]));
+    playWrong();
+  } else {
+    addLog(pick(["Anomalie détectée : mauvaise série sélectionnée.","Écart non conforme aux mesures attendues.","Résultat à revérifier par l'équipe."]));
+    playWrong();
+  }
+
+  $("stageNext").className = "stage-next show";
+  $("nextBtn").textContent = nextButtonLabel();
+  $("dashScore").textContent = score;
+}
+
+function nextQuestion(){
+  qIndex++;
+  if(qIndex>=DAY_EXERCISE.totalQuestions){ showResults(); return; }
+  startQuestion();
+}
+
+function showResults(){
+  $("dashProgFill").style.width = "100%";
+  $("dashQuestions").textContent = DAY_EXERCISE.totalQuestions+" / "+DAY_EXERCISE.totalQuestions;
+  const total = DAY_EXERCISE.totalQuestions;
+  const stars = score===total ? 3 : (score>=3 ? 2 : 1);
+  let st = ""; for(let s=0;s<3;s++) st += (s<stars ? "\u2b50" : "\u2606");
+
+  let status, statusClass, msg;
+  if(score===total){ status="MISSION RÉUSSIE"; statusClass="status-ok"; msg="Mission accomplie sans une seule erreur ! Le laboratoire te fait confiance."; }
+  else if(score>=3){ status="MISSION VALIDÉE"; statusClass="status-mid"; msg="Bonne mission ! Continue à bien comparer les données avant de conclure."; }
+  else { status="MISSION À CONSOLIDER"; statusClass="status-low"; msg="Mission à reprendre en douceur : relis bien chaque observation avant de choisir."; }
+
+  $("scannerInner").innerHTML =
+    '<div class="bilan">'
+    + '<div class="bilan-title">MISSION TERMINÉE</div>'
+    + '<div class="bilan-lines">'
+    + '<div class="bilan-line"><span>Observations réalisées</span><strong>'+total+' / '+total+'</strong></div>'
+    + '<div class="bilan-line"><span>Observations validées</span><strong>'+score+' / '+total+'</strong></div>'
+    + '<div class="bilan-line"><span>Temps utilisé</span><strong>'+formatTempsTotal(timeUsedTotal)+'</strong></div>'
+    + '<div class="bilan-line"><span>Statut de mission</span><strong class="'+statusClass+'">'+status+'</strong></div>'
+    + '</div>'
+    + '<div class="bilan-stars">'+st+'</div>'
+    + '<p class="bilan-msg">'+msg+'</p>'
+    + '<button class="btn" type="button" onclick="restart()">Nouvelle mission</button>'
+    + '</div>';
+  addLog(pick(["Mission terminée : rapport final généré.","Toutes les observations ont été transmises au centre de contrôle."]));
+  playFinal();
+}
+
+function restart(){
+  clearInterval(timerHandle);
+  qIndex = 0;
+  score = 0;
+  timeUsedTotal = 0;
+  answered = false;
+
+  $("dashScore").textContent = "0";
+  $("dashQuestions").textContent = "1 / " + DAY_EXERCISE.totalQuestions;
+  $("dashProgFill").style.width = Math.round(1/DAY_EXERCISE.totalQuestions*100)+"%";
+
+  addLog("Nouvelle mission lancée : régénération des données.");
+  startQuestion();
+}
+
+/* --- Sons (Web Audio API), pilotés par le bouton son du bandeau --- */
+let actx = null;
+function ensureAudio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
+function tone(freq, dur, type, delay, gainVal){
+  if(!soundOn) return;
+  const ctx = ensureAudio(); if(!ctx) return;
+  const t0 = ctx.currentTime + (delay||0);
+  const osc = ctx.createOscillator(); const g = ctx.createGain();
+  osc.type = type||"sine"; osc.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gainVal||0.12, t0+0.02);
+  g.gain.linearRampToValueAtTime(0, t0+dur);
+  osc.connect(g); g.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+function playCorrect(){ tone(660,.14,"sine",0); tone(880,.18,"sine",.12); }
+function playWrong(){ tone(220,.22,"sine",0,.09); }
+function playFinal(){ tone(523,.14,"sine",0); tone(659,.14,"sine",.14); tone(784,.22,"sine",.28); }
+function toggleSound(){
+  soundOn = !soundOn;
+  const btn = $("soundBtn");
+  btn.setAttribute("aria-pressed", String(!soundOn));
+  btn.textContent = soundOn ? "🔊" : "🔇";
+  btn.setAttribute("aria-label", soundOn ? "Désactiver le son" : "Activer le son");
+  if(soundOn) ensureAudio();
+}
+
+/* ============================================================================
+   MODULE DU JOUR — JOUR 1 : moyennes et étendues (Semaine 7)
+   5 formats différents, fidèles au manuel, difficulté croissante.
+   ============================================================================ */
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function genSeriesMean(meanScaled, n, minVal, maxVal, maxTries){
+  maxTries = maxTries || 100;
+  for(let t=0; t<maxTries; t++){
+    let vals=[], sum=0;
+    for(let i=0;i<n-1;i++){ const v=randInt(minVal,maxVal); vals.push(v); sum+=v; }
+    const last = meanScaled*n - sum;
+    if(Number.isInteger(last) && last>=minVal && last<=maxVal){ vals.push(last); shuffle(vals); return vals; }
+  }
+  return null;
+}
+function genSeriesRange(rangeScaled, n, minVal, maxVal, maxTries){
+  maxTries = maxTries || 100;
+  for(let t=0; t<maxTries; t++){
+    if(maxVal-rangeScaled < minVal) return null;
+    const lo = randInt(minVal, maxVal-rangeScaled);
+    let vals = [lo, lo+rangeScaled];
+    for(let i=0;i<n-2;i++){ vals.push(randInt(lo, lo+rangeScaled)); }
+    shuffle(vals);
+    return vals;
+  }
+  return null;
+}
+function genValueSeries(cfg, targetScaled, n){
+  return cfg.type==="moyenne"
+    ? genSeriesMean(targetScaled, n, cfg.minVal, cfg.maxVal)
+    : genSeriesRange(targetScaled, n, cfg.minVal, cfg.maxVal);
+}
+function checkSeries(cfg, vals, targetScaled){
+  if(cfg.type==="moyenne") return vals.reduce((a,b)=>a+b,0) === targetScaled*vals.length;
+  return (Math.max(...vals)-Math.min(...vals)) === targetScaled;
+}
+function fmtVal(v, scale){
+  if(scale===1){ return v<0 ? "\u2212"+Math.abs(v) : String(v); }
+  const dec = v/scale;
+  const s = Math.abs(dec).toFixed(1).replace(".", ",");
+  return dec<0 ? "\u2212"+s : s;
+}
+function typeLabel(type){ return type==="moyenne" ? "moyenne" : "étendue"; }
+function genDistractors(target, scale, type, count){
+  const pool = scale===1 ? [1,2,3,4,-1,-2,-3,-4,5,-5] : [5,10,15,20,-5,-10,-15,-20,25,-25];
+  shuffle(pool);
+  const result = [];
+  for(const d of pool){
+    const val = target+d;
+    if(val===target) continue;
+    if(type==="etendue" && val<1) continue;
+    if(result.indexOf(val)===-1) result.push(val);
+    if(result.length>=count) break;
+  }
+  let guard=0;
+  while(result.length<count && guard<30){
+    guard++;
+    const step = (scale===1?1:10)*randInt(6,9)*(Math.random()<0.5?1:-1);
+    const val = target+step;
+    if(val!==target && result.indexOf(val)===-1 && !(type==="etendue"&&val<1)) result.push(val);
+  }
+  return result;
+}
+
+const ZONE_CLASSES = ["z-green","z-red","z-yellow","z-blue"];
+
+/* ============================================================================
+   JEUX DE DONNÉES DE SECOURS (vérifiés mathématiquement à la main)
+   Utilisés uniquement si la génération aléatoire échoue après 50 tentatives,
+   pour garantir que l'activité ne reste jamais bloquée.
+   ============================================================================ */
+const FALLBACK_ZONES_DIFF_MOYENNE = {
+  mode:"zones-diff", cfg:{type:"moyenne",scale:1}, scale:1, commonTarget:8, oddTarget:10,
+  series:[
+    { vals:[6,10], isOdd:false },   // moyenne 8
+    { vals:[7,8,9], isOdd:false },  // moyenne 8
+    { vals:[4,8,12], isOdd:false }, // moyenne 8
+    { vals:[8,12], isOdd:true }     // moyenne 10
+  ],
+  correctIndex:3,
+  consigne:'Quelle série de nombres n\u2019a pas la même <span class="kw">moyenne</span> que les autres&nbsp;?'
+};
+const FALLBACK_ZONES_DIFF_ETENDUE = {
+  mode:"zones-diff", cfg:{type:"etendue",scale:1}, scale:1, commonTarget:6, oddTarget:9,
+  series:[
+    { vals:[2,8], isOdd:false },   // étendue 8-2=6
+    { vals:[5,11], isOdd:false },  // étendue 11-5=6
+    { vals:[0,6], isOdd:false },   // étendue 6-0=6
+    { vals:[2,11], isOdd:true }    // étendue 11-2=9
+  ],
+  correctIndex:3,
+  consigne:'Quelle série de nombres n\u2019a pas la même <span class="kw">étendue</span> que les autres&nbsp;?'
+};
+const FALLBACK_STATEMENTS = {
+  mode:"statements", type:"moyenne", scale:1, vals:[4,6,8], target:6,
+  items:[
+    { value:8, isCorrect:false },
+    { value:6, isCorrect:true },  // moyenne de [4,6,8] = 18/3 = 6
+    { value:5, isCorrect:false },
+    { value:9, isCorrect:false }
+  ],
+  correctIndex:1,
+  consigne:"Parmi ces quatre affirmations, laquelle est correcte&nbsp;?"
+};
+const FALLBACK_ZONES_TARGET = {
+  mode:"zones-target", type:"moyenne", scale:1, target:7,
+  series:[
+    { vals:[4,6] },     // moyenne 5
+    { vals:[5,9] },     // moyenne 7 -> bonne réponse
+    { vals:[8,10] },    // moyenne 9
+    { vals:[3,7,8] }    // moyenne 6
+  ],
+  correctIndex:1,
+  consigne:'Quelle série a pour <span class="kw">moyenne</span> <strong>7</strong>&nbsp;?'
+};
+
+/* ---- Q1, Q2, Q3 : trouver la série différente (moyenne ou étendue) ---- */
+function buildZonesDiff(cfg){
+  for(let attempt=0; attempt<50; attempt++){
+    const commonTarget = randInt(cfg.targetMin, cfg.targetMax);
+    let delta = randInt(cfg.deltaMin, cfg.deltaMax);
+    if(cfg.type==="moyenne" && Math.random()<0.5) delta = -delta;
+    let oddTarget = commonTarget + delta;
+    if(cfg.type==="etendue" && oddTarget<1) oddTarget = commonTarget + Math.abs(delta);
+    if(oddTarget===commonTarget) continue;
+
+    const series = []; let ok = true;
+    for(let i=0;i<3;i++){
+      const n = cfg.nOptions[randInt(0,cfg.nOptions.length-1)];
+      const vals = genValueSeries(cfg, commonTarget, n);
+      if(!vals){ ok=false; break; }
+      series.push({ vals, isOdd:false });
+    }
+    if(!ok) continue;
+    const nOdd = cfg.nOptions[randInt(0,cfg.nOptions.length-1)];
+    const valsOdd = genValueSeries(cfg, oddTarget, nOdd);
+    if(!valsOdd) continue;
+    series.push({ vals:valsOdd, isOdd:true });
+
+    shuffle(series);
+    const correctIndex = series.findIndex(s=>s.isOdd);
+    let checkOk = true;
+    for(const s of series){ if(!checkSeries(cfg, s.vals, s.isOdd?oddTarget:commonTarget)) checkOk=false; }
+    if(!checkOk || correctIndex<0) continue;
+
+    const label = typeLabel(cfg.type);
+    return {
+      mode:"zones-diff", cfg, scale:cfg.scale, commonTarget, oddTarget, series, correctIndex,
+      consigne: "Quelle série de nombres n\u2019a pas la même <span class=\"kw\">"+label+"</span> que les autres&nbsp;?"
+    };
+  }
+  return cfg.type==="moyenne" ? FALLBACK_ZONES_DIFF_MOYENNE : FALLBACK_ZONES_DIFF_ETENDUE;
+}
+
+/* ---- Q4 : quatre affirmations, une seule correcte ---- */
+function buildStatements(){
+  const type = Math.random()<0.5 ? "moyenne" : "etendue";
+  const scale = (type==="moyenne" && Math.random()<0.4) ? 10 : 1;
+  const cfg = {
+    type, scale,
+    minVal: type==="etendue" ? 0 : (scale===10 ? 10 : 1),
+    maxVal: scale===10 ? 220 : 25
+  };
+  const targetMin = scale===10 ? 50 : (type==="etendue" ? 4 : 6);
+  const targetMax = scale===10 ? 160 : (type==="etendue" ? 14 : 16);
+  const nOptions = [3,4,5];
+
+  for(let attempt=0; attempt<50; attempt++){
+    const target = randInt(targetMin, targetMax);
+    const n = nOptions[randInt(0,nOptions.length-1)];
+    const vals = genValueSeries(cfg, target, n);
+    if(!vals) continue;
+    if(!checkSeries(cfg, vals, target)) continue;
+    const distractors = genDistractors(target, scale, type, 3);
+    if(distractors.length<3) continue;
+
+    const items = shuffle([
+      { value:target, isCorrect:true },
+      { value:distractors[0], isCorrect:false },
+      { value:distractors[1], isCorrect:false },
+      { value:distractors[2], isCorrect:false }
+    ]);
+    const correctIndex = items.findIndex(it=>it.isCorrect);
+    if(correctIndex<0) continue;
+
+    return {
+      mode:"statements", type, scale, vals, target, items, correctIndex,
+      consigne:"Parmi ces quatre affirmations, laquelle est correcte&nbsp;?"
+    };
+  }
+  return FALLBACK_STATEMENTS;
+}
+
+/* ---- Q5 : retrouver la série correspondant à une valeur donnée ---- */
+function buildZonesTarget(){
+  const type = Math.random()<0.5 ? "moyenne" : "etendue";
+  let cfg, targetMin, targetMax;
+  if(type==="etendue"){
+    cfg = { type, scale:1, minVal:0, maxVal:26 };
+    targetMin=4; targetMax=16;
+  } else {
+    const decimal = Math.random()<0.35;
+    const allowNeg = Math.random()<0.3;
+    if(decimal){
+      cfg = { type, scale:10, minVal: allowNeg?-60:10, maxVal:180 };
+      targetMin = allowNeg?-20:40; targetMax = allowNeg?70:140;
+    } else {
+      cfg = { type, scale:1, minVal: allowNeg?-10:1, maxVal:25 };
+      targetMin = allowNeg?-3:6; targetMax = allowNeg?12:16;
+    }
+  }
+  const nOptions = type==="etendue" ? [2,3,4,5] : [2,3,4];
+
+  for(let attempt=0; attempt<50; attempt++){
+    const target = randInt(targetMin, targetMax);
+    const nMain = nOptions[randInt(0,nOptions.length-1)];
+    const mainVals = genValueSeries(cfg, target, nMain);
+    if(!mainVals) continue;
+    if(!checkSeries(cfg, mainVals, target)) continue;
+
+    const series = [{ vals: mainVals }];
+    let ok = true;
+    for(let i=0;i<3;i++){
+      let other = null;
+      for(let tries=0; tries<20 && !other; tries++){
+        const otherTarget = randInt(targetMin, targetMax);
+        if(otherTarget===target) continue;
+        const n = nOptions[randInt(0,nOptions.length-1)];
+        const v = genValueSeries(cfg, otherTarget, n);
+        if(v && checkSeries(cfg, v, otherTarget) && !checkSeries(cfg, v, target)) other = v;
+      }
+      if(!other){ ok=false; break; }
+      series.push({ vals: other });
+    }
+    if(!ok) continue;
+
+    shuffle(series);
+    let matchCount = 0, correctIndex = -1;
+    series.forEach(function(s,i){ if(checkSeries(cfg, s.vals, target)){ matchCount++; correctIndex=i; } });
+    if(matchCount!==1) continue;
+
+    const label = typeLabel(type);
+    return {
+      mode:"zones-target", type, scale:cfg.scale, target, series, correctIndex,
+      consigne:"Quelle série a pour <span class=\"kw\">"+label+"</span> <strong>"+fmtVal(target,cfg.scale)+"</strong>&nbsp;?"
+    };
+  }
+  return FALLBACK_ZONES_TARGET;
+}
+
+/* ---- rendu commun aux questions à 4 zones cliquables (Q1,Q2,Q3,Q5) ---- */
+function renderZonesClick(data, stageBodyEl, submitAnswer){
+  let html = '<div class="zones" id="zones">';
+  for(let i=0;i<4;i++){
+    const s = data.series[i];
+    let pas = "";
+    for(const v of s.vals){ pas += '<div class="pas">'+fmtVal(v,data.scale)+'</div>'; }
+    html += '<button class="zone '+ZONE_CLASSES[i]+'" id="zone'+i+'" type="button" onclick="daySelectZone('+i+')">'
+      + '<div class="pastilles">'+pas+'</div></button>';
+  }
+  html += '</div>';
+  stageBodyEl.innerHTML = html;
+  return wireZones(data, submitAnswer);
+}
+
+/* ---- rendu de la question à 4 affirmations (Q4) ---- */
+function renderStatements(data, stageBodyEl, submitAnswer){
+  let pasHtml = '<div class="pastilles" style="margin-bottom:1rem;">';
+  for(const v of data.vals){ pasHtml += '<div class="pas">'+fmtVal(v,data.scale)+'</div>'; }
+  pasHtml += '</div>';
+  let listHtml = '<div class="statement-list">';
+  data.items.forEach(function(it,i){
+    const verb = data.type==="moyenne" ? "La moyenne" : "L\u2019étendue";
+    const text = verb+" de cette série est <strong>"+fmtVal(it.value,data.scale)+"</strong>.";
+    listHtml += '<button class="zone zone-row '+ZONE_CLASSES[i]+'" id="zone'+i+'" type="button" onclick="daySelectZone('+i+')">'+text+'</button>';
+  });
+  listHtml += '</div>';
+  stageBodyEl.innerHTML = pasHtml + listHtml;
+  return wireZones(data, submitAnswer);
+}
+
+/* ---- verrouillage commun (4 boutons id="zone0..3") ---- */
+function wireZones(data, submitAnswer){
+  let locked = false;
+  function lockAll(chosenIndex){
+    locked = true;
+    for(let i=0;i<4;i++){
+      const z = $("zone"+i);
+      z.classList.add("locked");
+      z.disabled = true;
+      z.onclick = null;
+      if(i===data.correctIndex) z.classList.add("correctZ");
+      else if(i===chosenIndex) z.classList.add("wrongZ");
+      else z.classList.add("dimmed");
+    }
+  }
+  window.daySelectZone = function(i){
+    if(locked) return;
+    const isCorrect = (i===data.correctIndex);
+    lockAll(i);
+    submitAnswer({correct:isCorrect, timeout:false, chosenIndex:i});
+  };
+  return {
+    forceTimeout: function(){
+      if(locked) return;
+      lockAll(-1);
+      submitAnswer({correct:false, timeout:true, chosenIndex:-1});
+    }
+  };
+}
+
+/* ---- feedbacks par mode ---- */
+function feedbackZonesDiff(data, result){
+  const label = typeLabel(data.cfg.type);
+  const commonTxt = fmtVal(data.commonTarget, data.scale);
+  const oddTxt = fmtVal(data.oddTarget, data.scale);
+  if(result.correct){
+    return { title:"Bravo ! Cette série n\u2019a pas la même "+label+" que les trois autres.",
+      body:"Les trois autres séries ont pour "+label+" <strong>"+commonTxt+"</strong>, tandis que cette série a pour "+label+" <strong>"+oddTxt+"</strong>." };
+  }
+  return { title:(result.timeout?"Temps écoulé.":"Ce n\u2019est pas cette série.")+" Compare les "+label+"s des quatre séries.",
+    body:"La bonne réponse était la série mise en évidence. Les trois autres séries ont pour "+label+" <strong>"+commonTxt+"</strong>, tandis que celle-ci a pour "+label+" <strong>"+oddTxt+"</strong>." };
+}
+function feedbackZonesTarget(data, result){
+  const label = typeLabel(data.type);
+  const targetTxt = fmtVal(data.target, data.scale);
+  if(result.correct){
+    return { title:"Bravo ! Cette série a bien pour "+label+" "+targetTxt+".",
+      body:"Tu as correctement identifié la série dont la "+label+" vaut <strong>"+targetTxt+"</strong>." };
+  }
+  return { title:(result.timeout?"Temps écoulé.":"Ce n\u2019est pas cette série.")+" La série recherchée est mise en évidence.",
+    body:"La série recherchée a bien pour "+label+" <strong>"+targetTxt+"</strong>." };
+}
+function feedbackStatements(data, result){
+  const correctItem = data.items[data.correctIndex];
+  const verb = data.type==="moyenne" ? "moyenne" : "étendue";
+  const correctTxt = fmtVal(correctItem.value, data.scale);
+  if(result.correct){
+    return { title:"Bravo ! Cette affirmation est exacte.",
+      body:"La "+verb+" de cette série vaut bien <strong>"+correctTxt+"</strong>." };
+  }
+  return { title:(result.timeout?"Temps écoulé.":"Cette affirmation est fausse.")+" La bonne affirmation est mise en évidence.",
+    body:"La "+verb+" de cette série vaut en réalité <strong>"+correctTxt+"</strong>." };
+}
+
+const DAY_EXERCISE = {
+  meta: { title: "Calculer des fréquences et des moyennes" },
+  totalQuestions: 5,
+
+  buildQuestion(qIndex){
+    switch(qIndex){
+      case 0: return buildZonesDiff({ type:"moyenne", scale:1, nOptions:[2,3], minVal:1, maxVal:20, targetMin:6, targetMax:14, deltaMin:2, deltaMax:4 });
+      case 1: return buildZonesDiff({ type:"moyenne", scale:1, nOptions:[3,4], minVal:1, maxVal:35, targetMin:12, targetMax:26, deltaMin:3, deltaMax:6 });
+      case 2: return buildZonesDiff({ type:"etendue", scale:1, nOptions:[2,3,4,5], minVal:0, maxVal:26, targetMin:4, targetMax:14, deltaMin:3, deltaMax:6 });
+      case 3: return buildStatements();
+      case 4: return buildZonesTarget();
+    }
+  },
+
+  render(data, stageBodyEl, submitAnswer){
+    if(data.mode==="statements") return renderStatements(data, stageBodyEl, submitAnswer);
+    return renderZonesClick(data, stageBodyEl, submitAnswer);
+  },
+
+  feedbackHTML(data, result){
+    if(data.mode==="zones-diff") return feedbackZonesDiff(data, result);
+    if(data.mode==="zones-target") return feedbackZonesTarget(data, result);
+    return feedbackStatements(data, result);
+  }
+};
+
+/* ============================================================================
+   VÉRIFICATION AUTOMATIQUE DES JEUX DE SECOURS
+   S'assure qu'ils respectent exactement les mêmes règles que les données
+   générées aléatoirement (mêmes fonctions de contrôle : checkSeries).
+   Ne bloque jamais l'activité — signale seulement une anomalie en console,
+   pour détecter immédiatement toute modification qui casserait un secours.
+   ============================================================================ */
+function validateFallbacks(){
+  function check(cond, msg){ if(!cond) console.error("[Mission Océan] Jeu de secours invalide : "+msg); }
+
+  const fdm = FALLBACK_ZONES_DIFF_MOYENNE;
+  fdm.series.forEach(function(s,i){
+    check(checkSeries({type:"moyenne"}, s.vals, s.isOdd?fdm.oddTarget:fdm.commonTarget), "FALLBACK_ZONES_DIFF_MOYENNE série "+i);
+  });
+  check(fdm.series.filter(function(s){return s.isOdd;}).length===1, "FALLBACK_ZONES_DIFF_MOYENNE : une seule série différente attendue");
+  check(fdm.series[fdm.correctIndex] && fdm.series[fdm.correctIndex].isOdd===true, "FALLBACK_ZONES_DIFF_MOYENNE correctIndex");
+
+  const fde = FALLBACK_ZONES_DIFF_ETENDUE;
+  fde.series.forEach(function(s,i){
+    check(checkSeries({type:"etendue"}, s.vals, s.isOdd?fde.oddTarget:fde.commonTarget), "FALLBACK_ZONES_DIFF_ETENDUE série "+i);
+  });
+  check(fde.series.filter(function(s){return s.isOdd;}).length===1, "FALLBACK_ZONES_DIFF_ETENDUE : une seule série différente attendue");
+  check(fde.series[fde.correctIndex] && fde.series[fde.correctIndex].isOdd===true, "FALLBACK_ZONES_DIFF_ETENDUE correctIndex");
+
+  const fs = FALLBACK_STATEMENTS;
+  check(checkSeries({type:fs.type}, fs.vals, fs.target), "FALLBACK_STATEMENTS : série de base incohérente avec target");
+  const correctItems = fs.items.filter(function(it){return it.isCorrect;});
+  check(correctItems.length===1, "FALLBACK_STATEMENTS : une seule affirmation correcte attendue");
+  check(correctItems[0] && correctItems[0].value===fs.target, "FALLBACK_STATEMENTS : la valeur correcte doit être égale à target");
+  check(fs.items[fs.correctIndex] && fs.items[fs.correctIndex].isCorrect===true, "FALLBACK_STATEMENTS correctIndex");
+
+  const ft = FALLBACK_ZONES_TARGET;
+  let matchCount=0, matchIndex=-1;
+  ft.series.forEach(function(s,i){ if(checkSeries({type:ft.type}, s.vals, ft.target)){ matchCount++; matchIndex=i; } });
+  check(matchCount===1, "FALLBACK_ZONES_TARGET : une seule série doit correspondre à target");
+  check(matchIndex===ft.correctIndex, "FALLBACK_ZONES_TARGET correctIndex");
+}
+validateFallbacks();
+
+/* ============================================================================
+   LANCEMENT
+   ============================================================================ */
+initShell();
+</script>
+</body>
+</html>
