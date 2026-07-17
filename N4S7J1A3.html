@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -114,17 +115,10 @@ body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
 .method-box.reveal{display:block;}
 /* BOUTONS */
 .btn-row{display:flex;gap:.7rem;margin-top:1rem;}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
-  padding:.75rem 1.5rem;border-radius:12px;font-family:Arial,sans-serif;
-  font-size:clamp(.95rem,2.5vw,1.05rem);font-weight:800;cursor:pointer;border:none;
-  transition:transform .12s,opacity .12s;min-height:3rem;flex:1;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem 1.5rem;border-radius:12px;font-family:Arial,sans-serif;font-size:clamp(.95rem,2.5vw,1.05rem);font-weight:800;cursor:pointer;border:none;transition:transform .12s;min-height:3rem;flex:1;}
 .btn:active{transform:scale(.96);}.btn:disabled{opacity:.38;cursor:default;}
 .btn-primary{background:var(--day-color);color:#fff;box-shadow:0 4px 12px var(--day-glow);}
-.hint-btn{background:var(--day-color);color:#fff;border:none;border-radius:12px;
-  padding:.75rem 1.5rem;font-family:Arial,sans-serif;font-size:clamp(.95rem,2.5vw,1.05rem);
-  font-weight:800;cursor:pointer;min-height:3rem;display:inline-flex;align-items:center;
-  justify-content:center;gap:.4rem;transition:transform .12s;flex:1;
-  box-shadow:0 4px 12px var(--day-glow);}
+.hint-btn{background:var(--day-color);color:#fff;border:none;border-radius:12px;padding:.75rem 1.5rem;font-family:Arial,sans-serif;font-size:clamp(.95rem,2.5vw,1.05rem);font-weight:800;cursor:pointer;min-height:3rem;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;transition:transform .12s;flex:1;box-shadow:0 4px 12px var(--day-glow);}
 .hint-btn:active{transform:scale(.96);}
 /* INDICE */
 .hint-box{margin-top:.7rem;background:#fffbeb;border:1.5px dashed var(--yellow);border-radius:10px;
@@ -343,8 +337,26 @@ function freqSVG(notes,effs,total,vides){
   return s+'</svg>';
 }
 function genLevel(){
-  var qs=[],pool=[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
-  var notes=genNotes(pool,5),effs=notes.map(function(){return rand(1,8);}),total=effs.reduce(function(s,e){return s+e;},0);
+  /* Données contrôlées : total = multiple commun pour avoir des fractions propres */
+  var qs=[];
+  /* Choisir un total "propre" : 20, 25, 40, 50 */
+  var totals=[20,25,40,50];
+  var total=totals[rand(0,totals.length-1)];
+  /* Générer 5 effectifs dont la somme = total */
+  var pool=[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
+  var notes=genNotes(pool,5);
+  /* Distribuer total en 5 parts entières ≥ 1 */
+  var effs=[];
+  var reste=total;
+  for(var k=0;k<4;k++){
+    var max=reste-(4-k);
+    var v=rand(1,Math.min(max,Math.floor(total/3)));
+    effs.push(v);reste-=v;
+  }
+  effs.push(reste); /* dernière part */
+  /* Mélanger pour ne pas avoir d'ordre prévisible */
+  effs=shuffle(effs);
+
   var idx=rand(0,4),n1=notes[idx],e1=effs[idx];
   qs.push({nom:'Lire une fr\u00e9quence (fraction irr\u00e9ductible)',type:'frac',
     cons:'Voici les notes d\u2019un groupe d\u2019\u00e9l\u00e8ves. Donne la fr\u00e9quence de la note <strong>'+n1+'</strong> sous forme de <strong>fraction irr\u00e9ductible</strong>.',
@@ -353,20 +365,23 @@ function genLevel(){
     h2:'Effectif de '+n1+' = '+e1+'.\nEffectif total = '+total+'.\nCalcule '+e1+'/'+total+' et simplifie jusqu\u2019\u00e0 la forme irr\u00e9ductible.',
     method:'Fr\u00e9quence de '+n1+' = '+e1+' \u00f7 '+total+' = '+fracR(e1,total),
     answer:{n:e1,d:total}});
-  var idx2=(idx+1)%5,n2=notes[idx2],e2=effs[idx2],fd=roundN(e2/total,3);
+  var idx2=(idx+1)%5,n2=notes[idx2],e2=effs[idx2];
+  /* Fréquence décimale propre : e2/total exact au millième */
+  var fd=roundN(e2/total,3);
   qs.push({nom:'Calculer une fr\u00e9quence d\u00e9cimale',type:'dec',tol:0.0005,
     cons:'M\u00eame tableau. Donne la fr\u00e9quence de la note <strong>'+n2+'</strong> en \u00e9criture d\u00e9cimale (arrondie au milli\u00e8me).',
     figFn:function(){return tblSVG(notes,effs,idx2);},
     h1:'M\u00e9thode\u00a0:\nfr\u00e9quence = effectif de la note \u00f7 effectif total.\nArrondis le r\u00e9sultat au milli\u00e8me (3 d\u00e9cimales).',
     h2:'Effectif de '+n2+' = '+e2+', effectif total = '+total+'.\nCalcule '+e2+' \u00f7 '+total+' avec la calculatrice.',
-    method:'Fr\u00e9quence de '+n2+' = '+e2+' \u00f7 '+total+' \u2248 '+fd,answer:fd});
-  var idx3=(idx+2)%5,n3=notes[idx3],e3=effs[idx3],fp=roundN(e3/total*100,1);
+    method:'Fr\u00e9quence de '+n2+' = '+e2+' \u00f7 '+total+' = '+fd,answer:fd});
+  var idx3=(idx+2)%5,n3=notes[idx3],e3=effs[idx3];
+  var fp=roundN(e3/total*100,1);
   qs.push({nom:'Calculer une fr\u00e9quence en pourcentage',type:'pct',tol:0.05,
     cons:'M\u00eame tableau. Donne la fr\u00e9quence de la note <strong>'+n3+'</strong> en pourcentage (arrondie au dixi\u00e8me).',
     figFn:function(){return tblSVG(notes,effs,idx3);},
     h1:'M\u00e9thode\u00a0:\nfr\u00e9quence % = (effectif \u00f7 effectif total) \u00d7 100.\nMultiplie la fr\u00e9quence d\u00e9cimale par 100.',
     h2:'Effectif de '+n3+' = '+e3+', total = '+total+'.\nCalcule ('+e3+' \u00f7 '+total+') \u00d7 100.',
-    method:'Fr\u00e9quence de '+n3+' = ('+e3+' \u00f7 '+total+') \u00d7 100 \u2248 '+fp+'\u00a0%',answer:fp});
+    method:'Fr\u00e9quence de '+n3+' = ('+e3+' \u00f7 '+total+') \u00d7 100 = '+fp+'\u00a0%',answer:fp});
   var used={};used[idx]=true;used[idx2]=true;used[idx3]=true;
   var vides=[];while(vides.length<2){var v=rand(0,4);if(!used[v]){used[v]=true;vides.push(v);}}
   qs.push({nom:'Compl\u00e9ter un tableau de fr\u00e9quences',type:'tblfreq',
@@ -382,7 +397,7 @@ function genLevel(){
     figFn:null,
     h1:'M\u00e9thode\u00a0:\nfr\u00e9quence = effectif \u00f7 effectif total.\nArrondis au milli\u00e8me.',
     h2:'Calcule '+e5+' \u00f7 '+total+' avec la calculatrice et arrondis \u00e0 3 d\u00e9cimales.',
-    method:'Fr\u00e9quence = '+e5+' \u00f7 '+total+' \u2248 '+fd5,answer:fd5});
+    method:'Fr\u00e9quence = '+e5+' \u00f7 '+total+' = '+fd5,answer:fd5});
   return qs;
 }
 function inter(i,q){
