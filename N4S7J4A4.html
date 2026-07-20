@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths 4e – Probabilités – S7 J4</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8;--day-dark:#1a6e88;--day-light:#e8f6fb;--day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.3);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+      --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+      position:relative;overflow-x:hidden;letter-spacing:.03em;line-height:1.6;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--blue);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--yellow);top:200px;left:-30px;pointer-events:none;}
+    /* HEAD */
+    .head-card{width:100%;max-width:900px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1.9rem 1.5rem 1.6rem;text-align:center;
+      position:relative;z-index:1;margin-bottom:1.5rem;}
+    .logo-badge{background:var(--yellow);color:#000;font-size:14px;letter-spacing:.09em;
+      display:inline-flex;align-items:center;gap:.5rem;font-weight:700;text-transform:uppercase;
+      padding:.35rem 1.1rem;border-radius:99px;margin-bottom:.6rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{color:var(--day-dark);font-size:.88rem;margin:.5rem 0;font-family:'JetBrains Mono',monospace;}
+    .head-card h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--text);margin:.3rem 0;}
+    .head-card h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:.97rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+    /* CARDS */
+    .activities{width:100%;max-width:900px;display:flex;flex-direction:column;gap:1.5rem;position:relative;z-index:1;}
+    .activity-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .activity-stripe{height:4px;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+    .activity-label{padding:.8rem 1.4rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;
+      font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--day-dark);
+      background:var(--day-light);border-bottom:1.5px solid var(--day-border);}
+    iframe{display:block;width:100%;border:0;}
+    .ext-link{padding:.65rem 1.4rem;font-size:.88rem;color:var(--muted);
+      border-top:1.5px solid var(--border);background:var(--bg);}
+    .ext-link a{color:var(--day-dark);font-weight:700;text-decoration:underline;}
+    .ext-link a:hover{color:var(--day-color);}
+
+    /* ── STYLE COMMUN EXERCICEURS ── */
+    .exo-board{
+      background:linear-gradient(160deg,#2d3748,#1a202c);
+      font-family:'Georgia',serif;color:#fff;
+      padding:1.8rem 2rem;min-height:440px;position:relative;
+    }
+    .exo-score-box{position:absolute;top:1rem;right:1.2rem;background:#fff;color:#000;
+      font-family:Arial,sans-serif;font-weight:900;font-size:1.05rem;
+      padding:.3rem .8rem;border-radius:6px;}
+    .exo-title{font-style:italic;font-size:1.2rem;font-weight:700;margin-bottom:1.1rem;}
+    .exo-enonce{font-style:italic;font-size:1.05rem;line-height:1.8;margin-bottom:.8rem;}
+    .exo-tbl{border-collapse:collapse;font-style:italic;font-size:1rem;margin:.5rem 0 .9rem;}
+    .exo-tbl td,.exo-tbl th{border:1.5px solid #aaa;padding:.4rem .9rem;text-align:center;}
+    .exo-tbl th{background:rgba(255,255,255,.08);}
+    .exo-rep-row{display:flex;align-items:center;gap:.8rem;margin:.8rem 0;flex-wrap:wrap;}
+    .exo-rep-label{font-style:italic;font-size:1.1rem;}
+    .exo-inp{background:#f5c518;border:none;outline:none;padding:.5rem .8rem;
+      font-size:1.05rem;font-family:Arial,sans-serif;font-weight:700;
+      width:170px;border-radius:4px;color:#000;}
+    .exo-fb{display:none;background:#22c55e;color:#000;font-style:italic;
+      font-size:1rem;line-height:1.65;padding:.75rem 1rem;border-radius:4px;margin:.5rem 0;}
+    .exo-btn-y{background:#f5c518;color:#000;border:none;padding:.55rem 1.5rem;
+      font-family:Arial,sans-serif;font-size:1.05rem;font-weight:900;
+      border-radius:6px;cursor:pointer;margin-top:.7rem;}
+    .exo-btn-y:hover{opacity:.88;}
+    .exo-start,.exo-end{text-align:center;padding:2rem 1rem;}
+    .exo-start p,.exo-end p{font-style:italic;font-size:1.1rem;margin:.5rem 0;}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+
+<div class="head-card">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    PAZAPA &middot; MATHS &middot; 4&Egrave;ME
+  </div>
+  <div class="week-label">Semaine&nbsp;7 &ndash; Jour&nbsp;4</div>
+  <h1><span class="hl">&#127922; Calculer des probabilit&eacute;s</span></h1>
+  <p class="subtitle">Probabilit&eacute;s &middot; Urnes &middot; Tableaux</p>
+</div>
+
+<div class="activities">
+
+  <!-- ═══ EXERCICE 1 : URNES ═══ -->
+  <div class="activity-card">
+    <div class="activity-stripe"></div>
+    <div class="activity-label">Exercice&nbsp;1 &mdash; Probabilit&eacute; avec une urne</div>
+    <div class="exo-board" id="E1">
+      <div class="exo-score-box">Score= <span id="e1sc">0</span> / 10</div>
+      <div class="exo-start" id="e1-start">
+        <p><em>10 questions pour s&rsquo;entra&icirc;ner &agrave; calculer</em></p>
+        <p><em>la probabilit&eacute; d&rsquo;un &eacute;v&eacute;nement.</em></p>
+        <br>
+        <button class="exo-btn-y" onclick="E1.start()">Commencer</button>
+      </div>
+      <div id="e1-q" style="display:none;">
+        <div class="exo-title">Exerciceur d&rsquo;entra&icirc;nement</div>
+        <div class="exo-enonce" id="e1-txt"></div>
+        <div class="exo-rep-row">
+          <span class="exo-rep-label"><em>Ecris ta r&eacute;ponse</em></span>
+          <input class="exo-inp" id="e1-inp" type="text" autocomplete="off"
+            onkeydown="if(event.key==='Enter')E1.valider()"/>
+        </div>
+        <div class="exo-fb" id="e1-fb"></div>
+        <button class="exo-btn-y" id="e1-btn" onclick="E1.valider()">Valider</button>
+      </div>
+      <div class="exo-end" id="e1-end" style="display:none;">
+        <p id="e1-end-msg"></p><p id="e1-end-sub"></p><br>
+        <button class="exo-btn-y" onclick="E1.start()">Recommencer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ EXERCICE 2 : TABLEAUX ENTREPRISES ═══ -->
+  <div class="activity-card">
+    <div class="activity-stripe"></div>
+    <div class="activity-label">Exercice&nbsp;2 &mdash; Probabilit&eacute; avec un tableau</div>
+    <div class="exo-board" id="E2">
+      <div class="exo-score-box">Score= <span id="e2sc">0</span> / 10</div>
+      <div class="exo-start" id="e2-start">
+        <p><em>10 questions pour s&rsquo;entra&icirc;ner &agrave; calculer</em></p>
+        <p><em>la probabilit&eacute; d&rsquo;un &eacute;v&eacute;nement.</em></p>
+        <br>
+        <button class="exo-btn-y" onclick="E2.start()">Commencer</button>
+      </div>
+      <div id="e2-q" style="display:none;">
+        <div class="exo-title">Exerciceur d&rsquo;entra&icirc;nement</div>
+        <div class="exo-enonce" id="e2-txt"></div>
+        <table class="exo-tbl">
+          <tr><th></th><th><em>Entreprise A</em></th><th><em>Entreprise B</em></th></tr>
+          <tr><td><em>Hommes</em></td><td id="e2-hA"></td><td id="e2-hB"></td></tr>
+          <tr><td><em>Femmes</em></td><td id="e2-fA"></td><td id="e2-fB"></td></tr>
+        </table>
+        <div class="exo-rep-row">
+          <span class="exo-rep-label"><em>Ecris ta r&eacute;ponse</em></span>
+          <input class="exo-inp" id="e2-inp" type="text" autocomplete="off"
+            onkeydown="if(event.key==='Enter')E2.valider()"/>
+        </div>
+        <div class="exo-fb" id="e2-fb"></div>
+        <button class="exo-btn-y" id="e2-btn" onclick="E2.valider()">Valider</button>
+      </div>
+      <div class="exo-end" id="e2-end" style="display:none;">
+        <p id="e2-end-msg"></p><p id="e2-end-sub"></p><br>
+        <button class="exo-btn-y" onclick="E2.start()">Recommencer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ EXERCICE 3 : INTRUS CARTES URNES ═══ -->
+  <div class="activity-card">
+    <div class="activity-stripe"></div>
+    <div class="activity-label">Exercice&nbsp;3 &mdash; Trouve l&rsquo;intrus</div>
+    <div style="background:#fff;padding:1.5rem 1rem;">
+
+      <!-- Écran choix niveau -->
+      <div id="e3-niveau" style="text-align:center;padding:1rem;">
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:#3d7a10;font-weight:700;margin-bottom:.3rem;">Calcul mental</p>
+        <p style="font-size:1.1rem;font-weight:700;margin-bottom:1.2rem;">Quel est l&rsquo;intrus&nbsp;?</p>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#8a8f9a;margin-bottom:.5rem;">Choisis ton niveau.</p>
+        <div style="display:flex;gap:1.5rem;justify-content:center;margin-top:.8rem;align-items:center;">
+          <button onclick="E3.start(1)" title="Niveau 1" style="background:none;border:none;cursor:pointer;padding:4px;transition:transform .15s;" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform=''"><svg width="48" height="44" viewBox="0 0 48 44" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="24,2 46,16 24,42 2,16" fill="#2d8a4e"/>
+  <polygon points="24,2 46,16 24,20" fill="#4caf50" opacity=".7"/>
+  <polygon points="2,16 24,20 24,42" fill="#1a5c30" opacity=".5"/>
+  <polygon points="24,2 2,16 24,20" fill="#4caf50" opacity=".4"/>
+</svg></button>
+          <button onclick="E3.start(2)" title="Niveau 2" style="background:none;border:none;cursor:pointer;padding:4px;transition:transform .15s;" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform=''"><svg width="48" height="44" viewBox="0 0 48 44" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="24,2 46,16 24,42 2,16" fill="#8a8a8a"/>
+  <polygon points="24,2 46,16 24,20" fill="#aaaaaa" opacity=".7"/>
+  <polygon points="2,16 24,20 24,42" fill="#666666" opacity=".5"/>
+  <polygon points="24,2 2,16 24,20" fill="#aaaaaa" opacity=".4"/>
+</svg></button>
+          <button onclick="E3.start(3)" title="Niveau 3" style="background:none;border:none;cursor:pointer;padding:4px;transition:transform .15s;" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform=''"><svg width="48" height="44" viewBox="0 0 48 44" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="24,2 46,16 24,42 2,16" fill="#b0b0b0"/>
+  <polygon points="24,2 46,16 24,20" fill="#cccccc" opacity=".7"/>
+  <polygon points="2,16 24,20 24,42" fill="#909090" opacity=".5"/>
+  <polygon points="24,2 2,16 24,20" fill="#cccccc" opacity=".4"/>
+</svg></button>
+        </div>
+      </div>
+
+      <!-- Zone de jeu -->
+      <div id="e3-game" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#8a8f9a;">
+          <span id="e3-qnum">Question 1 / 8</span>
+          <span>Score&nbsp;: <span id="e3-sc">0</span> / 8</span>
+        </div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#8a8f9a;text-align:center;margin-bottom:.8rem;">
+          Une carte ne correspond pas aux 3 autres. Clique sur <strong>l&rsquo;intrus</strong>.
+        </p>
+        <div id="e3-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;max-width:580px;margin:0 auto;"></div>
+        <div id="e3-fb" style="margin-top:1rem;padding:.7rem 1rem;border-radius:10px;font-size:.95rem;display:none;text-align:center;font-weight:700;"></div>
+        <div style="text-align:center;margin-top:.8rem;">
+          <button id="e3-btn" onclick="E3.next()" style="display:none;background:#f5c518;color:#000;border:none;padding:.55rem 1.5rem;font-family:Arial,sans-serif;font-size:1.05rem;font-weight:900;border-radius:6px;cursor:pointer;">Question suivante &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Écran fin -->
+      <div id="e3-end" style="display:none;text-align:center;padding:1.2rem;">
+        <p style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem;" id="e3-end-msg"></p>
+        <button onclick="E3.reset()" style="background:#f5c518;color:#000;border:none;padding:.55rem 1.5rem;font-family:Arial,sans-serif;font-size:1.05rem;font-weight:900;border-radius:6px;cursor:pointer;margin-top:.8rem;">&#8635; Changer de niveau</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ACTIVITÉ 4 : LearningApps -->
+  <div class="activity-card">
+    <div class="activity-stripe"></div>
+    <div class="activity-label">Activit&eacute;&nbsp;4 &mdash; Probabilit&eacute;s</div>
+    <iframe src="https://learningapps.org/watch?app=6936269" height="520"
+      allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+    <div class="ext-link">&#128279; Si l&rsquo;activit&eacute; ne s&rsquo;affiche pas&nbsp;:
+      <a href="https://learningapps.org/watch?app=6936269" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+    </div>
+  </div>
+
+  <!-- ACTIVITÉ 4 : Calcul mental 51 -->
+  <div class="activity-card">
+    <div class="activity-stripe"></div>
+    <div class="activity-label">Activit&eacute;&nbsp;5 &mdash; Calcul mental</div>
+    <iframe src="https://tacproedupublicresources.blob.core.windows.net/hatier/calculmental/objectif51/index.htm"
+      height="520" allowfullscreen="true"></iframe>
+    <div class="ext-link">&#128279; Si l&rsquo;activit&eacute; ne s&rsquo;affiche pas&nbsp;:
+      <a href="https://tacproedupublicresources.blob.core.windows.net/hatier/calculmental/objectif51/index.htm" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+    </div>
+  </div>
+
+  <!-- ACTIVITÉ 5 : Calcul mental 52 -->
+  <div class="activity-card">
+    <div class="activity-stripe"></div>
+    <div class="activity-label">Activit&eacute;&nbsp;6 &mdash; Calcul mental</div>
+    <iframe src="https://tacproedupublicresources.blob.core.windows.net/hatier/calculmental/objectif52/index.htm"
+      height="520" allowfullscreen="true"></iframe>
+    <div class="ext-link">&#128279; Si l&rsquo;activit&eacute; ne s&rsquo;affiche pas&nbsp;:
+      <a href="https://tacproedupublicresources.blob.core.windows.net/hatier/calculmental/objectif52/index.htm" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── Utilitaires communs ── */
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+function fracReduite(n,d){var g=gcd(n,d);return [n/g,d/g];}
+function fracOk(raw,n,d){
+  raw=(raw||'').trim().replace(',','.');
+  var m=raw.match(/^(\d+)\/(\d+)$/);
+  if(m){var a=parseInt(m[1]),b=parseInt(m[2]);return a*d===b*n;}
+  var v=parseFloat(raw);
+  return !isNaN(v)&&Math.abs(v-n/d)<0.005;
+}
+function fracTxt(n,d){
+  var r=fracReduite(n,d);
+  var s=n+'/'+d;
+  if(r[0]!==n)s+=' = '+r[0]+'/'+r[1];
+  return s;
+}
+function msg(score){
+  if(score>=8)return'Excellent\u00a0! Tr\u00e8s bon travail\u00a0!';
+  if(score>=5)return'Bien\u00a0! Continue \u00e0 t\u2019entra\u00eener.';
+  return'Il faut t\u2019entra\u00eener encore\u00a0! Courage\u00a0!';
+}
+function $(id){return document.getElementById(id);}
+
+/* ════════════════════════════════
+   EXERCICE 1 — URNES
+════════════════════════════════ */
+var E1=(function(){
+  var qs=[],idx=0,score=0,answered=false;
+
+  function genQ(){
+    var bleu=rand(5,35),rouge=rand(5,35),total=bleu+rouge;
+    var cible=Math.random()<0.5?'bleue':'rouge';
+    var num=cible==='bleue'?bleu:rouge;
+    return {
+      enonce:'Dans une urne il y a '+bleu+' boules bleues et '+rouge+' boules rouges.\n'
+            +'On prend une boule au hasard.\n'
+            +'Quelle est la probabilit\u00e9 d\u2019obtenir une boule '+cible+'\u00a0?',
+      num:num, den:total, cible:cible, bleu:bleu, rouge:rouge, total:total
+    };
+  }
+
+  function render(){
+    answered=false;
+    var q=qs[idx];
+    $('e1sc').textContent=score;
+    $('e1-txt').innerHTML=q.enonce.replace(/\n/g,'<br>');
+    $('e1-fb').style.display='none';
+    $('e1-inp').value=''; $('e1-inp').style.display='inline-block';
+    $('e1-btn').textContent='Valider'; $('e1-btn').onclick=valider;
+    $('e1-inp').focus();
+  }
+
+  function valider(){
+    if(answered)return;
+    var q=qs[idx];
+    var raw=$('e1-inp').value;
+    if(!raw.trim())return;
+    answered=true;
+    var ok=fracOk(raw,q.num,q.den);
+    if(ok)score++;
+    $('e1sc').textContent=score;
+    var fb=$('e1-fb');
+    fb.style.display='block';
+    var txt='Il y a '+q.total+' boules au total dans l\u2019urne, dont '+q.num+' boule'+(q.num>1?'s':'')+' '+q.cible+(q.num>1?'s':'')+'.\n'
+           +'La probabilit\u00e9 d\u2019obtenir une boule '+q.cible+' est p\u00a0= '+fracTxt(q.num,q.den);
+    fb.innerHTML=(ok?'<strong>Bravo\u00a0!</strong>':'<em style="color:#c0392b;font-weight:700;">Dommage\u00a0!</em>')
+      +'<br>'+txt.replace(/\n/g,'<br>');
+    $('e1-inp').style.display='none';
+    $('e1-btn').textContent=idx<9?'Suivant':'Voir mon r\u00e9sultat';
+    $('e1-btn').onclick=suivant;
+  }
+
+  function suivant(){idx++;if(idx>=10)end();else render();}
+
+  function end(){
+    $('e1-q').style.display='none';$('e1-end').style.display='block';
+    $('e1-end-msg').textContent='Ton r\u00e9sultat est '+score+' bonnes r\u00e9ponses sur 10.';
+    $('e1-end-sub').textContent=msg(score);
+  }
+
+  function start(){
+    qs=[];for(var i=0;i<10;i++)qs.push(genQ());
+    idx=0;score=0;answered=false;
+    $('e1-start').style.display='none';$('e1-end').style.display='none';
+    $('e1-q').style.display='block';
+    render();
+  }
+
+  return {start:start,valider:valider};
+})();
+
+/* ════════════════════════════════
+   EXERCICE 2 — TABLEAUX ENTREPRISES
+════════════════════════════════ */
+var E2=(function(){
+  var qs=[],idx=0,score=0,answered=false;
+
+  function genQ(){
+    var hA=rand(10,30),hB=rand(10,30),fA=rand(10,30),fB=rand(10,30);
+    var scope=rand(0,2); // 0=A, 1=B, 2=les deux
+    var genre=Math.random()<0.5?'homme':'femme';
+    var num,den,scopeLabel;
+    if(scope===0){
+      den=hA+fA; num=genre==='homme'?hA:fA; scopeLabel='l\u2019entreprise A';
+    } else if(scope===1){
+      den=hB+fB; num=genre==='homme'?hB:fB; scopeLabel='l\u2019entreprise B';
+    } else {
+      den=hA+hB+fA+fB; num=genre==='homme'?(hA+hB):(fA+fB); scopeLabel='__DEUX__';
+    }
+    return {hA:hA,hB:hB,fA:fA,fB:fB,num:num,den:den,genre:genre,scopeLabel:scopeLabel};
+  }
+
+  function render(){
+    answered=false;
+    var q=qs[idx];
+    $('e2sc').textContent=score;
+    $('e2-txt').innerHTML='On a recens\u00e9 les employ\u00e9s de deux entreprises.<br>'
+      +(q.scopeLabel==='__DEUX__'?'On choisit une personne au hasard parmi l\u2019ensemble des employ\u00e9s des deux entreprises,<br>':'On choisit une personne au hasard parmi l\u2019ensemble des employ\u00e9s de '+q.scopeLabel+',<br>')
+      +'quelle est la probabilit\u00e9 que ce soit un '+q.genre+'\u00a0?';
+    $('e2-hA').textContent=q.hA; $('e2-hB').textContent=q.hB;
+    $('e2-fA').textContent=q.fA; $('e2-fB').textContent=q.fB;
+    $('e2-fb').style.display='none';
+    $('e2-inp').value=''; $('e2-inp').style.display='inline-block';
+    $('e2-btn').textContent='Valider'; $('e2-btn').onclick=valider;
+    $('e2-inp').focus();
+  }
+
+  function valider(){
+    if(answered)return;
+    var q=qs[idx];
+    var raw=$('e2-inp').value;
+    if(!raw.trim())return;
+    answered=true;
+    var ok=fracOk(raw,q.num,q.den);
+    if(ok)score++;
+    $('e2sc').textContent=score;
+    var fb=$('e2-fb');
+    fb.style.display='block';
+    var txt='La probabilit\u00e9 d\u2019obtenir un '+q.genre+' est p = '+fracTxt(q.num,q.den);
+    fb.innerHTML=(ok?'<strong>Bravo\u00a0!</strong>':'<em style="color:#c0392b;font-weight:700;">Dommage\u00a0!</em>')
+      +'<br>'+txt;
+    $('e2-inp').style.display='none';
+    $('e2-btn').textContent=idx<9?'Suivant':'Voir mon r\u00e9sultat';
+    $('e2-btn').onclick=suivant;
+  }
+
+  function suivant(){idx++;if(idx>=10)end();else render();}
+
+  function end(){
+    $('e2-q').style.display='none';$('e2-end').style.display='block';
+    $('e2-end-msg').textContent='Ton r\u00e9sultat est '+score+' bonnes r\u00e9ponses sur 10.';
+    $('e2-end-sub').textContent=msg(score);
+  }
+
+  function start(){
+    qs=[];for(var i=0;i<10;i++)qs.push(genQ());
+    idx=0;score=0;answered=false;
+    $('e2-start').style.display='none';$('e2-end').style.display='none';
+    $('e2-q').style.display='block';
+    render();
+  }
+
+  return {start:start,valider:valider};
+})();
+</script>
+<script>
+/* ════════════════════════════════
+   EXERCICE 3 — INTRUS CARTES URNES
+   Niveau 1 : boules vertes/bleues uniquement
+   Niveau 2 : + représentation décimale
+   Niveau 3 : + 3 couleurs (vert/bleu/rouge)
+════════════════════════════════ */
+var E3=(function(){
+  var idx=0,score=0,nb=8,niveau=1,answered=false,questions=[];
+
+  function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+  function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+  function fracR(n,d){var g=gcd(n,d);return (n/g)+'/'+(d/g);}
+  function decFr(n,d){
+    var v=n/d, r=Math.round(v*10)/10;
+    if(Math.abs(r-v)<0.005) return r.toString().replace('.',',');
+    r=Math.round(v*100)/100;
+    if(Math.abs(r-v)<0.0005) return r.toString().replace('.',',');
+    return fracR(n,d);
+  }
+  function pStr(n,d,lv){
+    if(lv===1) return fracR(n,d);
+    if(lv===2) return Math.random()<0.5?fracR(n,d):decFr(n,d);
+    return Math.random()<0.33?fracR(n,d):Math.random()<0.5?decFr(n,d):fracR(n,d);
+  }
+  function $(id){return document.getElementById(id);}
+
+  /* Dessine les boules en SVG */
+  function makeBoules(counts){
+    // counts = {vert:n, bleu:n, rouge:n}
+    var boules=[];
+    for(var i=0;i<(counts.vert||0);i++) boules.push('#4caf50');
+    for(var j=0;j<(counts.bleu||0);j++) boules.push('#3ab5d8');
+    for(var k=0;k<(counts.rouge||0);k++) boules.push('#e03030');
+    // mélanger
+    for(var m=boules.length-1;m>0;m--){var r=rand(0,m);var t=boules[m];boules[m]=boules[r];boules[r]=t;}
+    var total=boules.length;
+    var cols=Math.min(Math.max(Math.ceil(Math.sqrt(total)),3),6);
+    var rows=Math.ceil(total/cols);
+    var r2=13,pad=4;
+    var W=cols*(2*r2+pad)+pad, H=rows*(2*r2+pad)+pad;
+    var svg='<svg width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg">';
+    boules.forEach(function(c,idx2){
+      var col=idx2%cols, row=Math.floor(idx2/cols);
+      var cx=pad+col*(2*r2+pad)+r2, cy=pad+row*(2*r2+pad)+r2;
+      svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r2+'" fill="'+c+'" stroke="rgba(0,0,0,.15)" stroke-width="1.2"/>';
+    });
+    return svg+'</svg>';
+  }
+
+  /* Génère une question */
+  function genQ(){
+    var lv=niveau;
+    var couleurs=['vert','bleu'];
+    if(lv===3) couleurs.push('rouge');
+
+    // Choisir 2 ou 3 couleurs à utiliser
+    var nbCouleurs=lv===3&&Math.random()<0.5?3:2;
+    var usedCouleurs=couleurs.slice(0,nbCouleurs);
+
+    // Générer les effectifs
+    var counts={};
+    usedCouleurs.forEach(function(c){counts[c]=rand(1,lv===1?8:12);});
+    var total=Object.values(counts).reduce(function(s,v){return s+v;},0);
+
+    // Construire les 4 cartes correctes
+    var cards=[];
+
+    // Carte description
+    var descParts=[];
+    if(counts.vert) descParts.push(counts.vert+' boule'+(counts.vert>1?'s':'')+' verte'+(counts.vert>1?'s':''));
+    if(counts.bleu) descParts.push(counts.bleu+' boule'+(counts.bleu>1?'s':'')+' bleue'+(counts.bleu>1?'s':''));
+    if(counts.rouge) descParts.push(counts.rouge+' boule'+(counts.rouge>1?'s':'')+' rouge'+(counts.rouge>1?'s':''));
+    cards.push({type:'desc', html:'<div style="font-size:.95rem;font-weight:600;line-height:1.6;">'+descParts.join('<br>et<br>')+'</div>', correct:true});
+
+    // Carte image
+    cards.push({type:'img', html:makeBoules(counts), correct:true});
+
+    // Carte P(couleur1)
+    var c1=usedCouleurs[0];
+    var label1=c1.charAt(0).toUpperCase()+c1.slice(1);
+    cards.push({type:'p1', html:'<div style="font-size:1rem;font-weight:700;">P(« '+label1+' ») = '+pStr(counts[c1],total,lv)+'</div>', correct:true});
+
+    // Carte P(couleur2) ou P(couleur3)
+    var c2=usedCouleurs[1];
+    var label2=c2.charAt(0).toUpperCase()+c2.slice(1);
+    cards.push({type:'p2', html:'<div style="font-size:1rem;font-weight:700;">P(« '+label2+' ») = '+pStr(counts[c2],total,lv)+'</div>', correct:true});
+
+    // Choisir l'intrus parmi les 4 cartes
+    var intrusIdx=rand(0,3);
+    var intrus=JSON.parse(JSON.stringify(cards[intrusIdx]));
+    intrus.correct=false;
+
+    if(intrus.type==='desc'){
+      var fCounts={};
+      usedCouleurs.forEach(function(c){fCounts[c]=counts[c]+rand(1,5);});
+      var fp=[];
+      if(fCounts.vert) fp.push(fCounts.vert+' boule'+(fCounts.vert>1?'s':'')+' verte'+(fCounts.vert>1?'s':''));
+      if(fCounts.bleu) fp.push(fCounts.bleu+' boule'+(fCounts.bleu>1?'s':'')+' bleue'+(fCounts.bleu>1?'s':''));
+      if(fCounts.rouge) fp.push(fCounts.rouge+' boule'+(fCounts.rouge>1?'s':'')+' rouge'+(fCounts.rouge>1?'s':''));
+      intrus.html='<div style="font-size:.95rem;font-weight:600;line-height:1.6;">'+fp.join('<br>et<br>')+'</div>';
+    } else if(intrus.type==='img'){
+      var fc2={};
+      usedCouleurs.forEach(function(c){fc2[c]=counts[c]+rand(1,4);});
+      intrus.html=makeBoules(fc2);
+    } else {
+      // Fausse probabilité — garantie non-équivalente à la bonne
+      var cCible=intrus.type==='p1'?c1:c2;
+      var lbl=intrus.type==='p1'?label1:label2;
+      var bonNum=counts[cCible], bonDen=total;
+      var fNum, fDen, att=0, valid=false;
+      while(!valid && att<50){
+        att++;
+        var str=rand(0,4);
+        if(str===0){
+          var delta=rand(1,3)*(Math.random()<0.5?1:-1);
+          fNum=bonNum+delta; fDen=bonDen;
+        } else if(str===1){
+          var autre=usedCouleurs[cCible===usedCouleurs[0]?1:0];
+          fNum=counts[autre]; fDen=bonDen;
+        } else if(str===2){
+          fNum=bonNum; fDen=Math.max(bonDen-1,bonNum+1);
+        } else if(str===3){
+          fNum=bonNum; fDen=bonDen+1;
+        } else {
+          fNum=bonDen; fDen=bonDen+rand(2,6);
+        }
+        if(fNum<1) fNum=1;
+        if(fDen<2) fDen=2;
+        if(fNum>=fDen) fNum=fDen-1;
+        if(fNum*bonDen!==bonNum*fDen) valid=true;
+      }
+      intrus.html='<div style="font-size:1rem;font-weight:700;">P(« '+lbl+' ») = '+fracR(fNum,fDen)+'</div>';
+    }
+    cards[intrusIdx]=intrus;
+
+    // Mélanger
+    for(var mm=cards.length-1;mm>0;mm--){var rr=rand(0,mm);var tt=cards[mm];cards[mm]=cards[rr];cards[rr]=tt;}
+    return {cards:cards};
+  }
+
+  var BORDER_COLORS=['#22c55e','#ef4444','#f5c518','#3ab5d8'];
+
+  function render(){
+    answered=false;
+    var q=questions[idx];
+    $('e3-qnum').textContent='Question '+(idx+1)+' / '+nb;
+    $('e3-sc').textContent=score;
+    $('e3-fb').style.display='none';
+    $('e3-btn').style.display='none';
+    var grid=$('e3-grid');
+    grid.innerHTML='';
+    q.cards.forEach(function(card,ci){
+      var div=document.createElement('div');
+      div.style.cssText='border:2.5px solid '+BORDER_COLORS[ci]+';border-radius:12px;padding:.9rem;min-height:100px;'
+        +'display:flex;align-items:center;justify-content:center;cursor:pointer;'
+        +'text-align:center;background:#fff;transition:transform .12s,box-shadow .12s;';
+      div.innerHTML=card.html;
+      div.addEventListener('mouseenter',function(){this.style.transform='scale(1.02)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)';});
+      div.addEventListener('mouseleave',function(){this.style.transform='';this.style.boxShadow='';});
+      (function(c,d){
+        div.addEventListener('click',function(){choisir(c,d,q);});
+      })(card,div);
+      grid.appendChild(div);
+    });
+  }
+
+  function choisir(card,div,q){
+    if(answered)return;
+    answered=true;
+    var ok=!card.correct;
+    if(ok)score++;
+    $('e3-sc').textContent=score;
+    // Marquer l'intrus en rouge dans la grille
+    var cells=$('e3-grid').children;
+    for(var i=0;i<cells.length;i++){
+      if(!q.cards[i].correct){
+        cells[i].style.background='#fef2f2';
+        cells[i].style.borderColor='#ef4444';
+        cells[i].style.borderWidth='3px';
+      }
+    }
+    var fb=$('e3-fb');
+    fb.style.display='block';
+    if(ok){
+      fb.style.cssText='display:block;margin-top:1rem;padding:.7rem 1rem;border-radius:10px;font-size:.95rem;text-align:center;font-weight:700;background:#f0faeb;color:#2f6e10;border:1.5px solid #22c55e;';
+      fb.textContent='✓ Bravo ! Tu as trouvé l’intrus.';
+    } else {
+      fb.style.cssText='display:block;margin-top:1rem;padding:.7rem 1rem;border-radius:10px;font-size:.95rem;text-align:center;font-weight:700;background:#fff0ef;color:#c0392b;border:1.5px solid #f28b82;';
+      fb.textContent='✗ Pas tout à fait. L’intrus est encadré en rouge.';
+    }
+    $('e3-btn').style.display='inline-block';
+    $('e3-btn').textContent=idx<nb-1?'Question suivante →':'Voir mon résultat';
+  }
+
+  function next(){
+    idx++;
+    if(idx>=nb){showEnd();return;}
+    render();
+  }
+
+  function showEnd(){
+    $('e3-game').style.display='none';
+    $('e3-end').style.display='block';
+    var msg=score>=7?'Excellent ! Tu maîtrises les probabilités.':
+             score>=5?'Bien ! Continue à t’entraîner.':
+             'Il faut t’entraîner encore ! Courage !';
+    $('e3-end-msg').textContent='Score : '+score+' / '+nb+' — '+msg;
+  }
+
+  function start(lv){
+    niveau=lv||1; idx=0; score=0; answered=false;
+    questions=[];for(var i=0;i<nb;i++)questions.push(genQ());
+    $('e3-niveau').style.display='none';
+    $('e3-end').style.display='none';
+    $('e3-game').style.display='block';
+    render();
+  }
+
+  function reset(){
+    $('e3-game').style.display='none';
+    $('e3-end').style.display='none';
+    $('e3-niveau').style.display='block';
+  }
+
+  return {start:start,next:next,reset:reset};
+})();
+</script>
+</body>
+</html>
