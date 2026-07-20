@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa — Flash Défi — Symétrie centrale</title>
+<style>
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+:root{
+  --day-color:#f5a623;--day-dark:#c47a10;--day-light:#fff5e0;
+  --day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+  --bg:#fffdf7;--surface:#fff;--border:#f0e2c0;
+  --green:#8dc63f;--blue:#3ab5d8;--yellow:#f5c518;--red:#b94040;
+  --text:#1a1d23;--muted:#8a7a5a;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem 1rem 4rem;overflow-x:hidden;line-height:1.7;}
+body::before{content:'';position:fixed;inset:0;z-index:0;opacity:.03;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,#f5a623 20px,#f5a623 21px);pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:280px;height:280px;background:var(--yellow);top:-70px;right:-50px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.08;width:200px;height:200px;background:var(--day-color);bottom:-50px;left:-40px;pointer-events:none;}
+.bubble3{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:150px;height:150px;background:var(--green);top:40%;right:-60px;pointer-events:none;}
+.bubble4{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:160px;height:160px;background:#f28b82;bottom:20%;left:-70px;pointer-events:none;}
+header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:.88rem;margin-top:.3rem;font-family:'JetBrains Mono',monospace;}
+.chrono-wrap{width:100%;max-width:560px;position:relative;z-index:1;margin-bottom:.8rem;}
+.chrono-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;}
+.chrono-label{font-family:monospace;font-size:.78rem;color:var(--muted);text-transform:uppercase;}
+.chrono-val{font-family:monospace;font-weight:800;font-size:1.5rem;color:var(--day-dark);}
+.chrono-val.urgent{color:#c0392b;animation:pulse .5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.chrono-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.chrono-bar{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .9s linear;}
+.chrono-bar.urgent{background:linear-gradient(90deg,#c0392b,#e74c3c);}
+.prog-dots{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;position:relative;z-index:1;}
+.prog-dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:.3s;}
+.prog-dot.done{background:var(--green);}.prog-dot.active{background:var(--day-color);}
+#start-screen{width:100%;max-width:560px;position:relative;z-index:1;}
+.start-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.stripe{height:4px;border-radius:4px;margin-bottom:1.2rem;background:linear-gradient(90deg,#f5a623,#f5c518,#8dc63f);}
+.start-title{font-size:1.15rem;font-weight:900;color:var(--day-dark);margin-bottom:.6rem;}
+.start-text{font-size:.92rem;color:var(--text);line-height:1.8;margin-bottom:1.2rem;}
+#flash-zone{width:100%;max-width:560px;position:relative;z-index:1;display:none;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.6rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+.q-badge{display:inline-block;background:var(--day-color);color:#fff;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .65rem;border-radius:99px;margin-bottom:.7rem;font-family:'JetBrains Mono',monospace;}
+.q-text{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);margin-bottom:.8rem;line-height:1.6;}
+.fig-wrap{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.7rem;margin-bottom:.9rem;text-align:center;}
+.fig-wrap svg{width:100%;height:auto;max-width:360px;}
+.fig-legend{display:flex;justify-content:center;gap:1.2rem;font-size:.78rem;color:var(--muted);margin-top:.4rem;font-family:'JetBrains Mono',monospace;flex-wrap:wrap;}
+.leg-dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:-1px;}
+.vf-row{display:flex;gap:.6rem;margin-top:.5rem;}
+.vf-btn{flex:1;padding:.75rem 1rem;border-radius:10px;border:2px solid var(--day-border);background:var(--day-light);cursor:pointer;font-weight:800;font-size:1rem;min-height:50px;transition:.15s;}
+.vf-btn:hover:not([disabled]){border-color:var(--day-color);background:#ffe9bf;}
+.vf-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.vf-btn[disabled]{cursor:default;}
+.vf-btn.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.vf-btn.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.vf-btn.reveal{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opts-col{display:flex;flex-direction:column;gap:.45rem;margin-top:.5rem;}
+.opt-btn{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-radius:10px;border:2px solid var(--day-border);background:var(--day-light);cursor:pointer;min-height:44px;font-size:.95rem;font-weight:600;transition:.15s;text-align:left;width:100%;}
+.opt-btn:hover:not([disabled]){border-color:var(--day-color);background:#ffe9bf;}
+.opt-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.opt-btn[disabled]{cursor:default;}
+.opt-btn.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-btn.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.opt-btn.reveal{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-btn.selected{border-color:var(--day-color);background:#ffe9bf;font-weight:800;}
+.opt-letter{font-family:'JetBrains Mono',monospace;font-weight:800;min-width:1.3rem;color:var(--day-dark);}
+.boat-hint{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);margin-top:.5rem;text-align:center;}
+.boat-opt{cursor:pointer;}
+.boat-opt polygon,.boat-opt rect,.boat-opt path,.boat-opt line{transition:.15s;}
+.boat-opt.selected rect,.boat-opt.selected path{filter:drop-shadow(0 0 0 transparent);}
+.boat-opt.selected .boat-ring{stroke:var(--day-color);stroke-width:3;opacity:1;}
+.boat-ring{opacity:0;}
+.boat-opt.locked-ok .boat-ring{stroke:var(--green);opacity:1;}
+.boat-opt.locked-ko .boat-ring{stroke:#c0392b;opacity:1;}
+.feedback{margin-top:.8rem;padding:.7rem .9rem;border-radius:10px;font-size:clamp(.9rem,2.5vw,1rem);line-height:1.75;display:none;}
+.feedback.show{display:block;}
+.feedback.ok{background:#eefad8;border:1.5px solid var(--green);color:#3d7a10;}
+.feedback.ko{background:#fce4e4;border:1.5px solid #c0392b;color:#8f2f2f;}
+#next-wrap{margin-top:.9rem;text-align:center;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);}
+#final-screen{width:100%;max-width:560px;display:none;position:relative;z-index:1;}
+.final-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+.final-icon{font-size:2.5rem;margin-bottom:.5rem;}
+.final-title{font-size:1.2rem;font-weight:900;color:var(--day-dark);margin-bottom:.5rem;}
+.final-msg{font-size:clamp(.88rem,2.5vw,1rem);color:var(--text);line-height:1.8;}
+@media(max-width:480px){body{padding:1rem .75rem 3rem;}.card{padding:1.2rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div><div class="bubble3"></div><div class="bubble4"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Math&eacute;matiques &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 7 &ndash; Jour 1</div>
+  <h1>&#9889; Flash D&eacute;fi</h1>
+  <p class="subtitle">Sym&eacute;trie centrale &middot; 3 questions &middot; 20 secondes</p>
+</header>
+
+<div id="start-screen">
+  <div class="start-card">
+    <div class="stripe"></div>
+    <div class="start-title">Mission Temple &mdash; Restaurer la mosa&iuml;que</div>
+    <p class="start-text">Les fragments de la mosa&iuml;que ont &eacute;t&eacute; d&eacute;plac&eacute;s. Pour restaurer le motif du temple, tu dois reconna&icirc;tre les figures obtenues par un demi-tour et retrouver l&rsquo;image de chaque &eacute;l&eacute;ment.</p>
+    <button class="btn btn-primary" id="btn-start" style="font-size:1.05rem;padding:.8rem 2rem;">&#9654; Commencer la mission</button>
+  </div>
+</div>
+
+<div id="flash-zone" style="display:none;">
+  <div class="chrono-wrap">
+    <div class="chrono-top">
+      <span class="chrono-label">&#8987; Temps restant</span>
+      <span class="chrono-val" id="chrono-val">20 s</span>
+    </div>
+    <div class="chrono-bar-bg"><div class="chrono-bar" id="chrono-bar" style="width:100%"></div></div>
+  </div>
+  <div class="prog-dots">
+    <div class="prog-dot active" id="pd0"></div>
+    <div class="prog-dot" id="pd1"></div>
+    <div class="prog-dot" id="pd2"></div>
+  </div>
+  <div class="card" id="card">
+    <div class="card-stripe"></div>
+    <div class="q-badge" id="q-badge">Question 1 / 3</div>
+    <div id="q-content"></div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+    <div id="next-wrap"></div>
+  </div>
+</div>
+
+<div id="final-screen" style="display:none;">
+  <div class="final-card">
+    <div class="stripe"></div>
+    <div class="logo-badge" style="margin:0 auto .7rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+    </div>
+    <div class="final-icon">&#9889;</div>
+    <div class="final-title">R&eacute;activation termin&eacute;e&nbsp;!</div>
+    <div class="final-msg">Tu es pr&ecirc;t &agrave; restaurer les premiers fragments de la mosa&iuml;que.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+var DUREE=20,TOTAL=3;
+var tempsRestant=DUREE,timerID=null,fini=false,answered=false,qIdx=0;
+function el(id){return document.getElementById(id);}
+
+function updateChrono(){
+  el('chrono-val').textContent=tempsRestant+' s';
+  el('chrono-bar').style.width=(tempsRestant/DUREE*100)+'%';
+  var urgent=(tempsRestant<=5);
+  el('chrono-val').className='chrono-val'+(urgent?' urgent':'');
+  el('chrono-bar').className='chrono-bar'+(urgent?' urgent':'');
+}
+function startTimer(){
+  if(timerID){clearInterval(timerID);}
+  timerID=setInterval(function(){
+    tempsRestant--;
+    updateChrono();
+    if(tempsRestant<=0){
+      clearInterval(timerID);timerID=null;
+      if(!fini) showFin();
+    }
+  },1000);
+}
+function pauseChrono(){
+  if(timerID){clearInterval(timerID);timerID=null;}
+}
+function startFlash(){
+  el('start-screen').style.display='none';
+  el('flash-zone').style.display='block';
+  qIdx=0;fini=false;answered=false;tempsRestant=DUREE;
+  updateChrono();render();startTimer();
+}
+
+function svgWrap(inner,vb){
+  return '<div class="fig-wrap"><svg viewBox="'+(vb||'0 0 220 140')+'" xmlns="http://www.w3.org/2000/svg">'+inner+'</svg></div>';
+}
+function oDot(x,y,lx,ly,label){
+  return '<circle cx="'+x+'" cy="'+y+'" r="5" fill="none" stroke="#c47a10" stroke-width="2"/>'
+    +'<circle cx="'+x+'" cy="'+y+'" r="4.5" fill="#1a1d23"/>'
+    +'<text x="'+lx+'" y="'+ly+'" font-family="JetBrains Mono, monospace" font-size="15" font-weight="700" fill="#c47a10">'+(label||'O')+'</text>';
+}
+function ptDot(x,y,label,color,dx,dy){
+  return '<circle cx="'+x+'" cy="'+y+'" r="4.5" fill="'+color+'"/>'
+    +'<text x="'+(x+(dx===undefined?6:dx))+'" y="'+(y+(dy===undefined?-6:dy))+'" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="'+color+'">'+label+'</text>';
+}
+function boatIcon(id,x,y,color,rot,num){
+  var t='translate('+x+','+y+')'+(rot?' rotate('+rot+')':'');
+  return '<g id="'+id+'" class="boat-opt" data-x="'+x+'" data-y="'+y+'" transform="'+t+'" tabindex="0" role="button" aria-label="Bateau '+num+'" aria-pressed="false">'
+    +'<circle class="boat-ring" cx="0" cy="6" r="26" fill="none" stroke="var(--day-color)" stroke-width="3"/>'
+    +'<rect x="-16" y="12" width="32" height="8" rx="2" fill="'+color+'"/>'
+    +'<line x1="0" y1="12" x2="0" y2="-18" stroke="'+color+'" stroke-width="3"/>'
+    +'<path d="M 0,-18 L 16,6 L 0,6 Z" fill="'+color+'" opacity=".85"/>'
+    +'</g>';
+}
+
+// Q1 : reconnaissance Oui/Non (une seule figure, la répétition a été supprimée)
+function figQ1(){
+  return svgWrap(
+    '<line x1="40" y1="110" x2="90" y2="110" stroke="#1a1d23" stroke-width="5" stroke-linecap="round"/>'
+    +'<line x1="40" y1="110" x2="40" y2="70" stroke="#1a1d23" stroke-width="5" stroke-linecap="round"/>'
+    +'<line x1="190" y1="70" x2="140" y2="70" stroke="#b94040" stroke-width="5" stroke-linecap="round"/>'
+    +'<line x1="190" y1="70" x2="190" y2="110" stroke="#b94040" stroke-width="5" stroke-linecap="round"/>'
+    +oDot(115,90,122,87)
+  );
+}
+// Q2 : réactivation rapide de la définition du centre (pas de doublon avec le Niveau 2)
+function figQ2(){
+  return svgWrap(
+    '<line x1="30" y1="80" x2="200" y2="80" stroke="#1a1d23" stroke-width="2.5"/>'
+    +'<line x1="72.5" y1="68" x2="72.5" y2="92" stroke="#1a1d23" stroke-width="2"/>'
+    +'<line x1="157.5" y1="68" x2="157.5" y2="92" stroke="#1a1d23" stroke-width="2"/>'
+    +ptDot(30,80,'A','#1a1d23',-6,-14)
+    +ptDot(200,80,'A\u2019','#1a1d23',6,-14)
+    +oDot(115,80,109,64,'M')
+  ,'0 0 230 110');
+}
+// Q3 : bateaux symétriques par rapport à J (sélection multiple)
+function figQ3(){
+  return svgWrap(
+    oDot(150,90,157,86,'J')
+    +boatIcon('boat1',60,50,'#1a1d23',0,1)
+    +boatIcon('boat2',240,130,'#1a1d23',180,2)
+    +boatIcon('boat3',70,150,'#1a1d23',0,3)
+    +boatIcon('boat4',230,45,'#1a1d23',0,4)
+  ,'0 0 300 200');
+}
+
+var QUESTIONS=[
+  {
+    type:'vf',
+    q:'La figure rouge est-elle l\u2019image de la figure noire par la sym\u00e9trie centrale de centre O\u00a0?',
+    fig:figQ1,ans:'Oui',
+    fbOk:'\u2705 Bravo\u00a0! Les deux figures se correspondent par un demi-tour autour de O.',
+    fbKo:'\u274c Ce n\u2019est pas la bonne r\u00e9ponse. Regarde la position des deux angles de part et d\u2019autre de O.'
+  },
+  {
+    type:'qcm',
+    q:'M est le centre de la sym\u00e9trie qui transforme A en A\u2019. Quelle affirmation est vraie\u00a0?',
+    fig:figQ2,opts:['AM\u00a0=\u00a0MA\u2019, et A, M, A\u2019 sont align\u00e9s.','M est plus proche de A que de A\u2019.','AM est plus grand que MA\u2019.','M peut \u00eatre n\u2019importe o\u00f9 entre A et A\u2019.'],correct:0,
+    fbOk:'\u2705 Bravo\u00a0! M est le milieu de [AA\u2019]\u00a0: les trois points sont align\u00e9s et AM\u00a0=\u00a0MA\u2019.',
+    fbKo:'\u274c Ce n\u2019est pas la bonne r\u00e9ponse. Le centre d\u2019une sym\u00e9trie centrale est toujours le milieu du segment reliant un point \u00e0 son image.'
+  },
+  {
+    type:'multi',
+    q:'Parmi les bateaux propos\u00e9s, quels sont les deux bateaux sym\u00e9triques par rapport au point J\u00a0?',
+    fig:figQ3,correct:['boat1','boat2'],
+    fbOk:'\u2705 Bravo\u00a0! Ces deux bateaux sont sym\u00e9triques par rapport \u00e0 J.',
+    fbKo:'\u274c Ce n\u2019est pas la bonne r\u00e9ponse. J doit \u00eatre le milieu du segment reliant les deux bateaux.'
+  }
+];
+
+function render(){
+  answered=false;
+  for(var i=0;i<3;i++) el('pd'+i).className='prog-dot'+(i<qIdx?' done':i===qIdx?' active':'');
+  el('q-badge').textContent='Question '+(qIdx+1)+' / '+TOTAL;
+  el('feedback').className='feedback';el('feedback').innerHTML='';
+  el('next-wrap').innerHTML='';
+  var Q=QUESTIONS[qIdx];
+  var html='<div class="q-text">'+Q.q+'</div>'+Q.fig();
+
+  if(Q.type==='vf'){
+    html+='<div class="vf-row"><button class="vf-btn" id="vf-oui" tabindex="0">Oui</button><button class="vf-btn" id="vf-non" tabindex="0">Non</button></div>';
+    el('q-content').innerHTML=html;
+    var bo=el('vf-oui'),bn=el('vf-non');
+    bo.addEventListener('click',function(){answerVF('Oui');});
+    bn.addEventListener('click',function(){answerVF('Non');});
+    bo.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();answerVF('Oui');}});
+    bn.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();answerVF('Non');}});
+  } else if(Q.type==='qcm'){
+    html+='<div class="opts-col" id="qcm-opts"></div>';
+    el('q-content').innerHTML=html;
+    var row=el('qcm-opts');
+    Q.opts.forEach(function(o,i){
+      var btn=document.createElement('button');btn.type='button';btn.className='opt-btn';
+      btn.innerHTML='<span class="opt-letter">'+String.fromCharCode(65+i)+'.</span> '+o;
+      btn.addEventListener('click',function(){answerQCM(i);});
+      row.appendChild(btn);
+    });
+  } else if(Q.type==='multi'){
+    html+='<div class="boat-hint" id="boat-hint">Bateaux s&eacute;lectionn&eacute;s\u00a0: 0 / 2</div>';
+    el('q-content').innerHTML=html;
+    var selected=[];
+    document.querySelectorAll('.boat-opt').forEach(function(g){
+      g.addEventListener('click',function(){toggleBoat(g,selected);});
+      g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleBoat(g,selected);}});
+    });
+  }
+}
+
+function toggleBoat(g,selected){
+  if(answered) return;
+  var id=g.id;
+  var idx=selected.indexOf(id);
+  if(idx>=0){selected.splice(idx,1);g.classList.remove('selected');g.setAttribute('aria-pressed','false');}
+  else{
+    if(selected.length>=2) return;
+    selected.push(id);g.classList.add('selected');g.setAttribute('aria-pressed','true');
+  }
+  el('boat-hint').textContent='Bateaux s\u00e9lectionn\u00e9s\u00a0: '+selected.length+' / 2';
+  el('next-wrap').innerHTML='';
+  if(selected.length===2){
+    var btn=document.createElement('button');
+    btn.type='button';btn.className='btn btn-primary';btn.textContent='\u2713 Valider';
+    btn.addEventListener('click',function(){answerMulti(selected);});
+    el('next-wrap').appendChild(btn);
+  }
+}
+
+function lockFeedback(ok,Q){
+  answered=true;pauseChrono();
+  var fb=el('feedback');fb.className='feedback show '+(ok?'ok':'ko');
+  fb.textContent=ok?Q.fbOk:Q.fbKo;
+  showNextButton();
+}
+
+function answerVF(label){
+  if(answered) return;
+  var Q=QUESTIONS[qIdx];
+  var ok=(label===Q.ans);
+  var bo=el('vf-oui'),bn=el('vf-non');
+  bo.disabled=true;bn.disabled=true;
+  if(Q.ans==='Oui'){bo.className='vf-btn'+(label==='Oui'?' ok':' reveal');bn.className='vf-btn'+(label==='Non'?' ko':'');}
+  else{bn.className='vf-btn'+(label==='Non'?' ok':' reveal');bo.className='vf-btn'+(label==='Oui'?' ko':'');}
+  lockFeedback(ok,Q);
+}
+
+function answerQCM(i){
+  if(answered) return;
+  var Q=QUESTIONS[qIdx];
+  var ok=(i===Q.correct);
+  var row=el('qcm-opts');
+  row.querySelectorAll('.opt-btn').forEach(function(b,j){
+    b.disabled=true;
+    if(j===Q.correct) b.classList.add(ok&&j===i?'ok':'reveal');
+    else if(j===i) b.classList.add('ko');
+  });
+  lockFeedback(ok,Q);
+}
+
+function answerMulti(selected){
+  if(answered) return;
+  var Q=QUESTIONS[qIdx];
+  var sortedSel=selected.slice().sort();
+  var sortedCorrect=Q.correct.slice().sort();
+  var ok=(JSON.stringify(sortedSel)===JSON.stringify(sortedCorrect));
+  document.querySelectorAll('.boat-opt').forEach(function(g){
+    var isCorrectBoat=Q.correct.indexOf(g.id)>=0;
+    var isSelected=selected.indexOf(g.id)>=0;
+    if(isCorrectBoat) g.classList.add('locked-ok');
+    else if(isSelected) g.classList.add('locked-ko');
+  });
+  lockFeedback(ok,Q);
+}
+
+function showNextButton(){
+  pauseChrono();
+  var wrap=el('next-wrap');wrap.innerHTML='';
+  var btn=document.createElement('button');
+  btn.type='button';btn.className='btn btn-primary';
+  btn.textContent=(qIdx===TOTAL-1)?'\u2192 Voir le r\u00e9sultat':'\u2192 Question suivante';
+  btn.addEventListener('click',goNext);
+  wrap.appendChild(btn);
+}
+
+function goNext(){
+  if(fini) return;
+  if(qIdx===TOTAL-1){
+    showFin();
+    return;
+  }
+  qIdx++;render();startTimer();
+}
+
+function showFin(){
+  fini=true;clearInterval(timerID);timerID=null;
+  el('flash-zone').style.display='none';el('final-screen').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+el('btn-start').addEventListener('click',startFlash);
+updateChrono();
+})();
+</script>
+</body>
+</html>
