@@ -70,25 +70,351 @@
 
   <div class="activity-card">
     <div class="activity-stripe"></div>
-    <div class="activity-label">Activit&eacute;&nbsp;1 &mdash; M&eacute;diane</div>
-    <iframe src="https://mathenpoche.sesamath.net/?page=troisieme#troisieme_2_2_2_sesabibli/5cb9c3ab4bb1527df9236bfe"
-      height="520" allowfullscreen="true"></iframe>
-    <div class="ext-link">
-      &#128279; Si l&rsquo;activit&eacute; ne s&rsquo;affiche pas&nbsp;:
-      <a href="https://mathenpoche.sesamath.net/?page=troisieme#troisieme_2_2_2_sesabibli/5cb9c3ab4bb1527df9236bfe" target="_blank" rel="noopener">
-        Ouvrir dans un nouvel onglet
-      </a>
+    <div class="activity-label">Activit&eacute;&nbsp;1 &mdash; M&eacute;diane et quartiles</div>
+    <div id="med-wrap" style="background:#fff;padding:1.5rem 2rem;font-family:Arial,sans-serif;">
+
+      <!-- Barre haut style Sésamath -->
+      <div style="display:flex;align-items:stretch;gap:.8rem;margin-bottom:1rem;">
+        <div style="flex:1;background:linear-gradient(135deg,#e8631a,#f5a623);border-radius:10px;padding:1rem 1.5rem;display:flex;align-items:center;">
+          <div style="font-size:1.1rem;font-weight:800;color:#fff;">M&eacute;diane et quartiles d&rsquo;une s&eacute;rie statistique</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#e8631a,#f5a623);border-radius:10px;padding:.7rem 1.1rem;font-size:.9rem;font-weight:700;color:#fff;display:flex;flex-direction:column;justify-content:center;gap:.25rem;white-space:nowrap;">
+          <div>Question&nbsp;: <span id="med-qnum" style="color:#f5c518;">1a</span> sur 3</div>
+          <div>Score&nbsp;: <span id="med-score">0 sur ?</span></div>
+        </div>
+      </div>
+
+      <!-- Zone question -->
+      <div id="med-zone" style="display:flex;gap:1rem;">
+        <!-- Contenu principal -->
+        <div style="flex:1;">
+          <div id="med-enonce" style="font-size:.97rem;line-height:1.7;margin-bottom:.8rem;"></div>
+          <div id="med-tableau"></div>
+          <div id="med-question" style="margin-top:1rem;font-size:.97rem;line-height:2;"></div>
+        </div>
+        <!-- Feedback droite -->
+        <div id="med-fb" style="width:200px;flex-shrink:0;font-size:1rem;font-weight:700;color:#e8631a;display:none;padding:.5rem;"></div>
+      </div>
+
+      <!-- Boutons bas -->
+      <div style="display:flex;justify-content:flex-end;margin-top:1.2rem;gap:.8rem;">
+        <button id="med-btn-ok" onclick="MED.valider()"
+          style="background:linear-gradient(135deg,#2ab5c5,#1a8899);color:#fff;border:none;padding:.55rem 1.4rem;border-radius:20px;font-size:.97rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;">
+          &#10003; OK
+        </button>
+        <button id="med-btn-suite" onclick="MED.suite()"
+          style="display:none;background:linear-gradient(135deg,#2ab5c5,#1a8899);color:#fff;border:none;padding:.55rem 1.4rem;border-radius:20px;font-size:.97rem;font-weight:700;cursor:pointer;">
+          Suite &#9658;&#9658;
+        </button>
+      </div>
+
+      <!-- Fin -->
+      <div id="med-end" style="display:none;text-align:center;padding:1.5rem;">
+        <div style="font-size:1.2rem;font-weight:700;margin-bottom:.5rem;">Exercice termin&eacute;&nbsp;!</div>
+        <div id="med-end-score" style="font-size:1rem;color:#555;margin-bottom:1rem;"></div>
+        <button onclick="MED.reset()" style="background:linear-gradient(135deg,#e8631a,#f5a623);color:#fff;border:none;padding:.55rem 1.4rem;border-radius:20px;font-size:.97rem;font-weight:700;cursor:pointer;">&#8635; Recommencer</button>
+      </div>
     </div>
+
+    <script>
+    var MED=(function(){
+      function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+      function genData(){
+        var nbVals=rand(7,13);
+        var pool=[];for(var i=2;i<=98;i++)pool.push(i);
+        for(var i=pool.length-1;i>0;i--){var j=rand(0,i);var t=pool[i];pool[i]=pool[j];pool[j]=t;}
+        var vals=pool.slice(0,nbVals).sort(function(a,b){return a-b;});
+        var effs=vals.map(function(){return rand(5,20);});
+        var ecc=[],cum=0;
+        for(var i=0;i<effs.length;i++){cum+=effs[i];ecc.push(cum);}
+        var n=cum;
+
+        /* Médiane — règle exacte selon parité */
+        var medImpair=(n%2!==0);
+        var rangMed1,rangMed2,valMed1,valMed2,valMed;
+        if(medImpair){
+          rangMed1=(n+1)/2; valMed1=0;
+          for(var i=0;i<ecc.length;i++){if(ecc[i]>=rangMed1){valMed1=vals[i];break;}}
+          valMed=valMed1;
+        } else {
+          rangMed1=n/2; rangMed2=n/2+1;
+          valMed1=0; valMed2=0;
+          for(var i=0;i<ecc.length;i++){if(ecc[i]>=rangMed1&&!valMed1){valMed1=vals[i];}if(ecc[i]>=rangMed2&&!valMed2){valMed2=vals[i];}}
+          valMed=(valMed1+valMed2)/2;
+        }
+
+        /* Q1 et Q3 */
+        var rangQ1=Math.ceil(n/4),valQ1=0;
+        for(var i=0;i<ecc.length;i++){if(ecc[i]>=rangQ1){valQ1=vals[i];break;}}
+        var rangQ3=Math.ceil(3*n/4),valQ3=0;
+        for(var i=0;i<ecc.length;i++){if(ecc[i]>=rangQ3){valQ3=vals[i];break;}}
+
+        /* scoreMax : nbVals (ECC) + réponses 1b + 4 (quartiles) */
+        var nbRep1b=medImpair?2:3; /* rang+val si impair; rang1+rang2+médiane si pair */
+        var scoreMax=nbVals+nbRep1b+4;
+
+        return{vals:vals,effs:effs,ecc:ecc,n:n,
+          medImpair:medImpair,
+          rangMed1:rangMed1,rangMed2:rangMed2||null,
+          valMed1:valMed1,valMed2:valMed2||null,valMed:valMed,
+          rangQ1:rangQ1,valQ1:valQ1,rangQ3:rangQ3,valQ3:valQ3,
+          scoreMax:scoreMax,nbVals:nbVals};
+      }
+
+      var D={},qIdx=0,score=0,inputs=[],answered=false,essais=0;
+      function $(id){return document.getElementById(id);}
+
+      function tblStyle(){return 'border-collapse:collapse;font-size:.93rem;width:100%;margin:.4rem 0;';}
+      function thStyle(){return 'border:1.5px solid #bbb;padding:.4rem .6rem;text-align:center;background:#f5f5f5;font-weight:700;';}
+      function tdStyle(){return 'border:1.5px solid #bbb;padding:.4rem .6rem;text-align:center;';}
+      function tdIn(id){
+        return '<td style="'+tdStyle()+'">'
+          +'<input id="'+id+'" type="text" autocomplete="off" '
+          +'style="width:48px;height:30px;text-align:center;border:2px solid #f5a623;'
+          +'border-radius:4px;padding:.25rem;font-size:1rem;font-weight:700;'
+          +'background:#fff8f0;color:#1a1d23;" /></td>';
+      }
+      function inpStyle(){
+        return 'width:52px;height:30px;text-align:center;border:2px solid #f5a623;'
+          +'border-radius:4px;padding:.25rem;font-size:1rem;font-weight:700;'
+          +'background:#fff8f0;color:#1a1d23;';
+      }
+      function inp(id){return '<input id="'+id+'" type="text" autocomplete="off" style="'+inpStyle()+'" />';}
+
+      function updateScoreDisplay(){
+        $('med-score').textContent=score+' sur '+D.scoreMax;
+      }
+
+      function tableauECC(showValues){
+        var h='<table style="'+tblStyle()+'">';
+        h+='<tr><th style="'+thStyle()+'">Valeurs</th>';
+        D.vals.forEach(function(v){h+='<th style="'+thStyle()+'">'+v+'</th>';});
+        h+='</tr><tr><th style="'+thStyle()+'">Effectifs</th>';
+        D.effs.forEach(function(e){h+='<td style="'+tdStyle()+'">'+e+'</td>';});
+        h+='</tr><tr><th style="'+thStyle()+'">E.C.C.</th>';
+        if(showValues){
+          D.ecc.forEach(function(e){h+='<td style="'+tdStyle()+';color:#1a6e88;font-weight:700;">'+e+'</td>';});
+        } else {
+          D.ecc.forEach(function(e,i){h+=tdIn('ecc'+i);inputs.push({id:'ecc'+i,val:e});});
+        }
+        h+='</tr></table>';
+        return h;
+      }
+
+      /* ── Q1a ── */
+      function renderQ1a(){
+        answered=false;essais=0;inputs=[];
+        $('med-btn-ok').textContent='OK';
+        $('med-enonce').innerHTML="L\u2019\u00e9tude d\u2019un caract\u00e8re quantitatif discret sur un \u00e9chantillon de "+D.n+" valeurs donne les r\u00e9sultats regroup\u00e9s dans le tableau ci-dessous.<br>Compl\u00e8te le tableau par les effectifs cumul\u00e9s croissants (E.C.C.).";
+        $('med-tableau').innerHTML=tableauECC(false);
+        $('med-question').innerHTML='';
+        $('med-fb').style.display='none';
+        $('med-btn-suite').style.display='none';
+        $('med-btn-ok').style.display='inline-flex';
+        $('med-qnum').textContent='1a';
+        updateScoreDisplay();
+        setTimeout(function(){var el=document.getElementById('ecc0');if(el)el.focus();},80);
+      }
+
+      /* ── Q1b ── */
+      function renderQ1b(){
+        answered=false;essais=0;inputs=[];
+        $('med-btn-ok').textContent='OK';
+        $('med-enonce').innerHTML="L\u2019\u00e9tude d\u2019un caract\u00e8re quantitatif discret sur un \u00e9chantillon de "+D.n+" valeurs donne les r\u00e9sultats regroup\u00e9s dans le tableau ci-dessous.";
+        $('med-tableau').innerHTML=tableauECC(true);
+        var q='';
+        if(D.medImpair){
+          q='La m\u00e9diane de cette s\u00e9rie de donn\u00e9es se situe au rang '+inp('qb1')+' et vaut '+inp('qb2')+'\u00a0.';
+          inputs=[{id:'qb1',val:D.rangMed1},{id:'qb2',val:D.valMed}];
+        } else {
+          q='Les deux valeurs centrales se situent aux rangs '+inp('qb1')+' et '+inp('qb2')+'.<br>'
+           +'La m\u00e9diane vaut '+inp('qb3')+'\u00a0.';
+          inputs=[{id:'qb1',val:D.rangMed1},{id:'qb2',val:D.rangMed2},{id:'qb3',val:D.valMed}];
+        }
+        $('med-question').innerHTML=q;
+        $('med-fb').style.display='none';
+        $('med-btn-suite').style.display='none';
+        $('med-btn-ok').style.display='inline-flex';
+        $('med-qnum').textContent='1b';
+        updateScoreDisplay();
+        setTimeout(function(){var el=document.getElementById('qb1');if(el)el.focus();},80);
+      }
+
+      /* ── Q1c ── */
+      function renderQ1c(){
+        answered=false;essais=0;inputs=[];
+        $('med-btn-ok').textContent='OK';
+        $('med-enonce').innerHTML="L\u2019\u00e9tude d\u2019un caract\u00e8re quantitatif discret sur un \u00e9chantillon de "+D.n+" valeurs donne les r\u00e9sultats regroup\u00e9s dans le tableau ci-dessous.";
+        $('med-tableau').innerHTML=tableauECC(true);
+        $('med-question').innerHTML=
+          'Le premier quartile de cette s\u00e9rie de donn\u00e9es se situe au rang '
+          +inp('qc1')+' et vaut '+inp('qc2')+'\u00a0.<br>'
+          +'Le troisi\u00e8me quartile de cette s\u00e9rie de donn\u00e9es se situe au rang '
+          +inp('qc3')+' et vaut '+inp('qc4')+'\u00a0.';
+        inputs=[{id:'qc1',val:D.rangQ1},{id:'qc2',val:D.valQ1},{id:'qc3',val:D.rangQ3},{id:'qc4',val:D.valQ3}];
+        $('med-fb').style.display='none';
+        $('med-btn-suite').style.display='none';
+        $('med-btn-ok').style.display='inline-flex';
+        $('med-qnum').textContent='1c';
+        updateScoreDisplay();
+        setTimeout(function(){var el=document.getElementById('qc1');if(el)el.focus();},80);
+      }
+
+      /* ── Valider ── */
+      function afficherResultat(){
+        $('med-zone').style.display='none';
+        $('med-end').style.display='block';
+        $('med-end-score').textContent='Score\u00a0: '+score+' / '+D.scoreMax;
+      }
+
+      function apresValidation(allOk){
+        $('med-btn-ok').style.display='none';
+        if(qIdx<2){
+          $('med-btn-suite').style.display='inline-flex';
+        } else {
+          /* Q1c : bouton Voir mon résultat, pas de setTimeout */
+          var btnRes=document.createElement('button');
+          btnRes.id='med-btn-res';btnRes.textContent='Voir mon r\u00e9sultat';
+          btnRes.style.cssText='background:linear-gradient(135deg,#e8631a,#f5a623);color:#fff;border:none;padding:.55rem 1.4rem;border-radius:20px;font-size:.97rem;font-weight:700;cursor:pointer;';
+          btnRes.onclick=afficherResultat;
+          var row=document.querySelector('#med-wrap > div:last-of-type, div[style*="justify-content:flex-end"]');
+          /* Insérer après les boutons existants */
+          var cont=$('med-btn-ok').parentNode;
+          cont.appendChild(btnRes);
+        }
+      }
+
+      function correctionDansChamps(){
+        /* Remplir les champs incorrects avec la bonne réponse et les désactiver */
+        inputs.forEach(function(inp){
+          var el=document.getElementById(inp.id);if(!el)return;
+          var raw=(el.value||'').trim().replace(',','.');
+          var v=parseFloat(raw);
+          var ok=Math.abs(v-inp.val)<0.001;
+          if(!ok){
+            el.value=inp.val;
+            el.style.borderColor='#1a6e88';
+            el.style.color='#1a6e88';
+            el.style.background='#e8f4fd';
+          } else {
+            el.style.borderColor='#27ae60';
+            el.style.color='#1a5c30';
+          }
+          el.readOnly=true;
+        });
+      }
+
+      function valider(){
+        if(answered)return;
+        var allOk=true;
+        inputs.forEach(function(inp){
+          var el=document.getElementById(inp.id);if(!el)return;
+          var raw=(el.value||'').trim().replace(',','.');
+          var v=parseFloat(raw);
+          var ok=Math.abs(v-inp.val)<0.001;
+          if(!ok)allOk=false;
+        });
+        var fb=$('med-fb');fb.style.display='block';
+
+        if(allOk){
+          /* Bonne réponse */
+          inputs.forEach(function(inp){
+            var el=document.getElementById(inp.id);if(!el)return;
+            el.style.borderColor='#27ae60';el.style.color='#1a5c30';
+            el.readOnly=true;
+            score++;
+          });
+          answered=true;essais=0;
+          updateScoreDisplay();
+          fb.innerHTML='<span style="color:#27ae60;font-size:1.1rem;">\u2713 Bravo\u00a0!</span>';
+          apresValidation(true);
+
+        } else {
+          essais++;
+          if(essais<2){
+            /* 1er essai raté : signaler sans donner la correction */
+            inputs.forEach(function(inp){
+              var el=document.getElementById(inp.id);if(!el)return;
+              var raw=(el.value||'').trim().replace(',','.');
+              var v=parseFloat(raw);
+              var ok=Math.abs(v-inp.val)<0.001;
+              el.style.borderColor=ok?'#27ae60':'#e03030';
+              el.style.color=ok?'#1a5c30':'#c0392b';
+            });
+            fb.innerHTML='<span style="color:#e8631a;font-size:.95rem;">&#9888; Des erreurs. R\u00e9essaie\u00a0!</span>';
+            $('med-btn-ok').textContent='R\u00e9essayer';
+
+          } else {
+            /* 2e essai raté : afficher les corrections dans les champs */
+            inputs.forEach(function(inp){
+              var el=document.getElementById(inp.id);if(!el)return;
+              var raw=(el.value||'').trim().replace(',','.');
+              var v=parseFloat(raw);
+              var ok=Math.abs(v-inp.val)<0.001;
+              if(ok){el.style.borderColor='#27ae60';el.style.color='#1a5c30';score++;}
+            });
+            answered=true;essais=0;
+            updateScoreDisplay();
+
+            /* Remplir les champs incorrects avec la bonne réponse */
+            correctionDansChamps();
+
+            /* Message feedback court */
+            fb.innerHTML='<span style="color:#e8631a;font-size:1rem;">C\u2019est faux\u00a0!<br>Regarde la correction.</span>';
+
+            /* Explication selon la question */
+            if(qIdx===1){
+              if(D.medImpair){
+                fb.innerHTML+='<div style="font-size:.82rem;color:#1a6e88;margin-top:.4rem;">'
+                  +'('+D.n+'+1)/2 = '+D.rangMed1+'<br>'
+                  +'La valeur de rang '+D.rangMed1+' est '+D.valMed+'.</div>';
+              } else {
+                fb.innerHTML+='<div style="font-size:.82rem;color:#1a6e88;margin-top:.4rem;">'
+                  +'Rangs centraux\u00a0: '+D.rangMed1+' et '+D.rangMed2+'<br>'
+                  +'Les valeurs de rangs '+D.rangMed1+' et '+D.rangMed2+' sont '+D.valMed1+' et '+D.valMed2+'.<br>'
+                  +'M\u00e9diane = ('+D.valMed1+'+'+D.valMed2+')/2 = '+D.valMed+'.</div>';
+              }
+            } else if(qIdx===2){
+              fb.innerHTML+='<div style="font-size:.82rem;color:#1a6e88;margin-top:.4rem;">'
+                +'Q1\u00a0: rang '+D.rangQ1+', vaut '+D.valQ1+'<br>'
+                +'Q3\u00a0: rang '+D.rangQ3+', vaut '+D.valQ3+'</div>';
+            }
+            /* Pour Q1a (qIdx===0) : les champs ECC sont déjà remplis, pas d'explication supplémentaire */
+
+            apresValidation(false);
+          }
+        }
+      }
+
+
+      function suite(){qIdx++;if(qIdx===1)renderQ1b();else if(qIdx===2)renderQ1c();}
+
+      function reset(){
+        D=genData();qIdx=0;score=0;answered=false;essais=0;
+        var old=document.getElementById('med-btn-res');
+        if(old)old.parentNode.removeChild(old);
+        $('med-zone').style.display='flex';
+        $('med-end').style.display='none';
+        $('med-score').textContent='0 sur '+D.scoreMax;
+        renderQ1a();
+      }
+
+      D=genData();renderQ1a();
+      return{valider:valider,suite:suite,reset:reset};
+    })();
+
+    </script>
   </div>
 
   <div class="activity-card">
     <div class="activity-stripe"></div>
     <div class="activity-label">Activit&eacute;&nbsp;2 &mdash; M&eacute;diane</div>
-    <iframe src="https://learningapps.org/watch?app=26340702"
+    <iframe src="https://learningapps.org/view6639283?&allowFullscreen=1"
       height="520" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
     <div class="ext-link">
       &#128279; Si l&rsquo;activit&eacute; ne s&rsquo;affiche pas&nbsp;:
-      <a href="https://learningapps.org/watch?app=26340702" target="_blank" rel="noopener">
+      <a href="https://learningapps.org/view6639283?&allowFullscreen=1" target="_blank" rel="noopener">
         Ouvrir dans un nouvel onglet
       </a>
     </div>
