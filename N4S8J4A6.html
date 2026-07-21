@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa 4e – Fractions – Niveau 3</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8;--day-dark:#1a6e88;--day-light:#e8f6fb;--day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.3);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+      --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+      position:relative;overflow-x:hidden;letter-spacing:.03em;line-height:1.6;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--blue);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--yellow);top:200px;left:-30px;pointer-events:none;}
+    .head-card{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1.9rem 1.5rem 1.4rem;text-align:center;
+      position:relative;z-index:1;margin-bottom:1rem;}
+    .logo-badge{background:var(--yellow);color:#000;font-size:14px;letter-spacing:.09em;
+      display:inline-flex;align-items:center;gap:.5rem;font-weight:700;text-transform:uppercase;
+      padding:.35rem 1.1rem;border-radius:99px;margin-bottom:.6rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{color:var(--day-dark);font-size:.88rem;margin:.5rem 0;font-family:'JetBrains Mono',monospace;}
+    .head-card h1{font-size:clamp(1.2rem,4vw,1.8rem);font-weight:900;color:var(--text);margin:.3rem 0;}
+    .head-card h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:.95rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+    /* STATS */
+    .stats-card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.1rem;margin-bottom:1.3rem;
+      box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;}
+    .stats-row{display:flex;gap:.8rem;}
+    .stat-box{flex:1;background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:12px;padding:.9rem .5rem;text-align:center;}
+    .stat-num{font-size:1.7rem;font-weight:800;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;line-height:1.1;}
+    .stat-label{font-size:.86rem;color:var(--muted);margin-top:.25rem;}
+    .prog-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:1rem;}
+    .prog-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+    .prog-text{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.95rem;
+      color:var(--muted);margin-top:.6rem;}
+    /* ACTIVITÉ LABEL */
+    .act-label{width:100%;max-width:720px;position:relative;z-index:1;
+      font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);
+      margin:1.3rem 0 .6rem;padding:.5rem 1rem;
+      background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:10px;text-align:center;}
+    /* CARDS */
+    .cards-wrap{width:100%;max-width:720px;display:flex;flex-direction:column;gap:1rem;position:relative;z-index:1;}
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.4rem 1.5rem 1.2rem;position:relative;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+    .q-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+    .q-text{font-size:.97rem;line-height:1.7;margin-bottom:.7rem;color:var(--text);}
+    .q-expr{font-size:1.05rem;font-weight:700;color:var(--text);line-height:2;margin-bottom:.6rem;
+      display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;}
+    /* FRACTIONS */
+    .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;line-height:1.15;}
+    .frac .num{border-bottom:2px solid currentColor;padding:1px 5px;text-align:center;display:block;}
+    .frac .den{padding:1px 5px;text-align:center;display:block;}
+    /* SUB-QUESTIONS */
+    .sub-q{display:flex;flex-direction:column;gap:.7rem;margin-bottom:.5rem;}
+    .sub-item{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;font-size:.97rem;}
+    .sub-num{font-weight:700;color:var(--day-dark);min-width:1.2rem;}
+    /* INPUT */
+    .ai{border:2px solid var(--day-border);border-radius:10px;padding:.55rem .8rem;
+      font-size:1rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+      outline:none;transition:border-color .2s;width:110px;text-align:center;}
+    .ai:focus{border-color:var(--day-color);}
+    .ai.ok{border-color:var(--green);background:#eef7e9;color:#2f6e10;}
+    .ai.ko{border-color:var(--pink);background:#fdeeee;color:#c0392b;}
+    .ai-txt{border:2px solid var(--day-border);border-radius:10px;padding:.55rem .8rem;
+      font-size:1rem;font-family:Arial,sans-serif;outline:none;transition:border-color .2s;
+      width:160px;}
+    .ai-txt:focus{border-color:var(--day-color);}
+    .ai-txt.ok{border-color:var(--green);background:#eef7e9;color:#2f6e10;}
+    .ai-txt.ko{border-color:var(--pink);background:#fdeeee;color:#c0392b;}
+    /* BOUTONS */
+    .btn-row{display:flex;gap:.6rem;margin-top:.8rem;flex-wrap:wrap;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.65rem 1.2rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.92rem,2.5vw,1rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.9rem;flex:1;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-v{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-i{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    /* HINT */
+    .hint-box{margin-top:.6rem;background:#fffbeb;border:1.5px dashed var(--yellow);
+      border-radius:10px;padding:.65rem 1rem;font-size:.93rem;color:#7a5000;
+      display:none;line-height:1.7;}
+    .hint-box.show{display:block;}
+    /* FEEDBACK */
+    .fb{margin-top:.65rem;padding:.65rem .9rem;border-radius:10px;font-size:.93rem;
+      line-height:1.75;display:none;}
+    .fb.show{display:block;}
+    .fb.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    /* RÉSULTATS */
+    .results-wrap{width:100%;max-width:720px;display:none;position:relative;z-index:1;margin-top:1.5rem;}
+    .results-wrap.show{display:block;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .res-score{font-size:3.2rem;font-weight:800;color:var(--day-color);margin:.4rem 0;}
+    .res-msg{color:var(--muted);font-size:1rem;margin-bottom:1.2rem;line-height:1.7;}
+    .btn-restart{background:var(--surface);color:var(--day-dark);border:2px solid var(--day-border);
+      border-radius:10px;padding:.7rem 1.8rem;font-size:1rem;font-weight:800;cursor:pointer;
+      display:inline-flex;align-items:center;gap:.4rem;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){.btn-row{flex-direction:column;}.btn{width:100%;}.sub-item{flex-wrap:wrap;}}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+
+<div class="head-card">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    PAZAPA &middot; MATHS &middot; 4&Egrave;ME
+  </div>
+  <div class="week-label">Semaine&nbsp;8 &ndash; Jour&nbsp;4 &mdash; Je m&rsquo;entra&icirc;ne &mdash; Niveau&nbsp;3</div>
+  <h1><span class="hl">Multiplier et diviser des fractions</span></h1>
+  <p class="subtitle">17 exercices &middot; 4 activit&eacute;s</p>
+</div>
+
+<div class="stats-card">
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="st-ok">0</div><div class="stat-label">R&eacute;ussies</div></div>
+    <div class="stat-box"><div class="stat-num" id="st-rem">17</div><div class="stat-label">Restantes</div></div>
+    <div class="stat-box"><div class="stat-num" id="st-err">0</div><div class="stat-label">&Eacute;chou&eacute;es</div></div>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  <div class="prog-text" id="prog-txt">0 / 17</div>
+</div>
+
+<!-- ══ ACTIVITÉ 1 ══ -->
+<div class="act-label">Activit&eacute;&nbsp;1 &mdash; Probl&egrave;mes</div>
+<div class="cards-wrap" id="wrap-act1"></div>
+
+<!-- ══ ACTIVITÉ 2 ══ -->
+<div class="act-label">Activit&eacute;&nbsp;2 &mdash; Priorit&eacute;s op&eacute;ratoires</div>
+<div class="cards-wrap" id="wrap-act2"></div>
+
+<!-- ══ ACTIVITÉ 3 ══ -->
+<div class="act-label">Activit&eacute;&nbsp;3 &mdash; Parenth&egrave;ses</div>
+<div class="cards-wrap" id="wrap-act3"></div>
+
+<!-- ══ ACTIVITÉ 4 ══ -->
+<div class="act-label">Activit&eacute;&nbsp;4 &mdash; Calculs complexes</div>
+<div class="cards-wrap" id="wrap-act4"></div>
+
+<div class="results-wrap" id="results">
+  <div class="res-card">
+    <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;">R&eacute;sultat</div>
+    <div class="res-score" id="res-score"></div>
+    <p class="res-msg" id="res-msg"></p>
+    <button class="btn-restart" onclick="restart()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ══ UTILITAIRES ══ */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+function simplify(n,d){if(d===0)return null;if(d<0){n=-n;d=-d;}var g=gcd(Math.abs(n),Math.abs(d));return{n:n/g,d:d/g};}
+function eqFrac(an,ad,bn,bd){var a=simplify(an,ad),b=simplify(bn,bd);if(!a||!b)return false;return a.n===b.n&&a.d===b.d;}
+function parseFrac(raw){
+  raw=(raw||'').trim().replace(/\s+/g,'').replace(',','.');
+  if(/^-?\d+$/.test(raw))return{n:parseInt(raw),d:1};
+  var m=raw.match(/^(-?\d+)\/(-?\d+)$/);
+  if(!m)return null;
+  var n=parseInt(m[1]),d=parseInt(m[2]);
+  if(d===0)return null;
+  if(d<0){n=-n;d=-d;}
+  return{n:n,d:d};
+}
+function validateFrac(raw,rN,rD){
+  var p=parseFrac(raw);
+  if(!p)return'invalid';
+  if(!eqFrac(p.n,p.d,rN,rD))return'wrong';
+  var s=simplify(rN,rD);
+  if(p.n!==s.n||p.d!==s.d)return'unsimplified';
+  return'ok';
+}
+function hF(n,d){
+  if(d===1)return'<strong>'+n+'</strong>';
+  return'<span class="frac"><span class="num">'+n+'</span><span class="den">'+d+'</span></span>';
+}
+function ansStr(n,d){var s=simplify(n,d);return s.d===1?String(s.n):s.n+'/'+s.d;}
+function $(id){return document.getElementById(id);}
+
+/* ══ ÉTAT ══ */
+var TOTAL=17;
+var ST=[];for(var k=0;k<TOTAL;k++)ST.push({done:false,ok:false,err:false});
+
+/* ══ DONNÉES ══ */
+// Activité 1 : problèmes (id 0 et 1, chacun 2 sous-questions)
+var ACT1=[
+  {id:0,
+   titre:'Probl\u00e8me 1',
+   texte:'Lina a lu les <strong>3/8</strong> d\u2019un livre lundi, puis les <strong>5/12</strong> du m\u00eame livre mardi.',
+   subs:[
+     {lbl:'1.',q:'Quelle fraction du livre a-t-elle lue au total\u00a0?',type:'frac',rN:19,rD:24},
+     {lbl:'2.',q:'Quelle fraction lui reste-t-il \u00e0 lire\u00a0?',type:'frac',rN:5,rD:24}
+   ],
+   hint:'&Eacute;cris d\u2019abord les deux fractions avec le m\u00eame d\u00e9nominateur.',
+   corr:hF(3,8)+' = '+hF(9,24)+'\u00a0\u2022\u00a0'+hF(5,12)+' = '+hF(10,24)+'<br>'
+     +hF(9,24)+' + '+hF(10,24)+' = '+hF(19,24)+'<br>'
+     +'1 = '+hF(24,24)+' \u2192 '+hF(24,24)+' \u2212 '+hF(19,24)+' = '+hF(5,24)},
+  {id:1,
+   titre:'Probl\u00e8me 2',
+   texte:'Dans une classe, <strong>7/15</strong> des \u00e9l\u00e8ves pratiquent le football et <strong>2/5</strong> pratiquent le basketball.',
+   subs:[
+     {lbl:'1.',q:'Quelle activit\u00e9 est pratiqu\u00e9e par la plus grande fraction d\u2019\u00e9l\u00e8ves\u00a0?',type:'txt',rep:['football','le football']},
+     {lbl:'2.',q:'De combien cette fraction est-elle plus grande\u00a0?',type:'frac',rN:1,rD:15}
+   ],
+   hint:'Mets les deux fractions au m\u00eame d\u00e9nominateur.',
+   corr:hF(2,5)+' = '+hF(6,15)+'<br>'
+     +hF(7,15)+' > '+hF(6,15)+' \u2192 le football<br>'
+     +hF(7,15)+' \u2212 '+hF(6,15)+' = '+hF(1,15)}
+];
+
+// Activité 2 : priorités opératoires (ids 2-6)
+var ACT2=[
+  {id:2,lbl:'A',
+   expr:'A = '+hF(3,4)+' + '+hF(2,5)+' \u00d7 '+hF(5,6),
+   rN:13,rD:12,
+   hint:'Effectue d\u2019abord les multiplications et les divisions.',
+   corr:hF(2,5)+' \u00d7 '+hF(5,6)+' = '+hF(1,3)+'<br>'+hF(3,4)+' + '+hF(1,3)+' = '+hF(9,12)+' + '+hF(4,12)+' = '+hF(13,12)},
+  {id:3,lbl:'B',
+   expr:'B = '+hF(7,9)+' \u2212 '+hF(1,3)+' \u00d7 '+hF(2,5),
+   rN:29,rD:45,
+   hint:'Effectue d\u2019abord les multiplications et les divisions.',
+   corr:hF(1,3)+' \u00d7 '+hF(2,5)+' = '+hF(2,15)+'<br>'+hF(7,9)+' \u2212 '+hF(2,15)+' = '+hF(35,45)+' \u2212 '+hF(6,45)+' = '+hF(29,45)},
+  {id:4,lbl:'C',
+   expr:'C = '+hF(5,6)+' \u00f7 '+hF(10,9)+' + '+hF(1,4),
+   rN:1,rD:1,
+   hint:'Effectue d\u2019abord les multiplications et les divisions.',
+   corr:hF(5,6)+' \u00f7 '+hF(10,9)+' = '+hF(5,6)+' \u00d7 '+hF(9,10)+' = '+hF(3,4)+'<br>'+hF(3,4)+' + '+hF(1,4)+' = 1'},
+  {id:5,lbl:'D',
+   expr:'D = '+hF(2,3)+' + '+hF(5,8)+' \u00f7 '+hF(15,16),
+   rN:4,rD:3,
+   hint:'Effectue d\u2019abord les multiplications et les divisions.',
+   corr:hF(5,8)+' \u00f7 '+hF(15,16)+' = '+hF(5,8)+' \u00d7 '+hF(16,15)+' = '+hF(2,3)+'<br>'+hF(2,3)+' + '+hF(2,3)+' = '+hF(4,3)},
+  {id:6,lbl:'E',
+   expr:'E = '+hF(11,12)+' \u2212 '+hF(3,4)+' \u00d7 '+hF(2,9),
+   rN:3,rD:4,
+   hint:'Effectue d\u2019abord les multiplications et les divisions.',
+   corr:hF(3,4)+' \u00d7 '+hF(2,9)+' = '+hF(1,6)+'<br>'+hF(11,12)+' \u2212 '+hF(1,6)+' = '+hF(11,12)+' \u2212 '+hF(2,12)+' = '+hF(3,4)}
+];
+
+// Activité 3 : parenthèses (ids 7-11)
+var ACT3=[
+  {id:7,lbl:'A',
+   expr:'A = ('+hF(3,5)+' + '+hF(1,4)+') \u00d7 '+hF(2,3),
+   rN:17,rD:30,
+   hint:'Commence par calculer l\u2019int\u00e9rieur des parenth\u00e8ses.',
+   corr:hF(3,5)+' + '+hF(1,4)+' = '+hF(12,20)+' + '+hF(5,20)+' = '+hF(17,20)+'<br>'+hF(17,20)+' \u00d7 '+hF(2,3)+' = '+hF(17,30)},
+  {id:8,lbl:'B',
+   expr:'B = '+hF(7,8)+' \u00f7 ('+hF(1,2)+' + '+hF(3,4)+')',
+   rN:7,rD:10,
+   hint:'Commence par calculer l\u2019int\u00e9rieur des parenth\u00e8ses.',
+   corr:hF(1,2)+' + '+hF(3,4)+' = '+hF(2,4)+' + '+hF(3,4)+' = '+hF(5,4)+'<br>'+hF(7,8)+' \u00f7 '+hF(5,4)+' = '+hF(7,8)+' \u00d7 '+hF(4,5)+' = '+hF(7,10)},
+  {id:9,lbl:'C',
+   expr:'C = ('+hF(5,6)+' \u2212 '+hF(1,3)+') \u00d7 '+hF(9,4),
+   rN:9,rD:8,
+   hint:'Commence par calculer l\u2019int\u00e9rieur des parenth\u00e8ses.',
+   corr:hF(5,6)+' \u2212 '+hF(1,3)+' = '+hF(5,6)+' \u2212 '+hF(2,6)+' = '+hF(1,2)+'<br>'+hF(1,2)+' \u00d7 '+hF(9,4)+' = '+hF(9,8)},
+  {id:10,lbl:'D',
+   expr:'D = '+hF(4,7)+' + ('+hF(2,3)+' \u2212 '+hF(1,6)+')',
+   rN:15,rD:14,
+   hint:'Commence par calculer l\u2019int\u00e9rieur des parenth\u00e8ses.',
+   corr:hF(2,3)+' \u2212 '+hF(1,6)+' = '+hF(4,6)+' \u2212 '+hF(1,6)+' = '+hF(1,2)+'<br>'+hF(4,7)+' + '+hF(1,2)+' = '+hF(8,14)+' + '+hF(7,14)+' = '+hF(15,14)},
+  {id:11,lbl:'E',
+   expr:'E = ('+hF(3,4)+' + '+hF(5,8)+') \u00f7 '+hF(11,6),
+   rN:3,rD:4,
+   hint:'Commence par calculer l\u2019int\u00e9rieur des parenth\u00e8ses.',
+   corr:hF(3,4)+' + '+hF(5,8)+' = '+hF(6,8)+' + '+hF(5,8)+' = '+hF(11,8)+'<br>'+hF(11,8)+' \u00f7 '+hF(11,6)+' = '+hF(11,8)+' \u00d7 '+hF(6,11)+' = '+hF(3,4)}
+];
+
+// Activité 4 : calculs complexes (ids 12-16)
+var ACT4=[
+  {id:12,lbl:'A',
+   expr:'A = '+hF(3,4)+' + '+hF(5,6)+' \u00f7 '+hF(10,9)+' \u2212 '+hF(1,2),
+   rN:1,rD:1,
+   hint:'Calcule les parenth\u00e8ses, puis les multiplications et les divisions.',
+   corr:hF(5,6)+' \u00f7 '+hF(10,9)+' = '+hF(3,4)+'<br>'+hF(3,4)+' + '+hF(3,4)+' \u2212 '+hF(1,2)+' = '+hF(3,2)+' \u2212 '+hF(1,2)+' = 1'},
+  {id:13,lbl:'B',
+   expr:'B = ('+hF(2,3)+' + '+hF(1,2)+') \u00d7 '+hF(6,7)+' \u2212 '+hF(3,7),
+   rN:4,rD:7,
+   hint:'Calcule les parenth\u00e8ses, puis les multiplications et les divisions.',
+   corr:hF(2,3)+' + '+hF(1,2)+' = '+hF(7,6)+'<br>'+hF(7,6)+' \u00d7 '+hF(6,7)+' = 1<br>1 \u2212 '+hF(3,7)+' = '+hF(4,7)},
+  {id:14,lbl:'C',
+   expr:'C = '+hF(5,8)+' \u00f7 ('+hF(3,4)+' \u2212 '+hF(1,2)+') \u00d7 '+hF(2,5),
+   rN:1,rD:1,
+   hint:'Calcule les parenth\u00e8ses, puis les multiplications et les divisions.',
+   corr:hF(3,4)+' \u2212 '+hF(1,2)+' = '+hF(1,4)+'<br>'+hF(5,8)+' \u00f7 '+hF(1,4)+' = '+hF(5,2)+'<br>'+hF(5,2)+' \u00d7 '+hF(2,5)+' = 1'},
+  {id:15,lbl:'D',
+   expr:'D = '+hF(7,10)+' \u2212 '+hF(2,5)+' \u00d7 ('+hF(3,4)+' + '+hF(1,2)+')',
+   rN:1,rD:5,
+   hint:'Calcule les parenth\u00e8ses, puis les multiplications et les divisions.',
+   corr:hF(3,4)+' + '+hF(1,2)+' = '+hF(5,4)+'<br>'+hF(2,5)+' \u00d7 '+hF(5,4)+' = '+hF(1,2)+'<br>'+hF(7,10)+' \u2212 '+hF(1,2)+' = '+hF(7,10)+' \u2212 '+hF(5,10)+' = '+hF(1,5)},
+  {id:16,lbl:'E',
+   expr:'E = (1 \u2212 '+hF(3,8)+') \u00f7 '+hF(5,4)+' + '+hF(1,2),
+   rN:1,rD:1,
+   hint:'Calcule les parenth\u00e8ses, puis les multiplications et les divisions.',
+   corr:'1 \u2212 '+hF(3,8)+' = '+hF(5,8)+'<br>'+hF(5,8)+' \u00f7 '+hF(5,4)+' = '+hF(1,2)+'<br>'+hF(1,2)+' + '+hF(1,2)+' = 1'}
+];
+
+/* ══ CONSTRUCTION ══ */
+function hCard_calc(q){
+  return '<div class="card" id="c'+q.id+'">'
+    +'<div class="card-stripe"></div>'
+    +'<div class="q-label">'+q.lbl+'</div>'
+    +'<div class="q-expr">'+q.expr+' =</div>'
+    +'<div style="display:flex;align-items:center;gap:.6rem;margin:.4rem 0;">'
+    +'<input class="ai" id="inp'+q.id+'" type="text" autocomplete="off" '
+    +'onkeydown="if(event.key===\'Enter\')checkCalc('+q.id+')" /></div>'
+    +'<div class="btn-row">'
+    +'<button class="btn btn-v" id="vb'+q.id+'" onclick="checkCalc('+q.id+')">\u2713 V\u00e9rifier</button>'
+    +'<button class="btn btn-i" onclick="toggleHint(\'hx'+q.id+'\')">\uD83D\uDCA1 Indice</button>'
+    +'</div>'
+    +'<div class="hint-box" id="hx'+q.id+'">'+q.hint+'</div>'
+    +'<div class="fb" id="fb'+q.id+'"></div>'
+    +'</div>';
+}
+
+function hCard_pb(q){
+  var subs='';
+  q.subs.forEach(function(s,j){
+    var inpId='inp'+q.id+'_'+j;
+    var inp=s.type==='txt'
+      ?'<input class="ai-txt" id="'+inpId+'" type="text" autocomplete="off" />'
+      :'<input class="ai" id="'+inpId+'" type="text" autocomplete="off" />';
+    subs+='<div class="sub-item"><span class="sub-num">'+s.lbl+'</span>'
+      +'<span class="q-text" style="flex:1;">'+s.q+'</span>'+inp+'</div>';
+  });
+  return '<div class="card" id="c'+q.id+'">'
+    +'<div class="card-stripe"></div>'
+    +'<div class="q-label">'+q.titre+'</div>'
+    +'<div class="q-text" style="margin-bottom:.8rem;">'+q.texte+'</div>'
+    +'<div class="sub-q">'+subs+'</div>'
+    +'<div class="btn-row">'
+    +'<button class="btn btn-v" id="vb'+q.id+'" onclick="checkPb('+q.id+')">\u2713 V\u00e9rifier</button>'
+    +'<button class="btn btn-i" onclick="toggleHint(\'hx'+q.id+'\')">\uD83D\uDCA1 Indice</button>'
+    +'</div>'
+    +'<div class="hint-box" id="hx'+q.id+'">'+q.hint+'</div>'
+    +'<div class="fb" id="fb'+q.id+'"></div>'
+    +'</div>';
+}
+
+function build(){
+  $('wrap-act1').innerHTML=ACT1.map(hCard_pb).join('');
+  $('wrap-act2').innerHTML=ACT2.map(hCard_calc).join('');
+  $('wrap-act3').innerHTML=ACT3.map(hCard_calc).join('');
+  $('wrap-act4').innerHTML=ACT4.map(hCard_calc).join('');
+  update();
+}
+
+function toggleHint(id){$(id).classList.toggle('show');}
+
+/* ══ NORMALISATION TEXTE ══ */
+function normTxt(s){
+  return (s||'').toLowerCase()
+    .replace(/[àâä]/g,'a')
+    .replace(/[éèêë]/g,'e')
+    .replace(/[îï]/g,'i')
+    .replace(/[ôö]/g,'o')
+    .replace(/[ùûü]/g,'u')
+    .replace(/[ç]/g,'c')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+/* ══ VALIDATION CALCUL ══ */
+function checkCalc(id){
+  if(ST[id].done)return;
+  var all=[].concat(ACT2,ACT3,ACT4);
+  var q=all.filter(function(x){return x.id===id;})[0];
+  var raw=($('inp'+id).value||'').trim();
+  if(!raw){showFb(id,'ko','\u26a0\ufe0f Saisis ta r\u00e9ponse avant de valider.');return;}
+  var res=validateFrac(raw,q.rN,q.rD);
+  if(res==='ok'){
+    markDone(id,true,q.corr);
+  } else if(res==='unsimplified'){
+    /* Ne consomme PAS un essai */
+    $('inp'+id).className='ai ko';
+    showFb(id,'ko','Ton r\u00e9sultat est correct, mais simplifie encore la fraction.');
+  } else if(!ST[id].err){
+    ST[id].err=true;
+    $('inp'+id).className='ai ko';
+    $('vb'+id).innerHTML='\u21bb R\u00e9essayer';
+    showFb(id,'ko','\u2717 Pas tout \u00e0 fait. V\u00e9rifie ton calcul et r\u00e9essaie.');
+    $('hx'+id).classList.add('show');
+  } else {
+    $('inp'+id).value=ansStr(q.rN,q.rD);
+    markDone(id,false,q.corr);
+  }
+  update();
+}
+
+/* ══ VALIDATION PROBLÈME ══ */
+function checkPb(id){
+  if(ST[id].done)return;
+  var q=ACT1.filter(function(x){return x.id===id;})[0];
+  var hasUnsimplified=false;
+  var hasWrong=false;
+  var subResults=[];
+  q.subs.forEach(function(s,j){
+    var el=$('inp'+id+'_'+j);
+    var raw=(el.value||'').trim();
+    var ok=false;
+    var unsimp=false;
+    if(s.type==='txt'){
+      if(!raw){hasWrong=true;}
+      ok=s.rep.some(function(r){return normTxt(raw)===normTxt(r);});
+      if(!ok){hasWrong=true;}
+      el.className='ai-txt '+(ok?'ok':'ko');
+    } else {
+      var res=validateFrac(raw,s.rN,s.rD);
+      ok=(res==='ok');
+      unsimp=(res==='unsimplified');
+      if(unsimp){hasUnsimplified=true;}
+      else if(!ok){hasWrong=true;}
+      el.className='ai '+(ok?'ok':unsimp?'ko':'ko');
+    }
+    subResults.push({ok:ok,unsimp:unsimp,el:el,s:s});
+  });
+
+  var allOk=subResults.every(function(r){return r.ok;});
+  if(allOk){
+    /* Réussite */
+    subResults.forEach(function(r){r.el.disabled=true;});
+    ST[id].done=true;ST[id].ok=true;
+    $('vb'+id).disabled=true;
+    showFb(id,'ok','\u2713 Bravo\u00a0! '+q.corr);
+    update();
+  } else if(hasUnsimplified&&!hasWrong){
+    /* Fraction équivalente non simplifiée — ne consomme PAS un essai */
+    showFb(id,'ko','Ton r\u00e9sultat est correct, mais simplifie encore la fraction.');
+  } else if(!ST[id].err){
+    /* 1er vrai échec */
+    ST[id].err=true;
+    $('vb'+id).innerHTML='\u21bb R\u00e9essayer';
+    showFb(id,'ko','\u2717 Pas tout \u00e0 fait. V\u00e9rifie tes calculs et r\u00e9essaie.');
+    $('hx'+id).classList.add('show');
+  } else {
+    /* 2e essai raté : injecter bonnes réponses */
+    subResults.forEach(function(r){
+      var el=r.el; var s=r.s;
+      if(s.type==='txt'){
+        if(!r.ok){el.value=s.rep[0];el.className='ai-txt ko';}
+        else el.className='ai-txt ok';
+      } else {
+        var res=validateFrac(el.value,s.rN,s.rD);
+        if(res!=='ok'){el.value=ansStr(s.rN,s.rD);el.className='ai ko';}
+        else el.className='ai ok';
+      }
+      el.disabled=true;
+    });
+    ST[id].done=true;ST[id].ok=false;
+    $('vb'+id).disabled=true;
+    showFb(id,'ko','\u2717 Correction\u00a0:<br>'+q.corr);
+    update();
+  }
+}
+
+function markDone(id,ok,corr){
+  /* Utilisé uniquement par checkCalc */
+  ST[id].done=true;ST[id].ok=ok;
+  var inp=$('inp'+id);
+  if(inp){inp.className='ai '+(ok?'ok':'ko');inp.disabled=true;}
+  var vb=$('vb'+id);if(vb)vb.disabled=true;
+  var msg=(ok?'\u2713 Bravo\u00a0! ':'\u2717 Correction\u00a0:<br>')+corr;
+  showFb(id,ok?'ok':'ko',msg);
+}
+
+function showFb(id,t,msg){
+  var fb=$('fb'+id);
+  fb.className='fb show '+(t==='ok'?'ok':'ko');
+  fb.innerHTML=msg;
+}
+
+/* ══ STATS ══ */
+function update(){
+  var done=0,ok=0;
+  for(var i=0;i<TOTAL;i++){if(ST[i].done){done++;if(ST[i].ok)ok++;}}
+  $('st-ok').textContent=ok;
+  $('st-err').textContent=done-ok;
+  $('st-rem').textContent=TOTAL-done;
+  $('pfill').style.width=Math.round(done/TOTAL*100)+'%';
+  $('prog-txt').textContent=done+' / '+TOTAL;
+  if(done===TOTAL)showRes(ok);
+}
+
+function showRes(ok){
+  $('results').className='results-wrap show';
+  $('res-score').textContent=ok+' / '+TOTAL;
+  $('res-msg').textContent=ok===TOTAL?'Excellent\u00a0! Tu ma\u00eetrises les calculs complexes avec des fractions.':
+    ok>=14?'Tr\u00e8s bien\u00a0! Relis les corrections pour consolider.':
+    ok>=10?'Bien\u00a0! Continue \u00e0 t\u2019entra\u00eener.':
+    '\u00c0 retravailler. Relis chaque correction attentivement.';
+}
+
+/* ══ RECOMMENCER ══ */
+function restart(){
+  for(var i=0;i<TOTAL;i++)ST[i]={done:false,ok:false,err:false};
+  $('results').className='results-wrap';
+  build();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+build();
+</script>
+</body>
+</html>
