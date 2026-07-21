@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa 4e – Multiplier et diviser des fractions – Niveau 1</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8;--day-dark:#1a6e88;--day-light:#e8f6fb;--day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.3);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+      --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+      position:relative;overflow-x:hidden;letter-spacing:.03em;line-height:1.6;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--blue);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--green);top:200px;left:-30px;pointer-events:none;}
+    /* HEAD */
+    .head-card{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1.9rem 1.5rem 1.4rem;text-align:center;
+      position:relative;z-index:1;margin-bottom:1rem;}
+    .logo-badge{background:var(--yellow);color:#000;font-size:14px;letter-spacing:.09em;
+      display:inline-flex;align-items:center;gap:.5rem;font-weight:700;text-transform:uppercase;
+      padding:.35rem 1.1rem;border-radius:99px;margin-bottom:.6rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{color:var(--day-dark);font-size:.88rem;margin:.5rem 0;font-family:'JetBrains Mono',monospace;}
+    .head-card h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--text);margin:.3rem 0;}
+    .head-card h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:.97rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+    /* STATS */
+    .stats-card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.1rem;margin-bottom:1.5rem;
+      box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;}
+    .stats-row{display:flex;gap:.8rem;}
+    .stat-box{flex:1;background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:12px;padding:.9rem .5rem;text-align:center;}
+    .stat-num{font-size:1.7rem;font-weight:800;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;line-height:1.1;}
+    .stat-label{font-size:.86rem;color:var(--muted);margin-top:.25rem;}
+    .prog-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:1rem;}
+    .prog-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+    .prog-text{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.95rem;
+      color:var(--muted);margin-top:.6rem;}
+    /* SÉRIE LABEL */
+    .serie-label{width:100%;max-width:720px;position:relative;z-index:1;
+      font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.1em;color:var(--day-dark);
+      margin:1.4rem 0 .6rem;padding-left:.4rem;
+      border-left:4px solid var(--day-color);}
+    /* CARDS */
+    .cards-wrap{width:100%;max-width:720px;display:flex;flex-direction:column;gap:1rem;
+      position:relative;z-index:1;}
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.5rem 1.5rem 1.2rem;position:relative;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+    .q-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+      margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+    .q-expr{font-size:1.1rem;font-weight:700;color:var(--text);line-height:2;margin-bottom:.7rem;
+      display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;}
+    /* FRACTIONS */
+    .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;
+      margin:0 2px;line-height:1.15;}
+    .frac .num{border-bottom:2px solid currentColor;padding:1px 5px;text-align:center;display:block;}
+    .frac .den{padding:1px 5px;text-align:center;display:block;}
+    /* Grande fraction complexe */
+    .cfrac-wrap{display:inline-flex;flex-direction:column;align-items:center;
+      vertical-align:middle;margin:0 .6rem;}
+    .cfrac-top{display:flex;justify-content:center;padding-bottom:4px;}
+    .cfrac-bar{width:110%;min-width:52px;height:2px;background:#1a1d23;display:block;}
+    .cfrac-den-row{display:flex;justify-content:center;padding-top:4px;
+      font-weight:700;font-size:1.05rem;}
+    /* Sous-fraction verticale dans cfrac */
+    .cfrac-subfrac{display:inline-flex;flex-direction:column;align-items:center;line-height:1.1;}
+    .cfrac-subfrac .snum{display:block;border-bottom:2px solid currentColor;padding:1px 5px;}
+    .cfrac-subfrac .sden{display:block;padding:1px 5px;}
+    /* INPUT */
+    .aw{display:flex;align-items:center;gap:.6rem;margin:.5rem 0;flex-wrap:wrap;}
+    .ai{border:2px solid var(--day-border);border-radius:10px;padding:.6rem .85rem;
+      font-size:1rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+      outline:none;transition:border-color .2s;width:110px;text-align:center;}
+    .ai:focus{border-color:var(--day-color);}
+    .ai.ok{border-color:var(--green);background:#eef7e9;color:#2f6e10;}
+    .ai.ko{border-color:var(--pink);background:#fdeeee;color:#c0392b;}
+    /* BOUTONS */
+    .btn-row{display:flex;gap:.6rem;margin-top:.8rem;flex-wrap:wrap;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.68rem 1.25rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.92rem,2.5vw,1rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.9rem;flex:1;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-v{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-i{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    /* HINT */
+    .hint-box{margin-top:.6rem;background:#fffbeb;border:1.5px dashed var(--yellow);
+      border-radius:10px;padding:.7rem 1rem;font-size:.95rem;color:#7a5000;
+      display:none;line-height:1.75;}
+    .hint-box.show{display:block;}
+    /* FEEDBACK */
+    .fb{margin-top:.65rem;padding:.65rem .95rem;border-radius:10px;font-size:.95rem;
+      line-height:1.75;display:none;}
+    .fb.show{display:block;}
+    .fb.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    /* RÉSULTATS */
+    .results-wrap{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+    .results-wrap.show{display:block;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2.2rem 2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);margin-top:1.5rem;}
+    .res-score{font-size:3.5rem;font-weight:800;color:var(--day-color);margin:.4rem 0;}
+    .res-msg{color:var(--muted);font-size:1rem;margin-bottom:1.2rem;line-height:1.7;}
+    .btn-restart{background:var(--surface);color:var(--day-dark);border:2px solid var(--day-border);
+      border-radius:10px;padding:.7rem 1.8rem;font-size:1rem;font-weight:800;cursor:pointer;
+      display:inline-flex;align-items:center;gap:.4rem;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:480px){.btn-row{flex-direction:column;}.btn{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+
+<div class="head-card">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    PAZAPA &middot; MATHS &middot; 4&Egrave;ME
+  </div>
+  <div class="week-label">Semaine&nbsp;8 &ndash; Jour&nbsp;4 &mdash; Je m&rsquo;entra&icirc;ne &mdash; Niveau&nbsp;1</div>
+  <h1><span class="hl">Multiplier et diviser des fractions</span></h1>
+  <p class="subtitle">20 exercices &middot; 4 s&eacute;ries</p>
+</div>
+
+<div class="stats-card">
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="st-ok">0</div><div class="stat-label">R&eacute;ussies</div></div>
+    <div class="stat-box"><div class="stat-num" id="st-rem">20</div><div class="stat-label">Restantes</div></div>
+    <div class="stat-box"><div class="stat-num" id="st-err">0</div><div class="stat-label">&Eacute;chou&eacute;es</div></div>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  <div class="prog-text" id="prog-txt">0 / 20</div>
+</div>
+
+<div class="serie-label">S&eacute;rie&nbsp;1 &mdash; Multiplier des fractions</div>
+<div class="cards-wrap" id="s1-wrap"></div>
+
+<div class="serie-label">S&eacute;rie&nbsp;2 &mdash; Fractions complexes</div>
+<div class="cards-wrap" id="s2-wrap"></div>
+
+<div class="serie-label">S&eacute;rie&nbsp;3 &mdash; Trouver l&rsquo;inverse d&rsquo;un nombre</div>
+<div class="cards-wrap" id="s3-wrap"></div>
+
+<div class="serie-label">S&eacute;rie&nbsp;4 &mdash; Diviser des fractions</div>
+<div class="cards-wrap" id="s4-wrap"></div>
+
+<div class="results-wrap" id="results">
+  <div class="res-card">
+    <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;">R&eacute;sultat</div>
+    <div class="res-score" id="res-score"></div>
+    <p class="res-msg" id="res-msg"></p>
+    <button class="btn-restart" onclick="restart()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ══ UTILITAIRES FRACTIONS ══ */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+function simplify(n,d){
+  if(d===0)return null;
+  if(d<0){n=-n;d=-d;}
+  var g=gcd(Math.abs(n),Math.abs(d));
+  return{n:n/g,d:d/g};
+}
+function fracEq(an,ad,bn,bd){
+  // vérifie an/ad == bn/bd
+  var a=simplify(an,ad), b=simplify(bn,bd);
+  if(!a||!b)return false;
+  return a.n===b.n&&a.d===b.d;
+}
+function isSimplifed(an,ad){
+  if(ad<0)return false;
+  var g=gcd(Math.abs(an),Math.abs(ad));
+  return g===1;
+}
+
+/* Parse "a/b" ou entier ou décimal */
+function parseInput(raw){
+  raw=(raw||'').trim().replace(/\s+/g,'').replace(',','.');
+  // décimal (pour 1/10 → 0.1)
+  if(/^-?[\d]+\.[\d]+$/.test(raw)){
+    var v=parseFloat(raw);
+    // convertir en fraction
+    var dec=raw.replace('-','').split('.');
+    var d=Math.pow(10,dec[1].length);
+    var n=Math.round(v*d);
+    return{n:n,d:d,decimal:true};
+  }
+  // entier
+  if(/^-?\d+$/.test(raw))return{n:parseInt(raw),d:1};
+  // fraction
+  var m=raw.match(/^(-?\d+)\/(-?\d+)$/);
+  if(!m)return null;
+  return{n:parseInt(m[1]),d:parseInt(m[2])};
+}
+
+/* Valide la saisie contre la réponse attendue (rN/rD) */
+function validate(raw,rN,rD){
+  // Acceptances spéciales (Série 3, inverse de 10)
+  if(rN===1&&rD===10){
+    var t=raw.trim().replace(',','.');
+    if(t==='0.1'||t==='0,1')return'ok';
+  }
+  var p=parseInput(raw);
+  if(!p)return'invalid';
+  if(p.d===0)return'invalid';
+  if(!fracEq(p.n,p.d,rN,rD))return'wrong';
+  // Correct — vérifie simplification
+  if(p.decimal)return'unsimplified'; // décimal non accepté sauf 0.1 pour inverse de 10 (géré avant)
+  if(p.d<0)return'unsimplified'; // dénominateur négatif
+  if(!isSimplifed(p.n,p.d))return'unsimplified';
+  return'ok';
+}
+
+function ansStr(rN,rD){
+  if(rD===1)return String(rN);
+  return rN+'/'+rD;
+}
+
+/* ══ HTML FRACTIONS ══ */
+function hF(n,d){
+  return '<span class="frac"><span class="num">'+n+'</span><span class="den">'+d+'</span></span>';
+}
+function hCF(topN,topD,bot){
+  // Grande fraction complexe : topN/topD au numérateur, bot au dénominateur
+  return '<span class="cfrac-wrap">'
+    +'<span class="cfrac-top">'
+    +'<span class="cfrac-subfrac"><span class="snum">'+topN+'</span><span class="sden">'+topD+'</span></span>'
+    +'</span>'
+    +'<span class="cfrac-bar"></span>'
+    +'<span class="cfrac-den-row">'+bot+'</span>'
+    +'</span>';
+}
+
+/* ══ DONNÉES ══ */
+var TOTAL=20;
+var ST=[]; for(var k=0;k<TOTAL;k++)ST.push({done:false,ok:false,err:false});
+
+/* Série 1 : multiplications */
+var S1=[
+  {id:0, lbl:'A',
+   expr: hF(21,40)+' &times; '+hF(1,35),
+   rN:3,rD:200,
+   hint:'Multiplie num&eacute;rateur par num&eacute;rateur et d&eacute;nominateur par d&eacute;nominateur.\n21&times;1 = 21 et 40&times;35 = 1400. Puis simplifie 21/1400.',
+   corr: hF(21,40)+' &times; '+hF(1,35)+' = '+hF('21&times;1','40&times;35')+' = '+hF(21,1400)+' = '+hF(3,200)+'<br>On divise par 7 : 21&div;7=3, 1400&div;7=200.'},
+  {id:1, lbl:'B',
+   expr: hF(33,8)+' &times; '+hF(1,66),
+   rN:1,rD:16,
+   hint:'33&times;1 = 33 et 8&times;66 = 528. Simplifie 33/528.',
+   corr: hF(33,8)+' &times; '+hF(1,66)+' = '+hF(33,528)+' = '+hF(1,16)+'<br>pgcd(33,528) = 33. 33&div;33=1, 528&div;33=16.'},
+  {id:2, lbl:'C',
+   expr: hF(2,40)+' &times; '+hF(1,18),
+   rN:1,rD:360,
+   hint:'2&times;1 = 2 et 40&times;18 = 720. Simplifie 2/720.',
+   corr: hF(2,40)+' &times; '+hF(1,18)+' = '+hF(2,720)+' = '+hF(1,360)+'<br>On divise par 2.'},
+  {id:3, lbl:'D',
+   expr: hF(3,55)+' &times; '+hF(1,21),
+   rN:1,rD:385,
+   hint:'3&times;1 = 3 et 55&times;21 = 1155. Simplifie 3/1155.',
+   corr: hF(3,55)+' &times; '+hF(1,21)+' = '+hF(3,1155)+' = '+hF(1,385)+'<br>On divise par 3.'},
+  {id:4, lbl:'E',
+   expr: hF(3,14)+' &times; '+hF(1,27),
+   rN:1,rD:126,
+   hint:'3&times;1 = 3 et 14&times;27 = 378. Simplifie 3/378.',
+   corr: hF(3,14)+' &times; '+hF(1,27)+' = '+hF(3,378)+' = '+hF(1,126)+'<br>On divise par 3.'},
+];
+
+/* Série 2 : fractions complexes ÷ entier */
+var S2=[
+  {id:5, lbl:'A',
+   expr: hCF(49,16,70),
+   rN:7,rD:160,
+   hint:'Diviser par 70 = multiplier par 1/70.\n'+hF(49,16)+' &times; '+hF(1,70)+' = ... Simplifie.',
+   corr: hCF(49,16,70)+' = '+hF(49,16)+' &times; '+hF(1,70)+' = '+hF(49,1120)+' = '+hF(7,160)+'<br>pgcd(49,1120)=7.'},
+  {id:6, lbl:'B',
+   expr: hCF(12,21,18),
+   rN:2,rD:63,
+   hint:'Diviser par 18 = multiplier par 1/18.',
+   corr: hCF(12,21,18)+' = '+hF(12,21)+' &times; '+hF(1,18)+' = '+hF(12,378)+' = '+hF(2,63)+'<br>pgcd(12,378)=6.'},
+  {id:7, lbl:'C',
+   expr: hCF(55,24,44),
+   rN:5,rD:96,
+   hint:'Diviser par 44 = multiplier par 1/44.',
+   corr: hCF(55,24,44)+' = '+hF(55,24)+' &times; '+hF(1,44)+' = '+hF(55,1056)+' = '+hF(5,96)+'<br>pgcd(55,1056)=11.'},
+  {id:8, lbl:'D',
+   expr: hCF(33,12,88),
+   rN:1,rD:32,
+   hint:'Diviser par 88 = multiplier par 1/88.',
+   corr: hCF(33,12,88)+' = '+hF(33,12)+' &times; '+hF(1,88)+' = '+hF(33,1056)+' = '+hF(1,32)+'<br>pgcd(33,1056)=33.'},
+  {id:9, lbl:'E',
+   expr: hCF(2,56,4),
+   rN:1,rD:112,
+   hint:'Diviser par 4 = multiplier par 1/4.',
+   corr: hCF(2,56,4)+' = '+hF(2,56)+' &times; '+hF(1,4)+' = '+hF(2,224)+' = '+hF(1,112)+'<br>On divise par 2.'},
+];
+
+/* Série 3 : inverses */
+var S3=[
+  {id:10, lbl:'1',
+   expr:'Inverse de &minus;12',
+   rN:-1,rD:12,
+   hint:'L\'inverse de a est 1/a. L\'inverse de &minus;12 est ...',
+   corr:'L\'inverse de &minus;12 est '+hF('&minus;1',12)+'<br>&minus;12 &times; '+hF('&minus;1',12)+' = 1 &check;'},
+  {id:11, lbl:'2',
+   expr:'Inverse de 15',
+   rN:1,rD:15,
+   hint:'L\'inverse d\'un entier n est 1/n.',
+   corr:'L\'inverse de 15 est '+hF(1,15)+'<br>15 &times; '+hF(1,15)+' = 1 &check;'},
+  {id:12, lbl:'3',
+   expr:'Inverse de &minus;6',
+   rN:-1,rD:6,
+   hint:'L\'inverse de a est 1/a. Que donne 1 divisé par (−6) ?',
+   corr:'L\'inverse de &minus;6 est '+hF('&minus;1',6)+'<br>&minus;6 &times; '+hF('&minus;1',6)+' = 1 &check;'},
+  {id:13, lbl:'4',
+   expr:'Inverse de 11',
+   rN:1,rD:11,
+   hint:'L\'inverse de n est 1/n. Écris 1 divisé par 11.',
+   corr:'L\'inverse de 11 est '+hF(1,11)+'<br>11 &times; '+hF(1,11)+' = 1 &check;'},
+  {id:14, lbl:'5',
+   expr:'Inverse de 10',
+   rN:1,rD:10,
+   hint:'L\'inverse de n est 1/n. Que vaut 1 divisé par 10 ? Tu peux aussi l’écrire en décimal.',
+   corr:'L\'inverse de 10 est '+hF(1,10)+' = 0,1<br>10 &times; 0,1 = 1 &check;<br><em>Réponses acceptées : 1/10, 0,1, 0.1</em>'},
+  // acceptation spéciale gérée dans validate()
+];
+
+/* Série 4 : divisions avec signes */
+var S4=[
+  {id:15, lbl:'1',
+   expr: hF('&minus;8','&minus;9')+' &div; '+hF(1,'&minus;2'),
+   rN:-16,rD:9,
+   hint:'Simplifie d\'abord les signes : &minus;8/&minus;9 = 8/9. 1/&minus;2 = &minus;1/2.<br>Diviser par &minus;1/2 = multiplier par &minus;2/1.',
+   corr:'&minus;8/&minus;9 = 8/9 &nbsp;|&nbsp; 1/&minus;2 = &minus;1/2<br>'
+     +hF(8,9)+' &div; '+hF('&minus;1',2)+' = '+hF(8,9)+' &times; '+hF('(&minus;2)',1)
+     +' = '+hF('&minus;16',9)},
+  {id:16, lbl:'2',
+   expr: hF(6,'&minus;7')+' &div; '+hF('&minus;4','&minus;7'),
+   rN:-3,rD:2,
+   hint:'6/&minus;7 = &minus;6/7. &minus;4/&minus;7 = 4/7.<br>Diviser par 4/7 = multiplier par 7/4.',
+   corr:'6/&minus;7 = &minus;6/7 &nbsp;|&nbsp; &minus;4/&minus;7 = 4/7<br>'
+     +hF('&minus;6',7)+' &div; '+hF(4,7)+' = '+hF('&minus;6',7)+' &times; '+hF(7,4)
+     +' = '+hF('&minus;42',28)+' = '+hF('&minus;3',2)},
+  {id:17, lbl:'3',
+   expr: hF('&minus;3',5)+' &div; '+hF(1,'&minus;2'),
+   rN:6,rD:5,
+   hint:'1/&minus;2 = &minus;1/2. Diviser par &minus;1/2 = multiplier par &minus;2.',
+   corr:'1/&minus;2 = &minus;1/2<br>'
+     +hF('&minus;3',5)+' &div; '+hF('&minus;1',2)+' = '+hF('&minus;3',5)+' &times; '+hF('(&minus;2)',1)
+     +' = '+hF(6,5)},
+  {id:18, lbl:'4',
+   expr: hF('&minus;5',9)+' &div; '+hF('&minus;1','&minus;4'),
+   rN:-20,rD:9,
+   hint:'&minus;1/&minus;4 = 1/4. Diviser par 1/4 = multiplier par 4.',
+   corr:'&minus;1/&minus;4 = 1/4<br>'
+     +hF('&minus;5',9)+' &div; '+hF(1,4)+' = '+hF('&minus;5',9)+' &times; '+hF(4,1)
+     +' = '+hF('&minus;20',9)},
+  {id:19, lbl:'5',
+   expr: hF('&minus;1',10)+' &div; '+hF('&minus;2',5),
+   rN:1,rD:4,
+   hint:'Diviser par &minus;2/5 = multiplier par 5/&minus;2 = &minus;5/2.',
+   corr: hF('&minus;1',10)+' &div; '+hF('&minus;2',5)+' = '+hF('&minus;1',10)+' &times; '+hF('(&minus;5)',2)
+     +' = '+hF(5,20)+' = '+hF(1,4)},
+];
+
+/* ══ CONSTRUCTION DOM ══ */
+function hCard(q){
+  var i=q.id;
+  return '<div class="card" id="c'+i+'">'
+    +'<div class="card-stripe"></div>'
+    +'<div class="q-label">'+q.lbl+'</div>'
+    +'<div class="q-expr">'+q.expr+' =</div>'
+    +'<div class="aw"><input class="ai" id="inp'+i+'" type="text" autocomplete="off" '
+    +'onkeydown="if(event.key===\'Enter\')check('+i+')" /></div>'
+    +'<div class="btn-row">'
+    +'<button class="btn btn-v" id="vb'+i+'" onclick="check('+i+')">\u2713 V\u00e9rifier</button>'
+    +'<button class="btn btn-i" onclick="toggleHint('+i+')">\uD83D\uDCA1 Indice</button>'
+    +'</div>'
+    +'<div class="hint-box" id="hx'+i+'">'+q.hint.replace(/\n/g,'<br>')+'</div>'
+    +'<div class="fb" id="fb'+i+'"></div>'
+    +'</div>';
+}
+
+function build(){
+  var allQ=[].concat(S1,S2,S3,S4);
+  document.getElementById('s1-wrap').innerHTML=S1.map(hCard).join('');
+  document.getElementById('s2-wrap').innerHTML=S2.map(hCard).join('');
+  document.getElementById('s3-wrap').innerHTML=S3.map(hCard).join('');
+  document.getElementById('s4-wrap').innerHTML=S4.map(hCard).join('');
+  update();
+}
+
+function toggleHint(i){
+  var hx=document.getElementById('hx'+i);
+  hx.classList.toggle('show');
+}
+
+/* ══ VALIDATION ══ */
+function check(i){
+  if(ST[i].done)return;
+  var allQ=[].concat(S1,S2,S3,S4);
+  var q=allQ[i];
+  var raw=(document.getElementById('inp'+i).value||'');
+  if(!raw.trim()){showFb(i,'ko','\u26a0\ufe0f Saisis ta r\u00e9ponse avant de valider.');return;}
+
+  var res=validate(raw,q.rN,q.rD);
+
+  if(res==='ok'){
+    done(i,true,q);
+  } else if(res==='unsimplified'){
+    /* Ne consomme PAS un essai */
+    document.getElementById('inp'+i).className='ai ko';
+    showFb(i,'ko','Ton r\u00e9sultat est correct, mais simplifie encore la fraction.');
+  } else if(!ST[i].err){
+    ST[i].err=true;
+    document.getElementById('inp'+i).className='ai ko';
+    document.getElementById('vb'+i).innerHTML='\u21bb R\u00e9essayer';
+    showFb(i,'ko','\u2717 Pas tout \u00e0 fait. V\u00e9rifie tes calculs et r\u00e9essaie.');
+    document.getElementById('hx'+i).classList.add('show');
+  } else {
+    // 2e essai raté : correction complète
+    var ans=ansStr(q.rN,q.rD);
+    document.getElementById('inp'+i).value=ans;
+    done(i,false,q);
+  }
+  update();
+}
+
+function done(i,ok,q){
+  ST[i].done=true;ST[i].ok=ok;
+  document.getElementById('inp'+i).className='ai '+(ok?'ok':'ko');
+  document.getElementById('inp'+i).disabled=true;
+  document.getElementById('vb'+i).disabled=true;
+  var msg=ok?'\u2713 Bravo\u00a0! '+q.corr:'\u2717 Correction\u00a0:<br>'+q.corr;
+  showFb(i,ok?'ok':'ko',msg);
+}
+
+function showFb(i,t,msg){
+  var fb=document.getElementById('fb'+i);
+  fb.className='fb show '+(t==='ok'?'ok':'ko');
+  fb.innerHTML=msg;
+}
+
+/* ══ STATS ══ */
+function update(){
+  var done=0,ok=0;
+  for(var i=0;i<TOTAL;i++){if(ST[i].done){done++;if(ST[i].ok)ok++;}}
+  document.getElementById('st-ok').textContent=ok;
+  document.getElementById('st-err').textContent=done-ok;
+  document.getElementById('st-rem').textContent=TOTAL-done;
+  document.getElementById('pfill').style.width=Math.round(done/TOTAL*100)+'%';
+  document.getElementById('prog-txt').textContent=done+' / '+TOTAL;
+  if(done===TOTAL)showRes(ok);
+}
+
+function showRes(ok){
+  document.getElementById('results').className='results-wrap show';
+  document.getElementById('res-score').textContent=ok+' / '+TOTAL;
+  var msg=ok===TOTAL?'Excellent\u00a0! Tu ma\u00eetrises la multiplication et la division de fractions.':
+    ok>=16?'Tr\u00e8s bien\u00a0! Relis les corrections pour consolider.':
+    ok>=10?'Bien\u00a0! Continue \u00e0 t\u2019entra\u00eener.':
+    '\u00c0 retravailler. Relis attentivement chaque correction.';
+  document.getElementById('res-msg').textContent=msg;
+}
+
+/* ══ RECOMMENCER ══ */
+function restart(){
+  for(var i=0;i<TOTAL;i++)ST[i]={done:false,ok:false,err:false};
+  document.getElementById('results').className='results-wrap';
+  build();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+build();
+</script>
+</body>
+</html>
