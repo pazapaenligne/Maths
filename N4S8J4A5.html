@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa 4e – Fractions – Niveau 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#3ab5d8;--day-dark:#1a6e88;--day-light:#e8f6fb;--day-border:#9dd4e8;
+      --day-glow:rgba(58,181,216,.3);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+      --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+      position:relative;overflow-x:hidden;letter-spacing:.03em;line-height:1.6;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--blue);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--yellow);top:200px;left:-30px;pointer-events:none;}
+    .head-card{width:100%;max-width:720px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1.9rem 1.5rem 1.4rem;text-align:center;
+      position:relative;z-index:1;margin-bottom:1rem;}
+    .logo-badge{background:var(--yellow);color:#000;font-size:14px;letter-spacing:.09em;
+      display:inline-flex;align-items:center;gap:.5rem;font-weight:700;text-transform:uppercase;
+      padding:.35rem 1.1rem;border-radius:99px;margin-bottom:.6rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{color:var(--day-dark);font-size:.88rem;margin:.5rem 0;font-family:'JetBrains Mono',monospace;}
+    .head-card h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--text);margin:.3rem 0;}
+    .head-card h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:.97rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+    /* STATS */
+    .stats-card{width:100%;max-width:720px;background:var(--surface);border:2px solid var(--border);
+      border-radius:var(--radius);padding:1.1rem;margin-bottom:1.5rem;
+      box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;}
+    .stats-row{display:flex;gap:.8rem;}
+    .stat-box{flex:1;background:var(--day-light);border:1.5px solid var(--day-border);
+      border-radius:12px;padding:.9rem .5rem;text-align:center;}
+    .stat-num{font-size:1.7rem;font-weight:800;color:var(--day-dark);
+      font-family:'JetBrains Mono',monospace;line-height:1.1;}
+    .stat-label{font-size:.86rem;color:var(--muted);margin-top:.25rem;}
+    .prog-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:1rem;}
+    .prog-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));
+      border-radius:99px;transition:width .5s ease;}
+    .prog-text{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.95rem;
+      color:var(--muted);margin-top:.6rem;}
+    /* CARDS */
+    .cards-wrap{width:100%;max-width:720px;display:flex;flex-direction:column;gap:1.2rem;position:relative;z-index:1;}
+    .card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:1.5rem 1.5rem 1.2rem;position:relative;
+      box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+    .card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+      border-radius:var(--radius) var(--radius) 0 0;
+      background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+    .card-title{font-size:1rem;font-weight:800;color:var(--day-dark);margin-bottom:.3rem;}
+    .card-consigne{font-size:.9rem;color:var(--muted);margin-bottom:1rem;font-style:italic;line-height:1.6;}
+    /* FRACTIONS */
+    .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;line-height:1.15;}
+    .frac .num{border-bottom:2px solid currentColor;padding:1px 5px;text-align:center;display:block;}
+    .frac .den{padding:1px 5px;text-align:center;display:block;}
+    /* YOHAKU TABLE */
+    .yoh-wrap{overflow-x:auto;margin:.5rem 0;}
+    .yoh-table{border-collapse:collapse;font-size:1rem;margin:0 auto;}
+    .yoh-table td,.yoh-table th{border:2px solid #bbb;padding:.5rem .7rem;text-align:center;min-width:80px;}
+    .yoh-table .hdr{background:var(--day-light);font-weight:700;color:var(--day-dark);font-size:.85rem;}
+    .yoh-table .target{font-weight:700;}
+    .yoh-table .corner{background:var(--day-light);}
+    .yoh-inp{border:2px solid var(--day-border);border-radius:8px;padding:.4rem .5rem;
+      font-size:.97rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+      width:72px;text-align:center;outline:none;transition:border-color .2s;}
+    .yoh-inp:focus{border-color:var(--day-color);}
+    .yoh-inp.ok{border-color:var(--green);background:#eef7e9;color:#2f6e10;}
+    .yoh-inp.ko{border-color:var(--pink);background:#fdeeee;color:#c0392b;}
+    /* INPUT simple */
+    .ai{border:2px solid var(--day-border);border-radius:10px;padding:.6rem .85rem;
+      font-size:1rem;font-family:'JetBrains Mono',monospace;font-weight:700;
+      outline:none;transition:border-color .2s;width:110px;text-align:center;}
+    .ai:focus{border-color:var(--day-color);}
+    .ai.ok{border-color:var(--green);background:#eef7e9;color:#2f6e10;}
+    .ai.ko{border-color:var(--pink);background:#fdeeee;color:#c0392b;}
+    /* BOUTONS */
+    .btn-row{display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+      padding:.68rem 1.2rem;border-radius:10px;font-family:Arial,sans-serif;
+      font-size:clamp(.92rem,2.5vw,1rem);font-weight:800;cursor:pointer;border:none;
+      transition:transform .12s;min-height:2.9rem;flex:1;}
+    .btn:active{transform:scale(.96);}
+    .btn:disabled{opacity:.38;cursor:default;}
+    .btn-v{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+    .btn-corr{background:var(--surface);color:var(--day-dark);border:2px solid var(--day-border);display:none;}
+    .btn-corr.show{display:inline-flex;}
+    /* FEEDBACK */
+    .fb{margin-top:.65rem;padding:.65rem .95rem;border-radius:10px;font-size:.95rem;
+      line-height:1.75;display:none;}
+    .fb.show{display:block;}
+    .fb.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+    .fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+    .fb.info{background:var(--day-light);border:1.5px solid var(--day-border);color:var(--day-dark);}
+    /* CORR EXAMPLE */
+    .corr-ex{display:none;margin-top:.7rem;background:var(--day-light);
+      border:1.5px solid var(--day-border);border-left:4px solid var(--day-color);
+      border-radius:8px;padding:.85rem 1rem;font-size:.93rem;line-height:1.85;}
+    .corr-ex.show{display:block;}
+    /* ROSE SVG */
+    .rose-wrap{display:flex;justify-content:center;margin:.8rem 0;}
+    /* RÉSULTATS */
+    .results-wrap{width:100%;max-width:720px;display:none;position:relative;z-index:1;margin-top:1.5rem;}
+    .results-wrap.show{display:block;}
+    .res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      padding:2.2rem 2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .res-score{font-size:3.5rem;font-weight:800;color:var(--day-color);margin:.4rem 0;}
+    .res-msg{color:var(--muted);font-size:1rem;margin-bottom:1.2rem;line-height:1.7;}
+    .btn-restart{background:var(--surface);color:var(--day-dark);border:2px solid var(--day-border);
+      border-radius:10px;padding:.7rem 1.8rem;font-size:1rem;font-weight:800;cursor:pointer;
+      display:inline-flex;align-items:center;gap:.4rem;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:500px){.yoh-inp{width:60px;}.btn-row{flex-direction:column;}.btn{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+
+<div class="head-card">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    PAZAPA &middot; MATHS &middot; 4&Egrave;ME
+  </div>
+  <div class="week-label">Semaine&nbsp;8 &ndash; Jour&nbsp;4 &mdash; Je m&rsquo;entra&icirc;ne &mdash; Niveau&nbsp;2</div>
+  <h1><span class="hl">Multiplier et diviser des fractions</span></h1>
+  <p class="subtitle">4 activit&eacute;s &middot; Yohaku &amp; Rose multiplicative</p>
+</div>
+
+<div class="stats-card">
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="st-ok">0</div><div class="stat-label">R&eacute;ussies</div></div>
+    <div class="stat-box"><div class="stat-num" id="st-rem">4</div><div class="stat-label">Restantes</div></div>
+    <div class="stat-box"><div class="stat-num" id="st-err">0</div><div class="stat-label">&Eacute;chou&eacute;es</div></div>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  <div class="prog-text" id="prog-txt">0 / 4</div>
+</div>
+
+<div class="cards-wrap">
+
+<!-- ══ YOHAKU 1 ══ -->
+<div class="card" id="card0">
+  <div class="card-stripe"></div>
+  <div class="card-title">Yohaku multiplicatif &mdash; 1</div>
+  <div class="card-consigne">Trouver les fractions &agrave; mettre dans les cases vides pour que les produits de chaque ligne et chaque colonne soient exacts.<br>Compl&eacute;ter chaque grille avec des fractions qui conviennent <em>(plusieurs solutions possibles)</em>.</div>
+  <div class="yoh-wrap">
+    <table class="yoh-table">
+      <tr>
+        <td class="corner">&times;</td>
+        <td class="hdr">Colonne 1</td>
+        <td class="hdr">Colonne 2</td>
+        <td class="hdr">Produit des lignes</td>
+      </tr>
+      <tr>
+        <td class="hdr">Ligne 1</td>
+        <td><input class="yoh-inp" id="y1_00" type="text" autocomplete="off"/></td>
+        <td><input class="yoh-inp" id="y1_01" type="text" autocomplete="off"/></td>
+        <td class="target" id="y1_l1_target"></td>
+      </tr>
+      <tr>
+        <td class="hdr">Ligne 2</td>
+        <td><input class="yoh-inp" id="y1_10" type="text" autocomplete="off"/></td>
+        <td><input class="yoh-inp" id="y1_11" type="text" autocomplete="off"/></td>
+        <td class="target" id="y1_l2_target"></td>
+      </tr>
+      <tr>
+        <td class="hdr">Produit des colonnes</td>
+        <td class="target" id="y1_c1_target"></td>
+        <td class="target" id="y1_c2_target"></td>
+        <td class="corner"></td>
+      </tr>
+    </table>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-v" id="vb0" onclick="checkYoh(0)">&#10003; V&eacute;rifier</button>
+    <button class="btn btn-corr" id="bc0" onclick="toggleCorr(0)">Voir un exemple de correction</button>
+  </div>
+  <div class="fb" id="fb0"></div>
+  <div class="corr-ex" id="cx0"></div>
+</div>
+
+<!-- ══ YOHAKU 2 ══ -->
+<div class="card" id="card1">
+  <div class="card-stripe"></div>
+  <div class="card-title">Yohaku multiplicatif &mdash; 2</div>
+  <div class="card-consigne">Trouver les fractions &agrave; mettre dans les cases vides pour que les produits de chaque ligne et chaque colonne soient exacts.<br>Compl&eacute;ter chaque grille avec des fractions qui conviennent <em>(plusieurs solutions possibles)</em>.</div>
+  <div class="yoh-wrap">
+    <table class="yoh-table">
+      <tr>
+        <td class="corner">&times;</td>
+        <td class="hdr">Colonne 1</td>
+        <td class="hdr">Colonne 2</td>
+        <td class="hdr">Produit des lignes</td>
+      </tr>
+      <tr>
+        <td class="hdr">Ligne 1</td>
+        <td><input class="yoh-inp" id="y2_00" type="text" autocomplete="off"/></td>
+        <td><input class="yoh-inp" id="y2_01" type="text" autocomplete="off"/></td>
+        <td class="target" id="y2_l1_target"></td>
+      </tr>
+      <tr>
+        <td class="hdr">Ligne 2</td>
+        <td><input class="yoh-inp" id="y2_10" type="text" autocomplete="off"/></td>
+        <td><input class="yoh-inp" id="y2_11" type="text" autocomplete="off"/></td>
+        <td class="target" id="y2_l2_target"></td>
+      </tr>
+      <tr>
+        <td class="hdr">Produit des colonnes</td>
+        <td class="target" id="y2_c1_target"></td>
+        <td class="target" id="y2_c2_target"></td>
+        <td class="corner"></td>
+      </tr>
+    </table>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-v" id="vb1" onclick="checkYoh(1)">&#10003; V&eacute;rifier</button>
+    <button class="btn btn-corr" id="bc1" onclick="toggleCorr(1)">Voir un exemple de correction</button>
+  </div>
+  <div class="fb" id="fb1"></div>
+  <div class="corr-ex" id="cx1"></div>
+</div>
+
+<!-- ══ YOHAKU 3 ══ -->
+<div class="card" id="card2">
+  <div class="card-stripe"></div>
+  <div class="card-title">Yohaku multiplicatif &mdash; 3</div>
+  <div class="card-consigne">Trouver les fractions &agrave; mettre dans les cases vides pour que les produits de chaque ligne et chaque colonne soient exacts.<br>Compl&eacute;ter chaque grille avec des fractions qui conviennent <em>(plusieurs solutions possibles)</em>.</div>
+  <div class="yoh-wrap">
+    <table class="yoh-table">
+      <tr>
+        <td class="corner">&times;</td>
+        <td class="hdr">Colonne 1</td>
+        <td class="hdr">Colonne 2</td>
+        <td class="hdr">Produit des lignes</td>
+      </tr>
+      <tr>
+        <td class="hdr">Ligne 1</td>
+        <td><input class="yoh-inp" id="y3_00" type="text" autocomplete="off"/></td>
+        <td><input class="yoh-inp" id="y3_01" type="text" autocomplete="off"/></td>
+        <td class="target" id="y3_l1_target"></td>
+      </tr>
+      <tr>
+        <td class="hdr">Ligne 2</td>
+        <td><input class="yoh-inp" id="y3_10" type="text" autocomplete="off"/></td>
+        <td><input class="yoh-inp" id="y3_11" type="text" autocomplete="off"/></td>
+        <td class="target" id="y3_l2_target"></td>
+      </tr>
+      <tr>
+        <td class="hdr">Produit des colonnes</td>
+        <td class="target" id="y3_c1_target"></td>
+        <td class="target" id="y3_c2_target"></td>
+        <td class="corner"></td>
+      </tr>
+    </table>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-v" id="vb2" onclick="checkYoh(2)">&#10003; V&eacute;rifier</button>
+    <button class="btn btn-corr" id="bc2" onclick="toggleCorr(2)">Voir un exemple de correction</button>
+  </div>
+  <div class="fb" id="fb2"></div>
+  <div class="corr-ex" id="cx2"></div>
+</div>
+
+<!-- ══ ROSE MULTIPLICATIVE ══ -->
+<div class="card" id="card3">
+  <div class="card-stripe"></div>
+  <div class="card-title">Rose multiplicative</div>
+  <div class="card-consigne">Les nombres situ&eacute;s &agrave; l&rsquo;extr&eacute;mit&eacute; des fl&egrave;ches sont les produits des nombres dont les fl&egrave;ches sont issues.<br>Trouver l&rsquo;expression de la case <strong>d</strong>.</div>
+  <div class="rose-wrap">
+    <svg id="rose-svg" viewBox="0 0 420 460" width="100%" style="max-width:400px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
+      <!-- Grille centrale (losange arrondi comme la capture) -->
+      <rect x="155" y="155" width="110" height="110" fill="none" stroke="#555" stroke-width="1.5" rx="8"/>
+      <line x1="210" y1="155" x2="210" y2="265" stroke="#555" stroke-width="1.5"/>
+      <line x1="155" y1="210" x2="265" y2="210" stroke="#555" stroke-width="1.5"/>
+      <!-- Case haut-gauche : 1 -->
+      <text x="182" y="192" text-anchor="middle" font-size="16" font-weight="700">1</text>
+      <!-- Case haut-droite : 1 -->
+      <text x="238" y="192" text-anchor="middle" font-size="16" font-weight="700">1</text>
+      <!-- Case bas-gauche : ? -->
+      <text x="182" y="245" text-anchor="middle" font-size="14" fill="#1a6e88" font-style="italic" id="rose-bg">?</text>
+      <!-- Case bas-droite : ? -->
+      <text x="238" y="245" text-anchor="middle" font-size="14" fill="#1a6e88" font-style="italic" id="rose-bd">?</text>
+      <!-- Lignes pointillées vers losanges -->
+      <!-- Haut -->
+      <line x1="155" y1="155" x2="210" y2="75" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <line x1="265" y1="155" x2="210" y2="75" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <!-- Gauche -->
+      <line x1="155" y1="155" x2="75" y2="210" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <line x1="155" y1="265" x2="75" y2="210" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <!-- Droite -->
+      <line x1="265" y1="155" x2="345" y2="210" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <line x1="265" y1="265" x2="345" y2="210" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <!-- Bas -->
+      <line x1="155" y1="265" x2="210" y2="345" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <line x1="265" y1="265" x2="210" y2="345" stroke="#555" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <!-- Losange haut : 1 -->
+      <path d="M210,75 L224,61 L210,47 L196,61 Z" fill="white" stroke="#555" stroke-width="1.5"/>
+      <text x="210" y="65" text-anchor="middle" font-size="14" font-weight="700">1</text>
+      <!-- Losange gauche : 4 -->
+      <path d="M75,210 L61,196 L47,210 L61,224 Z" fill="white" stroke="#555" stroke-width="1.5"/>
+      <text x="61" y="214" text-anchor="middle" font-size="14" font-weight="700">4</text>
+      <!-- Losange droite : 4/5 -->
+      <path d="M345,210 L359,196 L373,210 L359,224 Z" fill="white" stroke="#555" stroke-width="1.5"/>
+      <text x="359" y="205" text-anchor="middle" font-size="12" font-weight="700">4</text>
+      <line x1="348" y1="209" x2="370" y2="209" stroke="#000" stroke-width="1.2"/>
+      <text x="359" y="220" text-anchor="middle" font-size="12" font-weight="700">5</text>
+      <!-- Losange bas : d -->
+      <path d="M210,345 L224,359 L210,373 L196,359 Z" fill="white" stroke="#555" stroke-width="1.5"/>
+      <text x="210" y="363" text-anchor="middle" font-size="14" font-style="italic" fill="#1a6e88" id="rose-d-label">d</text>
+    </svg>
+  </div>
+  <div style="display:flex;align-items:center;gap:.7rem;margin:.5rem 0;font-size:1rem;font-weight:700;">
+    <span style="font-style:italic;font-weight:700;">d</span> =
+    <input class="ai" id="rose-inp" type="text" autocomplete="off" onkeydown="if(event.key==='Enter')checkRose()"/>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-v" id="vb3" onclick="checkRose()">&#10003; V&eacute;rifier</button>
+    <button class="btn btn-corr" id="bc3" onclick="toggleCorr(3)">Voir la correction</button>
+  </div>
+  <div class="fb" id="fb3"></div>
+  <div class="corr-ex" id="cx3"></div>
+</div>
+
+</div><!-- .cards-wrap -->
+
+<div class="results-wrap" id="results">
+  <div class="res-card">
+    <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;">R&eacute;sultat</div>
+    <div class="res-score" id="res-score"></div>
+    <p class="res-msg" id="res-msg"></p>
+    <button class="btn-restart" onclick="restart()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<script>
+/* ══ UTILITAIRES ══ */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+function simplify(n,d){if(d===0)return null;if(d<0){n=-n;d=-d;}var g=gcd(Math.abs(n),Math.abs(d));return{n:n/g,d:d/g};}
+function mulFrac(an,ad,bn,bd){return simplify(an*bn,ad*bd);}
+function eqFrac(an,ad,bn,bd){var a=simplify(an,ad),b=simplify(bn,bd);if(!a||!b)return false;return a.n===b.n&&a.d===b.d;}
+function parseFrac(raw){
+  raw=(raw||'').trim().replace(/\s+/g,'').replace(',','.');
+  if(/^-?\d+$/.test(raw))return{n:parseInt(raw),d:1,rawD:1};
+  var m=raw.match(/^(-?\d+)\/(-?\d+)$/);
+  if(!m)return null;
+  var n=parseInt(m[1]),d=parseInt(m[2]);
+  if(d===0)return null;
+  var rawD=d; /* conserver le signe original */
+  if(d<0){n=-n;d=-d;}
+  return{n:n,d:d,rawD:rawD};
+}
+function hF(n,d){
+  if(d===1)return '<strong>'+n+'</strong>';
+  return '<span class="frac"><span class="num">'+n+'</span><span class="den">'+d+'</span></span>';
+}
+function fracDisp(n,d){var s=simplify(n,d);return s.d===1?String(s.n):s.n+'/'+s.d;}
+function $(id){return document.getElementById(id);}
+
+/* ══ DONNÉES YOHAKU ══ */
+var YOHS=[
+  // Yohaku 1
+  {l1n:8,l1d:9, l2n:60,l2d:49, c1n:2,c1d:7, c2n:80,c2d:21,
+   ex:['1/3','8/3','6/7','10/7']},
+  // Yohaku 2
+  {l1n:16,l1d:7, l2n:14,l2d:9, c1n:14,c1d:3, c2n:16,c2d:21,
+   ex:['10/5','8/7','7/3','2/3']},
+  // Yohaku 3
+  {l1n:3,l1d:25, l2n:4,l2d:7, c1n:2,c1d:35, c2n:6,c2d:5,
+   ex:['1/5','3/5','2/7','10/5']},
+];
+
+/* ══ ÉTAT ══ */
+var TOTAL=4;
+var ST=[{done:false,ok:false,err:false},{done:false,ok:false,err:false},
+        {done:false,ok:false,err:false},{done:false,ok:false,err:false}];
+
+/* ══ INIT AFFICHAGE ══ */
+function initDisplay(){
+  // Afficher les cibles Yohaku
+  YOHS.forEach(function(y,k){
+    var p=k+1;
+    $('y'+p+'_l1_target').innerHTML=hF(y.l1n,y.l1d);
+    $('y'+p+'_l2_target').innerHTML=hF(y.l2n,y.l2d);
+    $('y'+p+'_c1_target').innerHTML=hF(y.c1n,y.c1d);
+    $('y'+p+'_c2_target').innerHTML=hF(y.c2n,y.c2d);
+  });
+}
+
+/* ══ VALIDATION YOHAKU ══ */
+function checkYoh(idx){
+  if(ST[idx].done)return;
+  var y=YOHS[idx];
+  var p=idx+1;
+  var ids=['y'+p+'_00','y'+p+'_01','y'+p+'_10','y'+p+'_11'];
+  var vals=ids.map(function(id){return parseFrac($(id).value);});
+  if(vals.some(function(v){return!v;})){
+    showFb(idx,'ko','\u26a0\ufe0f Remplis toutes les cases (format a/b ou entier).');
+    return;
+  }
+  var v00=vals[0],v01=vals[1],v10=vals[2],v11=vals[3];
+  // Calculer les 4 produits
+  var pl1=mulFrac(v00.n,v00.d,v01.n,v01.d);
+  var pl2=mulFrac(v10.n,v10.d,v11.n,v11.d);
+  var pc1=mulFrac(v00.n,v00.d,v10.n,v10.d);
+  var pc2=mulFrac(v01.n,v01.d,v11.n,v11.d);
+  var okL1=eqFrac(pl1.n,pl1.d,y.l1n,y.l1d);
+  var okL2=eqFrac(pl2.n,pl2.d,y.l2n,y.l2d);
+  var okC1=eqFrac(pc1.n,pc1.d,y.c1n,y.c1d);
+  var okC2=eqFrac(pc2.n,pc2.d,y.c2n,y.c2d);
+  var allOk=okL1&&okL2&&okC1&&okC2;
+
+  // Colorier les inputs
+  var cellOk=[okL1&&okC1, okL1&&okC2, okL2&&okC1, okL2&&okC2];
+  ids.forEach(function(id,j){
+    $(id).className='yoh-inp '+(cellOk[j]?'ok':'ko');
+  });
+
+  if(allOk){
+    ST[idx].done=true;ST[idx].ok=true;
+    ids.forEach(function(id){$(id).disabled=true;});
+    $('vb'+idx).disabled=true;
+    var msg='<strong>\u2713 Bravo\u00a0!</strong> Tous les produits sont corrects.';
+    showFb(idx,'ok',msg);
+    update();
+  } else if(!ST[idx].err){
+    ST[idx].err=true;
+    var msgs=[];
+    if(!okL1)msgs.push('Ligne 1 incorrecte.');
+    if(!okL2)msgs.push('Ligne 2 incorrecte.');
+    if(!okC1)msgs.push('Colonne 1 incorrecte.');
+    if(!okC2)msgs.push('Colonne 2 incorrecte.');
+    $('vb'+idx).innerHTML='\u21bb R\u00e9essayer';
+    showFb(idx,'ko',msgs.join(' '));
+  } else {
+    // 2e essai raté
+    ST[idx].done=true;ST[idx].ok=false;
+    ids.forEach(function(id){$(id).disabled=true;});
+    $('vb'+idx).disabled=true;
+    var msgs=[];
+    if(!okL1)msgs.push('Ligne 1 incorrecte.');
+    if(!okL2)msgs.push('Ligne 2 incorrecte.');
+    if(!okC1)msgs.push('Colonne 1 incorrecte.');
+    if(!okC2)msgs.push('Colonne 2 incorrecte.');
+    showFb(idx,'ko',msgs.join(' ')+'<br><em>Plusieurs solutions sont possibles.</em>');
+    // Afficher bouton exemple
+    $('bc'+idx).className='btn btn-corr show';
+    // Préparer exemple
+    var ex=y.ex;
+    $('cx'+idx).innerHTML='<strong>Exemple de correction\u00a0:</strong><br>'
+      +'Ligne 1\u00a0: '+ex[0]+' &times; '+ex[1]+' = '+hF(y.l1n,y.l1d)+'<br>'
+      +'Ligne 2\u00a0: '+ex[2]+' &times; '+ex[3]+' = '+hF(y.l2n,y.l2d)+'<br>'
+      +'Colonne 1\u00a0: '+ex[0]+' &times; '+ex[2]+' = '+hF(y.c1n,y.c1d)+'<br>'
+      +'Colonne 2\u00a0: '+ex[1]+' &times; '+ex[3]+' = '+hF(y.c2n,y.c2d);
+    update();
+  }
+}
+
+function toggleCorr(idx){
+  var cx=$('cx'+idx);
+  cx.classList.toggle('show');
+}
+
+/* ══ ROSE MULTIPLICATIVE ══ */
+function revealRose(col){
+  $('rose-bg').textContent='4';$('rose-bg').setAttribute('font-style','normal');$('rose-bg').setAttribute('font-weight','700');$('rose-bg').setAttribute('fill',col);
+  $('rose-bd').textContent='4/5';$('rose-bd').setAttribute('font-style','normal');$('rose-bd').setAttribute('font-weight','700');$('rose-bd').setAttribute('fill',col);
+  $('rose-d-label').textContent='16/5';$('rose-d-label').setAttribute('font-style','normal');$('rose-d-label').setAttribute('font-weight','700');$('rose-d-label').setAttribute('fill',col);
+}
+
+function checkRose(){
+  if(ST[3].done)return;
+  var raw=$('rose-inp').value;
+  if(!raw.trim()){showFb(3,'ko','⚠️ Saisis la valeur de d.');return;}
+  var p=parseFrac(raw);
+  if(!p){showFb(3,'ko','⚠️ Format invalide. Utilise a/b ou un entier.');return;}
+  /* Dénominateur négatif saisi : ne consomme pas un essai */
+  if(p.rawD<0){
+    $('rose-inp').className='ai ko';
+    showFb(3,'ko','Ton résultat est équivalent, mais écris la fraction avec un dénominateur positif.');
+    return;
+  }
+  var irreductible=(p.d>0&&gcd(Math.abs(p.n),Math.abs(p.d))===1);
+  var isEq=eqFrac(p.n,p.d,16,5);
+  /* Correct mais non simplifié : ne consomme pas un essai */
+  if(isEq&&!irreductible){
+    $('rose-inp').className='ai ko';
+    showFb(3,'ko','Ton résultat est correct, mais simplifie encore la fraction.');
+    return;
+  }
+
+  var corrTxt='✗ Correction :<br>'
+    +'Pour obtenir 4 à gauche : 1 × 4 = 4<br>'
+    +'Pour obtenir 4/5 à droite : 1 × 4/5 = 4/5<br>'
+    +'Donc : d = 4 × 4/5 = 16/5';
+  if(!isEq){
+    if(!ST[3].err){
+      ST[3].err=true;
+      $('rose-inp').className='ai ko';
+      $('vb3').innerHTML='↻ Réessayer';
+      showFb(3,'ko','✗ Pas tout à fait. Vérifie ton calcul.');
+    } else {
+      ST[3].done=true;ST[3].ok=false;
+      $('rose-inp').value='16/5';
+      $('rose-inp').className='ai ko';
+      $('rose-inp').disabled=true;
+      $('vb3').disabled=true;
+      revealRose('#c0392b');
+      showFb(3,'ko',corrTxt);
+      $('bc3').className='btn btn-corr show';
+      $('cx3').innerHTML='<strong>Correction détaillée :</strong><br>'
+        +'Pour obtenir 4 à gauche : 1 × 4 = 4<br>'
+        +'Pour obtenir 4/5 à droite : 1 × 4/5 = 4/5<br>'
+        +'Donc : d = 4 × 4/5 = 16/5';
+      update();
+    }
+    return;
+  }
+  /* Bonne réponse irréductible */
+  ST[3].done=true;ST[3].ok=true;
+  $('rose-inp').value='16/5';
+  $('rose-inp').className='ai ok';
+  $('rose-inp').disabled=true;
+  $('vb3').disabled=true;
+  revealRose('#2f6e10');
+  showFb(3,'ok','✓ Bravo ! d = 16/5');
+  update();
+}
+function showFb(i,t,msg){
+  var fb=$('fb'+i);
+  fb.className='fb show '+(t==='ok'?'ok':t==='info'?'info':'ko');
+  fb.innerHTML=msg;
+}
+
+function update(){
+  var done=0,ok=0;
+  for(var i=0;i<TOTAL;i++){if(ST[i].done){done++;if(ST[i].ok)ok++;}}
+  $('st-ok').textContent=ok;
+  $('st-err').textContent=done-ok;
+  $('st-rem').textContent=TOTAL-done;
+  $('pfill').style.width=Math.round(done/TOTAL*100)+'%';
+  $('prog-txt').textContent=done+' / '+TOTAL;
+  if(done===TOTAL)showRes(ok);
+}
+
+function showRes(ok){
+  $('results').className='results-wrap show';
+  $('res-score').textContent=ok+' / '+TOTAL;
+  $('res-msg').textContent=ok===TOTAL?'Excellent\u00a0! Tu ma\u00eetrises les Yohaku et la Rose multiplicative.':
+    ok>=3?'Tr\u00e8s bien\u00a0! Relis les corrections pour consolider.':
+    ok>=2?'Bien\u00a0! Continue \u00e0 t\u2019entra\u00eener.':
+    '\u00c0 retravailler. Relis chaque correction attentivement.';
+}
+
+function restart(){
+  for(var i=0;i<TOTAL;i++)ST[i]={done:false,ok:false,err:false};
+  $('results').className='results-wrap';
+  // Réinitialiser inputs Yohaku
+  [1,2,3].forEach(function(p){
+    ['00','01','10','11'].forEach(function(s){
+      var el=$('y'+p+'_'+s);
+      if(el){el.value='';el.className='yoh-inp';el.disabled=false;}
+    });
+    var fb=$('fb'+(p-1));if(fb){fb.className='fb';fb.innerHTML='';}
+    var cx=$('cx'+(p-1));if(cx){cx.className='corr-ex';cx.innerHTML='';}
+    var vb=$('vb'+(p-1));if(vb){vb.disabled=false;vb.innerHTML='\u2713 V\u00e9rifier';}
+    var bc=$('bc'+(p-1));if(bc)bc.className='btn btn-corr';
+  });
+  // Réinitialiser Rose
+  var ri=$('rose-inp');if(ri){ri.value='';ri.className='ai';ri.disabled=false;}
+  var fb3=$('fb3');if(fb3){fb3.className='fb';fb3.innerHTML='';}
+  var cx3=$('cx3');if(cx3){cx3.className='corr-ex';cx3.innerHTML='';}
+  var vb3=$('vb3');if(vb3){vb3.disabled=false;vb3.innerHTML='\u2713 V\u00e9rifier';}
+  var bc3=$('bc3');if(bc3)bc3.className='btn btn-corr';
+  var bg=$('rose-bg');if(bg){bg.textContent='?';bg.setAttribute('font-style','italic');bg.setAttribute('font-weight','normal');bg.setAttribute('fill','#1a6e88');}
+  var bd=$('rose-bd');if(bd){bd.textContent='?';bd.setAttribute('font-style','italic');bd.setAttribute('font-weight','normal');bd.setAttribute('fill','#1a6e88');}
+  var dl=$('rose-d-label');if(dl){dl.textContent='d';dl.setAttribute('font-style','italic');dl.setAttribute('font-weight','normal');dl.setAttribute('fill','#1a6e88');}
+  update();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+initDisplay();
+</script>
+</body>
+</html>
