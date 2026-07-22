@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa 4e – Calculer le volume d'une pyramide – S6 J2 Niveau 2</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#b7472a;--day-dark:#6e2a17;--day-light:#fbeee8;--day-border:#e8b7a4;
+  --day-glow:rgba(183,71,42,.3);
+  --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+  --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+  --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+  position:relative;overflow-x:hidden;letter-spacing:.03em;line-height:1.6;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+  width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+  width:260px;height:260px;background:var(--blue);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+  background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+  background:var(--yellow);top:200px;left:-30px;pointer-events:none;}
+.head-card{width:100%;max-width:680px;background:var(--day-light);border:2px solid var(--day-border);
+  border-radius:var(--radius);padding:1.9rem 1.5rem 1.4rem;text-align:center;
+  position:relative;z-index:1;margin-bottom:1rem;}
+.logo-badge{background:var(--day-color);color:#fff;font-size:14px;letter-spacing:.09em;
+  display:inline-flex;align-items:center;gap:.5rem;font-weight:700;text-transform:uppercase;
+  padding:.35rem 1.1rem;border-radius:99px;margin-bottom:.6rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{color:var(--day-dark);font-size:.88rem;margin:.5rem 0;font-family:'JetBrains Mono',monospace;}
+.head-card h1{font-size:clamp(1.1rem,4vw,1.6rem);font-weight:900;color:var(--text);margin:.3rem 0;}
+.head-card h1 .hl{color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:.9rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+.formula-box{margin-top:1rem;background:var(--surface);border:1.5px solid var(--day-border);
+  border-radius:12px;padding:.9rem 1rem;display:flex;flex-direction:column;align-items:center;gap:.55rem;}
+.formula-main{display:flex;align-items:center;gap:.45rem;font-family:'JetBrains Mono',monospace;
+  font-size:1.15rem;font-weight:700;color:var(--day-dark);}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;line-height:1.15;}
+.frac .fn{border-bottom:2px solid var(--day-dark);padding:0 4px;}
+.frac .fd{padding:0 4px;}
+.formula-legend{font-size:.85rem;color:var(--muted);font-family:Arial,sans-serif;text-align:left;}
+.formula-legend div{margin:.15rem 0;}
+.level-row{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;}
+.level-btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.92rem;
+  letter-spacing:.06em;text-transform:uppercase;padding:.65rem 1.35rem;border-radius:12px;
+  border:2px solid var(--day-border);background:var(--surface);color:var(--day-dark);
+  min-height:2.9rem;display:inline-flex;align-items:center;}
+.level-btn.active{background:var(--day-color);color:#fff;border-color:var(--day-color);
+  box-shadow:0 3px 12px var(--day-glow);}
+.stats-card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);
+  border-radius:var(--radius);padding:1.1rem;margin-bottom:1.5rem;
+  box-shadow:0 4px 20px rgba(0,0,0,.05);position:relative;z-index:1;}
+.stats-row{display:flex;gap:.8rem;}
+.stat-box{flex:1;background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:12px;padding:.9rem .5rem;text-align:center;}
+.stat-num{font-size:1.7rem;font-weight:800;color:var(--day-dark);
+  font-family:'JetBrains Mono',monospace;line-height:1.1;}
+.stat-label{font-size:.86rem;color:var(--muted);margin-top:.25rem;}
+.prog-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:1rem;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));
+  border-radius:99px;transition:width .5s ease;}
+.prog-text{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.95rem;
+  color:var(--muted);margin-top:.6rem;}
+.cards-wrap{width:100%;max-width:680px;display:flex;flex-direction:column;gap:1.2rem;
+  position:relative;z-index:1;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:1.5rem 1.5rem 1.2rem;position:relative;
+  box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .35s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  background:linear-gradient(90deg,var(--day-color),var(--orange),var(--blue));}
+.q-label{font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--muted);
+  margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;}
+.enonce{font-size:.98rem;color:var(--text);margin:.3rem 0 .9rem;line-height:1.65;}
+.opt{display:flex;align-items:center;gap:.6rem;padding:.6rem .5rem;border-radius:8px;cursor:pointer;
+  border:2px solid var(--border);margin-bottom:.55rem;}
+.opt:hover{background:var(--day-light);border-color:var(--day-border);}
+.opt input{width:18px;height:18px;accent-color:var(--day-color);flex-shrink:0;}
+.opt span{font-size:.95rem;font-family:'JetBrains Mono',monospace;font-weight:700;}
+.opt.locked{cursor:default;}
+.opt.correct-mark{background:#f0faeb;border-color:var(--green);}
+.opt.wrong-mark{background:#fff0ef;border-color:var(--pink);}
+.btn-row{display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  padding:.68rem 1.25rem;border-radius:10px;font-family:Arial,sans-serif;
+  font-size:clamp(.92rem,2.5vw,1rem);font-weight:800;cursor:pointer;border:none;
+  transition:transform .12s;min-height:2.9rem;flex:1;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.38;cursor:default;}
+.btn-v{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-i{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.hint-box{margin-top:.65rem;background:var(--day-light);border:1.5px dashed var(--day-color);
+  border-radius:10px;padding:.7rem 1rem;font-size:.93rem;color:var(--day-dark);
+  display:none;line-height:1.75;}
+.hint-box.show{display:block;}
+.fb{margin-top:.7rem;padding:.7rem 1rem;border-radius:10px;font-size:.93rem;
+  line-height:1.85;display:none;}
+.fb.show{display:block;}
+.fb.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.fb.ko{background:#fff0ef;border:1.5px solid var(--pink);color:#c0392b;}
+.corr-box{margin-top:.7rem;padding:.8rem 1rem;border-radius:10px;font-size:.92rem;
+  line-height:2;background:var(--day-light);display:none;font-family:'JetBrains Mono',monospace;}
+.corr-box.show{display:block;}
+.results-wrap{width:100%;max-width:680px;display:none;position:relative;z-index:1;margin-top:1.5rem;}
+.results-wrap.show{display:block;}
+.res-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:2.2rem 2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.res-score{font-size:3.5rem;font-weight:800;color:var(--day-color);margin:.4rem 0;}
+.res-msg{color:var(--muted);font-size:1rem;margin-bottom:1.2rem;line-height:1.7;}
+.btn-restart{background:var(--surface);color:var(--day-dark);border:2px solid var(--day-border);
+  border-radius:10px;padding:.7rem 1.8rem;font-size:1rem;font-weight:800;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.4rem;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.btn-row{flex-direction:column;}.btn{width:100%;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div><div class="bubble2"></div>
+
+<div class="head-card">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    PAZAPA &middot; MATHS &middot; 4&Egrave;ME
+  </div>
+  <div class="week-label">Semaine&nbsp;6 &ndash; Jour&nbsp;2 &mdash; Je m&rsquo;entra&icirc;ne &mdash; Niveau&nbsp;2</div>
+  <h1><span class="hl">Calculer le volume d&rsquo;une pyramide</span></h1>
+  <p class="subtitle">4 exercices</p>
+  <div class="formula-box">
+    <div class="formula-main">V&nbsp;=&nbsp;<span class="frac"><span class="fn">1</span><span class="fd">3</span></span>&nbsp;&times;&nbsp;&#8492;&nbsp;&times;&nbsp;h</div>
+    <div class="formula-legend">
+      <div>&#8492;&nbsp;=&nbsp;aire de la base</div>
+      <div>h&nbsp;=&nbsp;hauteur de la pyramide</div>
+    </div>
+  </div>
+  <div class="level-row">
+    <span class="level-btn">Niveau&nbsp;1</span>
+    <span class="level-btn active">Niveau&nbsp;2</span>
+  </div>
+</div>
+
+<div class="stats-card">
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="st-ok">0</div><div class="stat-label">R&eacute;ussies</div></div>
+    <div class="stat-box"><div class="stat-num" id="st-rem">4</div><div class="stat-label">Restantes</div></div>
+    <div class="stat-box"><div class="stat-num" id="st-err">0</div><div class="stat-label">&Eacute;chou&eacute;es</div></div>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  <div class="prog-text" id="prog-text">0 / 4</div>
+</div>
+
+<div class="cards-wrap" id="cards"></div>
+
+<div class="results-wrap" id="results">
+  <div class="res-card">
+    <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;">R&eacute;sultat</div>
+    <div class="res-score" id="res-score"></div>
+    <p class="res-msg" id="res-msg"></p>
+    <button class="btn-restart" onclick="restart()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+
+var TOTAL=4;
+var ST=[];for(var k=0;k<TOTAL;k++)ST.push({done:false,ok:false,err:0});
+
+var QS=[
+  {id:0, lbl:'1', title:'Pyramide &agrave; base triangulaire rectangle',
+   enonce:'Calculer le volume, arrondi au dm&sup3; pr&egrave;s, d&rsquo;une pyramide de hauteur 3&nbsp;m dont la base est un triangle rectangle de c&ocirc;t&eacute;s perpendiculaires 7,4&nbsp;dm et 3,2&nbsp;dm.',
+   options:['59 dm&sup3;','355 dm&sup3;','118 dm&sup3;','237 dm&sup3;'],
+   correct:2,
+   hint:'Convertis d&rsquo;abord 3&nbsp;m en d&eacute;cim&egrave;tres, puis calcule l&rsquo;aire du triangle rectangle.',
+   corr:'3 m = 30 dm<br>Aire de la base = (7,4 &times; 3,2) / 2 = 11,84 dm&sup2;<br>V = 1/3 &times; 11,84 &times; 30 = 118,4 dm&sup3;<br>Donc V &asymp; <strong>118 dm&sup3;</strong>'
+  },
+  {id:1, lbl:'2', title:'Pyramide avec conversions',
+   enonce:'Calculer le volume, arrondi au dm&sup3; pr&egrave;s, d&rsquo;une pyramide de hauteur 0,7&nbsp;m dont la base est un triangle de base 8&nbsp;dm et de hauteur associ&eacute;e 48&nbsp;cm.',
+   options:['90 dm&sup3;','45 dm&sup3;','134 dm&sup3;'],
+   correct:1,
+   hint:'Exprime toutes les longueurs en d&eacute;cim&egrave;tres avant de calculer.',
+   corr:'48 cm = 4,8 dm<br>0,7 m = 7 dm<br>Aire de la base = (8 &times; 4,8) / 2 = 19,2 dm&sup2;<br>V = 1/3 &times; 19,2 &times; 7 = 44,8 dm&sup3;<br>Donc V &asymp; <strong>45 dm&sup3;</strong>'
+  },
+  {id:2, lbl:'3', title:'Pyramide &agrave; base triangulaire',
+   enonce:'Calculer le volume d&rsquo;une pyramide de hauteur 3&nbsp;cm dont la base est un triangle rectangle dont les c&ocirc;t&eacute;s perpendiculaires mesurent 10&nbsp;cm et 4&nbsp;cm.',
+   options:['10 cm&sup3;','40 cm&sup3;','20 cm&sup3;','60 cm&sup3;'],
+   correct:2,
+   hint:'L&rsquo;aire d&rsquo;un triangle rectangle est &eacute;gale au produit des deux c&ocirc;t&eacute;s perpendiculaires divis&eacute; par 2.',
+   corr:'Aire de la base = (10 &times; 4) / 2 = 20 cm&sup2;<br>V = 1/3 &times; 20 &times; 3 = 20 cm&sup3;<br>Donc V = <strong>20 cm&sup3;</strong>'
+  },
+  {id:3, lbl:'4', title:'Pyramide &agrave; base carr&eacute;e',
+   enonce:'Calculer le volume d&rsquo;une pyramide de hauteur 2&nbsp;mm dont la base est un carr&eacute; de 6&nbsp;mm de c&ocirc;t&eacute;.',
+   options:['72 mm&sup3;','18 mm&sup3;','24 mm&sup3;','12 mm&sup3;'],
+   correct:2,
+   hint:'Calcule d&rsquo;abord l&rsquo;aire du carr&eacute; : c&ocirc;t&eacute; &times; c&ocirc;t&eacute;.',
+   corr:'Aire de la base = 6&sup2; = 36 mm&sup2;<br>V = 1/3 &times; 36 &times; 2 = 24 mm&sup3;<br>Donc V = <strong>24 mm&sup3;</strong>'
+  }
+];
+
+/* ══ CONSTRUCTION ══ */
+function buildCards(){
+  var h='';
+  QS.forEach(function(q){
+    var optsH='';
+    q.options.forEach(function(o,j){
+      optsH+='<label class="opt" id="opt'+q.id+'_'+j+'">'
+        +'<input type="radio" name="q'+q.id+'" id="rb'+q.id+'_'+j+'"/>'
+        +'<span>'+o+'</span>'
+        +'</label>';
+    });
+    h+='<div class="card" id="c'+q.id+'">'
+      +'<div class="card-stripe"></div>'
+      +'<div class="q-label">Exercice '+q.lbl+' &mdash; '+q.title+'</div>'
+      +'<div class="enonce">'+q.enonce+'</div>'
+      +optsH
+      +'<div class="btn-row">'
+      +'<button class="btn btn-v" id="vb'+q.id+'" onclick="checkQ('+q.id+')">✓ V&eacute;rifier</button>'
+      +'<button class="btn btn-i" onclick="toggleHint('+q.id+')">&#x1F4A1; Indice</button>'
+      +'</div>'
+      +'<div class="hint-box" id="hx'+q.id+'">'+q.hint+'</div>'
+      +'<div class="fb" id="fb'+q.id+'"></div>'
+      +'<div class="corr-box" id="cb'+q.id+'">'+q.corr+'</div>'
+      +'</div>';
+  });
+  $('cards').innerHTML=h;
+  update();
+}
+
+function toggleHint(id){$('hx'+id).classList.toggle('show');}
+
+function checkQ(id){
+  if(ST[id].done)return;
+  var q=QS[id];
+  var picked=-1;
+  q.options.forEach(function(o,j){ if($('rb'+id+'_'+j).checked) picked=j; });
+  if(picked===-1){
+    showFb(id,'ko','&#9888;&#65039; S&eacute;lectionne une r&eacute;ponse avant de v&eacute;rifier.');
+    return;
+  }
+  if(picked===q.correct){
+    ST[id].done=true;ST[id].ok=true;
+    lockOptions(id);
+    $('opt'+id+'_'+picked).classList.add('correct-mark');
+    $('vb'+id).disabled=true;
+    showFb(id,'ok','✓ Bravo !');
+    $('cb'+id).classList.add('show');
+  } else {
+    ST[id].err++;
+    if(ST[id].err===1){
+      $('opt'+id+'_'+picked).classList.add('wrong-mark');
+      $('hx'+id).classList.add('show');
+      showFb(id,'ko','✗ Ce n&rsquo;est pas la bonne r&eacute;ponse. Relis l&rsquo;indice et r&eacute;essaie.');
+    } else {
+      ST[id].done=true;ST[id].ok=false;
+      lockOptions(id);
+      $('opt'+id+'_'+picked).classList.add('wrong-mark');
+      $('opt'+id+'_'+q.correct).classList.add('correct-mark');
+      $('vb'+id).disabled=true;
+      showFb(id,'ko','✗ Voici la correction d&eacute;taill&eacute;e :');
+      $('cb'+id).classList.add('show');
+    }
+  }
+  update();
+}
+
+function lockOptions(id){
+  QS[id].options.forEach(function(o,j){
+    $('rb'+id+'_'+j).disabled=true;
+    $('opt'+id+'_'+j).classList.add('locked');
+  });
+}
+
+function showFb(id,t,msg){
+  var fb=$('fb'+id);
+  fb.className='fb show '+(t==='ok'?'ok':'ko');
+  fb.innerHTML=msg;
+}
+
+/* ══ STATS ══ */
+function update(){
+  var done=0,ok=0;
+  for(var i=0;i<TOTAL;i++){if(ST[i].done){done++;if(ST[i].ok)ok++;}}
+  $('st-ok').textContent=ok;
+  $('st-err').textContent=done-ok;
+  $('st-rem').textContent=TOTAL-done;
+  $('pfill').style.width=Math.round(done/TOTAL*100)+'%';
+  $('prog-text').textContent=done+' / '+TOTAL;
+  if(done===TOTAL)showRes(ok);
+}
+
+function showRes(ok){
+  $('results').className='results-wrap show';
+  $('res-score').textContent=ok+' / '+TOTAL;
+  $('res-msg').textContent=ok===TOTAL?'Excellent ! Tu maîtrises le calcul du volume d’une pyramide.':
+    ok>=2?'Bien ! Relis les corrections pour consolider.':
+    'À retravailler. Relis chaque correction attentivement.';
+}
+
+/* ══ RECOMMENCER ══ */
+function restart(){
+  for(var i=0;i<TOTAL;i++)ST[i]={done:false,ok:false,err:0};
+  $('results').className='results-wrap';
+  buildCards();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildCards();
+</script>
+</body>
+</html>
