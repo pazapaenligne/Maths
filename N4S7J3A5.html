@@ -217,6 +217,15 @@ button:focus-visible{ outline:2px solid var(--ocean); outline-offset:2px; }
       <div class="b-title">Je relève le défi : fréquences et probabilités</div>
       <div>Jour 3 / 5</div>
     </div>
+    <div class="badge-status">
+      <button
+        class="sound-btn"
+        type="button"
+        id="soundBtn"
+        aria-label="Désactiver le son"
+        aria-pressed="false"
+        onclick="toggleSound()">🔊</button>
+    </div>
   </div>
 
   <section class="sheet" id="j3Panel">
@@ -252,11 +261,29 @@ function addLog(text){
   log.scrollTop = log.scrollHeight;
 }
 
-/* ---------- Sons (Web Audio, identiques en esprit au reste de la semaine) ---------- */
+/* ---------- Sons (Web Audio) — bips + ambiance de laboratoire océanographique ---------- */
 let actx=null;
+let soundOn = true;
+const AMBIENT_VOLUME = 0.12;
+let ambientStarted = false, ambientGain = null;
+let noiseSource = null, noiseFilter = null;
+let shimmerSource = null, shimmerFilter = null, shimmerGain = null;
+
 function ensureAudio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
+
+function duckAmbient(duration){
+  if(!ambientGain || !actx) return;
+  const now = actx.currentTime;
+  ambientGain.gain.cancelScheduledValues(now);
+  ambientGain.gain.setValueAtTime(ambientGain.gain.value, now);
+  ambientGain.gain.linearRampToValueAtTime(AMBIENT_VOLUME*0.35, now+0.05);
+  ambientGain.gain.linearRampToValueAtTime(soundOn?AMBIENT_VOLUME:0, now+duration+0.4);
+}
+
 function tone(freq,dur,type,delay,gainVal){
+  if(!soundOn) return;
   const ctx=ensureAudio(); if(!ctx) return;
+  duckAmbient(dur+(delay||0)+0.3);
   const t0=ctx.currentTime+(delay||0);
   const osc=ctx.createOscillator(), g=ctx.createGain();
   osc.type=type||"sine"; osc.frequency.setValueAtTime(freq,t0);
@@ -266,6 +293,209 @@ function tone(freq,dur,type,delay,gainVal){
 function playCorrect(){ tone(560,.14,"sine",0,.09); tone(700,.2,"sine",.1,.08); }
 function playWrong(){ tone(280,.14,"sine",0,.08); tone(200,.2,"sine",.1,.06); }
 function playFinal(){ tone(660,.12,"sine",0,.1); tone(660,.12,"sine",.16,.1); tone(392,.4,"sine",.34,.08); }
+function playObservationLoadSound(){
+  tone(1150+Math.random()*60,.09,"sine",0,.032);
+  tone(1150+Math.random()*60,.06,"sine",.12,.014);
+}
+
+function startAmbient(){
+  if(ambientStarted) return;
+  const ctx = ensureAudio(); if(!ctx) return;
+  ambientStarted = true;
+
+  const bufferSize = ctx.sampleRate * 4;
+
+  const brownBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const bd = brownBuffer.getChannelData(0);
+  let last = 0;
+  for(let i=0;i<bufferSize;i++){
+    const white = Math.random()*2-1;
+    last = (last + 0.018*white) / 1.018;
+    bd[i] = last * 3.2;
+  }
+  noiseSource = ctx.createBufferSource();
+  noiseSource.buffer = brownBuffer;
+  noiseSource.loop = true;
+
+  noiseFilter = ctx.createBiquadFilter();
+  noiseFilter.type = "lowpass";
+  noiseFilter.frequency.value = 520;
+  noiseFilter.Q.value = 0.5;
+
+  const lfo = ctx.createOscillator();
+  lfo.frequency.value = 0.09;
+  const lfoGain = ctx.createGain();
+  lfoGain.gain.value = 110;
+  lfo.connect(lfoGain);
+  lfoGain.connect(noiseFilter.frequency);
+  lfo.start();
+
+  const shimmerBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const sd = shimmerBuffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){ sd[i] = Math.random()*2-1; }
+  shimmerSource = ctx.createBufferSource();
+  shimmerSource.buffer = shimmerBuffer;
+  shimmerSource.loop = true;
+
+  shimmerFilter = ctx.createBiquadFilter();
+  shimmerFilter.type = "bandpass";
+  shimmerFilter.frequency.value = 1500;
+  shimmerFilter.Q.value = 0.8;
+
+  shimmerGain = ctx.createGain();
+  shimmerGain.gain.value = 0.22;
+
+  const lfo2 = ctx.createOscillator();
+  lfo2.frequency.value = 0.06;
+  const lfo2Gain = ctx.createGain();
+  lfo2Gain.gain.value = 400;
+  lfo2.connect(lfo2Gain);
+  lfo2Gain.connect(shimmerFilter.frequency);
+  lfo2.start();
+
+  ambientGain = ctx.createGain();
+  ambientGain.gain.value = 0;
+
+  noiseSource.connect(noiseFilter);
+  noiseFilter.connect(ambientGain);
+  shimmerSource.connect(shimmerFilter);
+  shimmerFilter.connect(shimmerGain);
+  shimmerGain.connect(ambientGain);
+
+  const engineOsc = ctx.createOscillator();
+  engineOsc.type = "sine";
+  engineOsc.frequency.value = 55;
+  const engineGain = ctx.createGain();
+  engineGain.gain.value = 0.045;
+  const engineLfo = ctx.createOscillator();
+  engineLfo.frequency.value = 0.05;
+  const engineLfoGain = ctx.createGain();
+  engineLfoGain.gain.value = 3;
+  engineLfo.connect(engineLfoGain);
+  engineLfoGain.connect(engineOsc.frequency);
+  engineLfo.start();
+  engineOsc.connect(engineGain);
+  engineGain.connect(ambientGain);
+  engineOsc.start();
+
+  ambientGain.connect(ctx.destination);
+
+  noiseSource.start();
+  shimmerSource.start();
+
+  if(soundOn){ ambientGain.gain.linearRampToValueAtTime(AMBIENT_VOLUME, ctx.currentTime+1.6); }
+  scheduleBubble();
+  scheduleAmbientPing();
+  scheduleCreak();
+  scheduleSeagull();
+}
+
+function scheduleAmbientPing(){
+  const delay = 14000 + Math.random()*10000;
+  setTimeout(function(){
+    if(soundOn) tone(1100+Math.random()*40, .11, "sine", 0, .03);
+    scheduleAmbientPing();
+  }, delay);
+}
+function scheduleCreak(){
+  const delay = 28000 + Math.random()*24000;
+  setTimeout(function(){
+    if(soundOn) playCreak();
+    scheduleCreak();
+  }, delay);
+}
+function playCreak(){
+  const ctx = actx; if(!ctx) return;
+  const t0 = ctx.currentTime;
+  const osc = ctx.createOscillator(); const g = ctx.createGain(); const filt = ctx.createBiquadFilter();
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(95, t0);
+  osc.frequency.exponentialRampToValueAtTime(62, t0+0.55);
+  filt.type = "lowpass"; filt.frequency.value = 300;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(0.035, t0+0.08);
+  g.gain.exponentialRampToValueAtTime(0.001, t0+0.6);
+  osc.connect(filt); filt.connect(g); g.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0+0.65);
+}
+function scheduleSeagull(){
+  const delay = 40000 + Math.random()*30000;
+  setTimeout(function(){
+    if(soundOn) playSeagull();
+    scheduleSeagull();
+  }, delay);
+}
+function playSeagull(){
+  const ctx = actx; if(!ctx) return;
+  const t0 = ctx.currentTime;
+  const osc = ctx.createOscillator(); const g = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(950, t0);
+  osc.frequency.linearRampToValueAtTime(1400, t0+0.12);
+  osc.frequency.linearRampToValueAtTime(1050, t0+0.28);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(0.018, t0+0.04);
+  g.gain.linearRampToValueAtTime(0, t0+0.32);
+  osc.connect(g); g.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0+0.35);
+}
+function scheduleBubble(){
+  const delay = 2200 + Math.random()*7000;
+  const cluster = Math.random() < 0.28;
+  setTimeout(function(){
+    if(soundOn){
+      playBubble(1);
+      if(cluster){
+        setTimeout(function(){ if(soundOn) playBubble(0.85); }, 220+Math.random()*260);
+      }
+    }
+    scheduleBubble();
+  }, delay);
+}
+function playBubble(scale){
+  scale = scale || 1;
+  const ctx = actx; if(!ctx) return;
+  const t0 = ctx.currentTime;
+  const osc = ctx.createOscillator(); const g = ctx.createGain();
+  const startFreq = (200 + Math.random()*220) * scale;
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(startFreq, t0);
+  osc.frequency.exponentialRampToValueAtTime(startFreq*(1.8+Math.random()*0.6), t0+0.14+Math.random()*0.12);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(0.04*scale, t0+0.018);
+  g.gain.exponentialRampToValueAtTime(0.001, t0+0.2+Math.random()*0.1);
+  osc.connect(g); g.connect(ctx.destination);
+  osc.start(t0); osc.stop(t0+0.35);
+}
+function setAmbientVolume(target){
+  if(!ambientGain || !actx) return;
+  const now = actx.currentTime;
+  ambientGain.gain.cancelScheduledValues(now);
+  ambientGain.gain.setValueAtTime(ambientGain.gain.value, now);
+  ambientGain.gain.linearRampToValueAtTime(target, now+0.8);
+}
+function armAmbientOnFirstInteraction(){
+  function handler(){
+    startAmbient();
+    document.removeEventListener("pointerdown", handler);
+    document.removeEventListener("keydown", handler);
+  }
+  document.addEventListener("pointerdown", handler, {once:true});
+  document.addEventListener("keydown", handler, {once:true});
+}
+function toggleSound(){
+  soundOn = !soundOn;
+  const btn = $("soundBtn");
+  btn.setAttribute("aria-pressed", String(!soundOn));
+  btn.textContent = soundOn ? "🔊" : "🔇";
+  btn.setAttribute("aria-label", soundOn ? "Désactiver le son" : "Activer le son");
+  if(soundOn){
+    ensureAudio();
+    if(!ambientStarted) startAmbient(); else setAmbientVolume(AMBIENT_VOLUME);
+  } else {
+    setAmbientVolume(0);
+  }
+}
 
 /* ---------- Données des missions (calculs et réponses inchangés) ---------- */
 const MISSIONS = [
@@ -416,6 +646,7 @@ function forceFullReveal(){
 function renderQuestion(){
   const item = FLAT[idx];
   attempts = 0;
+  playObservationLoadSound();
   const html =
     renderSonarSVG()
     + '<div class="j3-progress"><span>Mission '+item.missionNumber+' / '+MISSIONS.length+'</span><span>Défi '+(idx+1)+' / '+TOTAL+'</span></div>'
@@ -497,6 +728,7 @@ function j3Restart(){
   renderQuestion();
 }
 
+armAmbientOnFirstInteraction();
 renderQuestion();
 </script>
 </body>
