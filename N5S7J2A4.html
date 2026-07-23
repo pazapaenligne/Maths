@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa — Je m'entraîne — Propriétés de la symétrie centrale</title>
+<style>
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+:root{
+  --day-color:#b94040;--day-dark:#7a1f1f;--day-light:#f7eded;
+  --day-border:#e3b3b3;--day-glow:rgba(185,64,64,.3);
+  --bg:#fdf7f7;--surface:#fff;--border:#ecdcdc;
+  --green:#8dc63f;--blue:#3ab5d8;--yellow:#f5c518;--red:#b94040;
+  --text:#1a1d23;--muted:#8a7373;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:0 1rem 110px;overflow-x:hidden;line-height:1.7;}
+body::before{content:'';position:fixed;inset:0;z-index:0;opacity:.03;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,#b94040 20px,#b94040 21px);pointer-events:none;}
+.bubble-yellow{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:220px;height:220px;background:var(--yellow);top:-60px;right:-40px;pointer-events:none;}
+.bubble-day{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:180px;height:180px;background:var(--day-color);bottom:-40px;left:-40px;pointer-events:none;}
+.bubble-green{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:140px;height:140px;background:var(--green);top:45%;right:-70px;pointer-events:none;}
+.bubble-pink{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:140px;height:140px;background:#f28b82;top:40%;left:-70px;pointer-events:none;}
+header{width:100%;text-align:center;padding:1.2rem 0 .5rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:monospace;font-size:.82rem;color:var(--muted);}
+h1{font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:900;color:var(--day-dark);margin:.3rem 0 .1rem;}
+.activity-label{font-size:clamp(1rem,3vw,1.25rem);font-weight:800;color:var(--text);line-height:1.35;}
+.subtitle-main{color:var(--muted);font-size:.86rem;font-family:monospace;margin-top:.3rem;}
+.hud{width:100%;max-width:680px;display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;margin:.6rem auto;background:var(--surface);border:2px solid var(--border);border-radius:12px;position:relative;z-index:1;flex-wrap:wrap;}
+.hud-stars{font-size:.9rem;font-weight:700;color:var(--day-dark);margin-right:auto;font-family:monospace;}
+.lv-btn{font-family:monospace;font-weight:700;font-size:.8rem;padding:.45rem .9rem;border-radius:8px;border:2px solid var(--border);background:var(--surface);color:var(--muted);min-height:44px;display:inline-flex;align-items:center;-webkit-appearance:none;appearance:none;}
+.lv-btn.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+.lv-btn.done{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.lv-btn.locked{opacity:.45;cursor:not-allowed;}
+.lv-btn:not(.locked){cursor:pointer;}
+.lv-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.level-banner{width:100%;max-width:680px;margin:.3rem auto 0;position:relative;z-index:1;font-size:1rem;font-weight:800;color:var(--day-dark);font-family:monospace;}
+.level-mission{width:100%;max-width:680px;margin:0 auto .9rem;font-size:.88rem;color:var(--muted);position:relative;z-index:1;}
+#main-zone{width:100%;max-width:680px;position:relative;z-index:1;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.3rem 1.4rem;position:relative;box-shadow:0 4px 16px rgba(0,0,0,.05);margin-bottom:.8rem;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+.figure-wrap{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.9rem;margin-bottom:1.1rem;text-align:center;}
+.figure-wrap svg{max-width:100%;height:auto;}
+.figure-cap{font-family:monospace;font-size:.78rem;color:var(--day-dark);margin-top:.4rem;}
+.q-block{margin-bottom:1.2rem;padding-bottom:1.1rem;border-bottom:1.5px dashed var(--border);}
+.q-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.q-row{display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.6rem;}
+.q-num{background:var(--day-color);color:#fff;border-radius:50%;width:1.7rem;height:1.7rem;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;margin-top:.05rem;}
+.q-label{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;line-height:1.7;}
+.q-feedback{font-size:clamp(.9rem,2.5vw,1rem);line-height:1.75;padding:.7rem .9rem;border-radius:10px;margin-top:.6rem;display:none;border-left:5px solid transparent;}
+.q-feedback.show{display:block;}
+.q-feedback.ok{background:#eefad8;border-left-color:var(--green);color:#3d7a10;}
+.q-feedback.ko{background:#fce4e4;border-left-color:#c0392b;color:#8f2f2f;}
+.fb-titre{font-weight:800;display:block;margin-bottom:.2rem;}
+.tags-row{display:flex;gap:.6rem;margin:.5rem 0 .7rem;flex-wrap:wrap;}
+.tag{background:var(--day-light);border:2px solid var(--day-border);border-radius:8px;padding:.35rem .8rem;font-family:monospace;font-weight:800;font-size:.95rem;color:var(--day-dark);}
+.opts-col{display:flex;flex-direction:column;gap:.45rem;margin-top:.5rem;}
+.opt-card{font-size:.92rem;font-weight:600;padding:.65rem 1rem;border-radius:10px;border:2px solid var(--day-border);background:var(--day-light);color:var(--text);cursor:pointer;min-height:48px;text-align:left;display:flex;gap:.6rem;align-items:center;transition:.15s;width:100%;line-height:1.5;}
+.opt-card:hover:not([disabled]){border-color:var(--day-color);background:#f2dcdc;}
+.opt-card:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.opt-card[disabled]{cursor:default;}
+.opt-card.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-card.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.opt-card.reveal{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-card.selected{border-color:var(--day-color);background:#f2dcdc;font-weight:800;}
+.opt-letter{font-family:monospace;font-weight:800;min-width:1.3rem;flex-shrink:0;color:var(--day-dark);}
+.trou-wrap{font-size:.98rem;font-weight:600;line-height:2.7;margin:.4rem 0;}
+.trou-select{padding:.35rem .55rem;border-radius:8px;border:2px solid var(--day-border);background:var(--day-light);font-family:monospace;font-weight:700;font-size:.9rem;min-height:42px;cursor:pointer;color:var(--day-dark);}
+.trou-select:focus-visible{outline:3px solid var(--day-color);}
+.trou-select.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.trou-select.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.9rem;}
+.msg-vide{font-family:monospace;font-size:.85rem;color:#c0392b;width:100%;margin-bottom:.2rem;}
+.level-success{display:none;background:var(--surface);border:2px solid var(--green);border-radius:var(--radius);padding:1.4rem;text-align:center;margin-top:.6rem;box-shadow:0 4px 16px rgba(141,198,63,.15);}
+.level-success.show{display:block;}
+.ls-star{font-size:2rem;margin-bottom:.3rem;}
+.ls-title{font-weight:800;font-size:1.05rem;color:#3d7a10;margin-bottom:.4rem;}
+.ls-msg{font-size:.92rem;color:var(--text);line-height:1.8;}
+#final-screen{display:none;width:100%;max-width:680px;position:relative;z-index:1;}
+#final-screen.show{display:block;}
+.final-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem 1.6rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.stripe{height:4px;border-radius:4px;margin-bottom:1.2rem;background:linear-gradient(90deg,#b94040,#f5c518,#8dc63f);}
+.final-title{font-size:1.2rem;font-weight:900;color:var(--day-dark);margin-bottom:.4rem;}
+.final-sub{font-size:.94rem;color:var(--text);line-height:1.8;margin-bottom:.8rem;}
+.final-stars{font-size:1.3rem;margin:.8rem 0;font-family:monospace;}
+.skill-list{text-align:left;margin:.9rem 0;display:flex;flex-direction:column;gap:.4rem;}
+.skill-item{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:8px;padding:.55rem .9rem;font-size:.9rem;font-weight:600;line-height:1.6;}
+.final-synth{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:.9rem 1rem;font-size:.88rem;line-height:1.85;text-align:left;margin-top:.8rem;color:var(--day-dark);}
+@media(max-width:480px){body{padding:0 .75rem 90px;}.card{padding:1rem;}}
+</style>
+</head>
+<body>
+<div class="bubble-yellow"></div><div class="bubble-day"></div><div class="bubble-green"></div><div class="bubble-pink"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Math&eacute;matiques &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 7 &ndash; Jour 2</div>
+  <h1>Propri&eacute;t&eacute;s de la sym&eacute;trie centrale</h1>
+  <p class="activity-label">Je m&rsquo;entra&icirc;ne pour progresser</p>
+  <p class="subtitle-main">3 niveaux</p>
+</header>
+
+<div class="hud">
+  <span class="hud-stars" id="hud-stars">&#11088; 0 / 3</span>
+  <button class="lv-btn active" id="lv1-btn" type="button">Niveau 1</button>
+  <button class="lv-btn locked" id="lv2-btn" type="button" disabled>Niveau 2</button>
+  <button class="lv-btn locked" id="lv3-btn" type="button" disabled>Niveau 3</button>
+</div>
+<div class="level-banner" id="level-banner"></div>
+<div class="level-mission" id="level-mission"></div>
+
+<div id="main-zone"></div>
+
+<div id="final-screen">
+  <div class="final-card">
+    <div class="stripe"></div>
+    <div class="logo-badge" style="margin:0 auto .7rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+    </div>
+    <div class="final-title">&#127942; Mission accomplie</div>
+    <div class="final-sub">Gr&acirc;ce aux propri&eacute;t&eacute;s de la sym&eacute;trie centrale, tu as pu comparer les fragments sans tout mesurer.</div>
+    <div class="final-stars" id="final-stars"></div>
+    <div class="skill-list">
+      <div class="skill-item">&#10004; Reconna&icirc;tre les grandeurs conserv&eacute;es</div>
+      <div class="skill-item">&#10004; D&eacute;terminer une longueur ou un angle image</div>
+      <div class="skill-item">&#10004; Utiliser la conservation du parall&eacute;lisme et de l&rsquo;alignement</div>
+      <div class="skill-item">&#10004; Compl&eacute;ter un raisonnement g&eacute;om&eacute;trique simple</div>
+    </div>
+    <div class="final-synth"><strong>&Agrave; retenir&nbsp;:</strong> la sym&eacute;trie centrale conserve l&rsquo;alignement, le parall&eacute;lisme, les longueurs, les mesures des angles, les p&eacute;rim&egrave;tres et les aires. L&rsquo;image d&rsquo;une droite est une droite parall&egrave;le, et l&rsquo;image d&rsquo;une figure est une figure superposable.</div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn btn-ghost" id="btn-review">&#8635; Revoir les niveaux</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var currentLevel=0,starsEarned=0;
+var state={};
+
+function initState(){
+  state={
+    0:{answers:{},attempts:0,validated:false,done:false,unlocked:true},
+    1:{answers:{},attempts:0,validated:false,done:false,unlocked:false},
+    2:{answers:{},attempts:0,validated:false,done:false,unlocked:false}
+  };
+}
+initState();
+
+/* ══════════════════════════════════════════════════════
+   FIGURES SVG
+   ══════════════════════════════════════════════════════ */
+var FIGURE_N2 =
+  /* Coordonn\u00e9es recalcul\u00e9es (\u00e9chelle 20 px = 1 cm) : W(140,190) sommet de l\u2019angle ;
+     WV = 74 px = 3,7 cm dans la direction -90\u00b0 ; WD = 112 px = 5,6 cm dans la direction -35\u00b0,
+     soit un angle DWV de 55\u00b0 exact. O(250,150) est le centre de sym\u00e9trie ;
+     D\u2019, W\u2019, V\u2019 sont les images exactes de D, W, V par rapport \u00e0 O (X\u2019=2Ox-X, Y\u2019=2Oy-Y). */
+  '<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deux triangles DWV et D\u2019W\u2019V\u2019 sym\u00e9triques par rapport au point O">'
+  +'<line x1="231.7" y1="125.8" x2="268.3" y2="174.2" stroke="#e3b3b3" stroke-width="1.5" stroke-dasharray="4 4"/>'
+  +'<line x1="140" y1="190" x2="360" y2="110" stroke="#e3b3b3" stroke-width="1.5" stroke-dasharray="4 4"/>'
+  +'<line x1="140" y1="116" x2="360" y2="184" stroke="#e3b3b3" stroke-width="1.5" stroke-dasharray="4 4"/>'
+  +'<polygon points="231.7,125.8 140,190 140,116" fill="#f7eded" stroke="#b94040" stroke-width="2.5"/>'
+  +'<polygon points="268.3,174.2 360,110 360,184" fill="#eefad8" stroke="#3d7a10" stroke-width="2.5"/>'
+  +'<circle cx="250" cy="150" r="4.5" fill="#7a1f1f"/>'
+  +'<text x="256" y="142" font-size="14" font-weight="800" fill="#7a1f1f" font-family="monospace">O</text>'
+  +'<circle cx="231.7" cy="125.8" r="4" fill="#b94040"/><text x="238" y="116" font-size="14" font-weight="800" fill="#7a1f1f">D</text>'
+  +'<circle cx="140" cy="190" r="4" fill="#b94040"/><text x="108" y="208" font-size="14" font-weight="800" fill="#7a1f1f">W</text>'
+  +'<circle cx="140" cy="116" r="4" fill="#b94040"/><text x="112" y="106" font-size="14" font-weight="800" fill="#7a1f1f">V</text>'
+  +'<circle cx="268.3" cy="174.2" r="4" fill="#3d7a10"/><text x="274" y="194" font-size="14" font-weight="800" fill="#3d7a10">D\u2019</text>'
+  +'<circle cx="360" cy="110" r="4" fill="#3d7a10"/><text x="350" y="98" font-size="14" font-weight="800" fill="#3d7a10">W\u2019</text>'
+  +'<circle cx="360" cy="184" r="4" fill="#3d7a10"/><text x="350" y="202" font-size="14" font-weight="800" fill="#3d7a10">V\u2019</text>'
+  +'<text x="152" y="148" font-size="12" fill="#7a1f1f" font-family="monospace">DW = 5,6 cm</text>'
+  +'<text x="40" y="157" font-size="12" fill="#7a1f1f" font-family="monospace">WV = 3,7 cm</text>'
+  +'<text x="150" y="205" font-size="12" fill="#7a1f1f" font-family="monospace">angle DWV = 55&#176;</text>'
+  +'</svg>';
+
+var FIGURE_N3 =
+  '<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Points Y, N, R et leurs images Y\u2019, N\u2019, R\u2019 sym\u00e9triques par rapport au point O, avec la droite d1 et son image d\u20191">'
+  +'<line x1="80" y1="10" x2="80" y2="250" stroke="#e3b3b3" stroke-width="1.5" stroke-dasharray="2 4"/>'
+  +'<line x1="320" y1="10" x2="320" y2="250" stroke="#e3b3b3" stroke-width="1.5" stroke-dasharray="2 4"/>'
+  +'<line x1="300" y1="10" x2="300" y2="250" stroke="#3ab5d8" stroke-width="2" stroke-dasharray="6 4"/>'
+  +'<line x1="100" y1="10" x2="100" y2="250" stroke="#1a6e88" stroke-width="2" stroke-dasharray="6 4"/>'
+  +'<line x1="80" y1="80" x2="320" y2="180" stroke="#e3b3b3" stroke-width="1.5" stroke-dasharray="4 4"/>'
+  +'<line x1="80" y1="180" x2="320" y2="80" stroke="#e3b3b3" stroke-width="1.5" stroke-dasharray="4 4"/>'
+  +'<line x1="300" y1="60" x2="100" y2="200" stroke="#e3b3b3" stroke-width="1.5" stroke-dasharray="4 4"/>'
+  +'<line x1="80" y1="80" x2="80" y2="180" stroke="#b94040" stroke-width="3"/>'
+  +'<line x1="320" y1="180" x2="320" y2="80" stroke="#3d7a10" stroke-width="3"/>'
+  +'<circle cx="200" cy="130" r="4.5" fill="#7a1f1f"/><text x="207" y="122" font-size="14" font-weight="800" fill="#7a1f1f" font-family="monospace">O</text>'
+  +'<circle cx="80" cy="80" r="4" fill="#b94040"/><text x="55" y="76" font-size="14" font-weight="800" fill="#7a1f1f">Y</text>'
+  +'<circle cx="80" cy="180" r="4" fill="#b94040"/><text x="55" y="196" font-size="14" font-weight="800" fill="#7a1f1f">N</text>'
+  +'<circle cx="300" cy="60" r="4" fill="#b94040"/><text x="306" y="52" font-size="14" font-weight="800" fill="#7a1f1f">R</text>'
+  +'<circle cx="320" cy="180" r="4" fill="#3d7a10"/><text x="328" y="188" font-size="14" font-weight="800" fill="#3d7a10">Y\u2019</text>'
+  +'<circle cx="320" cy="80" r="4" fill="#3d7a10"/><text x="328" y="72" font-size="14" font-weight="800" fill="#3d7a10">N\u2019</text>'
+  +'<circle cx="100" cy="200" r="4" fill="#3d7a10"/><text x="70" y="216" font-size="14" font-weight="800" fill="#3d7a10">R\u2019</text>'
+  +'<text x="304" y="20" font-size="12" fill="#1a6e88" font-family="monospace">(d1)</text>'
+  +'<text x="104" y="20" font-size="12" fill="#3ab5d8" font-family="monospace">(d\u20191)</text>'
+  +'<text x="15" y="100" font-size="12" fill="#7a1f1f" font-family="monospace">YN = 4,4 cm</text>'
+  +'</svg>';
+
+/* ══════════════════════════════════════════════════════
+   MOTEUR G\u00c9N\u00c9RIQUE DE RENDU DES QUESTIONS
+   ══════════════════════════════════════════════════════ */
+function tagsHtml(tags){
+  if(!tags||!tags.length) return '';
+  var h='<div class="tags-row">';
+  tags.forEach(function(t){h+='<span class="tag">'+t+'</span>';});
+  return h+'</div>';
+}
+
+// QCM (opt-card)
+function renderQCM(container,qd,st,lvlIdx){
+  var b=document.createElement('div'); b.className='q-block';
+  b.innerHTML='<div class="q-row"><span class="q-num">'+qd.num+'</span><span class="q-label">'+qd.label+'</span></div>'
+    +tagsHtml(qd.tags)
+    +'<div class="opts-col" id="opts-'+qd.key+'"></div>'
+    +'<div class="q-feedback" id="fb-'+qd.key+'"></div>';
+  container.appendChild(b);
+  var row=b.querySelector('#opts-'+qd.key);
+  qd.options.forEach(function(o,i){
+    var btn=document.createElement('button'); btn.type='button'; btn.className='opt-card';
+    btn.innerHTML='<span class="opt-letter">'+String.fromCharCode(65+i)+'.</span> '+o;
+    var cur=st.answers[qd.key];
+    if(st.validated){
+      btn.disabled=true;
+      if(i===qd.correct) btn.classList.add(cur===i?'ok':'reveal');
+      else if(cur===i) btn.classList.add('ko');
+    } else if(cur===i) btn.classList.add('selected');
+    btn.addEventListener('click',function(){
+      if(state[lvlIdx].validated) return;
+      state[lvlIdx].answers[qd.key]=i;
+      row.querySelectorAll('.opt-card').forEach(function(bb,j){bb.className='opt-card'+(j===i?' selected':'');});
+    });
+    row.appendChild(btn);
+  });
+  if(st.validated&&st.answers[qd.key]!==undefined){
+    var ok=st.answers[qd.key]===qd.correct;
+    var fb=b.querySelector('#fb-'+qd.key);
+    fb.className='q-feedback show '+(ok?'ok':'ko');
+    fb.innerHTML='<span class="fb-titre">'+(ok?'\u2705':'\u274c')+'</span>'+(ok?qd.fbOk:qd.fbKo);
+  }
+}
+function qcmAnswered(qd,st){return st.answers[qd.key]!==undefined;}
+function qcmCorrect(qd,st){return st.answers[qd.key]===qd.correct;}
+
+// Texte \u00e0 trous (une ou plusieurs listes d\u00e9roulantes ins\u00e9r\u00e9es dans des segments de texte)
+function renderFill(container,qd,st,lvlIdx){
+  var b=document.createElement('div'); b.className='q-block';
+  b.innerHTML='<div class="q-row"><span class="q-num">'+qd.num+'</span><span class="q-label">'+qd.label+'</span></div>'
+    +tagsHtml(qd.tags);
+  var tw=document.createElement('div'); tw.className='trou-wrap';
+  qd.segments.forEach(function(seg,si){
+    if(typeof seg==='string'){
+      tw.appendChild(document.createTextNode(seg));
+    } else {
+      var sel=document.createElement('select'); sel.className='trou-select'; sel.id='sel-'+qd.key+'-'+si;
+      seg.options.forEach(function(o,i){var opt=document.createElement('option');opt.value=i;opt.textContent=o;sel.appendChild(opt);});
+      var cur=st.answers[qd.key+'_'+si];
+      if(cur!==undefined) sel.value=cur;
+      if(st.validated){sel.disabled=true;sel.classList.add(cur==seg.correct?'ok':'ko');}
+      sel.addEventListener('change',function(){state[lvlIdx].answers[qd.key+'_'+si]=parseInt(sel.value);});
+      tw.appendChild(sel);
+    }
+  });
+  b.appendChild(tw);
+  var fb=document.createElement('div'); fb.className='q-feedback'; fb.id='fb-'+qd.key;
+  if(st.validated){
+    var ok=fillCorrect(qd,st);
+    fb.className='q-feedback show '+(ok?'ok':'ko');
+    fb.innerHTML='<span class="fb-titre">'+(ok?'\u2705':'\u274c')+'</span>'+(ok?qd.fbOk:qd.fbKo);
+  }
+  b.appendChild(fb);
+  container.appendChild(b);
+}
+function fillBlankKeys(qd){
+  var ks=[];qd.segments.forEach(function(seg,si){if(typeof seg!=='string') ks.push({key:qd.key+'_'+si,correct:seg.correct});});
+  return ks;
+}
+function fillAnswered(qd,st){
+  return fillBlankKeys(qd).every(function(b){return st.answers[b.key]!==undefined&&st.answers[b.key]!==0;});
+}
+function fillCorrect(qd,st){
+  return fillBlankKeys(qd).every(function(b){return st.answers[b.key]===b.correct;});
+}
+
+function renderQuestion(container,qd,st,lvlIdx){
+  if(qd.type==='fill') renderFill(container,qd,st,lvlIdx);
+  else renderQCM(container,qd,st,lvlIdx);
+}
+function qAnswered(qd,st){return qd.type==='fill'?fillAnswered(qd,st):qcmAnswered(qd,st);}
+function qCorrect(qd,st){return qd.type==='fill'?fillCorrect(qd,st):qcmCorrect(qd,st);}
+
+/* ══════════════════════════════════════════════════════
+   D\u00c9FINITION DES 3 NIVEAUX
+   ══════════════════════════════════════════════════════ */
+var OPT_BLANK=['-- ?','(d\u20191)','(Y\u2019N\u2019)','O'];
+
+var LEVELS=[
+{
+  title:'Niveau 1 \u2014 Reconna\u00eetre les propri\u00e9t\u00e9s conserv\u00e9es',
+  mission:'Identifie ce que la sym\u00e9trie centrale conserve.',
+  fbSuccess:'Premier fragment restaur\u00e9\u00a0! Tu reconnais les propri\u00e9t\u00e9s conserv\u00e9es par la sym\u00e9trie centrale.',
+  figure:null,
+  questions:[
+    {key:'n1q1',num:1,type:'qcm',
+      label:'Le sym\u00e9trique d\u2019un segment de longueur 5\u00a0cm est\u00a0:',
+      options:['un segment de longueur 2,5\u00a0cm','un segment de longueur 10\u00a0cm','une droite','un segment de longueur 5\u00a0cm'],
+      correct:3,
+      fbOk:'La sym\u00e9trie centrale conserve les longueurs. Le sym\u00e9trique d\u2019un segment de longueur 5\u00a0cm est donc un segment de longueur 5\u00a0cm.',
+      fbKo:'La sym\u00e9trie centrale conserve les longueurs. Le sym\u00e9trique d\u2019un segment de longueur 5\u00a0cm est donc un segment de longueur 5\u00a0cm.',
+      hint:'Compare la longueur d\u2019une figure et celle de son image.'},
+    {key:'n1q2',num:2,type:'qcm',
+      label:'Le sym\u00e9trique d\u2019un triangle isoc\u00e8le est\u00a0:',
+      options:['obligatoirement un triangle rectangle','un triangle deux fois plus grand','un quadrilat\u00e8re','un triangle isoc\u00e8le superposable au premier'],
+      correct:3,
+      fbOk:'Les longueurs sont conserv\u00e9es. Les deux c\u00f4t\u00e9s \u00e9gaux du triangle restent \u00e9gaux\u00a0: l\u2019image est donc \u00e9galement un triangle isoc\u00e8le.',
+      fbKo:'Les longueurs sont conserv\u00e9es. Les deux c\u00f4t\u00e9s \u00e9gaux du triangle restent \u00e9gaux\u00a0: l\u2019image est donc \u00e9galement un triangle isoc\u00e8le.',
+      hint:'La sym\u00e9trie centrale ne change ni les longueurs ni la forme de la figure.'},
+    {key:'n1q3',num:3,type:'qcm',
+      label:'Le sym\u00e9trique d\u2019un triangle de p\u00e9rim\u00e8tre 20\u00a0cm a pour p\u00e9rim\u00e8tre\u00a0:',
+      options:['10\u00a0cm','20\u00a0cm','40\u00a0cm','on ne peut pas le d\u00e9terminer'],
+      correct:1,
+      fbOk:'Toutes les longueurs sont conserv\u00e9es. La somme de ces longueurs reste donc la m\u00eame\u00a0: le p\u00e9rim\u00e8tre est 20\u00a0cm.',
+      fbKo:'Toutes les longueurs sont conserv\u00e9es. La somme de ces longueurs reste donc la m\u00eame\u00a0: le p\u00e9rim\u00e8tre est 20\u00a0cm.',
+      hint:'Le p\u00e9rim\u00e8tre est la somme des longueurs des c\u00f4t\u00e9s.'},
+    {key:'n1q4',num:4,type:'qcm',
+      label:'Le sym\u00e9trique d\u2019un angle de 35\u00b0 mesure\u00a0:',
+      options:['35\u00b0','55\u00b0','145\u00b0','325\u00b0'],
+      correct:0,
+      fbOk:'La sym\u00e9trie centrale conserve les mesures des angles. L\u2019angle image mesure donc 35\u00b0.',
+      fbKo:'La sym\u00e9trie centrale conserve les mesures des angles. L\u2019angle image mesure donc 35\u00b0.',
+      hint:'Une sym\u00e9trie centrale ne modifie pas l\u2019ouverture de l\u2019angle.'},
+    {key:'n1q5',num:5,type:'qcm',
+      label:'Le sym\u00e9trique d\u2019un cercle de rayon 3\u00a0cm est\u00a0:',
+      options:['un cercle de rayon 1,5\u00a0cm','un cercle de diam\u00e8tre 3\u00a0cm','un disque de rayon 6\u00a0cm','un cercle de rayon 3\u00a0cm'],
+      correct:3,
+      fbOk:'La sym\u00e9trie centrale conserve les longueurs. Le cercle image poss\u00e8de donc lui aussi un rayon de 3\u00a0cm.',
+      fbKo:'La sym\u00e9trie centrale conserve les longueurs. Le cercle image poss\u00e8de donc lui aussi un rayon de 3\u00a0cm.',
+      hint:'Le rayon est une longueur.'},
+    {key:'n1q6',num:6,type:'fill',
+      label:'Compl\u00e8te la phrase\u00a0:',
+      segments:[
+        'La sym\u00e9trie centrale conserve les\u00a0',
+        {options:['-- ?','longueurs','couleurs','positions','noms'],correct:1},
+        ', les mesures des\u00a0',
+        {options:['-- ?','angles','sommets','centres','axes'],correct:1},
+        ', les p\u00e9rim\u00e8tres et les\u00a0',
+        {options:['-- ?','aires','orientations','lettres','quadrillages'],correct:1},
+        '.'
+      ],
+      fbOk:'La sym\u00e9trie centrale conserve les longueurs, les mesures des angles, les p\u00e9rim\u00e8tres et les aires.',
+      fbKo:'La sym\u00e9trie centrale conserve les longueurs, les mesures des angles, les p\u00e9rim\u00e8tres et les aires.',
+      hint:'Cherche les grandeurs g\u00e9om\u00e9triques qui restent identiques apr\u00e8s le demi-tour.'}
+  ]
+},
+{
+  title:'Niveau 2 \u2014 Calculer avec les propri\u00e9t\u00e9s',
+  mission:'D\u00e9termine des longueurs et des angles sans mesurer la figure image.',
+  fbSuccess:'Deuxi\u00e8me fragment restaur\u00e9\u00a0! Tu sais calculer une mesure gr\u00e2ce aux propri\u00e9t\u00e9s de la sym\u00e9trie centrale.',
+  figure:FIGURE_N2,
+  figureCaption:'Les triangles DWV et D\u2019W\u2019V\u2019 sont sym\u00e9triques par rapport au point O.',
+  questions:[
+    {key:'n2q1',num:1,type:'qcm',
+      label:'Quelle est la longueur W\u2019V\u2019\u00a0?',
+      tags:['WV = 3,7 cm'],
+      options:['3,7\u00a0cm','5,6\u00a0cm','7,4\u00a0cm','impossible \u00e0 d\u00e9terminer'],
+      correct:0,
+      fbOk:'La sym\u00e9trie centrale conserve les longueurs. Comme WV\u00a0=\u00a03,7\u00a0cm, alors W\u2019V\u2019\u00a0=\u00a03,7\u00a0cm.',
+      fbKo:'La sym\u00e9trie centrale conserve les longueurs. Comme WV\u00a0=\u00a03,7\u00a0cm, alors W\u2019V\u2019\u00a0=\u00a03,7\u00a0cm.',
+      hint:'[WV] et [W\u2019V\u2019] sont deux segments sym\u00e9triques.'},
+    {key:'n2q2',num:2,type:'qcm',
+      label:'Quelle est la longueur D\u2019W\u2019\u00a0?',
+      tags:['DW = 5,6 cm'],
+      options:['2,8\u00a0cm','3,7\u00a0cm','5,6\u00a0cm','11,2\u00a0cm'],
+      correct:2,
+      fbOk:'D\u2019 est l\u2019image de D et W\u2019 est l\u2019image de W. Le segment [D\u2019W\u2019] est donc l\u2019image de [DW]. Comme DW\u00a0=\u00a05,6\u00a0cm, D\u2019W\u2019\u00a0=\u00a05,6\u00a0cm.',
+      fbKo:'D\u2019 est l\u2019image de D et W\u2019 est l\u2019image de W. Le segment [D\u2019W\u2019] est donc l\u2019image de [DW]. Comme DW\u00a0=\u00a05,6\u00a0cm, D\u2019W\u2019\u00a0=\u00a05,6\u00a0cm.',
+      hint:'Rep\u00e8re l\u2019image de chacun des deux points D et W.'},
+    {key:'n2q3',num:3,type:'qcm',
+      label:'Quelle est la mesure de l\u2019angle D\u2019W\u2019V\u2019\u00a0?',
+      tags:['angle DWV = 55\u00b0'],
+      options:['35\u00b0','110\u00b0','125\u00b0','55\u00b0'],
+      correct:3,
+      fbOk:'La sym\u00e9trie centrale conserve la mesure des angles. Comme l\u2019angle DWV mesure 55\u00b0, l\u2019angle D\u2019W\u2019V\u2019 mesure aussi 55\u00b0.',
+      fbKo:'La sym\u00e9trie centrale conserve la mesure des angles. Comme l\u2019angle DWV mesure 55\u00b0, l\u2019angle D\u2019W\u2019V\u2019 mesure aussi 55\u00b0.',
+      hint:'L\u2019angle D\u2019W\u2019V\u2019 est l\u2019image de l\u2019angle DWV.'},
+    {key:'n2q4',num:4,type:'qcm',
+      label:'Les droites (DW) et (D\u2019W\u2019) sont\u00a0:',
+      options:['perpendiculaires','parall\u00e8les','confondues dans tous les cas','s\u00e9cantes.'],
+      correct:1,
+      fbOk:'L\u2019image d\u2019une droite par une sym\u00e9trie centrale est une droite parall\u00e8le. Donc (DW) et (D\u2019W\u2019) sont parall\u00e8les.',
+      fbKo:'L\u2019image d\u2019une droite par une sym\u00e9trie centrale est une droite parall\u00e8le. Donc (DW) et (D\u2019W\u2019) sont parall\u00e8les.',
+      hint:'Observe la direction d\u2019une droite et celle de son image.'},
+    {key:'n2q5',num:5,type:'qcm',
+      label:'Choisis le raisonnement correct pour justifier que W\u2019V\u2019\u00a0=\u00a03,7\u00a0cm.',
+      options:[
+        'Je sais que W\u2019 et V\u2019 sont les images de W et V par une sym\u00e9trie centrale. Or la sym\u00e9trie centrale conserve les longueurs. Donc W\u2019V\u2019\u00a0=\u00a0WV\u00a0=\u00a03,7\u00a0cm.',
+        'Les segments semblent avoir la m\u00eame longueur sur le dessin, donc W\u2019V\u2019\u00a0=\u00a03,7\u00a0cm.',
+        'La sym\u00e9trie centrale double toutes les longueurs, donc W\u2019V\u2019\u00a0=\u00a07,4\u00a0cm.',
+        'W\u2019V\u2019 est parall\u00e8le \u00e0 WV, donc W\u2019V\u2019 mesure n\u00e9cessairement 3,7\u00a0cm.'
+      ],
+      correct:0,
+      fbOk:'Le raisonnement correct identifie d\u2019abord [W\u2019V\u2019] comme l\u2019image de [WV], puis utilise la conservation des longueurs.',
+      fbKo:'Une simple observation du dessin ne constitue pas une justification. Le raisonnement correct identifie d\u2019abord [W\u2019V\u2019] comme l\u2019image de [WV], puis utilise la conservation des longueurs.',
+      hint:'Une justification doit citer les points correspondants puis la propri\u00e9t\u00e9 utilis\u00e9e.'}
+  ]
+},
+{
+  title:'Niveau 3 \u2014 Justifier avec les propri\u00e9t\u00e9s',
+  mission:'R\u00e9dige et compl\u00e8te des raisonnements g\u00e9om\u00e9triques.',
+  fbSuccess:'Mosa\u00efque restaur\u00e9e\u00a0! Tu sais utiliser les propri\u00e9t\u00e9s de la sym\u00e9trie centrale pour calculer et justifier.',
+  figure:FIGURE_N3,
+  figureCaption:'Y\u2019, N\u2019 et R\u2019 sont les images de Y, N et R par la sym\u00e9trie de centre O. (d1) passe par R et est parall\u00e8le \u00e0 la droite (YN)\u00a0; (d\u20191) est son image.',
+  questions:[
+    {key:'n3q1',num:1,type:'qcm',
+      label:'Quelle est la longueur Y\u2019N\u2019\u00a0?',
+      tags:['YN = 4,4 cm'],
+      options:['4,4\u00a0cm','2,2\u00a0cm','8,8\u00a0cm','impossible \u00e0 d\u00e9terminer'],
+      correct:0,
+      fbOk:'La sym\u00e9trie centrale conserve les longueurs. Comme YN\u00a0=\u00a04,4\u00a0cm, alors Y\u2019N\u2019\u00a0=\u00a04,4\u00a0cm.',
+      fbKo:'La sym\u00e9trie centrale conserve les longueurs. Comme YN\u00a0=\u00a04,4\u00a0cm, alors Y\u2019N\u2019\u00a0=\u00a04,4\u00a0cm.',
+      hint:'[Y\u2019N\u2019] est l\u2019image du segment [YN].'},
+    {key:'n3q2',num:2,type:'qcm',
+      label:'La droite (d\u20191), image de (d1), passe par\u00a0:',
+      options:['Y\u2019','N\u2019','R\u2019','O obligatoirement'],
+      correct:2,
+      fbOk:'La droite (d1) passe par R. L\u2019image de R est R\u2019. La droite image (d\u20191) passe donc par R\u2019.',
+      fbKo:'La droite (d1) passe par R. L\u2019image de R est R\u2019. La droite image (d\u20191) passe donc par R\u2019.',
+      hint:'Cherche l\u2019image du point R appartenant \u00e0 la droite (d1).'},
+    {key:'n3q3',num:3,type:'fill',
+      label:'Compl\u00e8te le raisonnement\u00a0: je sais que la droite (d1) est parall\u00e8le \u00e0 la droite (YN). Les objets correspondants sont\u00a0:',
+      segments:[
+        '(d1) \u2194\u00a0',
+        {options:OPT_BLANK,correct:1},
+        '\u00a0\u2014\u00a0(YN) \u2194\u00a0',
+        {options:OPT_BLANK,correct:2},
+        '.\u00a0Or la sym\u00e9trie centrale conserve le parall\u00e9lisme. Donc\u00a0',
+        {options:OPT_BLANK,correct:1},
+        '\u00a0est parall\u00e8le \u00e0\u00a0',
+        {options:OPT_BLANK,correct:2},
+        '.'
+      ],
+      fbOk:'La droite (d\u20191) est l\u2019image de (d1), et (Y\u2019N\u2019) est l\u2019image de (YN). La conservation du parall\u00e9lisme permet donc d\u2019affirmer que (d\u20191) est parall\u00e8le \u00e0 la droite (Y\u2019N\u2019).',
+      fbKo:'La droite (d\u20191) est l\u2019image de (d1), et (Y\u2019N\u2019) est l\u2019image de (YN). La conservation du parall\u00e9lisme permet donc d\u2019affirmer que (d\u20191) est parall\u00e8le \u00e0 la droite (Y\u2019N\u2019).',
+      hint:'Remplace chaque objet par son image.'},
+    {key:'n3q4',num:4,type:'qcm',
+      label:'Trois points A, B et C sont align\u00e9s. A\u2019, B\u2019 et C\u2019 sont leurs images par une sym\u00e9trie centrale. Que peut-on affirmer\u00a0?',
+      options:['A\u2019, B\u2019 et C\u2019 forment obligatoirement un triangle.','A\u2019, B\u2019 et C\u2019 sont confondus.','A\u2019, B\u2019 et C\u2019 sont perpendiculaires.','A\u2019, B\u2019 et C\u2019 sont align\u00e9s.'],
+      correct:3,
+      fbOk:'La sym\u00e9trie centrale conserve l\u2019alignement. Les images A\u2019, B\u2019 et C\u2019 sont donc align\u00e9es.',
+      fbKo:'La sym\u00e9trie centrale conserve l\u2019alignement. Les images A\u2019, B\u2019 et C\u2019 sont donc align\u00e9es.',
+      hint:'La sym\u00e9trie centrale conserve la disposition de points appartenant \u00e0 une m\u00eame droite.'},
+    {key:'n3q5',num:5,type:'qcm',
+      label:'Les segments [MN] et [M\u2019N\u2019] sont sym\u00e9triques par rapport \u00e0 O. Choisis le raisonnement enti\u00e8rement correct pour d\u00e9montrer que MN\u00a0=\u00a0M\u2019N\u2019.',
+      options:[
+        'Les segments semblent \u00e9gaux sur le dessin, donc MN\u00a0=\u00a0M\u2019N\u2019.',
+        'Je sais que [M\u2019N\u2019] est l\u2019image de [MN] par une sym\u00e9trie centrale. Or la sym\u00e9trie centrale conserve les longueurs. Donc MN\u00a0=\u00a0M\u2019N\u2019.',
+        'O est un point de la figure, donc MN\u00a0=\u00a0M\u2019N\u2019.',
+        'Les droites (MN) et (M\u2019N\u2019) sont parall\u00e8les, donc tous leurs segments ont la m\u00eame longueur.'
+      ],
+      correct:1,
+      fbOk:'Le raisonnement complet identifie [M\u2019N\u2019] comme l\u2019image de [MN], puis applique la conservation des longueurs.',
+      fbKo:'Le raisonnement doit comporter une donn\u00e9e, une propri\u00e9t\u00e9 et une conclusion\u00a0: [M\u2019N\u2019] est l\u2019image de [MN]\u00a0; la sym\u00e9trie centrale conserve les longueurs\u00a0; donc MN\u00a0=\u00a0M\u2019N\u2019.',
+      hint:'Le raisonnement doit comporter une donn\u00e9e, une propri\u00e9t\u00e9 et une conclusion.'}
+  ]
+}
+];
+
+/* ══════════════════════════════════════════════════════
+   MOTEUR DE NIVEAU
+   ══════════════════════════════════════════════════════ */
+function renderLevel(){
+  updateHUD();
+  var zone=$('main-zone'); zone.innerHTML='';
+  var lvlIdx=currentLevel, lvl=LEVELS[lvlIdx], st=state[lvlIdx];
+  var card=document.createElement('div'); card.className='card';
+  card.innerHTML='<div class="card-stripe"></div>';
+  if(lvl.figure){
+    var fw=document.createElement('div'); fw.className='figure-wrap';
+    fw.innerHTML=lvl.figure+'<div class="figure-cap">'+lvl.figureCaption+'</div>';
+    card.appendChild(fw);
+  }
+  lvl.questions.forEach(function(qd){renderQuestion(card,qd,st,lvlIdx);});
+  zone.appendChild(card);
+  appendFooter(lvl,zone,lvlIdx,st);
+}
+
+function allAnswered(){
+  var lvl=LEVELS[currentLevel], st=state[currentLevel];
+  return lvl.questions.every(function(qd){return qAnswered(qd,st);});
+}
+function allCorrect(){
+  var lvl=LEVELS[currentLevel], st=state[currentLevel];
+  return lvl.questions.every(function(qd){return qCorrect(qd,st);});
+}
+
+function updateHUD(){
+  $('hud-stars').innerHTML='\u2b50 '+starsEarned+' / 3';
+  [0,1,2].forEach(function(i){
+    var btn=$('lv'+(i+1)+'-btn'); if(!btn) return;
+    btn.className='lv-btn'+(i===currentLevel?' active':state[i].done?' done':!state[i].unlocked?' locked':'');
+    btn.disabled=!state[i].unlocked;
+  });
+  $('level-banner').textContent=LEVELS[currentLevel].title;
+  $('level-mission').innerHTML='\uD83C\uDFAF Objectif\u00a0: '+LEVELS[currentLevel].mission;
+}
+
+function goToLevel(i){
+  if(!state[i].unlocked) return;
+  currentLevel=i; renderLevel();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function appendFooter(lvl,zone,lvlIdx,st){
+  var suc=document.createElement('div'); suc.className='level-success'; suc.id='lvs-'+lvlIdx;
+  if(st.done){
+    suc.classList.add('show');
+    suc.innerHTML='<div class="ls-star">\u2b50</div><div class="ls-title">\u00c9toile obtenue\u00a0!</div><div class="ls-msg">'+lvl.fbSuccess+'</div>';
+    if(lvlIdx<2){
+      var nb=document.createElement('button'); nb.type='button'; nb.className='btn btn-primary'; nb.style.marginTop='.8rem';
+      nb.innerHTML='Niveau '+(lvlIdx+2)+' \u2192'; nb.addEventListener('click',goNext); suc.appendChild(nb);
+    } else {
+      var fb=document.createElement('button'); fb.type='button'; fb.className='btn btn-primary'; fb.style.marginTop='.8rem';
+      fb.innerHTML='Voir le bilan \u2192'; fb.addEventListener('click',showFinal); suc.appendChild(fb);
+    }
+  } else if(st.validated && st.attempts>=2){
+    // niveau non r\u00e9ussi apr\u00e8s 2 tentatives : corrections affich\u00e9es, on peut continuer ou retenter
+    suc.classList.add('show');
+    suc.innerHTML='<div class="ls-star">\uD83D\uDCA1</div><div class="ls-title">Corrections disponibles ci-dessus</div><div class="ls-msg">Tu peux continuer vers la suite, ou retenter ce niveau pour obtenir l\u2019\u00e9toile.</div>';
+    var rowBtns=document.createElement('div'); rowBtns.className='btn-row'; rowBtns.style.justifyContent='center';
+    var rb=document.createElement('button'); rb.type='button'; rb.className='btn btn-ghost';
+    rb.innerHTML='\u21bb Retenter pour obtenir l\u2019\u00e9toile'; rb.addEventListener('click',restartLevel); rowBtns.appendChild(rb);
+    if(lvlIdx<2){
+      if(!state[lvlIdx+1].unlocked) state[lvlIdx+1].unlocked=true;
+      var nb2=document.createElement('button'); nb2.type='button'; nb2.className='btn btn-primary';
+      nb2.innerHTML='Continuer \u2192 Niveau '+(lvlIdx+2); nb2.addEventListener('click',goNext); rowBtns.appendChild(nb2);
+    } else {
+      var fb2=document.createElement('button'); fb2.type='button'; fb2.className='btn btn-primary';
+      fb2.innerHTML='Voir le bilan \u2192'; fb2.addEventListener('click',showFinal); rowBtns.appendChild(fb2);
+    }
+    suc.appendChild(rowBtns);
+  }
+  zone.appendChild(suc);
+
+  if(!st.done && !(st.validated && st.attempts>=2)){
+    var br=document.createElement('div'); br.className='btn-row';
+    var vb=document.createElement('button'); vb.type='button'; vb.className='btn btn-primary';
+    vb.innerHTML=st.attempts>0?'\u21bb V\u00e9rifier \u00e0 nouveau':'\u2713 V\u00e9rifier';
+    vb.addEventListener('click',verifyLevel); br.appendChild(vb);
+    var rb3=document.createElement('button'); rb3.type='button'; rb3.className='btn btn-ghost';
+    rb3.innerHTML='\u21bb Recommencer'; rb3.addEventListener('click',restartLevel); br.appendChild(rb3);
+    zone.appendChild(br);
+  }
+}
+
+function showFirstAttemptHelp(){
+  var lvl=LEVELS[currentLevel], st=state[currentLevel];
+  lvl.questions.forEach(function(qd){
+    if(!qCorrect(qd,st)){
+      var fb=$('fb-'+qd.key);
+      if(fb){fb.className='q-feedback show ko';fb.innerHTML='<span class="fb-titre">\uD83D\uDCA1 Indice</span>'+qd.hint;}
+    }
+  });
+}
+
+function verifyLevel(){
+  var lvlIdx=currentLevel, st=state[lvlIdx];
+  if(!allAnswered()){
+    var rows=document.querySelectorAll('#main-zone .btn-row');
+    rows.forEach(function(row){
+      if(!row.querySelector('.msg-vide')){
+        var msg=document.createElement('div'); msg.className='msg-vide';
+        msg.textContent='\u270F\uFE0F R\u00e9ponds \u00e0 toutes les questions avant de valider.';
+        row.insertBefore(msg,row.firstChild);
+      }
+    });
+    return;
+  }
+  st.attempts++;
+  if(allCorrect()){
+    st.validated=true; st.done=true; starsEarned++;
+    if(lvlIdx<2) state[lvlIdx+1].unlocked=true;
+    renderLevel();
+  } else if(st.attempts===1){
+    st.validated=false;
+    renderLevel();
+    showFirstAttemptHelp();
+    var rows2=document.querySelectorAll('#main-zone .btn-row');
+    rows2.forEach(function(row){
+      row.innerHTML='';
+      var vb=document.createElement('button'); vb.type='button'; vb.className='btn btn-primary';
+      vb.innerHTML='\u21bb V\u00e9rifier \u00e0 nouveau'; vb.addEventListener('click',verifyLevel); row.appendChild(vb);
+      var rb=document.createElement('button'); rb.type='button'; rb.className='btn btn-ghost';
+      rb.innerHTML='\u21bb Recommencer'; rb.addEventListener('click',restartLevel); row.appendChild(rb);
+    });
+  } else {
+    st.validated=true;
+    if(lvlIdx<2) state[lvlIdx+1].unlocked=true;
+    renderLevel();
+  }
+}
+
+function goNext(){
+  if(currentLevel<2){currentLevel++; renderLevel(); window.scrollTo({top:0,behavior:'smooth'});}
+}
+function restartLevel(){
+  var lvlIdx=currentLevel;
+  var wasDone=state[lvlIdx].done;
+  state[lvlIdx]={answers:{},attempts:0,validated:false,done:false,unlocked:true};
+  if(wasDone) starsEarned=Math.max(0,starsEarned-1);
+  renderLevel();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showFinal(){
+  $('main-zone').style.display='none';
+  document.querySelector('.hud').style.display='none';
+  $('level-banner').style.display='none';
+  $('level-mission').style.display='none';
+  $('final-screen').classList.add('show');
+  $('final-stars').textContent='\u2b50'.repeat(starsEarned)+'\u2606'.repeat(3-starsEarned)+' ('+starsEarned+'/3)';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function reviewLevels(){
+  currentLevel=0;
+  $('final-screen').classList.remove('show');
+  ['main-zone','level-banner','level-mission'].forEach(function(id){$(id).style.display='';});
+  document.querySelector('.hud').style.display='';
+  renderLevel();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+$('lv1-btn').addEventListener('click',function(){goToLevel(0);});
+$('lv2-btn').addEventListener('click',function(){goToLevel(1);});
+$('lv3-btn').addEventListener('click',function(){goToLevel(2);});
+$('btn-review').addEventListener('click',reviewLevels);
+
+renderLevel();
+</script>
+</body>
+</html>
