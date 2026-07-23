@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa — Flash Défi — Propriétés de la symétrie centrale</title>
+<style>
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+:root{
+  --day-color:#b94040;--day-dark:#7a1f1f;--day-light:#f7eded;
+  --day-border:#e3b3b3;--day-glow:rgba(185,64,64,.3);
+  --bg:#fdf7f7;--surface:#fff;--border:#ecdcdc;
+  --green:#8dc63f;--blue:#3ab5d8;--yellow:#f5c518;--red:#b94040;
+  --text:#1a1d23;--muted:#8a7373;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem 1rem 4rem;overflow-x:hidden;line-height:1.7;}
+body::before{content:'';position:fixed;inset:0;z-index:0;opacity:.03;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,#b94040 20px,#b94040 21px);pointer-events:none;}
+.bubble-yellow{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:220px;height:220px;background:var(--yellow);top:-60px;right:-40px;pointer-events:none;}
+.bubble-day{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:200px;height:200px;background:var(--day-color);bottom:-50px;left:-40px;pointer-events:none;}
+.bubble-green{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:150px;height:150px;background:var(--green);top:40%;right:-70px;pointer-events:none;}
+.bubble-pink{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:150px;height:150px;background:#f28b82;top:35%;left:-70px;pointer-events:none;}
+header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:monospace;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--day-dark);}
+.activity-label{font-size:clamp(1rem,3vw,1.2rem);font-weight:800;color:var(--text);margin-top:.3rem;line-height:1.35;}
+.subtitle{color:var(--muted);font-size:.88rem;margin-top:.35rem;font-family:monospace;}
+.chrono-wrap{width:100%;max-width:560px;position:relative;z-index:1;margin-bottom:.8rem;}
+.chrono-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;}
+.chrono-label{font-family:monospace;font-size:.78rem;color:var(--muted);text-transform:uppercase;}
+.chrono-val{font-family:monospace;font-weight:800;font-size:1.5rem;color:var(--day-dark);}
+.chrono-val.urgent{color:#8f1f1f;animation:pulse .5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.chrono-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.chrono-bar{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .9s linear;}
+.chrono-bar.urgent{background:linear-gradient(90deg,#8f1f1f,#c0392b);}
+.prog-dots{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;position:relative;z-index:1;}
+.prog-dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:.3s;}
+.prog-dot.done{background:var(--green);}.prog-dot.active{background:var(--day-color);}
+#start-screen{width:100%;max-width:560px;position:relative;z-index:1;}
+.start-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.stripe{height:4px;border-radius:4px;margin-bottom:1.2rem;background:linear-gradient(90deg,#b94040,#f5c518,#8dc63f);}
+.start-title{font-size:1.1rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;}
+.start-txt{color:var(--muted);font-size:.92rem;margin-bottom:1.2rem;line-height:1.7;}
+#flash-zone{width:100%;max-width:560px;position:relative;z-index:1;display:none;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.6rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+.q-badge{display:inline-block;background:var(--day-color);color:#fff;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .65rem;border-radius:99px;margin-bottom:.7rem;font-family:monospace;}
+.q-text{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;color:var(--text);margin-bottom:.9rem;line-height:1.75;}
+.tags-row{display:flex;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap;}
+.tag{background:var(--day-light);border:2px solid var(--day-border);border-radius:10px;padding:.4rem .9rem;font-family:monospace;font-weight:800;font-size:1.02rem;color:var(--day-dark);}
+.tag.highlight{background:#fff3b0;border-color:#f5c518;color:#7a5500;}
+.opts-col{display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem;}
+.opt-btn{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-radius:10px;border:2px solid var(--day-border);background:var(--day-light);cursor:pointer;min-height:48px;font-size:clamp(.95rem,2.6vw,1.02rem);font-weight:600;transition:.15s;text-align:left;width:100%;}
+.opt-btn:hover:not([disabled]){border-color:var(--day-color);background:#f2dcdc;}
+.opt-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.opt-btn[disabled]{cursor:default;}
+.opt-btn.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-btn.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.opt-btn.reveal{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-letter{font-family:monospace;font-weight:800;min-width:1.3rem;color:var(--day-dark);}
+.feedback{margin-top:.9rem;padding:.75rem 1rem;border-radius:10px;font-size:clamp(.9rem,2.5vw,1rem);line-height:1.8;display:none;border-left:5px solid transparent;}
+.feedback.show{display:block;}
+.feedback.ok{background:#eefad8;border-left-color:var(--green);color:#3d7a10;}
+.feedback.ko{background:#fce4e4;border-left-color:#c0392b;color:#8f2f2f;}
+.fb-titre{font-weight:800;display:block;margin-bottom:.2rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+#final-screen{width:100%;max-width:560px;display:none;position:relative;z-index:1;}
+.final-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+.final-icon{font-size:2.5rem;margin-bottom:.5rem;}
+.final-title{font-size:1.2rem;font-weight:800;color:var(--day-dark);margin-bottom:.5rem;}
+.final-msg{font-size:.95rem;color:var(--text);line-height:1.8;margin-bottom:1rem;}
+.btn-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem;}
+@media(max-width:480px){body{padding:1rem .75rem 3rem;}.card{padding:1.2rem;}}
+</style>
+</head>
+<body>
+<div class="bubble-yellow"></div><div class="bubble-day"></div><div class="bubble-green"></div><div class="bubble-pink"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Math&eacute;matiques &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 7 &ndash; Jour 2</div>
+  <h1>Propri&eacute;t&eacute;s de la sym&eacute;trie centrale</h1>
+  <p class="activity-label">&#9889; Flash D&eacute;fi</p>
+  <p class="subtitle">3 questions &middot; 20 secondes</p>
+</header>
+
+<div id="start-screen">
+  <div class="start-card">
+    <div class="stripe"></div>
+    <div class="start-title">R&eacute;chauffement &eacute;clair</div>
+    <p class="start-txt">Tu as <strong>20 secondes</strong> au total pour r&eacute;pondre &agrave; <strong>3 questions</strong> sur ce que conserve la sym&eacute;trie centrale.</p>
+    <button class="btn btn-primary" id="btn-start" style="font-size:1.05rem;padding:.8rem 2rem;">&#9654; Commencer</button>
+  </div>
+</div>
+
+<div id="flash-zone" style="display:none;">
+  <div class="chrono-wrap">
+    <div class="chrono-top">
+      <span class="chrono-label">&#8987; Temps restant</span>
+      <span class="chrono-val" id="chrono-val">20 s</span>
+    </div>
+    <div class="chrono-bar-bg"><div class="chrono-bar" id="chrono-bar" style="width:100%"></div></div>
+  </div>
+  <div class="prog-dots">
+    <div class="prog-dot active" id="pd0"></div>
+    <div class="prog-dot" id="pd1"></div>
+    <div class="prog-dot" id="pd2"></div>
+  </div>
+  <div class="card" id="card">
+    <div class="card-stripe"></div>
+    <div class="q-badge" id="q-badge">Question 1 / 3</div>
+    <div id="q-content"></div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="final-screen" style="display:none;">
+  <div class="final-card">
+    <div class="stripe"></div>
+    <div class="logo-badge" style="margin:0 auto .7rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+    </div>
+    <div class="final-icon">&#128295;</div>
+    <div class="final-title">&Eacute;chauffement termin&eacute;&nbsp;!</div>
+    <div class="final-msg">Tu es pr&ecirc;t&middot;e &agrave; utiliser les propri&eacute;t&eacute;s de la sym&eacute;trie centrale.</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btn-restart">&#8635; Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var DUREE=20,TOTAL=3;
+var tempsRestant=DUREE,timerID=null,transitionID=null,fini=false,answered=false,qIdx=0;
+
+function el(id){return document.getElementById(id);}
+
+var QUESTIONS=[
+  {
+    text:"Le segment [AB] mesure 5 cm. Le segment [A\u2019B\u2019] est son image par une sym\u00e9trie centrale.\u00a0Quelle est la longueur de [A\u2019B\u2019]\u00a0?",
+    tags:[{t:"AB = 5 cm",hl:true}],
+    options:["10 cm","2,5 cm","5 cm","On ne peut pas savoir"],
+    correct:2,
+    fbOk:"Exact\u00a0! La sym\u00e9trie centrale conserve les longueurs.",
+    fbKo:"La sym\u00e9trie centrale ne modifie pas la longueur d\u2019un segment. [A\u2019B\u2019] mesure donc 5\u00a0cm."
+  },
+  {
+    text:"Un angle mesure 35\u00b0. Son image est obtenue par une sym\u00e9trie centrale.\u00a0Quelle est la mesure de l\u2019angle image\u00a0?",
+    tags:[{t:"angle = 35\u00b0",hl:true}],
+    options:["35\u00b0","145\u00b0","70\u00b0","180\u00b0"],
+    correct:0,
+    fbOk:"Exact\u00a0! La sym\u00e9trie centrale conserve la mesure des angles.",
+    fbKo:"Un angle et son image par sym\u00e9trie centrale ont la m\u00eame mesure\u00a0: 35\u00b0."
+  },
+  {
+    text:"Une droite (d\u2019) est l\u2019image d\u2019une droite (d) par une sym\u00e9trie centrale.\u00a0Quelle affirmation est correcte\u00a0?",
+    tags:[{t:"(d) \u2192 (d\u2019)",hl:false}],
+    options:["Elles sont perpendiculaires","Elles ont obligatoirement un seul point commun","Elles sont parall\u00e8les","Les droites (d) et (d\u2019) sont perpendiculaires."],
+    correct:2,
+    fbOk:"Exact\u00a0! L\u2019image d\u2019une droite par une sym\u00e9trie centrale est une droite parall\u00e8le.",
+    fbKo:"La sym\u00e9trie centrale conserve la direction\u00a0: une droite et son image sont parall\u00e8les."
+  }
+];
+
+function updateChrono(){
+  el('chrono-val').textContent=tempsRestant+' s';
+  el('chrono-bar').style.width=(tempsRestant/DUREE*100)+'%';
+  var urgent=(tempsRestant<=5);
+  el('chrono-val').className='chrono-val'+(urgent?' urgent':'');
+  el('chrono-bar').className='chrono-bar'+(urgent?' urgent':'');
+}
+
+function startTimer(){
+  if(timerID){clearInterval(timerID);}
+  timerID=setInterval(function(){
+    tempsRestant--;
+    updateChrono();
+    if(tempsRestant<=0){
+      clearInterval(timerID);timerID=null;
+      clearTimeout(transitionID);transitionID=null;
+      if(!fini) showFin();
+    }
+  },1000);
+}
+
+function pauseChrono(){
+  if(timerID){clearInterval(timerID);timerID=null;}
+}
+
+function startFlash(){
+  el('start-screen').style.display='none';
+  el('flash-zone').style.display='block';
+  qIdx=0;fini=false;answered=false;tempsRestant=DUREE;
+  updateChrono();render();startTimer();
+}
+
+function buildTags(tags){
+  if(!tags||!tags.length) return '';
+  var h='<div class="tags-row">';
+  tags.forEach(function(tg){h+='<span class="tag'+(tg.hl?' highlight':'')+'">'+tg.t+'</span>';});
+  return h+'</div>';
+}
+
+function buildQ(qd){
+  var h='<div class="q-text">'+qd.text+'</div>'+buildTags(qd.tags)+'<div class="opts-col">';
+  qd.options.forEach(function(o,i){
+    h+='<button class="opt-btn" data-i="'+i+'" tabindex="0"><span class="opt-letter">'+String.fromCharCode(65+i)+'.</span> '+o+'</button>';
+  });
+  return h+'</div>';
+}
+
+function attachQ(qd){
+  el('q-content').querySelectorAll('.opt-btn[data-i]').forEach(function(b){
+    var i=parseInt(b.getAttribute('data-i'));
+    b.addEventListener('click',function(){answer(qd,i);});
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();answer(qd,i);}});
+  });
+}
+
+function answer(qd,i){
+  if(answered) return;
+  answered=true;pauseChrono();
+  var ok=(i===qd.correct);
+  el('q-content').querySelectorAll('.opt-btn[data-i]').forEach(function(b,j){
+    b.disabled=true;
+    if(j===qd.correct) b.classList.add(ok&&j===i?'ok':'reveal');
+    else if(j===i) b.classList.add('ko');
+  });
+  var fb=el('feedback');fb.className='feedback show '+(ok?'ok':'ko');
+  fb.innerHTML='<span class="fb-titre">'+(ok?'\u2714 Bravo\u00a0!':'\u2716 Ce n\u2019est pas la bonne r\u00e9ponse.')+'</span>'+(ok?qd.fbOk:qd.fbKo);
+  scheduleNext();
+}
+
+function scheduleNext(){
+  clearTimeout(transitionID);
+  pauseChrono();
+  if(qIdx===TOTAL-1){
+    transitionID=setTimeout(function(){transitionID=null;if(!fini)showFin();},1800);
+    return;
+  }
+  transitionID=setTimeout(function(){
+    transitionID=null;if(fini)return;
+    qIdx++;render();startTimer();
+  },1800);
+}
+
+function render(){
+  answered=false;
+  for(var i=0;i<3;i++) el('pd'+i).className='prog-dot'+(i<qIdx?' done':i===qIdx?' active':'');
+  el('q-badge').textContent='Question '+(qIdx+1)+' / '+TOTAL;
+  el('feedback').className='feedback';el('feedback').innerHTML='';
+  el('q-content').innerHTML=buildQ(QUESTIONS[qIdx]);
+  attachQ(QUESTIONS[qIdx]);
+}
+
+function showFin(){
+  fini=true;clearInterval(timerID);timerID=null;clearTimeout(transitionID);transitionID=null;
+  el('flash-zone').style.display='none';el('final-screen').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restart(){
+  clearInterval(timerID);timerID=null;clearTimeout(transitionID);transitionID=null;
+  fini=false;answered=false;qIdx=0;tempsRestant=DUREE;
+  el('final-screen').style.display='none';el('start-screen').style.display='';
+  updateChrono();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+el('btn-start').addEventListener('click',startFlash);
+el('btn-restart').addEventListener('click',restart);
+updateChrono();
+})();
+</script>
+</body>
+</html>
