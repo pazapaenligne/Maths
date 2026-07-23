@@ -241,6 +241,17 @@
     font-family:var(--font-mono); font-size:.72rem; color:#7a7364;
   }
 
+  .header-meta{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+  .timer{
+    font-family:var(--font-mono); font-size:.78rem; font-weight:700;
+    background:var(--steel-dark); color:#fff;
+    border-radius:7px; padding:8px 12px; white-space:nowrap;
+  }
+  .temps-final{
+    font-family:var(--font-mono); font-size:.85rem; color:#dff5e4;
+    margin:.5rem 0 0;
+  }
+
   @media (prefers-reduced-motion: reduce){
     .tile, .final-banner{ transition:none !important; }
   }
@@ -259,7 +270,10 @@
       <h1>Contrôle des réserves — Zoo Zoologia</h1>
       <p>Le zoo ouvre dans quelques minutes. Avant que les soigneurs distribuent la nourriture dans chaque enclos, complète correctement chaque fiche de contrôle.</p>
     </div>
-    <div class="counter" id="counter">Fiches validées : <span id="counterValue">0</span> / 10</div>
+    <div class="header-meta">
+      <div class="timer" id="timerDisplay">⏱ Temps : <span id="timerValue">00:00</span></div>
+      <div class="counter" id="counter">Fiches validées : <span id="counterValue">0</span> / 10</div>
+    </div>
   </header>
 
   <div class="sound-row">
@@ -272,7 +286,7 @@
     <div class="tray" id="tray"></div>
   </div>
 
-  <main class="board">
+  <main class="board" id="boardSection">
     <section class="clipboard">
       <div class="clip"></div>
       <ol class="sheet" id="sheet"></ol>
@@ -295,6 +309,7 @@
     <p>Toutes les fiches de contrôle sont validées.<br>
     Les réserves alimentaires peuvent maintenant être distribuées correctement dans chaque enclos.<br>
     Le Zoo Zoologia est prêt à accueillir ses nouveaux animaux.</p>
+    <p class="temps-final" id="tempsFinal"></p>
   </div>
 
 </div>
@@ -324,6 +339,59 @@
   var counterBox = document.getElementById("counter");
   var finalBanner = document.getElementById("finalBanner");
   var validatedCount = 0;
+
+  // ---------------------------------------------------------------------
+  // Chronomètre global (mesure uniquement, aucun compte à rebours,
+  // aucune pénalité). Démarre une seule fois, un seul setInterval,
+  // s'arrête définitivement une fois les dix fiches validées.
+  // ---------------------------------------------------------------------
+  var timerValueEl = document.getElementById("timerValue");
+  var tempsFinalEl = document.getElementById("tempsFinal");
+  var timerInterval = null;
+  var timerStarted = false;
+  var elapsedSeconds = 0;
+
+  function pad2(n){ return n < 10 ? "0" + n : String(n); }
+
+  function formatTimer(totalSeconds){
+    var m = Math.floor(totalSeconds / 60);
+    var s = totalSeconds % 60;
+    return pad2(m) + ":" + pad2(s);
+  }
+
+  function updateTimerDisplay(){
+    if(timerValueEl){ timerValueEl.textContent = formatTimer(elapsedSeconds); }
+  }
+
+  function startTimer(){
+    if(timerStarted) return; // ne jamais créer plusieurs setInterval
+    timerStarted = true;
+    timerInterval = setInterval(function(){
+      elapsedSeconds++;
+      updateTimerDisplay();
+    }, 1000);
+  }
+
+  function stopTimer(){
+    if(timerInterval !== null){
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function showFinalTime(){
+    if(!tempsFinalEl) return;
+    var m = Math.floor(elapsedSeconds / 60);
+    var s = elapsedSeconds % 60;
+    tempsFinalEl.textContent = "Défi terminé en " + pad2(m) + " min " + pad2(s) + " s.";
+  }
+
+  var boardSection = document.getElementById("boardSection");
+  if(boardSection){
+    boardSection.addEventListener("pointerdown", function(){
+      if(!timerStarted){ startTimer(); }
+    });
+  }
 
   // ---- Construction des fiches ----
   STATEMENTS.forEach(function(st, idx){
@@ -379,6 +447,8 @@
     counterValue.textContent = validatedCount;
     if(validatedCount >= STATEMENTS.length){
       counterBox.classList.add("is-complete");
+      stopTimer();
+      showFinalTime();
       finalBanner.classList.add("is-visible");
       finalBanner.scrollIntoView({ behavior:"smooth", block:"nearest" });
     }
