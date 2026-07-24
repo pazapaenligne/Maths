@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa — Je m'entraîne — Angles alternes-internes</title>
+<style>
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+:root{
+  --day-color:#8dc63f;--day-dark:#3d7a10;--day-light:#f0f7e6;
+  --day-border:#bde08a;--day-glow:rgba(141,198,63,.3);
+  --bg:#f6faf0;--surface:#fff;--border:#dce8cc;
+  --green:#8dc63f;--blue:#3ab5d8;--yellow:#f5c518;--red:#b94040;
+  --text:#1a1d23;--muted:#7a8a6a;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:0 1rem 110px;overflow-x:hidden;line-height:1.7;}
+body::before{content:'';position:fixed;inset:0;z-index:0;opacity:.03;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,#8dc63f 20px,#8dc63f 21px);pointer-events:none;}
+.bubble-yellow{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:220px;height:220px;background:var(--yellow);top:-60px;right:-40px;pointer-events:none;}
+.bubble-day{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:180px;height:180px;background:var(--day-color);bottom:-40px;left:-40px;pointer-events:none;}
+.bubble-blue{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:140px;height:140px;background:var(--blue);top:45%;right:-70px;pointer-events:none;}
+.bubble-pink{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:140px;height:140px;background:#f28b82;top:40%;left:-70px;pointer-events:none;}
+header{width:100%;text-align:center;padding:1.2rem 0 .5rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:monospace;font-size:.82rem;color:var(--muted);}
+h1{font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:900;color:var(--day-dark);margin:.3rem 0 .1rem;}
+.activity-label{font-size:clamp(1rem,3vw,1.25rem);font-weight:800;color:var(--text);line-height:1.35;}
+.subtitle-main{color:var(--muted);font-size:.86rem;font-family:monospace;margin-top:.3rem;}
+.hud{width:100%;max-width:680px;display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.6rem 1rem;margin:.6rem auto;background:var(--surface);border:2px solid var(--border);border-radius:12px;position:relative;z-index:1;flex-wrap:wrap;}
+.stars-badge{display:inline-flex;align-items:center;gap:.5rem;justify-content:center;margin:.7rem auto;padding:.6rem 1.3rem;background:var(--surface);border:2px solid var(--day-border);border-radius:99px;font-family:monospace;font-weight:800;font-size:1.15rem;color:var(--day-dark);position:relative;z-index:1;width:fit-content;}
+.stars-badge .star-icon{font-size:1.1rem;}
+.lv-btn{font-family:monospace;font-weight:700;font-size:.8rem;padding:.45rem .9rem;border-radius:8px;border:2px solid var(--border);background:var(--surface);color:var(--muted);min-height:44px;display:inline-flex;align-items:center;-webkit-appearance:none;appearance:none;}
+.lv-btn.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
+.lv-btn.done{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.lv-btn.locked{opacity:.45;cursor:not-allowed;}
+.lv-btn:not(.locked){cursor:pointer;}
+.lv-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.level-banner{width:100%;max-width:680px;margin:.3rem auto 0;position:relative;z-index:1;font-size:1rem;font-weight:800;color:var(--day-dark);font-family:monospace;}
+.level-mission{width:100%;max-width:680px;margin:0 auto .9rem;font-size:.88rem;color:var(--muted);position:relative;z-index:1;}
+#main-zone{width:100%;max-width:680px;position:relative;z-index:1;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.3rem 1.4rem;position:relative;box-shadow:0 4px 16px rgba(0,0,0,.05);margin-bottom:.8rem;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+.figure-wrap{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.9rem;margin-bottom:1.1rem;text-align:center;}
+.figure-wrap svg{max-width:100%;height:auto;}
+.figure-cap{font-family:monospace;font-size:.78rem;color:var(--day-dark);margin-top:.4rem;}
+.q-block{margin-bottom:1.2rem;padding-bottom:1.1rem;border-bottom:1.5px dashed var(--border);}
+.q-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.q-row{display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.6rem;}
+.q-num{background:var(--day-color);color:#fff;border-radius:50%;width:1.7rem;height:1.7rem;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0;margin-top:.05rem;}
+.q-label{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;line-height:1.7;}
+.q-feedback{font-size:clamp(.9rem,2.5vw,1rem);line-height:1.75;padding:.7rem .9rem;border-radius:10px;margin-top:.6rem;display:none;border-left:5px solid transparent;}
+.q-feedback.show{display:block;}
+.q-feedback.ok{background:#eefad8;border-left-color:var(--green);color:#3d7a10;}
+.q-feedback.ko{background:#fce4e4;border-left-color:#c0392b;color:#8f2f2f;}
+.fb-titre{font-weight:800;display:block;margin-bottom:.2rem;}
+.hint-line{margin-top:.6rem;}
+.hint-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .8rem;border-radius:8px;font-family:Arial,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:2px solid var(--day-border);background:var(--day-light);color:var(--day-dark);min-height:38px;transition:.15s;}
+.hint-btn:hover:not([disabled]){border-color:var(--day-color);background:#e6f2d6;}
+.hint-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.hint-btn[disabled]{opacity:.55;cursor:default;}
+.hint-box{display:none;margin-top:.5rem;padding:.6rem .85rem;border-radius:10px;background:#fff8e6;border-left:5px solid var(--yellow);font-size:.9rem;font-style:italic;color:#7a5500;line-height:1.6;}
+.hint-box.show{display:block;}
+.tags-row{display:flex;gap:.6rem;margin:.5rem 0 .7rem;flex-wrap:wrap;}
+.tag{background:var(--day-light);border:2px solid var(--day-border);border-radius:8px;padding:.35rem .8rem;font-family:monospace;font-weight:800;font-size:.95rem;color:var(--day-dark);}
+.opts-col{display:flex;flex-direction:column;gap:.45rem;margin-top:.5rem;}
+.opt-card{font-size:.92rem;font-weight:600;padding:.65rem 1rem;border-radius:10px;border:2px solid var(--day-border);background:var(--day-light);color:var(--text);cursor:pointer;min-height:48px;text-align:left;display:flex;gap:.6rem;align-items:center;transition:.15s;width:100%;line-height:1.5;}
+.opt-card:hover:not([disabled]){border-color:var(--day-color);background:#e6f2d6;}
+.opt-card:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.opt-card[disabled]{cursor:default;}
+.opt-card.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-card.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.opt-card.reveal{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.opt-card.selected{border-color:var(--day-color);background:#e6f2d6;font-weight:800;}
+.opt-letter{font-family:monospace;font-weight:800;min-width:1.3rem;flex-shrink:0;color:var(--day-dark);}
+.trou-wrap{font-size:.98rem;font-weight:600;line-height:2.7;margin:.4rem 0;}
+.trou-select{padding:.35rem .55rem;border-radius:8px;border:2px solid var(--day-border);background:var(--day-light);font-family:monospace;font-weight:700;font-size:.9rem;min-height:42px;cursor:pointer;color:var(--day-dark);}
+.trou-select:focus-visible{outline:3px solid var(--day-color);}
+.trou-select.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.trou-select.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.num-row{display:flex;align-items:center;gap:.6rem;margin:.5rem 0;flex-wrap:wrap;}
+.num-input{width:6.5rem;padding:.5rem .6rem;border-radius:8px;border:2px solid var(--day-border);background:var(--day-light);font-family:monospace;font-size:1.05rem;font-weight:800;text-align:center;color:var(--day-dark);}
+.num-input:focus-visible{outline:3px solid var(--day-color);}
+.num-input.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.num-input.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.btn-primary{background:var(--day-color);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.9rem;}
+.msg-vide{font-family:monospace;font-size:.85rem;color:#c0392b;width:100%;margin-bottom:.2rem;}
+.level-success{display:none;background:var(--surface);border:2px solid var(--green);border-radius:var(--radius);padding:1.4rem;text-align:center;margin-top:.6rem;box-shadow:0 4px 16px rgba(141,198,63,.15);}
+.level-success.show{display:block;}
+.ls-star{font-size:2rem;margin-bottom:.3rem;}
+.ls-title{font-weight:800;font-size:1.05rem;color:#3d7a10;margin-bottom:.4rem;}
+.ls-msg{font-size:.92rem;color:var(--text);line-height:1.8;}
+#final-screen{display:none;width:100%;max-width:680px;position:relative;z-index:1;}
+#final-screen.show{display:block;}
+.final-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem 1.6rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.stripe{height:4px;border-radius:4px;margin-bottom:1.2rem;background:linear-gradient(90deg,#8dc63f,#f5c518,#3ab5d8);}
+.final-title{font-size:1.2rem;font-weight:900;color:var(--day-dark);margin-bottom:.4rem;}
+.final-sub{font-size:.94rem;color:var(--text);line-height:1.8;margin-bottom:.8rem;}
+.skill-list{text-align:left;margin:.9rem 0;display:flex;flex-direction:column;gap:.4rem;}
+.skill-item{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:8px;padding:.55rem .9rem;font-size:.9rem;font-weight:600;line-height:1.6;}
+.final-synth{background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:.9rem 1rem;font-size:.88rem;line-height:1.85;text-align:left;margin-top:.8rem;color:var(--day-dark);}
+@media(max-width:480px){body{padding:0 .75rem 90px;}.card{padding:1rem;}}
+</style>
+</head>
+<body>
+<div class="bubble-yellow"></div><div class="bubble-day"></div><div class="bubble-blue"></div><div class="bubble-pink"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Math&eacute;matiques &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 7 &ndash; Jour 3</div>
+  <h1>Angles alternes-internes</h1>
+  <p class="activity-label">Je m&rsquo;entra&icirc;ne pour progresser</p>
+  <p class="subtitle-main">3 niveaux</p>
+</header>
+
+<div class="stars-badge" id="stars-badge"><span class="star-icon">&#11088;</span> 0&nbsp;/&nbsp;3</div>
+<div class="hud">
+  <button class="lv-btn active" id="lv1-btn" type="button" aria-current="step" aria-disabled="false">Niveau 1</button>
+  <button class="lv-btn locked" id="lv2-btn" type="button" disabled aria-disabled="true">Niveau 2</button>
+  <button class="lv-btn locked" id="lv3-btn" type="button" disabled aria-disabled="true">Niveau 3</button>
+</div>
+<div class="level-banner" id="level-banner"></div>
+<div class="level-mission" id="level-mission"></div>
+
+<div id="main-zone"></div>
+
+<div id="final-screen" role="status" aria-live="polite">
+  <div class="final-card">
+    <div class="stripe"></div>
+    <div class="logo-badge" style="margin:0 auto .7rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+    </div>
+    <div class="final-title" id="final-title" tabindex="-1">Entra&icirc;nement termin&eacute;</div>
+    <div class="final-sub">Tu sais maintenant reconna&icirc;tre des angles alternes-internes, calculer leurs mesures et utiliser leur &eacute;galit&eacute; pour d&eacute;montrer que des droites sont parall&egrave;les.</div>
+    <div class="skill-list">
+      <div class="skill-item">&#9656; Reconna&icirc;tre des angles alternes-internes et correspondants</div>
+      <div class="skill-item">&#9656; Calculer une mesure d&rsquo;angle en utilisant le parall&eacute;lisme</div>
+      <div class="skill-item">&#9656; D&eacute;terminer si deux droites sont parall&egrave;les</div>
+      <div class="skill-item">&#9656; R&eacute;diger une justification math&eacute;matique compl&egrave;te</div>
+    </div>
+    <div class="final-synth"><strong>&Agrave; retenir&nbsp;:</strong> si deux droites parall&egrave;les sont coup&eacute;es par une s&eacute;cante, les angles alternes-internes qu&rsquo;elles d&eacute;terminent ont la m&ecirc;me mesure&nbsp;; r&eacute;ciproquement, si deux angles alternes-internes ont la m&ecirc;me mesure, alors les deux droites coup&eacute;es par la s&eacute;cante sont parall&egrave;les. Les angles correspondants sont &eacute;gaux entre deux parall&egrave;les, et deux angles oppos&eacute;s par le sommet sont toujours &eacute;gaux.</div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn btn-ghost" id="btn-review">&#8635; Revoir les niveaux</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var currentLevel=0;
+var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var state={};
+
+function initState(){
+  state={
+    0:{answers:{},attempts:0,validated:false,done:false,unlocked:true,hints:{}},
+    1:{answers:{},attempts:0,validated:false,done:false,unlocked:false,hints:{}},
+    2:{answers:{},attempts:0,validated:false,done:false,unlocked:false,hints:{}}
+  };
+}
+initState();
+
+/* ══════════════════════════════════════════════════════
+   FIGURES SVG (donn\u00e9es et lettres non modifi\u00e9es)
+   ══════════════════════════════════════════════════════ */
+var EX1_SVG =
+  '<svg viewBox="0 0 600 360" role="img" aria-label="Deux droites coup\u00e9es par une s\u00e9cante, avec les points y, O, z, y prime, E, z prime, x et x prime">'
+  +'<line x1="80" y1="115" x2="520" y2="145" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="90" y1="255" x2="520" y2="225" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="330" y1="35" x2="275" y2="325" stroke="#0f9f8f" stroke-width="5"/>'
+  +'<circle cx="315" cy="131" r="5" fill="#0f172a"/>'
+  +'<circle cx="293" cy="241" r="5" fill="#0f172a"/>'
+  +'<text x="55" y="110" font-size="22">y</text>'
+  +'<text x="525" y="147" font-size="22">z</text>'
+  +'<text x="57" y="267" font-size="22">y\u2019</text>'
+  +'<text x="525" y="226" font-size="22">z\u2019</text>'
+  +'<text x="338" y="37" font-size="22">x</text>'
+  +'<text x="255" y="342" font-size="22">x\u2019</text>'
+  +'<text x="322" y="126" font-size="22">O</text>'
+  +'<text x="300" y="265" font-size="22">E</text>'
+  +'<path d="M315 131 L292 130 A34 34 0 0 0 306 164 Z" fill="#f59e0b" fill-opacity="0.75"/>'
+  +'<path d="M293 241 L302 207 A35 35 0 0 1 328 239 Z" fill="#38bdf8" fill-opacity="0.75"/>'
+  +'</svg>';
+
+var EX2_SVG =
+  '<svg viewBox="0 0 620 390" role="img" aria-label="Les droites AB et CD sont coup\u00e9es par la s\u00e9cante EF aux points G et H">'
+  +'<line x1="70" y1="120" x2="545" y2="112" stroke="#64748b" stroke-width="4"/>'
+  +'<line x1="75" y1="265" x2="550" y2="215" stroke="#64748b" stroke-width="4"/>'
+  +'<line x1="355" y1="35" x2="285" y2="350" stroke="#0f9f8f" stroke-width="5"/>'
+  +'<circle cx="337" cy="116" r="5" fill="#0f172a"/>'
+  +'<circle cx="311" cy="240" r="5" fill="#0f172a"/>'
+  +'<text x="52" y="115" font-size="22" fill="#2563eb">A</text>'
+  +'<text x="555" y="111" font-size="22" fill="#2563eb">B</text>'
+  +'<text x="52" y="277" font-size="22" fill="#2563eb">C</text>'
+  +'<text x="557" y="216" font-size="22" fill="#2563eb">D</text>'
+  +'<text x="360" y="32" font-size="22" fill="#2563eb">E</text>'
+  +'<text x="270" y="373" font-size="22" fill="#2563eb">F</text>'
+  +'<text x="345" y="108" font-size="22">G</text>'
+  +'<text x="318" y="261" font-size="22">H</text>'
+  +'</svg>';
+
+var EX4_SVG =
+  '<svg viewBox="0 0 600 420" role="img" aria-label="Deux droites d1 et d2 coup\u00e9es par la s\u00e9cante d avec huit angles num\u00e9rot\u00e9s">'
+  +'<line x1="75" y1="125" x2="530" y2="85" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="70" y1="300" x2="525" y2="255" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="355" y1="25" x2="255" y2="385" stroke="#0f9f8f" stroke-width="5"/>'
+  +'<text x="535" y="87" font-size="22">d\u2081</text>'
+  +'<text x="530" y="258" font-size="22">d\u2082</text>'
+  +'<text x="365" y="29" font-size="22">d</text>'
+  +'<circle cx="329" cy="103" r="48" fill="#a7f3d0" fill-opacity="0.35"/>'
+  +'<circle cx="282" cy="279" r="48" fill="#a7f3d0" fill-opacity="0.35"/>'
+  +'<text x="294" y="78" font-size="22">1</text>'
+  +'<text x="344" y="76" font-size="22">2</text>'
+  +'<text x="342" y="128" font-size="22">3</text>'
+  +'<text x="292" y="132" font-size="22">4</text>'
+  +'<text x="246" y="254" font-size="22">5</text>'
+  +'<text x="298" y="252" font-size="22">6</text>'
+  +'<text x="297" y="305" font-size="22">7</text>'
+  +'<text x="245" y="310" font-size="22">8</text>'
+  +'</svg>';
+
+var N2E1_SVG =
+  '<svg viewBox="0 0 620 430" role="img" aria-label="Deux droites parall\u00e8les zz prime et uu prime coup\u00e9es par la s\u00e9cante xx prime avec un angle de 113 degr\u00e9s">'
+  +'<line x1="85" y1="130" x2="535" y2="95" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="90" y1="310" x2="540" y2="270" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="245" y1="35" x2="410" y2="385" stroke="#0f9f8f" stroke-width="5"/>'
+  +'<circle cx="287" cy="115" r="5" fill="#0f172a"/>'
+  +'<circle cx="365" cy="286" r="5" fill="#0f172a"/>'
+  +'<text x="60" y="139" font-size="22">z</text>'
+  +'<text x="543" y="98" font-size="22">z\u2019</text>'
+  +'<text x="62" y="320" font-size="22">u</text>'
+  +'<text x="547" y="273" font-size="22">u\u2019</text>'
+  +'<text x="223" y="32" font-size="22">x</text>'
+  +'<text x="412" y="405" font-size="22">x\u2019</text>'
+  +'<text x="295" y="109" font-size="22">R</text>'
+  +'<text x="373" y="306" font-size="22">E</text>'
+  +'<path d="M287 115 L260 68 A55 55 0 0 1 340 111 Z" fill="#86efac" fill-opacity="0.78"/>'
+  +'<text x="292" y="72" font-size="22" font-weight="700" fill="#166534">113\u00b0</text>'
+  +'</svg>';
+
+var N2E2_SVG =
+  '<svg viewBox="0 0 650 430" role="img" aria-label="Deux droites parall\u00e8les AB et CD coup\u00e9es par la s\u00e9cante EF avec un angle de 121 degr\u00e9s au point H">'
+  +'<line x1="75" y1="135" x2="570" y2="135" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="75" y1="270" x2="570" y2="270" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="420" y1="35" x2="225" y2="390" stroke="#0f9f8f" stroke-width="5"/>'
+  +'<circle cx="365" cy="135" r="5" fill="#0f172a"/>'
+  +'<circle cx="291" cy="270" r="5" fill="#0f172a"/>'
+  +'<text x="52" y="130" font-size="22">A</text>'
+  +'<text x="578" y="130" font-size="22">B</text>'
+  +'<text x="52" y="265" font-size="22">C</text>'
+  +'<text x="578" y="265" font-size="22">D</text>'
+  +'<text x="425" y="33" font-size="22">E</text>'
+  +'<text x="207" y="412" font-size="22">F</text>'
+  +'<text x="373" y="158" font-size="22">G</text>'
+  +'<text x="299" y="293" font-size="22">H</text>'
+  +'<path d="M291 270 L236 270 A58 58 0 0 1 319 220 Z" fill="#fb7185" fill-opacity="0.75"/>'
+  +'<text x="244" y="237" font-size="22" font-weight="700" fill="#e11d48">121\u00b0</text>'
+  +'<text x="250" y="65" font-size="18" fill="#475569">(AB) // (CD)</text>'
+  +'</svg>';
+
+var N2E3_SVG =
+  '<svg viewBox="0 0 620 390" role="img" aria-label="Deux droites parall\u00e8les d et d prime coup\u00e9es par une s\u00e9cante avec un angle de 133 degr\u00e9s et un angle rouge \u00e0 calculer">'
+  +'<line x1="80" y1="120" x2="540" y2="75" stroke="#1e293b" stroke-width="5"/>'
+  +'<line x1="80" y1="285" x2="540" y2="240" stroke="#1e293b" stroke-width="5"/>'
+  +'<line x1="390" y1="25" x2="245" y2="360" stroke="#0f172a" stroke-width="5"/>'
+  +'<circle cx="360" cy="93" r="5" fill="#0f172a"/>'
+  +'<circle cx="291" cy="265" r="5" fill="#0f172a"/>'
+  +'<text x="50" y="125" font-size="24" font-style="italic">d</text>'
+  +'<text x="46" y="292" font-size="24" font-style="italic">d\u2019</text>'
+  +'<text x="350" y="69" font-size="22">B</text>'
+  +'<text x="298" y="288" font-size="22">E</text>'
+  +'<path d="M291 265 L241 270 A58 58 0 0 1 318 210 Z" fill="#2dd4bf" fill-opacity="0.72"/>'
+  +'<text x="237" y="226" font-size="26" fill="#0f9f8f" font-weight="700">133\u00b0</text>'
+  +'<path d="M360 93 L326 96 A42 42 0 0 0 378 132 Z" fill="#e11d48" fill-opacity="0.85"/>'
+  +'<text x="202" y="45" font-size="18" fill="#475569">(d) // (d\u2019)</text>'
+  +'</svg>';
+
+var N2E4_SVG =
+  '<svg viewBox="0 0 650 440" role="img" aria-label="Deux droites parall\u00e8les AB et ED coup\u00e9es par la s\u00e9cante FCB avec un angle de 44 degr\u00e9s au point C">'
+  +'<line x1="85" y1="290" x2="555" y2="365" stroke="#65a30d" stroke-width="4"/>'
+  +'<line x1="85" y1="150" x2="555" y2="225" stroke="#a855f7" stroke-width="4"/>'
+  +'<line x1="330" y1="40" x2="435" y2="405" stroke="#f59e0b" stroke-width="5"/>'
+  +'<circle cx="372" cy="196" r="5" fill="#0f172a"/>'
+  +'<circle cx="420" cy="343" r="5" fill="#0f172a"/>'
+  +'<text x="72" y="292" font-size="22">A</text>'
+  +'<text x="565" y="373" font-size="22">B</text>'
+  +'<text x="70" y="150" font-size="22">E</text>'
+  +'<text x="566" y="229" font-size="22">D</text>'
+  +'<text x="315" y="32" font-size="22">F</text>'
+  +'<text x="380" y="191" font-size="22">C</text>'
+  +'<path d="M372 196 L324 188 A48 48 0 0 1 359 151 Z" fill="#fb7185" fill-opacity="0.78"/>'
+  +'<text x="327" y="168" font-size="22" fill="#e11d48" font-weight="700">44\u00b0</text>'
+  +'<text x="185" y="410" font-size="18" fill="#475569">(AB) // (ED)</text>'
+  +'</svg>';
+
+var N3E1_SVG =
+  '<svg viewBox="0 0 640 420" role="img" aria-label="Deux droites AB et CD coup\u00e9es par une s\u00e9cante avec deux angles alternes-internes de 46 degr\u00e9s">'
+  +'<line x1="80" y1="145" x2="545" y2="70" stroke="#38a3db" stroke-width="5"/>'
+  +'<line x1="80" y1="315" x2="545" y2="240" stroke="#c084c7" stroke-width="5"/>'
+  +'<line x1="360" y1="25" x2="235" y2="390" stroke="#84cc16" stroke-width="5"/>'
+  +'<circle cx="329" cy="105" r="5" fill="#0f172a"/>'
+  +'<circle cx="276" cy="283" r="5" fill="#0f172a"/>'
+  +'<text x="64" y="145" font-size="22">A</text>'
+  +'<text x="337" y="98" font-size="22">B</text>'
+  +'<text x="246" y="302" font-size="22">C</text>'
+  +'<text x="552" y="241" font-size="22">D</text>'
+  +'<path d="M329 105 L298 110 A38 38 0 0 0 318 140 Z" fill="#fb7185" fill-opacity="0.80"/>'
+  +'<path d="M276 283 L304 278 A38 38 0 0 0 287 248 Z" fill="#fb7185" fill-opacity="0.80"/>'
+  +'<text x="284" y="137" font-size="21" fill="#e11d48" font-weight="700">46\u00b0</text>'
+  +'<text x="291" y="258" font-size="21" fill="#e11d48" font-weight="700">46\u00b0</text>'
+  +'</svg>';
+
+var N3E2_SVG =
+  '<svg viewBox="0 0 640 420" role="img" aria-label="Deux droites AB et CD coup\u00e9es par une s\u00e9cante avec des angles alternes-internes de 46 et 47 degr\u00e9s">'
+  +'<line x1="80" y1="145" x2="545" y2="70" stroke="#f59e42" stroke-width="5"/>'
+  +'<line x1="80" y1="315" x2="545" y2="240" stroke="#ec6fa7" stroke-width="5"/>'
+  +'<line x1="360" y1="25" x2="235" y2="390" stroke="#f59e0b" stroke-width="5"/>'
+  +'<circle cx="329" cy="105" r="5" fill="#0f172a"/>'
+  +'<circle cx="276" cy="283" r="5" fill="#0f172a"/>'
+  +'<text x="64" y="145" font-size="22">A</text>'
+  +'<text x="337" y="98" font-size="22">B</text>'
+  +'<text x="246" y="302" font-size="22">C</text>'
+  +'<text x="552" y="241" font-size="22">D</text>'
+  +'<path d="M329 105 L298 110 A38 38 0 0 0 318 140 Z" fill="#fb7185" fill-opacity="0.80"/>'
+  +'<path d="M276 283 L304 278 A38 38 0 0 0 287 248 Z" fill="#38bdf8" fill-opacity="0.80"/>'
+  +'<text x="284" y="137" font-size="21" fill="#e11d48" font-weight="700">46\u00b0</text>'
+  +'<text x="291" y="258" font-size="21" fill="#0284c7" font-weight="700">47\u00b0</text>'
+  +'</svg>';
+
+var N3E3A_SVG =
+  '<svg viewBox="0 0 430 350" role="img" aria-label="Droites AB et OT coup\u00e9es par CE avec deux angles de 110 degr\u00e9s">'
+  +'<line x1="45" y1="105" x2="385" y2="105" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="45" y1="255" x2="385" y2="255" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="245" y1="25" x2="175" y2="325" stroke="#0f9f8f" stroke-width="5"/>'
+  +'<circle cx="226" cy="105" r="5" fill="#0f172a"/>'
+  +'<circle cx="191" cy="255" r="5" fill="#0f172a"/>'
+  +'<text x="25" y="100" font-size="20">A</text>'
+  +'<text x="393" y="100" font-size="20">B</text>'
+  +'<text x="25" y="250" font-size="20">O</text>'
+  +'<text x="393" y="250" font-size="20">T</text>'
+  +'<text x="251" y="25" font-size="20">C</text>'
+  +'<text x="161" y="345" font-size="20">E</text>'
+  +'<text x="234" y="127" font-size="20">U</text>'
+  +'<text x="199" y="278" font-size="20">S</text>'
+  +'<path d="M226 105 L190 105 A45 45 0 0 0 217 148 Z" fill="#86efac" fill-opacity="0.75"/>'
+  +'<path d="M191 255 L227 255 A45 45 0 0 0 201 212 Z" fill="#fb7185" fill-opacity="0.75"/>'
+  +'<text x="172" y="145" font-size="19" fill="#166534">110\u00b0</text>'
+  +'<text x="207" y="224" font-size="19" fill="#be123c">110\u00b0</text>'
+  +'</svg>';
+
+var N3E3B_SVG =
+  '<svg viewBox="0 0 430 350" role="img" aria-label="Droites AB et OT coup\u00e9es par CE avec un angle de 90 degr\u00e9s et un angle de 89 degr\u00e9s">'
+  +'<line x1="45" y1="105" x2="385" y2="135" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="45" y1="255" x2="385" y2="285" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="245" y1="20" x2="175" y2="330" stroke="#0f9f8f" stroke-width="5"/>'
+  +'<circle cx="224" cy="121" r="5" fill="#0f172a"/>'
+  +'<circle cx="190" cy="268" r="5" fill="#0f172a"/>'
+  +'<text x="24" y="102" font-size="20">A</text>'
+  +'<text x="393" y="137" font-size="20">B</text>'
+  +'<text x="24" y="252" font-size="20">O</text>'
+  +'<text x="393" y="287" font-size="20">T</text>'
+  +'<text x="251" y="23" font-size="20">C</text>'
+  +'<text x="160" y="347" font-size="20">E</text>'
+  +'<text x="232" y="143" font-size="20">U</text>'
+  +'<text x="198" y="291" font-size="20">S</text>'
+  +'<path d="M224 121 L190 118 A42 42 0 0 0 214 160 Z" fill="#86efac" fill-opacity="0.75"/>'
+  +'<path d="M190 268 L224 271 A42 42 0 0 0 200 228 Z" fill="#fb7185" fill-opacity="0.75"/>'
+  +'<text x="177" y="157" font-size="19" fill="#166534">90\u00b0</text>'
+  +'<text x="204" y="240" font-size="19" fill="#be123c">89\u00b0</text>'
+  +'</svg>';
+
+var N3E4_SVG =
+  '<svg viewBox="0 0 600 390" role="img" aria-label="Deux droites d1 et d2 coup\u00e9es par une s\u00e9cante avec deux angles alternes-internes de 58 degr\u00e9s">'
+  +'<line x1="75" y1="110" x2="535" y2="145" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="75" y1="285" x2="535" y2="320" stroke="#334155" stroke-width="4"/>'
+  +'<line x1="350" y1="25" x2="270" y2="365" stroke="#0f9f8f" stroke-width="5"/>'
+  +'<text x="540" y="147" font-size="22">d\u2081</text>'
+  +'<text x="540" y="323" font-size="22">d\u2082</text>'
+  +'<text x="360" y="28" font-size="22">d</text>'
+  +'<path d="M326 129 L292 126 A42 42 0 0 0 317 168 Z" fill="#c084fc" fill-opacity="0.78"/>'
+  +'<path d="M286 301 L320 304 A42 42 0 0 0 295 262 Z" fill="#c084fc" fill-opacity="0.78"/>'
+  +'<text x="281" y="166" font-size="21" fill="#7e22ce" font-weight="700">58\u00b0</text>'
+  +'<text x="308" y="274" font-size="21" fill="#7e22ce" font-weight="700">58\u00b0</text>'
+  +'</svg>';
+
+/* ══════════════════════════════════════════════════════
+   MOTEUR G\u00c9N\u00c9RIQUE DE RENDU DES QUESTIONS
+   ══════════════════════════════════════════════════════ */
+function tagsHtml(tags){
+  if(!tags||!tags.length) return '';
+  var h='<div class="tags-row">';
+  tags.forEach(function(t){h+='<span class="tag">'+t+'</span>';});
+  return h+'</div>';
+}
+function figHtml(qd){
+  return qd.figure?'<div class="figure-wrap">'+qd.figure+'</div>':'';
+}
+function hintBoxHtml(qd,st){
+  var open=!!(st.hints && st.hints[qd.key]);
+  var h='';
+  if(!st.validated){
+    h+='<div class="hint-line"><button type="button" class="hint-btn" data-hintkey="'+qd.key+'"'+(open?' disabled':'')+'>\uD83D\uDCA1 Indice</button></div>';
+  }
+  h+='<div class="hint-box'+(open?' show':'')+'" id="hintbox-'+qd.key+'">'+(open?qd.hint:'')+'</div>';
+  return h;
+}
+function attachHintBtn(qd,st,lvlIdx,root){
+  var btn=root.querySelector('[data-hintkey="'+qd.key+'"]');
+  if(!btn) return;
+  btn.addEventListener('click',function(){
+    if(!state[lvlIdx].hints) state[lvlIdx].hints={};
+    state[lvlIdx].hints[qd.key]=true;
+    var box=$('hintbox-'+qd.key);
+    if(box){ box.innerHTML=qd.hint; box.classList.add('show'); }
+    btn.disabled=true;
+  });
+}
+function normalizeNumeric(v){
+  if(v===null||v===undefined) return null;
+  v=String(v).trim().replace(/\u00b0/g,'').replace(/\s+/g,'').replace(',','.');
+  if(v==='') return null;
+  var n=parseFloat(v);
+  return isNaN(n)?null:n;
+}
+
+// QCM (opt-card)
+function renderQCM(container,qd,st,lvlIdx){
+  var b=document.createElement('div'); b.className='q-block';
+  b.innerHTML='<div class="q-row"><span class="q-num">'+qd.num+'</span><span class="q-label">'+qd.label+'</span></div>'
+    +tagsHtml(qd.tags)+figHtml(qd)
+    +'<div class="opts-col" id="opts-'+qd.key+'"></div>'
+    +hintBoxHtml(qd,st)
+    +'<div class="q-feedback" id="fb-'+qd.key+'" role="status" aria-live="polite"></div>';
+  container.appendChild(b);
+  attachHintBtn(qd,st,lvlIdx,b);
+  var row=b.querySelector('#opts-'+qd.key);
+  qd.options.forEach(function(o,i){
+    var btn=document.createElement('button'); btn.type='button'; btn.className='opt-card';
+    btn.innerHTML='<span class="opt-letter">'+String.fromCharCode(65+i)+'.</span> '+o;
+    var cur=st.answers[qd.key];
+    if(st.validated){
+      btn.disabled=true;
+      if(i===qd.correct) btn.classList.add(cur===i?'ok':'reveal');
+      else if(cur===i) btn.classList.add('ko');
+    } else if(cur===i) btn.classList.add('selected');
+    btn.addEventListener('click',function(){
+      if(state[lvlIdx].validated) return;
+      state[lvlIdx].answers[qd.key]=i;
+      row.querySelectorAll('.opt-card').forEach(function(bb,j){bb.className='opt-card'+(j===i?' selected':'');});
+    });
+    row.appendChild(btn);
+  });
+  if(st.validated&&st.answers[qd.key]!==undefined){
+    var ok=st.answers[qd.key]===qd.correct;
+    var fb=b.querySelector('#fb-'+qd.key);
+    fb.className='q-feedback show '+(ok?'ok':'ko');
+    fb.innerHTML='<span class="fb-titre">'+(ok?'\u2705':'\u274c')+'</span>'+(ok?qd.fbOk:qd.fbKo);
+  }
+}
+function qcmAnswered(qd,st){return st.answers[qd.key]!==undefined;}
+function qcmCorrect(qd,st){return st.answers[qd.key]===qd.correct;}
+
+// Texte \u00e0 trous
+function renderFill(container,qd,st,lvlIdx){
+  var b=document.createElement('div'); b.className='q-block';
+  b.innerHTML='<div class="q-row"><span class="q-num">'+qd.num+'</span><span class="q-label">'+qd.label+'</span></div>'
+    +tagsHtml(qd.tags)+figHtml(qd);
+  var tw=document.createElement('div'); tw.className='trou-wrap';
+  qd.segments.forEach(function(seg,si){
+    if(typeof seg==='string'){
+      tw.appendChild(document.createTextNode(seg));
+    } else {
+      var sel=document.createElement('select'); sel.className='trou-select'; sel.id='sel-'+qd.key+'-'+si;
+      sel.setAttribute('aria-label', seg.ariaLabel || 'Choisir le mot manquant');
+      seg.options.forEach(function(o,i){var opt=document.createElement('option');opt.value=i;opt.textContent=o;sel.appendChild(opt);});
+      var cur=st.answers[qd.key+'_'+si];
+      if(cur!==undefined) sel.value=cur;
+      if(st.validated){sel.disabled=true;sel.classList.add(cur==seg.correct?'ok':'ko');}
+      sel.addEventListener('change',function(){state[lvlIdx].answers[qd.key+'_'+si]=parseInt(sel.value);});
+      tw.appendChild(sel);
+    }
+  });
+  b.appendChild(tw);
+  var hintWrap=document.createElement('div'); hintWrap.innerHTML=hintBoxHtml(qd,st);
+  b.appendChild(hintWrap);
+  attachHintBtn(qd,st,lvlIdx,b);
+  var fb=document.createElement('div'); fb.className='q-feedback'; fb.id='fb-'+qd.key;
+  fb.setAttribute('role','status'); fb.setAttribute('aria-live','polite');
+  if(st.validated){
+    var ok=fillCorrect(qd,st);
+    fb.className='q-feedback show '+(ok?'ok':'ko');
+    fb.innerHTML='<span class="fb-titre">'+(ok?'\u2705':'\u274c')+'</span>'+(ok?qd.fbOk:qd.fbKo);
+  }
+  b.appendChild(fb);
+  container.appendChild(b);
+}
+function fillBlankKeys(qd){
+  var ks=[];qd.segments.forEach(function(seg,si){if(typeof seg!=='string') ks.push({key:qd.key+'_'+si,correct:seg.correct});});
+  return ks;
+}
+function fillAnswered(qd,st){
+  return fillBlankKeys(qd).every(function(b){return st.answers[b.key]!==undefined&&st.answers[b.key]!==0;});
+}
+function fillCorrect(qd,st){
+  return fillBlankKeys(qd).every(function(b){return st.answers[b.key]===b.correct;});
+}
+
+// R\u00e9ponse num\u00e9rique (angle en degr\u00e9s)
+function renderNumeric(container,qd,st,lvlIdx){
+  var b=document.createElement('div'); b.className='q-block';
+  b.innerHTML='<div class="q-row"><span class="q-num">'+qd.num+'</span><span class="q-label">'+qd.label+'</span></div>'
+    +tagsHtml(qd.tags)+figHtml(qd);
+  var row=document.createElement('div'); row.className='num-row';
+  var inp=document.createElement('input'); inp.type='text'; inp.inputMode='numeric'; inp.className='num-input';
+  inp.id='num-'+qd.key; inp.setAttribute('aria-label','R\u00e9ponse en degr\u00e9s');
+  var cur=st.answers[qd.key];
+  if(cur!==undefined) inp.value=cur;
+  if(st.validated){
+    inp.disabled=true;
+    inp.classList.add(normalizeNumeric(cur)===qd.expected?'ok':'ko');
+  }
+  inp.addEventListener('input',function(){ if(!state[lvlIdx].validated) state[lvlIdx].answers[qd.key]=inp.value; });
+  row.appendChild(inp);
+  var deg=document.createElement('span'); deg.textContent='\u00b0'; row.appendChild(deg);
+  b.appendChild(row);
+  var hintWrap2=document.createElement('div'); hintWrap2.innerHTML=hintBoxHtml(qd,st);
+  b.appendChild(hintWrap2);
+  attachHintBtn(qd,st,lvlIdx,b);
+  var fb=document.createElement('div'); fb.className='q-feedback'; fb.id='fb-'+qd.key;
+  fb.setAttribute('role','status'); fb.setAttribute('aria-live','polite');
+  if(st.validated){
+    var ok=numCorrect(qd,st);
+    fb.className='q-feedback show '+(ok?'ok':'ko');
+    fb.innerHTML='<span class="fb-titre">'+(ok?'\u2705':'\u274c')+'</span>'+(ok?qd.fbOk:qd.fbKo);
+  }
+  b.appendChild(fb);
+  container.appendChild(b);
+}
+function numAnswered(qd,st){ return st.answers[qd.key]!==undefined && normalizeNumeric(st.answers[qd.key])!==null; }
+function numCorrect(qd,st){ var v=normalizeNumeric(st.answers[qd.key]); return v!==null && v===qd.expected; }
+
+function renderQuestion(container,qd,st,lvlIdx){
+  if(qd.type==='fill') renderFill(container,qd,st,lvlIdx);
+  else if(qd.type==='numeric') renderNumeric(container,qd,st,lvlIdx);
+  else renderQCM(container,qd,st,lvlIdx);
+}
+function qAnswered(qd,st){
+  if(qd.type==='fill') return fillAnswered(qd,st);
+  if(qd.type==='numeric') return numAnswered(qd,st);
+  return qcmAnswered(qd,st);
+}
+function qCorrect(qd,st){
+  if(qd.type==='fill') return fillCorrect(qd,st);
+  if(qd.type==='numeric') return numCorrect(qd,st);
+  return qcmCorrect(qd,st);
+}
+
+/* ══════════════════════════════════════════════════════
+   D\u00c9FINITION DES 3 NIVEAUX
+   ══════════════════════════════════════════════════════ */
+var REL_OPTIONS=['alternes-internes','correspondants','oppos\u00e9s par le sommet','adjacents'];
+
+var LEVELS=[
+{
+  title:'Niveau 1 \u2014 Je reconnais',
+  mission:'Identifier des angles alternes-internes et correspondants sans effectuer de calcul.',
+  fbSuccess:'Niveau 1 termin\u00e9\u00a0: tu sais reconna\u00eetre les angles alternes-internes et correspondants.',
+  figure:null,
+  questions:[
+    {key:'n1q1',num:1,type:'qcm',
+      label:'Observe la figure. Les angles yOx\u2019 et xEz\u2019 sont-ils alternes-internes\u00a0?',
+      figure:EX1_SVG,
+      options:['Oui, car ils sont \u00e0 l\u2019int\u00e9rieur des deux droites et de part et d\u2019autre de la s\u00e9cante.','Non, car ils n\u2019ont pas le m\u00eame sommet.','Non, car les droites ne sont pas cod\u00e9es parall\u00e8les.'],
+      correct:0,
+      fbOk:'Les angles yOx\u2019 et xEz\u2019 sont alternes-internes\u00a0: ils sont plac\u00e9s entre les deux droites et de part et d\u2019autre de la s\u00e9cante (xx\u2019). Il n\u2019est pas n\u00e9cessaire que les droites soient parall\u00e8les pour les nommer alternes-internes.',
+      fbKo:'Les angles yOx\u2019 et xEz\u2019 sont alternes-internes\u00a0: ils sont plac\u00e9s entre les deux droites et de part et d\u2019autre de la s\u00e9cante (xx\u2019). Il n\u2019est pas n\u00e9cessaire que les droites soient parall\u00e8les pour les nommer alternes-internes.',
+      hint:'Pour reconna\u00eetre des angles alternes-internes, observe uniquement leur position par rapport aux deux droites et \u00e0 la s\u00e9cante.'},
+    {key:'n1q2',num:2,type:'qcm',
+      label:'Nomme une paire d\u2019angles alternes-internes. Les droites (AB) et (CD) sont coup\u00e9es par la s\u00e9cante (EF) aux points G et H.',
+      figure:EX2_SVG,
+      options:['AGH et GHD','BGH et CHG','EGB et DHF','AGE et EGB'],
+      correct:1,
+      fbOk:'Les angles BGH et CHG sont alternes-internes. Ils sont entre les droites (AB) et (CD) et de part et d\u2019autre de la s\u00e9cante (EF).',
+      fbKo:'Les angles BGH et CHG sont alternes-internes. Ils sont entre les droites (AB) et (CD) et de part et d\u2019autre de la s\u00e9cante (EF).',
+      hint:'Cherche deux angles plac\u00e9s entre les droites (AB) et (CD), l\u2019un \u00e0 gauche et l\u2019autre \u00e0 droite de la s\u00e9cante (EF).'},
+    {key:'n1q3',num:3,type:'qcm',
+      label:'Quel angle est correspondant \u00e0 l\u2019angle EGB\u00a0?',
+      figure:EX2_SVG,
+      options:['GHD','DHF','CHG','BGH'],
+      correct:1,
+      fbOk:'L\u2019angle correspondant \u00e0 EGB est DHF. Les deux angles sont situ\u00e9s du m\u00eame c\u00f4t\u00e9 de la s\u00e9cante et dans la m\u00eame position par rapport aux droites coup\u00e9es.',
+      fbKo:'L\u2019angle correspondant \u00e0 EGB est DHF. Les deux angles sont situ\u00e9s du m\u00eame c\u00f4t\u00e9 de la s\u00e9cante et dans la m\u00eame position par rapport aux droites coup\u00e9es.',
+      hint:'Deux angles correspondants occupent la m\u00eame \u00ab\u00a0place\u00a0\u00bb aux deux points d\u2019intersection.'},
+    {key:'n1q4',num:4,type:'qcm',
+      label:'Observe la figure puis indique la relation entre les angles 3 et 5.',
+      figure:EX4_SVG,options:REL_OPTIONS,correct:0,
+      fbOk:'Les angles 3 et 5 sont alternes-internes.',
+      fbKo:'Les angles 3 et 5 sont alternes-internes.',
+      hint:'Ils sont plac\u00e9s entre les deux droites et de part et d\u2019autre de la s\u00e9cante.'},
+    {key:'n1q5',num:5,type:'qcm',
+      label:'Que peut-on dire des angles 1 et 5\u00a0?',
+      figure:EX4_SVG,options:REL_OPTIONS,correct:1,
+      fbOk:'Les angles 1 et 5 sont correspondants\u00a0: ils occupent la m\u00eame position relative.',
+      fbKo:'Les angles 1 et 5 sont correspondants\u00a0: ils occupent la m\u00eame position relative.',
+      hint:'Compare leur position aux deux points d\u2019intersection.'},
+    {key:'n1q6',num:6,type:'qcm',
+      label:'Que peut-on dire des angles 1 et 3\u00a0?',
+      figure:EX4_SVG,options:REL_OPTIONS,correct:2,
+      fbOk:'Les angles 1 et 3 sont oppos\u00e9s par le sommet.',
+      fbKo:'Les angles 1 et 3 sont oppos\u00e9s par le sommet.',
+      hint:'Ils ont le m\u00eame sommet et leurs c\u00f4t\u00e9s sont dans le prolongement les uns des autres.'},
+    {key:'n1q7',num:7,type:'fill',
+      label:'Compl\u00e8te la d\u00e9finition des angles alternes-internes.',
+      segments:[
+        'Deux angles alternes-internes sont situ\u00e9s \u00e0 l\u2019\u00a0',
+        {options:['-- ?','int\u00e9rieur','ext\u00e9rieur','sommet'],correct:1},
+        '\u00a0des deux droites et de part et d\u2019autre de la\u00a0',
+        {options:['-- ?','parall\u00e8le','s\u00e9cante','m\u00e9diatrice'],correct:2},
+        '.'
+      ],
+      fbOk:'Deux angles alternes-internes sont situ\u00e9s \u00e0 l\u2019int\u00e9rieur des deux droites et de part et d\u2019autre de la s\u00e9cante.',
+      fbKo:'Deux angles alternes-internes sont situ\u00e9s \u00e0 l\u2019int\u00e9rieur des deux droites et de part et d\u2019autre de la s\u00e9cante.',
+      hint:'Le premier mot indique la zone comprise entre les deux droites. Le second d\u00e9signe la droite qui coupe les deux autres.'}
+  ]
+},
+{
+  title:'Niveau 2 \u2014 Je calcule',
+  mission:'Utiliser le parall\u00e9lisme, les angles alternes-internes, les angles correspondants, les angles oppos\u00e9s par le sommet et les angles suppl\u00e9mentaires.',
+  fbSuccess:'Niveau 2 termin\u00e9\u00a0: tu sais calculer des angles en utilisant le parall\u00e9lisme.',
+  figure:null,
+  questions:[
+    {key:'n2q1',num:1,type:'numeric',
+      label:'Les droites (zz\u2019) et (uu\u2019) sont parall\u00e8les. Quelle est la mesure de l\u2019angle x\u2019Rz\u2019\u00a0?',
+      figure:N2E1_SVG,expected:67,
+      fbOk:'Les angles xRz\u2019 et x\u2019Rz\u2019 sont suppl\u00e9mentaires. Donc\u00a0: x\u2019Rz\u2019\u00a0=\u00a0180\u00b0\u00a0\u2212\u00a0113\u00b0\u00a0=\u00a067\u00b0.',
+      fbKo:'Les angles xRz\u2019 et x\u2019Rz\u2019 sont suppl\u00e9mentaires. Donc\u00a0: x\u2019Rz\u2019\u00a0=\u00a0180\u00b0\u00a0\u2212\u00a0113\u00b0\u00a0=\u00a067\u00b0.',
+      hint:'Les deux angles forment ensemble un angle plat. Leur somme vaut 180\u00b0.'},
+    {key:'n2q2',num:2,type:'numeric',
+      label:'Quelle est la mesure de l\u2019angle uEx\u00a0?',
+      figure:N2E1_SVG,expected:67,
+      fbOk:'L\u2019angle x\u2019Rz\u2019 mesure 67\u00b0. Les angles x\u2019Rz\u2019 et uEx sont alternes-internes entre deux droites parall\u00e8les. Ils ont donc la m\u00eame mesure\u00a0: uEx\u00a0=\u00a067\u00b0.',
+      fbKo:'L\u2019angle x\u2019Rz\u2019 mesure 67\u00b0. Les angles x\u2019Rz\u2019 et uEx sont alternes-internes entre deux droites parall\u00e8les. Ils ont donc la m\u00eame mesure\u00a0: uEx\u00a0=\u00a067\u00b0.',
+      hint:'Les droites (zz\u2019) et (uu\u2019) sont parall\u00e8les. Rep\u00e8re une paire d\u2019angles alternes-internes.'},
+    {key:'n2q3',num:3,type:'numeric',
+      label:'On sait que les droites (AB) et (CD) sont parall\u00e8les. Quelle est la mesure de l\u2019angle HGB\u00a0?',
+      figure:N2E2_SVG,expected:121,
+      fbOk:'Les angles CHG et HGB sont alternes-internes. Comme (AB) // (CD), ils ont la m\u00eame mesure\u00a0: HGB\u00a0=\u00a0121\u00b0.',
+      fbKo:'Les angles CHG et HGB sont alternes-internes. Comme (AB) // (CD), ils ont la m\u00eame mesure\u00a0: HGB\u00a0=\u00a0121\u00b0.',
+      hint:'Les deux angles sont situ\u00e9s entre les droites parall\u00e8les et de part et d\u2019autre de la s\u00e9cante.'},
+    {key:'n2q4',num:4,type:'numeric',
+      label:'Quelle est la mesure de l\u2019angle FHD\u00a0?',
+      figure:N2E2_SVG,expected:121,
+      fbOk:'Les angles CHG et FHD sont oppos\u00e9s par le sommet. Ils ont donc la m\u00eame mesure\u00a0: FHD\u00a0=\u00a0121\u00b0.',
+      fbKo:'Les angles CHG et FHD sont oppos\u00e9s par le sommet. Ils ont donc la m\u00eame mesure\u00a0: FHD\u00a0=\u00a0121\u00b0.',
+      hint:'Observe les deux angles ayant le sommet H. Leurs c\u00f4t\u00e9s sont dans le prolongement les uns des autres.'},
+    {key:'n2q5',num:5,type:'numeric',
+      label:'Les droites (d) et (d\u2019) sont parall\u00e8les. Quelle est la mesure de l\u2019angle rouge\u00a0?',
+      figure:N2E3_SVG,expected:47,
+      fbOk:'Les deux angles sont int\u00e9rieurs et du m\u00eame c\u00f4t\u00e9 de la s\u00e9cante. Leur somme vaut 180\u00b0\u00a0: angle rouge\u00a0=\u00a0180\u00b0\u00a0\u2212\u00a0133\u00b0\u00a0=\u00a047\u00b0.',
+      fbKo:'Les deux angles sont int\u00e9rieurs et du m\u00eame c\u00f4t\u00e9 de la s\u00e9cante. Leur somme vaut 180\u00b0\u00a0: angle rouge\u00a0=\u00a0180\u00b0\u00a0\u2212\u00a0133\u00b0\u00a0=\u00a047\u00b0.',
+      hint:'Les deux angles int\u00e9rieurs plac\u00e9s du m\u00eame c\u00f4t\u00e9 de la s\u00e9cante sont suppl\u00e9mentaires lorsque les droites sont parall\u00e8les.'},
+    {key:'n2q6',num:6,type:'numeric',
+      label:'Les droites (AB) et (ED) sont parall\u00e8les. Quelle est la mesure de l\u2019angle BCD\u00a0?',
+      figure:N2E4_SVG,expected:44,
+      fbOk:'Les angles ECF et BCD sont oppos\u00e9s par le sommet. Donc\u00a0: BCD\u00a0=\u00a044\u00b0.',
+      fbKo:'Les angles ECF et BCD sont oppos\u00e9s par le sommet. Donc\u00a0: BCD\u00a0=\u00a044\u00b0.',
+      hint:'Les points F, C et B sont align\u00e9s, tout comme E, C et D. Observe les angles oppos\u00e9s au sommet C.'},
+    {key:'n2q7',num:7,type:'numeric',
+      label:'Quelle est la mesure de l\u2019angle ABC\u00a0?',
+      figure:N2E4_SVG,expected:44,
+      fbOk:'Les angles ECF et ABC sont correspondants entre les droites parall\u00e8les (ED) et (AB). Ils ont donc la m\u00eame mesure\u00a0: ABC\u00a0=\u00a044\u00b0.',
+      fbKo:'Les angles ECF et ABC sont correspondants entre les droites parall\u00e8les (ED) et (AB). Ils ont donc la m\u00eame mesure\u00a0: ABC\u00a0=\u00a044\u00b0.',
+      hint:'Utilise le parall\u00e9lisme de (AB) et (ED). Cherche deux angles correspondants ou alternes-internes.'}
+  ]
+},
+{
+  title:'Niveau 3 \u2014 Je justifie',
+  mission:'D\u00e9terminer si des droites sont parall\u00e8les et r\u00e9diger une justification math\u00e9matique.',
+  fbSuccess:'Niveau 3 termin\u00e9\u00a0: tu sais d\u00e9terminer si deux droites sont parall\u00e8les et justifier ta r\u00e9ponse.',
+  figure:null,
+  questions:[
+    {key:'n3q1',num:1,type:'qcm',
+      label:'D\u00e9termine si les droites (AB) et (CD) sont parall\u00e8les.',
+      figure:N3E1_SVG,
+      options:['Oui','Non','On ne peut pas savoir'],correct:0,
+      fbOk:'Les deux angles marqu\u00e9s sont alternes-internes et mesurent chacun 46\u00b0. Comme ils ont la m\u00eame mesure, les droites (AB) et (CD) sont parall\u00e8les.',
+      fbKo:'Les deux angles marqu\u00e9s sont alternes-internes et mesurent chacun 46\u00b0. Comme ils ont la m\u00eame mesure, les droites (AB) et (CD) sont parall\u00e8les.',
+      hint:'Compare les mesures des deux angles marqu\u00e9s.'},
+    {key:'n3q2',num:2,type:'qcm',
+      label:'Choisis la justification correcte.',
+      figure:N3E1_SVG,
+      options:['Les deux angles sont adjacents et \u00e9gaux.','Les deux angles alternes-internes ont la m\u00eame mesure, donc les droites sont parall\u00e8les.','Les deux angles sont suppl\u00e9mentaires, donc les droites sont parall\u00e8les.'],
+      correct:1,
+      fbOk:'Les deux angles marqu\u00e9s sont alternes-internes et mesurent chacun 46\u00b0. Si deux angles alternes-internes ont la m\u00eame mesure, alors les deux droites coup\u00e9es par la s\u00e9cante sont parall\u00e8les. Donc (AB) // (CD).',
+      fbKo:'Les deux angles marqu\u00e9s sont alternes-internes et mesurent chacun 46\u00b0. Si deux angles alternes-internes ont la m\u00eame mesure, alors les deux droites coup\u00e9es par la s\u00e9cante sont parall\u00e8les. Donc (AB) // (CD).',
+      hint:'V\u00e9rifie la position des deux angles\u00a0: ils sont \u00e0 l\u2019int\u00e9rieur des droites et de part et d\u2019autre de la s\u00e9cante.'},
+    {key:'n3q3',num:3,type:'qcm',
+      label:'D\u00e9termine si les droites (AB) et (CD) sont parall\u00e8les.',
+      figure:N3E2_SVG,
+      options:['Oui','Non','On ne peut pas savoir'],correct:1,
+      fbOk:'Les deux angles alternes-internes mesurent 46\u00b0 et 47\u00b0. Ils ne sont pas \u00e9gaux. Si les droites \u00e9taient parall\u00e8les, ces angles auraient la m\u00eame mesure. Donc (AB) et (CD) ne sont pas parall\u00e8les.',
+      fbKo:'Les deux angles alternes-internes mesurent 46\u00b0 et 47\u00b0. Ils ne sont pas \u00e9gaux. Si les droites \u00e9taient parall\u00e8les, ces angles auraient la m\u00eame mesure. Donc (AB) et (CD) ne sont pas parall\u00e8les.',
+      hint:'Si les droites \u00e9taient parall\u00e8les, que pourrait-on dire des deux angles alternes-internes\u00a0?'},
+    {key:'n3q4',num:4,type:'qcm',
+      label:'Choisis la justification correcte.',
+      figure:N3E2_SVG,
+      options:['Les angles alternes-internes ne sont pas de m\u00eame mesure, donc les droites ne sont pas parall\u00e8les.','Les angles mesurent presque la m\u00eame chose, donc les droites sont parall\u00e8les.','Deux droites coup\u00e9es par une s\u00e9cante sont toujours parall\u00e8les.'],
+      correct:0,
+      fbOk:'Les deux angles alternes-internes mesurent 46\u00b0 et 47\u00b0. Ils ne sont pas \u00e9gaux. Si les droites \u00e9taient parall\u00e8les, ces angles auraient la m\u00eame mesure. Donc (AB) et (CD) ne sont pas parall\u00e8les.',
+      fbKo:'Les deux angles alternes-internes mesurent 46\u00b0 et 47\u00b0. Ils ne sont pas \u00e9gaux. Si les droites \u00e9taient parall\u00e8les, ces angles auraient la m\u00eame mesure. Donc (AB) et (CD) ne sont pas parall\u00e8les.',
+      hint:'En g\u00e9om\u00e9trie, 46\u00b0 et 47\u00b0 ne sont pas \u00e9gaux, m\u00eame s\u2019ils sont proches.'},
+    {key:'n3q5',num:5,type:'qcm',
+      label:'Cas 1\u00a0: les droites (AB) et (OT) sont-elles parall\u00e8les\u00a0?',
+      figure:N3E3A_SVG,
+      options:['Oui','Non'],correct:0,
+      fbOk:'Les angles alternes-internes mesurent tous les deux 110\u00b0. Les droites sont donc parall\u00e8les.',
+      fbKo:'Les angles alternes-internes mesurent tous les deux 110\u00b0. Les droites sont donc parall\u00e8les.',
+      hint:'Compare les mesures des angles alternes-internes.'},
+    {key:'n3q6',num:6,type:'qcm',
+      label:'Choisis la justification correcte pour le cas 1.',
+      figure:N3E3A_SVG,
+      options:['Les deux angles sont adjacents et \u00e9gaux.','Les deux angles alternes-internes ont la m\u00eame mesure, donc les droites sont parall\u00e8les.','Les deux angles sont suppl\u00e9mentaires, donc les droites sont parall\u00e8les.'],
+      correct:1,
+      fbOk:'Les angles alternes-internes mesurent tous les deux 110\u00b0. Les droites sont donc parall\u00e8les.',
+      fbKo:'Les angles alternes-internes mesurent tous les deux 110\u00b0. Les droites sont donc parall\u00e8les.',
+      hint:'Compare les mesures des angles alternes-internes.'},
+    {key:'n3q7',num:7,type:'qcm',
+      label:'Cas 2\u00a0: les droites (AB) et (OT) sont-elles parall\u00e8les\u00a0?',
+      figure:N3E3B_SVG,
+      options:['Oui','Non'],correct:1,
+      fbOk:'Les angles alternes-internes mesurent 90\u00b0 et 89\u00b0. Ils ne sont pas \u00e9gaux. Les droites ne sont donc pas parall\u00e8les.',
+      fbKo:'Les angles alternes-internes mesurent 90\u00b0 et 89\u00b0. Ils ne sont pas \u00e9gaux. Les droites ne sont donc pas parall\u00e8les.',
+      hint:'Compare les mesures des angles alternes-internes.'},
+    {key:'n3q8',num:8,type:'qcm',
+      label:'Choisis la justification correcte pour le cas 2.',
+      figure:N3E3B_SVG,
+      options:['Les angles alternes-internes ne sont pas de m\u00eame mesure, donc les droites ne sont pas parall\u00e8les.','Les angles mesurent presque la m\u00eame chose, donc les droites sont parall\u00e8les.','Deux droites coup\u00e9es par une s\u00e9cante sont toujours parall\u00e8les.'],
+      correct:0,
+      fbOk:'Les angles alternes-internes mesurent 90\u00b0 et 89\u00b0. Ils ne sont pas \u00e9gaux. Les droites ne sont donc pas parall\u00e8les.',
+      fbKo:'Les angles alternes-internes mesurent 90\u00b0 et 89\u00b0. Ils ne sont pas \u00e9gaux. Les droites ne sont donc pas parall\u00e8les.',
+      hint:'Compare les mesures des angles alternes-internes.'},
+    {key:'n3q9',num:9,type:'fill',
+      label:'Compl\u00e8te le raisonnement permettant de montrer que deux droites sont parall\u00e8les.',
+      figure:N3E4_SVG,
+      segments:[
+        'Les deux angles marqu\u00e9s sont des angles\u00a0',
+        {options:['-- ?','alternes-internes','correspondants','adjacents'],correct:1,ariaLabel:'Choisir le type d\u2019angles'},
+        '.\u00a0Ils ont tous les deux une mesure de\u00a0',
+        {options:['-- ?','58\u00b0','122\u00b0'],correct:1,ariaLabel:'Choisir la mesure des angles'},
+        '.\u00a0Ils ont donc\u00a0',
+        {options:['-- ?','la m\u00eame','des mesures diff\u00e9rentes'],correct:1,ariaLabel:'Choisir la comparaison des mesures'},
+        '\u00a0mesure. Si deux angles\u00a0',
+        {options:['-- ?','alternes-internes','correspondants','adjacents'],correct:1,ariaLabel:'Choisir le type d\u2019angles utilis\u00e9 dans la propri\u00e9t\u00e9'},
+        '\u00a0ont la m\u00eame mesure, alors les droites coup\u00e9es par la s\u00e9cante sont\u00a0',
+        {options:['-- ?','parall\u00e8les','perpendiculaires','s\u00e9cantes'],correct:1,ariaLabel:'Choisir la conclusion sur les droites'},
+        '.\u00a0Donc les droites (d\u2081) et (d\u2082) sont\u00a0',
+        {options:['-- ?','parall\u00e8les','perpendiculaires','s\u00e9cantes'],correct:1,ariaLabel:'Choisir la conclusion finale'},
+        '.'
+      ],
+      fbOk:'Les deux angles marqu\u00e9s sont alternes-internes. Ils mesurent tous les deux 58\u00b0, donc ils ont la m\u00eame mesure. Si deux angles alternes-internes ont la m\u00eame mesure, alors les deux droites coup\u00e9es par la s\u00e9cante sont parall\u00e8les. Donc (d\u2081) // (d\u2082).',
+      fbKo:'Les deux angles marqu\u00e9s sont alternes-internes. Ils mesurent tous les deux 58\u00b0, donc ils ont la m\u00eame mesure. Si deux angles alternes-internes ont la m\u00eame mesure, alors les deux droites coup\u00e9es par la s\u00e9cante sont parall\u00e8les. Donc (d\u2081) // (d\u2082).',
+      hint:'Le raisonnement doit suivre quatre \u00e9tapes\u00a0: identifier les angles, comparer leurs mesures, citer la propri\u00e9t\u00e9, conclure.'}
+  ]
+}
+];
+
+/* ══════════════════════════════════════════════════════
+   MOTEUR DE NIVEAU
+   ══════════════════════════════════════════════════════ */
+function renderLevel(){
+  updateHUD();
+  var zone=$('main-zone'); zone.innerHTML='';
+  var lvlIdx=currentLevel, lvl=LEVELS[lvlIdx], st=state[lvlIdx];
+  var card=document.createElement('div'); card.className='card';
+  card.innerHTML='<div class="card-stripe"></div>';
+  if(lvl.figure){
+    var fw=document.createElement('div'); fw.className='figure-wrap';
+    fw.innerHTML=lvl.figure+'<div class="figure-cap">'+lvl.figureCaption+'</div>';
+    card.appendChild(fw);
+  }
+  lvl.questions.forEach(function(qd){renderQuestion(card,qd,st,lvlIdx);});
+  zone.appendChild(card);
+  appendFooter(lvl,zone,lvlIdx,st);
+}
+
+function allAnswered(){
+  var lvl=LEVELS[currentLevel], st=state[currentLevel];
+  return lvl.questions.every(function(qd){return qAnswered(qd,st);});
+}
+function allCorrect(){
+  var lvl=LEVELS[currentLevel], st=state[currentLevel];
+  return lvl.questions.every(function(qd){return qCorrect(qd,st);});
+}
+
+function updateHUD(){
+  var starsEarned=[0,1,2].filter(function(i){return state[i].done;}).length;
+  $('stars-badge').innerHTML='<span class="star-icon">\u2b50</span> '+starsEarned+'&nbsp;/&nbsp;3';
+  [0,1,2].forEach(function(i){
+    var btn=$('lv'+(i+1)+'-btn'); if(!btn) return;
+    btn.className='lv-btn'+(i===currentLevel?' active':state[i].done?' done':!state[i].unlocked?' locked':'');
+    btn.disabled=!state[i].unlocked;
+    btn.setAttribute('aria-disabled', state[i].unlocked?'false':'true');
+    if(i===currentLevel){btn.setAttribute('aria-current','step');} else {btn.removeAttribute('aria-current');}
+  });
+  $('level-banner').textContent=LEVELS[currentLevel].title;
+  $('level-mission').innerHTML='\uD83C\uDFAF Objectif\u00a0: '+LEVELS[currentLevel].mission;
+}
+
+function goToLevel(i){
+  if(!state[i].unlocked) return;
+  currentLevel=i; renderLevel();
+  window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});
+}
+
+function appendFooter(lvl,zone,lvlIdx,st){
+  var suc=document.createElement('div'); suc.className='level-success'; suc.id='lvs-'+lvlIdx;
+  if(st.done){
+    suc.classList.add('show');
+    suc.innerHTML='<div class="ls-star">\u2705</div><div class="ls-title">Niveau r\u00e9ussi\u00a0!</div><div class="ls-msg">'+lvl.fbSuccess+'</div>';
+    if(lvlIdx<2){
+      var nb=document.createElement('button'); nb.type='button'; nb.className='btn btn-primary'; nb.style.marginTop='.8rem';
+      nb.innerHTML='Niveau '+(lvlIdx+2)+' \u2192'; nb.addEventListener('click',goNext); suc.appendChild(nb);
+    } else {
+      var fb=document.createElement('button'); fb.type='button'; fb.className='btn btn-primary'; fb.style.marginTop='.8rem';
+      fb.innerHTML='Voir le bilan \u2192'; fb.addEventListener('click',showFinal); suc.appendChild(fb);
+    }
+  } else if(st.validated && st.attempts>=2){
+    suc.classList.add('show');
+    suc.innerHTML='<div class="ls-star">\uD83D\uDCA1</div><div class="ls-title">Corrections disponibles ci-dessus</div><div class="ls-msg">Tu peux continuer vers la suite, ou retenter ce niveau.</div>';
+    var rowBtns=document.createElement('div'); rowBtns.className='btn-row'; rowBtns.style.justifyContent='center';
+    var rb=document.createElement('button'); rb.type='button'; rb.className='btn btn-ghost';
+    rb.innerHTML='\u21bb Retenter ce niveau'; rb.addEventListener('click',restartLevel); rowBtns.appendChild(rb);
+    if(lvlIdx<2){
+      if(!state[lvlIdx+1].unlocked) state[lvlIdx+1].unlocked=true;
+      var nb2=document.createElement('button'); nb2.type='button'; nb2.className='btn btn-primary';
+      nb2.innerHTML='Continuer \u2192 Niveau '+(lvlIdx+2); nb2.addEventListener('click',goNext); rowBtns.appendChild(nb2);
+    } else {
+      var fb2=document.createElement('button'); fb2.type='button'; fb2.className='btn btn-primary';
+      fb2.innerHTML='Voir le bilan \u2192'; fb2.addEventListener('click',showFinal); rowBtns.appendChild(fb2);
+    }
+    suc.appendChild(rowBtns);
+  }
+  zone.appendChild(suc);
+
+  if(!st.done && !(st.validated && st.attempts>=2)){
+    var br=document.createElement('div'); br.className='btn-row';
+    var vb=document.createElement('button'); vb.type='button'; vb.className='btn btn-primary';
+    vb.innerHTML=st.attempts>0?'\u21bb V\u00e9rifier \u00e0 nouveau':'\u2713 V\u00e9rifier';
+    vb.addEventListener('click',verifyLevel); br.appendChild(vb);
+    var rb3=document.createElement('button'); rb3.type='button'; rb3.className='btn btn-ghost';
+    rb3.innerHTML='\u21bb Recommencer'; rb3.addEventListener('click',restartLevel); br.appendChild(rb3);
+    zone.appendChild(br);
+  }
+}
+
+function showFirstAttemptHelp(){
+  var lvl=LEVELS[currentLevel], st=state[currentLevel];
+  lvl.questions.forEach(function(qd){
+    if(!qCorrect(qd,st)){
+      var fb=$('fb-'+qd.key);
+      if(fb){fb.className='q-feedback show ko';fb.innerHTML='<span class="fb-titre">\uD83D\uDCA1 Indice</span>'+qd.hint;}
+    }
+  });
+}
+
+function verifyLevel(){
+  var lvlIdx=currentLevel, st=state[lvlIdx];
+  if(!allAnswered()){
+    var rows=document.querySelectorAll('#main-zone .btn-row');
+    rows.forEach(function(row){
+      if(!row.querySelector('.msg-vide')){
+        var msg=document.createElement('div'); msg.className='msg-vide';
+        msg.textContent='\u270F\uFE0F R\u00e9ponds \u00e0 toutes les questions avant de valider.';
+        row.insertBefore(msg,row.firstChild);
+      }
+    });
+    return;
+  }
+  st.attempts++;
+  if(allCorrect()){
+    st.validated=true; st.done=true;
+    if(lvlIdx<2) state[lvlIdx+1].unlocked=true;
+    renderLevel();
+  } else if(st.attempts===1){
+    st.validated=false;
+    renderLevel();
+    showFirstAttemptHelp();
+    var rows2=document.querySelectorAll('#main-zone .btn-row');
+    rows2.forEach(function(row){
+      row.innerHTML='';
+      var vb=document.createElement('button'); vb.type='button'; vb.className='btn btn-primary';
+      vb.innerHTML='\u21bb V\u00e9rifier \u00e0 nouveau'; vb.addEventListener('click',verifyLevel); row.appendChild(vb);
+      var rb=document.createElement('button'); rb.type='button'; rb.className='btn btn-ghost';
+      rb.innerHTML='\u21bb Recommencer'; rb.addEventListener('click',restartLevel); row.appendChild(rb);
+    });
+  } else {
+    st.validated=true;
+    if(lvlIdx<2) state[lvlIdx+1].unlocked=true;
+    renderLevel();
+  }
+}
+
+function goNext(){
+  if(currentLevel<2){currentLevel++; renderLevel(); window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});}
+}
+function restartLevel(){
+  var lvlIdx=currentLevel;
+  state[lvlIdx]={answers:{},attempts:0,validated:false,done:false,unlocked:true,hints:{}};
+  renderLevel();
+  window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});
+}
+function showFinal(){
+  $('main-zone').style.display='none';
+  document.querySelector('.hud').style.display='none';
+  $('level-banner').style.display='none';
+  $('level-mission').style.display='none';
+  $('final-screen').classList.add('show');
+  window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});
+  $('final-title').focus();
+}
+function reviewLevels(){
+  currentLevel=0;
+  $('final-screen').classList.remove('show');
+  ['main-zone','level-banner','level-mission'].forEach(function(id){$(id).style.display='';});
+  document.querySelector('.hud').style.display='';
+  renderLevel();
+  window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});
+}
+
+$('lv1-btn').addEventListener('click',function(){goToLevel(0);});
+$('lv2-btn').addEventListener('click',function(){goToLevel(1);});
+$('lv3-btn').addEventListener('click',function(){goToLevel(2);});
+$('btn-review').addEventListener('click',reviewLevels);
+
+renderLevel();
+</script>
+</body>
+</html>
