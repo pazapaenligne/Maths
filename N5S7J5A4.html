@@ -439,6 +439,16 @@ function renderOrder(container,qd,st,lvlIdx){
     }
     itemsRow.appendChild(btn);
   });
+  if(!st.validated){
+    var clearBtn=document.createElement('button'); clearBtn.type='button'; clearBtn.className='hint-btn'; clearBtn.style.marginTop='.6rem';
+    clearBtn.innerHTML='\u21b6 Effacer ma s\u00e9lection';
+    clearBtn.addEventListener('click',function(){
+      if(state[lvlIdx].validated) return;
+      state[lvlIdx].answers[qd.key]=[];
+      renderLevel();
+    });
+    b.appendChild(clearBtn);
+  }
   if(st.validated){
     var ok=orderCorrect(qd,st);
     var fb=b.querySelector('#fb-'+qd.key);
@@ -457,9 +467,19 @@ function normalizeText(v){
   if(v===null||v===undefined) return '';
   v=String(v).toLowerCase();
   if(v.normalize) v=v.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  v=v.replace(/[\[\]().,;:!?'"\u2019\u00ab\u00bb]/g,' ');
+  v=v.replace(/[\[\]().,;:!?'"\u2019\u00ab\u00bb=]/g,' ');
   v=v.replace(/\s+/g,' ').trim();
   return v;
+}
+var TEXT_STOPWORDS=['segment','puisque','car','donc','ainsi','le','la','les','l','du','de','des','un','une','et','ce','cette','ces','au','aux','avec','que','qui','soit'];
+function textTokens(v){
+  return normalizeText(v).split(' ').filter(function(w){
+    return w!=='' && TEXT_STOPWORDS.indexOf(w)===-1;
+  }).sort();
+}
+function tokensEqual(a,b){
+  if(a.length!==b.length) return false;
+  return a.every(function(t,i){return t===b[i];});
 }
 function renderText(container,qd,st,lvlIdx){
   var b=document.createElement('div'); b.className='q-block';
@@ -491,9 +511,11 @@ function renderText(container,qd,st,lvlIdx){
 }
 function textAnswered(qd,st){ return !!(st.answers[qd.key] && String(st.answers[qd.key]).trim()!==''); }
 function textCorrect(qd,st){
-  var v=normalizeText(st.answers[qd.key]);
-  if(v==='') return false;
-  return qd.accepted.some(function(a){ return normalizeText(a)===v; });
+  var raw=st.answers[qd.key];
+  if(!raw || String(raw).trim()==='') return false;
+  var curTokens=textTokens(raw);
+  if(curTokens.length===0) return false;
+  return qd.accepted.some(function(a){ return tokensEqual(curTokens, textTokens(a)); });
 }
 
 function renderQuestion(container,qd,st,lvlIdx){
@@ -602,9 +624,9 @@ var LEVELS=[
         {id:'or',label:'Or, si\u2026 alors\u2026'}
       ],
       correctOrder:['sais','or','donc'],
-      fbOk:'L\u2019ordre logique d\u2019une d\u00e9monstration est toujours\u00a0: \u00ab\u00a0Je sais que\u2026\u00a0\u00bb (les donn\u00e9es), puis \u00ab\u00a0Or, si\u2026 alors\u2026\u00a0\u00bb (la propri\u00e9t\u00e9), puis \u00ab\u00a0Donc\u2026\u00a0\u00bb (la conclusion).',
-      fbKo:'L\u2019ordre logique d\u2019une d\u00e9monstration est toujours\u00a0: \u00ab\u00a0Je sais que\u2026\u00a0\u00bb (les donn\u00e9es), puis \u00ab\u00a0Or, si\u2026 alors\u2026\u00a0\u00bb (la propri\u00e9t\u00e9), puis \u00ab\u00a0Donc\u2026\u00a0\u00bb (la conclusion).',
-      hint:'On commence toujours par ce que l\u2019on sait, avant d\u2019utiliser une propri\u00e9t\u00e9, et on termine par ce que l\u2019on peut en conclure.'}
+      fbOk:'Dans cette structure de d\u00e9monstration, l\u2019ordre logique est\u00a0: \u00ab\u00a0Je sais que\u2026\u00a0\u00bb (les donn\u00e9es), puis \u00ab\u00a0Or, si\u2026 alors\u2026\u00a0\u00bb (la propri\u00e9t\u00e9), puis \u00ab\u00a0Donc\u2026\u00a0\u00bb (la conclusion).',
+      fbKo:'Dans cette structure de d\u00e9monstration, l\u2019ordre logique est\u00a0: \u00ab\u00a0Je sais que\u2026\u00a0\u00bb (les donn\u00e9es), puis \u00ab\u00a0Or, si\u2026 alors\u2026\u00a0\u00bb (la propri\u00e9t\u00e9), puis \u00ab\u00a0Donc\u2026\u00a0\u00bb (la conclusion).',
+      hint:'Dans cette s\u00e9ance, on commence par ce que l\u2019on sait, avant d\u2019utiliser une propri\u00e9t\u00e9, et on termine par ce que l\u2019on peut en conclure.'}
   ]
 },
 {
@@ -639,8 +661,8 @@ var LEVELS=[
         {id:'sais2',label:'Je sais que\u2026'}
       ],
       correctOrder:['sais2','or2','donc2'],
-      fbOk:'L\u2019ordre est toujours\u00a0: \u00ab\u00a0Je sais que\u2026\u00a0\u00bb, puis \u00ab\u00a0Or\u2026\u00a0\u00bb, puis \u00ab\u00a0Donc\u2026\u00a0\u00bb.',
-      fbKo:'L\u2019ordre est toujours\u00a0: \u00ab\u00a0Je sais que\u2026\u00a0\u00bb, puis \u00ab\u00a0Or\u2026\u00a0\u00bb, puis \u00ab\u00a0Donc\u2026\u00a0\u00bb.',
+      fbOk:'Dans cette structure de d\u00e9monstration, l\u2019ordre est\u00a0: \u00ab\u00a0Je sais que\u2026\u00a0\u00bb, puis \u00ab\u00a0Or\u2026\u00a0\u00bb, puis \u00ab\u00a0Donc\u2026\u00a0\u00bb.',
+      fbKo:'Dans cette structure de d\u00e9monstration, l\u2019ordre est\u00a0: \u00ab\u00a0Je sais que\u2026\u00a0\u00bb, puis \u00ab\u00a0Or\u2026\u00a0\u00bb, puis \u00ab\u00a0Donc\u2026\u00a0\u00bb.',
       hint:'On rappelle d\u2019abord ce que l\u2019on sait, avant d\u2019utiliser une propri\u00e9t\u00e9, puis on conclut.'},
     {key:'n2q4',num:4,type:'text',
       exTitle:'Exercice 3 \u2014 Compl\u00e9ter la d\u00e9monstration (parall\u00e9logramme)',
