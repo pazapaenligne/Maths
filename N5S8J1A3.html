@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa — Flash Défi — Aires des polygones et du disque</title>
+<style>
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+:root{
+  --day-color:#f5a623;--day-dark:#c47a10;--day-light:#fff5e0;
+  --day-border:#f5d080;--day-glow:rgba(245,166,35,.3);
+  --bg:#fffdf7;--surface:#fff;--border:#f0e2c0;
+  --green:#8dc63f;--blue:#3ab5d8;--yellow:#f5c518;--red:#b94040;
+  --text:#1a1d23;--muted:#8a7a5a;--radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.5rem 1rem 4rem;overflow-x:hidden;line-height:1.7;}
+body::before{content:'';position:fixed;inset:0;z-index:0;opacity:.03;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,#f5a623 20px,#f5a623 21px);pointer-events:none;}
+.bubble-yellow{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:220px;height:220px;background:var(--yellow);top:-60px;right:-40px;pointer-events:none;}
+.bubble-day{position:fixed;border-radius:50%;z-index:0;opacity:.09;width:200px;height:200px;background:var(--day-color);bottom:-50px;left:-40px;pointer-events:none;}
+.bubble-green{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:150px;height:150px;background:var(--green);top:40%;right:-70px;pointer-events:none;}
+.bubble-pink{position:fixed;border-radius:50%;z-index:0;opacity:.06;width:150px;height:150px;background:#f28b82;top:35%;left:-70px;pointer-events:none;}
+header{text-align:center;margin-bottom:1.2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#f5c518;color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:monospace;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(--day-dark);}
+.activity-label{font-size:clamp(1rem,3vw,1.2rem);font-weight:800;color:var(--text);margin-top:.3rem;line-height:1.35;}
+.subtitle{color:var(--muted);font-size:.88rem;margin-top:.35rem;font-family:monospace;}
+.chrono-wrap{width:100%;max-width:640px;position:relative;z-index:1;margin-bottom:.8rem;}
+.chrono-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;}
+.chrono-label{font-family:monospace;font-size:.78rem;color:var(--muted);text-transform:uppercase;}
+.chrono-val{font-family:monospace;font-weight:800;font-size:1.5rem;color:var(--day-dark);}
+.chrono-val.urgent{color:#8f1f1f;animation:pulse .5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.chrono-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.chrono-bar{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .9s linear;}
+.chrono-bar.urgent{background:linear-gradient(90deg,#8f1f1f,#c0392b);}
+#flash-zone{width:100%;max-width:640px;position:relative;z-index:1;}
+.card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:1.6rem;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--yellow),var(--green));}
+.instr{font-size:clamp(1rem,3vw,1.1rem);font-weight:700;color:var(--text);margin-bottom:1rem;line-height:1.7;text-align:center;}
+.figures-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1.3rem;}
+.fig-card{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.5rem;text-align:center;}
+.fig-card svg{width:100%;height:auto;display:block;}
+.fig-name{font-family:monospace;font-size:.7rem;color:var(--day-dark);font-weight:700;margin-top:.2rem;line-height:1.3;}
+.drop-zone{margin-top:.5rem;min-height:3rem;border:2px dashed var(--day-border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-weight:800;font-size:.92rem;color:var(--muted);background:var(--surface);padding:.3rem;cursor:pointer;transition:.25s;}
+.drop-zone:hover:not(.locked){border-color:var(--day-color);background:#fff3d9;}
+.drop-zone.filled{border-style:solid;}
+.drop-zone.locked{cursor:default;}
+.drop-zone.ok{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.drop-zone.ko{border-color:#c0392b;background:#fce4e4;color:#8f2f2f;}
+.calc-pool{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-top:.6rem;min-height:3.4rem;}
+.calc-card{padding:.7rem 1rem;border-radius:12px;border:2px solid var(--day-border);background:var(--day-light);cursor:pointer;font-weight:800;font-size:.98rem;min-height:48px;font-family:monospace;color:var(--day-dark);transition:.15s;}
+.calc-card:hover:not([disabled]){border-color:var(--day-color);background:#fff3d9;transform:translateY(-1px);}
+.calc-card:focus-visible{outline:3px solid var(--day-dark);outline-offset:2px;}
+.calc-card.selected{border-color:var(--day-dark);background:var(--day-color);color:#fff;}
+.hint-txt{text-align:center;font-size:.82rem;color:var(--muted);font-family:monospace;margin-top:.8rem;min-height:1.2rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:clamp(.88rem,2.5vw,.97rem);font-weight:800;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active{transform:scale(.96);}
+.btn:focus-visible{outline:3px solid var(--day-dark);outline-offset:2px;}
+.btn-primary{background:var(--day-dark);color:#fff;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-primary[disabled]{opacity:.5;cursor:default;transform:none;}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover{border-color:var(--day-color);color:var(--text);}
+.btn-row{display:flex;justify-content:center;margin-top:1.2rem;}
+.global-fb{text-align:center;font-size:.92rem;line-height:1.7;margin-top:.9rem;padding:.7rem .9rem;border-radius:10px;display:none;border-left:5px solid transparent;}
+.global-fb.show{display:block;}
+.global-fb.ok{background:#eefad8;border-left-color:var(--green);color:#3d7a10;}
+.global-fb.ko{background:#fce4e4;border-left-color:#c0392b;color:#8f2f2f;}
+#final-screen{width:100%;max-width:560px;display:none;position:relative;z-index:1;}
+.final-card{background:var(--surface);border:2px solid var(--day-border);border-radius:var(--radius);padding:2rem 1.6rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;}
+.final-msg{font-size:1.02rem;font-weight:700;color:var(--day-dark);line-height:1.8;margin-bottom:1.3rem;}
+.fb-titre{font-size:1.4rem;margin-right:.4rem;}
+@media(max-width:600px){.figures-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){body{padding:1rem .75rem 3rem;}.card{padding:1.2rem;}}
+</style>
+</head>
+<body>
+<div class="bubble-yellow"></div><div class="bubble-day"></div><div class="bubble-green"></div><div class="bubble-pink"></div>
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Math&eacute;matiques &middot; 5&egrave;me
+  </div>
+  <div class="week-label">Semaine 8 &ndash; Jour 1</div>
+  <h1>Aires des polygones et du disque</h1>
+  <p class="activity-label">&#9889; Flash D&eacute;fi</p>
+  <p class="subtitle">Associe chaque calcul &agrave; sa figure</p>
+</header>
+
+<div class="chrono-wrap">
+  <div class="chrono-top">
+    <span class="chrono-label">&#8987; Temps restant</span>
+    <span class="chrono-val" id="chrono-val" role="timer" aria-live="off" aria-label="Temps restant">30 s</span>
+  </div>
+  <div class="chrono-bar-bg"><div class="chrono-bar" id="chrono-bar" style="width:100%" role="progressbar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="30" aria-label="Progression du temps restant"></div></div>
+</div>
+
+<div id="flash-zone">
+  <div class="card">
+    <div class="card-stripe"></div>
+    <div class="instr">Associe chaque calcul &agrave; l&rsquo;aire de la bonne figure. Clique sur un calcul, puis sur la figure correspondante. Tu peux changer d&rsquo;avis avant de v&eacute;rifier.</div>
+    <div class="figures-grid" id="figures-grid"></div>
+    <div class="calc-pool" id="calc-pool"></div>
+    <div class="hint-txt" id="hint-txt" role="status" aria-live="polite"></div>
+    <div class="global-fb" id="global-fb" role="status" aria-live="polite"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-verify" type="button">&#10003; V&eacute;rifier</button>
+    </div>
+  </div>
+</div>
+
+<div id="final-screen">
+  <div class="final-card">
+    <div class="logo-badge" style="margin:0 auto .9rem;display:flex;width:fit-content;">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+    </div>
+    <div class="final-msg" id="final-message" tabindex="-1"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="btn-restart" type="button">&#8635; Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var DUREE=30;
+var tempsRestant=DUREE,timerID=null,fini=false;
+var selectedCalc=null;
+var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function el(id){return document.getElementById(id);}
+
+/* ══════════════════════════════════════════════════════
+   FIGURES (donn\u00e9es num\u00e9riques identiques \u00e0 l\u2019exercice du manuel)
+   Rectangle 7\u00d74 ; triangle base 11 hauteur 4 ; carr\u00e9 c\u00f4t\u00e9 4 ; triangle base 7 hauteur 4
+   ══════════════════════════════════════════════════════ */
+var SVG_RECT =
+  '<svg viewBox="0 0 160 120" role="img" aria-label="Rectangle de longueur 7 et largeur 4">'
+  +'<rect x="20" y="35" width="120" height="45" fill="#fff5e0" stroke="#c47a10" stroke-width="3"/>'
+  +'<text x="72" y="28" font-size="17" font-weight="700" fill="#8a6000">7</text>'
+  +'<text x="6" y="62" font-size="17" font-weight="700" fill="#8a6000">4</text>'
+  +'</svg>';
+var SVG_CARRE =
+  '<svg viewBox="0 0 160 120" role="img" aria-label="Carr\u00e9 de c\u00f4t\u00e9 4">'
+  +'<rect x="45" y="25" width="70" height="70" fill="#fff5e0" stroke="#c47a10" stroke-width="3"/>'
+  +'<text x="74" y="18" font-size="17" font-weight="700" fill="#8a6000">4</text>'
+  +'<text x="26" y="65" font-size="17" font-weight="700" fill="#8a6000">4</text>'
+  +'</svg>';
+var SVG_TRI11 =
+  '<svg viewBox="0 0 160 120" role="img" aria-label="Triangle de base 11 et hauteur 4">'
+  +'<polygon points="15,95 145,95 95,20" fill="#fff5e0" stroke="#c47a10" stroke-width="3"/>'
+  +'<line x1="95" y1="20" x2="95" y2="95" stroke="#7a1f1f" stroke-width="2" stroke-dasharray="4 3"/>'
+  +'<text x="72" y="112" font-size="17" font-weight="700" fill="#8a6000">11</text>'
+  +'<text x="102" y="60" font-size="17" font-weight="700" fill="#7a1f1f">4</text>'
+  +'</svg>';
+var SVG_TRI7 =
+  '<svg viewBox="0 0 160 120" role="img" aria-label="Triangle de base 7 et hauteur 4">'
+  +'<polygon points="35,95 125,95 90,20" fill="#fff5e0" stroke="#c47a10" stroke-width="3"/>'
+  +'<line x1="90" y1="20" x2="90" y2="95" stroke="#7a1f1f" stroke-width="2" stroke-dasharray="4 3"/>'
+  +'<text x="72" y="112" font-size="17" font-weight="700" fill="#8a6000">7</text>'
+  +'<text x="97" y="60" font-size="17" font-weight="700" fill="#7a1f1f">4</text>'
+  +'</svg>';
+
+var FIGURES=[
+  {id:'rect',name:'Rectangle',svg:SVG_RECT,correctCalc:'R'},
+  {id:'tri11',name:'Triangle base\u00a011, hauteur\u00a04',svg:SVG_TRI11,correctCalc:'S'},
+  {id:'carre',name:'Carr\u00e9 c\u00f4t\u00e9\u00a04',svg:SVG_CARRE,correctCalc:'T'},
+  {id:'tri7',name:'Triangle base\u00a07, hauteur\u00a04',svg:SVG_TRI7,correctCalc:'U'}
+];
+var CALCS=[
+  {id:'U',label:'U\u00a0=\u00a0(7\u00a0\u00d7\u00a04)\u00a0\u00f7\u00a02'},
+  {id:'T',label:'T\u00a0=\u00a04\u00b2'},
+  {id:'R',label:'R\u00a0=\u00a07\u00a0\u00d7\u00a04'},
+  {id:'S',label:'S\u00a0=\u00a0(11\u00a0\u00d7\u00a04)\u00a0\u00f7\u00a02'}
+];
+
+var assignments={};
+var locked={};
+
+function updateChrono(){
+  el('chrono-val').textContent=tempsRestant+' s';
+  el('chrono-bar').style.width=(tempsRestant/DUREE*100)+'%';
+  el('chrono-bar').setAttribute('aria-valuenow', String(Math.max(0,tempsRestant)));
+  var urgent=(tempsRestant<=7);
+  el('chrono-val').className='chrono-val'+(urgent?' urgent':'');
+  el('chrono-bar').className='chrono-bar'+(urgent?' urgent':'');
+}
+function startTimer(){
+  timerID=setInterval(function(){
+    tempsRestant--;
+    updateChrono();
+    if(tempsRestant<=0){
+      tempsRestant=0;
+      updateChrono();
+      clearInterval(timerID);timerID=null;
+      endActivity(false);
+    }
+  },1000);
+}
+function pauseChrono(){
+  if(timerID){clearInterval(timerID);timerID=null;}
+}
+
+function renderAll(){
+  var grid=el('figures-grid'); grid.innerHTML='';
+  FIGURES.forEach(function(fig){
+    var card=document.createElement('div'); card.className='fig-card';
+    card.innerHTML=fig.svg+'<div class="fig-name">'+fig.name+'</div>';
+    var zone=document.createElement('div'); zone.className='drop-zone';
+    zone.setAttribute('tabindex','0');
+    zone.setAttribute('role','button');
+    zone.setAttribute('aria-label','D\u00e9poser un calcul sur '+fig.name);
+    var assignedId=assignments[fig.id];
+    var isLocked=!!locked[fig.id];
+    if(isLocked){
+      zone.classList.add('filled','locked','ok');
+      zone.textContent=CALCS.filter(function(c){return c.id===assignedId;})[0].label;
+    } else if(assignedId){
+      zone.classList.add('filled');
+      zone.textContent=CALCS.filter(function(c){return c.id===assignedId;})[0].label;
+      zone.addEventListener('click',function(){ unassign(fig.id); });
+      zone.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();unassign(fig.id);}});
+    } else {
+      zone.textContent='?';
+      zone.addEventListener('click',function(){ placeOn(fig.id); });
+      zone.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();placeOn(fig.id);}});
+    }
+    card.appendChild(zone);
+    grid.appendChild(card);
+  });
+
+  var pool=el('calc-pool'); pool.innerHTML='';
+  var assignedCalcIds=Object.keys(assignments).map(function(k){return assignments[k];});
+  CALCS.forEach(function(c){
+    if(assignedCalcIds.indexOf(c.id)>=0) return;
+    var chip=document.createElement('button'); chip.type='button'; chip.className='calc-card';
+    chip.textContent=c.label;
+    if(selectedCalc===c.id) chip.classList.add('selected');
+    chip.addEventListener('click',function(){
+      selectedCalc=(selectedCalc===c.id)?null:c.id;
+      renderAll();
+    });
+    pool.appendChild(chip);
+  });
+
+  var allLocked=FIGURES.every(function(f){return locked[f.id];});
+  var allAssigned=FIGURES.every(function(f){return assignments[f.id];});
+  el('btn-verify').disabled = allLocked || !allAssigned;
+  if(allLocked){
+    el('hint-txt').textContent='';
+  } else if(selectedCalc){
+    el('hint-txt').textContent='Clique maintenant sur la figure correspondante.';
+  } else if(!allAssigned){
+    el('hint-txt').textContent='S\u00e9lectionne un calcul pour commencer, ou clique sur un calcul d\u00e9j\u00e0 plac\u00e9 pour le reprendre.';
+  } else {
+    el('hint-txt').textContent='Tout est plac\u00e9\u00a0! Clique sur \u00ab\u00a0V\u00e9rifier\u00a0\u00bb, ou reprends un calcul pour changer d\u2019avis.';
+  }
+}
+function placeOn(figId){
+  if(!selectedCalc) return;
+  if(locked[figId]) return;
+  assignments[figId]=selectedCalc;
+  selectedCalc=null;
+  renderAll();
+}
+function unassign(figId){
+  if(locked[figId]) return;
+  delete assignments[figId];
+  renderAll();
+}
+
+function verify(){
+  if(fini) return;
+  var allAssigned=FIGURES.every(function(f){return assignments[f.id];});
+  if(!allAssigned) return;
+  var allCorrectNow=true;
+  var toRevert=[];
+  FIGURES.forEach(function(fig){
+    if(locked[fig.id]) return;
+    var ok=(assignments[fig.id]===fig.correctCalc);
+    var zone=document.querySelectorAll('.drop-zone')[FIGURES.indexOf(fig)];
+    if(ok){
+      locked[fig.id]=true;
+    } else {
+      allCorrectNow=false;
+      toRevert.push(fig.id);
+      if(zone){ zone.classList.add('ko'); }
+    }
+  });
+  renderAllKeepZoneColors(toRevert);
+  var gfb=el('global-fb');
+  if(toRevert.length===0){
+    gfb.className='global-fb show ok';
+    gfb.innerHTML='<span class="fb-titre">\u2705</span>Bravo\u00a0! Tu as correctement associ\u00e9 chaque calcul \u00e0 la figure correspondante. Tu peux maintenant passer aux calculs d\u2019aires.';
+    endActivity(true);
+  } else {
+    gfb.className='global-fb show ko';
+    gfb.innerHTML='<span class="fb-titre">\u274c</span>Observe les dimensions indiqu\u00e9es sur la figure (longueur, largeur, base, hauteur ou c\u00f4t\u00e9), puis choisis le calcul correspondant.';
+    setTimeout(function(){
+      toRevert.forEach(function(figId){ delete assignments[figId]; });
+      gfb.className='global-fb';
+      renderAll();
+    },1400);
+  }
+}
+function renderAllKeepZoneColors(){
+  renderAll();
+  var zones=document.querySelectorAll('.drop-zone');
+  FIGURES.forEach(function(fig,i){
+    if(!locked[fig.id] && assignments[fig.id] && assignments[fig.id]!==fig.correctCalc){
+      zones[i].classList.add('ko');
+    }
+  });
+}
+
+function endActivity(success){
+  if(fini) return;
+  fini=true;
+  pauseChrono();
+  el('flash-zone').style.display='none';
+  document.querySelector('.chrono-wrap').style.display='none';
+  var msg=el('final-message');
+  if(success){
+    msg.innerHTML='<span class="fb-titre">\u2705</span>Bravo\u00a0! Tu as correctement associ\u00e9 chaque calcul \u00e0 la figure correspondante. Tu peux maintenant passer aux calculs d\u2019aires.';
+  } else {
+    msg.innerHTML='<span class="fb-titre">\u274c</span>Observe les dimensions indiqu\u00e9es sur la figure (longueur, largeur, base, hauteur ou c\u00f4t\u00e9), puis choisis le calcul correspondant.';
+  }
+  el('final-screen').style.display='block';
+  window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});
+  msg.focus();
+}
+function restart(){
+  clearTimeout(timerID);
+  fini=false;tempsRestant=DUREE;assignments={};locked={};selectedCalc=null;
+  el('final-screen').style.display='none';
+  el('flash-zone').style.display='block';
+  document.querySelector('.chrono-wrap').style.display='block';
+  el('global-fb').className='global-fb';
+  updateChrono();
+  renderAll();
+  startTimer();
+  window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});
+}
+
+el('btn-verify').addEventListener('click',verify);
+el('btn-restart').addEventListener('click',restart);
+renderAll();
+updateChrono();
+startTimer();
+})();
+</script>
+</body>
+</html>
