@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths &mdash; Semaine 6 Jour 1 &mdash; Droites, segments et demi-droites</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+/* ===== COULEUR DU JOUR : d&eacute;commenter UNE seule ligne ===== */
+/* LUNDI  (orange)      */    :root{--day-color:#f5a623;--day-dark:#8a5200;--day-light:#fff8ec;--day-border:#f5cf8a;--day-glow:rgba(245,166,35,.25);}
+/* MARDI  (rouge brique)*/ /* :root{--day-color:#b94040;--day-dark:#7a1f1f;--day-light:#fdf2f2;--day-border:#e8a8a8;--day-glow:rgba(185,64,64,.25);} */
+/* MERCREDI (vert)      */ /* :root{--day-color:#8dc63f;--day-dark:#3f6a10;--day-light:#f5fbee;--day-border:#c4e39a;--day-glow:rgba(141,198,63,.25);} */
+/* JEUDI  (bleu)        */ /* :root{--day-color:#3ab5d8;--day-dark:#0d5b73;--day-light:#eefaff;--day-border:#a2ddef;--day-glow:rgba(58,181,216,.25);} */
+/* VENDREDI (jaune)     */ /* :root{--day-color:#f5c518;--day-dark:#8a6000;--day-light:#fffbeb;--day-border:#f5e08a;--day-glow:rgba(245,197,24,.25);} */
+:root{--bg:#fffdf7;--surface:#fff;--border:#e8e4d9;--yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;--text:#1a1d23;--muted:#8a8f9a;--radius:16px;--n1:#8dc63f;--n2:#f5a623;--n3:#b94040;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;width:260px;height:260px;background:var(--orange);bottom:-60px;left:-60px;pointer-events:none;}
+.b1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.b2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+header{text-align:center;margin-bottom:2rem;position:relative;z-index:1;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--yellow);color:#000;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;margin-bottom:.5rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);margin-bottom:.5rem;}
+h1{font-size:clamp(1.3rem,3.5vw,1.9rem);font-weight:800;line-height:1.3;color:var(--day-dark);}
+.subtitle{color:var(--muted);font-size:.88rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+.progress-wrap{width:100%;max-width:680px;margin-bottom:1.2rem;position:relative;z-index:1;}
+.progress-info{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem;}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:7px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--orange));border-radius:99px;transition:width .5s ease;}
+.score-row{display:flex;gap:.6rem;margin-bottom:1.6rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+.chip{display:flex;align-items:center;gap:.4rem;padding:.3rem .75rem;border-radius:99px;font-size:.8rem;font-family:'JetBrains Mono',monospace;border:1.5px solid var(--border);background:var(--surface);font-weight:600;}
+.chip .dot{width:8px;height:8px;border-radius:50%;}
+.chip.correct .dot{background:var(--green);}
+.chip.wrong .dot{background:var(--pink);}
+.chip.remaining .dot{background:var(--muted);}
+.card{width:100%;max-width:680px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2rem 2rem 1.6rem;position:relative;z-index:1;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--pink),var(--green));}
+.theme-badge{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .6rem;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;}
+.consigne-bar{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;color:var(--day-dark);text-transform:uppercase;margin-bottom:1.4rem;display:flex;align-items:center;gap:.5rem;}
+.consigne-bar::before{content:'';display:inline-block;width:3px;height:16px;border-radius:2px;background:var(--day-color);flex-shrink:0;}
+.q-header{display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem;}
+.q-num{display:inline-flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:50%;color:#fff;font-weight:800;font-size:.85rem;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.q-enonce{font-size:.98rem;line-height:1.75;margin-bottom:1rem;color:var(--text);}
+.q-enonce strong{color:var(--day-dark);}
+.sub-q{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;flex-wrap:wrap;}
+.sub-label{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;color:var(--muted);min-width:1.2rem;}
+.sub-enonce{font-size:.93rem;flex:1;line-height:1.5;}
+.ans-input{width:76px;height:38px;border:2px solid var(--border);border-radius:8px;text-align:center;font-size:1rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text);background:#fff;outline:none;transition:border-color .15s;}
+.ans-input:focus{border-color:var(--day-color);}
+.ans-input.inp-ok{border-color:var(--green);background:#f0faeb;}
+.ans-input.inp-ko{border-color:#c0392b;background:#fff0ef;}
+.ans-input:disabled{opacity:1;}
+.unit{font-size:.82rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-left:.2rem;}
+.sub-fb{font-size:.75rem;font-family:'JetBrains Mono',monospace;margin-left:.3rem;display:none;}
+.sub-fb.ok{color:var(--green);display:inline;}
+.sub-fb.ko{color:#c0392b;display:inline;}
+.options{display:flex;flex-direction:row;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem;}
+.option{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.1rem;border:2px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;font-size:.92rem;font-weight:600;transition:border-color .15s,background .15s;min-height:44px;}
+.option:hover:not(.locked){border-color:var(--day-border);background:var(--day-light);}
+.option.locked{cursor:default;}
+.opt-box{width:20px;height:20px;border:2px solid var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;border-radius:50%;}
+.option.selected .opt-box{background:var(--day-color);border-color:var(--day-color);}
+.option.selected{border-color:var(--day-color);background:var(--day-light);}
+.option.correct{border-color:var(--green);background:#f0faeb;}
+.option.correct .opt-box{background:var(--green);border-color:var(--green);}
+.option.wrong{border-color:#c0392b;background:#fff0ef;}
+.option.wrong .opt-box{background:#c0392b;border-color:#c0392b;}
+.option.missed{border-color:var(--orange);background:#fffbeb;}
+.opt-tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;margin-left:.3rem;padding:.1rem .45rem;border-radius:99px;display:none;}
+.option.correct .opt-tag{display:inline;background:var(--green);color:#fff;}
+.option.wrong .opt-tag{display:inline;background:#c0392b;color:#fff;}
+.option.missed .opt-tag{display:inline;background:var(--orange);color:#fff;}
+.hint-wrap{margin:.6rem 0 0;}
+.btn-hint-inline{background:none;border:1.5px dashed var(--day-border);border-radius:8px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;color:var(--day-dark);font-family:'JetBrains Mono',monospace;transition:background .15s;min-height:36px;}
+.btn-hint-inline:hover{background:var(--day-light);}
+.hint-box{margin-top:.5rem;background:var(--day-light);border:1.5px dashed var(--day-border);border-radius:10px;padding:.6rem .9rem;font-size:.82rem;color:var(--day-dark);display:none;line-height:1.8;}
+.hint-box.show{display:block;}
+.q-feedback{margin:.7rem 0 0;padding:.6rem .9rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;display:none;}
+.q-feedback.show{display:block;}
+.q-feedback.ok{background:#f0faeb;border:1.5px solid var(--green);color:#2f6e10;}
+.q-feedback.ko{background:#fff0ef;border:1.5px solid #c0392b;color:#c0392b;}
+.btn-corr-wrap{margin:.5rem 0 0;display:none;}
+.btn-corr{background:none;border:1.5px solid var(--border);border-radius:8px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;color:var(--muted);font-family:'JetBrains Mono',monospace;transition:border-color .15s,color .15s;min-height:36px;}
+.btn-corr:hover{border-color:var(--day-color);color:var(--day-dark);}
+.corr-box{display:none;margin-top:.6rem;background:#f0f4ff;border:1.5px solid #a0b4ff;border-radius:10px;padding:.7rem 1rem;font-size:.82rem;color:#1a2d6e;line-height:1.9;}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.6rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:10px;font-family:Arial,sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;border:none;transition:transform .12s,box-shadow .15s;min-height:44px;}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.38;cursor:default;}
+.btn-primary{background:var(--day-color);color:#5a4000;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-ghost{background:transparent;color:var(--muted);border:2px solid var(--border);}
+.btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.transition-screen{width:100%;max-width:680px;display:none;position:relative;z-index:1;}
+.transition-screen.show{display:block;}
+.transition-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);text-align:center;animation:fadeUp .4s ease both;}
+.niveau-pill{display:inline-block;padding:.4rem 1.2rem;border-radius:99px;font-weight:700;font-size:.85rem;margin-bottom:1.2rem;}
+.results{width:100%;max-width:680px;text-align:center;display:none;position:relative;z-index:1;}
+.results.show{display:block;}
+.results-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,.06);animation:fadeUp .4s ease both;}
+.results-score{font-size:clamp(3rem,10vw,5rem);font-weight:800;line-height:1;margin:.8rem 0 .4rem;color:var(--day-dark);}
+.stars{font-size:2rem;margin:.4rem 0 1rem;letter-spacing:.1em;}
+.results-msg{color:var(--muted);font-size:.95rem;margin-bottom:1.5rem;font-weight:600;}
+.recap-niveaux{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;text-align:left;}
+.recap-niveau{padding:.8rem 1rem;border-radius:10px;font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:.7rem;border:1.5px solid var(--border);}
+.recap-niveau.n1{background:#f0faeb;border-color:var(--n1);color:#2d6a00;}
+.recap-niveau.n2{background:#fff5e0;border-color:var(--n2);color:#7a3500;}
+.recap-niveau.n3{background:#f7eded;border-color:var(--n3);color:#7a1f1f;}
+.comp-box{text-align:left;background:var(--day-light);border:1.5px solid var(--day-border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem;}
+.comp-box h3{color:var(--day-dark);font-size:.9rem;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;}
+.comp-line{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.4rem;font-size:.85rem;line-height:1.8;color:var(--text);}
+.comp-line .arr{color:var(--day-dark);font-weight:800;flex-shrink:0;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.card,.results-card,.transition-card{padding:1.4rem;}.btn{font-size:.85rem;padding:.55rem 1rem;}.sub-q{flex-wrap:wrap;}}
+
+/* CALCULATRICE FLOTTANTE */
+.calc-fab{position:fixed;bottom:1.2rem;right:1.2rem;z-index:100;width:48px;height:48px;border-radius:50%;background:var(--day-color);color:var(--day-dark);border:none;box-shadow:0 4px 14px rgba(0,0,0,.2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:transform .15s,box-shadow .15s;}
+.calc-fab:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(0,0,0,.25);}
+.calc-panel{position:fixed;bottom:4.5rem;right:1.2rem;z-index:200;background:#1a1a2e;border-radius:14px;padding:.9rem;box-shadow:0 6px 28px rgba(0,0,0,.4);font-family:'JetBrains Mono',monospace;display:none;width:220px;cursor:move;user-select:none;}
+.calc-panel.show{display:block;animation:fadeUp .25s ease both;}
+.calc-screen{background:#0d1117;color:#e2f0d9;font-size:1.3rem;text-align:right;padding:.4rem .6rem;border-radius:8px;margin-bottom:.6rem;min-height:2.2rem;word-break:break-all;}
+.calc-screen .calc-expr{font-size:.65rem;color:#6a9a7a;min-height:.8rem;margin-bottom:.1rem;}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem;align-items:center;}
+.calc-key{background:#2a2a4a;color:#e8e8f0;border:none;border-radius:6px;padding:0;font-size:.85rem;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:background .1s;height:36px;width:100%;display:flex;align-items:center;justify-content:center;}
+.calc-key:hover{background:#3a3a6a;}
+.calc-key:active{background:#4a4a8a;}
+.calc-key.op{background:#3ab5d8;color:#fff;}
+.calc-key.op:hover{background:#2a9ab8;}
+.calc-key.eq{background:var(--day-color);color:#5a4000;}
+.calc-key.eq:hover{background:var(--day-dark);color:#fff;}
+.calc-key.clr{background:#b94040;color:#fff;}
+.calc-key.clr:hover{background:#8a2020;}
+.calc-key.wide{grid-column:span 2;}
+.calc-label{font-size:.6rem;color:#9dd4e8;text-align:center;margin-bottom:.3rem;font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="b1"></div><div class="b2"></div>
+
+<!-- ============ EN-T&Ecirc;TE : &agrave; personnaliser ============ -->
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 6 &ndash; Jour 1</div>
+  <h1>Droites, segments et demi-droites</h1>
+  <p class="subtitle">Je m&rsquo;entra&icirc;ne &middot; <span id="sub-nb-ex">0</span> exercices &middot; 3 niveaux</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="prog-label">Exercice 1 / 1</span>
+    <span id="prog-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+</div>
+
+<div class="score-row">
+  <div class="chip correct"><div class="dot"></div><span id="count-ok">0</span> correctes</div>
+  <div class="chip wrong"><div class="dot"></div><span id="count-ko">0</span> erreurs</div>
+  <div class="chip remaining"><div class="dot"></div><span id="count-rem">0</span> restantes</div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div class="theme-badge" id="theme-badge"></div>
+  <div class="consigne-bar" id="consigne-bar"></div>
+  <div id="quiz-zone"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="prevQ()" style="display:none;">&#8592; Pr&eacute;c&eacute;dent</button>
+    <button class="btn btn-primary" id="btn-valider" onclick="validerQ()" disabled>V&eacute;rifier</button>
+    <button class="btn btn-ghost" id="btn-next" onclick="nextQ()" style="display:none;">Exercice suivant &#8594;</button>
+    <button class="btn btn-primary" id="btn-bilan" onclick="showBilan()" style="display:none;">Voir le bilan &#8594;</button>
+  </div>
+</div>
+
+<!-- ============ &Eacute;CRANS DE TRANSITION : &agrave; personnaliser ============ -->
+<div class="transition-screen" id="trans-1">
+  <div class="transition-card">
+    <div style="font-size:3rem;margin-bottom:.8rem">&#x1F7E2;</div>
+    <div class="niveau-pill" style="background:#f0faeb;color:#2d6a00;border:1.5px solid var(--n1)">Niveau 1 termin&eacute;&nbsp;!</div>
+    <div style="font-size:1.3rem;font-weight:800;margin-bottom:.6rem">Bien jou&eacute;&nbsp;!</div>
+    <div style="color:var(--muted);font-size:.95rem;line-height:1.8;margin-bottom:1.8rem">Tu sais reconna&icirc;tre une droite, un segment et une demi-droite, et les nommer.<br>Tu vas maintenant apprendre &agrave; utiliser les notations &isin; et &notin;, et &agrave; donner plusieurs noms &agrave; une m&ecirc;me droite.</div>
+    <button class="btn btn-primary" style="margin:0 auto" onclick="startNiveau(2)">&#9654;&nbsp;Commencer le niveau 2</button>
+  </div>
+</div>
+
+<div class="transition-screen" id="trans-2">
+  <div class="transition-card">
+    <div style="font-size:3rem;margin-bottom:.8rem">&#x1F7E1;</div>
+    <div class="niveau-pill" style="background:#fff5e0;color:#7a3500;border:1.5px solid var(--n2)">Niveau 2 termin&eacute;&nbsp;!</div>
+    <div style="font-size:1.3rem;font-weight:800;margin-bottom:.6rem">Excellent travail&nbsp;!</div>
+    <div style="color:var(--muted);font-size:.95rem;line-height:1.8;margin-bottom:1.8rem">Tu sais utiliser les notations et nommer une droite de plusieurs fa&ccedil;ons.<br>Tu vas maintenant calculer des longueurs en utilisant le milieu d&rsquo;un segment.</div>
+    <button class="btn btn-primary" style="margin:0 auto" onclick="startNiveau(3)">&#9654;&nbsp;Commencer le niveau 3</button>
+  </div>
+</div>
+
+<!-- ============ BILAN FINAL ============ -->
+<div class="results" id="results-screen">
+  <div class="results-card">
+    <div class="logo-badge" style="margin-bottom:.5rem">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      R&eacute;sultats
+    </div>
+    <div class="results-score" id="score-display">0/0</div>
+    <div class="stars" id="stars-row"></div>
+    <div class="results-msg" id="results-msg"></div>
+    <div class="recap-niveaux" id="recap-niveaux"></div>
+
+    <!-- Bilan de comp&eacute;tences : &agrave; personnaliser (2 &agrave; 4 lignes) -->
+    <div class="comp-box">
+      <h3>Ce que je sais maintenant&nbsp;:</h3>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Reconna&icirc;tre une droite, un segment et une demi-droite, et les noter correctement.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Utiliser les symboles &isin; et &notin; pour indiquer si un point appartient ou n&rsquo;appartient pas &agrave; une droite, un segment ou une demi-droite.</span></div>
+      <div class="comp-line"><span class="arr">&rarr;</span><span>Calculer une longueur avec le milieu d&rsquo;un segment ou trois points align&eacute;s.</span></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto;display:flex;">&#128260;&nbsp;Recommencer</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+function approxEq(a,b){return Math.abs(a-b)<0.01;}
+function parseNum(s){return parseFloat(s.trim().replace(',','.'));}
+
+/* =====================================================================
+   ZONE &Agrave; REMPLIR &mdash; tout le reste du script s'adapte automatiquement
+   (nombre d'exercices, nombre de r&eacute;ponses, bornes des niveaux, bilan)
+   ===================================================================== */
+
+/* --- Libell&eacute;s des 3 niveaux --- */
+var BADGE_TXT={
+  1:'Niveau 1 \u2014 Reconna\u00eetre et nommer',
+  2:'Niveau 2 \u2014 Utiliser les notations',
+  3:'Niveau 3 \u2014 Calculer des longueurs'
+};
+var CONSIGNE={
+  1:'Observe la figure puis r\u00e9ponds aux questions.',
+  2:'Utilise les bonnes notations pour d\u00e9crire la figure.',
+  3:'Utilise les propri\u00e9t\u00e9s du milieu et des longueurs.'
+};
+
+/* --- Figure de r\u00e9f\u00e9rence (SVG), r\u00e9utilis\u00e9e dans plusieurs exercices --- */
+var FIGURE_SVG = '<svg viewBox="0 0 600 220" width="100%" style="max-width:520px;display:block;margin:0 auto 1rem;font-family:Arial,sans-serif">'
+  + '<defs><marker id="fleche" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
+  + '<path d="M0,0L10,5L0,10z" fill="var(--day-dark)"/></marker></defs>'
+  + '<line x1="30" y1="55" x2="570" y2="55" stroke="var(--day-dark)" stroke-width="2.5" marker-start="url(#fleche)" marker-end="url(#fleche)"/>'
+  + '<circle cx="120" cy="55" r="4" fill="var(--day-dark)"/><text x="120" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">A</text>'
+  + '<circle cx="300" cy="55" r="4" fill="var(--day-dark)"/><text x="300" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">H</text>'
+  + '<circle cx="460" cy="55" r="4" fill="var(--day-dark)"/><text x="460" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">B</text>'
+  + '<line x1="70" y1="135" x2="230" y2="135" stroke="var(--day-dark)" stroke-width="2.5"/>'
+  + '<circle cx="70" cy="135" r="4" fill="var(--day-dark)"/><text x="70" y="155" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">C</text>'
+  + '<circle cx="230" cy="135" r="4" fill="var(--day-dark)"/><text x="230" y="155" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">D</text>'
+  + '<line x1="320" y1="180" x2="470" y2="180" stroke="var(--day-dark)" stroke-width="2.5"/>'
+  + '<circle cx="320" cy="180" r="4" fill="var(--day-dark)"/><text x="320" y="200" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">G</text>'
+  + '<circle cx="470" cy="180" r="4" fill="var(--day-dark)"/><text x="470" y="200" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">I</text>'
+  + '<line x1="480" y1="105" x2="580" y2="105" stroke="var(--day-dark)" stroke-width="2.5" marker-end="url(#fleche)"/>'
+  + '<circle cx="480" cy="105" r="4" fill="var(--day-dark)"/><text x="480" y="125" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">E</text>'
+  + '<circle cx="540" cy="105" r="4" fill="var(--day-dark)"/><text x="540" y="125" text-anchor="middle" font-size="16" font-weight="700" fill="var(--day-dark)">F</text>'
+  + '</svg>';
+
+/* --- Les exercices ---------------------------------------------------
+   4 types disponibles :
+     'multi'  : plusieurs r\u00e9ponses num\u00e9riques (a., b., c. ...)
+     'input1' : une seule r\u00e9ponse num\u00e9rique
+     'vf'     : un QCM simple (une bonne r\u00e9ponse parmi plusieurs)
+     'vf2'    : QCM + justification obligatoire ("Pourquoi ?")
+--------------------------------------------------------------------- */
+var EX=[
+
+  /* ---------- NIVEAU 1 : reconna\u00eetre et nommer ---------- */
+  {lvl:1,num:1,type:'vf',
+   enonce:FIGURE_SVG+'Sur la figure, l\u2019objet qui passe par les points A, H et B ne s\u2019arr\u00eate jamais\u00a0: il continue ind\u00e9finiment des deux c\u00f4t\u00e9s. Comment appelle-t-on cet objet\u00a0?',
+   opts:[
+     {txt:'Un segment',correct:false},
+     {txt:'Une demi-droite',correct:false},
+     {txt:'Une droite',correct:true}
+   ],
+   hint:'Une droite n\u2019a ni d\u00e9but ni fin\u00a0: c\u2019est pour cela qu\u2019on dessine une fl\u00e8che \u00e0 chaque extr\u00e9mit\u00e9 du trait.',
+   fbOk:'\u2705 Exactement\u00a0! Une droite se prolonge \u00e0 l\u2019infini dans les deux sens.',
+   fbKo:'Regarde bien les fl\u00e8ches aux deux bouts du trait qui passe par A, H et B.',
+   corr:'Le trait passant par A, H et B a une fl\u00e8che de chaque c\u00f4t\u00e9\u00a0: il continue ind\u00e9finiment dans les deux sens. C\u2019est donc <strong>une droite</strong>, not\u00e9e (AB).'},
+
+  {lvl:1,num:2,type:'vf',
+   enonce:FIGURE_SVG+'Et l\u2019objet qui a une origine en E, passe par F, et ne continue que dans un seul sens\u00a0? Comment l\u2019appelle-t-on\u00a0?',
+   opts:[
+     {txt:'Une droite',correct:false},
+     {txt:'Un segment',correct:false},
+     {txt:'Une demi-droite',correct:true}
+   ],
+   hint:'Regarde le nombre de fl\u00e8ches sur le trait qui part de E\u00a0: une seule extr\u00e9mit\u00e9 a une fl\u00e8che, l\u2019autre a une origine fixe.',
+   fbOk:'\u2705 Bravo\u00a0! Une demi-droite a une origine fixe et se prolonge \u00e0 l\u2019infini d\u2019un seul c\u00f4t\u00e9.',
+   fbKo:'Le point E est une origine fixe (un point de d\u00e9part), et une seule fl\u00e8che est dessin\u00e9e du c\u00f4t\u00e9 de F.',
+   corr:'Le trait part du point E (origine fixe) et se prolonge \u00e0 l\u2019infini du c\u00f4t\u00e9 de F (une seule fl\u00e8che). C\u2019est donc <strong>une demi-droite</strong>, not\u00e9e [EF).'},
+
+  {lvl:1,num:3,type:'vf2',
+   enonce:FIGURE_SVG+'Manon affirme\u00a0: \u00ab\u00a0Le segment [CD] a la m\u00eame longueur, que je le mesure de C vers D ou de D vers C.\u00a0\u00bb A-t-elle raison\u00a0?',
+   opts:[
+     {txt:'Non',correct:false},
+     {txt:'Oui',correct:true}
+   ],
+   justOpts:[
+     {txt:'Parce qu\u2019un segment a deux extr\u00e9mit\u00e9s fixes, et la distance entre elles ne d\u00e9pend pas du sens dans lequel on la mesure',correct:true},
+     {txt:'Parce qu\u2019un segment est en fait une droite',correct:false},
+     {txt:'Parce que C et D sont toujours align\u00e9s avec l\u2019origine',correct:false}
+   ],
+   hint:'Un segment est d\u00e9limit\u00e9 par deux points fixes appel\u00e9s extr\u00e9mit\u00e9s\u00a0: [CD] et [DC] d\u00e9signent le m\u00eame segment.',
+   fbOk:'\u2705 Tout \u00e0 fait\u00a0! [CD] et [DC] repr\u00e9sentent le m\u00eame segment.',
+   fbKo:'Un segment poss\u00e8de deux extr\u00e9mit\u00e9s fixes\u00a0: sa longueur ne d\u00e9pend pas du sens de lecture.',
+   corr:'Manon a raison\u00a0: un segment est d\u00e9fini par ses deux extr\u00e9mit\u00e9s. [CD] et [DC] d\u00e9signent le <strong>m\u00eame segment</strong>, de m\u00eame longueur.'},
+
+  /* ---------- NIVEAU 2 : utiliser les notations ---------- */
+  {lvl:2,num:4,type:'vf',
+   enonce:FIGURE_SVG+'Le point G n\u2019est pas plac\u00e9 sur la droite (AB). Quelle notation traduit correctement cette phrase\u00a0?',
+   opts:[
+     {txt:'G \u2208 (AB)',correct:false},
+     {txt:'G \u2209 (AB)',correct:true},
+     {txt:'G \u2208 [AB]',correct:false}
+   ],
+   hint:'Le symbole \u2208 signifie \u00ab\u00a0appartient \u00e0\u00a0\u00bb, et le symbole \u2209 signifie \u00ab\u00a0n\u2019appartient pas \u00e0\u00a0\u00bb.',
+   fbOk:'\u2705 Parfait\u00a0! \u2209 signifie bien \u00ab\u00a0n\u2019appartient pas \u00e0\u00a0\u00bb.',
+   fbKo:'G n\u2019est pas sur la droite (AB)\u00a0: il faut donc utiliser le symbole \u2209 (\u00ab\u00a0n\u2019appartient pas \u00e0\u00a0\u00bb).',
+   corr:'G n\u2019est pas align\u00e9 avec A et B, donc G n\u2019appartient pas \u00e0 la droite (AB)\u00a0: on note <strong>G \u2209 (AB)</strong>.'},
+
+  {lvl:2,num:5,type:'vf',
+   enonce:FIGURE_SVG+'La droite qui passe par A et B passe aussi par le point H, align\u00e9 avec eux. Quel autre nom peut-on donner \u00e0 cette droite\u00a0?',
+   opts:[
+     {txt:'[AH]',correct:false},
+     {txt:'[AH)',correct:false},
+     {txt:'(AH)',correct:true}
+   ],
+   hint:'Une droite peut se nommer avec deux quelconques de ses points, toujours entre parenth\u00e8ses.',
+   fbOk:'\u2705 Exact\u00a0! (AB) et (AH) d\u00e9signent la m\u00eame droite.',
+   fbKo:'Une droite se note toujours avec des <strong>parenth\u00e8ses</strong>\u00a0: ni crochets, ni crochet ouvert.',
+   corr:'H appartient \u00e0 la droite (AB). Une droite peut \u00eatre nomm\u00e9e avec n\u2019importe quels deux points qui lui appartiennent. Comme A, H et B sont align\u00e9s sur cette m\u00eame droite, on peut la noter (AB), (AH), (HB) ou encore (BA).'},
+
+  {lvl:2,num:6,type:'multi',
+   enonce:FIGURE_SVG+'Observe attentivement la figure et compte les objets tra\u00e9s.',
+   subs:[
+     {lbl:'a.',txt:'Combien de droites sont repr\u00e9sent\u00e9es sur cette figure\u00a0?',an:1,unit:''},
+     {lbl:'b.',txt:'Combien de segments vois-tu\u00a0?',an:2,unit:''},
+     {lbl:'c.',txt:'Combien de demi-droites vois-tu\u00a0?',an:1,unit:''}
+   ],
+   hint:'Regarde les extr\u00e9mit\u00e9s de chaque trait\u00a0: deux fl\u00e8ches = droite, aucune fl\u00e8che = segment, une seule fl\u00e8che = demi-droite.',
+   fbOk:'\u2705 Bravo\u00a0! Tu as bien identifi\u00e9 chaque type d\u2019objet.',
+   fbKo:'Recompte en t\u2019aidant des fl\u00e8ches\u00a0: la droite (AB), les segments [CD] et [GI], la demi-droite [EF).',
+   corr:'a. La droite <strong>(AB)</strong> (1)<br>b. Les segments <strong>[CD]</strong> et <strong>[GI]</strong> (2)<br>c. La demi-droite <strong>[EF)</strong> (1)'},
+
+  /* ---------- NIVEAU 3 : calculer des longueurs ---------- */
+  {lvl:3,num:7,type:'input1',
+   enonce:'N appartient au segment [OT]. On sait que <strong>OT = 9 cm</strong> et <strong>NT = 3 cm</strong>. Calcule ON.',
+   an:6,unit:'cm',
+   hint:'N est entre O et T, donc OT = ON + NT.',
+   fbOk:'\u2705 Bravo\u00a0! ON = OT \u2212 NT.',
+   fbKo:'Utilise la relation OT = ON + NT, puis isole ON.',
+   corr:'N \u00e9tant entre O et T\u00a0: OT = ON + NT, donc ON = OT \u2212 NT = 9 \u2212 3 = <strong>6 cm</strong>.'},
+
+  {lvl:3,num:8,type:'input1',
+   enonce:'J est le milieu du segment [TH]. On sait que <strong>TH = 8 cm</strong>. Calcule TJ.',
+   an:4,unit:'cm',
+   hint:'Le milieu d\u2019un segment le partage en deux parties de m\u00eame longueur.',
+   fbOk:'\u2705 Parfait\u00a0! Le milieu partage le segment en deux moiti\u00e9s \u00e9gales.',
+   fbKo:'Le milieu divise le segment en deux longueurs \u00e9gales\u00a0: TJ = TH \u00f7 2.',
+   corr:'J milieu de [TH]\u00a0: TJ = TH \u00f7 2 = 8 \u00f7 2 = <strong>4 cm</strong>.'},
+
+  {lvl:3,num:9,type:'multi',
+   enonce:'Le segment [PQ] mesure <strong>14 cm</strong>. R est le milieu de [PQ]. S appartient \u00e0 [PR] et <strong>RS = 2 cm</strong>.',
+   subs:[
+     {lbl:'a.',txt:'Calcule PR.',an:7,unit:'cm'},
+     {lbl:'b.',txt:'Calcule PS.',an:5,unit:'cm'}
+   ],
+   hint:'R est le milieu de [PQ]\u00a0: PR = PQ \u00f7 2. Puis S est entre P et R, donc PR = PS + SR.',
+   fbOk:'\u2705 Excellent\u00a0! Tu as combin\u00e9 le milieu et la relation entre trois points align\u00e9s.',
+   fbKo:'Calcule d\u2019abord PR (milieu de [PQ]), puis utilise PR = PS + SR pour trouver PS.',
+   corr:'a. R milieu de [PQ]\u00a0: PR = PQ \u00f7 2 = 14 \u00f7 2 = <strong>7 cm</strong><br>b. S entre P et R\u00a0: PR = PS + SR, donc PS = PR \u2212 SR = 7 \u2212 2 = <strong>5 cm</strong>'}
+
+];
+
+/* --- Messages du bilan (adapt&eacute;s automatiquement au total) --- */
+function messageBilan(ratio){
+  if(ratio>=1)   return '\u2B50 Excellent\u00a0! MESSAGE DE R\u00c9USSITE TOTALE.';
+  if(ratio>=0.8) return '\u2705 Tr\u00e8s bon travail\u00a0! Relis les corrections des exercices manqu\u00e9s.';
+  if(ratio>=0.6) return '\u2705 Bon travail\u00a0! Quelques exercices restent \u00e0 consolider.';
+  return '\u2B50 Continue tes efforts\u00a0! Relis les corrections puis refais les exercices.';
+}
+
+/* =====================================================================
+   FIN DE LA ZONE \u00c0 REMPLIR \u2014 ne rien modifier en dessous
+   ===================================================================== */
+
+var BADGE={1:'background:#f0faeb;color:#2d6a00;border:1.5px solid var(--n1)',2:'background:#fff5e0;color:#7a3500;border:1.5px solid var(--n2)',3:'background:#f7eded;color:#7a1f1f;border:1.5px solid var(--n3)'};
+
+function nbAns(ex){
+  if(ex.type==='multi')return ex.subs.length;
+  return 1;
+}
+var TOTAL_EX=EX.length;
+var TOTAL_ANS=EX.reduce(function(t,ex){return t+nbAns(ex);},0);
+
+// Premier index de chaque niveau + derniers index (calcul\u00e9s, pas cod\u00e9s en dur)
+var FIRST_OF_LVL={},LAST_OF_LVL={};
+EX.forEach(function(ex,i){
+  if(FIRST_OF_LVL[ex.lvl]===undefined)FIRST_OF_LVL[ex.lvl]=i;
+  LAST_OF_LVL[ex.lvl]=i;
+});
+
+var currentEx=0;
+var exValidated=[],exResults=[],hintOpen=[],corrOpen=[],exAttempts=[];
+for(var i=0;i<TOTAL_EX;i++){exValidated.push(false);exResults.push([]);hintOpen.push(false);corrOpen.push(false);exAttempts.push(0);}
+
+var selectedVF=-1,selectedVF2just=-1;
+
+function renderEx(){
+  var ex=EX[currentEx];
+  $('theme-badge').textContent=BADGE_TXT[ex.lvl];
+  $('theme-badge').style.cssText=BADGE[ex.lvl];
+  $('consigne-bar').textContent=CONSIGNE[ex.lvl];
+
+  var html='<div class="q-header">'
+    +'<span class="q-num" style="background:'+(ex.lvl===1?'var(--n1)':ex.lvl===2?'var(--n2)':'var(--n3)')+'">'+ex.num+'</span>'
+    +'<span style="font-weight:700;font-size:1rem">Exercice '+ex.num+'</span></div>'
+    +'<div class="q-enonce">'+ex.enonce+'</div>';
+
+  if(ex.type==='multi'){
+    ex.subs.forEach(function(s,i){
+      html+='<div class="sub-q">'
+        +'<span class="sub-label">'+s.lbl+'</span>'
+        +'<span class="sub-enonce">'+s.txt+'</span>'
+        +'<input type="text" inputmode="decimal" class="ans-input" id="inp-'+i+'" oninput="checkInputs()" onkeydown="handleEnter(event)"/>'
+        +'<span class="unit">'+s.unit+'</span>'
+        +'<span class="sub-fb" id="sfb-'+i+'"></span>'
+        +'</div>';
+    });
+  } else if(ex.type==='input1'){
+    html+='<div class="sub-q">'
+      +'<input type="text" inputmode="decimal" class="ans-input" id="inp-0" oninput="checkInputs()" onkeydown="handleEnter(event)"/>'
+      +'<span class="unit">'+ex.unit+'</span>'
+      +'</div>';
+  } else if(ex.type==='vf'){
+    html+='<div class="options" id="vf-opts">';
+    ex.opts.forEach(function(o,i){
+      html+='<div class="option" id="opt-'+i+'" onclick="selectVF('+i+')">'
+        +'<span class="opt-box" id="box-'+i+'"></span>'
+        +'<span>'+o.txt+'</span>'
+        +'<span class="opt-tag" id="tag-'+i+'"></span></div>';
+    });
+    html+='</div>';
+  } else if(ex.type==='vf2'){
+    html+='<div class="options vf2-opts" id="vf2-opts">';
+    ex.opts.forEach(function(o,i){
+      html+='<div class="option vf2-opt" id="vf2-'+i+'" onclick="selectVF2('+i+')">'
+        +'<span class="opt-box" id="vf2box-'+i+'"></span>'
+        +'<span>'+o.txt+'</span>'
+        +'<span class="opt-tag" id="vf2tag-'+i+'"></span></div>';
+    });
+    html+='</div>';
+    html+='<div id="just-wrap" style="display:none;margin-top:.8rem">';
+    html+='<div style="font-size:.88rem;font-weight:700;color:var(--day-dark);margin-bottom:.5rem">Pourquoi ?</div>';
+    html+='<div class="options" style="flex-direction:column">';
+    ex.justOpts.forEach(function(j,i){
+      html+='<div class="option just-opt" id="just-'+i+'" onclick="selectVF2just('+i+')">'
+        +'<span class="opt-box" id="justbox-'+i+'"></span>'
+        +'<span>'+j.txt+'</span>'
+        +'<span class="opt-tag" id="justtag-'+i+'"></span></div>';
+    });
+    html+='</div></div>';
+  }
+  html+='<div class="hint-wrap"><button class="btn-hint-inline" id="btn-hint" onclick="toggleHint()">Indice</button>'
+    +'<div class="hint-box" id="hint-box">'+ex.hint+'</div></div>'
+    +'<div class="q-feedback" id="q-fb"></div>'
+    +'<div class="btn-corr-wrap" id="corr-wrap"><button class="btn-corr" onclick="toggleCorr()">Voir la correction</button></div>'
+    +'<div class="corr-box" id="corr-box">'+ex.corr+'</div>';
+
+  $('quiz-zone').innerHTML=html;
+  selectedVF=-1;
+  selectedVF2just=-1;
+
+  if(exValidated[currentEx]) restoreState();
+
+  $('btn-prev').style.display=currentEx>0?'inline-flex':'none';
+  $('btn-next').style.display='none';
+  $('btn-bilan').style.display='none';
+  $('btn-valider').disabled=!exValidated[currentEx];
+  if(hintOpen[currentEx]){$('hint-box').classList.add('show');$('btn-hint').textContent='Masquer l\u2019indice';}
+  if(corrOpen[currentEx])$('corr-box').style.display='block';
+
+  /* Indice visible seulement apr\u00e8s une 1re r\u00e9ponse incorrecte ;
+     correction visible seulement apr\u00e8s une 2e r\u00e9ponse incorrecte. */
+  var bhInit=$('btn-hint');if(bhInit)bhInit.style.display=(exAttempts[currentEx]>=1)?'inline-flex':'none';
+  var cwInit=$('corr-wrap');if(cwInit)cwInit.style.display=(exAttempts[currentEx]>=2)?'block':'none';
+
+  updateProgress();
+}
+
+window.checkInputs=function(){
+  if(exValidated[currentEx])return;
+  var ex=EX[currentEx];
+  var ok=false;
+  if(ex.type==='multi') ok=ex.subs.every(function(_,i){var v=$('inp-'+i);return v&&v.value.trim()!=='';});
+  else if(ex.type==='input1'){var v=$('inp-0');ok=v&&v.value.trim()!=='';}
+  else if(ex.type==='vf') ok=selectedVF>=0;
+  else if(ex.type==='vf2') ok=selectedVF>=0&&selectedVF2just>=0;
+  $('btn-valider').disabled=!ok;
+};
+window.handleEnter=function(e){if(e.key==='Enter'&&!$('btn-valider').disabled)validerQ();};
+
+window.selectVF=function(i){
+  if(exValidated[currentEx])return;
+  selectedVF=i;
+  document.querySelectorAll('.option').forEach(function(o,j){o.classList.toggle('selected',j===i);o.querySelector('.opt-box').innerHTML=j===i?'&#10003;':'';});
+  window.checkInputs();
+};
+window.selectVF2=function(i){
+  if(exValidated[currentEx])return;
+  selectedVF=i;
+  document.querySelectorAll('.vf2-opt').forEach(function(o,j){
+    o.classList.toggle('selected',j===i);
+    o.querySelector('.opt-box').innerHTML=j===i?'&#10003;':'';
+  });
+  var jw=document.getElementById('just-wrap');
+  if(jw) jw.style.display='block';
+  window.checkInputs();
+};
+window.selectVF2just=function(i){
+  if(exValidated[currentEx])return;
+  selectedVF2just=i;
+  document.querySelectorAll('.just-opt').forEach(function(o,j){
+    o.classList.toggle('selected',j===i);
+    o.querySelector('.opt-box').innerHTML=j===i?'&#10003;':'';
+  });
+  window.checkInputs();
+};
+
+window.validerQ=function(){
+  if(exValidated[currentEx])return;
+  var ex=EX[currentEx];
+  var allOk=true;
+  var results=[];
+
+  /* --- calcul de la r\u00e9ussite, sans effet de bord sur l'affichage --- */
+  if(ex.type==='multi'){
+    ex.subs.forEach(function(s,i){
+      var inp=$('inp-'+i),ok=approxEq(parseNum(inp.value),s.an);
+      results.push(ok);if(!ok)allOk=false;
+    });
+  } else if(ex.type==='input1'){
+    var v=$('inp-0'),okv=approxEq(parseNum(v.value),ex.an);
+    results.push(okv);if(!okv)allOk=false;
+  } else if(ex.type==='vf2'){
+    var ok1=ex.opts[selectedVF]&&ex.opts[selectedVF].correct;
+    var ok2=ex.justOpts[selectedVF2just]&&ex.justOpts[selectedVF2just].correct;
+    results.push(!!(ok1&&ok2));if(!(ok1&&ok2))allOk=false;
+  } else if(ex.type==='vf'){
+    var okq=ex.opts[selectedVF]&&ex.opts[selectedVF].correct;
+    results.push(!!okq);if(!okq)allOk=false;
+  }
+
+  var attemptsSoFar=exAttempts[currentEx]||0;
+  var mustLock=allOk||attemptsSoFar>=1;
+
+  if(!mustLock){
+    /* 1re r\u00e9ponse incorrecte : pas de verrouillage, l'\u00e9l\u00e8ve peut r\u00e9essayer.
+       Le bouton Indice appara\u00eet automatiquement, la correction reste cach\u00e9e. */
+    exAttempts[currentEx]=attemptsSoFar+1;
+    var fbTry=$('q-fb');
+    fbTry.className='q-feedback show ko';
+    fbTry.innerHTML=ex.fbKo;
+    $('btn-valider').disabled=true;
+    var bhTry=$('btn-hint');if(bhTry)bhTry.style.display='inline-flex';
+    updateProgress();
+    return;
+  }
+
+  /* --- Verrouillage d\u00e9finitif : bonne r\u00e9ponse, ou 2e r\u00e9ponse incorrecte --- */
+  if(!allOk)exAttempts[currentEx]=2;
+  exValidated[currentEx]=true;
+  exResults[currentEx]=results;
+
+  if(ex.type==='multi'){
+    ex.subs.forEach(function(s,i){
+      var inp=$('inp-'+i),ok=results[i];
+      inp.disabled=true;inp.className='ans-input '+(ok?'inp-ok':'inp-ko');
+      var fb=$('sfb-'+i);if(fb){fb.textContent=ok?'\u2705':'\u274C';fb.className='sub-fb '+(ok?'ok':'ko');}
+    });
+  } else if(ex.type==='input1'){
+    var vv=$('inp-0');vv.disabled=true;vv.className='ans-input '+(results[0]?'inp-ok':'inp-ko');
+  } else if(ex.type==='vf2'){
+    document.querySelectorAll('.vf2-opt').forEach(function(o,i){
+      o.classList.add('locked');o.classList.remove('selected');o.querySelector('.opt-box').innerHTML='';
+      var tag=document.getElementById('vf2tag-'+i);
+      if(ex.opts[i].correct&&i===selectedVF){o.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+      else if(!ex.opts[i].correct&&i===selectedVF){o.classList.add('wrong');if(tag)tag.textContent='Incorrect';}
+      else if(ex.opts[i].correct&&i!==selectedVF){o.classList.add('missed');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    });
+    document.querySelectorAll('.just-opt').forEach(function(o,i){
+      o.classList.add('locked');o.classList.remove('selected');o.querySelector('.opt-box').innerHTML='';
+      var tag=document.getElementById('justtag-'+i);
+      if(ex.justOpts[i].correct&&i===selectedVF2just){o.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+      else if(!ex.justOpts[i].correct&&i===selectedVF2just){o.classList.add('wrong');if(tag)tag.textContent='Incorrect';}
+      else if(ex.justOpts[i].correct&&i!==selectedVF2just){o.classList.add('missed');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    });
+  } else if(ex.type==='vf'){
+    document.querySelectorAll('.option').forEach(function(o,i){
+      o.classList.add('locked');o.classList.remove('selected');o.querySelector('.opt-box').innerHTML='';
+      var tag=$('tag-'+i);
+      if(ex.opts[i].correct&&i===selectedVF){o.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+      else if(!ex.opts[i].correct&&i===selectedVF){o.classList.add('wrong');if(tag)tag.textContent='Incorrect';}
+      else if(ex.opts[i].correct&&i!==selectedVF){o.classList.add('missed');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    });
+  }
+
+  $('btn-valider').disabled=true;
+  var bh=$('btn-hint');if(bh)bh.style.display=(exAttempts[currentEx]>=1)?'inline-flex':'none';
+  $('hint-box').classList.remove('show');
+
+  var fb=$('q-fb');
+  fb.className='q-feedback show '+(allOk?'ok':'ko');
+  fb.innerHTML=allOk?ex.fbOk:ex.fbKo;
+
+  var delay=allOk?2000:3000;
+  setTimeout(function(){var cw=$('corr-wrap');if(cw)cw.style.display=(exAttempts[currentEx]>=2)?'block':'none';},delay);
+  setTimeout(function(){
+    var isLast=currentEx===TOTAL_EX-1;
+    if(isLast)$('btn-bilan').style.display='inline-flex';
+    else $('btn-next').style.display='inline-flex';
+  },delay);
+  updateProgress();updateChips();
+};
+
+function restoreState(){
+  var ex=EX[currentEx];
+  var allOk=exResults[currentEx].length>0&&exResults[currentEx].every(function(v){return v;});
+  if(ex.type==='multi'){
+    ex.subs.forEach(function(s,i){
+      var inp=$('inp-'+i);if(inp){inp.value=String(s.an).replace('.',',');inp.disabled=true;inp.className='ans-input '+(exResults[currentEx][i]?'inp-ok':'inp-ko');}
+      var fb=$('sfb-'+i);if(fb){fb.textContent=exResults[currentEx][i]?'\u2705':'\u274C';fb.className='sub-fb '+(exResults[currentEx][i]?'ok':'ko');}
+    });
+  } else if(ex.type==='input1'){
+    var v=$('inp-0');if(v){v.value=String(ex.an).replace('.',',');v.disabled=true;v.className='ans-input '+(exResults[currentEx][0]?'inp-ok':'inp-ko');}
+  } else if(ex.type==='vf2'){
+    var okr=exResults[currentEx].length>0&&exResults[currentEx][0];
+    document.querySelectorAll('.vf2-opt').forEach(function(o,i){
+      o.classList.add('locked');
+      var tag=document.getElementById('vf2tag-'+i);
+      if(ex.opts[i].correct){o.classList.add(okr?'correct':'missed');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    });
+    var jw2=document.getElementById('just-wrap');if(jw2)jw2.style.display='block';
+    document.querySelectorAll('.just-opt').forEach(function(o,i){
+      o.classList.add('locked');
+      var tag=document.getElementById('justtag-'+i);
+      if(ex.justOpts[i].correct){o.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    });
+  } else if(ex.type==='vf'){
+    document.querySelectorAll('.option').forEach(function(o,i){
+      o.classList.add('locked');
+      var tag=$('tag-'+i);
+      if(ex.opts[i].correct){o.classList.add('correct');if(tag)tag.textContent='Bonne r\u00e9ponse';}
+    });
+  }
+  var fbr=$('q-fb');fbr.className='q-feedback show '+(allOk?'ok':'ko');fbr.innerHTML=allOk?ex.fbOk:ex.fbKo;
+  $('btn-valider').disabled=true;
+  var bh=$('btn-hint');if(bh)bh.style.display='none';
+  var cw=$('corr-wrap');if(cw)cw.style.display='block';
+  if(corrOpen[currentEx])$('corr-box').style.display='block';
+  var isLast=currentEx===TOTAL_EX-1;
+  if(isLast)$('btn-bilan').style.display='inline-flex';else $('btn-next').style.display='inline-flex';
+}
+
+window.toggleHint=function(){
+  hintOpen[currentEx]=!hintOpen[currentEx];
+  var h=$('hint-box'),b=$('btn-hint');
+  if(hintOpen[currentEx]){h.classList.add('show');b.textContent='Masquer l\u2019indice';}
+  else{h.classList.remove('show');b.textContent='Indice';}
+};
+window.toggleCorr=function(){
+  corrOpen[currentEx]=!corrOpen[currentEx];
+  var box=$('corr-box'),btn=document.querySelector('#corr-wrap .btn-corr');
+  box.style.display=corrOpen[currentEx]?'block':'none';
+  if(btn)btn.textContent=corrOpen[currentEx]?'Masquer la correction':'Voir la correction';
+};
+
+window.nextQ=function(){
+  // Fin d'un niveau -> \u00e9cran de transition (bornes calcul\u00e9es automatiquement)
+  if(currentEx===LAST_OF_LVL[1]&&FIRST_OF_LVL[2]!==undefined){showCard(false);showTransition(1);return;}
+  if(currentEx===LAST_OF_LVL[2]&&FIRST_OF_LVL[3]!==undefined){showCard(false);showTransition(2);return;}
+  if(currentEx<TOTAL_EX-1){currentEx++;renderEx();}
+};
+window.prevQ=function(){if(currentEx>0){currentEx--;renderEx();}};
+window.startNiveau=function(n){
+  hideTransitions();showCard(true);
+  if(FIRST_OF_LVL[n]!==undefined)currentEx=FIRST_OF_LVL[n];
+  renderEx();window.scrollTo({top:0,behavior:'smooth'});
+};
+
+function showCard(v){$('ex-card').style.display=v?'block':'none';}
+function showTransition(n){$('trans-1').classList.remove('show');$('trans-2').classList.remove('show');$('trans-'+n).classList.add('show');window.scrollTo({top:0,behavior:'smooth'});}
+function hideTransitions(){$('trans-1').classList.remove('show');$('trans-2').classList.remove('show');}
+
+function getScore(){var ok=0;exResults.forEach(function(r){r.forEach(function(v){if(v===true)ok++;});});return ok;}
+function getAnswered(){var n=0;exResults.forEach(function(r){r.forEach(function(v){if(v!==null&&v!==undefined)n++;});});return n;}
+
+function updateProgress(){
+  var done=exValidated.filter(function(v){return v;}).length;
+  var pct=Math.round(done/TOTAL_EX*100);
+  $('progress-bar').style.width=pct+'%';
+  $('prog-pct').textContent=pct+'\u00a0%';
+  $('prog-label').textContent='Exercice '+(currentEx+1)+' / '+TOTAL_EX;
+}
+function updateChips(){
+  var ok=getScore(),answered=getAnswered();
+  $('count-ok').textContent=ok;
+  $('count-ko').textContent=answered-ok;
+  $('count-rem').textContent=TOTAL_ANS-answered;
+}
+
+window.showBilan=function(){
+  showCard(false);hideTransitions();
+  var sc=getScore();
+  var rs=$('results-screen');rs.classList.add('show');
+  $('score-display').textContent=sc+'/'+TOTAL_ANS;
+  var ratio=TOTAL_ANS?sc/TOTAL_ANS:0;
+  var stars=ratio>=1?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:1;
+  $('stars-row').textContent='\u2B50'.repeat(stars)+'\u2606'.repeat(5-stars);
+  $('results-msg').textContent=messageBilan(ratio);
+
+  var recap=$('recap-niveaux');recap.innerHTML='';
+  [1,2,3].forEach(function(n){
+    if(FIRST_OF_LVL[n]===undefined)return;
+    var ok=0,tot=0;
+    EX.forEach(function(ex,i){
+      if(ex.lvl!==n)return;
+      tot+=nbAns(ex);
+      exResults[i].forEach(function(v){if(v===true)ok++;});
+    });
+    var div=document.createElement('div');div.className='recap-niveau n'+n;
+    var ic=ok===tot?'\u2705':ok>=tot*0.5?'\uD83D\uDFE1':'\uD83D\uDD34';
+    div.innerHTML='<span style="font-size:1.1rem">'+ic+'</span><span><strong>'+BADGE_TXT[n]+'</strong> \u2014 '+ok+' / '+tot+'</span>';
+    recap.appendChild(div);
+  });
+  $('progress-bar').style.width='100%';
+  $('prog-pct').textContent='100\u00a0%';
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+window.restart=function(){
+  currentEx=0;
+  for(var k=0;k<TOTAL_EX;k++){exValidated[k]=false;exResults[k]=[];hintOpen[k]=false;corrOpen[k]=false;}
+  $('results-screen').classList.remove('show');hideTransitions();showCard(true);
+  $('count-ok').textContent='0';$('count-ko').textContent='0';$('count-rem').textContent=TOTAL_ANS;
+  renderEx();window.scrollTo({top:0,behavior:'smooth'});
+};
+
+/* ---------------- CALCULATRICE ---------------- */
+var calcExpr='',calcCur='0',calcLastOp='',calcLastNum='',calcJust=false,calcOpen=false;
+function calcDisp(){$('calc-display').textContent=calcCur.replace('.',',');$('calc-expr').textContent=calcExpr.replace(/\./g,',');}
+function calcCompute(a,op,b){var x=parseFloat(a),y=parseFloat(b);if(op==='+')return Math.round((x+y)*1e8)/1e8;if(op==='-')return Math.round((x-y)*1e8)/1e8;if(op==='\u00d7')return Math.round((x*y)*1e8)/1e8;if(op==='\u00f7')return y===0?'Err':Math.round((x/y)*1e8)/1e8;return x;}
+window.toggleCalc=function(){calcOpen=!calcOpen;var p=$('calc-panel');if(calcOpen)p.classList.add('show');else p.classList.remove('show');};
+window.calcKey=function(k){if(k==='C'){calcCur='0';calcExpr='';calcLastOp='';calcLastNum='';calcJust=false;calcDisp();return;}if(k==='\u00b1'){calcCur=(parseFloat(calcCur)*-1).toString();calcDisp();return;}if(k==='%'){calcCur=(parseFloat(calcCur)/100).toString();calcDisp();return;}if(['+','-','\u00d7','\u00f7'].indexOf(k)>=0){if(calcJust){calcExpr=calcCur+' '+k+' ';calcLastNum=calcCur;}else{if(calcLastOp&&!calcJust){calcCur=calcCompute(calcLastNum,calcLastOp,calcCur).toString();}calcLastNum=calcCur;calcExpr=calcCur+' '+k+' ';}calcLastOp=k;calcCur='0';calcJust=false;calcDisp();return;}if(k==='='){if(calcLastOp){var r=calcCompute(calcLastNum,calcLastOp,calcCur);calcExpr=calcExpr+calcCur+' =';calcCur=r.toString();calcLastOp='';calcJust=true;}calcDisp();return;}if(k===','){if(calcCur.indexOf('.')<0){calcCur+='.';calcJust=false;}calcDisp();return;}if(calcJust){calcCur=k;calcJust=false;}else{calcCur=calcCur==='0'?k:calcCur+k;}calcDisp();};
+
+/* ---------------- D\u00e9placement de la calculatrice ---------------- */
+(function(){
+  var panel=null,dragging=false,ox=0,oy=0;
+  document.addEventListener('DOMContentLoaded',function(){
+    panel=document.getElementById('calc-panel');
+    if(!panel)return;
+    panel.addEventListener('mousedown',function(e){
+      if(e.target.classList.contains('calc-key')||e.target.classList.contains('calc-fab'))return;
+      dragging=true;
+      var r=panel.getBoundingClientRect();
+      ox=e.clientX-r.left;oy=e.clientY-r.top;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove',function(e){
+      if(!dragging)return;
+      panel.style.left=(e.clientX-ox)+'px';panel.style.top=(e.clientY-oy)+'px';
+      panel.style.right='auto';panel.style.bottom='auto';
+    });
+    document.addEventListener('mouseup',function(){dragging=false;});
+    panel.addEventListener('touchstart',function(e){
+      if(e.target.classList.contains('calc-key'))return;
+      var t=e.touches[0];
+      dragging=true;
+      var r=panel.getBoundingClientRect();
+      ox=t.clientX-r.left;oy=t.clientY-r.top;
+    },{passive:true});
+    document.addEventListener('touchmove',function(e){
+      if(!dragging)return;
+      var t=e.touches[0];
+      panel.style.left=(t.clientX-ox)+'px';panel.style.top=(t.clientY-oy)+'px';
+      panel.style.right='auto';panel.style.bottom='auto';
+    },{passive:true});
+    document.addEventListener('touchend',function(){dragging=false;});
+  });
+})();
+
+document.addEventListener('DOMContentLoaded',function(){
+  $('sub-nb-ex').textContent=TOTAL_EX;
+  $('count-rem').textContent=TOTAL_ANS;
+  renderEx();
+});
+})();
+</script>
+
+<!-- CALCULATRICE FLOTTANTE -->
+<button class="calc-fab" id="calc-fab" onclick="toggleCalc()" title="Calculatrice (facultative)">
+  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/>
+    <rect x="4.5" y="4.5" width="13" height="4" rx="1" fill="currentColor" opacity=".6"/>
+    <circle cx="6" cy="12" r="1.2" fill="currentColor"/>
+    <circle cx="11" cy="12" r="1.2" fill="currentColor"/>
+    <circle cx="16" cy="12" r="1.2" fill="currentColor"/>
+    <circle cx="6" cy="16" r="1.2" fill="currentColor"/>
+    <circle cx="11" cy="16" r="1.2" fill="currentColor"/>
+    <circle cx="16" cy="16" r="1.2" fill="currentColor"/>
+  </svg>
+</button>
+<div class="calc-panel" id="calc-panel">
+  <div class="calc-label">Calculatrice (facultative)</div>
+  <div class="calc-screen">
+    <div class="calc-expr" id="calc-expr"></div>
+    <div id="calc-display">0</div>
+  </div>
+  <div class="calc-grid">
+    <button class="calc-key clr" onclick="calcKey('C')">C</button>
+    <button class="calc-key op" onclick="calcKey('&plusmn;')">&plusmn;</button>
+    <button class="calc-key op" onclick="calcKey('%')">%</button>
+    <button class="calc-key op" onclick="calcKey('&divide;')">&divide;</button>
+    <button class="calc-key" onclick="calcKey('7')">7</button>
+    <button class="calc-key" onclick="calcKey('8')">8</button>
+    <button class="calc-key" onclick="calcKey('9')">9</button>
+    <button class="calc-key op" onclick="calcKey('&times;')">&times;</button>
+    <button class="calc-key" onclick="calcKey('4')">4</button>
+    <button class="calc-key" onclick="calcKey('5')">5</button>
+    <button class="calc-key" onclick="calcKey('6')">6</button>
+    <button class="calc-key op" onclick="calcKey('-')">-</button>
+    <button class="calc-key" onclick="calcKey('1')">1</button>
+    <button class="calc-key" onclick="calcKey('2')">2</button>
+    <button class="calc-key" onclick="calcKey('3')">3</button>
+    <button class="calc-key op" onclick="calcKey('+')">+</button>
+    <button class="calc-key wide" onclick="calcKey('0')">0</button>
+    <button class="calc-key" onclick="calcKey(',')">,</button>
+    <button class="calc-key eq" onclick="calcKey('=')">=</button>
+  </div>
+</div>
+
+</body>
+</html>
