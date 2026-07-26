@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa · Le Temple Oublié · Défi symétrie centrale</title>
+<style>
+/* ============ JETONS DE DESIGN — Temple Oublié ============ */
+:root{
+  --stone-dark:#181310;
+  --stone:#241b14;
+  --stone-mid:#4a3826;
+  --stone-light:#6b5238;
+  --sand:#c9a15f;
+  --gold:#e8b84b;
+  --gold-bright:#ffd876;
+  --torch:#e8672c;
+  --teal:#3f8f76;
+  --teal-light:#7fc9ae;
+  --parchment:#f3e6c8;
+  --ink:#241a12;
+  --success:#6fae4f;
+  --danger:#c1502e;
+  --radius:20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:inherit;}
+html{scroll-behavior:smooth;}
+body{
+  min-height:100vh;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--parchment);
+  background:
+    radial-gradient(ellipse 700px 500px at 15% 0%, rgba(232,103,44,.16), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 85% 100%, rgba(63,143,118,.14), transparent 60%),
+    linear-gradient(180deg,#100c09,#1c1510 40%,#241b14 100%);
+  overflow-x:hidden;
+  position:relative;
+  padding-bottom:3rem;
+}
+body::before{ /* texture pierre discrète */
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.15) 0 2px, transparent 2px 64px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 2px, transparent 2px 96px);
+}
+.torch-glow{position:fixed;width:260px;height:260px;border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle, rgba(232,103,44,.30), transparent 70%);filter:blur(6px);}
+.torch-glow.tg-l{top:6%;left:-60px;animation:flicker 4.2s ease-in-out infinite;}
+.torch-glow.tg-r{bottom:8%;right:-60px;animation:flicker 3.6s ease-in-out infinite .7s;}
+@keyframes flicker{0%,100%{opacity:.7;transform:scale(1);}45%{opacity:1;transform:scale(1.08);}60%{opacity:.55;transform:scale(.96);}}
+@media (prefers-reduced-motion: reduce){ .torch-glow{animation:none !important;} *{animation-duration:.001ms !important;transition-duration:.001ms !important;} }
+
+/* ---------- HUD ---------- */
+.hud{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.8rem 1.2rem;
+  background:linear-gradient(180deg, rgba(24,19,16,.96), rgba(24,19,16,.85));
+  border-bottom:2px solid var(--stone-mid);
+  backdrop-filter:blur(3px);
+  flex-wrap:wrap;
+}
+.hud-title{display:flex;align-items:center;gap:.6rem;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:1.05rem;color:var(--gold-bright);}
+.hud-title .em{font-size:1.3rem;}
+.hud-mid{font-family:'Courier New',Consolas,monospace;font-size:.8rem;color:var(--sand);text-align:center;letter-spacing:.03em;}
+.hud-frags{display:flex;align-items:center;gap:.7rem;}
+.hud-timer{font-family:'Courier New',Consolas,monospace;font-size:.85rem;font-weight:700;color:var(--gold-bright);
+  background:rgba(0,0,0,.28);border:1.5px solid var(--stone-light);border-radius:8px;
+  padding:.4rem .7rem;min-width:4.6em;text-align:center;letter-spacing:.03em;}
+.frag-row{display:flex;gap:.35rem;}
+.frag{width:20px;height:20px;border-radius:5px;background:var(--stone-mid);border:1.5px solid var(--stone-light);
+  transition:background .4s ease, box-shadow .4s ease, transform .4s ease;}
+.frag.done{background:var(--gold);border-color:var(--gold-bright);box-shadow:0 0 10px var(--gold);transform:scale(1.08);}
+.btn-sound{background:none;border:1.5px solid var(--stone-light);color:var(--parchment);border-radius:10px;
+  padding:.4rem .7rem;font-size:.95rem;cursor:pointer;min-height:2.6rem;font-family:'Courier New',Consolas,monospace;}
+.btn-sound:hover{border-color:var(--gold);}
+.btn-sound:focus-visible, .btn:focus-visible, .station:focus-visible, .opt-tile:focus-visible, .tab-opt:focus-visible{
+  outline:3px solid var(--teal-light);outline-offset:2px;
+}
+
+/* ---------- SCENES ---------- */
+.stage{max-width:900px;margin:0 auto;padding:1.6rem 1.2rem 0;position:relative;z-index:1;}
+.scene{display:none;}
+.scene.show{display:block;animation:fadeUp .45s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* ---- Intro ---- */
+.intro-card{
+  background:linear-gradient(180deg, rgba(74,56,38,.55), rgba(36,27,20,.75));
+  border:2px solid var(--stone-mid);border-radius:var(--radius);
+  padding:2.2rem 2rem;text-align:center;
+  box-shadow:0 10px 40px rgba(0,0,0,.45);
+}
+.intro-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal-light);margin-bottom:.6rem;}
+.intro-card h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.6rem,4vw,2.3rem);color:var(--gold-bright);margin-bottom:.4rem;line-height:1.3;}
+.intro-card h2{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:1.1rem;color:var(--sand);margin-bottom:1.2rem;}
+.intro-text{max-width:560px;margin:0 auto 1.6rem;line-height:1.85;font-size:1rem;color:var(--parchment);text-align:left;}
+.intro-text p{margin-bottom:.9rem;}
+.intro-text .quote{font-style:normal;border-left:3px solid var(--gold);padding:.6rem 1rem;background:rgba(232,184,75,.08);border-radius:6px;color:var(--gold-bright);}
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.75rem 1.5rem;border-radius:12px;border:none;cursor:pointer;
+  font-family:Arial,Helvetica,sans-serif;font-weight:800;font-size:1rem;
+  min-height:2.7rem;transition:transform .12s ease, box-shadow .15s ease;
+}
+.btn:active{transform:scale(.96);}
+.btn-torch{background:linear-gradient(135deg,var(--torch),#c94c1c);color:#fff8ec;box-shadow:0 4px 16px rgba(232,103,44,.4);}
+.btn-torch:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(232,103,44,.5);}
+.btn-ghost{background:transparent;border:2px solid var(--stone-light);color:var(--parchment);}
+.btn-ghost:hover{border-color:var(--gold);}
+
+/* ---- Salle / stations ---- */
+.room-wrap{display:flex;flex-direction:column;align-items:center;gap:1.6rem;}
+.room-caption{font-family:'Courier New',Consolas,monospace;font-size:.8rem;color:var(--sand);text-align:center;letter-spacing:.05em;}
+.mosaic-disc{width:min(280px,60vw);height:min(280px,60vw);position:relative;}
+.mosaic-disc svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5));}
+.wedge{transition:fill .6s ease, opacity .6s ease;}
+.wedge.lit{filter:drop-shadow(0 0 6px var(--gold-bright));}
+.disc-ring{fill:none;stroke:var(--stone-light);stroke-width:2;}
+.disc-glow{opacity:0;transition:opacity .8s ease;}
+.disc-glow.on{opacity:1;}
+
+.stations{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;width:100%;max-width:600px;}
+.station{
+  display:block;width:100%;
+  background:linear-gradient(180deg, rgba(74,56,38,.5), rgba(36,27,20,.7));
+  border:2px solid var(--stone-mid);border-radius:16px;
+  padding:1.1rem 1rem;text-align:center;cursor:pointer;
+  transition:border-color .2s, transform .15s, box-shadow .2s;
+  min-height:2.6rem;position:relative;
+}
+.station .icon{font-size:2rem;display:block;margin-bottom:.4rem;}
+.station .name{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:.92rem;color:var(--sand);}
+.station .sub{font-size:.74rem;color:var(--stone-light);margin-top:.15rem;font-family:'Courier New',Consolas,monospace;}
+.station.unlocked{border-color:var(--gold);box-shadow:0 0 0 0 rgba(232,184,75,.5);animation:pulseGlow 2.2s ease-in-out infinite;}
+.station.unlocked:hover{transform:translateY(-2px);}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(232,184,75,.35);}50%{box-shadow:0 0 0 10px rgba(232,184,75,0);}}
+.station.locked{opacity:.42;cursor:not-allowed;}
+.station:disabled{opacity:.42;cursor:not-allowed;}
+.station.done{border-color:var(--success);animation:none;}
+.station .badge{position:absolute;top:-10px;right:-10px;background:var(--success);color:#fff;
+  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;
+  border:2px solid var(--stone-dark);}
+.station .lock{position:absolute;top:-10px;right:-10px;background:var(--stone-mid);color:var(--parchment);
+  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;
+  border:2px solid var(--stone-dark);}
+
+/* ---- Modal mission ---- */
+.modal-veil{position:fixed;inset:0;background:rgba(10,7,5,.72);z-index:100;display:none;align-items:flex-start;justify-content:center;
+  padding:2.2rem 1rem;overflow-y:auto;}
+.modal-veil.show{display:flex;}
+.modal{
+  width:100%;max-width:640px;background:linear-gradient(180deg,#2a2015,#1c150e);
+  border:2px solid var(--stone-mid);border-radius:var(--radius);padding:1.8rem 1.7rem;
+  box-shadow:0 20px 60px rgba(0,0,0,.55);animation:fadeUp .35s ease both;
+}
+.modal-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-light);margin-bottom:.3rem;}
+.modal h2{font-family:Georgia,'Times New Roman',serif;color:var(--gold-bright);font-size:1.35rem;margin-bottom:.7rem;line-height:1.3;}
+.modal-story{font-size:.94rem;line-height:1.85;color:var(--parchment);margin-bottom:1.2rem;}
+.modal-question{font-weight:800;font-size:1rem;color:var(--sand);margin-bottom:1rem;line-height:1.7;}
+
+/* Grilles d'options (dalles / portes / sceaux) */
+.opt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;margin-bottom:1rem;}
+.opt-tile{
+  background:var(--stone);border:2.5px solid var(--stone-mid);border-radius:14px;
+  padding:.7rem;cursor:pointer;text-align:center;transition:border-color .15s, transform .1s, background .2s;
+  min-height:2.6rem;display:block;width:100%;
+}
+.opt-tile:hover:not(.locked){border-color:var(--gold);transform:translateY(-2px);}
+.opt-tile svg{width:100%;height:auto;display:block;margin-bottom:.4rem;border-radius:8px;background:#150f0a;}
+.opt-tile .lbl{font-family:'Courier New',Consolas,monospace;font-size:.78rem;color:var(--sand);}
+.opt-tile.locked,.opt-tile:disabled{cursor:not-allowed;}
+.opt-tile.correct{border-color:var(--success);background:rgba(111,174,79,.15);}
+.opt-tile.correct .lbl::after{content:' ✓ mécanisme activé';color:var(--success);}
+.opt-tile.wrong{border-color:var(--danger);background:rgba(193,80,46,.15);animation:shake .35s ease;}
+.opt-tile.wrong .lbl::after{content:' ✗';color:var(--danger);}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+/* Fragments (mission 2) : référence fixe + 4 candidats */
+.frag-ref{display:flex;align-items:center;gap:.9rem;background:rgba(63,143,118,.12);border:1.5px dashed var(--teal-light);
+  border-radius:12px;padding:.7rem 1rem;margin-bottom:1rem;}
+.frag-ref svg{width:64px;height:64px;flex-shrink:0;background:#150f0a;border-radius:8px;}
+.frag-ref .txt{font-size:.86rem;color:var(--teal-light);line-height:1.7;}
+
+/* Tablette (mission 3) : liste de méthodes */
+.tab-list{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1rem;}
+.tab-opt{
+  display:flex;align-items:center;gap:.8rem;background:var(--stone);
+  border:2.5px solid var(--stone-mid);border-radius:12px;padding:.75rem 1rem;
+  cursor:pointer;transition:border-color .15s,background .2s;min-height:2.6rem;width:100%;
+}
+.tab-opt:hover:not(.locked){border-color:var(--gold);}
+.tab-opt .chk{width:20px;height:20px;border-radius:5px;border:2px solid var(--stone-light);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;}
+.tab-opt .txt{font-size:.95rem;color:var(--parchment);}
+.tab-opt.locked,.tab-opt:disabled{cursor:not-allowed;}
+.tab-opt.correct{border-color:var(--success);background:rgba(111,174,79,.15);}
+.tab-opt.correct .chk{background:var(--success);border-color:var(--success);}
+.tab-opt.wrong{border-color:var(--danger);background:rgba(193,80,46,.15);animation:shake .35s ease;}
+.tab-opt.wrong .chk{background:var(--danger);border-color:var(--danger);}
+
+.modal-feedback{padding:.75rem 1rem;border-radius:10px;font-size:.9rem;line-height:1.8;display:none;margin-bottom:.8rem;}
+.modal-feedback.show{display:block;}
+.modal-feedback.ok{background:rgba(111,174,79,.16);border:1.5px solid var(--success);color:#c8e8b8;}
+.modal-feedback.ko{background:rgba(193,80,46,.16);border:1.5px solid var(--danger);color:#f5c9b8;}
+.modal-hint{font-size:.84rem;color:var(--gold-bright);background:rgba(232,184,75,.09);border:1.5px dashed var(--gold);
+  border-radius:10px;padding:.6rem .9rem;margin-bottom:.9rem;line-height:1.8;display:none;}
+.modal-hint.show{display:block;}
+.modal-corr{font-size:.86rem;color:#dbe9ff;background:rgba(111,159,216,.10);border:1.5px solid #6f9fd8;
+  border-radius:10px;padding:.7rem 1rem;margin-bottom:.9rem;line-height:1.9;display:none;}
+.modal-corr.show{display:block;}
+.modal-corr strong{color:#a9cdff;}
+.chrono-wrap{display:none;align-items:center;gap:.9rem;margin-bottom:1rem;padding:.7rem 1rem;
+  border:2px solid var(--gold);border-radius:12px;background:rgba(232,184,75,.12);}
+.chrono-wrap.show{display:flex;}
+.chrono-num{font-family:'Courier New',Consolas,monospace;font-size:1.6rem;font-weight:800;
+  color:var(--gold-bright);min-width:2.4rem;text-align:center;flex-shrink:0;}
+.chrono-body{flex:1;min-width:0;}
+.chrono-label{font-family:'Courier New',Consolas,monospace;font-size:.8rem;color:var(--sand);margin-bottom:.4rem;}
+.chrono-track{height:9px;border-radius:99px;background:var(--stone-mid);overflow:hidden;}
+.chrono-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold-bright));width:100%;transition:width 1s linear;}
+.modal-actions{display:flex;justify-content:flex-end;gap:.6rem;}
+
+/* ---- Finale ---- */
+.finale-wrap{position:relative;text-align:center;padding:2.4rem 1rem;}
+.doors{position:relative;width:min(420px,86vw);height:260px;margin:0 auto 1.6rem;overflow:hidden;border-radius:16px;
+  border:2px solid var(--stone-mid);background:#0d0906;}
+.door-half{position:absolute;top:0;bottom:0;width:52%;background:linear-gradient(180deg,#4a3826,#2a1f14);
+  border:2px solid var(--stone-light);transition:transform 1.4s cubic-bezier(.6,0,.3,1);}
+.door-half.l{left:-1%;border-radius:16px 0 0 16px;}
+.door-half.r{right:-1%;border-radius:0 16px 16px 0;}
+.doors.open .door-half.l{transform:translateX(-100%);}
+.doors.open .door-half.r{transform:translateX(100%);}
+.door-light{position:absolute;inset:0;background:radial-gradient(circle, rgba(255,216,118,.9), rgba(255,216,118,0) 65%);
+  opacity:0;transition:opacity 1s ease .6s;}
+.doors.open .door-light{opacity:1;}
+.finale-title{font-family:Georgia,'Times New Roman',serif;color:var(--gold-bright);font-size:1.25rem;
+  font-weight:700;line-height:1.6;max-width:560px;margin:0 auto .9rem;}
+.finale-text{max-width:520px;margin:0 auto 1.6rem;line-height:1.85;color:var(--parchment);text-align:left;}
+.finale-text p{margin-bottom:.7rem;}
+.finale-time{display:inline-flex;align-items:center;gap:.5rem;font-family:'Courier New',Consolas,monospace;
+  font-size:1rem;font-weight:700;color:var(--gold-bright);background:rgba(232,184,75,.12);
+  border:1.5px solid var(--gold);border-radius:99px;padding:.5rem 1.1rem;margin-bottom:1.6rem;}
+
+@media(max-width:480px){
+  .modal{padding:1.3rem 1.1rem;}
+  .opt-grid{grid-template-columns:1fr 1fr;gap:.6rem;}
+}
+</style>
+</head>
+<body>
+<div class="torch-glow tg-l"></div>
+<div class="torch-glow tg-r"></div>
+
+<!-- ============ HUD ============ -->
+<div class="hud">
+  <div class="hud-title"><span class="em">🏺</span> Le Temple Oublié</div>
+  <div class="hud-mid" id="hud-mission">Salle de la mosaïque sacrée</div>
+  <div class="hud-frags">
+    <div class="hud-timer" id="hud-timer" aria-label="Chronomètre du défi">⏱ 00:00</div>
+    <div class="frag-row" id="frag-row">
+      <div class="frag" data-f="1"></div><div class="frag" data-f="2"></div>
+      <div class="frag" data-f="3"></div><div class="frag" data-f="4"></div>
+    </div>
+    <button class="btn-sound" id="btn-sound" onclick="toggleSound()" aria-label="Activer ou couper le son">🔊</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <!-- ============ SCÈNE 1 : INTRO ============ -->
+  <section class="scene show" id="scene-intro">
+    <div class="intro-card">
+      <div class="intro-eyebrow">Défi · symétrie centrale</div>
+      <h1>Le Secret de la Mosaïque Royale</h1>
+      <h2>Salle interdite du temple</h2>
+      <div class="intro-text">
+        <p>Après plusieurs heures d'exploration, tu découvres une salle interdite.</p>
+        <p>Au centre se trouve une immense mosaïque circulaire. Autour de celle-ci sont disposées quatre dalles de pierre, une tablette d'archéologue, des portes à mécanisme et un sceau ancien.</p>
+        <p class="quote">« Seules les dalles respectant parfaitement le demi-tour sacré permettront d'ouvrir la chambre du trésor. »</p>
+        <p>Tu dois identifier ce qui respecte vraiment la <strong>symétrie centrale</strong> pour réactiver le mécanisme antique, pièce par pièce.</p>
+      </div>
+      <button class="btn btn-torch" onclick="enterRoom()">🔥 Entrer dans la salle</button>
+    </div>
+  </section>
+
+  <!-- ============ SCÈNE 2 : SALLE (stations) ============ -->
+  <section class="scene" id="scene-room">
+    <div class="room-wrap">
+      <div class="mosaic-disc" id="mosaic-disc"><!-- injecté en JS --></div>
+      <div class="room-caption" id="room-caption">Choisis la station qui s'illumine pour continuer l'exploration.</div>
+      <div class="stations">
+        <button type="button" class="station" id="station-1" onclick="openMission(1)">
+          <span class="icon" aria-hidden="true">🪨</span><span class="name">Les dalles</span><span class="sub">Mission 1</span>
+        </button>
+        <button type="button" class="station" id="station-2" onclick="openMission(2)">
+          <span class="icon" aria-hidden="true">🚪</span><span class="name">Les portes</span><span class="sub">Mission 2</span>
+        </button>
+        <button type="button" class="station" id="station-3" onclick="openMission(3)">
+          <span class="icon" aria-hidden="true">📜</span><span class="name">La tablette</span><span class="sub">Mission 3</span>
+        </button>
+        <button type="button" class="station" id="station-4" onclick="openMission(4)">
+          <span class="icon" aria-hidden="true">🪬</span><span class="name">Le sceau</span><span class="sub">Mission 4</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCÈNE 3 : FINALE ============ -->
+  <section class="scene" id="scene-finale">
+    <div class="finale-wrap">
+      <div class="doors" id="doors">
+        <div class="door-light"></div>
+        <div class="door-half l"></div>
+        <div class="door-half r"></div>
+      </div>
+      <div class="finale-title">🏺 Grâce à ton sens de l'observation, tu as retrouvé les véritables symétries centrales et réveillé les mécanismes du Temple oublié. La voie vers les prochaines découvertes est désormais ouverte !</div>
+      <div class="finale-time" id="finale-time">⏱ Temps total : 00:00</div>
+      <div class="finale-text">
+        <p>Les engrenages de pierre commencent à tourner. Une lumière traverse la mosaïque centrale.</p>
+        <p>Une porte monumentale s'ouvre lentement devant toi.</p>
+        <p>Tu peux maintenant poursuivre ton exploration et découvrir ce que révèle l'Arrivée.</p>
+      </div>
+      <button class="btn btn-torch" onclick="restart()">🔄 Revivre le défi</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ MODALE MISSION ============ -->
+<div class="modal-veil" id="modal-veil">
+  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* ==================================================================
+   MOTEUR DE TUILES — un seul motif de référence, décliné par transform
+   rotate180  = vraie symétrie centrale (demi-tour)
+   axial      = symétrie axiale (piège fréquent)
+   translate  = translation (aucune rotation)
+   deform     = figure déformée (proportions faussées)
+   almost     = "presque" un demi-tour (rotation 165°, insuffisante)
+   random     = motif totalement différent, purement décoratif
+   ================================================================== */
+var MOTIF = '<path d="M14,14 L46,14 L46,30 L64,44 L46,58 L46,74 L14,74 Z" fill="var(--gold)"/>'
+          + '<circle cx="82" cy="28" r="8" fill="var(--teal-light)"/>';
+var MOTIF_RANDOM = '<polygon points="50,10 58,38 88,38 63,55 72,84 50,66 28,84 37,55 12,38 42,38" fill="var(--sand)"/>'
+                  + '<circle cx="20" cy="82" r="6" fill="var(--torch)"/>';
+
+function tileSVG(type,pivotDot){
+  var inner='', transform='';
+  if(type==='rotate180'){ transform='rotate(180 50 50)'; inner=MOTIF; }
+  else if(type==='axial'){ transform='matrix(-1,0,0,1,100,0)'; inner=MOTIF; }
+  else if(type==='translate'){ transform='translate(16,10)'; inner=MOTIF; }
+  else if(type==='deform'){ transform='translate(50,50) scale(1.4,0.6) translate(-50,-50)'; inner=MOTIF; }
+  else if(type==='almost'){ transform='rotate(165 50 50)'; inner=MOTIF; }
+  else if(type==='random'){ transform=''; inner=MOTIF_RANDOM; }
+  else if(type==='ref'){ transform=''; inner=MOTIF; }
+  var pivot = pivotDot ? '<circle cx="50" cy="50" r="4.2" fill="var(--gold-bright)" stroke="#150f0a" stroke-width="0.6" opacity=".9"/>' : '';
+  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+       + '<rect x="1" y="1" width="98" height="98" rx="10" fill="#150f0a" stroke="#4a3826" stroke-width="1.5"/>'
+       + '<g transform="'+transform+'">'+inner+'</g>' + pivot
+       + '</svg>';
+}
+
+function shuffle(arr){
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  return arr;
+}
+
+/* ==================================================================
+   ÉTAT
+   ================================================================== */
+var completed=[false,false,false,false];
+var soundOn=true;
+var attempts=[0,0,0,0];
+var audioCtx=null;
+
+function ac(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } return audioCtx; }
+function tone(freq,dur,type,startDelay,gainVal){
+  if(!soundOn) return;
+  var c=ac(); if(!c) return;
+  var t0=c.currentTime+(startDelay||0);
+  var osc=c.createOscillator(), g=c.createGain();
+  osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(gainVal||0.16,t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g); g.connect(c.destination);
+  osc.start(t0); osc.stop(t0+dur+0.05);
+}
+function playCorrect(){ tone(160,.35,'sine',0,.18); tone(320,.4,'sine',.08,.12); tone(640,.5,'triangle',.16,.08); }
+function playWrong(){ tone(180,.18,'sawtooth',0,.09); tone(120,.22,'sawtooth',.1,.09); }
+function playOpen(){ tone(220,.5,'sine',0,.14); tone(330,.55,'sine',.15,.12); tone(440,.7,'triangle',.3,.10); tone(660,.9,'sine',.45,.08); }
+
+window.toggleSound=function(){
+  soundOn=!soundOn;
+  $('btn-sound').textContent=soundOn?'🔊':'🔇';
+};
+
+/* ==================================================================
+   CHRONO GLOBAL DU DÉFI — chronomètre le temps total, du début à la fin
+   ================================================================== */
+var gameStartTime=null, gameTimerInterval=null;
+function formatTime(totalSec){
+  var m=Math.floor(totalSec/60), s=totalSec%60;
+  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+function startGameTimer(){
+  gameStartTime=Date.now();
+  clearInterval(gameTimerInterval);
+  updateGameTimer();
+  gameTimerInterval=setInterval(updateGameTimer,1000);
+}
+function updateGameTimer(){
+  var el=$('hud-timer'); if(!el||!gameStartTime) return;
+  var elapsed=Math.floor((Date.now()-gameStartTime)/1000);
+  el.textContent='⏱ '+formatTime(elapsed);
+}
+function stopGameTimer(){
+  clearInterval(gameTimerInterval);
+  if(!gameStartTime) return 0;
+  return Math.floor((Date.now()-gameStartTime)/1000);
+}
+function resetGameTimer(){
+  clearInterval(gameTimerInterval);
+  gameStartTime=null;
+  var el=$('hud-timer'); if(el) el.textContent='⏱ 00:00';
+}
+
+/* ==================================================================
+   MOSAÏQUE CENTRALE (élément signature)
+   ================================================================== */
+function renderMosaic(){
+  var colors=['#6b5238','#6b5238','#6b5238','#6b5238'];
+  var html='<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">'
+    +'<circle class="disc-glow" id="disc-glow" cx="100" cy="100" r="98" fill="none" stroke="var(--gold-bright)" stroke-width="4" opacity="0"/>'
+    +'<circle cx="100" cy="100" r="90" fill="#1c150e"/>'
+    +wedgePath(1,0,90)+wedgePath(2,90,180)+wedgePath(3,180,270)+wedgePath(4,270,360)
+    +'<circle class="disc-ring" cx="100" cy="100" r="90"/>'
+    +'<circle cx="100" cy="100" r="26" fill="#150f0a" stroke="var(--stone-light)" stroke-width="2"/>'
+    +'<text x="100" y="107" text-anchor="middle" font-size="26" fill="var(--gold)">🏺</text>'
+    +'</svg>';
+  $('mosaic-disc').innerHTML=html;
+}
+function polar(cx,cy,r,angleDeg){
+  var a=(angleDeg-90)*Math.PI/180;
+  return [cx+r*Math.cos(a), cy+r*Math.sin(a)];
+}
+function wedgePath(n,a0,a1){
+  var cx=100,cy=100,r=90;
+  var p0=polar(cx,cy,r,a0), p1=polar(cx,cy,r,a1);
+  var large = (a1-a0)>180?1:0;
+  var d='M'+cx+','+cy+' L'+p0[0]+','+p0[1]+' A'+r+','+r+' 0 '+large+' 1 '+p1[0]+','+p1[1]+' Z';
+  return '<path class="wedge" id="wedge-'+n+'" d="'+d+'" fill="var(--stone-mid)" stroke="#1c150e" stroke-width="2"/>';
+}
+function litWedge(n){
+  var w=$('wedge-'+n);
+  if(w){ w.setAttribute('fill','var(--gold)'); w.classList.add('lit'); }
+}
+
+/* ==================================================================
+   NAVIGATION ENTRE SCÈNES
+   ================================================================== */
+function showScene(id){
+  document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('show');});
+  $(id).classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+window.enterRoom=function(){
+  renderMosaic();
+  showScene('scene-room');
+  updateStations();
+  startGameTimer();
+};
+
+function updateStations(){
+  for(var n=1;n<=4;n++){
+    var st=$('station-'+n);
+    st.classList.remove('locked','unlocked','done');
+    var oldBadge=st.querySelector('.badge,.lock'); if(oldBadge)oldBadge.remove();
+    if(completed[n-1]){
+      st.classList.add('done');
+      st.disabled=false;
+      var b=document.createElement('span'); b.className='badge'; b.setAttribute('aria-hidden','true'); b.textContent='✓'; st.appendChild(b);
+    } else if(n===1 || completed[n-2]){
+      st.classList.add('unlocked');
+      st.disabled=false;
+    } else {
+      st.classList.add('locked');
+      st.disabled=true;
+      var l=document.createElement('span'); l.className='lock'; l.setAttribute('aria-hidden','true'); l.textContent='🔒'; st.appendChild(l);
+    }
+  }
+  $('hud-mission').textContent = 'Mission '+(completed.filter(function(v){return v;}).length+ (completed.every(function(v){return v;})?0:1))+' / 4';
+  for(var i=1;i<=4;i++){
+    var f=document.querySelector('.frag[data-f="'+i+'"]');
+    f.classList.toggle('done', completed[i-1]);
+  }
+}
+
+/* ==================================================================
+   DONNÉES DES MISSIONS
+   ================================================================== */
+var missionData = {};
+
+function buildMission1(){
+  var opts=shuffle([
+    {type:'rotate180',isCorrect:true},
+    {type:'axial',isCorrect:false},
+    {type:'translate',isCorrect:false},
+    {type:'deform',isCorrect:false}
+  ]);
+  return opts;
+}
+function buildMission2(){
+  var opts=shuffle([
+    {type:'rotate180',isCorrect:true},
+    {type:'axial',isCorrect:false},
+    {type:'translate',isCorrect:false},
+    {type:'almost',isCorrect:false}
+  ]);
+  return opts;
+}
+function buildMission4(){
+  var opts=shuffle([
+    {type:'rotate180',isCorrect:true},
+    {type:'axial',isCorrect:false},
+    {type:'almost',isCorrect:false},
+    {type:'random',isCorrect:false}
+  ]);
+  return opts;
+}
+missionData[1]=buildMission1();
+missionData[2]=buildMission2();
+missionData[4]=buildMission4();
+
+var mission3Options = shuffle([
+  {txt:'Retourner la pierre (comme un miroir)', isCorrect:false},
+  {txt:'Faire un quart de tour', isCorrect:false},
+  {txt:'Faire un demi-tour', isCorrect:true},
+  {txt:'La faire glisser (translation)', isCorrect:false}
+]);
+
+/* ==================================================================
+   OUVERTURE D'UNE MISSION
+   ================================================================== */
+window.openMission=function(n){
+  var st=$('station-'+n);
+  if(!st.classList.contains('unlocked') && !st.classList.contains('done')) return;
+  renderModal(n);
+  $('modal-veil').classList.add('show');
+};
+function startChrono(durationMs, onDone){
+  var wrap=$('modal-chrono'), fill=$('chrono-fill'), label=$('chrono-label'), num=$('chrono-num');
+  if(!wrap) { onDone && setTimeout(onDone, durationMs); return; }
+  wrap.classList.add('show');
+  var totalSec = Math.ceil(durationMs/1000);
+  var remaining = totalSec;
+  num.textContent = remaining;
+  label.textContent = '⏱ Retour à la salle dans '+remaining+' s';
+  fill.style.transition='none'; fill.style.width='100%';
+  requestAnimationFrame(function(){
+    fill.style.transition='width '+durationMs+'ms linear';
+    fill.style.width='0%';
+  });
+  // s'assurer que le chrono est bien visible à l'écran, même dans une modale longue
+  setTimeout(function(){ wrap.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 50);
+  clearInterval(window.__chronoInterval);
+  window.__chronoInterval = setInterval(function(){
+    remaining--;
+    if(remaining<=0){
+      clearInterval(window.__chronoInterval);
+      num.textContent = '0';
+      label.textContent = '⏱ Retour à la salle…';
+    } else {
+      num.textContent = remaining;
+      label.textContent = '⏱ Retour à la salle dans '+remaining+' s';
+    }
+  }, 1000);
+  window.__chronoTimeout = setTimeout(function(){
+    clearInterval(window.__chronoInterval);
+    onDone && onDone();
+  }, durationMs);
+}
+function clearChrono(){
+  clearInterval(window.__chronoInterval);
+  clearTimeout(window.__chronoTimeout);
+}
+
+window.closeModal=function(){ clearChrono(); $('modal-veil').classList.remove('show'); };
+
+function renderModal(n){
+  var m=$('modal');
+  if(n===1) m.innerHTML = tplMission1();
+  else if(n===2) m.innerHTML = tplMission2();
+  else if(n===3) m.innerHTML = tplMission3();
+  else if(n===4) m.innerHTML = tplMission4();
+  if(completed[n-1]) lockAsDone(n);
+  else if(attempts[n-1]>=2){
+    var h=$('m'+n+'-hint'), c=$('m'+n+'-corr');
+    if(h) h.classList.add('show');
+    if(c) c.classList.add('show');
+  }
+}
+
+function tplMission1(){
+  var opts=missionData[1];
+  var tiles = opts.map(function(o,i){
+    return '<button type="button" class="opt-tile" id="m1-opt-'+i+'" onclick="answer(1,'+i+')">'
+      + tileSVG(o.type,true)
+      + '<span class="lbl">Dalle '+String.fromCharCode(65+i)+'</span></button>';
+  }).join('');
+  return '<div class="modal-eyebrow">Mission 1 · Les dalles de pierre</div>'
+    +'<h2>La bonne dalle</h2>'
+    +'<div class="modal-story">Quatre mosaïques antiques sont gravées devant toi. Une seule provient réellement d\u2019une rotation de 180° autour du point doré — le vrai demi-tour sacré. Les trois autres cachent un piège : un reflet, un glissement ou une figure déformée.</div>'
+    +'<div class="modal-question">Quelle dalle respecte le demi-tour parfait ?</div>'
+    +'<div class="opt-grid">'+tiles+'</div>'
+    +'<div class="modal-hint" id="m1-hint">💡 Indice : lors d\u2019un vrai demi-tour, le motif tourne autour du point central, il ne se retourne pas comme dans un miroir, et il ne glisse pas sur le côté.</div>'
+    +'<div class="modal-corr" id="m1-corr">📖 <strong>Correction :</strong> imagine une aiguille plantée sur le point doré. Fais tourner toute la figure d\u2019un demi-tour (180°) autour de cette aiguille : le motif doit retrouver exactement sa forme, à la même distance du centre, mais de l\u2019autre côté. Si le motif est retourné comme dans un miroir, c\u2019est une symétrie axiale. S\u2019il est seulement décalé, c\u2019est une translation. Si ses proportions changent, la figure est déformée. Cherche la dalle où seule une vraie rotation de 180° a eu lieu.</div>'
+    +'<div class="modal-feedback" id="m1-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +modalActions();
+}
+
+function tplMission2(){
+  var opts=missionData[2];
+  var tiles = opts.map(function(o,i){
+    return '<button type="button" class="opt-tile" id="m2-opt-'+i+'" onclick="answer(2,'+i+')">'
+      + tileSVG(o.type,true)
+      + '<span class="lbl">Porte '+(i+1)+'</span></button>';
+  }).join('');
+  return '<div class="modal-eyebrow">Mission 2 · Les portes à mécanisme</div>'
+    +'<h2>Quel mécanisme va s\u2019activer ?</h2>'
+    +'<div class="frag-ref">' + tileSVG('ref',true) + '<div class="txt">Ce fragment de référence doit pivoter d\u2019un demi-tour exact autour du point doré pour actionner la porte.</div></div>'
+    +'<div class="modal-question">Observe les quatre portes. Une seule contient le fragment qui correspond vraiment à ce demi-tour.</div>'
+    +'<div class="opt-grid">'+tiles+'</div>'
+    +'<div class="modal-hint" id="m2-hint">💡 Indice : aucune construction n\u2019est nécessaire ici. Regarde simplement si le fragment semble avoir tourné autour du point, ou s\u2019il a seulement glissé ou changé de forme.</div>'
+    +'<div class="modal-corr" id="m2-corr">📖 <strong>Correction :</strong> compare chaque porte au fragment de référence. Seule une rotation de 180° autour du point doré donne le bon mécanisme : le fragment se retrouve exactement de l\u2019autre côté du point, à la même distance. Un fragment simplement décalé (translation) ou dont l\u2019allure a changé (presque un demi-tour, mais pas tout à fait) ne peut pas activer la porte.</div>'
+    +'<div class="modal-feedback" id="m2-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +modalActions();
+}
+
+function tplMission3(){
+  var opts=mission3Options;
+  var list = opts.map(function(o,i){
+    return '<button type="button" class="tab-opt" id="m3-opt-'+i+'" onclick="answer(3,'+i+')">'
+      + '<span class="chk" aria-hidden="true"></span><span class="txt">'+o.txt+'</span></button>';
+  }).join('');
+  return '<div class="modal-eyebrow">Mission 3 · La tablette de l\u2019archéologue</div>'
+    +'<h2>Réassembler la mosaïque sacrée</h2>'
+    +'<div class="modal-story">Une tablette gravée indique la marche à suivre pour réassembler la mosaïque, mais un mot manque. Il faut choisir le bon geste.</div>'
+    +'<div class="modal-question">Pour réassembler une mosaïque sacrée, il faut…</div>'
+    +'<div class="tab-list">'+list+'</div>'
+    +'<div class="modal-hint" id="m3-hint">💡 Indice : le geste sacré fait tourner la pierre d\u2019un demi-cercle complet autour d\u2019un seul point, sans la retourner ni la faire glisser.</div>'
+    +'<div class="modal-corr" id="m3-corr">📖 <strong>Correction :</strong> un demi-tour est une rotation de 180° autour d\u2019un point fixe. Un quart de tour ne fait que 90°, ce n\u2019est pas suffisant. Retourner la pierre correspond à une symétrie axiale (un effet miroir), pas à une rotation. La faire glisser correspond à une translation, sans aucune rotation. Seul le demi-tour correspond vraiment à la symétrie centrale.</div>'
+    +'<div class="modal-feedback" id="m3-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +modalActions();
+}
+
+function tplMission4(){
+  var opts=missionData[4];
+  var tiles = opts.map(function(o,i){
+    return '<button type="button" class="opt-tile" id="m4-opt-'+i+'" onclick="answer(4,'+i+')">'
+      + tileSVG(o.type,true)
+      + '<span class="lbl">Sceau '+(i+1)+'</span></button>';
+  }).join('');
+  return '<div class="modal-eyebrow">Mission 4 · Le sceau du temple</div>'
+    +'<h2>Le vrai sceau</h2>'
+    +'<div class="modal-story">Quatre sceaux sont gravés sur l\u2019autel. Un seul possède réellement un centre de symétrie : tourné d\u2019un demi-tour autour de son centre, il retrouve exactement sa position de départ.</div>'
+    +'<div class="modal-question">Quel sceau peut activer le mécanisme final ?</div>'
+    +'<div class="opt-grid">'+tiles+'</div>'
+    +'<div class="modal-hint" id="m4-hint">💡 Indice : les sceaux « presque » symétriques ou seulement symétriques par un miroir ne suffisent pas — il faut un vrai demi-tour.</div>'
+    +'<div class="modal-corr" id="m4-corr">📖 <strong>Correction :</strong> un sceau possède un centre de symétrie si, après une rotation de 180° autour de ce point, il se superpose exactement à lui-même. Un sceau seulement symétrique par un axe (effet miroir) ne repasse pas par lui-même après un demi-tour. Un sceau « presque » symétrique a un petit décalage qui casse l\u2019égalité parfaite. Un motif purement décoratif n\u2019a aucune relation de symétrie particulière.</div>'
+    +'<div class="modal-feedback" id="m4-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +modalActions();
+}
+
+function modalActions(){
+  return '<div class="chrono-wrap" id="modal-chrono" aria-hidden="true">'
+    +'<span class="chrono-num" id="chrono-num">4</span>'
+    +'<div class="chrono-body">'
+      +'<div class="chrono-label" id="chrono-label">⏱ Retour à la salle dans quelques secondes…</div>'
+      +'<div class="chrono-track"><div class="chrono-fill" id="chrono-fill"></div></div>'
+    +'</div></div>'
+    +'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">Quitter la salle</button></div>';
+}
+
+/* ==================================================================
+   VÉRIFICATION DES RÉPONSES
+   ================================================================== */
+window.answer=function(missionN, idx){
+  if(completed[missionN-1]) return;
+  var opts, prefix, fb, hint, corr;
+  if(missionN===1){opts=missionData[1];prefix='m1-opt-';fb=$('m1-fb');hint=$('m1-hint');corr=$('m1-corr');}
+  else if(missionN===2){opts=missionData[2];prefix='m2-opt-';fb=$('m2-fb');hint=$('m2-hint');corr=$('m2-corr');}
+  else if(missionN===3){opts=mission3Options;prefix='m3-opt-';fb=$('m3-fb');hint=$('m3-hint');corr=$('m3-corr');}
+  else if(missionN===4){opts=missionData[4];prefix='m4-opt-';fb=$('m4-fb');hint=$('m4-hint');corr=$('m4-corr');}
+
+  var chosen=opts[idx];
+  var el=$(prefix+idx);
+
+  if(chosen.isCorrect){
+    playCorrect();
+    for(var i=0;i<opts.length;i++){ var oEl=$(prefix+i); oEl.classList.add('locked'); oEl.disabled=true; }
+    el.classList.add('correct');
+    fb.className='modal-feedback show ok';
+    fb.innerHTML = feedbackOk(missionN);
+    completed[missionN-1]=true;
+    litWedge(missionN);
+    startChrono(5000, function(){
+      closeModal();
+      updateStations();
+      if(completed.every(function(v){return v;})){
+        setTimeout(triggerFinale, 500);
+      }
+    });
+  } else {
+    playWrong();
+    el.classList.add('wrong');
+    setTimeout(function(){ el.classList.remove('wrong'); }, 450);
+    attempts[missionN-1]++;
+    fb.className='modal-feedback show ko';
+    fb.innerHTML = feedbackKo(missionN);
+    if(attempts[missionN-1]>=2){
+      hint.classList.add('show');
+      if(corr) corr.classList.add('show');
+    }
+  }
+};
+
+function feedbackOk(n){
+  if(n===1) return '✅ La dalle s\u2019enfonce dans son socle. Un rouage se met en marche quelque part dans le mur.';
+  if(n===2) return '✅ La porte tremble légèrement puis s\u2019entrouvre. Le mécanisme a reconnu le vrai demi-tour.';
+  if(n===3) return '✅ La tablette s\u2019illumine faiblement. Tu tiens la bonne méthode.';
+  return '✅ Le sceau se met à luire d\u2019une lumière dorée. La mosaïque centrale absorbe son énergie.';
+}
+function feedbackKo(n){
+  if(n===1) return '❌ La dalle reste immobile. Regarde bien : ce motif a-t-il vraiment tourné autour du point, ou seulement glissé, ou été retourné ?';
+  if(n===2) return '❌ Rien ne se passe. Ce fragment ne correspond pas à un vrai demi-tour du fragment de référence.';
+  if(n===3) return '❌ La tablette reste muette. Ce geste ne correspond pas à la symétrie centrale.';
+  return '❌ Le sceau reste terne. Il lui manque un vrai centre de symétrie.';
+}
+
+function lockAsDone(n){
+  var opts, prefix;
+  if(n===1){opts=missionData[1];prefix='m1-opt-';}
+  else if(n===2){opts=missionData[2];prefix='m2-opt-';}
+  else if(n===3){opts=mission3Options;prefix='m3-opt-';}
+  else {opts=missionData[4];prefix='m4-opt-';}
+  opts.forEach(function(o,i){
+    var el=$(prefix+i);
+    if(el){ el.classList.add('locked'); el.disabled=true; if(o.isCorrect) el.classList.add('correct'); }
+  });
+  var fb=$( (n===1?'m1':n===2?'m2':n===3?'m3':'m4') + '-fb');
+  if(fb){ fb.className='modal-feedback show ok'; fb.innerHTML=feedbackOk(n); }
+}
+
+/* ==================================================================
+   FINALE
+   ================================================================== */
+function triggerFinale(){
+  var totalSec = stopGameTimer();
+  var glow=$('disc-glow'); if(glow) glow.classList.add('on');
+  playOpen();
+  setTimeout(function(){
+    showScene('scene-finale');
+    $('finale-time').textContent = '⏱ Temps total : '+formatTime(totalSec);
+    setTimeout(function(){ $('doors').classList.add('open'); }, 300);
+  }, 900);
+}
+
+window.restart=function(){
+  completed=[false,false,false,false];
+  attempts=[0,0,0,0];
+  missionData[1]=buildMission1();
+  missionData[2]=buildMission2();
+  missionData[4]=buildMission4();
+  mission3Options = shuffle(mission3Options);
+  $('doors').classList.remove('open');
+  resetGameTimer();
+  showScene('scene-intro');
+};
+
+document.addEventListener('DOMContentLoaded', function(){
+  renderMosaic();
+});
+})();
+</script>
+</body>
+</html>
