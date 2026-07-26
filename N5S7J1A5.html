@@ -3,334 +3,284 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Pazapa · Le Temple Oublié · Défi symétrie centrale</title>
+<title>Pazapa · 5e · Semaine 7 Jour 1 · Restaurer la mosaïque antique</title>
 <style>
-/* ============ JETONS DE DESIGN — Temple Oublié ============ */
+/* ============ JETONS DE DESIGN — Atelier de restauration archéologique ============
+   Interface calme et scientifique : pierre beige, sable, bois ancien, cuivre, bronze,
+   turquoise, blanc cassé. Aucun élément "jeu vidéo" : ni porte, ni cadenas, ni coffre. */
 :root{
-  --stone-dark:#181310;
-  --stone:#241b14;
-  --stone-mid:#4a3826;
-  --stone-light:#6b5238;
-  --sand:#c9a15f;
-  --gold:#e8b84b;
-  --gold-bright:#ffd876;
-  --torch:#e8672c;
-  --teal:#3f8f76;
-  --teal-light:#7fc9ae;
-  --parchment:#f3e6c8;
-  --ink:#241a12;
-  --success:#6fae4f;
-  --danger:#c1502e;
-  --radius:20px;
+  --stone:#efe7d3;
+  --stone-mid:#d9cba3;
+  --sand:#dcc38f;
+  --wood:#8a6a45;
+  --wood-dark:#5c4426;
+  --copper:#b5652f;
+  --bronze:#8a5a2b;
+  --turquoise:#2f9a93;
+  --turquoise-light:#7fd0ca;
+  --off-white:#fbf7ec;
+  --ink:#2c2417;
+  --muted:#7c7259;
+  --success:#2f8f6f;
+  --success-bg:#e3f3ec;
+  --danger:#a1442c;
+  --danger-bg:#f8e6e0;
+  --gold:#c9932f;
+  --radius:16px;
+  /* Couleur du jour Pazapa — Jour 1 : orange */
+  --day-color:#f5a623;
+  --day-dark:#8a5200;
+  --day-light:#fff3e0;
+  --day-gold:#ffcf6b;
+  --day-glow:rgba(245,166,35,.35);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:inherit;}
-html{scroll-behavior:smooth;}
+html{scroll-behavior:auto;}
 body{
-  min-height:100vh;
-  font-family:Arial,Helvetica,sans-serif;
-  color:var(--parchment);
+  min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--ink);
   background:
-    radial-gradient(ellipse 700px 500px at 15% 0%, rgba(232,103,44,.16), transparent 60%),
-    radial-gradient(ellipse 700px 500px at 85% 100%, rgba(63,143,118,.14), transparent 60%),
-    linear-gradient(180deg,#100c09,#1c1510 40%,#241b14 100%);
-  overflow-x:hidden;
-  position:relative;
-  padding-bottom:3rem;
+    radial-gradient(ellipse 760px 480px at 18% -8%, rgba(245,166,35,.32), transparent 62%),
+    radial-gradient(ellipse 620px 440px at 92% 105%, rgba(47,154,147,.18), transparent 60%),
+    linear-gradient(180deg,#d9be86,#a9895a 45%,#5c4426 100%);
+  overflow-x:hidden;position:relative;padding-bottom:3rem;
 }
-body::before{ /* texture pierre discrète */
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
-  background-image:
-    repeating-linear-gradient(0deg, rgba(0,0,0,.15) 0 2px, transparent 2px 64px),
-    repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 2px, transparent 2px 96px);
-}
-.torch-glow{position:fixed;width:260px;height:260px;border-radius:50%;z-index:0;pointer-events:none;
-  background:radial-gradient(circle, rgba(232,103,44,.30), transparent 70%);filter:blur(6px);}
-.torch-glow.tg-l{top:6%;left:-60px;animation:flicker 4.2s ease-in-out infinite;}
-.torch-glow.tg-r{bottom:8%;right:-60px;animation:flicker 3.6s ease-in-out infinite .7s;}
-@keyframes flicker{0%,100%{opacity:.7;transform:scale(1);}45%{opacity:1;transform:scale(1.08);}60%{opacity:.55;transform:scale(.96);}}
-@media (prefers-reduced-motion: reduce){ .torch-glow{animation:none !important;} *{animation-duration:.001ms !important;transition-duration:.001ms !important;} }
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.45;
+  background-image:radial-gradient(circle, rgba(70,50,20,.18) 1.2px, transparent 1.6px);
+  background-size:22px 22px;}
+.dust{position:fixed;width:4px;height:4px;border-radius:50%;background:rgba(232,184,75,.55);pointer-events:none;z-index:0;
+  box-shadow:0 0 4px rgba(232,184,75,.5);}
+.dust.d1{top:12%;left:6%;animation:dustDrift 10s ease-in-out infinite;}
+.dust.d2{top:55%;left:92%;animation:dustDrift 12s ease-in-out infinite 2s;}
+.dust.d3{top:78%;left:14%;animation:dustDrift 14s ease-in-out infinite 4s;}
+@keyframes dustDrift{0%,100%{transform:translateY(0) translateX(0);opacity:.3;}50%{transform:translateY(-22px) translateX(9px);opacity:.75;}}
+.deco-stone{position:fixed;z-index:0;pointer-events:none;opacity:.5;filter:drop-shadow(0 6px 8px rgba(40,25,5,.3));}
+.deco-stone.ds1{width:70px;top:8%;left:-18px;transform:rotate(-12deg);}
+.deco-stone.ds2{width:56px;bottom:6%;right:-14px;transform:rotate(18deg);}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important;transition-duration:.001ms !important;} }
 
 /* ---------- HUD ---------- */
-.hud{
-  position:sticky;top:0;z-index:50;
-  display:flex;align-items:center;justify-content:space-between;gap:1rem;
-  padding:.8rem 1.2rem;
-  background:linear-gradient(180deg, rgba(24,19,16,.96), rgba(24,19,16,.85));
-  border-bottom:2px solid var(--stone-mid);
-  backdrop-filter:blur(3px);
-  flex-wrap:wrap;
-}
-.hud-title{display:flex;align-items:center;gap:.6rem;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:1.05rem;color:var(--gold-bright);}
-.hud-title .em{font-size:1.3rem;}
-.hud-mid{font-family:'Courier New',Consolas,monospace;font-size:.8rem;color:var(--sand);text-align:center;letter-spacing:.03em;}
-.hud-frags{display:flex;align-items:center;gap:.7rem;}
-.hud-timer{font-family:'Courier New',Consolas,monospace;font-size:.85rem;font-weight:700;color:var(--gold-bright);
-  background:rgba(0,0,0,.28);border:1.5px solid var(--stone-light);border-radius:8px;
+.hud{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.7rem 1.2rem;background:rgba(251,247,236,.98);border-bottom:1px solid var(--stone-mid);
+  background-image:radial-gradient(circle, rgba(138,82,0,.06) 1px, transparent 1.4px);background-size:26px 26px;
+  box-shadow:0 3px 0 var(--day-color), 0 4px 16px rgba(40,25,5,.25);backdrop-filter:blur(3px);flex-wrap:wrap;position:relative;}
+.hud-brand{display:flex;flex-direction:column;line-height:1.3;}
+.hud-brand .logo{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:1rem;color:var(--wood-dark);letter-spacing:.03em;}
+.hud-brand .meta{font-family:'Courier New',Consolas,monospace;font-size:.72rem;color:var(--muted);}
+.hud-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.hud-timer{font-family:'Courier New',Consolas,monospace;font-size:.85rem;font-weight:700;color:var(--day-dark);
+  background:var(--day-light);border:1.5px solid var(--day-color);border-radius:8px;
   padding:.4rem .7rem;min-width:4.6em;text-align:center;letter-spacing:.03em;}
-.frag-row{display:flex;gap:.35rem;}
-.frag{width:20px;height:20px;border-radius:5px;background:var(--stone-mid);border:1.5px solid var(--stone-light);
-  transition:background .4s ease, box-shadow .4s ease, transform .4s ease;}
-.frag.done{background:var(--gold);border-color:var(--gold-bright);box-shadow:0 0 10px var(--gold);transform:scale(1.08);}
-.btn-sound{background:none;border:1.5px solid var(--stone-light);color:var(--parchment);border-radius:10px;
-  padding:.4rem .7rem;font-size:.95rem;cursor:pointer;min-height:2.6rem;font-family:'Courier New',Consolas,monospace;}
-.btn-sound:hover{border-color:var(--gold);}
-.btn-sound:focus-visible, .btn:focus-visible, .station:focus-visible, .opt-tile:focus-visible, .tab-opt:focus-visible{
-  outline:3px solid var(--teal-light);outline-offset:2px;
-}
+.btn-sound{background:none;border:1.5px solid var(--stone-mid);color:var(--ink);border-radius:10px;
+  padding:.4rem .7rem;font-size:.9rem;cursor:pointer;min-height:2.6rem;font-family:'Courier New',Consolas,monospace;}
+.btn-sound:hover{border-color:var(--day-color);}
+.btn-sound[aria-pressed="true"]{border-color:var(--day-color);color:var(--day-dark);}
+.btn-sound:focus-visible,.btn:focus-visible,.opt-tile:focus-visible,.tab-opt:focus-visible{outline:3px solid var(--turquoise);outline-offset:2px;}
 
-/* ---------- SCENES ---------- */
-.stage{max-width:900px;margin:0 auto;padding:1.6rem 1.2rem 0;position:relative;z-index:1;}
-.scene{display:none;}
-.scene.show{display:block;animation:fadeUp .45s ease both;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.stage{max-width:1080px;margin:0 auto;padding:1.4rem 1.2rem 0;position:relative;z-index:1;}
 
 /* ---- Intro ---- */
-.intro-card{
-  background:linear-gradient(180deg, rgba(74,56,38,.55), rgba(36,27,20,.75));
-  border:2px solid var(--stone-mid);border-radius:var(--radius);
-  padding:2.2rem 2rem;text-align:center;
-  box-shadow:0 10px 40px rgba(0,0,0,.45);
-}
-.intro-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal-light);margin-bottom:.6rem;}
-.intro-card h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.6rem,4vw,2.3rem);color:var(--gold-bright);margin-bottom:.4rem;line-height:1.3;}
-.intro-card h2{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:1.1rem;color:var(--sand);margin-bottom:1.2rem;}
-.intro-text{max-width:560px;margin:0 auto 1.6rem;line-height:1.85;font-size:1rem;color:var(--parchment);text-align:left;}
-.intro-text p{margin-bottom:.9rem;}
-.intro-text .quote{font-style:normal;border-left:3px solid var(--gold);padding:.6rem 1rem;background:rgba(232,184,75,.08);border-radius:6px;color:var(--gold-bright);}
-.btn{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.75rem 1.5rem;border-radius:12px;border:none;cursor:pointer;
-  font-family:Arial,Helvetica,sans-serif;font-weight:800;font-size:1rem;
-  min-height:2.7rem;transition:transform .12s ease, box-shadow .15s ease;
-}
+.intro-card{background:var(--off-white);border:2px solid var(--day-color);border-radius:var(--radius);
+  padding:2rem 2rem;text-align:center;max-width:680px;margin:1rem auto;box-shadow:0 16px 44px rgba(40,25,5,.35), 0 0 0 6px var(--day-light);}
+.intro-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--day-dark);margin-bottom:.5rem;}
+.intro-card h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.4rem,3.6vw,1.9rem);color:var(--day-dark);margin-bottom:1rem;line-height:1.3;}
+.intro-text{max-width:560px;margin:0 auto 1.4rem;line-height:1.85;font-size:.98rem;text-align:left;color:var(--ink);}
+.intro-text p{margin-bottom:.8rem;}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.72rem 1.4rem;border-radius:12px;border:none;cursor:pointer;
+  font-family:Arial,Helvetica,sans-serif;font-weight:800;font-size:.98rem;min-height:2.7rem;transition:transform .12s ease, box-shadow .15s ease;}
 .btn:active{transform:scale(.96);}
-.btn-torch{background:linear-gradient(135deg,var(--torch),#c94c1c);color:#fff8ec;box-shadow:0 4px 16px rgba(232,103,44,.4);}
-.btn-torch:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(232,103,44,.5);}
-.btn-ghost{background:transparent;border:2px solid var(--stone-light);color:var(--parchment);}
-.btn-ghost:hover{border-color:var(--gold);}
+.btn-copper{background:linear-gradient(135deg,var(--day-color),var(--day-gold));color:#4a2c00;box-shadow:0 6px 20px var(--day-glow), 0 0 0 1px rgba(255,255,255,.25) inset;}
+.btn-copper:hover{transform:translateY(-1px);box-shadow:0 9px 28px var(--day-glow), 0 0 0 1px rgba(255,255,255,.3) inset;}
+.btn-ghost{background:transparent;border:2px solid var(--stone-mid);color:var(--ink);}
+.btn-ghost:hover{border-color:var(--day-color);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
 
-/* ---- Salle / stations ---- */
-.room-wrap{display:flex;flex-direction:column;align-items:center;gap:1.6rem;}
-.room-caption{font-family:'Courier New',Consolas,monospace;font-size:.8rem;color:var(--sand);text-align:center;letter-spacing:.05em;}
-.mosaic-disc{width:min(280px,60vw);height:min(280px,60vw);position:relative;}
-.mosaic-disc svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 18px rgba(0,0,0,.5));}
-.wedge{transition:fill .6s ease, opacity .6s ease;}
-.wedge.lit{filter:drop-shadow(0 0 6px var(--gold-bright));}
-.disc-ring{fill:none;stroke:var(--stone-light);stroke-width:2;}
-.disc-glow{opacity:0;transition:opacity .8s ease;}
-.disc-glow.on{opacity:1;}
+/* ---- Atelier (persistant) ---- */
+#scene-atelier{display:none;}
+#scene-atelier.show{display:block;}
+.atelier-header{text-align:center;margin-bottom:1rem;}
+.atelier-header h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.3rem,3.2vw,1.7rem);color:var(--day-gold);text-shadow:0 2px 10px rgba(0,0,0,.25);margin-bottom:.5rem;}
+.atelier-header .sub{font-size:.9rem;color:#f3e6c8;max-width:600px;margin:0 auto;line-height:1.7;text-shadow:0 1px 6px rgba(0,0,0,.2);}
 
-.stations{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;width:100%;max-width:600px;}
-.station{
-  display:block;width:100%;
-  background:linear-gradient(180deg, rgba(74,56,38,.5), rgba(36,27,20,.7));
-  border:2px solid var(--stone-mid);border-radius:16px;
-  padding:1.1rem 1rem;text-align:center;cursor:pointer;
-  transition:border-color .2s, transform .15s, box-shadow .2s;
-  min-height:2.6rem;position:relative;
+.progress-wrap{max-width:620px;margin:0 auto 1rem;}
+.progress-label{display:flex;justify-content:space-between;font-family:'Courier New',Consolas,monospace;font-size:.78rem;color:var(--day-gold);text-shadow:0 1px 6px rgba(0,0,0,.25);margin-bottom:.35rem;font-weight:700;}
+.progress-track{height:13px;border-radius:99px;background:rgba(44,32,15,.45);overflow:hidden;border:1.5px solid rgba(255,207,107,.4);box-shadow:inset 0 2px 5px rgba(0,0,0,.3);}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--day-color),var(--day-gold));width:0%;transition:width .8s ease;box-shadow:0 0 14px var(--day-glow);}
+
+/* Bandeau compact : petits encarts + mosaïque, sur une seule ligne */
+.top-row{display:grid;grid-template-columns:135px minmax(0,420px) 135px;justify-content:center;gap:.7rem;align-items:stretch;margin-bottom:1rem;}
+@media(max-width:700px){
+  .top-row{grid-template-columns:1fr 1fr;grid-template-areas:"left right" "mosaic mosaic";}
+  .mini-left{grid-area:left;} .mini-right{grid-area:right;} .mosaic-wrap{grid-area:mosaic;}
 }
-.station .icon{font-size:2rem;display:block;margin-bottom:.4rem;}
-.station .name{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:.92rem;color:var(--sand);}
-.station .sub{font-size:.74rem;color:var(--stone-light);margin-top:.15rem;font-family:'Courier New',Consolas,monospace;}
-.station.unlocked{border-color:var(--gold);box-shadow:0 0 0 0 rgba(232,184,75,.5);animation:pulseGlow 2.2s ease-in-out infinite;}
-.station.unlocked:hover{transform:translateY(-2px);}
-@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(232,184,75,.35);}50%{box-shadow:0 0 0 10px rgba(232,184,75,0);}}
-.station.locked{opacity:.42;cursor:not-allowed;}
-.station:disabled{opacity:.42;cursor:not-allowed;}
-.station.done{border-color:var(--success);animation:none;}
-.station .badge{position:absolute;top:-10px;right:-10px;background:var(--success);color:#fff;
-  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;
-  border:2px solid var(--stone-dark);}
-.station .lock{position:absolute;top:-10px;right:-10px;background:var(--stone-mid);color:var(--parchment);
-  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;
-  border:2px solid var(--stone-dark);}
 
-/* ---- Modal mission ---- */
-.modal-veil{position:fixed;inset:0;background:rgba(10,7,5,.72);z-index:100;display:none;align-items:flex-start;justify-content:center;
-  padding:2.2rem 1rem;overflow-y:auto;}
-.modal-veil.show{display:flex;}
-.modal{
-  width:100%;max-width:640px;background:linear-gradient(180deg,#2a2015,#1c150e);
-  border:2px solid var(--stone-mid);border-radius:var(--radius);padding:1.8rem 1.7rem;
-  box-shadow:0 20px 60px rgba(0,0,0,.55);animation:fadeUp .35s ease both;
-}
-.modal-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-light);margin-bottom:.3rem;}
-.modal h2{font-family:Georgia,'Times New Roman',serif;color:var(--gold-bright);font-size:1.35rem;margin-bottom:.7rem;line-height:1.3;}
-.modal-story{font-size:.94rem;line-height:1.85;color:var(--parchment);margin-bottom:1.2rem;}
-.modal-question{font-weight:800;font-size:1rem;color:var(--sand);margin-bottom:1rem;line-height:1.7;}
+.mini-panel{background:var(--off-white);border:1.5px dashed var(--day-color);border-radius:12px;padding:.5rem .4rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.2rem;
+  box-shadow:0 6px 14px rgba(40,25,5,.2);}
+.mini-panel .mini-icon{width:44px;height:44px;flex-shrink:0;}
+.mini-panel .mini-icon svg{width:100%;height:100%;display:block;}
+.mini-panel .mini-label{font-family:Georgia,'Times New Roman',serif;font-size:.68rem;color:var(--day-dark);line-height:1.2;}
+.mini-panel .mini-sub{font-family:'Courier New',Consolas,monospace;font-size:.66rem;color:var(--muted);}
+.mini-tools{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;}
+.mini-tools svg{width:22px;height:22px;}
 
-/* Grilles d'options (dalles / portes / sceaux) */
-.opt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;margin-bottom:1rem;}
-.opt-tile{
-  background:var(--stone);border:2.5px solid var(--stone-mid);border-radius:14px;
-  padding:.7rem;cursor:pointer;text-align:center;transition:border-color .15s, transform .1s, background .2s;
-  min-height:2.6rem;display:block;width:100%;
-}
-.opt-tile:hover:not(.locked){border-color:var(--gold);transform:translateY(-2px);}
-.opt-tile svg{width:100%;height:auto;display:block;margin-bottom:.4rem;border-radius:8px;background:#150f0a;}
-.opt-tile .lbl{font-family:'Courier New',Consolas,monospace;font-size:.78rem;color:var(--sand);}
-.opt-tile.locked,.opt-tile:disabled{cursor:not-allowed;}
-.opt-tile.correct{border-color:var(--success);background:rgba(111,174,79,.15);}
-.opt-tile.correct .lbl::after{content:' ✓ mécanisme activé';color:var(--success);}
-.opt-tile.wrong{border-color:var(--danger);background:rgba(193,80,46,.15);animation:shake .35s ease;}
+/* Mosaïque centrale */
+.mosaic-wrap{position:relative;background:var(--off-white);border:2px solid var(--day-color);border-radius:var(--radius);
+  padding:.6rem;overflow:hidden;box-shadow:0 18px 46px rgba(40,25,5,.4), 0 0 0 7px var(--day-light), 0 0 26px var(--day-glow);}
+.mosaic-wrap svg{display:block;width:100%;height:auto;}
+.light-beam{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%, var(--day-glow), transparent 70%);
+  opacity:0;transition:opacity 1.4s ease;pointer-events:none;}
+.light-beam.on{opacity:1;}
+.dust-particle{opacity:.55;animation:dustFade 900ms ease forwards;}
+@keyframes dustFade{from{opacity:.55;transform:translateY(0);}to{opacity:0;transform:translateY(-6px);}}
+@keyframes successPulse{0%{box-shadow:0 0 0 0 var(--day-glow);}70%{box-shadow:0 0 0 14px rgba(245,166,35,0);}100%{box-shadow:0 0 0 0 rgba(245,166,35,0);}}
+.pulse{animation:successPulse .9s ease;}
+
+.work-card{background:var(--off-white);border:2px solid var(--day-color);border-radius:var(--radius);padding:1.5rem 1.4rem;
+  box-shadow:0 16px 40px rgba(40,25,5,.34), 0 0 0 5px var(--day-light), inset 0 1px 0 rgba(255,255,255,.6);
+  background-image:radial-gradient(circle, rgba(138,106,69,.05) 1px, transparent 1.4px);background-size:16px 16px;position:relative;}
+.work-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--day-dark);margin-bottom:.3rem;}
+.work-card h2{font-family:Georgia,'Times New Roman',serif;color:var(--day-dark);font-size:1.12rem;margin-bottom:.7rem;line-height:1.3;}
+.work-story{font-size:.92rem;color:var(--muted);margin-bottom:.9rem;line-height:1.8;}
+.work-consigne{font-weight:800;font-size:.94rem;color:var(--ink);margin-bottom:1rem;line-height:1.7;
+  background:var(--day-light);border-left:4px solid var(--day-color);border-radius:8px;padding:.65rem .9rem;}
+.frag-ref{display:flex;align-items:center;gap:.9rem;background:rgba(181,101,47,.08);border:1.5px dashed var(--copper);
+  border-radius:12px;padding:.65rem .9rem;margin-bottom:1rem;}
+.frag-ref svg{width:60px;height:60px;flex-shrink:0;background:#150f0a10;border-radius:8px;}
+.frag-ref .txt{font-size:.84rem;color:var(--wood-dark);line-height:1.7;}
+
+.opt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-bottom:1rem;}
+.opt-tile{background:var(--off-white);border:2.5px solid var(--stone-mid);border-radius:12px;padding:.65rem;
+  cursor:pointer;text-align:center;transition:border-color .15s,transform .1s;min-height:2.6rem;display:block;width:100%;}
+.opt-tile:hover:not(:disabled){border-color:var(--day-color);transform:translateY(-2px);}
+.opt-tile svg{width:100%;height:auto;display:block;margin-bottom:.4rem;border-radius:8px;}
+.opt-tile .lbl{font-family:'Courier New',Consolas,monospace;font-size:.76rem;color:var(--muted);}
+.opt-tile.correct{border-color:var(--success);background:var(--success-bg);}
+.opt-tile.correct .lbl::after{content:' ✓';color:var(--success);}
+.opt-tile.wrong{border-color:var(--danger);background:var(--danger-bg);animation:shake .35s ease;}
 .opt-tile.wrong .lbl::after{content:' ✗';color:var(--danger);}
-@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.opt-tile:disabled{cursor:not-allowed;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
 
-/* Fragments (mission 2) : référence fixe + 4 candidats */
-.frag-ref{display:flex;align-items:center;gap:.9rem;background:rgba(63,143,118,.12);border:1.5px dashed var(--teal-light);
-  border-radius:12px;padding:.7rem 1rem;margin-bottom:1rem;}
-.frag-ref svg{width:64px;height:64px;flex-shrink:0;background:#150f0a;border-radius:8px;}
-.frag-ref .txt{font-size:.86rem;color:var(--teal-light);line-height:1.7;}
-
-/* Tablette (mission 3) : liste de méthodes */
-.tab-list{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1rem;}
-.tab-opt{
-  display:flex;align-items:center;gap:.8rem;background:var(--stone);
-  border:2.5px solid var(--stone-mid);border-radius:12px;padding:.75rem 1rem;
-  cursor:pointer;transition:border-color .15s,background .2s;min-height:2.6rem;width:100%;
-}
-.tab-opt:hover:not(.locked){border-color:var(--gold);}
-.tab-opt .chk{width:20px;height:20px;border-radius:5px;border:2px solid var(--stone-light);flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;}
-.tab-opt .txt{font-size:.95rem;color:var(--parchment);}
-.tab-opt.locked,.tab-opt:disabled{cursor:not-allowed;}
-.tab-opt.correct{border-color:var(--success);background:rgba(111,174,79,.15);}
+.tab-list{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.tab-opt{display:flex;align-items:center;gap:.7rem;background:var(--off-white);border:2.5px solid var(--stone-mid);
+  border-radius:10px;padding:.7rem .9rem;cursor:pointer;min-height:2.6rem;transition:border-color .15s;width:100%;}
+.tab-opt:hover:not(:disabled){border-color:var(--day-color);}
+.tab-opt .chk{width:18px;height:18px;border-radius:5px;border:2px solid var(--stone-mid);flex-shrink:0;}
+.tab-opt .txt{font-size:.92rem;color:var(--ink);}
+.tab-opt.correct{border-color:var(--success);background:var(--success-bg);}
 .tab-opt.correct .chk{background:var(--success);border-color:var(--success);}
-.tab-opt.wrong{border-color:var(--danger);background:rgba(193,80,46,.15);animation:shake .35s ease;}
+.tab-opt.wrong{border-color:var(--danger);background:var(--danger-bg);animation:shake .35s ease;}
 .tab-opt.wrong .chk{background:var(--danger);border-color:var(--danger);}
+.tab-opt:disabled{cursor:not-allowed;}
 
-.modal-feedback{padding:.75rem 1rem;border-radius:10px;font-size:.9rem;line-height:1.8;display:none;margin-bottom:.8rem;}
-.modal-feedback.show{display:block;}
-.modal-feedback.ok{background:rgba(111,174,79,.16);border:1.5px solid var(--success);color:#c8e8b8;}
-.modal-feedback.ko{background:rgba(193,80,46,.16);border:1.5px solid var(--danger);color:#f5c9b8;}
-.modal-hint{font-size:.84rem;color:var(--gold-bright);background:rgba(232,184,75,.09);border:1.5px dashed var(--gold);
-  border-radius:10px;padding:.6rem .9rem;margin-bottom:.9rem;line-height:1.8;display:none;}
-.modal-hint.show{display:block;}
-.modal-corr{font-size:.86rem;color:#dbe9ff;background:rgba(111,159,216,.10);border:1.5px solid #6f9fd8;
-  border-radius:10px;padding:.7rem 1rem;margin-bottom:.9rem;line-height:1.9;display:none;}
-.modal-corr.show{display:block;}
-.modal-corr strong{color:#a9cdff;}
-.chrono-wrap{display:none;align-items:center;gap:.9rem;margin-bottom:1rem;padding:.7rem 1rem;
-  border:2px solid var(--gold);border-radius:12px;background:rgba(232,184,75,.12);}
+.actions-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.3rem;}
+.hint-box{margin-top:.7rem;background:var(--day-light);border:2px dashed var(--day-color);border-radius:10px;
+  padding:.6rem .9rem;font-size:.84rem;color:var(--day-dark);display:none;line-height:1.8;}
+.hint-box.show{display:block;}
+.corr-box{margin-top:1rem;padding-top:.9rem;border-top:2px dotted var(--stone-mid);background:rgba(47,154,147,.08);border:1.5px solid var(--turquoise);border-radius:10px;
+  padding:.65rem .9rem;font-size:.85rem;color:#1c4d47;display:none;line-height:1.85;}
+.corr-box.show{display:block;}
+.corr-box strong{color:var(--turquoise);}
+.feedback{margin-top:.8rem;padding:.65rem .9rem;border-radius:10px;font-size:.88rem;line-height:1.8;display:none;}
+.feedback.show{display:block;}
+.feedback.ok{background:var(--success-bg);border:2px solid var(--success);color:#1c4d3c;box-shadow:0 0 12px rgba(47,143,111,.25);}
+.feedback.ko{background:var(--danger-bg);border:2px solid var(--danger);color:#5c2416;}
+.feedback.info{background:rgba(47,154,147,.08);border:1.5px solid var(--turquoise);color:#1c4d47;}
+
+.chrono-wrap{display:none;align-items:center;gap:.9rem;margin-top:1rem;padding:.65rem 1rem;
+  border:2px solid var(--day-color);border-radius:12px;background:var(--day-light);}
 .chrono-wrap.show{display:flex;}
-.chrono-num{font-family:'Courier New',Consolas,monospace;font-size:1.6rem;font-weight:800;
-  color:var(--gold-bright);min-width:2.4rem;text-align:center;flex-shrink:0;}
+.chrono-num{font-family:'Courier New',Consolas,monospace;font-size:1.4rem;font-weight:800;color:var(--day-dark);min-width:2.2rem;text-align:center;flex-shrink:0;}
 .chrono-body{flex:1;min-width:0;}
-.chrono-label{font-family:'Courier New',Consolas,monospace;font-size:.8rem;color:var(--sand);margin-bottom:.4rem;}
-.chrono-track{height:9px;border-radius:99px;background:var(--stone-mid);overflow:hidden;}
-.chrono-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold-bright));width:100%;transition:width 1s linear;}
-.modal-actions{display:flex;justify-content:flex-end;gap:.6rem;}
+.chrono-label{font-family:'Courier New',Consolas,monospace;font-size:.76rem;color:var(--day-dark);margin-bottom:.3rem;}
+.chrono-track{height:8px;border-radius:99px;background:var(--stone-mid);overflow:hidden;}
+.chrono-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--day-color),var(--day-gold));width:100%;transition:width 1s linear;}
 
-/* ---- Finale ---- */
-.finale-wrap{position:relative;text-align:center;padding:2.4rem 1rem;}
-.doors{position:relative;width:min(420px,86vw);height:260px;margin:0 auto 1.6rem;overflow:hidden;border-radius:16px;
-  border:2px solid var(--stone-mid);background:#0d0906;}
-.door-half{position:absolute;top:0;bottom:0;width:52%;background:linear-gradient(180deg,#4a3826,#2a1f14);
-  border:2px solid var(--stone-light);transition:transform 1.4s cubic-bezier(.6,0,.3,1);}
-.door-half.l{left:-1%;border-radius:16px 0 0 16px;}
-.door-half.r{right:-1%;border-radius:0 16px 16px 0;}
-.doors.open .door-half.l{transform:translateX(-100%);}
-.doors.open .door-half.r{transform:translateX(100%);}
-.door-light{position:absolute;inset:0;background:radial-gradient(circle, rgba(255,216,118,.9), rgba(255,216,118,0) 65%);
-  opacity:0;transition:opacity 1s ease .6s;}
-.doors.open .door-light{opacity:1;}
-.finale-title{font-family:Georgia,'Times New Roman',serif;color:var(--gold-bright);font-size:1.25rem;
-  font-weight:700;line-height:1.6;max-width:560px;margin:0 auto .9rem;}
-.finale-text{max-width:520px;margin:0 auto 1.6rem;line-height:1.85;color:var(--parchment);text-align:left;}
-.finale-text p{margin-bottom:.7rem;}
-.finale-time{display:inline-flex;align-items:center;gap:.5rem;font-family:'Courier New',Consolas,monospace;
-  font-size:1rem;font-weight:700;color:var(--gold-bright);background:rgba(232,184,75,.12);
-  border:1.5px solid var(--gold);border-radius:99px;padding:.5rem 1.1rem;margin-bottom:1.6rem;}
+.final-card{text-align:center;padding:1rem 0 1.1rem;position:relative;}
+.final-card::before{content:'';display:block;width:64px;height:3px;margin:0 auto 1rem;background:linear-gradient(90deg,var(--day-color),var(--day-gold));border-radius:99px;}
+.final-card h2{font-family:Georgia,'Times New Roman',serif;color:var(--day-dark);font-size:1.25rem;margin-bottom:.8rem;}
+.final-card p{font-size:.94rem;color:var(--ink);line-height:1.85;max-width:520px;margin:0 auto .5rem;}
+.final-time{display:inline-flex;align-items:center;gap:.5rem;font-family:'Courier New',Consolas,monospace;
+  font-size:.94rem;font-weight:700;color:var(--day-dark);background:var(--day-light);
+  border:1.5px solid var(--day-color);border-radius:99px;padding:.45rem 1rem;margin:.8rem 0 1.1rem;}
 
 @media(max-width:480px){
-  .modal{padding:1.3rem 1.1rem;}
-  .opt-grid{grid-template-columns:1fr 1fr;gap:.6rem;}
+  .work-card{padding:1.1rem 1rem;}
+  .opt-grid{gap:.6rem;}
+  .deco-stone{display:none;}
 }
 </style>
 </head>
 <body>
-<div class="torch-glow tg-l"></div>
-<div class="torch-glow tg-r"></div>
+<div class="dust d1"></div><div class="dust d2"></div><div class="dust d3"></div>
+<svg class="deco-stone ds1" viewBox="0 0 70 70" aria-hidden="true"><polygon points="10,50 6,26 30,8 58,14 62,42 40,64 18,60" fill="#8a6a45" opacity=".85"/><polygon points="18,42 20,28 34,20 48,26 46,44 30,52" fill="#6b4d2e" opacity=".5"/></svg>
+<svg class="deco-stone ds2" viewBox="0 0 70 70" aria-hidden="true"><polygon points="8,44 14,18 42,6 62,22 58,50 32,64" fill="#8a6a45" opacity=".85"/><circle cx="34" cy="34" r="9" fill="none" stroke="#2f9a93" stroke-width="2" opacity=".5"/></svg>
 
-<!-- ============ HUD ============ -->
 <div class="hud">
-  <div class="hud-title"><span class="em">🏺</span> Le Temple Oublié</div>
-  <div class="hud-mid" id="hud-mission">Salle de la mosaïque sacrée</div>
-  <div class="hud-frags">
-    <div class="hud-timer" id="hud-timer" aria-label="Chronomètre du défi">⏱ 00:00</div>
-    <div class="frag-row" id="frag-row">
-      <div class="frag" data-f="1"></div><div class="frag" data-f="2"></div>
-      <div class="frag" data-f="3"></div><div class="frag" data-f="4"></div>
-    </div>
-    <button class="btn-sound" id="btn-sound" onclick="toggleSound()" aria-label="Activer ou couper le son">🔊</button>
+  <div class="hud-brand">
+    <span class="logo">PAZAPA</span>
+    <span class="meta">Mathématiques · 5e · Semaine 7 · Jour 1 · Je relève le défi</span>
+  </div>
+  <div class="hud-right">
+    <div class="hud-timer" id="hud-timer" role="status" aria-live="off" aria-label="Chronomètre du défi">⏱ 00:00</div>
+    <button class="btn-sound" id="btn-sound" onclick="toggleSound()" aria-pressed="true" aria-label="Couper le son">🔊 Son activé</button>
   </div>
 </div>
 
 <div class="stage">
 
-  <!-- ============ SCÈNE 1 : INTRO ============ -->
-  <section class="scene show" id="scene-intro">
+  <!-- ============ INTRO ============ -->
+  <section id="scene-intro">
     <div class="intro-card">
-      <div class="intro-eyebrow">Défi · symétrie centrale</div>
-      <h1>Le Secret de la Mosaïque Royale</h1>
-      <h2>Salle interdite du temple</h2>
+      <div class="intro-eyebrow">Je relève le défi · symétrie centrale</div>
+      <h1>🏺 Restaurer la mosaïque antique</h1>
       <div class="intro-text">
-        <p>Après plusieurs heures d'exploration, tu découvres une salle interdite.</p>
-        <p>Au centre se trouve une immense mosaïque circulaire. Autour de celle-ci sont disposées quatre dalles de pierre, une tablette d'archéologue, des portes à mécanisme et un sceau ancien.</p>
-        <p class="quote">« Seules les dalles respectant parfaitement le demi-tour sacré permettront d'ouvrir la chambre du trésor. »</p>
-        <p>Tu dois identifier ce qui respecte vraiment la <strong>symétrie centrale</strong> pour réactiver le mécanisme antique, pièce par pièce.</p>
+        <p>Quatre pierres de la grande mosaïque du temple ont été retrouvées. Utilise la symétrie centrale pour replacer chacune d'elles à son emplacement d'origine.</p>
+        <p>À toi de terminer la restauration.</p>
       </div>
-      <button class="btn btn-torch" onclick="enterRoom()">🔥 Entrer dans la salle</button>
+      <button class="btn btn-copper" onclick="startGame()">🏺 Commencer la restauration</button>
     </div>
   </section>
 
-  <!-- ============ SCÈNE 2 : SALLE (stations) ============ -->
-  <section class="scene" id="scene-room">
-    <div class="room-wrap">
-      <div class="mosaic-disc" id="mosaic-disc"><!-- injecté en JS --></div>
-      <div class="room-caption" id="room-caption">Choisis la station qui s'illumine pour continuer l'exploration.</div>
-      <div class="stations">
-        <button type="button" class="station" id="station-1" onclick="openMission(1)">
-          <span class="icon" aria-hidden="true">🪨</span><span class="name">Les dalles</span><span class="sub">Mission 1</span>
-        </button>
-        <button type="button" class="station" id="station-2" onclick="openMission(2)">
-          <span class="icon" aria-hidden="true">🚪</span><span class="name">Les portes</span><span class="sub">Mission 2</span>
-        </button>
-        <button type="button" class="station" id="station-3" onclick="openMission(3)">
-          <span class="icon" aria-hidden="true">📜</span><span class="name">La tablette</span><span class="sub">Mission 3</span>
-        </button>
-        <button type="button" class="station" id="station-4" onclick="openMission(4)">
-          <span class="icon" aria-hidden="true">🪬</span><span class="name">Le sceau</span><span class="sub">Mission 4</span>
-        </button>
+  <!-- ============ ATELIER (persistant, ne disparaît jamais) ============ -->
+  <section id="scene-atelier">
+    <div class="atelier-header">
+      <h1>🏺 Restaurer la mosaïque antique</h1>
+      <div class="sub">Examine chaque pierre récupérée sur le chantier, puis replace-la à son emplacement d'origine.</div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Restauration de la mosaïque</span><span id="progress-pct">0 %</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div class="top-row">
+      <div class="mini-panel mini-left">
+        <div class="mini-icon" id="stones-tray"><!-- injecté en JS --></div>
+        <div class="mini-label">Pierre à l'étude</div>
+        <div class="mini-sub" id="stones-count">Pierre 1 sur 4</div>
+      </div>
+
+      <div class="mosaic-wrap">
+        <div class="light-beam" id="light-beam"></div>
+        <div id="mosaic-svg-holder"><!-- injecté en JS --></div>
+      </div>
+
+      <div class="mini-panel mini-right">
+        <div class="mini-label">Matériel</div>
+        <div class="mini-tools">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><title>Truelle</title><path d="M10,30 L22,18 L26,22 L14,34 Z" fill="#b5652f" stroke="#8a5a2b" stroke-width="1.4"/><line x1="22" y1="18" x2="32" y2="8" stroke="#8a6a45" stroke-width="4" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 40 40" aria-hidden="true"><title>Pinceau</title><line x1="8" y1="32" x2="26" y2="14" stroke="#8a6a45" stroke-width="4" stroke-linecap="round"/><path d="M24,10 L32,18 L26,24 L18,16 Z" fill="#b5652f"/></svg>
+          <svg viewBox="0 0 40 40" aria-hidden="true"><title>Tamis</title><rect x="6" y="10" width="28" height="14" rx="1" fill="none" stroke="#8a6a45" stroke-width="2"/><line x1="8" y1="24" x2="32" y2="30" stroke="#5c4426" stroke-width="2"/></svg>
+          <svg viewBox="0 0 40 40" aria-hidden="true"><title>Seau</title><path d="M10,14 L30,14 L27,34 L13,34 Z" fill="none" stroke="#8a5a2b" stroke-width="2.2"/><line x1="8" y1="14" x2="32" y2="14" stroke="#5c4426" stroke-width="2"/></svg>
+        </div>
       </div>
     </div>
+
+    <div class="work-card" id="work-card"><!-- injecté en JS --></div>
   </section>
 
-  <!-- ============ SCÈNE 3 : FINALE ============ -->
-  <section class="scene" id="scene-finale">
-    <div class="finale-wrap">
-      <div class="doors" id="doors">
-        <div class="door-light"></div>
-        <div class="door-half l"></div>
-        <div class="door-half r"></div>
-      </div>
-      <div class="finale-title">🏺 Grâce à ton sens de l'observation, tu as retrouvé les véritables symétries centrales et réveillé les mécanismes du Temple oublié. La voie vers les prochaines découvertes est désormais ouverte !</div>
-      <div class="finale-time" id="finale-time">⏱ Temps total : 00:00</div>
-      <div class="finale-text">
-        <p>Les engrenages de pierre commencent à tourner. Une lumière traverse la mosaïque centrale.</p>
-        <p>Une porte monumentale s'ouvre lentement devant toi.</p>
-        <p>Tu peux maintenant poursuivre ton exploration et découvrir ce que révèle l'Arrivée.</p>
-      </div>
-      <button class="btn btn-torch" onclick="restart()">🔄 Revivre le défi</button>
-    </div>
-  </section>
-
-</div>
-
-<!-- ============ MODALE MISSION ============ -->
-<div class="modal-veil" id="modal-veil">
-  <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
 </div>
 
 <script>
@@ -339,7 +289,7 @@ body::before{ /* texture pierre discrète */
 var $=function(id){return document.getElementById(id);};
 
 /* ==================================================================
-   MOTEUR DE TUILES — un seul motif de référence, décliné par transform
+   MOTEUR DE TUILES — inchangé (même moteur mathématique que la version précédente)
    rotate180  = vraie symétrie centrale (demi-tour)
    axial      = symétrie axiale (piège fréquent)
    translate  = translation (aucune rotation)
@@ -347,10 +297,10 @@ var $=function(id){return document.getElementById(id);};
    almost     = "presque" un demi-tour (rotation 165°, insuffisante)
    random     = motif totalement différent, purement décoratif
    ================================================================== */
-var MOTIF = '<path d="M14,14 L46,14 L46,30 L64,44 L46,58 L46,74 L14,74 Z" fill="var(--gold)"/>'
-          + '<circle cx="82" cy="28" r="8" fill="var(--teal-light)"/>';
+var MOTIF = '<path d="M14,14 L46,14 L46,30 L64,44 L46,58 L46,74 L14,74 Z" fill="var(--copper)"/>'
+          + '<circle cx="82" cy="28" r="8" fill="var(--turquoise)"/>';
 var MOTIF_RANDOM = '<polygon points="50,10 58,38 88,38 63,55 72,84 50,66 28,84 37,55 12,38 42,38" fill="var(--sand)"/>'
-                  + '<circle cx="20" cy="82" r="6" fill="var(--torch)"/>';
+                  + '<circle cx="20" cy="82" r="6" fill="var(--wood)"/>';
 
 function tileSVG(type,pivotDot){
   var inner='', transform='';
@@ -361,13 +311,12 @@ function tileSVG(type,pivotDot){
   else if(type==='almost'){ transform='rotate(165 50 50)'; inner=MOTIF; }
   else if(type==='random'){ transform=''; inner=MOTIF_RANDOM; }
   else if(type==='ref'){ transform=''; inner=MOTIF; }
-  var pivot = pivotDot ? '<circle cx="50" cy="50" r="4.2" fill="var(--gold-bright)" stroke="#150f0a" stroke-width="0.6" opacity=".9"/>' : '';
+  var pivot = pivotDot ? '<circle cx="50" cy="50" r="4.2" fill="#c9932f" stroke="#5c4426" stroke-width="0.6" opacity=".9"/>' : '';
   return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
-       + '<rect x="1" y="1" width="98" height="98" rx="10" fill="#150f0a" stroke="#4a3826" stroke-width="1.5"/>'
+       + '<rect x="1" y="1" width="98" height="98" rx="10" fill="#f3ead4" stroke="#d9cba3" stroke-width="1.5"/>'
        + '<g transform="'+transform+'">'+inner+'</g>' + pivot
        + '</svg>';
 }
-
 function shuffle(arr){
   for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
   return arr;
@@ -381,7 +330,11 @@ var soundOn=true;
 var attempts=[0,0,0,0];
 var audioCtx=null;
 
-function ac(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } return audioCtx; }
+function ac(){
+  if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+  if(audioCtx && audioCtx.state==='suspended'){ audioCtx.resume(); }
+  return audioCtx;
+}
 function tone(freq,dur,type,startDelay,gainVal){
   if(!soundOn) return;
   var c=ac(); if(!c) return;
@@ -397,398 +350,413 @@ function tone(freq,dur,type,startDelay,gainVal){
 function playCorrect(){ tone(160,.35,'sine',0,.18); tone(320,.4,'sine',.08,.12); tone(640,.5,'triangle',.16,.08); }
 function playWrong(){ tone(180,.18,'sawtooth',0,.09); tone(120,.22,'sawtooth',.1,.09); }
 function playOpen(){ tone(220,.5,'sine',0,.14); tone(330,.55,'sine',.15,.12); tone(440,.7,'triangle',.3,.10); tone(660,.9,'sine',.45,.08); }
-
 window.toggleSound=function(){
   soundOn=!soundOn;
-  $('btn-sound').textContent=soundOn?'🔊':'🔇';
+  var b=$('btn-sound');
+  b.textContent=soundOn?'🔊 Son activé':'🔇 Son coupé';
+  b.setAttribute('aria-pressed', soundOn?'true':'false');
+  b.setAttribute('aria-label', soundOn?'Couper le son':'Activer le son');
 };
 
 /* ==================================================================
-   CHRONO GLOBAL DU DÉFI — chronomètre le temps total, du début à la fin
+   CHRONO GLOBAL — inchangé (temps écoulé, jamais bloquant)
    ================================================================== */
 var gameStartTime=null, gameTimerInterval=null;
-function formatTime(totalSec){
-  var m=Math.floor(totalSec/60), s=totalSec%60;
-  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-}
-function startGameTimer(){
-  gameStartTime=Date.now();
-  clearInterval(gameTimerInterval);
-  updateGameTimer();
-  gameTimerInterval=setInterval(updateGameTimer,1000);
-}
-function updateGameTimer(){
-  var el=$('hud-timer'); if(!el||!gameStartTime) return;
-  var elapsed=Math.floor((Date.now()-gameStartTime)/1000);
-  el.textContent='⏱ '+formatTime(elapsed);
-}
-function stopGameTimer(){
-  clearInterval(gameTimerInterval);
-  if(!gameStartTime) return 0;
-  return Math.floor((Date.now()-gameStartTime)/1000);
-}
-function resetGameTimer(){
-  clearInterval(gameTimerInterval);
-  gameStartTime=null;
-  var el=$('hud-timer'); if(el) el.textContent='⏱ 00:00';
-}
+function formatTime(totalSec){ var m=Math.floor(totalSec/60), s=totalSec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+function startGameTimer(){ gameStartTime=Date.now(); clearInterval(gameTimerInterval); updateGameTimer(); gameTimerInterval=setInterval(updateGameTimer,1000); }
+function updateGameTimer(){ var el=$('hud-timer'); if(!el||!gameStartTime) return; el.textContent='⏱ '+formatTime(Math.floor((Date.now()-gameStartTime)/1000)); }
+function stopGameTimer(){ clearInterval(gameTimerInterval); if(!gameStartTime) return 0; return Math.floor((Date.now()-gameStartTime)/1000); }
 
 /* ==================================================================
-   MOSAÏQUE CENTRALE (élément signature)
+   ZONE DE FOUILLE — chantier tout juste ouvert : surtout du sable/de la terre,
+   quelques fragments de mosaïque à peine exposés, et 4 pierres encore
+   à moitié enfouies (une par exercice) que l'on dégage progressivement.
    ================================================================== */
-function renderMosaic(){
-  var colors=['#6b5238','#6b5238','#6b5238','#6b5238'];
-  var html='<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">'
-    +'<circle class="disc-glow" id="disc-glow" cx="100" cy="100" r="98" fill="none" stroke="var(--gold-bright)" stroke-width="4" opacity="0"/>'
-    +'<circle cx="100" cy="100" r="90" fill="#1c150e"/>'
-    +wedgePath(1,0,90)+wedgePath(2,90,180)+wedgePath(3,180,270)+wedgePath(4,270,360)
-    +'<circle class="disc-ring" cx="100" cy="100" r="90"/>'
-    +'<circle cx="100" cy="100" r="26" fill="#150f0a" stroke="var(--stone-light)" stroke-width="2"/>'
-    +'<text x="100" y="107" text-anchor="middle" font-size="26" fill="var(--gold)">🏺</text>'
-    +'</svg>';
-  $('mosaic-disc').innerHTML=html;
+var COLS=10, ROWS=6, CELL=40;
+var SLOTS=[{id:1,c:2,r:1},{id:2,c:7,r:1},{id:3,c:2,r:4},{id:4,c:7,r:4}];
+function slotAt(c,r){ return SLOTS.find(function(s){return s.c===c && s.r===r;}); }
+function bevel(x,y,cell){
+  return '<line x1="'+x+'" y1="'+y+'" x2="'+(x+cell)+'" y2="'+y+'" stroke="rgba(255,255,255,.22)" stroke-width="1"/>'
+    +'<line x1="'+x+'" y1="'+y+'" x2="'+x+'" y2="'+(y+cell)+'" stroke="rgba(255,255,255,.18)" stroke-width="1"/>'
+    +'<line x1="'+x+'" y1="'+(y+cell)+'" x2="'+(x+cell)+'" y2="'+(y+cell)+'" stroke="rgba(40,25,10,.3)" stroke-width="1"/>'
+    +'<line x1="'+(x+cell)+'" y1="'+y+'" x2="'+(x+cell)+'" y2="'+(y+cell)+'" stroke="rgba(40,25,10,.26)" stroke-width="1"/>';
 }
-function polar(cx,cy,r,angleDeg){
-  var a=(angleDeg-90)*Math.PI/180;
-  return [cx+r*Math.cos(a), cy+r*Math.sin(a)];
+function crackLine(x,y,cell){
+  var x1=x+3+Math.random()*(cell-6), y1=y+2;
+  var xm=x+3+Math.random()*(cell-6), ym=y+cell*0.55;
+  var x2=x+3+Math.random()*(cell-6), y2=y+cell-2;
+  return '<path d="M'+x1.toFixed(1)+','+y1.toFixed(1)+' L'+xm.toFixed(1)+','+ym.toFixed(1)+' L'+x2.toFixed(1)+','+y2.toFixed(1)+'" fill="none" stroke="rgba(60,42,18,.45)" stroke-width="0.9"/>';
 }
-function wedgePath(n,a0,a1){
-  var cx=100,cy=100,r=90;
-  var p0=polar(cx,cy,r,a0), p1=polar(cx,cy,r,a1);
-  var large = (a1-a0)>180?1:0;
-  var d='M'+cx+','+cy+' L'+p0[0]+','+p0[1]+' A'+r+','+r+' 0 '+large+' 1 '+p1[0]+','+p1[1]+' Z';
-  return '<path class="wedge" id="wedge-'+n+'" d="'+d+'" fill="var(--stone-mid)" stroke="#1c150e" stroke-width="2"/>';
+function jitterPoly(x,y,cell,j){
+  j=j||2;
+  function jp(px,py){ return (px+(Math.random()*j-j/2)).toFixed(1)+','+(py+(Math.random()*j-j/2)).toFixed(1); }
+  return jp(x,y)+' '+jp(x+cell,y)+' '+jp(x+cell,y+cell)+' '+jp(x,y+cell);
 }
-function litWedge(n){
-  var w=$('wedge-'+n);
-  if(w){ w.setAttribute('fill','var(--gold)'); w.classList.add('lit'); }
+function sandGrains(x,y,cell,n){
+  var out='';
+  for(var i=0;i<n;i++){
+    var gx=x+Math.random()*cell, gy=y+Math.random()*cell;
+    if(Math.min(gx-x,x+cell-gx,gy-y,y+cell-gy)>7) continue; // grains surtout sur les bords, entre les tesselles
+    out+='<circle cx="'+gx.toFixed(1)+'" cy="'+gy.toFixed(1)+'" r="'+(0.6+Math.random()*0.6).toFixed(1)+'" fill="#c9b385" opacity=".6"/>';
+  }
+  return out;
 }
-
-/* ==================================================================
-   NAVIGATION ENTRE SCÈNES
-   ================================================================== */
-function showScene(id){
-  document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('show');});
-  $(id).classList.add('show');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-window.enterRoom=function(){
-  renderMosaic();
-  showScene('scene-room');
-  updateStations();
-  startGameTimer();
-};
-
-function updateStations(){
-  for(var n=1;n<=4;n++){
-    var st=$('station-'+n);
-    st.classList.remove('locked','unlocked','done');
-    var oldBadge=st.querySelector('.badge,.lock'); if(oldBadge)oldBadge.remove();
-    if(completed[n-1]){
-      st.classList.add('done');
-      st.disabled=false;
-      var b=document.createElement('span'); b.className='badge'; b.setAttribute('aria-hidden','true'); b.textContent='✓'; st.appendChild(b);
-    } else if(n===1 || completed[n-2]){
-      st.classList.add('unlocked');
-      st.disabled=false;
+function decorTile(c,r){
+  var x=c*CELL, y=r*CELL;
+  var exposed = Math.random()<0.16; // peu de mosaïque encore visible sur ce chantier
+  if(exposed){
+    var pick=Math.floor(Math.random()*3);
+    var wornBase = ['#e7d6ad','#e1cf9c','#ecd9ab','#dcc79a'][Math.floor(Math.random()*4)];
+    var out='<polygon points="'+jitterPoly(x,y,CELL,2.4)+'" fill="'+wornBase+'" stroke="#c9b385" stroke-width="0.6"/>';
+    if(pick===0){
+      out+='<polygon points="'+(x+CELL/2)+','+(y+8)+' '+(x+CELL-8)+','+(y+CELL/2)+' '+(x+CELL/2)+','+(y+CELL-8)+' '+(x+8)+','+(y+CELL/2)+'" fill="#c9932f" opacity=".72"/>';
+    } else if(pick===1){
+      out+='<circle cx="'+(x+CELL/2)+'" cy="'+(y+CELL/2)+'" r="6" fill="none" stroke="#2f9a93" stroke-width="1.8" opacity=".75"/>';
     } else {
-      st.classList.add('locked');
-      st.disabled=true;
-      var l=document.createElement('span'); l.className='lock'; l.setAttribute('aria-hidden','true'); l.textContent='🔒'; st.appendChild(l);
+      out+='<circle cx="'+(x+CELL/2)+'" cy="'+(y+CELL/2)+'" r="5" fill="#b5652f" opacity=".68"/>';
+    }
+    out+=bevel(x,y,CELL);
+    if(Math.random()<0.4){ out+=crackLine(x,y,CELL); }
+    if(Math.random()<0.22){ // petit éclat cassé au coin d'une tesselle
+      out+='<polygon points="'+x+','+y+' '+(x+9)+','+y+' '+x+','+(y+9)+'" fill="#2c2013" opacity=".4"/>';
+    }
+    if(Math.random()<0.2){ // zone légèrement érodée
+      out+='<circle cx="'+(x+8+Math.random()*(CELL-16)).toFixed(1)+'" cy="'+(y+8+Math.random()*(CELL-16)).toFixed(1)+'" r="'+(4+Math.random()*4).toFixed(1)+'" fill="#c9b385" opacity=".22"/>';
+    }
+    out+=sandGrains(x,y,CELL,3);
+    return out;
+  }
+  // tesselle manquante (véritable lacune de la mosaïque, pas seulement du sable)
+  if(Math.random()<0.07){
+    return '<polygon points="'+jitterPoly(x,y,CELL,2)+'" fill="#2c2013" opacity=".55"/>'
+      +'<polygon points="'+jitterPoly(x+2,y+2,CELL-4,1.4)+'" fill="none" stroke="rgba(0,0,0,.4)" stroke-width="1.4"/>'
+      +sandGrains(x,y,CELL,4);
+  }
+  // sable / terre non fouillée, avec légère usure
+  var shade = 203+Math.floor(Math.random()*24);
+  var speck1x=x+8+Math.random()*(CELL-16), speck1y=y+8+Math.random()*(CELL-16);
+  var speck2x=x+8+Math.random()*(CELL-16), speck2y=y+8+Math.random()*(CELL-16);
+  var out2='<polygon points="'+jitterPoly(x,y,CELL,2)+'" fill="rgb('+shade+','+(shade-24)+','+(shade-58)+')" stroke="#c9b385" stroke-width="0.4"/>'
+    +'<circle cx="'+speck1x.toFixed(1)+'" cy="'+speck1y.toFixed(1)+'" r="1.1" fill="#6b4d2e" opacity=".4"/>'
+    +'<circle cx="'+speck2x.toFixed(1)+'" cy="'+speck2y.toFixed(1)+'" r="0.9" fill="#6b4d2e" opacity=".35"/>'
+    +bevel(x,y,CELL);
+  if(Math.random()<0.2){ out2+=crackLine(x,y,CELL); }
+  return out2;
+}
+function emptySlotTile(c,r,id){
+  var x=c*CELL, y=r*CELL, cx=x+CELL/2, cy=y+CELL/2;
+  return '<ellipse cx="'+cx+'" cy="'+(y+CELL-4)+'" rx="15" ry="4" fill="#6b4d2e" opacity=".3"/>'
+    +'<polygon points="'+jitterPoly(x+5,y+5,CELL-10,2.4)+'" fill="#d9c79c" stroke="#b5652f" stroke-width="1.6" stroke-dasharray="3 3" id="slot-'+id+'"/>'
+    +'<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(CELL/2-9)+'" ry="'+(CELL/2-10)+'" fill="rgba(60,42,18,.14)"/>'
+    +'<path d="M'+(cx-4)+','+(y+8)+' L'+(cx+2)+','+(cy)+' L'+(cx-3)+','+(y+CELL-8)+'" fill="none" stroke="rgba(60,42,18,.35)" stroke-width="0.9"/>'
+    +sandGrains(x,y,CELL,5)
+    +'<circle cx="'+(cx-6)+'" cy="'+(cy+5)+'" r="2.2" fill="#c9b385"/>'
+    +'<circle cx="'+(cx+7)+'" cy="'+(cy-4)+'" r="1.6" fill="#c9b385"/>';
+}
+function filledSlotTile(c,r){
+  var x=c*CELL, y=r*CELL, cx=x+CELL/2, cy=y+CELL/2;
+  var base=['#e7d0a0','#dfc593','#e3ca9a'][Math.floor(Math.random()*3)];
+  return '<polygon points="'+jitterPoly(x,y,CELL,1.6)+'" fill="'+base+'" stroke="#b5652f" stroke-width="1"/>'
+    +bevel(x,y,CELL)
+    +'<path d="M'+(x+6)+','+(y+7)+' L'+(x+11)+','+(y+16)+'" fill="none" stroke="rgba(60,42,18,.3)" stroke-width="0.8"/>'
+    +sandGrains(x,y,CELL,2)
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="11" fill="none" stroke="#f5a623" stroke-width="1.3" opacity=".45"/>'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="3.2" fill="#f5a623" opacity=".9"/>';
+}
+function buildMosaic(){
+  var w=COLS*CELL, h=ROWS*CELL;
+  var html='<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mosaic-title mosaic-desc">'
+    +'<title id="mosaic-title">Zone de fouille, chantier tout juste ouvert</title>'
+    +'<desc id="mosaic-desc">Une large zone de fouille recouverte de sable et de terre. Seuls quelques fragments de mosaïque affleurent encore. Quatre pierres sont visibles, à moitié enfouies, matérialisées par un contour pointillé. Elles sont dégagées progressivement à mesure que les exercices sont réussis.</desc>';
+  for(var r=0;r<ROWS;r++){
+    for(var c=0;c<COLS;c++){
+      var slot=slotAt(c,r);
+      if(slot){ html+='<g id="slotgroup-'+slot.id+'">'+emptySlotTile(c,r,slot.id)+'</g>'; }
+      else { html+=decorTile(c,r); }
     }
   }
-  $('hud-mission').textContent = 'Mission '+(completed.filter(function(v){return v;}).length+ (completed.every(function(v){return v;})?0:1))+' / 4';
-  for(var i=1;i<=4;i++){
-    var f=document.querySelector('.frag[data-f="'+i+'"]');
-    f.classList.toggle('done', completed[i-1]);
+  html+='</svg>';
+  $('mosaic-svg-holder').innerHTML=html;
+}
+function fillMosaicSlot(id){
+  var slot=SLOTS.find(function(s){return s.id===id;});
+  if(!slot) return;
+  var g=$('slotgroup-'+id);
+  if(g){ g.innerHTML=filledSlotTile(slot.c,slot.r); }
+  var svg=$('mosaic-svg-holder').querySelector('svg');
+  if(svg){
+    var cx=slot.c*CELL+CELL/2, cy=slot.r*CELL+CELL/2;
+    for(var i=0;i<4;i++){
+      var particle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      var ang=Math.random()*Math.PI*2, rad=8+Math.random()*8;
+      particle.setAttribute('cx', cx+Math.cos(ang)*rad);
+      particle.setAttribute('cy', cy+Math.sin(ang)*rad);
+      particle.setAttribute('r', 1.4+Math.random()*1.2);
+      particle.setAttribute('fill', '#d9cba3');
+      particle.setAttribute('class','dust-particle');
+      svg.appendChild(particle);
+    }
   }
 }
 
 /* ==================================================================
-   DONNÉES DES MISSIONS
+   PIERRE À L'ÉTUDE (panneau gauche) & PROGRESSION
    ================================================================== */
-var missionData = {};
+function renderStonesTray(){
+  var allDone = completed.every(function(v){return v;});
+  if(allDone){
+    $('stones-tray').innerHTML='<svg class="stone-icon" viewBox="0 0 40 40" aria-hidden="true">'
+      +'<polygon points="7,27 5,17 12,7 22,5 32,10 35,20 30,32 19,35 9,33" fill="#e7d0a0" stroke="#f5a623" stroke-width="2"/>'
+      +'<circle cx="20" cy="20" r="4.5" fill="#f5a623"/></svg>';
+    $('stones-count').textContent='Toutes les pierres ont été replacées';
+    return;
+  }
+  var html='<svg class="stone-icon" viewBox="0 0 40 40" aria-hidden="true">'
+    +'<polygon points="7,27 5,17 12,7 22,5 32,10 35,20 30,32 19,35 9,33" fill="#d9c79c" stroke="#8a6a45" stroke-width="1.8"/>'
+    +'<path d="M14,12 L20,18 L15,26" fill="none" stroke="rgba(60,42,18,.35)" stroke-width="0.9"/>'
+    +'<circle cx="27" cy="14" r="1.4" fill="#8a6a45" opacity=".45"/>'
+    +'<circle cx="24" cy="27" r="1" fill="#8a6a45" opacity=".4"/>'
+    +'<circle cx="20" cy="20" r="4.5" fill="none" stroke="#2f9a93" stroke-width="1.4" opacity=".7"/>'
+    +'</svg>';
+  $('stones-tray').innerHTML=html;
+  $('stones-count').textContent='Pierre '+current+' sur 4';
+}
+function updateProgress(){
+  var done=completed.filter(function(v){return v;}).length;
+  var pct=Math.round(done/4*100);
+  $('progress-fill').style.width=pct+'%';
+  $('progress-pct').textContent=pct+' %';
+}
 
+/* ==================================================================
+   DONNÉES DES EXERCICES — contenu, réponses, indices et corrections
+   strictement inchangés ; seul l'habillage narratif (portes/sceaux) a
+   été remplacé par du vocabulaire de restauration archéologique.
+   ================================================================== */
+var missionData={};
 function buildMission1(){
-  var opts=shuffle([
-    {type:'rotate180',isCorrect:true},
-    {type:'axial',isCorrect:false},
-    {type:'translate',isCorrect:false},
-    {type:'deform',isCorrect:false}
+  return shuffle([
+    {type:'rotate180',isCorrect:true},{type:'axial',isCorrect:false},
+    {type:'translate',isCorrect:false},{type:'deform',isCorrect:false}
   ]);
-  return opts;
 }
 function buildMission2(){
-  var opts=shuffle([
-    {type:'rotate180',isCorrect:true},
-    {type:'axial',isCorrect:false},
-    {type:'translate',isCorrect:false},
-    {type:'almost',isCorrect:false}
+  return shuffle([
+    {type:'rotate180',isCorrect:true},{type:'axial',isCorrect:false},
+    {type:'translate',isCorrect:false},{type:'almost',isCorrect:false}
   ]);
-  return opts;
 }
 function buildMission4(){
-  var opts=shuffle([
-    {type:'rotate180',isCorrect:true},
-    {type:'axial',isCorrect:false},
-    {type:'almost',isCorrect:false},
-    {type:'random',isCorrect:false}
+  return shuffle([
+    {type:'rotate180',isCorrect:true},{type:'axial',isCorrect:false},
+    {type:'almost',isCorrect:false},{type:'random',isCorrect:false}
   ]);
-  return opts;
 }
 missionData[1]=buildMission1();
 missionData[2]=buildMission2();
 missionData[4]=buildMission4();
-
-var mission3Options = shuffle([
+var mission3Options=shuffle([
   {txt:'Retourner la pierre (comme un miroir)', isCorrect:false},
   {txt:'Faire un quart de tour', isCorrect:false},
   {txt:'Faire un demi-tour', isCorrect:true},
   {txt:'La faire glisser (translation)', isCorrect:false}
 ]);
 
-/* ==================================================================
-   OUVERTURE D'UNE MISSION
-   ================================================================== */
-window.openMission=function(n){
-  var st=$('station-'+n);
-  if(!st.classList.contains('unlocked') && !st.classList.contains('done')) return;
-  renderModal(n);
-  $('modal-veil').classList.add('show');
-};
-function startChrono(durationMs, onDone){
-  var wrap=$('modal-chrono'), fill=$('chrono-fill'), label=$('chrono-label'), num=$('chrono-num');
-  if(!wrap) { onDone && setTimeout(onDone, durationMs); return; }
-  wrap.classList.add('show');
-  var totalSec = Math.ceil(durationMs/1000);
-  var remaining = totalSec;
-  num.textContent = remaining;
-  label.textContent = '⏱ Retour à la salle dans '+remaining+' s';
-  fill.style.transition='none'; fill.style.width='100%';
-  requestAnimationFrame(function(){
-    fill.style.transition='width '+durationMs+'ms linear';
-    fill.style.width='0%';
-  });
-  // s'assurer que le chrono est bien visible à l'écran, même dans une modale longue
-  setTimeout(function(){ wrap.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 50);
-  clearInterval(window.__chronoInterval);
-  window.__chronoInterval = setInterval(function(){
-    remaining--;
-    if(remaining<=0){
-      clearInterval(window.__chronoInterval);
-      num.textContent = '0';
-      label.textContent = '⏱ Retour à la salle…';
-    } else {
-      num.textContent = remaining;
-      label.textContent = '⏱ Retour à la salle dans '+remaining+' s';
-    }
-  }, 1000);
-  window.__chronoTimeout = setTimeout(function(){
-    clearInterval(window.__chronoInterval);
-    onDone && onDone();
-  }, durationMs);
-}
-function clearChrono(){
-  clearInterval(window.__chronoInterval);
-  clearTimeout(window.__chronoTimeout);
-}
+var FEEDBACK_OK = '✅ Cette pierre retrouve sa place dans la mosaïque.';
+var FEEDBACK_KO = 'Cette pierre ne correspond pas encore à cet emplacement. Observe de nouveau les indices géométriques.';
 
-window.closeModal=function(){ clearChrono(); $('modal-veil').classList.remove('show'); };
+var current=1;
 
-function renderModal(n){
-  var m=$('modal');
-  if(n===1) m.innerHTML = tplMission1();
-  else if(n===2) m.innerHTML = tplMission2();
-  else if(n===3) m.innerHTML = tplMission3();
-  else if(n===4) m.innerHTML = tplMission4();
-  if(completed[n-1]) lockAsDone(n);
-  else if(attempts[n-1]>=2){
-    var h=$('m'+n+'-hint'), c=$('m'+n+'-corr');
+function renderExercise(n){
+  current=n;
+  renderStonesTray();
+  var c=$('work-card');
+  if(n===1) c.innerHTML=tplEx1();
+  else if(n===2) c.innerHTML=tplEx2();
+  else if(n===3) c.innerHTML=tplEx3();
+  else if(n===4) c.innerHTML=tplEx4();
+  else { renderFinal(); return; }
+  if(attempts[n-1]>=2){
+    var h=$('ex-hint'), corr=$('ex-corr');
     if(h) h.classList.add('show');
-    if(c) c.classList.add('show');
+    if(corr) corr.classList.add('show');
   }
 }
 
-function tplMission1(){
+function tplEx1(){
   var opts=missionData[1];
-  var tiles = opts.map(function(o,i){
-    return '<button type="button" class="opt-tile" id="m1-opt-'+i+'" onclick="answer(1,'+i+')">'
-      + tileSVG(o.type,true)
-      + '<span class="lbl">Dalle '+String.fromCharCode(65+i)+'</span></button>';
+  var tiles=opts.map(function(o,i){
+    return '<button type="button" class="opt-tile" id="opt-'+i+'" onclick="answer(1,'+i+')">'
+      + tileSVG(o.type,true) + '<span class="lbl">Pierre '+String.fromCharCode(65+i)+'</span></button>';
   }).join('');
-  return '<div class="modal-eyebrow">Mission 1 · Les dalles de pierre</div>'
-    +'<h2>La bonne dalle</h2>'
-    +'<div class="modal-story">Quatre mosaïques antiques sont gravées devant toi. Une seule provient réellement d\u2019une rotation de 180° autour du point doré — le vrai demi-tour sacré. Les trois autres cachent un piège : un reflet, un glissement ou une figure déformée.</div>'
-    +'<div class="modal-question">Quelle dalle respecte le demi-tour parfait ?</div>'
+  return '<div class="work-eyebrow">Pierre n°1 / 4</div>'
+    +'<h2>Le motif gravé</h2>'
+    +'<div class="work-story">Un premier fragment décoratif a été retrouvé sur le chantier, accompagné d\u2019un motif de référence encore intact. Une seule des quatre pierres proposées correspond réellement à une rotation de 180° de ce motif — le vrai demi-tour. Les trois autres cachent un piège : un reflet, un glissement ou une figure déformée.</div>'
+    +'<div class="frag-ref">'+tileSVG('ref',true)+'<div class="txt">Voici le motif de référence, tel qu\u2019il apparaissait avant que la pierre ne soit brisée.</div></div>'
+    +'<div class="work-consigne">Observe le motif de référence. Quelle pierre représente son image après un demi-tour autour du point central ?</div>'
     +'<div class="opt-grid">'+tiles+'</div>'
-    +'<div class="modal-hint" id="m1-hint">💡 Indice : lors d\u2019un vrai demi-tour, le motif tourne autour du point central, il ne se retourne pas comme dans un miroir, et il ne glisse pas sur le côté.</div>'
-    +'<div class="modal-corr" id="m1-corr">📖 <strong>Correction :</strong> imagine une aiguille plantée sur le point doré. Fais tourner toute la figure d\u2019un demi-tour (180°) autour de cette aiguille : le motif doit retrouver exactement sa forme, à la même distance du centre, mais de l\u2019autre côté. Si le motif est retourné comme dans un miroir, c\u2019est une symétrie axiale. S\u2019il est seulement décalé, c\u2019est une translation. Si ses proportions changent, la figure est déformée. Cherche la dalle où seule une vraie rotation de 180° a eu lieu.</div>'
-    +'<div class="modal-feedback" id="m1-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
-    +modalActions();
+    +actionsBlock()
+    +'<div class="hint-box" id="ex-hint">💡 Indice : lors d\u2019un vrai demi-tour, le motif tourne autour du point central, il ne se retourne pas comme dans un miroir, et il ne glisse pas sur le côté.</div>'
+    +'<div class="corr-box" id="ex-corr"><strong>📖 Correction :</strong> imagine une aiguille plantée sur le point doré. Fais tourner le motif de référence d\u2019un demi-tour (180°) autour de cette aiguille : il doit retrouver exactement sa forme, à la même distance du centre, mais de l\u2019autre côté. Si le motif est retourné comme dans un miroir, c\u2019est une symétrie axiale. S\u2019il est seulement décalé, c\u2019est une translation. Si ses proportions changent, la figure est déformée. Cherche la pierre où seule une vraie rotation de 180° a eu lieu.</div>'
+    +'<div class="feedback" id="ex-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +chronoBlock();
 }
-
-function tplMission2(){
+function tplEx2(){
   var opts=missionData[2];
-  var tiles = opts.map(function(o,i){
-    return '<button type="button" class="opt-tile" id="m2-opt-'+i+'" onclick="answer(2,'+i+')">'
-      + tileSVG(o.type,true)
-      + '<span class="lbl">Porte '+(i+1)+'</span></button>';
+  var tiles=opts.map(function(o,i){
+    return '<button type="button" class="opt-tile" id="opt-'+i+'" onclick="answer(2,'+i+')">'
+      + tileSVG(o.type,true) + '<span class="lbl">Fragment '+(i+1)+'</span></button>';
   }).join('');
-  return '<div class="modal-eyebrow">Mission 2 · Les portes à mécanisme</div>'
-    +'<h2>Quel mécanisme va s\u2019activer ?</h2>'
-    +'<div class="frag-ref">' + tileSVG('ref',true) + '<div class="txt">Ce fragment de référence doit pivoter d\u2019un demi-tour exact autour du point doré pour actionner la porte.</div></div>'
-    +'<div class="modal-question">Observe les quatre portes. Une seule contient le fragment qui correspond vraiment à ce demi-tour.</div>'
+  return '<div class="work-eyebrow">Pierre n°2 / 4</div>'
+    +'<h2>Le fragment associé</h2>'
+    +'<div class="work-story">Ce fragment de référence a été relevé avec précision par les archéologues. Un second morceau, retrouvé séparément, devrait lui correspondre exactement par une rotation d\u2019un demi-tour autour du même point.</div>'
+    +'<div class="frag-ref">'+tileSVG('ref',true)+'<div class="txt">Ce fragment de référence doit pivoter d\u2019un demi-tour exact autour du point doré pour correspondre au morceau recherché.</div></div>'
+    +'<div class="work-consigne">Observe les quatre fragments proposés. Un seul correspond vraiment à ce demi-tour.</div>'
     +'<div class="opt-grid">'+tiles+'</div>'
-    +'<div class="modal-hint" id="m2-hint">💡 Indice : aucune construction n\u2019est nécessaire ici. Regarde simplement si le fragment semble avoir tourné autour du point, ou s\u2019il a seulement glissé ou changé de forme.</div>'
-    +'<div class="modal-corr" id="m2-corr">📖 <strong>Correction :</strong> compare chaque porte au fragment de référence. Seule une rotation de 180° autour du point doré donne le bon mécanisme : le fragment se retrouve exactement de l\u2019autre côté du point, à la même distance. Un fragment simplement décalé (translation) ou dont l\u2019allure a changé (presque un demi-tour, mais pas tout à fait) ne peut pas activer la porte.</div>'
-    +'<div class="modal-feedback" id="m2-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
-    +modalActions();
+    +actionsBlock()
+    +'<div class="hint-box" id="ex-hint">💡 Indice : aucune construction n\u2019est nécessaire ici. Regarde simplement si le fragment semble avoir tourné autour du point, ou s\u2019il a seulement glissé ou changé de forme.</div>'
+    +'<div class="corr-box" id="ex-corr"><strong>📖 Correction :</strong> compare chaque fragment proposé au fragment de référence. Seule une rotation de 180° autour du point doré donne la bonne correspondance : le fragment se retrouve exactement de l\u2019autre côté du point, à la même distance. Un fragment simplement décalé (translation) ou dont l\u2019allure a changé (presque un demi-tour, mais pas tout à fait) ne correspond pas à la pierre recherchée.</div>'
+    +'<div class="feedback" id="ex-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +chronoBlock();
 }
-
-function tplMission3(){
+function tplEx3(){
   var opts=mission3Options;
-  var list = opts.map(function(o,i){
-    return '<button type="button" class="tab-opt" id="m3-opt-'+i+'" onclick="answer(3,'+i+')">'
-      + '<span class="chk" aria-hidden="true"></span><span class="txt">'+o.txt+'</span></button>';
+  var list=opts.map(function(o,i){
+    return '<button type="button" class="tab-opt" id="opt-'+i+'" onclick="answer(3,'+i+')">'
+      +'<span class="chk" aria-hidden="true"></span><span class="txt">'+o.txt+'</span></button>';
   }).join('');
-  return '<div class="modal-eyebrow">Mission 3 · La tablette de l\u2019archéologue</div>'
-    +'<h2>Réassembler la mosaïque sacrée</h2>'
-    +'<div class="modal-story">Une tablette gravée indique la marche à suivre pour réassembler la mosaïque, mais un mot manque. Il faut choisir le bon geste.</div>'
-    +'<div class="modal-question">Pour réassembler une mosaïque sacrée, il faut…</div>'
+  return '<div class="work-eyebrow">Pierre n°3 / 4</div>'
+    +'<h2>La fiche du carnet de fouilles</h2>'
+    +'<div class="work-story">Une fiche du carnet de fouilles indique la marche à suivre pour repositionner une pierre à son emplacement d\u2019origine, mais un mot est manquant.</div>'
+    +'<div class="work-consigne">Pour repositionner cette pierre, il faut…</div>'
     +'<div class="tab-list">'+list+'</div>'
-    +'<div class="modal-hint" id="m3-hint">💡 Indice : le geste sacré fait tourner la pierre d\u2019un demi-cercle complet autour d\u2019un seul point, sans la retourner ni la faire glisser.</div>'
-    +'<div class="modal-corr" id="m3-corr">📖 <strong>Correction :</strong> un demi-tour est une rotation de 180° autour d\u2019un point fixe. Un quart de tour ne fait que 90°, ce n\u2019est pas suffisant. Retourner la pierre correspond à une symétrie axiale (un effet miroir), pas à une rotation. La faire glisser correspond à une translation, sans aucune rotation. Seul le demi-tour correspond vraiment à la symétrie centrale.</div>'
-    +'<div class="modal-feedback" id="m3-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
-    +modalActions();
+    +actionsBlock()
+    +'<div class="hint-box" id="ex-hint">💡 Indice : le bon geste fait tourner la pierre d\u2019un demi-cercle complet autour d\u2019un seul point, sans la retourner ni la faire glisser.</div>'
+    +'<div class="corr-box" id="ex-corr"><strong>📖 Correction :</strong> un demi-tour est une rotation de 180° autour d\u2019un point fixe. Un quart de tour ne fait que 90°, ce n\u2019est pas suffisant. Retourner la pierre correspond à une symétrie axiale (un effet miroir), pas à une rotation. La faire glisser correspond à une translation, sans aucune rotation. Seul le demi-tour correspond vraiment à la symétrie centrale.</div>'
+    +'<div class="feedback" id="ex-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +chronoBlock();
 }
-
-function tplMission4(){
+function tplEx4(){
   var opts=missionData[4];
-  var tiles = opts.map(function(o,i){
-    return '<button type="button" class="opt-tile" id="m4-opt-'+i+'" onclick="answer(4,'+i+')">'
-      + tileSVG(o.type,true)
-      + '<span class="lbl">Sceau '+(i+1)+'</span></button>';
+  var tiles=opts.map(function(o,i){
+    return '<button type="button" class="opt-tile" id="opt-'+i+'" onclick="answer(4,'+i+')">'
+      + tileSVG(o.type,true) + '<span class="lbl">Pierre '+(i+1)+'</span></button>';
   }).join('');
-  return '<div class="modal-eyebrow">Mission 4 · Le sceau du temple</div>'
-    +'<h2>Le vrai sceau</h2>'
-    +'<div class="modal-story">Quatre sceaux sont gravés sur l\u2019autel. Un seul possède réellement un centre de symétrie : tourné d\u2019un demi-tour autour de son centre, il retrouve exactement sa position de départ.</div>'
-    +'<div class="modal-question">Quel sceau peut activer le mécanisme final ?</div>'
+  return '<div class="work-eyebrow">Pierre n°4 / 4</div>'
+    +'<h2>Le motif central</h2>'
+    +'<div class="work-story">Quatre pierres portent un motif gravé retrouvé dans les décombres, aux côtés d\u2019un motif de référence encore lisible. Une seule pierre est réellement l\u2019image de ce motif après une rotation de 180° autour de son centre — les autres trahissent un reflet, un glissement ou un motif totalement différent.</div>'
+    +'<div class="frag-ref">'+tileSVG('ref',true)+'<div class="txt">Voici le motif de référence, tel qu\u2019il apparaissait avant que la pierre ne soit brisée.</div></div>'
+    +'<div class="work-consigne">Observe le motif de référence. Quelle pierre représente son image après une rotation de 180° autour du point central ?</div>'
     +'<div class="opt-grid">'+tiles+'</div>'
-    +'<div class="modal-hint" id="m4-hint">💡 Indice : les sceaux « presque » symétriques ou seulement symétriques par un miroir ne suffisent pas — il faut un vrai demi-tour.</div>'
-    +'<div class="modal-corr" id="m4-corr">📖 <strong>Correction :</strong> un sceau possède un centre de symétrie si, après une rotation de 180° autour de ce point, il se superpose exactement à lui-même. Un sceau seulement symétrique par un axe (effet miroir) ne repasse pas par lui-même après un demi-tour. Un sceau « presque » symétrique a un petit décalage qui casse l\u2019égalité parfaite. Un motif purement décoratif n\u2019a aucune relation de symétrie particulière.</div>'
-    +'<div class="modal-feedback" id="m4-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
-    +modalActions();
+    +actionsBlock()
+    +'<div class="hint-box" id="ex-hint">💡 Indice : les pierres « presque » tournées ou seulement symétriques par un miroir ne suffisent pas — il faut un vrai demi-tour.</div>'
+    +'<div class="corr-box" id="ex-corr"><strong>📖 Correction :</strong> compare chaque pierre au motif de référence. Seule une rotation de 180° autour du point doré donne la bonne image : la pierre se retrouve exactement de l\u2019autre côté du point, à la même distance. Une pierre seulement symétrique par un axe (effet miroir), une pierre « presque » tournée (un angle légèrement insuffisant), ou un motif totalement différent ne correspondent pas à cette rotation.</div>'
+    +'<div class="feedback" id="ex-fb" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +chronoBlock();
 }
+function actionsBlock(){
+  return '<div class="actions-row"><button class="btn btn-ghost" id="btn-hint" onclick="toggleHint()">💡 Voir un indice</button></div>';
+}
+function chronoBlock(){
+  return '<div class="chrono-wrap" id="chrono-wrap"><span class="chrono-num" id="chrono-num">4</span>'
+    +'<div class="chrono-body"><div class="chrono-label" id="chrono-label">⏱ Pierre suivante dans quelques secondes…</div>'
+    +'<div class="chrono-track"><div class="chrono-fill" id="chrono-fill"></div></div></div></div>';
+}
+window.toggleHint=function(){ $('ex-hint').classList.toggle('show'); };
 
-function modalActions(){
-  return '<div class="chrono-wrap" id="modal-chrono" aria-hidden="true">'
-    +'<span class="chrono-num" id="chrono-num">4</span>'
-    +'<div class="chrono-body">'
-      +'<div class="chrono-label" id="chrono-label">⏱ Retour à la salle dans quelques secondes…</div>'
-      +'<div class="chrono-track"><div class="chrono-fill" id="chrono-fill"></div></div>'
-    +'</div></div>'
-    +'<div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">Quitter la salle</button></div>';
+/* ==================================================================
+   CHRONO INLINE (transition entre exercices) — inchangé dans son fonctionnement
+   ================================================================== */
+function startChrono(durationMs,onDone){
+  var wrap=$('chrono-wrap'),fill=$('chrono-fill'),lab=$('chrono-label'),num=$('chrono-num');
+  window.__chronoFired=false;
+  if(!wrap){ if(!window.__chronoFired){window.__chronoFired=true; onDone && onDone();} return; }
+  wrap.classList.add('show');
+  var remaining=Math.ceil(durationMs/1000);
+  num.textContent=remaining; lab.textContent='⏱ Pierre suivante dans '+remaining+' s';
+  fill.style.transition='none'; fill.style.width='100%';
+  requestAnimationFrame(function(){ fill.style.transition='width '+durationMs+'ms linear'; fill.style.width='0%'; });
+  clearInterval(window.__chronoInterval);
+  window.__chronoInterval=setInterval(function(){
+    remaining--;
+    if(remaining<=0){ clearInterval(window.__chronoInterval); num.textContent='0'; lab.textContent='⏱ Pierre suivante…'; }
+    else { num.textContent=remaining; lab.textContent='⏱ Pierre suivante dans '+remaining+' s'; }
+  },1000);
+  clearTimeout(window.__chronoTimeout);
+  window.__chronoTimeout=setTimeout(function(){
+    clearInterval(window.__chronoInterval);
+    if(!window.__chronoFired){ window.__chronoFired=true; onDone && onDone(); }
+  },durationMs);
 }
 
 /* ==================================================================
    VÉRIFICATION DES RÉPONSES
    ================================================================== */
-window.answer=function(missionN, idx){
-  if(completed[missionN-1]) return;
-  var opts, prefix, fb, hint, corr;
-  if(missionN===1){opts=missionData[1];prefix='m1-opt-';fb=$('m1-fb');hint=$('m1-hint');corr=$('m1-corr');}
-  else if(missionN===2){opts=missionData[2];prefix='m2-opt-';fb=$('m2-fb');hint=$('m2-hint');corr=$('m2-corr');}
-  else if(missionN===3){opts=mission3Options;prefix='m3-opt-';fb=$('m3-fb');hint=$('m3-hint');corr=$('m3-corr');}
-  else if(missionN===4){opts=missionData[4];prefix='m4-opt-';fb=$('m4-fb');hint=$('m4-hint');corr=$('m4-corr');}
-
+window.answer=function(n, idx){
+  if(completed[n-1]) return;
+  var opts = n===3 ? mission3Options : missionData[n];
   var chosen=opts[idx];
-  var el=$(prefix+idx);
-
+  var el=$('opt-'+idx);
+  var fb=$('ex-fb');
   if(chosen.isCorrect){
     playCorrect();
-    for(var i=0;i<opts.length;i++){ var oEl=$(prefix+i); oEl.classList.add('locked'); oEl.disabled=true; }
+    for(var i=0;i<opts.length;i++){ var oEl=$('opt-'+i); if(oEl){ oEl.disabled=true; } }
     el.classList.add('correct');
-    fb.className='modal-feedback show ok';
-    fb.innerHTML = feedbackOk(missionN);
-    completed[missionN-1]=true;
-    litWedge(missionN);
-    startChrono(5000, function(){
-      closeModal();
-      updateStations();
-      if(completed.every(function(v){return v;})){
-        setTimeout(triggerFinale, 500);
-      }
+    fb.className='feedback show ok';
+    fb.innerHTML=FEEDBACK_OK;
+    completed[n-1]=true;
+    fillMosaicSlot(n);
+    var mw=document.querySelector('.mosaic-wrap'); if(mw){ mw.classList.add('pulse'); setTimeout(function(){ mw.classList.remove('pulse'); },900); }
+    renderStonesTray();
+    updateProgress();
+    var hb=$('btn-hint'); if(hb) hb.style.display='none';
+    startChrono(4000, function(){
+      if(completed.every(function(v){return v;})){ triggerFinal(); }
+      else { renderExercise(n+1); }
     });
   } else {
     playWrong();
     el.classList.add('wrong');
-    setTimeout(function(){ el.classList.remove('wrong'); }, 450);
-    attempts[missionN-1]++;
-    fb.className='modal-feedback show ko';
-    fb.innerHTML = feedbackKo(missionN);
-    if(attempts[missionN-1]>=2){
-      hint.classList.add('show');
-      if(corr) corr.classList.add('show');
+    setTimeout(function(){ el.classList.remove('wrong'); },450);
+    attempts[n-1]++;
+    fb.className='feedback show ko';
+    fb.innerHTML=FEEDBACK_KO;
+    if(attempts[n-1]>=2){
+      $('ex-hint').classList.add('show');
+      $('ex-corr').classList.add('show');
     }
   }
 };
 
-function feedbackOk(n){
-  if(n===1) return '✅ La dalle s\u2019enfonce dans son socle. Un rouage se met en marche quelque part dans le mur.';
-  if(n===2) return '✅ La porte tremble légèrement puis s\u2019entrouvre. Le mécanisme a reconnu le vrai demi-tour.';
-  if(n===3) return '✅ La tablette s\u2019illumine faiblement. Tu tiens la bonne méthode.';
-  return '✅ Le sceau se met à luire d\u2019une lumière dorée. La mosaïque centrale absorbe son énergie.';
-}
-function feedbackKo(n){
-  if(n===1) return '❌ La dalle reste immobile. Regarde bien : ce motif a-t-il vraiment tourné autour du point, ou seulement glissé, ou été retourné ?';
-  if(n===2) return '❌ Rien ne se passe. Ce fragment ne correspond pas à un vrai demi-tour du fragment de référence.';
-  if(n===3) return '❌ La tablette reste muette. Ce geste ne correspond pas à la symétrie centrale.';
-  return '❌ Le sceau reste terne. Il lui manque un vrai centre de symétrie.';
-}
-
-function lockAsDone(n){
-  var opts, prefix;
-  if(n===1){opts=missionData[1];prefix='m1-opt-';}
-  else if(n===2){opts=missionData[2];prefix='m2-opt-';}
-  else if(n===3){opts=mission3Options;prefix='m3-opt-';}
-  else {opts=missionData[4];prefix='m4-opt-';}
-  opts.forEach(function(o,i){
-    var el=$(prefix+i);
-    if(el){ el.classList.add('locked'); el.disabled=true; if(o.isCorrect) el.classList.add('correct'); }
-  });
-  var fb=$( (n===1?'m1':n===2?'m2':n===3?'m3':'m4') + '-fb');
-  if(fb){ fb.className='modal-feedback show ok'; fb.innerHTML=feedbackOk(n); }
-}
-
 /* ==================================================================
-   FINALE
+   NAVIGATION
    ================================================================== */
-function triggerFinale(){
-  var totalSec = stopGameTimer();
-  var glow=$('disc-glow'); if(glow) glow.classList.add('on');
-  playOpen();
-  setTimeout(function(){
-    showScene('scene-finale');
-    $('finale-time').textContent = '⏱ Temps total : '+formatTime(totalSec);
-    setTimeout(function(){ $('doors').classList.add('open'); }, 300);
-  }, 900);
-}
-
-window.restart=function(){
-  completed=[false,false,false,false];
-  attempts=[0,0,0,0];
-  missionData[1]=buildMission1();
-  missionData[2]=buildMission2();
-  missionData[4]=buildMission4();
-  mission3Options = shuffle(mission3Options);
-  $('doors').classList.remove('open');
-  resetGameTimer();
-  showScene('scene-intro');
+window.startGame=function(){
+  $('scene-intro').style.display='none';
+  $('scene-atelier').classList.add('show');
+  buildMosaic();
+  renderStonesTray();
+  updateProgress();
+  startGameTimer();
+  renderExercise(1);
 };
 
-document.addEventListener('DOMContentLoaded', function(){
-  renderMosaic();
-});
+function triggerFinal(){
+  var totalSec=stopGameTimer();
+  playOpen();
+  $('light-beam').classList.add('on');
+  var c=$('work-card');
+  c.innerHTML='<div class="final-card">'
+    +'<div class="work-eyebrow">Restauration terminée</div>'
+    +'<h2>📜 Première étape de la restauration terminée</h2>'
+    +'<p>🏺 La dernière pierre retrouve sa place.</p>'
+    +'<p>La grande mosaïque du temple est désormais reconstituée.</p>'
+    +'<p>Les archéologues peuvent poursuivre leur exploration vers une nouvelle salle où les attendent des motifs géométriques encore plus complexes.</p>'
+    +'<div class="final-time">⏱ Temps total : '+formatTime(totalSec)+'</div>'
+    +'</div>';
+}
+
+document.addEventListener('DOMContentLoaded', function(){});
 })();
 </script>
 </body>
