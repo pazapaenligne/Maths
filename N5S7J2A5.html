@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa · 5e · Semaine 7 Jour 2 · Le mécanisme oublié du temple</title>
+<style>
+/* ============ JETONS DE DESIGN — Mécanisme oublié (bronze / pierre claire) ============
+   Interface volontairement différente du Jour 1 (salle sombre / mosaïque) :
+   ici, salle de pierre claire, lumière chaude, engrenages de bronze. */
+:root{
+  --stone:#efe8d8;
+  --stone-deep:#d9cdb0;
+  --stone-panel:#fbf6ea;
+  --sand:#c9a15f;
+  --bronze:#8a5a2b;
+  --bronze-dark:#5c3b1c;
+  --bronze-light:#b4783c;
+  --ochre:#c67c2e;
+  --gold:#e8b84b;
+  --gold-bright:#ffce5c;
+  --ink:#3a2c1b;
+  --muted:#8a7860;
+  --success:#5c8f4f;
+  --success-bg:#eaf5e2;
+  --danger:#b1462c;
+  --danger-bg:#fbe9e2;
+  --info:#3f6f8f;
+  --info-bg:#e6f0f7;
+  --radius:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:inherit;}
+html{scroll-behavior:smooth;}
+body{
+  min-height:100vh;
+  font-family:Arial,Helvetica,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse 620px 420px at 12% -5%, rgba(230,180,90,.35), transparent 60%),
+    radial-gradient(ellipse 620px 420px at 100% 100%, rgba(138,90,43,.18), transparent 60%),
+    linear-gradient(180deg,#f6f0e2,#efe6d2 45%,#e6d8ba 100%);
+  overflow-x:hidden;
+  position:relative;
+  padding-bottom:3rem;
+}
+body::before{ /* poussière discrète en suspension */
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(circle, rgba(138,90,43,.10) 1px, transparent 1.6px);
+  background-size:42px 42px;
+}
+.dust{position:fixed;width:5px;height:5px;border-radius:50%;background:rgba(198,124,46,.35);pointer-events:none;z-index:0;}
+.dust.d1{top:14%;left:8%;animation:drift 9s ease-in-out infinite;}
+.dust.d2{top:60%;left:88%;animation:drift 11s ease-in-out infinite 1.5s;}
+.dust.d3{top:80%;left:20%;animation:drift 13s ease-in-out infinite 3s;}
+@keyframes drift{0%,100%{transform:translateY(0) translateX(0);opacity:.35;}50%{transform:translateY(-26px) translateX(10px);opacity:.7;}}
+@media (prefers-reduced-motion: reduce){ .dust{animation:none !important;} *{animation-duration:.001ms !important;transition-duration:.001ms !important;} }
+
+/* ---------- HUD ---------- */
+.hud{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.8rem 1.2rem;
+  background:linear-gradient(180deg, rgba(251,246,234,.97), rgba(251,246,234,.88));
+  border-bottom:2px solid var(--stone-deep);
+  backdrop-filter:blur(3px);
+  flex-wrap:wrap;
+}
+.hud-title{display:flex;align-items:center;gap:.55rem;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:1.02rem;color:var(--bronze-dark);}
+.hud-title .em{font-size:1.25rem;}
+.hud-mid{font-family:'Courier New',Consolas,monospace;font-size:.78rem;color:var(--muted);text-align:center;letter-spacing:.03em;}
+.hud-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.hud-timer{font-family:'Courier New',Consolas,monospace;font-size:.85rem;font-weight:700;color:var(--bronze-dark);
+  background:rgba(198,124,46,.14);border:1.5px solid var(--sand);border-radius:8px;
+  padding:.4rem .7rem;min-width:4.6em;text-align:center;letter-spacing:.03em;}
+.btn-sound{background:none;border:1.5px solid var(--stone-deep);color:var(--ink);border-radius:10px;
+  padding:.4rem .7rem;font-size:.95rem;cursor:pointer;min-height:2.6rem;font-family:'Courier New',Consolas,monospace;}
+.btn-sound:hover{border-color:var(--ochre);}
+.btn-sound:focus-visible, .btn:focus-visible, .pt-btn:focus-visible, .field:focus-visible{
+  outline:3px solid var(--info);outline-offset:2px;
+}
+
+/* ---------- Engrenages (progression) ---------- */
+.gears-row{display:flex;justify-content:center;gap:1.6rem;margin:1.4rem 0 .4rem;position:relative;z-index:1;}
+.gear-slot{display:flex;flex-direction:column;align-items:center;gap:.35rem;}
+.gear-slot svg{width:56px;height:56px;filter:drop-shadow(0 3px 6px rgba(90,60,20,.25));}
+.gear-slot .gear-shape{fill:var(--stone-deep);stroke:var(--bronze-dark);stroke-width:2;transition:fill .5s ease;}
+.gear-slot.done .gear-shape{fill:var(--gold);}
+.gear-slot.spin svg{animation:spin .9s ease-in-out;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(160deg);}}
+.gear-slot .g-label{font-family:'Courier New',Consolas,monospace;font-size:.7rem;color:var(--muted);}
+
+/* ---------- Scènes ---------- */
+.stage{max-width:820px;margin:0 auto;padding:.4rem 1.2rem 0;position:relative;z-index:1;}
+.scene{display:none;}
+.scene.show{display:block;animation:fadeUp .45s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* ---- Intro ---- */
+.intro-card{
+  background:linear-gradient(180deg, rgba(251,246,234,.92), rgba(233,221,192,.92));
+  border:2px solid var(--stone-deep);border-radius:var(--radius);
+  padding:2.1rem 2rem;text-align:center;box-shadow:0 10px 34px rgba(90,60,20,.14);
+}
+.intro-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ochre);margin-bottom:.5rem;}
+.intro-card h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.4rem,3.6vw,2rem);color:var(--bronze-dark);margin-bottom:.3rem;line-height:1.3;}
+.intro-card h2{font-family:Georgia,'Times New Roman',serif;font-weight:600;font-size:1.02rem;color:var(--ochre);margin-bottom:1.1rem;}
+.intro-text{max-width:540px;margin:0 auto 1.5rem;line-height:1.85;font-size:1rem;text-align:left;}
+.intro-text p{margin-bottom:.85rem;}
+.intro-text .quote{border-left:3px solid var(--gold);padding:.6rem 1rem;background:rgba(232,184,75,.14);border-radius:6px;color:var(--bronze-dark);font-weight:700;}
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.72rem 1.45rem;border-radius:12px;border:none;cursor:pointer;
+  font-family:Arial,Helvetica,sans-serif;font-weight:800;font-size:1rem;
+  min-height:2.7rem;transition:transform .12s ease, box-shadow .15s ease;
+}
+.btn:active{transform:scale(.96);}
+.btn-bronze{background:linear-gradient(135deg,var(--ochre),var(--bronze));color:#fff8ec;box-shadow:0 4px 14px rgba(138,90,43,.4);}
+.btn-bronze:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(138,90,43,.5);}
+.btn-ghost{background:transparent;border:2px solid var(--stone-deep);color:var(--ink);}
+.btn-ghost:hover{border-color:var(--ochre);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+/* ---- Carte épreuve ---- */
+.epreuve-card{
+  background:var(--stone-panel);border:2px solid var(--stone-deep);border-radius:var(--radius);
+  padding:1.7rem 1.6rem;box-shadow:0 8px 28px rgba(90,60,20,.12);
+}
+.epreuve-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--info);margin-bottom:.3rem;}
+.epreuve-card h2{font-family:Georgia,'Times New Roman',serif;color:var(--bronze-dark);font-size:1.28rem;margin-bottom:.7rem;line-height:1.3;}
+.epreuve-consigne{font-weight:800;font-size:.98rem;color:var(--ink);margin-bottom:1.1rem;line-height:1.75;background:rgba(198,124,46,.10);
+  border-left:4px solid var(--ochre);border-radius:8px;padding:.7rem .9rem;}
+
+.fig-wrap{position:relative;width:100%;max-width:520px;margin:0 auto 1rem;background:#fff9ec;border:1.5px solid var(--stone-deep);border-radius:12px;overflow:hidden;}
+.fig-wrap svg{display:block;width:100%;height:auto;}
+.pt-btn{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;
+  border:2.5px solid var(--bronze-dark);background:rgba(255,255,255,.92);color:var(--ink);
+  font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:.86rem;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,border-color .15s,transform .12s;}
+.pt-btn:hover:not(:disabled){transform:scale(1.08);border-color:var(--ochre);}
+.pt-btn.selected{border-color:var(--gold);background:var(--gold);color:#3a2a0a;}
+.pt-btn.correct{border-color:var(--success);background:var(--success-bg);color:var(--success);}
+.pt-btn.wrong{border-color:var(--danger);background:var(--danger-bg);color:var(--danger);animation:shake .35s ease;}
+.pt-btn:disabled{cursor:not-allowed;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem;}
+.panel{background:#fff9ec;border:1.5px solid var(--stone-deep);border-radius:12px;padding:.85rem .95rem;}
+.panel h3{font-family:'Courier New',Consolas,monospace;font-size:.78rem;color:var(--bronze-dark);margin-bottom:.55rem;text-transform:uppercase;letter-spacing:.04em;}
+.panel .line{font-size:.92rem;line-height:2.1;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;}
+.field{width:74px;height:2.4rem;border:2px solid var(--stone-deep);border-radius:8px;text-align:center;
+  font-size:1rem;font-weight:700;font-family:'Courier New',Consolas,monospace;color:var(--ink);background:#fff;outline:none;transition:border-color .15s;}
+.field:focus{border-color:var(--ochre);}
+.field.f-ok{border-color:var(--success);background:var(--success-bg);}
+.field.f-ko{border-color:var(--danger);background:var(--danger-bg);}
+.field:disabled{opacity:1;}
+.unit{font-size:.82rem;color:var(--muted);font-family:'Courier New',Consolas,monospace;}
+
+.actions-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.4rem;}
+.hint-box{margin-top:.7rem;background:rgba(232,184,75,.14);border:1.5px dashed var(--gold);border-radius:10px;
+  padding:.65rem .9rem;font-size:.85rem;color:var(--bronze-dark);display:none;line-height:1.8;}
+.hint-box.show{display:block;}
+.corr-box{margin-top:.7rem;background:var(--info-bg);border:1.5px solid var(--info);border-radius:10px;
+  padding:.7rem .95rem;font-size:.86rem;color:#1c3a4d;display:none;line-height:1.9;}
+.corr-box.show{display:block;}
+.corr-box strong{color:var(--info);}
+.feedback{margin-top:.8rem;padding:.7rem .95rem;border-radius:10px;font-size:.9rem;line-height:1.8;display:none;}
+.feedback.show{display:block;}
+.feedback.ok{background:var(--success-bg);border:1.5px solid var(--success);color:#2f5c26;}
+.feedback.ko{background:var(--danger-bg);border:1.5px solid var(--danger);color:var(--danger);}
+
+/* chrono inline (épreuve suivante) */
+.chrono-wrap{display:none;align-items:center;gap:.9rem;margin-top:1rem;padding:.7rem 1rem;
+  border:2px solid var(--gold);border-radius:12px;background:rgba(232,184,75,.16);}
+.chrono-wrap.show{display:flex;}
+.chrono-num{font-family:'Courier New',Consolas,monospace;font-size:1.5rem;font-weight:800;color:var(--bronze-dark);min-width:2.3rem;text-align:center;flex-shrink:0;}
+.chrono-body{flex:1;min-width:0;}
+.chrono-label{font-family:'Courier New',Consolas,monospace;font-size:.78rem;color:var(--bronze-dark);margin-bottom:.35rem;}
+.chrono-track{height:9px;border-radius:99px;background:var(--stone-deep);overflow:hidden;}
+.chrono-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold-bright));width:100%;transition:width 1s linear;}
+
+/* ---- Finale ---- */
+.finale-wrap{position:relative;text-align:center;padding:1.6rem 1rem 2rem;}
+.big-gears{display:flex;justify-content:center;gap:1.6rem;margin-bottom:1.4rem;}
+.big-gears svg{width:74px;height:74px;filter:drop-shadow(0 4px 10px rgba(90,60,20,.3));}
+.big-gears .gear-shape{fill:var(--gold);stroke:var(--bronze-dark);stroke-width:2;}
+.big-gears svg{animation:spinSlow 3.2s linear infinite;}
+@keyframes spinSlow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+.doors{position:relative;width:min(380px,80vw);height:210px;margin:0 auto 1.5rem;overflow:hidden;border-radius:14px;
+  border:2px solid var(--stone-deep);background:#f3ead4;}
+.door-half{position:absolute;top:0;bottom:0;width:52%;background:linear-gradient(180deg,#c9a674,#8a5a2b);
+  border:2px solid var(--bronze-dark);transition:transform 1.4s cubic-bezier(.6,0,.3,1);}
+.door-half.l{left:-1%;border-radius:14px 0 0 14px;}
+.door-half.r{right:-1%;border-radius:0 14px 14px 0;}
+.doors.open .door-half.l{transform:translateX(-100%);}
+.doors.open .door-half.r{transform:translateX(100%);}
+.door-light{position:absolute;inset:0;background:radial-gradient(circle, rgba(255,214,110,.95), rgba(255,214,110,0) 65%);
+  opacity:0;transition:opacity 1s ease .6s;}
+.doors.open .door-light{opacity:1;}
+
+.finale-title{font-family:Georgia,'Times New Roman',serif;color:var(--bronze-dark);font-size:1.22rem;
+  font-weight:700;line-height:1.65;max-width:560px;margin:0 auto 1rem;}
+.finale-time{display:inline-flex;align-items:center;gap:.5rem;font-family:'Courier New',Consolas,monospace;
+  font-size:1rem;font-weight:700;color:var(--bronze-dark);background:rgba(232,184,75,.2);
+  border:1.5px solid var(--gold);border-radius:99px;padding:.5rem 1.1rem;margin-bottom:1rem;}
+.finale-sub{font-size:.94rem;color:var(--muted);margin-bottom:1.5rem;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.8;}
+.corrections-panel{display:none;text-align:left;max-width:600px;margin:0 auto 1.4rem;background:var(--info-bg);
+  border:1.5px solid var(--info);border-radius:12px;padding:1rem 1.2rem;}
+.corrections-panel.show{display:block;}
+.corrections-panel h3{font-family:Georgia,serif;color:var(--info);font-size:1rem;margin-bottom:.7rem;}
+.corr-item{font-size:.86rem;line-height:1.85;margin-bottom:.7rem;color:#1c3a4d;}
+.corr-item .st{font-weight:800;margin-right:.3rem;}
+
+@media(max-width:480px){
+  .epreuve-card{padding:1.2rem 1.1rem;}
+  .panels{grid-template-columns:1fr;}
+  .btn{font-size:.85rem;padding:.55rem 1rem;}
+}
+</style>
+</head>
+<body>
+<div class="dust d1"></div><div class="dust d2"></div><div class="dust d3"></div>
+
+<!-- ============ HUD ============ -->
+<div class="hud">
+  <div class="hud-title"><span class="em">⚙️</span> Le mécanisme oublié</div>
+  <div class="hud-mid" id="hud-mid">Pazapa · 5e · Semaine 7 · Jour 2</div>
+  <div class="hud-right">
+    <div class="hud-timer" id="hud-timer" aria-label="Chronomètre du défi">⏱ 00:00</div>
+    <button class="btn-sound" id="btn-sound" onclick="toggleSound()" aria-label="Activer ou couper le son">🔊 Son activé</button>
+  </div>
+</div>
+
+<div class="gears-row" id="gears-row"><!-- injecté en JS --></div>
+
+<div class="stage">
+
+  <!-- ============ SCÈNE 1 : INTRO ============ -->
+  <section class="scene show" id="scene-intro">
+    <div class="intro-card">
+      <div class="intro-eyebrow">Je relève le défi · symétrie centrale</div>
+      <h1>Le mécanisme oublié du temple</h1>
+      <h2>Trois engrenages à réveiller</h2>
+      <div class="intro-text">
+        <p class="quote">⚙️ Mission : réactiver le mécanisme oublié.</p>
+        <p>Trois engrenages commandent l'ouverture d'une salle secrète.</p>
+        <p>Résous les trois épreuves de symétrie centrale pour les remettre en mouvement.</p>
+      </div>
+      <button class="btn btn-bronze" onclick="startGame()">⚙️ Entrer dans la salle des engrenages</button>
+    </div>
+  </section>
+
+  <!-- ============ SCÈNE 2 : ÉPREUVES ============ -->
+  <section class="scene" id="scene-epreuve">
+    <div class="epreuve-card" id="epreuve-card"><!-- injecté en JS --></div>
+  </section>
+
+  <!-- ============ SCÈNE 3 : FINALE ============ -->
+  <section class="scene" id="scene-finale">
+    <div class="finale-wrap">
+      <div class="big-gears" id="big-gears"><!-- injecté en JS --></div>
+      <div class="doors" id="doors">
+        <div class="door-light"></div>
+        <div class="door-half l"></div>
+        <div class="door-half r"></div>
+      </div>
+      <div class="finale-title">🏛️ Bravo ! Grâce à ta rapidité et à ton sens de l'observation, le mécanisme du temple s'est remis en marche. Une nouvelle salle secrète t'attend !</div>
+      <div class="finale-time" id="finale-time">⏱ Temps total : 00:00</div>
+      <div class="finale-sub" id="finale-sub">⚙️ Les trois engrenages tournent désormais à l'unisson. Le mécanisme oublié reprend vie et révèle l'entrée d'une nouvelle salle du temple.</div>
+      <div class="corrections-panel" id="corrections-panel"></div>
+      <div class="actions-row" style="justify-content:center">
+        <button class="btn btn-bronze" onclick="restart()">↻ Recommencer le défi</button>
+        <button class="btn btn-ghost" onclick="toggleCorrections()">📖 Voir les corrections</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* ==================================================================
+   GÉOMÉTRIE — points calculés par réflexion exacte autour de O
+   ================================================================== */
+function reflect(p,o){ return {x:2*o.x-p.x, y:2*o.y-p.y}; }
+function mid(p1,p2){ return {x:(p1.x+p2.x)/2, y:(p1.y+p2.y)/2}; }
+
+/* ---- Épreuve 1 : A, A', B, B' autour de O ---- */
+var E1_VB={w:520,h:260};
+var e1_O={x:255,y:135};
+var e1_A={x:100,y:65};
+var e1_A2=reflect(e1_A,e1_O);
+var e1_B={x:420,y:45};
+var e1_B2=reflect(e1_B,e1_O);
+
+/* ---- Épreuve 3 : A, B, C, D autour de O (grille) ---- */
+var E3_VB={w:480,h:340};
+var e3_O={x:260,y:180};
+var e3_A={x:110,y:70};
+var e3_C=reflect(e3_A,e3_O);
+var e3_B={x:360,y:175};
+var e3_D=reflect(e3_B,e3_O);
+
+/* ---- Épreuve 2 : triangles ABC / A'B'C' autour de O ---- */
+var E2_VB={w:620,h:330};
+var e2_O={x:315,y:165};
+var e2_A={x:75,y:235};
+var e2_B={x:245,y:235};
+var e2_C={x:175,y:95};
+var e2_A2=reflect(e2_A,e2_O);
+var e2_B2=reflect(e2_B,e2_O);
+var e2_C2=reflect(e2_C,e2_O);
+
+/* ==================================================================
+   ENGRENAGE (SVG réutilisable)
+   ================================================================== */
+function gearPath(cx,cy,rOuter,rInner,teeth){
+  var step=Math.PI*2/teeth, pts=[];
+  for(var i=0;i<teeth;i++){
+    var a0=i*step, a1=a0+step*0.42, a2=a0+step*0.5, a3=a0+step*0.92;
+    pts.push([cx+rOuter*Math.cos(a0),cy+rOuter*Math.sin(a0)]);
+    pts.push([cx+rOuter*Math.cos(a1),cy+rOuter*Math.sin(a1)]);
+    pts.push([cx+rInner*Math.cos(a2),cy+rInner*Math.sin(a2)]);
+    pts.push([cx+rInner*Math.cos(a3),cy+rInner*Math.sin(a3)]);
+  }
+  return 'M'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' L')+' Z';
+}
+function gearSVG(size){
+  var c=size/2, rO=size*0.46, rI=size*0.33, hole=size*0.14;
+  return '<svg viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg">'
+    +'<path class="gear-shape" d="'+gearPath(c,c,rO,rI,9)+'"/>'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+hole+'" fill="var(--stone-panel)" stroke="var(--bronze-dark)" stroke-width="2"/>'
+    +'</svg>';
+}
+function renderGears(){
+  var html='';
+  for(var i=1;i<=3;i++){
+    html+='<div class="gear-slot" id="gear-'+i+'">'+gearSVG(56)+'<span class="g-label">Épreuve '+i+'</span></div>';
+  }
+  $('gears-row').innerHTML=html;
+  var big='';
+  for(var j=1;j<=3;j++){ big+=gearSVG(74); }
+  $('big-gears').innerHTML=big;
+}
+function spinGear(n){
+  var g=$('gear-'+n);
+  g.classList.add('done','spin');
+  setTimeout(function(){ g.classList.remove('spin'); }, 950);
+}
+
+/* ==================================================================
+   SON — Web Audio API uniquement, jamais avant le premier clic
+   ================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } return audioCtx; }
+function tone(freq,dur,type,startDelay,gainVal){
+  if(!soundOn) return;
+  var c=ac(); if(!c) return;
+  var t0=c.currentTime+(startDelay||0);
+  var osc=c.createOscillator(), g=c.createGain();
+  osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(gainVal||0.15,t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g); g.connect(c.destination);
+  osc.start(t0); osc.stop(t0+dur+0.05);
+}
+function playClick(){ tone(500,.06,'sine',0,.08); }
+function playCorrect(){ tone(180,.3,'sine',0,.16); tone(360,.35,'sine',.08,.12); tone(540,.4,'triangle',.16,.08); }
+function playWrong(){ tone(170,.16,'sawtooth',0,.08); tone(110,.2,'sawtooth',.09,.08); }
+function playHint(){ tone(420,.18,'sine',0,.09); }
+function playGear(){ tone(90,.22,'square',0,.10); tone(140,.18,'square',.08,.07); }
+function playFinal(){ tone(200,.5,'sine',0,.14); tone(300,.55,'sine',.15,.12); tone(420,.7,'triangle',.3,.10); tone(640,.9,'sine',.45,.08); }
+window.toggleSound=function(){
+  soundOn=!soundOn;
+  $('btn-sound').textContent = soundOn ? '🔊 Son activé' : '🔇 Son coupé';
+};
+
+/* ==================================================================
+   CHRONO GLOBAL DU DÉFI
+   ================================================================== */
+var gameStartTime=null, gameTimerInterval=null;
+function formatTime(totalSec){
+  var m=Math.floor(totalSec/60), s=totalSec%60;
+  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+function startGameTimer(){
+  gameStartTime=Date.now();
+  clearInterval(gameTimerInterval);
+  updateGameTimer();
+  gameTimerInterval=setInterval(updateGameTimer,1000);
+}
+function updateGameTimer(){
+  var el=$('hud-timer'); if(!el||!gameStartTime) return;
+  el.textContent='⏱ '+formatTime(Math.floor((Date.now()-gameStartTime)/1000));
+}
+function stopGameTimer(){
+  clearInterval(gameTimerInterval);
+  if(!gameStartTime) return 0;
+  return Math.floor((Date.now()-gameStartTime)/1000);
+}
+function resetGameTimer(){
+  clearInterval(gameTimerInterval);
+  gameStartTime=null;
+  var el=$('hud-timer'); if(el) el.textContent='⏱ 00:00';
+}
+
+/* ---- Chrono inline "épreuve suivante" (comme le Jour 1) ---- */
+function startChrono(durationMs,onDone){
+  var wrap=$('chrono-wrap'),fill=$('chrono-fill'),label=$('chrono-label'),num=$('chrono-num');
+  if(!wrap){ onDone && setTimeout(onDone,durationMs); return; }
+  wrap.classList.add('show');
+  var remaining=Math.ceil(durationMs/1000);
+  num.textContent=remaining;
+  label.textContent='⏱ Épreuve suivante dans '+remaining+' s';
+  fill.style.transition='none'; fill.style.width='100%';
+  requestAnimationFrame(function(){ fill.style.transition='width '+durationMs+'ms linear'; fill.style.width='0%'; });
+  setTimeout(function(){ wrap.scrollIntoView({behavior:'smooth',block:'nearest'}); },50);
+  clearInterval(window.__chronoInterval);
+  window.__chronoInterval=setInterval(function(){
+    remaining--;
+    if(remaining<=0){ clearInterval(window.__chronoInterval); num.textContent='0'; label.textContent='⏱ Épreuve suivante…'; }
+    else { num.textContent=remaining; label.textContent='⏱ Épreuve suivante dans '+remaining+' s'; }
+  },1000);
+  clearTimeout(window.__chronoTimeout);
+  window.__chronoTimeout=setTimeout(function(){
+    clearInterval(window.__chronoInterval);
+    onDone && onDone();
+  },durationMs);
+}
+function clearChronoTimers(){
+  clearInterval(window.__chronoInterval);
+  clearTimeout(window.__chronoTimeout);
+}
+
+/* ==================================================================
+   ÉTAT DU DÉFI
+   ================================================================== */
+var current=1;               // épreuve affichée (1..3)
+var attempts=[0,0,0];        // essais faux par épreuve (index 0..2)
+var solved=[false,false,false];
+var correctionShown=[false,false,false];
+var selectedPoint=null;      // pour épreuves 1 et 3
+
+var CORR = {
+  1:'Le centre est O, car A et A\u2019 sont de part et d\u2019autre de O à la même distance. Il en est de même pour B et B\u2019.',
+  2:'b = 5 cm · c = 37° · d = 14,6 cm · a = 9 cm². Les deux triangles étant symétriques par rapport à O, toutes ces grandeurs sont conservées : longueurs, angles, périmètre et aire.',
+  3:'Le centre est O, car AO = OC et DO = OB. O est donc le milieu de [AC] et de [DB].'
+};
+
+/* ==================================================================
+   NAVIGATION
+   ================================================================== */
+function showScene(id){
+  document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('show');});
+  $(id).classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+window.startGame=function(){
+  playClick();
+  showScene('scene-epreuve');
+  startGameTimer();
+  renderEpreuve(1);
+};
+
+/* ==================================================================
+   RENDU DES ÉPREUVES
+   ================================================================== */
+function renderEpreuve(n){
+  current=n;
+  var card=$('epreuve-card');
+  if(n===1) card.innerHTML=tplE1();
+  else if(n===2) card.innerHTML=tplE2();
+  else if(n===3) card.innerHTML=tplE3();
+  selectedPoint=null;
+  if(attempts[n-1]>=1){ var hb=$('btn-hint'); if(hb) hb.style.display='inline-flex'; }
+  if(attempts[n-1]>=2){ var cb=$('corr-'+n); if(cb) cb.classList.add('show'); }
+}
+
+function ptBtn(id,label,p,vb){
+  var leftPct=(p.x/vb.w*100).toFixed(2), topPct=(p.y/vb.h*100).toFixed(2);
+  return '<button type="button" class="pt-btn" id="pt-'+id+'" style="left:'+leftPct+'%;top:'+topPct+'%" '
+    +'onclick="selectPoint(\''+id+'\')" aria-label="Point '+label+'">'+label+'</button>';
+}
+
+function tplE1(){
+  var svg='<svg viewBox="0 0 '+E1_VB.w+' '+E1_VB.h+'" xmlns="http://www.w3.org/2000/svg">'
+    +'<line x1="'+e1_A.x+'" y1="'+e1_A.y+'" x2="'+e1_A2.x+'" y2="'+e1_A2.y+'" stroke="var(--bronze)" stroke-width="2"/>'
+    +'<line x1="'+e1_B.x+'" y1="'+e1_B.y+'" x2="'+e1_B2.x+'" y2="'+e1_B2.y+'" stroke="var(--ochre)" stroke-width="2"/>'
+    +tickMarks(e1_A,e1_O,'var(--bronze)',1)
+    +tickMarks(e1_O,e1_A2,'var(--bronze)',1)
+    +tickMarks(e1_B,e1_O,'var(--ochre)',2)
+    +tickMarks(e1_O,e1_B2,'var(--ochre)',2)
+    +'<circle cx="'+e1_O.x+'" cy="'+e1_O.y+'" r="4.2" fill="var(--gold-bright)" stroke="var(--bronze-dark)" stroke-width="0.8"/>'
+    +'</svg>';
+  var pts = ptBtn('A',"A",e1_A,E1_VB) + ptBtn('A2',"A’",e1_A2,E1_VB) + ptBtn('B',"B",e1_B,E1_VB) + ptBtn('B2',"B’",e1_B2,E1_VB) + ptBtn('O',"O",e1_O,E1_VB);
+  return '<div class="epreuve-eyebrow">Épreuve 1 / 3 · Premier engrenage</div>'
+    +'<h2>Retrouver le centre</h2>'
+    +'<div class="epreuve-consigne">Quel est le centre de symétrie de cette figure ? Choisis le point, puis vérifie.</div>'
+    +'<div class="fig-wrap" style="aspect-ratio:'+E1_VB.w+'/'+E1_VB.h+'">'+svg+pts+'</div>'
+    +'<div class="actions-row">'
+      +'<button class="btn btn-bronze" id="btn-valider" onclick="checkE1()" disabled>⚙️ Vérifier</button>'
+      +'<button class="btn btn-ghost" id="btn-hint" style="display:none" onclick="toggleHint(1)">💡 Voir un indice</button>'
+    +'</div>'
+    +'<div class="hint-box" id="hint-1">💡 Le centre de symétrie est le milieu du segment qui relie un point à son symétrique.</div>'
+    +'<div class="corr-box" id="corr-1"><strong>📖 Correction :</strong> '+CORR[1]+'</div>'
+    +'<div class="feedback" id="fb-1" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +chronoBlock();
+}
+
+function tplE3(){
+  var grid='';
+  var cols=8, rows=7, cw=E3_VB.w/cols, rh=E3_VB.h/rows;
+  for(var i=0;i<=cols;i++){ grid+='<line x1="'+(i*cw)+'" y1="0" x2="'+(i*cw)+'" y2="'+E3_VB.h+'" stroke="#e3d7ba" stroke-width="1"/>'; }
+  for(var j=0;j<=rows;j++){ grid+='<line x1="0" y1="'+(j*rh)+'" x2="'+E3_VB.w+'" y2="'+(j*rh)+'" stroke="#e3d7ba" stroke-width="1"/>'; }
+  var tri1='<polygon points="'+e3_A.x+','+e3_A.y+' '+e3_O.x+','+e3_O.y+' '+e3_B.x+','+e3_B.y+'" fill="rgba(177,70,44,.14)" stroke="var(--bronze)" stroke-width="1.5"/>';
+  var tri2='<polygon points="'+e3_C.x+','+e3_C.y+' '+e3_O.x+','+e3_O.y+' '+e3_D.x+','+e3_D.y+'" fill="rgba(177,70,44,.14)" stroke="var(--bronze)" stroke-width="1.5"/>';
+  var svg='<svg viewBox="0 0 '+E3_VB.w+' '+E3_VB.h+'" xmlns="http://www.w3.org/2000/svg">'
+    +grid+tri1+tri2
+    +'<line x1="'+e3_A.x+'" y1="'+e3_A.y+'" x2="'+e3_C.x+'" y2="'+e3_C.y+'" stroke="var(--bronze-dark)" stroke-width="1.5" stroke-dasharray="4 3"/>'
+    +'<line x1="'+e3_D.x+'" y1="'+e3_D.y+'" x2="'+e3_B.x+'" y2="'+e3_B.y+'" stroke="var(--bronze-dark)" stroke-width="1.5" stroke-dasharray="4 3"/>'
+    +tickMarks(e3_A,e3_O,'var(--bronze-dark)',1)
+    +tickMarks(e3_O,e3_C,'var(--bronze-dark)',1)
+    +tickMarks(e3_D,e3_O,'var(--ochre)',2)
+    +tickMarks(e3_O,e3_B,'var(--ochre)',2)
+    +'<circle cx="'+e3_O.x+'" cy="'+e3_O.y+'" r="4.2" fill="var(--gold-bright)" stroke="var(--bronze-dark)" stroke-width="0.8"/>'
+    +'</svg>';
+  var pts = ptBtn('A',"A",e3_A,E3_VB) + ptBtn('B',"B",e3_B,E3_VB) + ptBtn('C',"C",e3_C,E3_VB) + ptBtn('D',"D",e3_D,E3_VB) + ptBtn('O',"O",e3_O,E3_VB);
+  return '<div class="epreuve-eyebrow">Épreuve 3 / 3 · Cœur du mécanisme</div>'
+    +'<h2>Retrouver le centre caché</h2>'
+    +'<div class="epreuve-consigne">Quel est le centre de symétrie de cette figure ? Choisis le point, puis vérifie.</div>'
+    +'<div class="fig-wrap" style="aspect-ratio:'+E3_VB.w+'/'+E3_VB.h+'">'+svg+pts+'</div>'
+    +'<div class="actions-row">'
+      +'<button class="btn btn-bronze" id="btn-valider" onclick="checkE3()" disabled>⚙️ Vérifier</button>'
+      +'<button class="btn btn-ghost" id="btn-hint" style="display:none" onclick="toggleHint(3)">💡 Voir un indice</button>'
+    +'</div>'
+    +'<div class="hint-box" id="hint-3">💡 Relie A à C puis D à B. Le centre est leur point commun.</div>'
+    +'<div class="corr-box" id="corr-3"><strong>📖 Correction :</strong> '+CORR[3]+'</div>'
+    +'<div class="feedback" id="fb-3" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +chronoBlock();
+}
+
+function tplE2(){
+  var arc=function(p,r){ return '<path d="M '+(p.x+r)+' '+p.y+' A '+r+' '+r+' 0 0 0 '+p.x+' '+(p.y-r)+'" fill="none" stroke="var(--ochre)" stroke-width="1.5"/>'; };
+  var svg='<svg viewBox="0 0 '+E2_VB.w+' '+E2_VB.h+'" xmlns="http://www.w3.org/2000/svg">'
+    +'<polygon points="'+e2_A.x+','+e2_A.y+' '+e2_B.x+','+e2_B.y+' '+e2_C.x+','+e2_C.y+'" fill="rgba(177,70,44,.08)" stroke="var(--danger)" stroke-width="2"/>'
+    +'<polygon points="'+e2_A2.x+','+e2_A2.y+' '+e2_B2.x+','+e2_B2.y+' '+e2_C2.x+','+e2_C2.y+'" fill="rgba(177,70,44,.08)" stroke="var(--danger)" stroke-width="2"/>'
+    +arc(e2_A,16)+arc(e2_A2,16)
+    +'<circle cx="'+e2_O.x+'" cy="'+e2_O.y+'" r="4.2" fill="var(--gold-bright)" stroke="var(--bronze-dark)" stroke-width="0.8"/>'
+    +'<text x="'+e2_A.x+'" y="'+(e2_A.y+18)+'" font-family="Georgia,serif" font-size="14" fill="var(--ink)">A</text>'
+    +'<text x="'+(e2_B.x+6)+'" y="'+(e2_B.y+18)+'" font-family="Georgia,serif" font-size="14" fill="var(--ink)">B</text>'
+    +'<text x="'+(e2_C.x-4)+'" y="'+(e2_C.y-8)+'" font-family="Georgia,serif" font-size="14" fill="var(--ink)">C</text>'
+    +'<text x="'+(e2_O.x+8)+'" y="'+(e2_O.y-8)+'" font-family="Georgia,serif" font-size="14" fill="var(--bronze-dark)">O</text>'
+    +'<text x="'+(e2_A2.x-4)+'" y="'+(e2_A2.y-8)+'" font-family="Georgia,serif" font-size="14" fill="var(--ink)">A’</text>'
+    +'<text x="'+(e2_B2.x-14)+'" y="'+(e2_B2.y-8)+'" font-family="Georgia,serif" font-size="14" fill="var(--ink)">B’</text>'
+    +'<text x="'+(e2_C2.x+6)+'" y="'+(e2_C2.y+18)+'" font-family="Georgia,serif" font-size="14" fill="var(--ink)">C’</text>'
+    +'</svg>';
+  return '<div class="epreuve-eyebrow">Épreuve 2 / 3 · Les triangles sacrés</div>'
+    +'<h2>Les propriétés conservées</h2>'
+    +'<div class="epreuve-consigne">Les triangles ABC et A’B’C’ sont symétriques par rapport au point O. Détermine les valeurs inconnues, puis vérifie.</div>'
+    +'<div class="fig-wrap" style="max-width:600px;aspect-ratio:'+E2_VB.w+'/'+E2_VB.h+'">'+svg+'</div>'
+    +'<div class="panels">'
+      +'<div class="panel"><h3>Triangle ABC</h3>'
+        +'<div class="line">AC = 5 <span class="unit">cm</span></div>'
+        +'<div class="line">BAC = 37 <span class="unit">°</span></div>'
+        +'<div class="line">Périmètre = 14,6 <span class="unit">cm</span></div>'
+        +'<div class="line">Aire = <input type="text" inputmode="decimal" class="field" id="f-a" aria-label="Valeur de a, l’aire du triangle ABC, en centimètres carrés" oninput="checkE2Ready()"> <span class="unit">cm²</span></div>'
+      +'</div>'
+      +'<div class="panel"><h3>Triangle A’B’C’</h3>'
+        +'<div class="line">A’C’ = <input type="text" inputmode="decimal" class="field" id="f-b" aria-label="Valeur de b, la longueur A′C′, en centimètres" oninput="checkE2Ready()"> <span class="unit">cm</span></div>'
+        +'<div class="line">B’A’C’ = <input type="text" inputmode="decimal" class="field" id="f-c" aria-label="Valeur de c, l’angle B′A′C′, en degrés" oninput="checkE2Ready()"> <span class="unit">°</span></div>'
+        +'<div class="line">Périmètre = <input type="text" inputmode="decimal" class="field" id="f-d" aria-label="Valeur de d, le périmètre du triangle A′B′C′, en centimètres" oninput="checkE2Ready()"> <span class="unit">cm</span></div>'
+        +'<div class="line">Aire = 9 <span class="unit">cm²</span></div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="actions-row">'
+      +'<button class="btn btn-bronze" id="btn-valider" onclick="checkE2()" disabled>⚙️ Vérifier</button>'
+      +'<button class="btn btn-ghost" id="btn-hint" style="display:none" onclick="toggleHint(2)">💡 Voir un indice</button>'
+    +'</div>'
+    +'<div class="hint-box" id="hint-2">💡 Une symétrie centrale ne modifie ni les longueurs, ni les angles, ni le périmètre, ni l’aire.</div>'
+    +'<div class="corr-box" id="corr-2"><strong>📖 Correction :</strong> '+CORR[2]+'</div>'
+    +'<div class="feedback" id="fb-2" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +chronoBlock();
+}
+
+function tickMarks(p1,p2,color,style){
+  var m=mid(p1,p2);
+  var dx=p2.x-p1.x, dy=p2.y-p1.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  var ux=-dy/d, uy=dx/d, len=6;
+  if(style===1){
+    return '<line x1="'+(m.x-ux*len)+'" y1="'+(m.y-uy*len)+'" x2="'+(m.x+ux*len)+'" y2="'+(m.y+uy*len)+'" stroke="'+color+'" stroke-width="2"/>';
+  }
+  var gap=3.2, dxx=dx/d, dyy=dy/d;
+  var m1={x:m.x-dxx*gap,y:m.y-dyy*gap}, m2={x:m.x+dxx*gap,y:m.y+dyy*gap};
+  return '<line x1="'+(m1.x-ux*len)+'" y1="'+(m1.y-uy*len)+'" x2="'+(m1.x+ux*len)+'" y2="'+(m1.y+uy*len)+'" stroke="'+color+'" stroke-width="2"/>'
+       + '<line x1="'+(m2.x-ux*len)+'" y1="'+(m2.y-uy*len)+'" x2="'+(m2.x+ux*len)+'" y2="'+(m2.y+uy*len)+'" stroke="'+color+'" stroke-width="2"/>';
+}
+
+function chronoBlock(){
+  return '<div class="chrono-wrap" id="chrono-wrap">'
+    +'<span class="chrono-num" id="chrono-num">5</span>'
+    +'<div class="chrono-body">'
+      +'<div class="chrono-label" id="chrono-label">⏱ Épreuve suivante dans quelques secondes…</div>'
+      +'<div class="chrono-track"><div class="chrono-fill" id="chrono-fill"></div></div>'
+    +'</div></div>';
+}
+
+/* ==================================================================
+   SÉLECTION DE POINT (épreuves 1 et 3)
+   ================================================================== */
+window.selectPoint=function(id){
+  playClick();
+  selectedPoint=id;
+  document.querySelectorAll('.pt-btn').forEach(function(b){ b.classList.remove('selected'); });
+  $('pt-'+id).classList.add('selected');
+  $('btn-valider').disabled=false;
+};
+
+/* ==================================================================
+   INDICE
+   ================================================================== */
+window.toggleHint=function(n){
+  playHint();
+  var h=$('hint-'+n);
+  h.classList.toggle('show');
+};
+
+/* ==================================================================
+   VÉRIFICATION — ÉPREUVE 1 et 3 (centre = O)
+   ================================================================== */
+window.checkE1=function(){ handlePointAnswer(1,'O'); };
+window.checkE3=function(){ handlePointAnswer(3,'O'); };
+
+function handlePointAnswer(n,correctId){
+  if(solved[n-1]) return;
+  var ok = selectedPoint===correctId;
+  var fb=$('fb-'+n);
+  var btn=$('pt-'+selectedPoint);
+  if(ok){
+    playCorrect();
+    document.querySelectorAll('.pt-btn').forEach(function(b){ b.disabled=true; });
+    btn.classList.add('correct');
+    fb.className='feedback show ok';
+    fb.innerHTML = n===1
+      ? '✅ Exact ! O est le centre de symétrie, car il est le milieu de [AA’] et de [BB’].'
+      : '✅ Exact ! O est le centre de symétrie car il est le milieu des segments reliant les sommets correspondants.';
+    onEpreuveSolved(n);
+  } else {
+    playWrong();
+    btn.classList.add('wrong');
+    setTimeout(function(){ btn.classList.remove('wrong'); },400);
+    attempts[n-1]++;
+    fb.className='feedback show ko';
+    fb.innerHTML = n===1
+      ? '❌ Observe le point situé au milieu de chaque segment reliant un point à son image.'
+      : '❌ Cherche le point placé au milieu des segments reliant deux sommets opposés.';
+    if(attempts[n-1]>=1){ var hb=$('btn-hint'); hb.style.display='inline-flex'; }
+    if(attempts[n-1]>=2){ $('corr-'+n).classList.add('show'); correctionShown[n-1]=true; }
+  }
+}
+
+/* ==================================================================
+   VÉRIFICATION — ÉPREUVE 2 (4 champs)
+   ================================================================== */
+function parseFlex(str){
+  if(!str) return NaN;
+  var m=String(str).replace(',', '.').match(/-?\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : NaN;
+}
+window.checkE2Ready=function(){
+  var ids=['f-a','f-b','f-c','f-d'];
+  var ok = ids.every(function(id){ var v=$(id); return v && v.value.trim()!==''; });
+  var btn=$('btn-valider'); if(btn) btn.disabled=!ok;
+};
+window.checkE2=function(){
+  if(solved[1]) return;
+  var vals={ a:parseFlex($('f-a').value), b:parseFlex($('f-b').value), c:parseFlex($('f-c').value), d:parseFlex($('f-d').value) };
+  var expected={ a:9, b:5, c:37, d:14.6 };
+  var okA=Math.abs(vals.a-expected.a)<0.05, okB=Math.abs(vals.b-expected.b)<0.05,
+      okC=Math.abs(vals.c-expected.c)<0.05, okD=Math.abs(vals.d-expected.d)<0.05;
+  var allOk=okA&&okB&&okC&&okD;
+  var fb=$('fb-2');
+  ['a','b','c','d'].forEach(function(k){
+    var f=$('f-'+k);
+    f.classList.remove('f-ok','f-ko');
+    f.classList.add(({a:okA,b:okB,c:okC,d:okD})[k] ? 'f-ok' : 'f-ko');
+  });
+  if(allOk){
+    playCorrect();
+    ['f-a','f-b','f-c','f-d'].forEach(function(id){ $(id).disabled=true; });
+    fb.className='feedback show ok';
+    fb.innerHTML='✅ Bravo ! Une symétrie centrale conserve les longueurs, les angles, le périmètre et l’aire.';
+    onEpreuveSolved(2);
+  } else {
+    playWrong();
+    attempts[1]++;
+    fb.className='feedback show ko';
+    fb.innerHTML='❌ Compare chaque donnée avec la grandeur correspondante dans le triangle symétrique.';
+    if(attempts[1]>=1){ var hb=$('btn-hint'); hb.style.display='inline-flex'; }
+    if(attempts[1]>=2){ $('corr-2').classList.add('show'); correctionShown[1]=true; }
+  }
+};
+
+/* ==================================================================
+   ÉPREUVE RÉUSSIE — engrenage, avance automatique
+   ================================================================== */
+function onEpreuveSolved(n){
+  solved[n-1]=true;
+  playGear();
+  spinGear(n);
+  var btn=$('btn-valider'); if(btn) btn.disabled=true;
+  var hb=$('btn-hint'); if(hb) hb.style.display='none';
+  startChrono(5000, function(){
+    if(n<3){ renderEpreuve(n+1); }
+    else { triggerFinale(); }
+  });
+}
+
+/* ==================================================================
+   FINALE
+   ================================================================== */
+function triggerFinale(){
+  var totalSec = stopGameTimer();
+  playFinal();
+  showScene('scene-finale');
+  $('finale-time').textContent='⏱ Temps total : '+formatTime(totalSec);
+  setTimeout(function(){ $('doors').classList.add('open'); },500);
+}
+
+window.toggleCorrections=function(){
+  var p=$('corrections-panel');
+  if(p.classList.contains('show')){ p.classList.remove('show'); return; }
+  var labels=['Épreuve 1 — Retrouver le centre','Épreuve 2 — Les propriétés conservées','Épreuve 3 — Retrouver le centre caché'];
+  var html='<h3>📖 Corrections des trois épreuves</h3>';
+  for(var i=1;i<=3;i++){
+    var st = solved[i-1] ? (correctionShown[i-1] ? '<span class="st" style="color:var(--info)">ℹ️</span>' : '<span class="st" style="color:var(--success)">✅</span>') : '<span class="st" style="color:var(--danger)">—</span>';
+    html+='<div class="corr-item">'+st+'<strong>'+labels[i-1]+'</strong><br>'+CORR[i]+'</div>';
+  }
+  p.innerHTML=html;
+  p.classList.add('show');
+};
+
+/* ==================================================================
+   RECOMMENCER
+   ================================================================== */
+window.restart=function(){
+  clearChronoTimers();
+  current=1;
+  attempts=[0,0,0]; solved=[false,false,false]; correctionShown=[false,false,false];
+  selectedPoint=null;
+  renderGears();
+  $('doors').classList.remove('open');
+  $('corrections-panel').classList.remove('show');
+  resetGameTimer();
+  showScene('scene-intro');
+};
+
+document.addEventListener('DOMContentLoaded', function(){
+  renderGears();
+});
+})();
+</script>
+</body>
+</html>
