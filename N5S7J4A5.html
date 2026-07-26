@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa · 5e · Semaine 7 Jour 4 · Le Sceau du Bâtisseur</title>
+<style>
+/* ============ JETONS DE DESIGN — Le Sceau du Bâtisseur (salle centrale, pierre beige / bronze / turquoise) ============
+   Interface distincte des Jours 1 (mosaïque nocturne), 2 (salle claire/engrenages) et 3 (galerie bronze/émeraude) :
+   ici, salle ensoleillée, pierre beige claire, accents turquoise, lumière dorée verticale. */
+:root{
+  --stone:#efe6ce;
+  --stone-mid:#d8c79c;
+  --stone-dark:#a8925f;
+  --bronze:#a9701f;
+  --bronze-dark:#6b4713;
+  --sand:#d9b878;
+  --turquoise:#2fa7a0;
+  --turquoise-light:#7fd6cf;
+  --gold:#e8b84b;
+  --gold-bright:#ffd876;
+  --ink:#2c2417;
+  --muted:#8a7c5c;
+  --success:#2f8f6f;
+  --success-bg:#e3f3ec;
+  --danger:#b1462c;
+  --danger-bg:#f8e6e0;
+  --info:#3f6f8f;
+  --info-bg:#e6f0f7;
+  --radius:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:inherit;}
+html{scroll-behavior:auto;}
+body{
+  min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--ink);
+  background:
+    radial-gradient(ellipse 560px 420px at 50% -6%, rgba(232,184,75,.30), transparent 62%),
+    radial-gradient(ellipse 420px 320px at 100% 100%, rgba(47,167,160,.18), transparent 60%),
+    linear-gradient(180deg,#f7efd8,#efe3bf 45%,#e2cf9c 100%);
+  overflow-x:hidden;position:relative;padding-bottom:3rem;
+}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;
+  background-image:radial-gradient(circle, rgba(169,112,31,.08) 1px, transparent 1.6px);background-size:40px 40px;}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important;transition-duration:.001ms !important;} }
+
+.hud{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.8rem 1.2rem;background:linear-gradient(180deg, rgba(247,239,216,.97), rgba(247,239,216,.88));
+  border-bottom:2px solid var(--stone-dark);backdrop-filter:blur(3px);flex-wrap:wrap;}
+.hud-title{display:flex;align-items:center;gap:.55rem;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:1.02rem;color:var(--bronze-dark);}
+.hud-mid{font-family:'Courier New',Consolas,monospace;font-size:.78rem;color:var(--muted);text-align:center;letter-spacing:.03em;}
+.hud-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.hud-timer{font-family:'Courier New',Consolas,monospace;font-size:.85rem;font-weight:700;color:var(--bronze-dark);
+  background:rgba(47,167,160,.14);border:1.5px solid var(--turquoise);border-radius:8px;
+  padding:.4rem .7rem;min-width:4.6em;text-align:center;letter-spacing:.03em;}
+.btn-sound{background:none;border:1.5px solid var(--stone-dark);color:var(--ink);border-radius:10px;
+  padding:.4rem .7rem;font-size:.9rem;cursor:pointer;min-height:2.6rem;font-family:'Courier New',Consolas,monospace;}
+.btn-sound:hover{border-color:var(--bronze);}
+.btn-sound[aria-pressed="true"]{border-color:var(--turquoise);color:var(--turquoise);}
+.btn-sound:focus-visible,.btn:focus-visible,.opt-btn:focus-visible{outline:3px solid var(--turquoise);outline-offset:2px;}
+
+.seals-row{display:flex;justify-content:center;gap:1.6rem;margin:1.4rem 0 .4rem;position:relative;z-index:1;}
+.seal-slot{display:flex;flex-direction:column;align-items:center;gap:.35rem;}
+.seal-slot svg{width:54px;height:54px;filter:drop-shadow(0 3px 6px rgba(80,60,20,.3));}
+.seal-slot .seal-disc{fill:var(--stone-mid);stroke:var(--bronze-dark);stroke-width:2;transition:fill .5s ease;}
+.seal-slot .seal-crack{stroke:var(--bronze-dark);stroke-width:1.4;fill:none;opacity:.5;}
+.seal-slot.done .seal-disc{fill:var(--gold);}
+.seal-slot.done .seal-crack{stroke:var(--gold-bright);opacity:1;}
+.seal-slot .s-label{font-family:'Courier New',Consolas,monospace;font-size:.7rem;color:var(--muted);}
+
+.stage{max-width:820px;margin:0 auto;padding:.4rem 1.2rem 0;position:relative;z-index:1;}
+.scene{display:none;}
+.scene.show{display:block;animation:fadeUp .45s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+.intro-card{background:linear-gradient(180deg, rgba(255,251,238,.92), rgba(232,218,180,.92));
+  border:2px solid var(--stone-dark);border-radius:var(--radius);padding:2.1rem 2rem;text-align:center;
+  box-shadow:0 10px 34px rgba(80,60,20,.14);}
+.intro-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--turquoise);margin-bottom:.5rem;}
+.intro-card h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.4rem,3.6vw,2rem);color:var(--bronze-dark);margin-bottom:.3rem;line-height:1.3;}
+.intro-text{max-width:540px;margin:0 auto 1.5rem;line-height:1.85;font-size:1rem;text-align:left;}
+.intro-text p{margin-bottom:.85rem;}
+.intro-text .quote{border-left:3px solid var(--turquoise);padding:.6rem 1rem;background:rgba(47,167,160,.1);border-radius:6px;color:#1c4d47;font-weight:700;}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.72rem 1.45rem;border-radius:12px;border:none;cursor:pointer;
+  font-family:Arial,Helvetica,sans-serif;font-weight:800;font-size:1rem;min-height:2.7rem;transition:transform .12s ease, box-shadow .15s ease;}
+.btn:active{transform:scale(.96);}
+.btn-turquoise{background:linear-gradient(135deg,var(--turquoise-light),var(--turquoise));color:#04302c;box-shadow:0 4px 14px rgba(47,167,160,.4);}
+.btn-turquoise:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(47,167,160,.5);}
+.btn-ghost{background:transparent;border:2px solid var(--stone-dark);color:var(--ink);}
+.btn-ghost:hover{border-color:var(--bronze);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.epreuve-card{background:#fffbee;border:2px solid var(--stone-dark);border-radius:var(--radius);
+  padding:1.7rem 1.6rem;box-shadow:0 8px 28px rgba(80,60,20,.12);}
+.epreuve-eyebrow{font-family:'Courier New',Consolas,monospace;font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--turquoise);margin-bottom:.3rem;}
+.epreuve-card h2{font-family:Georgia,'Times New Roman',serif;color:var(--bronze-dark);font-size:1.22rem;margin-bottom:.7rem;line-height:1.3;}
+.epreuve-story{font-size:.9rem;color:var(--muted);margin-bottom:.9rem;line-height:1.8;}
+.epreuve-consigne{font-weight:800;font-size:.96rem;color:var(--ink);margin-bottom:1rem;line-height:1.75;
+  background:rgba(47,167,160,.09);border-left:4px solid var(--turquoise);border-radius:8px;padding:.7rem .9rem;}
+
+.pillars-row{display:flex;justify-content:center;gap:.7rem;margin-bottom:1rem;}
+.pillar{width:16px;height:44px;border-radius:4px;background:var(--stone-mid);border:2px solid var(--bronze-dark);transition:background .6s ease,box-shadow .6s ease;}
+.pillar.lit{background:var(--gold);box-shadow:0 0 10px var(--gold-bright);}
+
+.fig-wrap{position:relative;width:100%;max-width:520px;margin:0 auto 1rem;background:#fffdf3;border:1.5px solid var(--stone-dark);border-radius:12px;overflow:hidden;}
+.fig-wrap svg{display:block;width:100%;height:auto;}
+
+.choice-list{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.opt-btn{display:flex;align-items:center;gap:.7rem;padding:.75rem 1rem;border-radius:10px;border:2.5px solid var(--stone-dark);
+  background:#fffdf3;color:var(--ink);font-weight:700;font-size:.94rem;cursor:pointer;min-height:2.8rem;text-align:left;
+  transition:border-color .15s,background .2s;}
+.opt-btn:hover:not(:disabled){border-color:var(--turquoise);}
+.opt-btn .ob-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--stone-dark);flex-shrink:0;}
+.opt-btn.selected{border-color:var(--turquoise);background:rgba(47,167,160,.10);}
+.opt-btn.selected .ob-dot{background:var(--turquoise);border-color:var(--turquoise);}
+.opt-btn.correct{border-color:var(--success);background:var(--success-bg);color:#1c4d3c;}
+.opt-btn.correct .ob-dot{background:var(--success);border-color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:var(--danger-bg);color:#5c2416;animation:shake .35s ease;}
+.opt-btn.wrong .ob-dot{background:var(--danger);border-color:var(--danger);}
+.opt-btn:disabled{cursor:not-allowed;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+
+.actions-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.4rem;}
+.hint-box{margin-top:.7rem;background:rgba(232,184,75,.16);border:1.5px dashed var(--gold);border-radius:10px;
+  padding:.65rem .9rem;font-size:.85rem;color:#6b4d10;display:none;line-height:1.8;}
+.hint-box.show{display:block;}
+.corr-box{margin-top:.7rem;background:var(--info-bg);border:1.5px solid var(--info);border-radius:10px;
+  padding:.7rem .95rem;font-size:.86rem;color:#1c3a4d;display:none;line-height:1.9;}
+.corr-box.show{display:block;}
+.corr-box strong{color:var(--info);}
+.feedback{margin-top:.8rem;padding:.7rem .95rem;border-radius:10px;font-size:.9rem;line-height:1.8;display:none;}
+.feedback.show{display:block;}
+.feedback.ok{background:var(--success-bg);border:1.5px solid var(--success);color:#1c4d3c;}
+.feedback.ko{background:var(--danger-bg);border:1.5px solid var(--danger);color:#5c2416;}
+.feedback.info{background:var(--info-bg);border:1.5px solid var(--info);color:#1c3a4d;}
+
+.chrono-wrap{display:none;align-items:center;gap:.9rem;margin-top:1rem;padding:.7rem 1rem;
+  border:2px solid var(--gold);border-radius:12px;background:rgba(232,184,75,.16);}
+.chrono-wrap.show{display:flex;}
+.chrono-num{font-family:'Courier New',Consolas,monospace;font-size:1.5rem;font-weight:800;color:#6b4d10;min-width:2.3rem;text-align:center;flex-shrink:0;}
+.chrono-body{flex:1;min-width:0;}
+.chrono-label{font-family:'Courier New',Consolas,monospace;font-size:.78rem;color:#6b4d10;margin-bottom:.35rem;}
+.chrono-track{height:9px;border-radius:99px;background:var(--stone-mid);overflow:hidden;}
+.chrono-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold-bright));width:100%;transition:width 1s linear;}
+
+.finale-wrap{position:relative;text-align:center;padding:1.6rem 1rem 2rem;}
+.treasure-glow{width:100%;max-width:420px;height:8px;margin:0 auto 1.2rem;border-radius:99px;
+  background:linear-gradient(90deg,transparent,var(--gold-bright),transparent);opacity:.85;}
+.doors{position:relative;width:min(400px,82vw);height:220px;margin:0 auto 1.5rem;overflow:hidden;border-radius:14px;
+  border:2px solid var(--stone-dark);background:#f3e8c8;}
+.door-half{position:absolute;top:0;bottom:0;width:52%;background:linear-gradient(180deg,#c9a15f,#8a5a2b);
+  border:2px solid var(--bronze-dark);transition:transform 1.4s cubic-bezier(.6,0,.3,1);}
+.door-half.l{left:-1%;border-radius:14px 0 0 14px;}
+.door-half.r{right:-1%;border-radius:0 14px 14px 0;}
+.doors.open .door-half.l{transform:translateX(-100%);}
+.doors.open .door-half.r{transform:translateX(100%);}
+.door-light{position:absolute;inset:0;background:radial-gradient(circle, rgba(255,214,110,.95), rgba(47,167,160,.2) 55%, transparent 75%);
+  opacity:0;transition:opacity 1s ease .6s;}
+.doors.open .door-light{opacity:1;}
+.finale-title{font-family:Georgia,'Times New Roman',serif;color:var(--bronze-dark);font-size:1.3rem;font-weight:700;margin-bottom:.6rem;}
+.finale-sub{font-size:1rem;color:var(--ink);margin-bottom:1rem;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.8;}
+.finale-time{display:inline-flex;align-items:center;gap:.5rem;font-family:'Courier New',Consolas,monospace;
+  font-size:1rem;font-weight:700;color:#6b4d10;background:rgba(232,184,75,.22);
+  border:1.5px solid var(--gold);border-radius:99px;padding:.5rem 1.1rem;margin-bottom:1.2rem;}
+.finale-encourage{max-width:540px;margin:0 auto 1.6rem;background:rgba(47,167,160,.09);border:1.5px solid var(--turquoise);
+  border-radius:12px;padding:.9rem 1.2rem;font-size:.94rem;line-height:1.85;color:#1c4d47;}
+.corrections-panel{display:none;text-align:left;max-width:620px;margin:0 auto 1.4rem;background:var(--info-bg);
+  border:1.5px solid var(--info);border-radius:12px;padding:1rem 1.2rem;}
+.corrections-panel.show{display:block;}
+.corrections-panel h3{font-family:Georgia,serif;color:var(--info);font-size:1rem;margin-bottom:.7rem;}
+.corr-item{font-size:.86rem;line-height:1.85;margin-bottom:.8rem;color:#1c3a4d;}
+.corr-item .st{font-weight:800;margin-right:.3rem;}
+
+@media(max-width:480px){
+  .epreuve-card{padding:1.2rem 1.1rem;}
+  .btn{font-size:.85rem;padding:.55rem 1rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <div class="hud-title">🏛 Le Sceau du Bâtisseur</div>
+  <div class="hud-mid">Pazapa · 5e · Semaine 7 · Jour 4</div>
+  <div class="hud-right">
+    <div class="hud-timer" id="hud-timer" role="status" aria-live="off" aria-label="Chronomètre du défi">⏱ 00:00</div>
+    <button class="btn-sound" id="btn-sound" onclick="toggleSound()" aria-pressed="true" aria-label="Couper le son">🔊 Son activé</button>
+  </div>
+</div>
+
+<div class="seals-row" id="seals-row"><!-- injecté en JS --></div>
+
+<div class="stage">
+
+  <section class="scene show" id="scene-intro">
+    <div class="intro-card">
+      <div class="intro-eyebrow">Je relève le défi · propriétés du parallélogramme</div>
+      <h1>🏛 Le Sceau du Bâtisseur</h1>
+      <div class="intro-text">
+        <p class="quote">Les anciens bâtisseurs ne validaient une construction qu’après avoir vérifié les propriétés du parallélogramme.</p>
+        <p>Trois sceaux protègent encore aujourd’hui le sanctuaire.</p>
+        <p>Active chaque mécanisme pour ouvrir le passage.</p>
+      </div>
+      <button class="btn btn-turquoise" onclick="startGame()">▶ Commencer le défi</button>
+    </div>
+  </section>
+
+  <section class="scene" id="scene-epreuve">
+    <div class="epreuve-card" id="epreuve-card"><!-- injecté en JS --></div>
+  </section>
+
+  <section class="scene" id="scene-finale">
+    <div class="finale-wrap">
+      <div class="treasure-glow"></div>
+      <div class="doors" id="doors">
+        <div class="door-light"></div>
+        <div class="door-half l"></div>
+        <div class="door-half r"></div>
+      </div>
+      <div class="finale-title">🏛 Défi terminé !</div>
+      <div class="finale-sub" id="finale-sub">Les trois sceaux ont reconnu tes connaissances. Tu peux désormais pénétrer dans le sanctuaire des bâtisseurs.</div>
+      <div class="finale-time" id="finale-time">⏱ Temps total : 00:00</div>
+      <div class="finale-encourage">🏛 Chaque propriété reconnue t’a permis d’avancer dans le temple. Continue ainsi, tu deviens un véritable maître bâtisseur !</div>
+      <div class="corrections-panel" id="corrections-panel"></div>
+      <div class="actions-row" style="justify-content:center">
+        <button class="btn btn-turquoise" onclick="restart()">↻ Recommencer le défi</button>
+        <button class="btn btn-ghost" onclick="toggleCorrections()">📖 Revoir les corrections</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+var REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function scrollTopSmart(){ window.scrollTo({top:0,behavior:REDUCED_MOTION?'auto':'smooth'}); }
+function scrollIntoViewSmart(el){ if(el) el.scrollIntoView({behavior:REDUCED_MOTION?'auto':'smooth',block:'nearest'}); }
+
+/* ==================================================================
+   GÉOMÉTRIE — codages de longueur égale et de parallélisme (SVG)
+   ================================================================== */
+function mid(p1,p2){ return {x:(p1.x+p2.x)/2,y:(p1.y+p2.y)/2}; }
+function equalTick(p1,p2,style,color){
+  var m=mid(p1,p2);
+  var dx=p2.x-p1.x, dy=p2.y-p1.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  var ux=-dy/d, uy=dx/d, len=8;
+  if(style===1){
+    return '<line x1="'+(m.x-ux*len).toFixed(1)+'" y1="'+(m.y-uy*len).toFixed(1)+'" x2="'+(m.x+ux*len).toFixed(1)+'" y2="'+(m.y+uy*len).toFixed(1)+'" stroke="'+color+'" stroke-width="2.6"/>';
+  }
+  var gap=4.2, dxx=dx/d, dyy=dy/d;
+  var m1={x:m.x-dxx*gap,y:m.y-dyy*gap}, m2={x:m.x+dxx*gap,y:m.y+dyy*gap};
+  return '<line x1="'+(m1.x-ux*len).toFixed(1)+'" y1="'+(m1.y-uy*len).toFixed(1)+'" x2="'+(m1.x+ux*len).toFixed(1)+'" y2="'+(m1.y+uy*len).toFixed(1)+'" stroke="'+color+'" stroke-width="2.6"/>'
+       + '<line x1="'+(m2.x-ux*len).toFixed(1)+'" y1="'+(m2.y-uy*len).toFixed(1)+'" x2="'+(m2.x+ux*len).toFixed(1)+'" y2="'+(m2.y+uy*len).toFixed(1)+'" stroke="'+color+'" stroke-width="2.6"/>';
+}
+function chevronMark(p1,p2,color){
+  var m=mid(p1,p2);
+  var dx=p2.x-p1.x, dy=p2.y-p1.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  var ux=dx/d, uy=dy/d, px=-uy, py=ux, len=11, wing=6.5;
+  var tipX=m.x+ux*len/2, tipY=m.y+uy*len/2;
+  var backX=m.x-ux*len/2, backY=m.y-uy*len/2;
+  var w1x=backX+px*wing, w1y=backY+py*wing;
+  var w2x=backX-px*wing, w2y=backY-py*wing;
+  return '<path d="M'+w1x.toFixed(1)+','+w1y.toFixed(1)+' L'+tipX.toFixed(1)+','+tipY.toFixed(1)+' L'+w2x.toFixed(1)+','+w2y.toFixed(1)+
+    '" fill="none" stroke="'+color+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+}
+function ptLabel(p,txt,dx,dy){
+  return '<text x="'+(p.x+dx)+'" y="'+(p.y+dy)+'" font-family="Georgia,serif" font-weight="700" font-size="17" fill="#2c2417">'+txt+'</text>';
+}
+
+/* ==================================================================
+   SCEAUX (progression, HUD)
+   ================================================================== */
+function sealSVG(size){
+  var c=size/2, r=size*0.46;
+  return '<svg viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    +'<circle class="seal-disc" cx="'+c+'" cy="'+c+'" r="'+r+'"/>'
+    +'<path class="seal-crack" d="M'+(c-r*0.5)+','+(c-r*0.6)+' L'+(c-r*0.1)+','+(c-r*0.05)+' L'+(c+r*0.15)+','+(c-r*0.35)+' M'+(c-r*0.1)+','+(c-r*0.05)+' L'+(c+r*0.35)+','+(c+r*0.55)+'"/>'
+    +'</svg>';
+}
+function renderSeals(){
+  var html='';
+  for(var i=1;i<=3;i++){ html+='<div class="seal-slot" id="seal-'+i+'">'+sealSVG(54)+'<span class="s-label">Sceau '+i+'</span></div>'; }
+  $('seals-row').innerHTML=html;
+}
+function crackSeal(n){ $('seal-'+n).classList.add('done'); }
+
+/* ==================================================================
+   SON — Web Audio API uniquement, jamais avant une interaction
+   ================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){
+  if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+  if(audioCtx && audioCtx.state==='suspended'){ audioCtx.resume(); }
+  return audioCtx;
+}
+function tone(freq,dur,type,startDelay,gainVal){
+  if(!soundOn) return;
+  var c=ac(); if(!c) return;
+  var t0=c.currentTime+(startDelay||0);
+  var osc=c.createOscillator(), g=c.createGain();
+  osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(gainVal||0.14,t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g); g.connect(c.destination);
+  osc.start(t0); osc.stop(t0+dur+0.05);
+}
+function playClick(){ tone(480,.06,'sine',0,.07); }
+function playCorrect(){ tone(340,.16,'sine',0,.13); tone(520,.22,'sine',.12,.11); }
+function playWrong(){ tone(150,.28,'sine',0,.10); }
+function playHint(){ tone(700,.12,'sine',0,.08); tone(880,.1,'sine',.1,.06); }
+function playStoneSlide(){ tone(110,.45,'sawtooth',0,.08); tone(90,.5,'triangle',.08,.06); }
+function playMechanism(){ tone(200,.14,'square',0,.08); tone(260,.14,'square',.12,.07); tone(320,.18,'square',.24,.07); }
+function playVictory(){ tone(300,.3,'sine',0,.13); tone(400,.3,'sine',.15,.12); tone(500,.35,'sine',.3,.11); tone(650,.5,'triangle',.45,.09); }
+window.toggleSound=function(){
+  soundOn=!soundOn;
+  var b=$('btn-sound');
+  b.textContent = soundOn ? '🔊 Son activé' : '🔇 Son coupé';
+  b.setAttribute('aria-pressed', soundOn ? 'true':'false');
+  b.setAttribute('aria-label', soundOn ? 'Couper le son' : 'Activer le son');
+};
+
+/* ==================================================================
+   CHRONO — temps écoulé (jamais bloquant), cohérent avec les Jours 1-3
+   ================================================================== */
+var gameStartTime=null, gameTimerInterval=null;
+function formatTime(totalSec){ var m=Math.floor(totalSec/60), s=totalSec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+function startGameTimer(){ gameStartTime=Date.now(); clearInterval(gameTimerInterval); updateGameTimer(); gameTimerInterval=setInterval(updateGameTimer,1000); }
+function updateGameTimer(){ var el=$('hud-timer'); if(!el||!gameStartTime) return; el.textContent='⏱ '+formatTime(Math.floor((Date.now()-gameStartTime)/1000)); }
+function stopGameTimer(){ clearInterval(gameTimerInterval); if(!gameStartTime) return 0; return Math.floor((Date.now()-gameStartTime)/1000); }
+function resetGameTimer(){ clearInterval(gameTimerInterval); gameStartTime=null; var el=$('hud-timer'); if(el) el.textContent='⏱ 00:00'; }
+
+function chronoBlock(label){
+  return '<div class="chrono-wrap" id="chrono-wrap"><span class="chrono-num" id="chrono-num">5</span>'
+    +'<div class="chrono-body"><div class="chrono-label" id="chrono-label">⏱ '+(label||'Étape suivante')+' dans quelques secondes…</div>'
+    +'<div class="chrono-track"><div class="chrono-fill" id="chrono-fill"></div></div>'
+    +'<div class="actions-row"><button type="button" class="btn btn-ghost" id="chrono-skip" onclick="skipChrono()">▶ Continuer maintenant</button></div>'
+    +'</div></div>';
+}
+function startChrono(durationMs,label,onDone){
+  var wrap=$('chrono-wrap'),fill=$('chrono-fill'),lab=$('chrono-label'),num=$('chrono-num');
+  window.__chronoFired=false;
+  window.__chronoOnDone=onDone;
+  if(!wrap){ if(!window.__chronoFired){window.__chronoFired=true; onDone && onDone();} return; }
+  wrap.classList.add('show');
+  var remaining=Math.ceil(durationMs/1000);
+  num.textContent=remaining; lab.textContent='⏱ '+(label||'Étape suivante')+' dans '+remaining+' s';
+  fill.style.transition='none'; fill.style.width='100%';
+  requestAnimationFrame(function(){ fill.style.transition='width '+durationMs+'ms linear'; fill.style.width='0%'; });
+  setTimeout(function(){ scrollIntoViewSmart(wrap); },50);
+  clearInterval(window.__chronoInterval);
+  window.__chronoInterval=setInterval(function(){
+    remaining--;
+    if(remaining<=0){ clearInterval(window.__chronoInterval); num.textContent='0'; lab.textContent='⏱ '+(label||'Étape suivante')+'…'; }
+    else { num.textContent=remaining; lab.textContent='⏱ '+(label||'Étape suivante')+' dans '+remaining+' s'; }
+  },1000);
+  clearTimeout(window.__chronoTimeout);
+  window.__chronoTimeout=setTimeout(function(){
+    clearInterval(window.__chronoInterval);
+    if(!window.__chronoFired){ window.__chronoFired=true; onDone && onDone(); }
+  },durationMs);
+}
+function clearChronoTimers(){ clearInterval(window.__chronoInterval); clearTimeout(window.__chronoTimeout); }
+window.skipChrono=function(){
+  clearChronoTimers();
+  if(!window.__chronoFired){
+    window.__chronoFired=true;
+    var fn=window.__chronoOnDone;
+    if(fn) fn();
+  }
+};
+
+/* ==================================================================
+   FIGURE — Épreuve 1 : quadrilatère ABCD, diagonales AC et BD (O = milieu commun)
+   ================================================================== */
+var E1_VB={w:500,h:320};
+var e1_A={x:90,y:220}, e1_C={x:390,y:140};
+var e1_O=mid(e1_A,e1_C);
+var e1_B={x:370,y:250}, e1_D={x:2*e1_O.x-e1_B.x, y:2*e1_O.y-e1_B.y};
+function buildE1SVG(){
+  return '<svg viewBox="0 0 '+E1_VB.w+' '+E1_VB.h+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="e1-title e1-desc">'
+    +'<title id="e1-title">Quadrilatère ABCD et ses diagonales</title>'
+    +'<desc id="e1-desc">Un quadrilatère ABCD légèrement incliné. Ses diagonales AC et BD se coupent en un point O. Des codages indiquent que AO est égal à OC, et que BO est égal à OD. Aucun autre codage n\u2019est présent : ni parallélisme, ni angle droit, ni longueur de côté.</desc>'
+    +'<polygon points="'+e1_A.x+','+e1_A.y+' '+e1_B.x+','+e1_B.y+' '+e1_C.x+','+e1_C.y+' '+e1_D.x+','+e1_D.y+'" fill="rgba(169,112,31,.08)" stroke="#a9701f" stroke-width="2.2"/>'
+    +'<line x1="'+e1_A.x+'" y1="'+e1_A.y+'" x2="'+e1_C.x+'" y2="'+e1_C.y+'" stroke="#6b4713" stroke-width="1.8"/>'
+    +'<line x1="'+e1_B.x+'" y1="'+e1_B.y+'" x2="'+e1_D.x+'" y2="'+e1_D.y+'" stroke="#6b4713" stroke-width="1.8"/>'
+    +equalTick(e1_A,e1_O,1,'#2fa7a0')+equalTick(e1_O,e1_C,1,'#2fa7a0')
+    +equalTick(e1_B,e1_O,2,'#b1462c')+equalTick(e1_O,e1_D,2,'#b1462c')
+    +'<circle cx="'+e1_O.x+'" cy="'+e1_O.y+'" r="4.4" fill="#e8b84b" stroke="#6b4713" stroke-width="0.8"/>'
+    +ptLabel(e1_A,'A',-18,10)+ptLabel(e1_B,'B',10,10)+ptLabel(e1_C,'C',10,-8)+ptLabel(e1_D,'D',-18,-6)+ptLabel(e1_O,'O',8,16)
+    +'</svg>';
+}
+
+/* ==================================================================
+   FIGURE — Épreuve 2 : quadrilatère EFGH, EF // GH et EF = GH
+   ================================================================== */
+var E2_VB={w:520,h:320};
+var e2_E={x:100,y:260}, e2_F={x:340,y:230};
+var e2_H={x:140,y:90};
+var e2_G={x:e2_F.x+(e2_H.x-e2_E.x), y:e2_F.y+(e2_H.y-e2_E.y)};
+function buildE2SVG(){
+  return '<svg viewBox="0 0 '+E2_VB.w+' '+E2_VB.h+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="e2-title e2-desc">'
+    +'<title id="e2-title">Quadrilatère EFGH</title>'
+    +'<desc id="e2-desc">Un quadrilatère EFGH légèrement incliné. Les côtés EF et GH sont codés à la fois par des chevrons de parallélisme identiques et par des marques de longueur égale identiques. Aucun autre codage n\u2019est présent sur les côtés FG et HE.</desc>'
+    +'<polygon points="'+e2_E.x+','+e2_E.y+' '+e2_F.x+','+e2_F.y+' '+e2_G.x+','+e2_G.y+' '+e2_H.x+','+e2_H.y+'" fill="rgba(169,112,31,.08)" stroke="#a9701f" stroke-width="2.2"/>'
+    +chevronMark(e2_E,e2_F,'#2fa7a0')+chevronMark(e2_H,e2_G,'#2fa7a0')
+    +equalTick(e2_E,e2_F,1,'#b1462c')+equalTick(e2_H,e2_G,1,'#b1462c')
+    +ptLabel(e2_E,'E',-18,10)+ptLabel(e2_F,'F',10,4)+ptLabel(e2_G,'G',10,-8)+ptLabel(e2_H,'H',-18,-6)
+    +'</svg>';
+}
+
+/* ==================================================================
+   FIGURE — Épreuve 3 : quadrilatère ABCD (nouvelle disposition), diagonales
+   ================================================================== */
+var E3_VB={w:560,h:340};
+var e3_A={x:120,y:90}, e3_C={x:430,y:240};
+var e3_O=mid(e3_A,e3_C);
+var e3_B={x:410,y:100}, e3_D={x:2*e3_O.x-e3_B.x, y:2*e3_O.y-e3_B.y};
+function buildE3SVG(){
+  return '<svg viewBox="0 0 '+E3_VB.w+' '+E3_VB.h+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="e3-title e3-desc">'
+    +'<title id="e3-title">Quadrilatère mystérieux ABCD gravé sur la table de pierre</title>'
+    +'<desc id="e3-desc">Un quadrilatère ABCD gravé sur une table de pierre, légèrement incliné. Ses diagonales AC et BD se coupent en un point O bien visible. Des codages indiquent que AO est égal à OC, et que BO est égal à OD. Aucun angle droit, aucun parallélisme et aucune longueur de côté ne sont indiqués.</desc>'
+    +'<polygon points="'+e3_A.x+','+e3_A.y+' '+e3_B.x+','+e3_B.y+' '+e3_C.x+','+e3_C.y+' '+e3_D.x+','+e3_D.y+'" fill="rgba(169,112,31,.08)" stroke="#a9701f" stroke-width="2.2"/>'
+    +'<line x1="'+e3_A.x+'" y1="'+e3_A.y+'" x2="'+e3_C.x+'" y2="'+e3_C.y+'" stroke="#6b4713" stroke-width="1.8"/>'
+    +'<line x1="'+e3_B.x+'" y1="'+e3_B.y+'" x2="'+e3_D.x+'" y2="'+e3_D.y+'" stroke="#6b4713" stroke-width="1.8"/>'
+    +equalTick(e3_A,e3_O,1,'#2fa7a0')+equalTick(e3_O,e3_C,1,'#2fa7a0')
+    +equalTick(e3_B,e3_O,2,'#b1462c')+equalTick(e3_O,e3_D,2,'#b1462c')
+    +'<circle cx="'+e3_O.x+'" cy="'+e3_O.y+'" r="4.6" fill="#e8b84b" stroke="#6b4713" stroke-width="0.8"/>'
+    +ptLabel(e3_A,'A',-18,-6)+ptLabel(e3_B,'B',10,-8)+ptLabel(e3_C,'C',10,16)+ptLabel(e3_D,'D',-18,16)+ptLabel(e3_O,'O',8,16)
+    +'</svg>';
+}
+
+/* ==================================================================
+   CORRECTIONS COMPLÈTES
+   ================================================================== */
+var CORR1='Si les diagonales d\u2019un quadrilatère se coupent en leur milieu, alors ce quadrilatère est un parallélogramme. Ici, AO = OC et BO = OD : le point O est le milieu commun des deux diagonales. Le quadrilatère ABCD est donc un parallélogramme.';
+var CORR2='Un quadrilatère possédant un couple de côtés opposés à la fois parallèles et de même longueur est un parallélogramme. Ici, EF et GH sont parallèles et EF = GH. Cette seule propriété suffit à conclure que EFGH est un parallélogramme.';
+var CORR3='AO = OC et BO = OD : le point O est donc le milieu des deux diagonales AC et BD. Or, si les diagonales d\u2019un quadrilatère se coupent en leur milieu, alors ce quadrilatère est un parallélogramme. Le quadrilatère ABCD est donc un parallélogramme.';
+var CORR={1:CORR1,2:CORR2,3:CORR3};
+
+/* ==================================================================
+   ÉTAT DU DÉFI
+   ================================================================== */
+var current=1;
+var attempts=[0,0,0];
+var solved=[false,false,false];
+var correctionShown=[false,false,false];
+var selected=[null,null,null];
+var lastChoiceText=[null,null,null];
+
+var E1_OPTS = shuffle([
+  {txt:'ABCD est un parallélogramme.', ok:true},
+  {txt:'Impossible de conclure.', ok:false},
+  {txt:'Les diagonales sont perpendiculaires.', ok:false},
+  {txt:'ABCD est un rectangle.', ok:false}
+]);
+var E2_OPTS = shuffle([
+  {txt:'C\u2019est un parallélogramme.', ok:true},
+  {txt:'C\u2019est un trapèze.', ok:false},
+  {txt:'Impossible de conclure.', ok:false},
+  {txt:'C\u2019est un losange.', ok:false}
+]);
+var E3_OPTS = shuffle([
+  {txt:'Les diagonales se coupent en leur milieu.', ok:true},
+  {txt:'Les quatre côtés semblent de même longueur.', ok:false},
+  {txt:'Les diagonales sont perpendiculaires.', ok:false},
+  {txt:'Les angles paraissent égaux.', ok:false}
+]);
+function shuffle(arr){ for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;} return arr; }
+
+/* ==================================================================
+   NAVIGATION
+   ================================================================== */
+function showScene(id){ document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('show');}); $(id).classList.add('show'); scrollTopSmart(); }
+window.startGame=function(){ playClick(); showScene('scene-epreuve'); startGameTimer(); renderE(1); };
+
+/* ==================================================================
+   RENDU GÉNÉRIQUE DES ÉPREUVES (QCM à réponse unique)
+   ================================================================== */
+var E_DATA = {
+  1:{eyebrow:'Sceau 1 / 3', title:'🪨 Le sceau des diagonales',
+     story:'Un premier sceau de pierre bloque le passage. Une figure y est gravée : un quadrilatère et ses diagonales.',
+     consigne:'Que peut-on conclure ?', svg:buildE1SVG, opts:E1_OPTS,
+     hint:'💡 Observe uniquement les codages placés sur les diagonales.',
+     fbFirst:'Toutes les égalités de longueurs ne permettent pas de conclure. Regarde précisément les diagonales.',
+     fbOk:'✅ Les diagonales se coupent en leur milieu. Cette propriété permet de conclure que ABCD est un parallélogramme.'},
+  2:{eyebrow:'Sceau 2 / 3', title:'🪨 Le sceau des bâtisseurs',
+     story:'Le deuxième sceau porte la marque des premiers bâtisseurs du temple : un quadrilatère aux côtés codés.',
+     consigne:'Que peut-on conclure ?', svg:buildE2SVG, opts:E2_OPTS,
+     hint:'💡 Observe les deux côtés codés. Ils possèdent deux propriétés.',
+     fbFirst:'Cherche deux informations concernant exactement les mêmes côtés.',
+     fbOk:'✅ Exact ! Une seule paire de côtés opposés suffit lorsqu\u2019elle est à la fois parallèle et de même longueur.'},
+  3:{eyebrow:'Sceau 3 / 3', title:'🪨 Le sceau du Maître bâtisseur',
+     story:'Au centre de la salle, une immense table de pierre porte la maquette du temple. Quatre piliers de bronze l\u2019entourent. Au milieu, un quadrilatère mystérieux attend ton verdict.',
+     consigne:'Le Maître bâtisseur n\u2019acceptera d\u2019ouvrir le sanctuaire que si tu justifies correctement ta décision. Quel argument prouve que ce quadrilatère est un parallélogramme ?', svg:buildE3SVG, opts:E3_OPTS,
+     hint:'💡 Ne regarde pas les côtés. Observe uniquement les diagonales.',
+     fbFirst:'Un Maître bâtisseur ne se fie jamais aux apparences. Observe uniquement les codages, pas la forme générale de la figure.',
+     fbOk:'✅ Bravo ! Tu as reconnu la propriété utilisée par les bâtisseurs. Le dernier sceau est désormais désactivé.'}
+};
+
+function renderE(n){
+  current=n;
+  var d=E_DATA[n];
+  var c=$('epreuve-card');
+  var optsHtml=d.opts.map(function(o,i){
+    return '<button type="button" class="opt-btn" id="opt-'+i+'" aria-pressed="false" onclick="selectOpt('+i+')">'
+      +'<span class="ob-dot" aria-hidden="true"></span><span>'+o.txt+'</span></button>';
+  }).join('');
+  var pillars = n===3 ? '<div class="pillars-row" id="pillars-row">'
+      +'<div class="pillar" id="pillar-1"></div><div class="pillar" id="pillar-2"></div>'
+      +'<div class="pillar" id="pillar-3"></div><div class="pillar" id="pillar-4"></div></div>' : '';
+  c.innerHTML='<div class="epreuve-eyebrow">'+d.eyebrow+'</div>'
+    +'<h2>'+d.title+'</h2>'
+    +'<div class="epreuve-story">'+d.story+'</div>'
+    +pillars
+    +'<div class="fig-wrap">'+d.svg()+'</div>'
+    +'<div class="epreuve-consigne">'+d.consigne+'</div>'
+    +'<div class="choice-list">'+optsHtml+'</div>'
+    +'<div class="actions-row">'
+      +'<button class="btn btn-turquoise" id="btn-valider" onclick="checkE()" disabled>🔑 Vérifier</button>'
+      +'<button class="btn btn-ghost" id="btn-hint" onclick="toggleHint()">💡 Voir un indice</button>'
+      +'<button class="btn btn-ghost" id="btn-continue" style="display:none" onclick="continueE()">▶ Continuer</button>'
+    +'</div>'
+    +'<div class="hint-box" id="hint-box">'+d.hint+'</div>'
+    +'<div class="corr-box" id="corr-box"><strong>📖 Correction :</strong> '+CORR[n]+'</div>'
+    +'<div class="feedback" id="fb-box" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +chronoBlock(n<3?'Sceau suivant':'Ouverture du sanctuaire');
+  selected[n-1]=null;
+  if(attempts[n-1]>=2){ $('corr-box').classList.add('show'); $('btn-continue').style.display='inline-flex'; }
+}
+window.selectOpt=function(i){
+  playClick();
+  selected[current-1]=i;
+  document.querySelectorAll('.opt-btn').forEach(function(b,idx){ b.classList.toggle('selected', idx===i); b.setAttribute('aria-pressed', idx===i); });
+  $('btn-valider').disabled=false;
+};
+window.toggleHint=function(){ playHint(); $('hint-box').classList.toggle('show'); };
+
+window.checkE=function(){
+  if(solved[current-1]) return;
+  var n=current, d=E_DATA[n];
+  var idx=selected[n-1];
+  var ok = d.opts[idx] && d.opts[idx].ok;
+  var fb=$('fb-box');
+  lastChoiceText[n-1] = d.opts[idx] ? d.opts[idx].txt : null;
+  document.querySelectorAll('.opt-btn').forEach(function(b){ b.classList.remove('correct','wrong'); });
+  $('opt-'+idx).classList.add(ok?'correct':'wrong');
+  if(ok){
+    playCorrect();
+    document.querySelectorAll('.opt-btn').forEach(function(b){ b.disabled=true; });
+    fb.className='feedback show ok';
+    fb.innerHTML=d.fbOk;
+    onEpreuveDone(n);
+  } else {
+    playWrong();
+    setTimeout(function(){ var el=$('opt-'+idx); if(el) el.classList.remove('wrong'); },400);
+    attempts[n-1]++;
+    fb.className='feedback show ko';
+    fb.innerHTML='❌ '+d.fbFirst;
+    if(attempts[n-1]>=2){ $('corr-box').classList.add('show'); $('btn-continue').style.display='inline-flex'; correctionShown[n-1]=true; }
+    // Empêcher de revalider avec la même réponse : on désélectionne et on désactive Vérifier.
+    document.querySelectorAll('.opt-btn').forEach(function(b){ b.classList.remove('selected'); b.setAttribute('aria-pressed','false'); });
+    selected[n-1]=null;
+    $('btn-valider').disabled=true;
+  }
+};
+window.continueE=function(){
+  var n=current;
+  playStoneSlide();
+  document.querySelectorAll('.opt-btn').forEach(function(b){ b.disabled=true; });
+  var fb=$('fb-box'); fb.className='feedback show info'; fb.innerHTML='➡️ Tu peux poursuivre. Relis la correction ci-dessus pour bien comprendre ce sceau.';
+  onEpreuveDone(n);
+};
+
+function onEpreuveDone(n){
+  solved[n-1]=true;
+  playStoneSlide();
+  setTimeout(playMechanism, 250);
+  crackSeal(n);
+  if(n===3){
+    ['pillar-1','pillar-2','pillar-3','pillar-4'].forEach(function(id){ var el=$(id); if(el) el.classList.add('lit'); });
+  }
+  var btn=$('btn-valider'); if(btn) btn.disabled=true;
+  var hb=$('btn-hint'); if(hb) hb.style.display='none';
+  var cb=$('btn-continue'); if(cb) cb.style.display='none';
+  if(n<3){
+    startChrono(5000, 'Sceau suivant', function(){ renderE(n+1); });
+  } else {
+    startChrono(5000, 'Ouverture du sanctuaire', function(){ triggerFinale(); });
+  }
+}
+
+/* ==================================================================
+   FINALE
+   ================================================================== */
+function triggerFinale(){
+  var totalSec=stopGameTimer();
+  playVictory();
+  showScene('scene-finale');
+  $('finale-time').textContent='⏱ Temps total : '+formatTime(totalSec);
+  var corrCount = correctionShown.filter(function(v){ return v; }).length;
+  var errCount = attempts.reduce(function(s,a){ return s+a; },0);
+  var sub;
+  if(corrCount===0 && errCount===0){
+    sub='🏆 Excellente réussite ! Tu as convaincu les bâtisseurs dès le premier essai à chaque sceau. Le sanctuaire s\u2019ouvre à toi sans réserve.';
+  } else if(corrCount===0){
+    sub='✨ Belle réussite ! Quelques hésitations en chemin, mais tu as toujours retrouvé la bonne propriété par toi-même. Les bâtisseurs t\u2019ouvrent le sanctuaire.';
+  } else {
+    sub='🌟 Réussite méritée ! Les corrections t\u2019ont aidé à repérer les bonnes propriétés. Les bâtisseurs saluent ta persévérance et t\u2019ouvrent le sanctuaire.';
+  }
+  $('finale-sub').textContent=sub;
+  setTimeout(function(){ $('doors').classList.add('open'); },500);
+}
+window.toggleCorrections=function(){
+  var p=$('corrections-panel');
+  if(p.classList.contains('show')){ p.classList.remove('show'); return; }
+  var labels=['Sceau 1 — Le sceau des diagonales','Sceau 2 — Le sceau des bâtisseurs','Sceau 3 — Le sceau du Maître bâtisseur'];
+  var html='<h3>📖 Corrections des trois sceaux</h3>';
+  for(var i=1;i<=3;i++){
+    var st = solved[i-1] ? (correctionShown[i-1] ? '<span class="st" style="color:var(--info)">ℹ️</span>' : '<span class="st" style="color:var(--success)">✅</span>') : '<span class="st" style="color:var(--danger)">—</span>';
+    var meta = '<div style="font-size:.78rem;color:var(--muted);margin:.3rem 0 .5rem;font-family:\'Courier New\',Consolas,monospace;">'
+      +'Tentatives : '+attempts[i-1]+ (solved[i-1]?' · Réussi':'')
+      +(lastChoiceText[i-1] ? ' · Dernière réponse choisie : « '+lastChoiceText[i-1]+' »' : '')
+      +'</div>';
+    html+='<div class="corr-item">'+st+'<strong>'+labels[i-1]+'</strong>'+meta+CORR[i]+'</div>';
+  }
+  p.innerHTML=html; p.classList.add('show');
+};
+
+/* ==================================================================
+   RECOMMENCER
+   ================================================================== */
+window.restart=function(){
+  clearChronoTimers();
+  current=1; attempts=[0,0,0]; solved=[false,false,false]; correctionShown=[false,false,false]; selected=[null,null,null]; lastChoiceText=[null,null,null];
+  shuffle(E1_OPTS); shuffle(E2_OPTS); shuffle(E3_OPTS);
+  renderSeals();
+  $('doors').classList.remove('open');
+  $('corrections-panel').classList.remove('show');
+  resetGameTimer();
+  showScene('scene-intro');
+};
+
+document.addEventListener('DOMContentLoaded', function(){ renderSeals(); });
+})();
+</script>
+</body>
+</html>
