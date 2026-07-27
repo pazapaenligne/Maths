@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa · 5e · Semaine 8 Jour 1 · Je relève le défi — Aires des polygones et du disque</title>
+<style>
+/* ============================================================
+   PAZAPA — Semaine 8 — Base martienne
+   Variables CSS : toute la palette est centralisée ici.
+   ============================================================ */
+:root{
+  --mars-red:#c1440e; --mars-red-dark:#8a2f0a; --copper:#d17a3f; --copper-light:#f0b27a;
+  --sand:#e8c9a0; --sand-light:#f7e9d0;
+  --metal:#5b6472; --metal-light:#8b95a3; --metal-dark:#333a44;
+  --cyan:#3ad6f0; --cyan-dark:#1a8fa8; --white:#f7fcff;
+  --success:#3fbf7f; --success-bg:#e4f8ee;
+  --warn:#e08a2e; --warn-bg:#fdf0de;
+  --info:#3ad6f0; --info-bg:#e6f9fd;
+  --ink:#241d17; --muted:#7a7168;
+  --radius:20px;
+  --glow-cyan:rgba(58,214,240,.4); --glow-copper:rgba(209,122,63,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+button,input{font:inherit;color:inherit;}
+button{background:none;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;}
+html{scroll-behavior:auto;}
+body{
+  min-height:100vh;font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:var(--ink);
+  overflow-x:hidden;position:relative;padding-bottom:3rem;
+  background:linear-gradient(180deg,#3a1f3d 0%,#7a3420 32%,#c1592a 55%,#e0895a 72%,#e8c9a0 100%);
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto !important;
+    transition-duration:.001ms !important;
+    transition-delay:0ms !important;
+  }
+  .dust,.stardust{ animation:none !important; display:none !important; }
+  .card,.feedback,.pulse-ok{ animation:none !important; }
+}
+
+/* ---------- Décor martien (SVG + CSS, discret) ---------- */
+.mars-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.mars-scene svg{position:absolute;bottom:0;left:0;width:100%;height:46vh;min-height:260px;}
+.moon{position:fixed;border-radius:50%;opacity:.8;pointer-events:none;z-index:0;}
+.moon.m1{width:46px;height:46px;background:radial-gradient(circle at 35% 35%, #fdf0da, #cbb489);top:6%;left:8%;box-shadow:0 0 18px rgba(255,240,210,.5);}
+.moon.m2{width:24px;height:24px;background:radial-gradient(circle at 35% 35%, #f2d9c6, #b98a6a);top:12%;right:12%;box-shadow:0 0 12px rgba(255,220,190,.4);}
+.dust{position:fixed;border-radius:50%;background:rgba(232,201,160,.35);pointer-events:none;z-index:0;}
+.dust.d1{width:5px;height:5px;top:70%;left:10%;animation:dustFloat 22s linear infinite;}
+.dust.d2{width:3px;height:3px;top:60%;left:60%;animation:dustFloat 28s linear infinite 4s;}
+.dust.d3{width:4px;height:4px;top:80%;left:35%;animation:dustFloat 25s linear infinite 8s;}
+.dust.d4{width:3px;height:3px;top:50%;left:85%;animation:dustFloat 30s linear infinite 2s;}
+@keyframes dustFloat{0%{transform:translate(0,0);opacity:0;}10%{opacity:.5;}90%{opacity:.5;}100%{transform:translate(120px,-60px);opacity:0;}}
+
+/* ---------- HUD ---------- */
+.hud{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.75rem 1.3rem;background:rgba(36,22,20,.55);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.12);flex-wrap:wrap;}
+.hud-brand{display:flex;flex-direction:column;line-height:1.3;}
+.hud-brand .logo{font-weight:800;font-size:1rem;color:var(--white);letter-spacing:.04em;}
+.hud-brand .meta{font-size:.72rem;color:var(--sand-light);opacity:.85;}
+.hud-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.hud-timer{font-variant-numeric:tabular-nums;font-size:.9rem;font-weight:700;color:var(--white);
+  background:rgba(0,0,0,.28);border:1.5px solid var(--cyan);border-radius:10px;padding:.4rem .8rem;min-width:4.4em;text-align:center;
+  box-shadow:0 0 10px var(--glow-cyan) inset;}
+.btn-sound{background:rgba(0,0,0,.28);border:1.5px solid rgba(255,255,255,.25);color:var(--white);border-radius:10px;
+  padding:.4rem .7rem;font-size:.9rem;cursor:pointer;min-height:2.6rem;transition:border-color .2s;}
+.btn-sound:hover{border-color:var(--cyan);}
+.btn-sound[aria-pressed="true"]{border-color:var(--cyan);}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px;}
+
+.stage{max-width:760px;margin:0 auto;padding:1.6rem 1.2rem 0;position:relative;z-index:1;}
+
+/* ---------- Cartes génériques ---------- */
+.card{background:rgba(247,252,255,.96);border-radius:var(--radius);box-shadow:0 14px 40px rgba(20,10,5,.35), 0 0 0 1px rgba(255,255,255,.5) inset;
+  padding:2rem 2rem;position:relative;overflow:hidden;animation:cardIn .5s cubic-bezier(.2,.9,.3,1) both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--mars-red),var(--copper),var(--cyan));}
+
+.intro-card{text-align:center;max-width:640px;margin:1rem auto;}
+.intro-eyebrow{font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mars-red-dark);font-weight:800;margin-bottom:.5rem;}
+.intro-card h1{font-size:clamp(1.35rem,3.6vw,1.9rem);font-weight:800;color:var(--mars-red-dark);margin-bottom:1rem;line-height:1.3;}
+.intro-text{max-width:560px;margin:0 auto 1.4rem;line-height:1.85;font-size:.98rem;text-align:left;color:var(--ink);}
+.intro-text p{margin-bottom:.75rem;}
+.intro-transition{font-size:.82rem;color:var(--muted);font-style:italic;margin-bottom:.9rem;}
+.chrono-info{font-size:.78rem;color:var(--cyan-dark);font-weight:700;margin-bottom:.7rem;}
+
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:99px;border:none;cursor:pointer;
+  font-weight:800;font-size:1rem;min-height:2.8rem;transition:transform .15s,box-shadow .2s,background .2s;}
+.btn:active{transform:scale(.95);}
+.btn-launch{background:linear-gradient(135deg,var(--cyan),var(--cyan-dark));color:#04303a;box-shadow:0 6px 18px var(--glow-cyan);}
+.btn-launch:hover{transform:translateY(-2px);box-shadow:0 10px 26px var(--glow-cyan);}
+.btn-copper{background:linear-gradient(135deg,var(--copper),var(--mars-red));color:#fff6ee;box-shadow:0 6px 18px var(--glow-copper);}
+.btn-copper:hover{transform:translateY(-2px);box-shadow:0 10px 26px var(--glow-copper);}
+
+/* ---------- Progression capsule ---------- */
+#scene-mission{display:none;} #scene-mission.show{display:block;}
+.progress-wrap{max-width:600px;margin:0 auto 1.2rem;}
+.progress-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--white);font-weight:700;margin-bottom:.4rem;text-shadow:0 1px 4px rgba(0,0,0,.4);}
+.progress-caps{display:flex;gap:.4rem;}
+.cap{flex:1;height:12px;border-radius:99px;background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.3);overflow:hidden;position:relative;}
+.cap .cap-fill{position:absolute;inset:0;border-radius:99px;background:var(--metal-light);transform:scaleX(0);transform-origin:left;transition:transform .5s ease,background .3s ease;}
+.cap.done .cap-fill{transform:scaleX(1);background:linear-gradient(90deg,var(--success),#2fa06a);}
+.cap.current .cap-fill{transform:scaleX(1);background:linear-gradient(90deg,var(--cyan),var(--cyan-dark));}
+
+/* ---------- Carte mission ---------- */
+.mission-eyebrow{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mars-red-dark);font-weight:800;margin-bottom:.3rem;}
+.mission-card h2{font-size:1.2rem;font-weight:800;color:var(--mars-red-dark);margin-bottom:.7rem;line-height:1.3;}
+.mission-story{font-size:.9rem;color:var(--muted);margin-bottom:1rem;line-height:1.7;}
+.shape-wrap{width:100%;max-width:360px;margin:0 auto 1.1rem;background:var(--white);border:2px solid var(--sand);border-radius:14px;padding:.8rem;
+  box-shadow:0 6px 18px rgba(120,80,40,.12);}
+.shape-wrap svg{display:block;width:100%;height:auto;}
+.mission-consigne{font-weight:800;font-size:1rem;color:var(--ink);margin-bottom:1rem;background:var(--sand-light);
+  border-left:5px solid var(--copper);border-radius:10px;padding:.7rem 1rem;}
+
+.hint-actions{margin-bottom:1rem;}
+.btn-hint{display:inline-flex;align-items:center;justify-content:center;padding:.55rem 1rem;border-radius:10px;
+  border:1.5px solid var(--cyan-dark);background:transparent;color:var(--cyan-dark);font-weight:800;min-height:44px;cursor:pointer;}
+.btn-hint:hover{background:var(--info-bg);}
+.hint-box[hidden],.correction-box[hidden]{display:none !important;}
+.hint-box{display:flex;gap:.6rem;align-items:flex-start;background:var(--info-bg);border:1.5px solid var(--cyan);border-radius:12px;
+  padding:.75rem 1rem;margin-top:.7rem;font-size:.88rem;color:#0d5566;line-height:1.7;}
+.hint-box .hint-emoji{font-size:1.2rem;flex-shrink:0;}
+
+.answer-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.answer-input{width:130px;height:3rem;border:2.5px solid var(--sand);border-radius:12px;text-align:center;
+  font-size:1.15rem;font-weight:800;color:var(--ink);background:var(--white);outline:none;transition:border-color .2s,background .2s;}
+.answer-input:focus{border-color:var(--cyan);}
+.answer-input.ok{border-color:var(--success);background:var(--success-bg);}
+.answer-input.ko{border-color:var(--warn);background:var(--warn-bg);}
+.answer-unit{font-weight:700;color:var(--muted);font-size:.95rem;}
+.answer-tip{font-size:.74rem;color:var(--muted);margin-top:.2rem;width:100%;}
+
+.choice-list{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.6rem;}
+.opt-btn{display:flex;align-items:center;gap:.7rem;padding:.75rem 1rem;border-radius:12px;border:2.5px solid var(--sand);
+  background:var(--white);color:var(--ink);font-weight:700;font-size:.92rem;cursor:pointer;text-align:left;min-height:2.8rem;transition:border-color .15s,background .2s;}
+.opt-btn:hover:not(:disabled){border-color:var(--cyan);}
+.opt-btn .ob-letter{width:26px;height:26px;border-radius:50%;background:var(--sand-light);color:var(--mars-red-dark);font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.82rem;}
+.opt-btn.correct{border-color:var(--success);background:var(--success-bg);}
+.opt-btn.correct .ob-letter{background:var(--success);color:#fff;}
+.opt-btn.wrong{border-color:var(--warn);background:var(--warn-bg);animation:shake .35s ease;}
+.opt-btn.wrong .ob-letter{background:var(--warn);color:#fff;}
+.opt-btn:disabled{cursor:not-allowed;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+.feedback{margin-top:.9rem;padding:.8rem 1rem;border-radius:12px;font-size:.9rem;line-height:1.8;display:none;}
+.feedback.show{display:block;animation:cardIn .35s ease both;}
+.feedback.ok{background:var(--success-bg);border:2px solid var(--success);color:#0f5c37;}
+.feedback.ko{background:var(--warn-bg);border:2px solid var(--warn);color:#7a4a12;}
+
+.correction-box{margin-top:1rem;padding:1rem 1.1rem;border-radius:14px;background:var(--info-bg);border:2px solid var(--cyan-dark);
+  color:#0d3f4d;font-size:.92rem;line-height:1.8;}
+.correction-box strong{color:var(--cyan-dark);}
+
+.next-action{display:flex;justify-content:center;margin-top:1rem;}
+.btn-next-mission{width:auto;max-width:100%;padding:.7rem 1.4rem;}
+
+.pulse-ok{animation:pulseOk .8s ease;}
+@keyframes pulseOk{0%{box-shadow:0 0 0 0 rgba(63,191,127,.5);}70%{box-shadow:0 0 0 18px rgba(63,191,127,0);}100%{box-shadow:0 0 0 0 rgba(63,191,127,0);}}
+
+/* ---------- Bilan final ---------- */
+.final-card{text-align:center;padding:1.6rem 1.2rem 1.8rem;position:relative;overflow:visible;}
+.final-card h2{font-size:1.4rem;font-weight:900;color:var(--mars-red-dark);margin-bottom:.9rem;}
+.final-missions{white-space:nowrap;font-size:clamp(1.15rem,4.5vw,1.8rem);font-weight:900;color:var(--success);margin-bottom:.8rem;line-height:1.3;}
+.final-time{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:.6rem;}
+.final-grade{font-size:1.15rem;font-weight:900;color:var(--cyan-dark);margin-bottom:.3rem;}
+.final-stars{font-size:1.8rem;letter-spacing:.3rem;margin:.3rem 0 .3rem;}
+.final-stars-label{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem;}
+.final-msg{font-size:1rem;font-weight:700;color:var(--ink);max-width:480px;margin:0 auto 1.2rem;line-height:1.7;}
+.final-summary{max-width:520px;margin:0 auto 1.4rem;text-align:left;font-size:.9rem;line-height:1.8;color:var(--ink);background:var(--sand-light);
+  border-radius:14px;padding:1rem 1.2rem;border:1.5px solid var(--sand);}
+.final-summary p{margin-bottom:.6rem;}
+.final-summary p:last-child{margin-bottom:0;}
+.stardust{position:absolute;border-radius:50%;opacity:.9;animation:stardustFloat 2.4s ease-out forwards;z-index:0;pointer-events:none;}
+@keyframes stardustFloat{0%{transform:translateY(0) scale(1);opacity:.95;}100%{transform:translateY(-170px) scale(.25);opacity:0;}}
+
+@media(max-width:480px){
+  .card{padding:1.4rem 1.2rem;}
+  .final-summary{padding:.85rem 1rem;font-size:.86rem;}
+}
+@media(max-width:360px){
+  body{padding-left:.55rem;padding-right:.55rem;}
+  .hud{padding:.65rem .7rem;gap:.5rem;}
+  .hud-right{width:100%;justify-content:space-between;}
+  .stage{padding-left:.35rem;padding-right:.35rem;}
+  .card{padding:1.15rem .85rem;border-radius:15px;}
+  .answer-row{flex-direction:column;align-items:stretch;}
+  .answer-input{width:100%;}
+  .answer-unit{text-align:center;}
+  .answer-row .btn{width:100%;justify-content:center;}
+  .btn{width:100%;justify-content:center;text-align:center;}
+  .final-stars{letter-spacing:.1rem;}
+  .final-missions{font-size:1.05rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="mars-scene" aria-hidden="true">
+  <svg viewBox="0 0 800 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="0,260 0,150 120,80 240,160 340,60 460,150 560,90 680,170 800,110 800,260" fill="#7a3018" opacity=".75"/>
+    <polygon points="0,260 0,190 150,140 300,200 420,120 540,190 650,150 800,200 800,260" fill="#5c2210" opacity=".85"/>
+    <g opacity=".55" stroke="#e8c9a0" stroke-width="2">
+      <line x1="120" y1="80" x2="120" y2="40"/><circle cx="120" cy="36" r="4" fill="#e8c9a0"/>
+      <line x1="560" y1="90" x2="560" y2="50"/><circle cx="560" cy="46" r="4" fill="#e8c9a0"/>
+    </g>
+  </svg>
+</div>
+<div class="moon m1" aria-hidden="true"></div>
+<div class="moon m2" aria-hidden="true"></div>
+<div class="dust d1" aria-hidden="true"></div><div class="dust d2" aria-hidden="true"></div>
+<div class="dust d3" aria-hidden="true"></div><div class="dust d4" aria-hidden="true"></div>
+
+<div class="hud">
+  <div class="hud-brand">
+    <span class="logo">🚀 PAZAPA</span>
+    <span class="meta">Mathématiques · 5e · Semaine 8 · Jour 1 · Défi chronométré</span>
+  </div>
+  <div class="hud-right">
+    <div class="hud-timer" id="hud-timer" role="timer" aria-live="off" aria-label="Temps écoulé depuis le début du défi chronométré">⏱️ 00:00</div>
+    <button class="btn-sound" id="btn-sound" onclick="toggleSound()" aria-pressed="true" aria-label="Couper le son">🔊 Son activé</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <section id="scene-intro">
+    <div class="card intro-card">
+      <div class="intro-eyebrow">Je relève le défi · aires des polygones et du disque</div>
+      <p class="chrono-info">⏱️ Défi chronométré sans limite de temps : avance à ton rythme.</p>
+      <h1>🚀 Début de la construction de la base martienne</h1>
+      <div class="intro-text">
+        <p>🚀 Les premiers modules de la base martienne viennent d'être installés.</p>
+        <p>Les ingénieurs commencent maintenant à préparer les différentes zones de construction. Avant d'envoyer les robots sur le terrain, ils doivent calculer avec précision l'aire de chaque surface afin de prévoir la quantité de matériaux nécessaire.</p>
+        <p>Chaque mission réussie permettra de valider une nouvelle étape de la construction de la future base martienne.</p>
+      </div>
+      <p class="intro-transition">Les plans sont prêts. Commence par vérifier la première zone de construction.</p>
+      <button class="btn btn-launch" onclick="startGame()">🚀 Lancer la mission</button>
+    </div>
+  </section>
+
+  <section id="scene-mission">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Missions accomplies</span><span id="progress-txt">0 / 5</span></div>
+      <div class="progress-caps" id="progress-caps" role="progressbar" aria-label="Progression des missions" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><!-- injecté en JS --></div>
+    </div>
+    <div class="card mission-card" id="mission-card"><!-- injecté en JS --></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+function setDisabled(el, disabled){ if(!el) return; el.disabled=disabled; el.setAttribute('aria-disabled', disabled?'true':'false'); }
+
+/* ==================================================================
+   SON — Web Audio API uniquement
+   ================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(audioCtx && audioCtx.state==='suspended'){ audioCtx.resume(); } return audioCtx; }
+function tone(freq,dur,type,startDelay,gainVal){
+  if(!soundOn) return;
+  var c=ac(); if(!c) return;
+  var t0=c.currentTime+(startDelay||0);
+  var osc=c.createOscillator(), g=c.createGain();
+  osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(gainVal||0.14,t0+0.02); g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g); g.connect(c.destination); osc.start(t0); osc.stop(t0+dur+0.05);
+}
+function playClick(){ tone(520,.06,'sine',0,.08); }
+function playCorrect(){ tone(440,.14,'sine',0,.13); tone(660,.18,'sine',.1,.11); tone(880,.22,'triangle',.2,.09); }
+function playWrong(){ tone(190,.22,'sawtooth',0,.09); }
+function playHint(){ tone(600,.09,'sine',0,.07); }
+function playNextMission(){ tone(500,.1,'sine',0,.08); tone(700,.12,'sine',.08,.08); }
+function playFinal(){ tone(400,.3,'sine',0,.13); tone(500,.3,'sine',.15,.12); tone(650,.35,'sine',.3,.11); tone(880,.6,'triangle',.45,.09); }
+window.toggleSound=function(){
+  soundOn=!soundOn;
+  var b=$('btn-sound');
+  b.textContent = soundOn ? '🔊 Son activé' : '🔇 Son coupé';
+  b.setAttribute('aria-pressed', soundOn?'true':'false');
+  b.setAttribute('aria-label', soundOn?'Couper le son':'Activer le son');
+};
+
+/* ==================================================================
+   CHRONO — purement informatif, ne bloque jamais
+   ================================================================== */
+var gameStartTime=null, gameTimerInterval=null;
+function formatTime(totalSec){ var m=Math.floor(totalSec/60), s=totalSec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+function startGameTimer(){
+  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
+  gameStartTime=Date.now();
+  updateGameTimer();
+  gameTimerInterval=setInterval(updateGameTimer,1000);
+}
+function updateGameTimer(){
+  var el=$('hud-timer');
+  if(!el||!gameStartTime) return;
+  var totalSec=Math.floor((Date.now()-gameStartTime)/1000);
+  el.textContent='⏱️ '+formatTime(totalSec);
+}
+function stopGameTimer(){
+  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
+  if(!gameStartTime) return 0;
+  return Math.floor((Date.now()-gameStartTime)/1000);
+}
+
+/* ==================================================================
+   DONNÉES DES 5 MISSIONS — vérifiées numériquement
+   ================================================================== */
+function shapeRect(){
+  return '<svg viewBox="0 0 240 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rectangle de 7 centimètres de longueur et 4 centimètres de largeur">'
+    +'<rect x="30" y="30" width="180" height="90" fill="#e6f9fd" stroke="#1a8fa8" stroke-width="3"/>'
+    +'<text x="120" y="20" text-anchor="middle" font-size="15" font-weight="700" fill="#8a2f0a">7 cm</text>'
+    +'<text x="222" y="80" text-anchor="middle" font-size="15" font-weight="700" fill="#8a2f0a" transform="rotate(90 222 80)">4 cm</text>'
+    +'</svg>';
+}
+function shapeParallelogram(){
+  return '<svg viewBox="0 0 260 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Parallélogramme de base 8 centimètres et de hauteur 5 centimètres">'
+    +'<polygon points="60,30 220,30 180,120 20,120" fill="#e6f9fd" stroke="#1a8fa8" stroke-width="3"/>'
+    +'<line x1="60" y1="30" x2="60" y2="120" stroke="#c1440e" stroke-width="2" stroke-dasharray="5 4"/>'
+    +'<path d="M 60,110 L 50,110 L 50,120" fill="none" stroke="#c1440e" stroke-width="2"/>'
+    +'<text x="100" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="#8a2f0a">base = 8 cm</text>'
+    +'<text x="30" y="78" text-anchor="middle" font-size="14" font-weight="700" fill="#c1440e">h = 5 cm</text>'
+    +'</svg>';
+}
+function shapeTriangle(bLabel,hLabel){
+  return '<svg viewBox="0 0 260 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Triangle de base '+bLabel+' centimètres et de hauteur '+hLabel+' centimètres">'
+    +'<polygon points="130,25 230,120 30,120" fill="#e6f9fd" stroke="#1a8fa8" stroke-width="3"/>'
+    +'<line x1="130" y1="25" x2="130" y2="120" stroke="#c1440e" stroke-width="2" stroke-dasharray="5 4"/>'
+    +'<path d="M 130,110 L 120,110 L 120,120" fill="none" stroke="#c1440e" stroke-width="2"/>'
+    +'<text x="130" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="#8a2f0a">base = '+bLabel+' cm</text>'
+    +'<text x="150" y="76" text-anchor="middle" font-size="14" font-weight="700" fill="#c1440e">h = '+hLabel+' cm</text>'
+    +'</svg>';
+}
+function shapeCircle(){
+  return '<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Disque de 7 centimètres de diamètre">'
+    +'<circle cx="120" cy="80" r="55" fill="#e6f9fd" stroke="#1a8fa8" stroke-width="3"/>'
+    +'<line x1="65" y1="80" x2="175" y2="80" stroke="#c1440e" stroke-width="2" stroke-dasharray="5 4"/>'
+    +'<circle cx="120" cy="80" r="2.6" fill="#c1440e"/>'
+    +'<text x="120" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="#8a2f0a">diamètre = 7 cm</text>'
+    +'</svg>';
+}
+function shapeCompare(){
+  return '<svg viewBox="0 0 320 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Un rectangle de 7 sur 4 centimètres et un triangle de base 7 centimètres et de hauteur 4 centimètres">'
+    +'<rect x="20" y="30" width="120" height="68" fill="#e6f9fd" stroke="#1a8fa8" stroke-width="3"/>'
+    +'<text x="80" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#8a2f0a">Rectangle 7 × 4</text>'
+    +'<polygon points="240,25 300,98 180,98" fill="#fdf0de" stroke="#e08a2e" stroke-width="3"/>'
+    +'<text x="240" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#8a2f0a">Triangle b=7, h=4</text>'
+    +'</svg>';
+}
+
+var MISSIONS=[
+  { id:1, eyebrow:'Mission 1 / 5', title:'🛰️ Plateforme solaire', type:'num',
+    story:'C\u2019est la toute première installation de la base : une plateforme solaire pour alimenter les futurs équipements en énergie. Sa surface exacte doit être connue avant l\u2019installation des panneaux.',
+    shape:shapeRect, consigne:'Calcule l\u2019aire de cette plateforme.',
+    hint:'💡 Pour un rectangle, multiplie la longueur par la largeur.',
+    unit:'cm²', answer:28,
+    correction:'Aire = longueur × largeur<br>7 × 4 = <strong>28 cm²</strong>' },
+  { id:2, eyebrow:'Mission 2 / 5', title:'🚁 Zone d\u2019atterrissage', type:'num',
+    story:'La première installation est terminée. Il faut maintenant préparer la zone d\u2019atterrissage où se posera la navette de ravitaillement. Il faut calculer sa surface avant le balisage.',
+    shape:shapeParallelogram, consigne:'Calcule son aire.',
+    hint:'💡 L\u2019aire d\u2019un parallélogramme se calcule comme celle d\u2019un rectangle : base × hauteur.',
+    unit:'cm²', answer:40,
+    correction:'Aire = base × hauteur<br>8 × 5 = <strong>40 cm²</strong>' },
+  { id:3, eyebrow:'Mission 3 / 5', title:'📡 Antenne scientifique', type:'num',
+    story:'Les premiers équipements sont maintenant opérationnels. Les communications avec la Terre doivent maintenant être installées. Le socle triangulaire de l\u2019antenne doit être coulé avec précision pour garantir sa stabilité sur le sol martien.',
+    shape:function(){return shapeTriangle(11,4);}, consigne:'Calcule son aire.',
+    hint:'💡 Commence par multiplier la base par la hauteur puis divise le résultat par deux.',
+    unit:'cm²', answer:22,
+    correction:'Aire = (base × hauteur) ÷ 2<br>(11 × 4) ÷ 2 = <strong>22 cm²</strong>' },
+  { id:4, eyebrow:'Mission 4 / 5', title:'🛡️ Dôme de protection', type:'num',
+    story:'L\u2019antenne scientifique est en place. La prochaine étape est la protection de la base : un dôme contre les tempêtes de poussière martiennes. Sa surface au sol conditionne la quantité de matériaux à prévoir.',
+    shape:shapeCircle, consigne:'Quelle est son aire approchée au centième ?',
+    hint:'💡 Commence par calculer le rayon puis utilise la formule π × rayon².',
+    unit:'cm²', answer:38.48, decimals:2,
+    correction:'Rayon = 7 ÷ 2 = 3,5 cm<br>Aire = π × 3,5² = π × 12,25 ≈ <strong>38,48 cm²</strong>' },
+  { id:5, eyebrow:'Mission 5 / 5', title:'🗺️ Validation des plans', type:'qcm',
+    story:'Les premières installations de la base sont maintenant prêtes. Avant de lancer la suite du chantier, les ingénieurs doivent comparer deux surfaces afin de valider les plans de cette première phase.',
+    shape:shapeCompare, consigne:'Quelle affirmation est correcte ?',
+    hint:'💡 Calcule les deux aires avant de comparer.',
+    options:[
+      {txt:'Le rectangle et le triangle ont la même aire.', ok:false},
+      {txt:'Le triangle possède une aire plus grande que le rectangle.', ok:false},
+      {txt:'Le rectangle possède une aire double de celle du triangle.', ok:true},
+      {txt:'Le triangle possède une aire double de celle du rectangle.', ok:false}
+    ],
+    correction:'Rectangle : 7 × 4 = 28 cm²<br>Triangle : (7 × 4) ÷ 2 = 14 cm²<br>28 = 2 × 14 : le rectangle possède donc une aire double de celle du triangle.' }
+];
+
+/* ==================================================================
+   ÉTAT
+   ================================================================== */
+var current=0;               // index de la mission affichée (0..4)
+var results=[false,false,false,false,false]; // réussite (à un moment) par mission
+var firstTry=[null,null,null,null,null];      // true si réussie du premier coup
+var attempts=[0,0,0,0,0];
+var gameStarted=false;
+var transitionPending=false;
+var transitionTimeoutID=null;
+function clearTransitionTimeout(){
+  if(transitionTimeoutID!==null){
+    clearTimeout(transitionTimeoutID);
+    transitionTimeoutID=null;
+  }
+}
+var challengeFinished=false;
+
+/* ==================================================================
+   NAVIGATION
+   ================================================================== */
+window.startGame=function(){
+  if(gameStarted) return;
+  gameStarted=true;
+  playClick();
+  $('scene-intro').style.display='none';
+  $('scene-mission').classList.add('show');
+  renderCaps();
+  startGameTimer();
+  renderMission();
+};
+
+function renderCaps(){
+  var html='';
+  for(var i=0;i<5;i++){
+    var cls = results[i] ? 'done' : (i===current ? 'current' : '');
+    html+='<div class="cap '+cls+'" aria-hidden="true"><div class="cap-fill"></div></div>';
+  }
+  var progress=$('progress-caps');
+  progress.innerHTML=html;
+  var done=results.filter(function(v){return v;}).length;
+  progress.setAttribute('aria-valuenow', String(done));
+  $('progress-txt').textContent=done+' / 5';
+}
+
+/* ==================================================================
+   RENDU D'UNE MISSION
+   ================================================================== */
+function renderMission(){
+  var m=MISSIONS[current];
+  var c=$('mission-card');
+  var body='';
+  if(m.type==='num'){
+    body='<div class="answer-row">'
+      +'<input type="text" inputmode="decimal" class="answer-input" id="mission-input" aria-label="Ta réponse en '+m.unit+'" autocomplete="off" spellcheck="false">'
+      +'<span class="answer-unit">'+m.unit+'</span>'
+      +'<button type="button" class="btn btn-launch" id="btn-check" onclick="checkNumeric()">Vérifier</button>'
+      +'</div>'
+      +'<div class="answer-tip">Saisis ta réponse puis appuie sur Entrée, ou clique sur Vérifier.</div>';
+  } else {
+    var optsHtml=m.options.map(function(o,i){
+      return '<button type="button" class="opt-btn" id="opt-'+i+'" onclick="checkQCM('+i+')" role="radio" aria-checked="false">'
+        +'<span class="ob-letter">'+String.fromCharCode(65+i)+'</span><span>'+o.txt+'</span></button>';
+    }).join('');
+    body='<div class="choice-list" role="radiogroup" aria-label="Choisis la bonne affirmation">'+optsHtml+'</div>';
+  }
+  c.innerHTML=
+    '<div class="mission-eyebrow">'+m.eyebrow+'</div>'
+    +'<h2>'+m.title+'</h2>'
+    +'<div class="mission-story">'+m.story+'</div>'
+    +'<div class="shape-wrap">'+m.shape()+'</div>'
+    +'<div class="mission-consigne">'+m.consigne+'</div>'
+    +'<div class="hint-actions">'
+      +'<button type="button" class="btn-hint" id="btn-hint" onclick="toggleMissionHint()" aria-expanded="false" aria-controls="mission-hint">💡 Indice</button>'
+      +'<div class="hint-box" id="mission-hint" hidden></div>'
+    +'</div>'
+    +body
+    +'<div class="feedback" id="fb-box" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +'<div class="correction-box" id="correction-box" hidden></div>'
+    +'<div class="next-action" id="next-action"></div>';
+  renderCaps();
+  if(m.type==='num'){
+    var inp=$('mission-input');
+    inp.focus();
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') checkNumeric(); });
+  }
+}
+window.toggleMissionHint=function(){
+  var box=$('mission-hint');
+  var button=$('btn-hint');
+  if(!box || !button) return;
+  var mission=MISSIONS[current];
+  var willOpen=box.hidden;
+  box.hidden=!willOpen;
+  button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  button.textContent = willOpen ? '💡 Masquer l\u2019indice' : '💡 Indice';
+  if(willOpen){
+    playHint();
+    box.innerHTML='<span class="hint-emoji" aria-hidden="true">💡</span><span>'+mission.hint.replace('💡 ','')+'</span>';
+  }
+};
+
+/* ==================================================================
+   VALIDATION — NUMÉRIQUE
+   ================================================================== */
+function parseFlex(str){
+  if(str==null) return NaN;
+  var s=String(str).trim().replace(/\s+/g,'').replace(',', '.').replace(/cm.?2?$|cm²$/i,'');
+  if(!/^-?\d+(\.\d+)?$/.test(s)) return NaN;
+  return parseFloat(s);
+}
+function roundToHundredth(value){
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+function checkNumeric(){
+  if(transitionPending || results[current]) return;
+  var m=MISSIONS[current];
+  var input=$('mission-input');
+  var val=parseFlex(input.value);
+  var feedback=$('fb-box');
+  if(isNaN(val)){
+    feedback.className='feedback show ko';
+    feedback.innerHTML='Saisis uniquement un nombre. L\u2019unité cm² est facultative.';
+    input.focus();
+    return;
+  }
+  var ok = m.decimals ? (roundToHundredth(val)===roundToHundredth(m.answer)) : (val===m.answer);
+  attempts[current]++;
+  if(!ok){
+    input.classList.remove('ok');
+    input.classList.add('ko');
+    if(firstTry[current]===null) firstTry[current]=false;
+    playWrong();
+    feedback.className='feedback show ko';
+    feedback.innerHTML='Ce n\u2019est pas encore la bonne réponse. Vérifie ton calcul puis essaie de nouveau.';
+    input.focus();
+    input.select();
+    return;
+  }
+  input.classList.remove('ko');
+  input.classList.add('ok');
+  setDisabled(input,true);
+  setDisabled($('btn-check'),true);
+  playCorrect();
+  results[current]=true;
+  if(firstTry[current]===null) firstTry[current]=(attempts[current]===1);
+  feedback.className='feedback show ok';
+  feedback.innerHTML='✅ Bravo ! Bonne réponse.';
+  showSuccessfulCorrection(m);
+  showNextMissionButton();
+  var card=$('mission-card'); card.classList.add('pulse-ok');
+  renderCaps();
+}
+
+/* ==================================================================
+   VALIDATION — QCM (mission 5)
+   ================================================================== */
+window.checkQCM=function(index){
+  if(transitionPending || results[current]) return;
+  var m=MISSIONS[current];
+  var ok=m.options[index].ok;
+  attempts[current]++;
+  var feedback=$('fb-box');
+  document.querySelectorAll('.opt-btn').forEach(function(b){ b.classList.remove('correct','wrong'); b.setAttribute('aria-checked','false'); });
+  var btn=$('opt-'+index);
+  btn.setAttribute('aria-checked','true');
+  if(!ok){
+    btn.classList.add('wrong');
+    setTimeout(function(){ btn.classList.remove('wrong'); },400);
+    if(firstTry[current]===null) firstTry[current]=false;
+    playWrong();
+    feedback.className='feedback show ko';
+    feedback.innerHTML='Ce n\u2019est pas la bonne affirmation. Recalcule les deux aires puis essaie de nouveau.';
+    return;
+  }
+  btn.classList.add('correct');
+  playCorrect();
+  document.querySelectorAll('.opt-btn').forEach(function(b){ setDisabled(b,true); });
+  results[current]=true;
+  if(firstTry[current]===null) firstTry[current]=(attempts[current]===1);
+  feedback.className='feedback show ok';
+  feedback.innerHTML='✅ Bravo ! Bonne réponse.';
+  showSuccessfulCorrection(m);
+  showNextMissionButton();
+  var card=$('mission-card'); card.classList.add('pulse-ok');
+  renderCaps();
+};
+
+/* ==================================================================
+   RÉUSSITE — correction automatique + bouton unique de progression
+   ================================================================== */
+function showSuccessfulCorrection(mission){
+  var correctionBox=$('correction-box');
+  if(!correctionBox) return;
+  correctionBox.hidden=false;
+  correctionBox.innerHTML='<strong>Correction :</strong><br>'+mission.correction;
+}
+function showNextMissionButton(){
+  var zone=$('next-action');
+  if(!zone) return;
+  var isLastMission=(current===MISSIONS.length-1);
+  zone.innerHTML='<button type="button" class="btn btn-launch btn-next-mission" id="btn-next-mission">'
+    +(isLastMission ? 'Voir le bilan →' : 'Mission suivante →')+'</button>';
+  var button=$('btn-next-mission');
+  button.addEventListener('click', continueToNextMission);
+  button.focus();
+}
+function continueToNextMission(){
+  if(transitionPending || !results[current]) return;
+  var button=$('btn-next-mission');
+  if(button){ setDisabled(button,true); }
+  if(current<MISSIONS.length-1){
+    transitionPending=true;
+    playNextMission();
+    clearTransitionTimeout();
+    transitionTimeoutID=setTimeout(function(){
+      transitionTimeoutID=null;
+      transitionPending=false;
+      current++;
+      renderMission();
+    },700);
+  } else {
+    triggerFinale();
+  }
+}
+
+/* ==================================================================
+   BILAN FINAL
+   ================================================================== */
+var finaleTriggered=false;
+function formatLongTime(totalSec){
+  var minutes=Math.floor(totalSec/60);
+  var seconds=totalSec%60;
+  return minutes+' min '+String(seconds).padStart(2,'0')+' s';
+}
+function getFinalGrade(totalSec){
+  if(totalSec<=180){
+    return {stars:'⭐⭐⭐⭐⭐', title:'Ingénieur en chef', message:'Première phase menée avec rapidité et précision !'};
+  }
+  if(totalSec<=300){
+    return {stars:'⭐⭐⭐⭐', title:'Ingénieur confirmé', message:'Excellent travail ! Toutes les surfaces de cette première phase ont été calculées avec soin.'};
+  }
+  if(totalSec<=600){
+    return {stars:'⭐⭐⭐', title:'Ingénieur appliqué', message:'Très bon travail ! Tu as pris le temps de vérifier correctement les calculs de cette première phase.'};
+  }
+  return {stars:'⭐⭐', title:'Ingénieur persévérant', message:'Bravo pour ta persévérance ! Pour calculer une aire, la précision compte davantage que la vitesse.'};
+}
+function triggerFinale(){
+  if(finaleTriggered) return;
+  if(!results.every(Boolean)) return;
+  finaleTriggered=true;
+  clearTransitionTimeout();
+  var totalSec=stopGameTimer();
+  var grade=getFinalGrade(totalSec);
+  playFinal();
+  var c=$('mission-card');
+  c.innerHTML='<div class="final-card" id="final-card">'
+    +'<div class="mission-eyebrow">Rapport de mission</div>'
+    +'<h2 id="final-title" tabindex="-1">🏆 Première phase validée</h2>'
+    +'<div class="final-missions">Missions validées : 5 / 5</div>'
+    +'<div class="final-time">Temps total : '+formatLongTime(totalSec)+'</div>'
+    +'<div class="final-grade">'+grade.title+'</div>'
+    +'<div class="final-stars" aria-hidden="true">'+grade.stars+'</div>'
+    +'<div class="final-stars-label">Grade attribué selon le temps réalisé</div>'
+    +'<div class="final-msg">'+grade.message+'</div>'
+    +'<div class="final-summary">'
+      +'<p>🎉 Grâce à tes calculs précis, les surfaces des différentes zones de la base martienne sont maintenant validées.</p>'
+      +'<p>Tu sais calculer l\u2019aire d\u2019un rectangle, d\u2019un parallélogramme, d\u2019un triangle et d\u2019un disque, puis comparer plusieurs surfaces.</p>'
+      +'<p>Les robots disposent désormais des mesures nécessaires pour poursuivre les travaux.</p>'
+      +'<p>Les ingénieurs disposent désormais de toutes les mesures nécessaires pour poursuivre la construction de la base lors de la prochaine mission.</p>'
+    +'</div>'
+    +'<div class="actions-row" style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-bottom:1rem">'
+      +'<button type="button" class="btn btn-launch" id="btn-finish" onclick="finishChallenge()">Terminer le défi</button>'
+      +'<button type="button" class="btn btn-copper" onclick="restartGame()">↻ Recommencer le défi</button>'
+    +'</div>'
+    +'<div class="feedback" id="final-feedback" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +'</div>';
+  results=[true,true,true,true,true];
+  renderCaps();
+  spawnConfetti();
+  var title=$('final-title'); if(title) title.focus();
+}
+function spawnConfetti(){
+  var card=$('final-card'); if(!card) return;
+  var colors=['#3ad6f0','#f0b27a','#ffffff','#d17a3f'];
+  for(var i=0;i<18;i++){
+    var el=document.createElement('div');
+    el.className='stardust';
+    var size=2+Math.random()*4;
+    el.style.width=size+'px';
+    el.style.height=size+'px';
+    el.style.left=(5+Math.random()*90)+'%';
+    el.style.top=(30+Math.random()*50)+'%';
+    var color=colors[i%colors.length];
+    el.style.background=color;
+    el.style.boxShadow='0 0 '+(4+size)+'px '+color;
+    el.style.animationDelay=(Math.random()*0.6)+'s';
+    card.appendChild(el);
+  }
+}
+window.finishChallenge=function(){
+  if(challengeFinished) return;
+  challengeFinished=true;
+  var btn=$('btn-finish');
+  if(btn){ setDisabled(btn,true); }
+  var fb=$('final-feedback');
+  if(fb){
+    fb.className='feedback show ok';
+    fb.innerHTML='🚀 Défi terminé. Tu peux maintenant poursuivre vers l\u2019Arrivée de la séance.';
+  }
+};
+window.restartGame=function(){
+  clearInterval(gameTimerInterval);
+  clearTransitionTimeout();
+  current=0;
+  results=[false,false,false,false,false];
+  firstTry=[null,null,null,null,null];
+  attempts=[0,0,0,0,0];
+  gameStarted=false;
+  finaleTriggered=false;
+  transitionPending=false;
+  challengeFinished=false;
+  gameStartTime=null;
+  var timer=$('hud-timer');
+  if(timer){ timer.textContent='⏱️ 00:00'; }
+  $('scene-mission').classList.remove('show');
+  $('scene-intro').style.display='block';
+  $('progress-caps').innerHTML='';
+  $('progress-caps').setAttribute('aria-valuenow','0');
+  $('progress-txt').textContent='0 / 5';
+  window.scrollTo({top:0,behavior:'auto'});
+  // Le choix du son n'est jamais réinitialisé ici : il reste celui de l'utilisateur.
+};
+
+document.addEventListener('DOMContentLoaded', function(){});
+})();
+</script>
+</body>
+</html>
