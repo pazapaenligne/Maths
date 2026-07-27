@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths — Semaine 7 — Jour 3 — Je relève le défi — La symétrie axiale</title>
+<style>
+:root{
+  --day-color:#8DC63F; --day-dark:#3D7A10; --day-light:#F0FAEB; --day-border:#B5E08A;
+  --gold:#C9A227; --gold-d:#8A6414;
+  --bg:#14210F; --panel:#1F3318; --panel2:#28401E;
+  --line:#3F5A2E; --text:#F3F8ED; --muted:#B9CBA6;
+  --green:#4E9A3A; --err:#D9534F; --neon:#B5E08A;
+  --copper:#B98A4E; --brass:#D9B35F;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 14px rgba(141,198,63,.34), 0 0 34px rgba(141,198,63,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#0E1A0A 0%, #14210F 50%, #101B0C 100%);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#D9B35F 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#D9B35F 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#0E1A0A;font-family:Arial,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:Arial,sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.15;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.16;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#8DC63F;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#D9B35F;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#3F5A2E;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#B5E08A;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(20,33,15,.96);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.3rem;}
+.hud-frag{width:1.6rem;height:1.8rem;border-radius:5px;background:#1B2A12;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#7A9468;transition:all .4s;}
+.hud-frag.got{background:rgba(141,198,63,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:Arial,sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#1B2A12;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Courier New',monospace;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#1B2A12;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(141,198,63,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:48px;}.hud-bar{gap:.5rem;padding:.45rem .5rem;}.hud-frag{width:1.3rem;height:1.6rem;font-size:.7rem;}.hud-dial{display:none;}.hud-timer{font-size:.8rem;padding:.2rem .4rem;}.hud-timer .lbl{display:none;}}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:620px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:var(--text);line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-note{margin:.9rem 0 .2rem;background:#1B2A12;border:1.5px dashed var(--day-border);border-radius:10px;padding:.8rem;text-align:center;font-size:.86rem;color:var(--day-light);}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#0E1A0A;
+  font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.crest{display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:Arial,sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.1rem;height:2.1rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#1B2A12;border:1.5px solid var(--line);font-size:1rem;color:#7A9468;transition:all .5s;}
+.frag.found{background:rgba(141,198,63,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#1B2A12;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:Arial,sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#1B2A12;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+
+.room-question{text-align:center;font-weight:700;color:var(--text);margin:.6rem 0;font-size:.98rem;}
+.rotor-figure svg,.mfig svg{max-width:100%;height:auto;}
+.mfig{text-align:center;margin-bottom:.6rem;}
+.compass-tool{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;background:#1B2A12;border-radius:12px;padding:1rem;margin-top:.6rem;border:1px solid var(--line);}
+.compass-group{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.compass-label{font-family:Arial,sans-serif;font-weight:700;font-size:.82rem;color:var(--muted);margin-right:.2rem;}
+.compass-btn{min-width:48px;min-height:44px;padding:.5rem .9rem;border:2px solid var(--copper);border-radius:8px;background:var(--panel2);color:var(--text);font-weight:800;font-family:'Courier New',monospace;cursor:pointer;font-size:.92rem;}
+.compass-btn:hover{background:#355A22;}
+.compass-btn.selected{background:linear-gradient(135deg,var(--brass),var(--gold));border-color:var(--gold);color:#3b2a06;}
+.compass-btn:disabled{opacity:.5;cursor:default;}
+.mcq-list{display:flex;flex-direction:column;gap:.6rem;margin-top:.8rem;}
+.mcq-opt{width:100%;text-align:left;padding:.8rem 1.1rem;border:2px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;font-size:.92rem;font-weight:600;color:var(--text);transition:border-color .15s,background .15s;min-height:44px;}
+.mcq-opt:hover:not(:disabled){border-color:var(--day-color);}
+.mcq-opt.selected{border-color:var(--day-color);background:rgba(141,198,63,.14);}
+.mcq-opt.correct{border-color:var(--green);background:rgba(111,163,74,.16);color:#D9F2C8;}
+.mcq-opt.wrong{border-color:var(--err);background:rgba(217,83,79,.14);color:#FFD0C9;}
+.mcq-opt.locked,.mcq-opt:disabled{cursor:default;}
+.plans-row{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:.6rem;}
+.plan{width:170px;background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:.7rem;cursor:pointer;text-align:center;min-height:44px;}
+.plan:hover:not(:disabled){border-color:var(--day-color);}
+.plan.selected{border-color:var(--day-color);background:rgba(141,198,63,.14);}
+.plan.correct{border-color:var(--green);background:rgba(111,163,74,.16);}
+.plan.wrong{border-color:var(--err);background:rgba(217,83,79,.14);}
+.plan.locked,.plan:disabled{cursor:default;}
+.plan-label{font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted);margin-top:.5rem;font-weight:700;}
+.just-label{text-align:center;font-weight:700;color:var(--day-color);margin-top:.9rem;font-size:.88rem;}
+.input-row{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:.8rem 0;}
+.cell-in{border:2px solid var(--line);border-radius:8px;background:#1B2A12;color:var(--text);font-family:'Courier New',monospace;font-size:16px;font-weight:600;text-align:center;padding:.5rem;outline:none;transition:border-color .2s,background .2s;min-height:46px;width:90px;}
+.cell-in:focus{border-color:var(--day-color);}
+.cell-in.ok{border-color:var(--green);background:rgba(111,163,74,.14);color:#D9F2C8;}
+.cell-in.ko{border-color:var(--err);background:rgba(217,83,79,.12);color:#FFD0C9;}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:Arial,sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#0E1A0A;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#243D1B;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#F5E4B7;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(111,163,74,.14);border:1.5px solid var(--green);color:#D9F2C8;}
+.fb.ko{background:rgba(217,83,79,.12);border:1.5px solid var(--err);color:#FFD0C9;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#f0dca0;}
+.correction{margin-top:.8rem;background:#1B2A12;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-family:Arial,sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--day-color);margin-bottom:.4rem;}
+.correction-x{font-size:clamp(.8rem,2.4vw,.88rem);color:var(--day-light);line-height:1.6;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+body.playing .sound-btn{top:58px;}
+@media(max-width:600px){body.playing .sound-btn{top:54px;}
+  .tools{flex-direction:column;}
+  .btn{width:100%;}
+}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(20,33,15,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:Arial,sans-serif;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(31,51,24,.97), rgba(10,24,8,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#1B2A12;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'Courier New',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:#1B2A12;}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(141,198,63,.3) 0%, rgba(141,198,63,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(141,198,63,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.4rem;margin:.8rem 0;flex-wrap:wrap;}
+.finale-crest .fc{width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(141,198,63,.16);border:1.5px solid var(--day-color);font-size:1.1rem;animation:pop .5s both;}
+.finale-title{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,5.6vw,2rem);color:var(--day-color);text-shadow:0 1px 0 rgba(184,112,10,.25);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Courier New',monospace;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#D9F2C8;margin-bottom:.6rem;}
+.finale-grade{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#0E1A0A;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:var(--day-light);font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-reveal{background:#1B2A12;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:var(--day-light);line-height:1.7;}
+.finale-reveal b{color:var(--day-color);font-family:Arial,sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#0E1A0A;box-shadow:var(--glow);font-family:Arial,sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+.seg-hit:focus,.seg-hit:focus-visible{outline:3px solid #FACC15;outline-offset:3px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button type="button" class="sound-btn" id="sound-btn" onclick="toggleSound()" aria-pressed="true" aria-label="Activer ou couper le son" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg" role="status" aria-live="polite"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Analyse des relevés&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Mise à jour de la carte</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128506;&#65039;</span>
+  <div class="hud-frags" id="hud-frags"></div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Restauration de la carte&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">Missions validées&nbsp;: 0/5 &middot; </span>&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#128506;&#65039;</div>
+    <div class="finale-title">CARTE MARITIME RESTAUR&Eacute;E&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201;&#65039; --:--</div>
+    <div class="finale-grade" id="finale-grade">Mission accomplie</div>
+    <div class="finale-sub">Les c&ocirc;tes, les routes maritimes et les rep&egrave;res disparus ont &eacute;t&eacute; reconstruits avec pr&eacute;cision gr&acirc;ce &agrave; la sym&eacute;trie axiale.</div>
+    <div class="finale-reveal">
+      <b>&#128506;&#65039; Bilan de la restauration</b>
+      Pour construire l&rsquo;image d&rsquo;un point par sym&eacute;trie axiale, le point et son image sont align&eacute;s perpendiculairement &agrave; l&rsquo;axe et se trouvent &agrave; la m&ecirc;me distance de celui-ci.
+      <div id="finale-autonomy" style="margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--line);"></div>
+    </div>
+    <button type="button" class="btn-restart" onclick="restartAll()">&#8635; Rejouer le d&eacute;fi</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f5a623"></span>
+      Pazapa &middot; Maths &middot; 6e
+    </div>
+    <div class="week">Semaine 7 — Jour 3</div>
+    <div class="title">&#127919; Je rel&egrave;ve le <span class="hl">d&eacute;fi</span></div>
+    <div class="subtitle">La sym&eacute;trie axiale &middot; Atelier de restauration cartographique</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#128506;&#65039;</div>
+    <div class="start-mission">
+      <b>&#128203; Mission du jour&nbsp;:</b> Dans l&rsquo;atelier de cartographie, les explorateurs rapportent une ancienne carte maritime endommag&eacute;e. Une partie des c&ocirc;tes, des routes maritimes et des rep&egrave;res a disparu.
+      <br><br>
+      Les cartographes constatent que la carte avait &eacute;t&eacute; con&ccedil;ue de mani&egrave;re parfaitement sym&eacute;trique de part et d&rsquo;autre d&rsquo;un axe central. Pour restaurer fid&egrave;lement le document, tu dois reconstruire les parties manquantes comme si le parchemin &eacute;tait pli&eacute; le long de cet axe.
+      <div class="start-note">&#128506;&#65039; Cinq &eacute;preuves t&rsquo;attendent pour restaurer enti&egrave;rement la carte maritime. Le chronom&egrave;tre est informatif et n&rsquo;entra&icirc;ne aucune p&eacute;nalit&eacute;.</div>
+    </div>
+    <button type="button" class="btn-start" onclick="beginGame()">&#9654;&#65039; Commencer la mission</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">&Eacute;l&eacute;ments cartographiques restaur&eacute;s&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+      <div class="frag" id="frag-4">?</div>
+    </div>
+    <div id="steps"></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* =====================================================================
+   SONS — Web Audio API uniquement, ambiance cartographie
+   ===================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+0.04);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+dur-0.05);
+  g.gain.linearRampToValueAtTime(0.0001,t+dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+/* clic sec — crayon de cartographe sur le parchemin */
+function sClick(){if(!soundOn)return;beep(720,0,0.035,"square",0.07);beep(500,0.02,0.03,"triangle",0.04);}
+/* erreur discr\u00e8te — mesure qui ne correspond pas */
+function sBad(){if(!soundOn)return;beep(260,0,0.09,"triangle",0.1);beep(196,0.07,0.13,"triangle",0.08);}
+/* \u00e9l\u00e9ment cartographique restaur\u00e9 — chime de validation */
+function sFrag(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.05,0.09,900,200,c.currentTime);beep(784,0.02,0.08,"square",0.14);beep(1047,0.09,0.12,"triangle",0.18);beep(1568,0.17,0.16,"triangle",0.18);}
+/* transition entre deux \u00e9preuves */
+function sTransition(){if(!soundOn)return;beep(700,0,0.05,"sine",0.09);beep(1050,0.06,0.06,"sine",0.11);beep(1400,0.12,0.1,"sine",0.13);}
+/* tintement doux — indice */
+function sHint(){if(!soundOn)return;beep(1568,0,0.08,"sine",0.09);beep(2093,0.08,0.12,"sine",0.08);}
+
+/* froissement l\u00e9ger de parchemin — d\u00e9pliage au lancement */
+function sPaper(){if(!soundOn)return;noise(0.16,0.1,2600,700,ac()?ac().currentTime:0);}
+/* son de trac\u00e9 sur le parchemin — point ou fragment restaur\u00e9 */
+function sTrace(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.22,0.07,1800,400,c.currentTime);beep(440,0.02,0.16,"triangle",0.08);}
+/* fanfare finale — carte maritime restaur\u00e9e */
+function sWin(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.14,0.08,2200,500,c.currentTime);[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,0.15+i*0.12,0.24,"triangle",0.2);});}
+function toggleSound(){
+  soundOn=!soundOn;
+  var b=$("sound-btn");
+  b.innerHTML=soundOn?"&#128266;":"&#128263;";
+  b.classList.toggle("off",!soundOn);
+  b.setAttribute("aria-pressed",soundOn?"true":"false");
+  if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();
+}
+
+/* =====================================================================
+   MESSAGES ET TRANSITIONS
+   ===================================================================== */
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2500);}
+
+var SCAN_SUB=["V\u00e9rification des trac\u00e9s\u2026","Placement des rep\u00e8res\u2026","Recherche de l\u2019axe\u2026","Association des points images\u2026","Restauration finale de la carte\u2026"];
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  transitionRunning=true;
+  if(!ov){done&&done();transitionRunning=false;return;}
+  if(txt)txt.innerHTML=SCAN_SUB[mi]||"Analyse en cours\u2026";
+  if(sub)sub.textContent="Mise \u00e0 jour du parchemin restaur\u00e9";
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");sTransition();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*22+14;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");transitionRunning=false;done&&done();},220);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },90);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+
+/* =====================================================================
+   GÉOMÉTRIE — triangle de repérage (inchangée)
+   ===================================================================== */
+function polar(cx,cy,r,deg){var rad=deg*Math.PI/180;return [cx+r*Math.cos(rad), cy-r*Math.sin(rad)];}
+function arcPoly(cx,cy,r,deg1,deg2,color,width){
+  var steps=28, pts=[];
+  for(var i=0;i<=steps;i++){var d=deg1+(deg2-deg1)*(i/steps);var p=polar(cx,cy,r,d);pts.push(p[0].toFixed(1)+','+p[1].toFixed(1));}
+  return '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+(color||'#F59E0B')+'" stroke-width="'+(width||3)+'"/>';
+}
+function dotLabel(x,y,label,color){return '<text x="'+x+'" y="'+y+'" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="'+(color||'#F2F8F6')+'">'+label+'</text>';}
+function pointDot(x,y,r,color){return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r||6)+'" fill="'+(color||'#D9B35F')+'" stroke="#F2F8F6" stroke-width="1.5"/>';}
+
+/* =====================================================================
+   GÉOMÉTRIE — symétrie axiale (réflexion par rapport à un axe vertical)
+   ===================================================================== */
+function reflectX(pt,axisX){ return [2*axisX-pt[0], pt[1]]; }
+function axisLine(axisX,y1,y2){ return '<line x1="'+axisX+'" y1="'+y1+'" x2="'+axisX+'" y2="'+y2+'" stroke="#D9B35F" stroke-width="3" stroke-dasharray="8,6"/>'; }
+function polylinePts(pts,color,width,closed){
+  var d=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
+  var tag=closed?'polygon':'polyline';
+  return '<'+tag+' points="'+d+'" fill="'+(closed?'rgba(141,198,63,.12)':'none')+'" stroke="'+(color||'#8DC63F')+'" stroke-width="'+(width||4)+'" stroke-linecap="round" stroke-linejoin="round"/>';
+}
+function svgWrap(viewBox,title,desc,inner,extraAttrs){
+  return '<svg viewBox="'+viewBox+'" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" '+(extraAttrs||'role="img" aria-label="'+title+'"')+'>'
+    +'<rect x="0" y="0" width="1000" height="1000" fill="#1B2A12" opacity="0"/>'
+    +inner+'</svg>';
+}
+
+/* =====================================================================
+   ÉPREUVE 1 — reconnaître une symétrie axiale
+   ===================================================================== */
+var E1_CANDS=[
+  {id:'a', pts:[[35,40],[55,25],[75,55],[60,90],[30,100]], correct:true},
+  {id:'b', pts:[[35,45],[60,30],[80,60],[65,95],[35,105]], correct:false, distort:18},
+  {id:'c', pts:[[40,35],[65,50],[55,85],[35,80]], correct:true}
+];
+var e1Selected={};
+function e1CardSVG(cand){
+  var ax=100;
+  var mirror=cand.pts.map(function(p){ var r=reflectX(p,ax); if(!cand.correct) r=[r[0],r[1]+cand.distort]; return r; });
+  var inner=axisLine(ax,10,150)+polylinePts(cand.pts,'#8DC63F',4,true)+polylinePts(mirror,'#D9B35F',4,true);
+  return svgWrap('0 0 200 160','Figure candidate',null,inner,'aria-hidden="true" focusable="false"');
+}
+function e1Render(){
+  e1Selected={};
+  var html='<p class="room-question">Choisis tous les fragments r\u00e9ellement sym\u00e9triques par rapport \u00e0 l\u2019axe central en pointill\u00e9s.</p>';
+  html+='<div class="plans-row" id="e1-cards">';
+  E1_CANDS.forEach(function(c){
+    html+='<button type="button" class="plan" id="e1card-'+c.id+'" aria-pressed="false" aria-label="Fragment '+c.id.toUpperCase()+'" onclick="toggleE1(\''+c.id+'\',this)">'+e1CardSVG(c)+'<div class="plan-label">Fragment '+c.id.toUpperCase()+'</div></button>';
+  });
+  html+='</div>';
+  html+='<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-0" aria-expanded="false" aria-controls="hint-0" onclick="toggleHint(0)">? Indice</button>'
+    +'<button type="button" class="btn btn-try" id="try-0" onclick="tryStep(0)" disabled>\u2705 V\u00e9rifier</button></div>'
+    +'<div class="hint" id="hint-0">'+STEPS[0].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[0]?' show':'')+'" id="corr-0"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-0">'+(correctionShown[0]?correctionText[0]:'')+'</div></div>'
+    +'<div class="fb" id="fb-0"><span id="fbi-0"></span><div id="fbm-0"></div></div>';
+  return html;
+}
+window.toggleE1=function(id,btn){
+  if(solved[0]) return;
+  sClick();
+  e1Selected[id]=!e1Selected[id];
+  btn.classList.toggle('selected',!!e1Selected[id]);
+  btn.setAttribute('aria-pressed',e1Selected[id]?'true':'false');
+  var any=Object.keys(e1Selected).some(function(k){return e1Selected[k];});
+  $('try-0').disabled=!any;
+};
+function e1Validate(){
+  if(solved[0]) return;
+  var chosen=Object.keys(e1Selected).filter(function(k){return e1Selected[k];}).sort();
+  var correct=E1_CANDS.filter(function(c){return c.correct;}).map(function(c){return c.id;}).sort();
+  var isCorrect = chosen.length===correct.length && chosen.every(function(v,i){return v===correct[i];});
+  roomAttempts[0]=(roomAttempts[0]||0)+1;
+  var B=feedbackBlocks(0);
+  document.querySelectorAll('#e1-cards .plan').forEach(function(b){ b.disabled=true; });
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='Les fragments A et C respectent la sym\u00e9trie\u00a0: chaque point et son image sont align\u00e9s perpendiculairement \u00e0 l\u2019axe et se trouvent \u00e0 la m\u00eame distance de celui-ci.';
+    if(!missionHadCorrection[0]) autonomousSuccesses++;
+    stepSuccess(0);
+  } else {
+    sBad();shakeStep(0);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    B.fbm.textContent='Ce n\u2019est pas la bonne s\u00e9lection. V\u00e9rifie si chaque point reconstruit est exactement en face de son point d\u2019origine.';
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[0]>=2){
+      correctionShown[0]=true; missionHadCorrection[0]=true;
+      correctionText[0]='Correction\u00a0: seuls les fragments A et C sont sym\u00e9triques. Dans le fragment B, la partie reconstruite est d\u00e9cal\u00e9e verticalement\u00a0: les points correspondants ne sont pas align\u00e9s perpendiculairement \u00e0 l\u2019axe.';
+      B.corrx.innerHTML=correctionText[0];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#e1-cards .plan').forEach(function(b){ var id=b.id.replace('e1card-',''); if(E1_CANDS.find(function(c){return c.id===id;}).correct) b.classList.add('correct'); });
+      stepSuccess(0);
+    } else {
+      document.querySelectorAll('#e1-cards .plan').forEach(function(b){ b.disabled=false; });
+      B.hint.innerHTML='Regarde si chaque point de droite est exactement en face de son point de gauche, à la même hauteur.';
+      showHintAfterError(0);
+    }
+  }
+}
+
+/* =====================================================================
+   ÉPREUVE 2 — compléter une figure symétrique (placement de points)
+   ===================================================================== */
+var E2_AXIS=250;
+var E2_LEFT=[[150,60],[190,90],[170,150],[130,120]];
+var e2idx=0;
+function e2Candidates(pt){
+  var correct=reflectX(pt,E2_AXIS);
+  var d1=[correct[0],correct[1]+30];
+  var d2=[correct[0]+35,correct[1]-15];
+  var opts=shuffle([{p:correct,ok:true},{p:d1,ok:false},{p:d2,ok:false}]);
+  return opts;
+}
+var e2opts=[];
+function e2Render(){
+  e2opts=e2Candidates(E2_LEFT[e2idx]);
+  var inner=axisLine(E2_AXIS,10,260);
+  inner+=polylinePts(E2_LEFT,'#8DC63F',4,false);
+  for(var i=0;i<e2idx;i++){ inner+=polylinePts([reflectX(E2_LEFT[i],E2_AXIS)],'#D9B35F',0,false); inner+=pointDot(reflectX(E2_LEFT[i],E2_AXIS)[0],reflectX(E2_LEFT[i],E2_AXIS)[1],7,'#D9B35F'); }
+  E2_LEFT.forEach(function(p,i){ inner+=pointDot(p[0],p[1],6,'#8DC63F')+dotLabel(p[0]-14,p[1]-10,String.fromCharCode(65+i)); });
+  e2opts.forEach(function(o,i){ inner+='<circle class="e2-opt" data-i="'+i+'" cx="'+o.p[0]+'" cy="'+o.p[1]+'" r="10" fill="#28401E" stroke="#D9B35F" stroke-width="2" style="cursor:pointer" tabindex="0" role="button" aria-label="Position candidate '+(i+1)+'" aria-disabled="false" onclick="validateE2('+i+')" onkeydown="e2Key(event,this,'+i+')"/>'; });
+  var svg=svgWrap('0 0 500 280','Repère maritime à restaurer par symétrie','Place le point image de '+String.fromCharCode(65+e2idx)+' par symétrie.',inner);
+  var html='<p class="room-question">Place le point image du rep&egrave;re <b>'+String.fromCharCode(65+e2idx)+'</b> ('+(e2idx+1)+' / '+E2_LEFT.length+') en cliquant sur la bonne position de l\u2019autre c&ocirc;t&eacute; de l\u2019axe.</p>'
+    +'<div class="mfig" id="e2-figure">'+svg+'</div>'
+    +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-1" aria-expanded="false" aria-controls="hint-1" onclick="toggleHint(1)">? Indice</button></div>'
+    +'<div class="hint" id="hint-1">'+STEPS[1].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[1]?' show':'')+'" id="corr-1"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-1">'+(correctionShown[1]?correctionText[1]:'')+'</div></div>'
+    +'<div class="fb" id="fb-1"><span id="fbi-1"></span><div id="fbm-1"></div></div>';
+  return html;
+}
+window.e2Key=function(evt,el,i){
+  if(!el||el.getAttribute('aria-disabled')==='true'||e2Locked||transitionRunning){
+    return;
+  }
+  if(evt.key==='Enter'||evt.key===' '||evt.key==='Spacebar'){
+    evt.preventDefault();
+    validateE2(i);
+  }
+};
+window.validateE2=function(i){
+  if(solved[1]||transitionRunning||e2Locked) return;
+  e2Locked=true;
+  var opt=e2opts[i];
+  roomAttempts[1]=(roomAttempts[1]||0)+1;
+  var B=feedbackBlocks(1);
+  document.querySelectorAll('.e2-opt').forEach(function(c){ c.style.pointerEvents='none'; c.setAttribute('aria-disabled','true'); });
+  if(opt.ok){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='Bien plac\u00e9\u00a0! Ce point est \u00e0 la m\u00eame distance de l\u2019axe, sur la perpendiculaire.';
+    setTimeout(function(){
+      if(e2idx<E2_LEFT.length-1){ e2idx++; clearFeedback(1); correctionShown[1]=false; e2Locked=false; refreshMissionBody(1); }
+      else { if(!missionHadCorrection[1]) autonomousSuccesses++; stepSuccess(1); e2Locked=false; }
+    },700);
+  } else {
+    sBad();shakeStep(1);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    B.fbm.textContent='Ce point n\u2019est pas \u00e0 la bonne position. Il doit \u00eatre exactement en face du point d\u2019origine, \u00e0 la m\u00eame hauteur et \u00e0 la m\u00eame distance de l\u2019axe.';
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[1]>=2){
+      correctionShown[1]=true; missionHadCorrection[1]=true;
+      correctionText[1]='Correction\u00a0: le point image est situ\u00e9 &agrave; la m\u00eame hauteur, &agrave; la m\u00eame distance de l\u2019axe, de l\u2019autre c\u00f4t\u00e9.';
+      B.corrx.innerHTML=correctionText[1];
+      B.corr.classList.add('show');
+      var correctIndex=e2opts.findIndex(function(option){ return option.ok; });
+      var correctEl=document.querySelector('.e2-opt[data-i="'+correctIndex+'"]');
+      if(correctEl){ correctEl.setAttribute('fill','#6FA34A'); correctEl.setAttribute('stroke','#D9F2C8'); }
+      setTimeout(function(){
+        e2Locked=false;
+        if(e2idx<E2_LEFT.length-1){ e2idx++; clearFeedback(1); correctionShown[1]=false; refreshMissionBody(1); }
+        else { stepSuccess(1); }
+      },1800);
+    } else {
+      document.querySelectorAll('.e2-opt').forEach(function(c){ c.style.pointerEvents='auto'; c.setAttribute('aria-disabled','false'); });
+      e2Locked=false;
+      B.hint.innerHTML=STEPS[1].hint1;
+      showHintAfterError(1);
+    }
+  }
+};
+
+/* =====================================================================
+   ÉPREUVE 3 — choisir le bon axe de symétrie
+   ===================================================================== */
+var E3_SHAPE=[[200,80],[300,80],[320,150],[250,220],[180,150]];
+var E3_AXES=[200,250,300];
+function e3Render(){
+  var order=shuffle(E3_AXES.map(function(x,i){return {x:x,ok:x===250,id:'ax'+i};}));
+  var inner=polylinePts(E3_SHAPE,'#8DC63F',4,true);
+  order.forEach(function(a){ inner+='<line class="e3-ax" data-ok="'+a.ok+'" x1="'+a.x+'" y1="20" x2="'+a.x+'" y2="270" stroke="#D9B35F" stroke-width="3" stroke-dasharray="8,6" style="cursor:pointer" tabindex="0" role="button" aria-label="Axe propos\u00e9" aria-disabled="false" onclick="validateE3(this)" onkeydown="e3Key(event,this)"/>'; });
+  var svg=svgWrap('0 0 500 290','Fragment de carte et trois axes proposés','Choisis l\u2019axe qui permet de restaurer ce fragment par symétrie.',inner);
+  var html='<p class="room-question">Clique sur le seul axe qui permet de restaurer ce fragment de carte par sym&eacute;trie.</p>'
+    +'<div class="mfig" id="e3-figure">'+svg+'</div>'
+    +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-2" aria-expanded="false" aria-controls="hint-2" onclick="toggleHint(2)">? Indice</button></div>'
+    +'<div class="hint" id="hint-2">'+STEPS[2].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[2]?' show':'')+'" id="corr-2"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-2">'+(correctionShown[2]?correctionText[2]:'')+'</div></div>'
+    +'<div class="fb" id="fb-2"><span id="fbi-2"></span><div id="fbm-2"></div></div>';
+  return html;
+}
+window.e3Key=function(evt,el){
+  if(!el||el.getAttribute('aria-disabled')==='true'||transitionRunning||solved[2]){
+    return;
+  }
+  if(evt.key==='Enter'||evt.key===' '||evt.key==='Spacebar'){
+    evt.preventDefault();
+    validateE3(el);
+  }
+};
+window.validateE3=function(el){
+  if(solved[2]||transitionRunning) return;
+  var isCorrect=el.getAttribute('data-ok')==='true';
+  roomAttempts[2]=(roomAttempts[2]||0)+1;
+  var B=feedbackBlocks(2);
+  document.querySelectorAll('.e3-ax').forEach(function(l){ l.style.pointerEvents='none'; l.setAttribute('aria-disabled','true'); });
+  if(isCorrect){
+    sTrace();
+    el.setAttribute('stroke','#8DC63F');
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='Cet axe est correct\u00a0: si l\u2019on plie la carte le long de cette ligne, les deux parties du trac\u00e9 se superposent exactement.';
+    if(!missionHadCorrection[2]) autonomousSuccesses++;
+    stepSuccess(2);
+  } else {
+    sBad();shakeStep(2);
+    el.setAttribute('stroke','#D9534F');
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    B.fbm.textContent='Cet axe ne convient pas&nbsp;: les deux parties ne co\u00efncident pas par pliage.';
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[2]>=2){
+      correctionShown[2]=true; missionHadCorrection[2]=true;
+      correctionText[2]='Correction\u00a0: seul l\u2019axe central est un axe de sym\u00e9trie. Chaque sommet du trac\u00e9 poss\u00e8de alors une image situ\u00e9e \u00e0 la m\u00eame distance de l\u2019axe.';
+      B.corrx.innerHTML=correctionText[2];
+      B.corr.classList.add('show');
+      document.querySelectorAll('.e3-ax').forEach(function(l){ if(l.getAttribute('data-ok')==='true') l.setAttribute('stroke','#8DC63F'); l.setAttribute('aria-disabled','true'); });
+      stepSuccess(2);
+    } else {
+      document.querySelectorAll('.e3-ax').forEach(function(l){ l.style.pointerEvents='auto'; l.setAttribute('aria-disabled','false'); });
+      B.hint.innerHTML=STEPS[2].hint1;
+      showHintAfterError(2);
+    }
+  }
+};
+
+/* =====================================================================
+   ÉPREUVE 4 — associer chaque point à son symétrique
+   ===================================================================== */
+var E4_AXIS=250;
+var E4_PTS=[['A',[150,60]],['B',[190,100]],['C',[170,160]],['D',[130,120]]];
+var e4pairIdx=0, e4candidates=[];
+function e4Render(){
+  if(e4pairIdx===0){
+    var trueImgs=E4_PTS.map(function(p){return reflectX(p[1],E4_AXIS);});
+    var decoys=[[350,100],[310,60]];
+    e4candidates=shuffle(trueImgs.map(function(p,i){return {pt:p,letter:E4_PTS[i][0]};}).concat(decoys.map(function(p){return {pt:p,letter:null};})));
+  }
+  var letter=E4_PTS[e4pairIdx][0];
+  var inner=axisLine(E4_AXIS,10,220);
+  E4_PTS.forEach(function(p){ inner+=pointDot(p[1][0],p[1][1],6,'#8DC63F')+dotLabel(p[1][0]-14,p[1][1]-10,p[0]); });
+  e4candidates.forEach(function(c,i){
+    if(c.used) return;
+    inner+='<circle class="e4-opt" data-i="'+i+'" cx="'+c.pt[0]+'" cy="'+c.pt[1]+'" r="10" fill="#28401E" stroke="#D9B35F" stroke-width="2" style="cursor:pointer" tabindex="0" role="button" aria-label="Point candidat" aria-disabled="false" onclick="validateE4('+i+')" onkeydown="e4Key(event,this,'+i+')"/>';
+  });
+  var svg=svgWrap('0 0 500 230','Repères maritimes et leurs images','Associe chaque repère à son symétrique.',inner);
+  var html='<p class="room-question">Associe le rep&egrave;re <b>'+letter+'</b> &agrave; son point image ('+(e4pairIdx+1)+' / '+E4_PTS.length+').</p>'
+    +'<div class="mfig" id="e4-figure">'+svg+'</div>'
+    +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-3" aria-expanded="false" aria-controls="hint-3" onclick="toggleHint(3)">? Indice</button></div>'
+    +'<div class="hint" id="hint-3">'+STEPS[3].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[3]?' show':'')+'" id="corr-3"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-3">'+(correctionShown[3]?correctionText[3]:'')+'</div></div>'
+    +'<div class="fb" id="fb-3"><span id="fbi-3"></span><div id="fbm-3"></div></div>';
+  return html;
+}
+window.e4Key=function(evt,el,i){
+  if(!el||el.getAttribute('aria-disabled')==='true'||e4Locked||transitionRunning){
+    return;
+  }
+  if(evt.key==='Enter'||evt.key===' '||evt.key==='Spacebar'){
+    evt.preventDefault();
+    validateE4(i);
+  }
+};
+window.validateE4=function(i){
+  if(solved[3]||transitionRunning||e4Locked) return;
+  e4Locked=true;
+  var letter=E4_PTS[e4pairIdx][0];
+  var cand=e4candidates[i];
+  var isCorrect=cand.letter===letter;
+  roomAttempts[3]=(roomAttempts[3]||0)+1;
+  var B=feedbackBlocks(3);
+  document.querySelectorAll('.e4-opt').forEach(function(c){ c.style.pointerEvents='none'; c.setAttribute('aria-disabled','true'); });
+  if(isCorrect){
+    sTrace();
+    cand.used=true;
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='Exact\u00a0! Ce point est align\u00e9 avec '+letter+' perpendiculairement \u00e0 l\u2019axe, \u00e0 la m\u00eame distance.';
+    setTimeout(function(){
+      if(e4pairIdx<E4_PTS.length-1){ e4pairIdx++; clearFeedback(3); correctionShown[3]=false; e4Locked=false; refreshMissionBody(3); }
+      else { if(!missionHadCorrection[3]) autonomousSuccesses++; stepSuccess(3); e4Locked=false; }
+    },700);
+  } else {
+    sBad();shakeStep(3);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    B.fbm.textContent='Ce n\u2019est pas le bon point. Compare la distance \u00e0 l\u2019axe et la hauteur.';
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[3]>=2){
+      correctionShown[3]=true; missionHadCorrection[3]=true;
+      correctionText[3]='Correction\u00a0: le point image de '+letter+' se trouve exactement en face du point d\u2019origine. Les deux points sont align\u00e9s perpendiculairement \u00e0 l\u2019axe et se trouvent \u00e0 la m\u00eame distance de celui-ci.';
+      B.corrx.innerHTML=correctionText[3];
+      B.corr.classList.add('show');
+      var correctIndex=e4candidates.findIndex(function(c){return c.letter===letter;});
+      var correctEl=document.querySelector('.e4-opt[data-i="'+correctIndex+'"]');
+      if(correctEl){ correctEl.setAttribute('fill','#6FA34A'); correctEl.setAttribute('stroke','#D9F2C8'); }
+      e4candidates[correctIndex].used=true;
+      setTimeout(function(){
+        e4Locked=false;
+        if(e4pairIdx<E4_PTS.length-1){ e4pairIdx++; clearFeedback(3); correctionShown[3]=false; refreshMissionBody(3); }
+        else { stepSuccess(3); }
+      },1800);
+    } else {
+      document.querySelectorAll('.e4-opt').forEach(function(c){ c.style.pointerEvents='auto'; c.setAttribute('aria-disabled','false'); });
+      e4Locked=false;
+      B.hint.innerHTML=STEPS[3].hint1;
+      showHintAfterError(3);
+    }
+  }
+};
+
+/* =====================================================================
+   ÉPREUVE 5 — restauration finale de la carte
+   ===================================================================== */
+var E5_AXIS=100;
+var E5_LEFT=[[35,30],[70,20],[80,60],[55,90],[25,80]];
+function e5MapSVG(kind){
+  var mirror;
+  if(kind==='ok') mirror=E5_LEFT.map(function(p){return reflectX(p,E5_AXIS);});
+  else if(kind==='shift') mirror=E5_LEFT.map(function(p){var r=reflectX(p,E5_AXIS); return [r[0],r[1]+16];});
+  else mirror=E5_LEFT.map(function(p){var r=reflectX(p,E5_AXIS); return [r[0]-14,r[1]];});
+  var inner=axisLine(E5_AXIS,5,105)+polylinePts(E5_LEFT,'#8DC63F',3,true)+polylinePts(mirror,'#D9B35F',3,true);
+  return svgWrap('0 0 200 110','Proposition de fragment de carte',null,inner,'aria-hidden="true" focusable="false"');
+}
+function e5Render(){
+  var order=shuffle([{id:'ok',ok:true},{id:'shift',ok:false},{id:'off',ok:false}]);
+  var html='<p class="room-question">Choisis la seule restauration o&ugrave; le fragment de carte est parfaitement sym&eacute;trique par rapport &agrave; l\u2019axe.</p>';
+  html+='<div class="plans-row" id="e5-cards">';
+  order.forEach(function(o){
+    html+='<button type="button" class="plan" data-ok="'+o.ok+'" aria-label="Proposition de restauration" onclick="validateE5(this)">'+e5MapSVG(o.id)+'<div class="plan-label">Proposition</div></button>';
+  });
+  html+='</div>';
+  html+='<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-4" aria-expanded="false" aria-controls="hint-4" onclick="toggleHint(4)">? Indice</button></div>'
+    +'<div class="hint" id="hint-4">'+STEPS[4].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[4]?' show':'')+'" id="corr-4"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-4">'+(correctionShown[4]?correctionText[4]:'')+'</div></div>'
+    +'<div class="fb" id="fb-4"><span id="fbi-4"></span><div id="fbm-4"></div></div>';
+  return html;
+}
+window.validateE5=function(btn){
+  if(solved[4]||transitionRunning) return;
+  var isCorrect=btn.getAttribute('data-ok')==='true';
+  roomAttempts[4]=(roomAttempts[4]||0)+1;
+  var B=feedbackBlocks(4);
+  document.querySelectorAll('#e5-cards .plan').forEach(function(b){ b.disabled=true; });
+  btn.classList.add(isCorrect?'correct':'wrong');
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='La restauration est exacte&nbsp;! Chaque point du trac\u00e9 reconstitu\u00e9 est l\u2019image sym\u00e9trique du point correspondant de l\u2019autre c\u00f4t\u00e9 de l\u2019axe.';
+    if(!missionHadCorrection[4]) autonomousSuccesses++;
+    stepSuccess(4);
+  } else {
+    sBad();shakeStep(4);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    B.fbm.textContent='Cette restauration n\u2019est pas exacte\u00a0: une partie du trac\u00e9 ne co\u00efnciderait pas avec l\u2019autre par pliage.';
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[4]>=2){
+      correctionShown[4]=true; missionHadCorrection[4]=true;
+      correctionText[4]='Correction\u00a0: dans une sym\u00e9trie axiale, chaque point et son image sont align\u00e9s perpendiculairement \u00e0 l\u2019axe et se trouvent \u00e0 la m\u00eame distance de celui-ci, sans d\u00e9calage.';
+      B.corrx.innerHTML=correctionText[4];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#e5-cards .plan').forEach(function(b){ if(b.getAttribute('data-ok')==='true') b.classList.add('correct'); });
+      stepSuccess(4);
+    } else {
+      document.querySelectorAll('#e5-cards .plan').forEach(function(b){ b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.hint.innerHTML=STEPS[4].hint1;
+      showHintAfterError(4);
+    }
+  }
+};
+/* =====================================================================
+   LES 5 ÉPREUVES DE RESTAURATION CARTOGRAPHIQUE
+   ===================================================================== */
+var STEPS=[
+ {ico:"&#128269;", name:"Épreuve 1&nbsp;: Vérifier les tracés", comp:"Reconnaître une symétrie axiale",
+  intro:"Plusieurs fragments de côtes ont été reconstitués. Identifie ceux qui respectent réellement la symétrie par rapport à l’axe central de la carte.",
+  hint1:"Un point et son image sont alignés perpendiculairement à l’axe et se trouvent à la même distance de celui-ci.",
+  frag:"&#128269;"},
+ {ico:"&#10010;", name:"Épreuve 2&nbsp;: Replacer les repères", comp:"Construire l’image d’un point",
+  intro:"Plusieurs repères maritimes ont disparu. Place chacun de leurs points images de l’autre côté de l’axe.",
+  hint1:"Avec un axe vertical, le point image se trouve à la même hauteur et à la même distance de l’axe que le point d’origine.",
+  frag:"&#10010;"},
+ {ico:"&#128204;", name:"Épreuve 3&nbsp;: Retrouver l’axe", comp:"Reconnaître un axe de symétrie",
+  intro:"L’axe central d’un fragment de carte a été effacé. Choisis l’axe qui permet aux deux parties du tracé de se superposer exactement par pliage.",
+  hint1:"Imagine que tu plies la carte le long de chaque axe proposé\u00a0: les deux parties doivent coïncider exactement.",
+  frag:"&#128204;"},
+ {ico:"&#128279;", name:"Épreuve 4&nbsp;: Associer les repères", comp:"Associer un point et son image",
+  intro:"Associe chaque repère maritime à son point image situé de l’autre côté de l’axe central.",
+  hint1:"Le segment reliant un point à son image est perpendiculaire à l’axe, et l’axe coupe ce segment en son milieu.",
+  frag:"&#128279;"},
+ {ico:"&#128506;&#65039;", name:"Épreuve 5&nbsp;: Restaurer la carte", comp:"Choisir la reconstruction symétrique",
+  intro:"Trois restaurations finales sont proposées. Choisis celle qui reconstitue exactement le fragment manquant de la carte maritime.",
+  hint1:"Vérifie que chaque point reconstruit est exactement en face de son modèle et à la même distance de l’axe.",
+  frag:"&#128506;&#65039;"}
+];
+var N=STEPS.length;
+var solved=[];for(var _i=0;_i<N;_i++)solved.push(false);
+var active=0;
+var totalSec=0,totalInt=null;
+var gameRunning=false;
+var validatedChallenges=0, autonomousSuccesses=0;
+var transitionRunning=false;
+var e2Locked=false, e4Locked=false;
+var roomAttempts={};
+var correctionShown=[false,false,false,false,false];
+var correctionText=['','','','',''];
+var missionHadCorrection=[false,false,false,false,false];
+
+/* =====================================================================
+   CHRONOMÈTRE — pause/reprise à la visibilité (règle permanente)
+   ===================================================================== */
+function timerTick(){
+  totalSec++;
+  var h=$("hud-timer");
+  if(h)h.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: '+solved.filter(Boolean).length+'/5 &middot; </span>\u23F1\uFE0F '+fmt(totalSec);
+}
+function pauseTimer(){ clearInterval(totalInt); totalInt=null; }
+function resumeTimer(){
+  if(!gameRunning) return;
+  clearInterval(totalInt);
+  totalInt=setInterval(timerTick,1000);
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){ pauseTimer(); } else { resumeTimer(); }
+});
+window.addEventListener("blur", pauseTimer);
+window.addEventListener("focus", function(){ if(!document.hidden) resumeTimer(); });
+
+function buildHudFrags(){
+  var h=$("hud-frags");if(!h)return;h.innerHTML="";
+  for(var i=0;i<N;i++){var s=document.createElement("span");s.className="hud-frag";s.id="hud-frag-"+i;s.innerHTML=STEPS[i].frag;h.appendChild(s);}
+}
+
+/* =====================================================================
+   OUTILS COMMUNS
+   ===================================================================== */
+function feedbackBlocks(mi){
+  return {fb:$('fb-'+mi),fbi:$('fbi-'+mi),fbm:$('fbm-'+mi),corr:$('corr-'+mi),corrx:$('corrx-'+mi),hint:$('hint-'+mi),hintbtn:$('hint-btn-'+mi)};
+}
+function clearFeedback(mi){
+  var B=feedbackBlocks(mi);
+  if(B.fb){ B.fb.className='fb'; }
+  if(B.corr){ B.corr.className='correction'; }
+  if(B.hint){ B.hint.classList.remove('show'); }
+  roomAttempts[mi]=0;
+}
+function shakeStep(mi){ var el=$('step-'+mi); if(el){ el.classList.add('shake'); setTimeout(function(){el.classList.remove('shake');},400); } }
+function refreshMissionBody(mi){
+  var body=$('body-'+mi);
+  if(!body) return;
+  body.innerHTML=bodyHTML(mi);
+}
+window.toggleHint=function(mi){
+  if(solved[mi]) return;
+  var el=$('hint-'+mi);
+  var willShow=!el.classList.contains('show');
+  if(willShow) sHint();
+  el.classList.toggle('show');
+  var button=$('hint-btn-'+mi);
+  if(button){
+    button.setAttribute('aria-expanded', el.classList.contains('show') ? 'true' : 'false');
+  }
+};
+function showHintAfterError(mi){
+  var hint=$('hint-'+mi);
+  if(!hint){
+    return;
+  }
+  hint.classList.add('show');
+  var button=$('hint-btn-'+mi);
+  if(button){
+    button.setAttribute('aria-expanded','true');
+  }
+}
+
+/* =====================================================================
+   CORPS DE CHAQUE ÉPREUVE
+   ===================================================================== */
+function bodyHTML(mi){
+  if(mi===0) return e1Render();
+  if(mi===1) return e2Render();
+  if(mi===2) return e3Render();
+  if(mi===3) return e4Render();
+  if(mi===4) return e5Render();
+  return '';
+}
+window.tryStep=function(mi){
+  if(transitionRunning) return;
+  if(mi===0) return e1Validate();
+};
+
+/* =====================================================================
+   MOTEUR GÉNÉRIQUE — construction dynamique des cartes d'épreuve
+   ===================================================================== */
+function build(){
+  var host=$("steps");host.innerHTML="";
+  STEPS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.name+'</div><div class="step-comp">'+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro" tabindex="-1" id="intro-'+mi+'">'+M.intro+'</div>';
+      if(!solved[mi]){
+        h+=bodyHTML(mi);
+      } else {
+        h+='<div style="text-align:center;color:var(--muted);padding:.6rem;">'+M.frag+' &Eacute;preuve r&eacute;ussie.</div>'
+          +'<div class="correction'+(correctionShown[mi]?' show':'')+'" id="corr-'+mi+'"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-'+mi+'">'+(correctionShown[mi]?correctionText[mi]:'')+'</div></div>'
+          +'<div class="fb show ok" id="fb-'+mi+'"><span id="fbi-'+mi+'">\u2705</span><div id="fbm-'+mi+'"><b style="color:var(--green)">Bravo&#8201;!</b><br>'+M.frag+' \u00c9l\u00e9ment cartographique restaur\u00e9&#8201;!</div></div>';
+      }
+    } else {
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine l\u2019&eacute;preuve pr\u00e9c\u00e9dente pour d\u00e9bloquer celle-ci.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+  });
+  updateCrest();updateProg();
+}
+
+function stepSuccess(mi){
+  if(solved[mi]){
+    return;
+  }
+  solved[mi]=true;
+  validatedChallenges++;
+  sFrag();
+  $('step-'+mi).classList.add('solved');
+  var hb=$('hint-btn-'+mi); if(hb) hb.disabled=true;
+  var hbox=$('hint-'+mi); if(hbox) hbox.classList.remove('show');
+  updateCrest();updateProg();
+  var body=$('body-'+mi);
+  if(body && !$('next-'+mi)){
+    var lab=(active<N-1)?'&Eacute;preuve suivante &#8594;':'Finaliser la restauration &#8594;';
+    body.insertAdjacentHTML('beforeend','<div style="text-align:center;margin-top:1rem;"><button type="button" class="btn btn-try" id="next-'+mi+'" onclick="goNext('+mi+')">'+lab+'</button></div>');
+  }
+}
+function goNext(mi){
+  if(transitionRunning) return;
+  sClick();
+  var nb=$('next-'+mi);if(nb){nb.disabled=true;nb.style.display='none';}
+  if(active<N-1){
+    active++;
+    runScan(active,function(){
+      build();
+      var el=$('step-'+active);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+      var introEl=$('intro-'+active); if(introEl){ introEl.setAttribute('tabindex','-1'); introEl.focus({preventScroll:true}); }
+    });
+  } else {
+    openFinale();
+  }
+}
+function updateCrest(){
+  STEPS.forEach(function(M,mi){
+    var f=$('frag-'+mi),hf=$('hud-frag-'+mi);
+    if(solved[mi]){ if(f){f.innerHTML=M.frag;f.classList.add('found');} if(hf){hf.classList.add('got');} }
+    else{ if(f){f.textContent='?';f.classList.remove('found');} if(hf){hf.classList.remove('got');} }
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/N*100);
+  var lab=$('hud-prog-label'),fill=$('hud-prog-fill');
+  if(lab)lab.innerHTML='Carte restaur&eacute;e&nbsp;: '+pct+'&#8201;%';
+  if(fill)fill.style.width=pct+'%';
+}
+
+/* =====================================================================
+   ÉCRAN FINAL — minimal, conforme au cahier des charges
+   ===================================================================== */
+function autonomyMessage(n){
+  if(n===5) return 'Excellent&#8201;! Tu as r\u00e9alis\u00e9 toutes les \u00e9preuves sans correction.';
+  if(n===3||n===4) return 'Tr\u00e8s bon travail&#8201;! Tu as r\u00e9alis\u00e9 la majorit\u00e9 des \u00e9preuves de mani\u00e8re autonome.';
+  if(n===1||n===2) return 'Bravo pour ta pers\u00e9v\u00e9rance&#8201;! Les corrections t\u2019ont aid\u00e9 \u00e0 restaurer la carte.';
+  return 'Tu as termin\u00e9 la restauration avec l\u2019aide des corrections. Relis les d\u00e9marches avant de recommencer.';
+}
+function openFinale(){
+  gameRunning=false;
+  clearInterval(totalInt);
+  $('hud-dial').innerHTML='&#128506;&#65039;';
+  setTimeout(function(){
+    var finalTime=$('finale-time');
+    if(finalTime){ finalTime.textContent='\u23F1\uFE0F '+fmtLong(totalSec); }
+    var autonomy=$('finale-autonomy');
+    if(autonomy){ autonomy.innerHTML='<strong>Missions r\u00e9alis\u00e9es sans correction\u00a0:</strong> '+autonomousSuccesses+' / 5<br>'+autonomyMessage(autonomousSuccesses); }
+    $('finale').classList.add('show');
+    sWin();
+  },300);
+}
+
+/* =====================================================================
+   DÉMARRAGE / RECOMMENCER
+   ===================================================================== */
+function beginGame(){
+  var c=ac();if(c&&c.state==='suspended')c.resume();
+  $('start-screen').style.display='none';
+  $('game').style.display='';
+  buildHudFrags();
+  $('hud-bar').classList.add('show');
+  document.body.classList.add('playing');
+  totalSec=0;clearInterval(totalInt);gameRunning=true;
+  var ht=$('hud-timer');if(ht)ht.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: 0/5 &middot; </span>\u23F1\uFE0F 00:00';
+  totalInt=setInterval(timerTick,1000);
+  sPaper();
+  build();
+}
+function restartAll(){
+  gameRunning=false;
+  clearInterval(totalInt);totalSec=0;
+  transitionRunning=false;
+  e2Locked=false; e4Locked=false;
+  solved=[];for(var i=0;i<N;i++)solved.push(false);
+  active=0; roomAttempts={}; validatedChallenges=0; autonomousSuccesses=0;
+  correctionShown=[false,false,false,false,false]; correctionText=['','','','','']; missionHadCorrection=[false,false,false,false,false];
+  e1Selected={}; e2idx=0; e4pairIdx=0; e4candidates=[];
+  $('finale').classList.remove('show');
+  var finalTime=$('finale-time'); if(finalTime){ finalTime.textContent='\u23F1\uFE0F --:--'; }
+  var finalAutonomy=$('finale-autonomy'); if(finalAutonomy){ finalAutonomy.innerHTML=''; }
+  var finalGrade=$('finale-grade'); if(finalGrade){ finalGrade.textContent='Mission accomplie'; }
+  var ov=$('scan-overlay');if(ov)ov.classList.remove('show');
+  $('hud-bar').classList.remove('show');
+  document.body.classList.remove('playing');
+  $('game').style.display='none';
+  $('start-screen').style.display='';
+  $('hud-dial').innerHTML='&#128506;&#65039;';
+  var ht=$('hud-timer');if(ht)ht.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: 0/5 &middot; </span>\u23F1\uFE0F 00:00';
+  for(var j=0;j<N;j++){var hf=$('hud-frag-'+j);if(hf)hf.classList.remove('got');}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
