@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths — Semaine 7 — Jour 2 — Je relève le défi — Reconnaître la nature d'un triangle</title>
+<style>
+:root{
+  --day-color:#0EA5A8; --day-dark:#0B6E70; --day-light:#E9FBFA; --day-border:#7DD9D6;
+  --gold:#C9A227; --gold-d:#8A6414;
+  --bg:#0F2438; --panel:#123A52; --panel2:#164A63;
+  --line:#2E5C74; --text:#F2F8F6; --muted:#AFC9CE;
+  --green:#6FA34A; --err:#D9534F; --neon:#7DD9D6;
+  --copper:#B98A4E; --brass:#D9B35F;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 14px rgba(14,165,168,.32), 0 0 34px rgba(14,165,168,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#0A1B2B 0%, #0F2438 50%, #0B2030 100%);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#D9B35F 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#D9B35F 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#08202E;font-family:Arial,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:Arial,sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.15;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.16;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#0EA5A8;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#3A8FA3;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#1D6F84;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#C9A227;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(8,29,45,.96);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.3rem;}
+.hud-frag{width:1.6rem;height:1.8rem;border-radius:5px;background:#10293C;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#6C93A0;transition:all .4s;}
+.hud-frag.got{background:rgba(14,165,168,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:Arial,sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#10293C;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Courier New',monospace;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#10293C;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(14,165,168,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:48px;}.hud-bar{gap:.5rem;padding:.45rem .5rem;}.hud-frag{width:1.3rem;height:1.6rem;font-size:.7rem;}.hud-dial{display:none;}.hud-timer{font-size:.8rem;padding:.2rem .4rem;}.hud-timer .lbl{display:none;}}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:620px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:var(--text);line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-note{margin:.9rem 0 .2rem;background:#10293C;border:1.5px dashed var(--day-border);border-radius:10px;padding:.8rem;text-align:center;font-size:.86rem;color:var(--day-light);}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#08202E;
+  font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.crest{display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:Arial,sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.1rem;height:2.1rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#10293C;border:1.5px solid var(--line);font-size:1rem;color:#6C93A0;transition:all .5s;}
+.frag.found{background:rgba(14,165,168,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#10293C;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:Arial,sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#10293C;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+
+.room-question{text-align:center;font-weight:700;color:var(--text);margin:.6rem 0;font-size:.98rem;}
+.rotor-figure svg,.mfig svg{max-width:100%;height:auto;}
+.mfig{text-align:center;margin-bottom:.6rem;}
+.compass-tool{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;background:#10293C;border-radius:12px;padding:1rem;margin-top:.6rem;border:1px solid var(--line);}
+.compass-group{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.compass-label{font-family:Arial,sans-serif;font-weight:700;font-size:.82rem;color:var(--muted);margin-right:.2rem;}
+.compass-btn{min-width:48px;min-height:44px;padding:.5rem .9rem;border:2px solid var(--copper);border-radius:8px;background:var(--panel2);color:var(--text);font-weight:800;font-family:'Courier New',monospace;cursor:pointer;font-size:.92rem;}
+.compass-btn:hover{background:#1D5570;}
+.compass-btn.selected{background:linear-gradient(135deg,var(--brass),var(--gold));border-color:var(--gold);color:#3b2a06;}
+.compass-btn:disabled{opacity:.5;cursor:default;}
+.mcq-list{display:flex;flex-direction:column;gap:.6rem;margin-top:.8rem;}
+.mcq-opt{width:100%;text-align:left;padding:.8rem 1.1rem;border:2px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;font-size:.92rem;font-weight:600;color:var(--text);transition:border-color .15s,background .15s;min-height:44px;}
+.mcq-opt:hover:not(:disabled){border-color:var(--day-color);}
+.mcq-opt.selected{border-color:var(--day-color);background:rgba(14,165,168,.14);}
+.mcq-opt.correct{border-color:var(--green);background:rgba(111,163,74,.16);color:#D9F2C8;}
+.mcq-opt.wrong{border-color:var(--err);background:rgba(217,83,79,.14);color:#FFD0C9;}
+.mcq-opt.locked,.mcq-opt:disabled{cursor:default;}
+.plans-row{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:.6rem;}
+.plan{width:170px;background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:.7rem;cursor:pointer;text-align:center;min-height:44px;}
+.plan:hover:not(:disabled){border-color:var(--day-color);}
+.plan.selected{border-color:var(--day-color);background:rgba(14,165,168,.14);}
+.plan.correct{border-color:var(--green);background:rgba(111,163,74,.16);}
+.plan.wrong{border-color:var(--err);background:rgba(217,83,79,.14);}
+.plan.locked,.plan:disabled{cursor:default;}
+.plan-label{font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted);margin-top:.5rem;font-weight:700;}
+.just-label{text-align:center;font-weight:700;color:var(--day-color);margin-top:.9rem;font-size:.88rem;}
+.input-row{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:.8rem 0;}
+.cell-in{border:2px solid var(--line);border-radius:8px;background:#10293C;color:var(--text);font-family:'Courier New',monospace;font-size:16px;font-weight:600;text-align:center;padding:.5rem;outline:none;transition:border-color .2s,background .2s;min-height:46px;width:90px;}
+.cell-in:focus{border-color:var(--day-color);}
+.cell-in.ok{border-color:var(--green);background:rgba(111,163,74,.14);color:#D9F2C8;}
+.cell-in.ko{border-color:var(--err);background:rgba(217,83,79,.12);color:#FFD0C9;}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:Arial,sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#08202E;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#12384A;border:1.5px dashed var(--day-border);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#DDF8F6;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(111,163,74,.14);border:1.5px solid var(--green);color:#D9F2C8;}
+.fb.ko{background:rgba(217,83,79,.12);border:1.5px solid var(--err);color:#FFD0C9;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#f0dca0;}
+.correction{margin-top:.8rem;background:#10293C;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-family:Arial,sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--day-color);margin-bottom:.4rem;}
+.correction-x{font-size:clamp(.8rem,2.4vw,.88rem);color:var(--day-light);line-height:1.6;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+body.playing .sound-btn{top:58px;}
+@media(max-width:600px){body.playing .sound-btn{top:54px;}
+  .tools{flex-direction:column;}
+  .btn{width:100%;}
+}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(8,29,45,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:Arial,sans-serif;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(15,55,75,.97), rgba(5,20,32,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#10293C;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'Courier New',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:#10293C;}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(14,165,168,.3) 0%, rgba(14,165,168,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(14,165,168,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.4rem;margin:.8rem 0;flex-wrap:wrap;}
+.finale-crest .fc{width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(14,165,168,.16);border:1.5px solid var(--day-color);font-size:1.1rem;animation:pop .5s both;}
+.finale-title{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,5.6vw,2rem);color:var(--day-color);text-shadow:0 1px 0 rgba(184,112,10,.25);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Courier New',monospace;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#D9F2C8;margin-bottom:.6rem;}
+.finale-grade{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#08202E;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:var(--day-light);font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-reveal{background:#10293C;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:var(--day-light);line-height:1.7;}
+.finale-reveal b{color:var(--day-color);font-family:Arial,sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#08202E;box-shadow:var(--glow);font-family:Arial,sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+.seg-hit:focus,.seg-hit:focus-visible{outline:3px solid #FACC15;outline-offset:3px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button type="button" class="sound-btn" id="sound-btn" onclick="toggleSound()" aria-pressed="true" aria-label="Activer ou couper le son" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg" role="status" aria-live="polite"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Analyse des relevés&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Mise à jour du registre de classement</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128506;&#65039;</span>
+  <div class="hud-frags" id="hud-frags"></div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Construction de la carte&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">Missions validées&nbsp;: 0/5 &middot; </span>&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#128451;&#65039;</div>
+    <div class="finale-crest" id="finale-crest"></div>
+    <div class="finale-title">MISSION ACCOMPLIE&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub">&#127881; Les cartes sont archiv&eacute;es&#8201;! Tu as identifi&eacute; la nature de chaque triangle, compar&eacute; les angles n&eacute;cessaires et class&eacute; toutes les cartes marines dans le bon casier.</div>
+    <div class="finale-reveal">
+      <b>&#128220; Bilan de la mission</b>
+      Rectangle, isoc&egrave;le, &eacute;quilat&eacute;ral ou quelconque&nbsp;: chaque carte a &eacute;t&eacute; class&eacute;e gr&acirc;ce aux angles et aux longueurs relev&eacute;s.
+      <div id="finale-autonomy" style="margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--line);"></div>
+    </div>
+    <button type="button" class="btn-restart" onclick="restartAll()">&#8635; Rejouer le d&eacute;fi</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f5a623"></span>
+      Pazapa &middot; Maths &middot; 6e
+    </div>
+    <div class="week">Semaine 7 — Jour 2</div>
+    <div class="title">&#127919; Je rel&egrave;ve le <span class="hl">d&eacute;fi</span></div>
+    <div class="subtitle">Reconna&icirc;tre la nature d&rsquo;un triangle &middot; Bureau de classement des cartes marines</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#129517;</div>
+    <div class="start-mission">
+      <b>&#128203; Mission du jour&nbsp;:</b> Les explorateurs viennent de rapporter plusieurs cartes repr&eacute;sentant des &icirc;les triangulaires. Avant de les archiver, le cartographe doit identifier la nature de chaque triangle, comparer certains angles, v&eacute;rifier les mesures et classer correctement toutes les cartes.
+      <br><br>
+      &Agrave; toi de v&eacute;rifier chaque carte marine et de la ranger dans le bon casier.
+      <div class="start-note">&#128220; Cinq missions t&rsquo;attendent pour terminer le classement. Dur&eacute;e indicative&nbsp;: 6 minutes (le chronom&egrave;tre est informatif, sans p&eacute;nalit&eacute;).</div>
+    </div>
+    <button type="button" class="btn-start" onclick="beginGame()">&#9654;&#65039; Commencer la mission</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">Casiers class&eacute;s&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+      <div class="frag" id="frag-4">?</div>
+    </div>
+    <div id="steps"></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* =====================================================================
+   SONS — Web Audio API uniquement, ambiance cartographie
+   ===================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+0.04);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+dur-0.05);
+  g.gain.linearRampToValueAtTime(0.0001,t+dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+/* clic sec — crayon de cartographe sur le papier */
+function sClick(){if(!soundOn)return;beep(720,0,0.035,"square",0.07);beep(500,0.02,0.03,"triangle",0.04);}
+/* erreur discr\u00e8te — mesure qui ne correspond pas */
+function sBad(){if(!soundOn)return;beep(260,0,0.09,"triangle",0.1);beep(196,0.07,0.13,"triangle",0.08);}
+/* \u00e9l\u00e9ment cartographique obtenu — chime + petit tampon de validation */
+function sFrag(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.05,0.09,900,200,c.currentTime);beep(784,0.02,0.08,"square",0.14);beep(1047,0.09,0.12,"triangle",0.18);beep(1568,0.17,0.16,"triangle",0.18);}
+/* pivot de boussole — transition entre deux missions */
+function sTransition(){if(!soundOn)return;beep(700,0,0.05,"sine",0.09);beep(1050,0.06,0.06,"sine",0.11);beep(1400,0.12,0.1,"sine",0.13);}
+/* tintement de boussole — indice */
+function sHint(){if(!soundOn)return;beep(1568,0,0.08,"sine",0.09);beep(2093,0.08,0.12,"sine",0.08);}
+
+/* petit clic de r\u00e8gle graduée — glissement du point le long de la r\u00e8gle */
+function sRuler(){if(!soundOn)return;beep(1500,0,0.025,"square",0.06);}
+/* froissement l\u00e9ger de carte — d\u00e9pliage au lancement */
+function sPaper(){if(!soundOn)return;noise(0.16,0.1,2600,700,ac()?ac().currentTime:0);}
+/* tintement de boussole — s\u00e9lection centre/rayon du compas */
+function sCompass(){if(!soundOn)return;beep(1760,0,0.12,"sine",0.11);beep(2093,0.08,0.16,"sine",0.09);}
+/* son de trac\u00e9 — segment ou arc dessin\u00e9 sur la carte */
+function sTrace(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.22,0.07,1800,400,c.currentTime);beep(440,0.02,0.16,"triangle",0.08);}
+/* fanfare finale — pivot de boussole puis carte achev\u00e9e */
+function sWin(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.14,0.08,2200,500,c.currentTime);[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,0.15+i*0.12,0.24,"triangle",0.2);});}
+function toggleSound(){
+  soundOn=!soundOn;
+  var b=$("sound-btn");
+  b.innerHTML=soundOn?"&#128266;":"&#128263;";
+  b.classList.toggle("off",!soundOn);
+  b.setAttribute("aria-pressed",soundOn?"true":"false");
+  if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();
+}
+
+/* =====================================================================
+   MESSAGES ET TRANSITIONS
+   ===================================================================== */
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2500);}
+
+var SCAN_SUB=["Analyse des angles\u2026","Comparaison des longueurs\u2026","Identification de la nature\u2026","V\u00e9rification de la propri\u00e9t\u00e9\u2026","Classement dans les casiers\u2026"];
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  if(!ov){done&&done();return;}
+  if(txt)txt.innerHTML=SCAN_SUB[mi]||"Analyse en cours\u2026";
+  if(sub)sub.textContent="Mise \u00e0 jour du registre de classement";
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");sTransition();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*22+14;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");done&&done();},220);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },90);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+
+/* =====================================================================
+   GÉOMÉTRIE — triangle de repérage (inchangée)
+   ===================================================================== */
+function polar(cx,cy,r,deg){var rad=deg*Math.PI/180;return [cx+r*Math.cos(rad), cy-r*Math.sin(rad)];}
+function arcPoly(cx,cy,r,deg1,deg2,color,width){
+  var steps=28, pts=[];
+  for(var i=0;i<=steps;i++){var d=deg1+(deg2-deg1)*(i/steps);var p=polar(cx,cy,r,d);pts.push(p[0].toFixed(1)+','+p[1].toFixed(1));}
+  return '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+(color||'#F59E0B')+'" stroke-width="'+(width||3)+'"/>';
+}
+function dotLabel(x,y,label,color){return '<text x="'+x+'" y="'+y+'" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="'+(color||'#F2F8F6')+'">'+label+'</text>';}
+function pointDot(x,y,r,color){return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r||6)+'" fill="'+(color||'#D9B35F')+'" stroke="#F2F8F6" stroke-width="1.5"/>';}
+
+/* ---- Construction d'un triangle à partir de deux angles (A et B), base fixe ---- */
+function triFromAngles(angleA,angleB,base,Ax,Ay){
+  Ax=Ax||150; Ay=Ay||320;
+  var A=[Ax,Ay], B=[Ax+base,Ay];
+  var ra=angleA*Math.PI/180, rb=angleB*Math.PI/180;
+  var d1=[Math.cos(ra),-Math.sin(ra)];
+  var d2=[-Math.cos(rb),-Math.sin(rb)];
+  var denom = d1[0]*(-d2[1]) - d1[1]*(-d2[0]);
+  var dx=B[0]-A[0], dy=B[1]-A[1];
+  var t = (dx*(-d2[1]) - dy*(-d2[0]))/denom;
+  var C=[A[0]+t*d1[0], A[1]+t*d1[1]];
+  return {A:A,B:B,C:C};
+}
+/* ---- Construction d'un triangle à partir de trois côtés (AB, AC, BC) ---- */
+function triFromSides(lenAB,lenAC,lenBC,Ax,Ay){
+  Ax=Ax||150; Ay=Ay||320;
+  var A=[Ax,Ay], B=[Ax+lenAB,Ay];
+  var xrel=(lenAC*lenAC - lenBC*lenBC + lenAB*lenAB)/(2*lenAB);
+  var h=Math.sqrt(Math.max(1,lenAC*lenAC - xrel*xrel));
+  var C=[A[0]+xrel, A[1]-h];
+  return {A:A,B:B,C:C};
+}
+/* ---- Rendu générique d'un triangle avec libellés d'angles et/ou de côtés ---- */
+function triangleSVG(opts){
+  var T=opts.tri, A=T.A,B=T.B,C=T.C;
+  var lab=opts.labels||['A','B','C'];
+  var pad=70;
+  var minX=Math.min(A[0],B[0],C[0])-pad, maxX=Math.max(A[0],B[0],C[0])+pad;
+  var minY=Math.min(A[1],B[1],C[1])-pad, maxY=Math.max(A[1],B[1],C[1])+pad;
+  var vbW=maxX-minX, vbH=maxY-minY;
+  var viewBox=opts.viewBox||(minX+' '+minY+' '+vbW+' '+vbH);
+  var svg='<svg viewBox="'+viewBox+'" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" role="img" aria-labelledby="'+opts.id+'-t '+opts.id+'-d"><title id="'+opts.id+'-t">'+(opts.title||'Triangle')+'</title><desc id="'+opts.id+'-d">'+(opts.desc||'')+'</desc>';
+  svg+='<rect x="'+minX+'" y="'+minY+'" width="'+vbW+'" height="'+vbH+'" rx="18" fill="#10293C" stroke="#0EA5A8" stroke-width="2" opacity="0.4"/>';
+  svg+='<polygon points="'+A[0]+','+A[1]+' '+B[0]+','+B[1]+' '+C[0]+','+C[1]+'" fill="rgba(14,165,168,.08)" stroke="#7DD9D6" stroke-width="4"/>';
+  if(opts.tickAC){ svg+=tickMark(A,C); }
+  if(opts.tickBC){ svg+=tickMark(B,C); }
+  if(opts.tickAB){ svg+=tickMark(A,B); }
+  if(opts.rightAt){ svg+=rightAngleMark(opts.rightAt==='A'?A:opts.rightAt==='B'?B:C, opts.rightAt==='A'?[B,C]:opts.rightAt==='B'?[A,C]:[A,B]); }
+  // libellés des sommets
+  var offA=labelOffset(A,B,C), offB=labelOffset(B,A,C), offC=labelOffset(C,A,B);
+  svg+=vertexLabel(A,offA,lab[0]);
+  svg+=vertexLabel(B,offB,lab[1]);
+  svg+=vertexLabel(C,offC,lab[2]);
+  // libellés d'angles (si fournis) : opts.angleLabels = [txtA, txtB, txtC] (null = rien)
+  if(opts.angleLabels){
+    var bis=[bisectorPoint(A,B,C),bisectorPoint(B,A,C),bisectorPoint(C,A,B)];
+    if(opts.angleLabels[0]!=null) svg+=angleText(bis[0],opts.angleLabels[0]);
+    if(opts.angleLabels[1]!=null) svg+=angleText(bis[1],opts.angleLabels[1]);
+    if(opts.angleLabels[2]!=null) svg+=angleText(bis[2],opts.angleLabels[2]);
+  }
+  // libellés de côtés (si fournis) : opts.sideLabels = {AB:txt, AC:txt, BC:txt}
+  if(opts.sideLabels){
+    if(opts.sideLabels.AB) svg+=midText(A,B,opts.sideLabels.AB,12);
+    if(opts.sideLabels.AC) svg+=midText(A,C,opts.sideLabels.AC,-12);
+    if(opts.sideLabels.BC) svg+=midText(B,C,opts.sideLabels.BC,12);
+  }
+  svg+='</svg>';
+  return svg;
+}
+function labelOffset(P,Q,R){
+  var mx=(Q[0]+R[0])/2, my=(Q[1]+R[1])/2;
+  var dx=P[0]-mx, dy=P[1]-my;
+  var d=Math.hypot(dx,dy)||1;
+  return [dx/d*22, dy/d*22-2];
+}
+function vertexLabel(P,off,txt){
+  return '<circle cx="'+P[0].toFixed(1)+'" cy="'+P[1].toFixed(1)+'" r="5" fill="#D9B35F" stroke="#F2F8F6" stroke-width="1.3"/>'
+    +'<text x="'+(P[0]+off[0]).toFixed(1)+'" y="'+(P[1]+off[1]).toFixed(1)+'" font-family="Arial,sans-serif" font-weight="800" font-size="17" fill="#F2F8F6" text-anchor="middle">'+txt+'</text>';
+}
+function bisectorPoint(P,Q,R,minClearance){
+  minClearance=minClearance||18;
+  var v1=[Q[0]-P[0],Q[1]-P[1]], v2=[R[0]-P[0],R[1]-P[1]];
+  var m1=Math.hypot(v1[0],v1[1])||1, m2=Math.hypot(v2[0],v2[1])||1;
+  var u1=[v1[0]/m1,v1[1]/m1], u2=[v2[0]/m2,v2[1]/m2];
+  var b=[u1[0]+u2[0],u1[1]+u2[1]];
+  var mb=Math.hypot(b[0],b[1])||1;
+  var dot=Math.max(-1,Math.min(1,u1[0]*u2[0]+u1[1]*u2[1]));
+  var angle=Math.acos(dot);
+  var half=Math.max(angle/2, 0.09);
+  var dist=Math.min(90, Math.max(34, minClearance/Math.sin(half)));
+  return [P[0]+b[0]/mb*dist, P[1]+b[1]/mb*dist];
+}
+function angleText(pt,txt){
+  return '<text x="'+pt[0].toFixed(1)+'" y="'+pt[1].toFixed(1)+'" font-family="Courier New,monospace" font-weight="800" font-size="15" fill="#7DD9D6" text-anchor="middle">'+txt+'</text>';
+}
+function midText(P,Q,txt,perp){
+  var mx=(P[0]+Q[0])/2, my=(P[1]+Q[1])/2;
+  var dx=Q[0]-P[0], dy=Q[1]-P[1]; var len=Math.hypot(dx,dy)||1;
+  var nx=-dy/len, ny=dx/len;
+  var x=mx+nx*perp, y=my+ny*perp;
+  return '<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" font-family="Courier New,monospace" font-weight="800" font-size="14" fill="#D9B35F" text-anchor="middle">'+txt+'</text>';
+}
+function tickMark(P,Q){
+  var mx=(P[0]+Q[0])/2, my=(P[1]+Q[1])/2;
+  var dx=Q[0]-P[0], dy=Q[1]-P[1]; var len=Math.hypot(dx,dy)||1;
+  var nx=-dy/len*7, ny=dx/len*7;
+  return '<line x1="'+(mx-nx).toFixed(1)+'" y1="'+(my-ny).toFixed(1)+'" x2="'+(mx+nx).toFixed(1)+'" y2="'+(my+ny).toFixed(1)+'" stroke="#D9B35F" stroke-width="3"/>';
+}
+function rightAngleMark(P,other){
+  var Q=other[0],R=other[1];
+  var v1=[Q[0]-P[0],Q[1]-P[1]], v2=[R[0]-P[0],R[1]-P[1]];
+  var m1=Math.hypot(v1[0],v1[1])||1, m2=Math.hypot(v2[0],v2[1])||1;
+  var u1=[v1[0]/m1*16,v1[1]/m1*16], u2=[v2[0]/m2*16,v2[1]/m2*16];
+  var p1=[P[0]+u1[0],P[1]+u1[1]], p2=[P[0]+u1[0]+u2[0],P[1]+u1[1]+u2[1]], p3=[P[0]+u2[0],P[1]+u2[1]];
+  return '<polyline points="'+p1[0].toFixed(1)+','+p1[1].toFixed(1)+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1)+' '+p3[0].toFixed(1)+','+p3[1].toFixed(1)+'" fill="none" stroke="#F2F8F6" stroke-width="2"/>';
+}
+/* ---- Petite carte de classement (mission 5) ---- */
+function classCardSVG(vals,unit){
+  var svg='<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" aria-hidden="true" focusable="false">';
+  svg+='<rect x="8" y="8" width="204" height="134" rx="10" fill="#10293C" stroke="#D9B35F" stroke-width="3"/>';
+  vals.forEach(function(v,i){svg+='<text x="110" y="'+(48+i*32)+'" text-anchor="middle" font-family="Courier New,monospace" font-weight="800" font-size="20" fill="#F2F8F6">'+v+(unit||'')+'</text>';});
+  svg+='</svg>';
+  return svg;
+}
+/* =====================================================================
+   LES 5 MISSIONS DU BUREAU DE CLASSEMENT
+   ===================================================================== */
+var NATURE_OPTS=[{v:'rectangle',t:'Rectangle'},{v:'isocele',t:'Isoc\u00e8le'},{v:'equilateral',t:'\u00c9quilat\u00e9ral'},{v:'quelconque',t:'Quelconque'}];
+
+var STEPS=[
+ {ico:"&#128207;", name:"Mission 1&nbsp;: Angles connus", comp:"Reconna\u00eetre la nature gr\u00e2ce aux angles",
+  intro:"Deux cartes indiquent chacune deux angles d\u2019un triangle. Calcule l\u2019angle manquant, puis identifie la nature du triangle.",
+  hint1:"La somme des trois angles d\u2019un triangle vaut toujours 180&deg;.",
+  frag:"&#128207;"},
+ {ico:"&#128209;", name:"Mission 2&nbsp;: Longueurs connues", comp:"Reconna\u00eetre la nature gr\u00e2ce aux longueurs",
+  intro:"Cinq cartes indiquent les trois longueurs d\u2019un triangle. Observe-les pour identifier sa nature.",
+  hint1:"Compare les trois longueurs deux \u00e0 deux&nbsp;: sont-elles toutes diff\u00e9rentes, deux \u00e9gales, ou toutes les trois \u00e9gales&nbsp;?",
+  frag:"&#128209;"},
+ {ico:"&#129517;", name:"Mission 3&nbsp;: Trois angles donn\u00e9s", comp:"Reconna\u00eetre la nature gr\u00e2ce aux angles",
+  intro:"Ces cartes indiquent directement les trois angles du triangle. Identifie sa nature.",
+  hint1:"Un triangle rectangle poss\u00e8de un angle qui mesure exactement 90&deg;.",
+  frag:"&#129517;"},
+ {ico:"&#9878;&#65039;", name:"Mission 4&nbsp;: Comparer des angles", comp:"Utiliser la propri\u00e9t\u00e9 du triangle isoc\u00e8le",
+  intro:"Ce triangle poss\u00e8de deux c\u00f4t\u00e9s codés égaux. Compare les angles \u2220BAC et \u2220CBA, puis explique pourquoi.",
+  hint1:"Dans un triangle isoc\u00e8le, les deux angles \u00e0 la base ont la m\u00eame mesure.",
+  frag:"&#9878;&#65039;"},
+ {ico:"&#128451;&#65039;", name:"Mission finale&nbsp;: Classement des cartes", comp:"Classer les triangles selon leur nature",
+  intro:"Range chaque carte dans le bon casier&nbsp;: triangles rectangles, triangles isoc\u00e8les non \u00e9quilat\u00e9raux, triangles \u00e9quilat\u00e9raux ou triangles quelconques. Pour ce classement, les triangles \u00e9quilat\u00e9raux doivent \u00eatre plac\u00e9s dans leur casier sp\u00e9cifique.",
+  hint1:"Rep\u00e8re d\u2019abord les triangles rectangles et \u00e9quilat\u00e9raux. Dans ce classement, un triangle est rang\u00e9 comme isoc\u00e8le lorsqu\u2019il poss\u00e8de exactement deux c\u00f4t\u00e9s \u00e9gaux.",
+  frag:"&#128451;&#65039;"}
+];
+var N=STEPS.length;
+var solved=[];for(var _i=0;_i<N;_i++)solved.push(false);
+var active=0;
+var totalSec=0,totalInt=null;
+var gameRunning=false;
+var validatedChallenges=0, autonomousSuccesses=0;
+var roomAttempts={};
+var correctionShown=[false,false,false,false,false];
+var correctionText=['','','','',''];
+var missionHadCorrection=[false,false,false,false,false];
+
+/* =====================================================================
+   CHRONOMÈTRE — pause/reprise à la visibilité (règle permanente)
+   ===================================================================== */
+function timerTick(){
+  totalSec++;
+  var h=$("hud-timer");
+  if(h)h.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: '+solved.filter(Boolean).length+'/5 &middot; </span>\u23F1\uFE0F '+fmt(totalSec);
+}
+function pauseTimer(){ clearInterval(totalInt); totalInt=null; }
+function resumeTimer(){
+  if(!gameRunning) return;
+  clearInterval(totalInt);
+  totalInt=setInterval(timerTick,1000);
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){ pauseTimer(); } else { resumeTimer(); }
+});
+window.addEventListener("blur", pauseTimer);
+window.addEventListener("focus", function(){ if(!document.hidden) resumeTimer(); });
+
+function buildHudFrags(){
+  var h=$("hud-frags");if(!h)return;h.innerHTML="";
+  for(var i=0;i<N;i++){var s=document.createElement("span");s.className="hud-frag";s.id="hud-frag-"+i;s.innerHTML=STEPS[i].frag;h.appendChild(s);}
+}
+
+/* =====================================================================
+   DONNÉES DES 5 MISSIONS (issues des exercices fournis, inchangées)
+   ===================================================================== */
+var M1_CARDS=[
+  {a:23,b:67,missing:90,nature:'rectangle'},
+  {a:44,b:68,missing:68,nature:'isocele'}
+];
+var M2_CARDS=[
+  {ab:5,ac:6,bc:6,labels:['A','B','C'],nature:'isocele'},
+  {ab:8,ac:5,bc:8,labels:['D','E','F'],nature:'isocele'},
+  {ab:7,ac:7,bc:7,labels:['I','J','K'],nature:'equilateral'},
+  {ab:12,ac:14,bc:9,labels:['P','Q','O'],nature:'quelconque'},
+  {ab:2,ac:3,bc:4,labels:['U','V','W'],nature:'quelconque'}
+];
+var M3_CARDS=[
+  {a:50,b:90,c:40,nature:'rectangle'},
+  {a:65,b:25,c:90,nature:'rectangle'}
+];
+var M5_CARDS=[
+  {vals:['23°','67°','90°'],drawer:'rect'},
+  {vals:['44°','68°','68°'],drawer:'iso'},
+  {vals:['5 cm','6 cm','6 cm'],drawer:'iso'},
+  {vals:['8 cm','5 cm','8 cm'],drawer:'iso'},
+  {vals:['7 cm','7 cm','7 cm'],drawer:'equi'},
+  {vals:['50°','90°','40°'],drawer:'rect'},
+  {vals:['65°','25°','90°'],drawer:'rect'},
+  {vals:['14 cm','12 cm','9 cm'],drawer:'quelc'},
+  {vals:['2 cm','3 cm','4 cm'],drawer:'quelc'}
+];
+var DRAWERS=[{id:'rect',t:'Triangles rectangles'},{id:'iso',t:'Triangles isoc\u00e8les non \u00e9quilat\u00e9raux'},{id:'equi',t:'Triangles \u00e9quilat\u00e9raux'},{id:'quelc',t:'Triangles quelconques'}];
+
+/* =====================================================================
+   ÉTAT PAR MISSION
+   ===================================================================== */
+var m1card=0, m1phase='calc', m1value=null;
+var m1CalcAttempts=0, m1NatureAttempts=0;
+var m2card=0;
+var m3card=0;
+var m4phase='compare';
+var m4CompareAttempts=0, m4WhyAttempts=0;
+var m5order=[], m5placed={}, m5selected=null, m5wrongTotal=0;
+var m5CardAttempts={};
+
+function feedbackBlocks(mi){
+  return {fb:$('fb-'+mi),fbi:$('fbi-'+mi),fbm:$('fbm-'+mi),corr:$('corr-'+mi),corrx:$('corrx-'+mi),hint:$('hint-'+mi),hintbtn:$('hint-btn-'+mi)};
+}
+function clearFeedback(mi){
+  var B=feedbackBlocks(mi);
+  if(B.fb){ B.fb.className='fb'; }
+  if(B.corr){ B.corr.className='correction'; }
+  if(B.hint){ B.hint.classList.remove('show'); }
+  roomAttempts[mi]=0;
+}
+
+/* =====================================================================
+   CORPS SPÉCIFIQUE DE CHAQUE MISSION
+   ===================================================================== */
+function bodyHTML(mi){
+  if(mi===0) return m1Render();
+  if(mi===1) return m2Render();
+  if(mi===2) return m3Render();
+  if(mi===3) return m4Render();
+  if(mi===4) return m5Render();
+  return '';
+}
+function afterRender(mi){ /* les fonctions m*Render() gèrent déjà leur propre affichage SVG */ }
+
+/* ---------------- MISSION 1 : angles connus ---------------- */
+function m1Render(){
+  var c=M1_CARDS[m1card];
+  var tri=triFromAngles(c.a,c.b,340);
+  var aLab=c.a+'°', bLab=c.b+'°', cLab=(m1phase==='calc')?'?':(c.missing+'°');
+  var svg=triangleSVG({tri:tri,id:'m1fig',title:'Triangle avec deux angles connus',desc:'Le triangle poss\u00e8de deux angles connus et un angle \u00e0 calculer.',angleLabels:[aLab,bLab,cLab]});
+  var html='<p class="room-question">Carte '+(m1card===0?'A':'B')+' &mdash; '+(m1card+1)+' / '+M1_CARDS.length+'</p>'
+    +'<div class="mfig" id="m1-figure">'+svg+'</div>';
+  if(m1phase==='calc'){
+    html+='<p class="room-question">Calcule la mesure de l\u2019angle manquant.</p>'
+      +'<div class="input-row"><input type="text" inputmode="numeric" class="cell-in" id="m1-input" placeholder="?" aria-label="Angle manquant en degr\u00e9s"/><span style="color:var(--muted)">&deg;</span></div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-0" onclick="toggleHint(0)">? Indice</button>'
+      +'<button type="button" class="btn btn-try" id="try-0" onclick="tryStep(0)">\u2705 V\u00e9rifier</button></div>';
+  } else {
+    html+='<p class="room-question">Quelle est la nature du triangle&nbsp;?</p>'
+      +'<div class="mcq-list" id="m1-nature">'+shuffle(NATURE_OPTS.slice()).map(function(o){return '<button type="button" class="mcq-opt" data-v="'+o.v+'" onclick="validateM1Nature(this)">'+o.t+'</button>';}).join('')+'</div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-0" onclick="toggleHint(0)">? Indice</button></div>';
+  }
+  html+='<div class="hint" id="hint-0">'+STEPS[0].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[0]?' show':'')+'" id="corr-0"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-0">'+(correctionShown[0]?correctionText[0]:'')+'</div></div>'
+    +'<div class="fb" id="fb-0"><span id="fbi-0"></span><div id="fbm-0"></div></div>';
+  return html;
+}
+window.tryStep=function(mi){
+  if(mi===0) return validateM1Calc();
+  if(mi===3) return validateM4Compare();
+};
+function validateM1Calc(){
+  if(solved[0]) return;
+  var c=M1_CARDS[m1card];
+  var raw=$('m1-input').value.trim().replace('°','').replace(',','.');
+  var val=parseFloat(raw);
+  var isCorrect = !isNaN(val) && Math.round(val)===c.missing;
+  m1CalcAttempts++;
+  var B=feedbackBlocks(0);
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='L\u2019angle manquant mesure bien '+c.missing+'&deg; (180&deg; &minus; '+c.a+'&deg; &minus; '+c.b+'&deg;).';
+    m1phase='nature'; m1NatureAttempts=0;
+    setTimeout(function(){ if(!solved[0]) refreshMissionBody(0); },700);
+  } else {
+    sBad();shakeStep(0);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(m1CalcAttempts>=2){
+      correctionShown[0]=true;
+      missionHadCorrection[0]=true;
+      correctionText[0]='Correction\u00a0: 180&deg; &minus; '+c.a+'&deg; &minus; '+c.b+'&deg; = '+c.missing+'&deg;. L\u2019angle manquant mesure donc '+c.missing+'&deg;.';
+      B.fbm.innerHTML=correctionText[0];
+      B.corrx.innerHTML=correctionText[0];
+      B.corr.classList.add('show');
+      var inp=$('m1-input'); inp.value=c.missing; inp.disabled=true;
+      $('try-0').disabled=true;
+      m1phase='nature'; m1NatureAttempts=0;
+      setTimeout(function(){ if(!solved[0]) refreshMissionBody(0); },900);
+    } else {
+      B.fbm.textContent='Ce n\u2019est pas la bonne mesure. Additionne les deux angles connus, puis soustrais leur somme \u00e0 180&deg;.';
+      if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+      B.hint.innerHTML='Rappelle-toi que les trois angles d\u2019un triangle ont une somme constante de 180&deg;.';
+      B.hint.classList.add('show');
+    }
+  }
+}
+window.validateM1Nature=function(btn){
+  if(solved[0]) return;
+  var c=M1_CARDS[m1card];
+  var isCorrect = btn.getAttribute('data-v')===c.nature;
+  m1NatureAttempts++;
+  var B=feedbackBlocks(0);
+  document.querySelectorAll('#m1-nature .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML=natureFeedback(c.nature,c);
+    advanceM1();
+  } else {
+    sBad();shakeStep(0);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(m1NatureAttempts>=2){
+      correctionShown[0]=true;
+      missionHadCorrection[0]=true;
+      correctionText[0]='Correction\u00a0: '+natureFeedback(c.nature,c);
+      B.fbm.innerHTML=correctionText[0];
+      B.corrx.innerHTML=correctionText[0];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#m1-nature .mcq-opt').forEach(function(b){ if(b.getAttribute('data-v')===c.nature) b.classList.add('selected'); });
+      advanceM1();
+    } else {
+      B.fbm.textContent = c.nature==='rectangle' ? 'Observe la mesure des trois angles. L\u2019un d\u2019eux correspond-il \u00e0 un angle droit\u00a0?' : 'Compare les trois mesures d\u2019angles. Deux angles ont-ils la m\u00eame mesure\u00a0?';
+      if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+      document.querySelectorAll('#m1-nature .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.hint.innerHTML=STEPS[0].hint1;
+    }
+  }
+};
+function natureFeedback(nature,c){
+  if(nature==='rectangle') return 'Un angle mesure 90&deg;, donc le triangle est rectangle.';
+  if(nature==='isocele') return 'Deux angles mesurent '+c.b+'&deg;, donc le triangle est isoc\u00e8le.';
+  if(nature==='equilateral') return 'Les trois angles sont \u00e9gaux\u00a0: ce triangle est \u00e9quilat\u00e9ral.';
+  return 'Les trois angles sont diff\u00e9rents\u00a0: ce triangle est quelconque.';
+}
+function advanceM1(){
+  setTimeout(function(){
+    if(m1card<M1_CARDS.length-1){ m1card++; m1phase='calc'; m1CalcAttempts=0; m1NatureAttempts=0; clearFeedback(0); correctionShown[0]=false; refreshMissionBody(0); }
+    else { if(!missionHadCorrection[0]) autonomousSuccesses++; stepSuccess(0); }
+  },900);
+}
+
+/* ---------------- MISSION 2 : longueurs connues ---------------- */
+function m2Render(){
+  var c=M2_CARDS[m2card];
+  var scale=26;
+  var tri=triFromSides(c.ab*scale,c.ac*scale,c.bc*scale);
+  var svg=triangleSVG({tri:tri,id:'m2fig',title:'Triangle avec trois longueurs connues',desc:'Les trois c\u00f4t\u00e9s du triangle sont indiqu\u00e9s en centim\u00e8tres.',labels:c.labels,
+    tickAB:c.ab===c.ac||c.ab===c.bc, tickAC:c.ac===c.ab||c.ac===c.bc, tickBC:c.bc===c.ab||c.bc===c.ac,
+    sideLabels:{AB:c.labels[0]+c.labels[1]+' = '+c.ab+' cm',AC:c.labels[0]+c.labels[2]+' = '+c.ac+' cm',BC:c.labels[1]+c.labels[2]+' = '+c.bc+' cm'}});
+  var html='<p class="room-question">Carte '+(m2card+1)+' / '+M2_CARDS.length+'</p>'
+    +'<div class="mfig" id="m2-figure">'+svg+'</div>'
+    +'<p class="room-question">Quelle est la nature de ce triangle&nbsp;?</p>'
+    +'<div class="mcq-list" id="m2-nature">'+shuffle(NATURE_OPTS.slice()).map(function(o){return '<button type="button" class="mcq-opt" data-v="'+o.v+'" onclick="validateM2(this)">'+o.t+'</button>';}).join('')+'</div>'
+    +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-1" onclick="toggleHint(1)">? Indice</button></div>'
+    +'<div class="hint" id="hint-1">'+STEPS[1].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[1]?' show':'')+'" id="corr-1"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-1">'+(correctionShown[1]?correctionText[1]:'')+'</div></div>'
+    +'<div class="fb" id="fb-1"><span id="fbi-1"></span><div id="fbm-1"></div></div>';
+  return html;
+}
+window.validateM2=function(btn){
+  if(solved[1]) return;
+  var c=M2_CARDS[m2card];
+  var isCorrect=btn.getAttribute('data-v')===c.nature;
+  roomAttempts[1]=(roomAttempts[1]||0)+1;
+  var B=feedbackBlocks(1);
+  document.querySelectorAll('#m2-nature .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  var reason=sideNatureReason(c);
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML=reason;
+    advanceM2();
+  } else {
+    sBad();shakeStep(1);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    B.fbm.textContent='Ce n\u2019est pas la bonne nature. Compare \u00e0 nouveau les trois longueurs.';
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[1]>=2){
+      correctionShown[1]=true;
+      missionHadCorrection[1]=true;
+      correctionText[1]='Correction\u00a0: '+reason;
+      B.corrx.innerHTML=correctionText[1];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#m2-nature .mcq-opt').forEach(function(b){ if(b.getAttribute('data-v')===c.nature) b.classList.add('selected'); });
+      advanceM2();
+    } else {
+      document.querySelectorAll('#m2-nature .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.hint.innerHTML=STEPS[1].hint1;
+    }
+  }
+};
+function sideNatureReason(c){
+  if(c.nature==='equilateral') return 'Les trois longueurs sont \u00e9gales ('+c.ab+'\u00a0cm)\u00a0: ce triangle est \u00e9quilat\u00e9ral.';
+  if(c.nature==='isocele'){
+    var eq = c.ab===c.ac? (c.labels[0]+c.labels[1]+' et '+c.labels[0]+c.labels[2]) : c.ab===c.bc? (c.labels[0]+c.labels[1]+' et '+c.labels[1]+c.labels[2]) : (c.labels[0]+c.labels[2]+' et '+c.labels[1]+c.labels[2]);
+    return 'Deux longueurs sont \u00e9gales ('+eq+')\u00a0: ce triangle est isoc\u00e8le.';
+  }
+  return 'Les trois longueurs sont diff\u00e9rentes\u00a0: ce triangle est quelconque.';
+}
+function advanceM2(){
+  setTimeout(function(){
+    if(m2card<M2_CARDS.length-1){ m2card++; clearFeedback(1); correctionShown[1]=false; refreshMissionBody(1); }
+    else { if(!missionHadCorrection[1]) autonomousSuccesses++; stepSuccess(1); }
+  },900);
+}
+
+/* ---------------- MISSION 3 : trois angles donnés ---------------- */
+function m3Render(){
+  var c=M3_CARDS[m3card];
+  var tri=triFromAngles(c.a,c.b,320);
+  var svg=triangleSVG({tri:tri,id:'m3fig',title:'Triangle avec ses trois angles',desc:'Les trois angles du triangle sont indiqu\u00e9s.',angleLabels:[c.a+'°',c.b+'°',c.c+'°']});
+  var html='<p class="room-question">Carte '+(m3card===0?'A':'B')+' &mdash; '+(m3card+1)+' / '+M3_CARDS.length+'</p>'
+    +'<div class="mfig" id="m3-figure">'+svg+'</div>'
+    +'<p class="room-question">Quelle est la nature de ce triangle&nbsp;?</p>'
+    +'<div class="mcq-list" id="m3-nature">'+shuffle(NATURE_OPTS.slice()).map(function(o){return '<button type="button" class="mcq-opt" data-v="'+o.v+'" onclick="validateM3(this)">'+o.t+'</button>';}).join('')+'</div>'
+    +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-2" onclick="toggleHint(2)">? Indice</button></div>'
+    +'<div class="hint" id="hint-2">'+STEPS[2].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[2]?' show':'')+'" id="corr-2"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-2">'+(correctionShown[2]?correctionText[2]:'')+'</div></div>'
+    +'<div class="fb" id="fb-2"><span id="fbi-2"></span><div id="fbm-2"></div></div>';
+  return html;
+}
+window.validateM3=function(btn){
+  if(solved[2]) return;
+  var c=M3_CARDS[m3card];
+  var isCorrect=btn.getAttribute('data-v')===c.nature;
+  roomAttempts[2]=(roomAttempts[2]||0)+1;
+  var B=feedbackBlocks(2);
+  document.querySelectorAll('#m3-nature .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  var reason='L\u2019un des angles mesure 90&deg;\u00a0: ce triangle est rectangle.';
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML=reason;
+    advanceM3();
+  } else {
+    sBad();shakeStep(2);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    B.fbm.textContent='Ce n\u2019est pas la bonne nature. Rep\u00e8re s\u2019il existe un angle de 90&deg;.';
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[2]>=2){
+      correctionShown[2]=true;
+      missionHadCorrection[2]=true;
+      correctionText[2]='Correction\u00a0: '+reason;
+      B.corrx.innerHTML=correctionText[2];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#m3-nature .mcq-opt').forEach(function(b){ if(b.getAttribute('data-v')===c.nature) b.classList.add('selected'); });
+      advanceM3();
+    } else {
+      document.querySelectorAll('#m3-nature .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.hint.innerHTML=STEPS[2].hint1;
+    }
+  }
+};
+function advanceM3(){
+  setTimeout(function(){
+    if(m3card<M3_CARDS.length-1){ m3card++; clearFeedback(2); correctionShown[2]=false; refreshMissionBody(2); }
+    else { if(!missionHadCorrection[2]) autonomousSuccesses++; stepSuccess(2); }
+  },900);
+}
+
+/* ---------------- MISSION 4 : comparer des angles ---------------- */
+function m4Render(){
+  var tri=triFromSides(260,220,220); // triangle isocèle AC = BC
+  var svg=triangleSVG({tri:tri,id:'m4fig',title:'Triangle isoc\u00e8le avec deux c\u00f4t\u00e9s cod\u00e9s \u00e9gaux',desc:'Les c\u00f4t\u00e9s AC et BC sont cod\u00e9s comme \u00e9gaux.',tickAC:true,tickBC:true});
+  var html='<div class="mfig" id="m4-figure">'+svg+'</div>';
+  if(m4phase==='compare'){
+    html+='<p class="room-question">Compare &ang;BAC et &ang;CBA.</p>'
+      +'<div class="mcq-list" id="m4-compare" style="max-width:260px;margin-left:auto;margin-right:auto;">'
+      +'<button type="button" class="mcq-opt" data-v="lt" onclick="validateM4Compare(this)">&ang;BAC &lt; &ang;CBA</button>'
+      +'<button type="button" class="mcq-opt" data-v="eq" onclick="validateM4Compare(this)">&ang;BAC = &ang;CBA</button>'
+      +'</div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-3" onclick="toggleHint(3)">? Indice</button></div>';
+  } else {
+    html+='<p class="room-question">&ang;BAC = &ang;CBA. Pourquoi&nbsp;?</p>'
+      +'<div class="mcq-list" id="m4-why">'
+      +shuffle([
+        {v:'rectangle',t:'Parce que le triangle est rectangle'},
+        {v:'isocele',t:'Parce que le triangle est isoc\u00e8le'},
+        {v:'equilateral',t:'Parce que le triangle est \u00e9quilat\u00e9ral'},
+        {v:'aucune',t:'Aucune raison particuli\u00e8re'}
+      ]).map(function(o){return '<button type="button" class="mcq-opt" data-v="'+o.v+'" onclick="validateM4Why(this)">'+o.t+'</button>';}).join('')
+      +'</div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-3" onclick="toggleHint(3)">? Indice</button></div>';
+  }
+  html+='<div class="hint" id="hint-3">'+STEPS[3].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[3]?' show':'')+'" id="corr-3"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-3">'+(correctionShown[3]?correctionText[3]:'')+'</div></div>'
+    +'<div class="fb" id="fb-3"><span id="fbi-3"></span><div id="fbm-3"></div></div>';
+  return html;
+}
+function validateM4Compare(btn){
+  if(solved[3]) return;
+  var isCorrect=btn.getAttribute('data-v')==='eq';
+  m4CompareAttempts++;
+  var B=feedbackBlocks(3);
+  document.querySelectorAll('#m4-compare .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='Les c\u00f4t\u00e9s [AC] et [BC] sont \u00e9gaux. Le triangle ABC est donc isoc\u00e8le en C. Sa base est [AB]\u00a0: les angles &ang;BAC et &ang;CBA sont \u00e9gaux.';
+    m4phase='why'; m4WhyAttempts=0;
+    setTimeout(function(){ if(!solved[3]) refreshMissionBody(3); },700);
+  } else {
+    sBad();shakeStep(3);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(m4CompareAttempts>=2){
+      correctionShown[3]=true;
+      missionHadCorrection[3]=true;
+      correctionText[3]='Correction\u00a0: comme AC = BC, le triangle ABC est isoc\u00e8le en C. Sa base est [AB]. Les deux angles \u00e0 la base, &ang;BAC et &ang;CBA, ont donc la m\u00eame mesure.';
+      B.fbm.innerHTML=correctionText[3];
+      B.corrx.innerHTML=correctionText[3];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#m4-compare .mcq-opt').forEach(function(b){ if(b.getAttribute('data-v')==='eq') b.classList.add('selected'); });
+      m4phase='why'; m4WhyAttempts=0;
+      setTimeout(function(){ if(!solved[3]) refreshMissionBody(3); },900);
+    } else {
+      B.fbm.innerHTML='Observe les codages des c\u00f4t\u00e9s. Le triangle poss\u00e8de deux c\u00f4t\u00e9s de m\u00eame longueur\u00a0: quels sont alors les angles situ\u00e9s \u00e0 la base\u00a0?';
+      if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+      document.querySelectorAll('#m4-compare .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.hint.innerHTML=STEPS[3].hint1;
+      B.hint.classList.add('show');
+    }
+  }
+}
+function validateM4Why(btn){
+  if(solved[3]) return;
+  var isCorrect=btn.getAttribute('data-v')==='isocele';
+  m4WhyAttempts++;
+  var B=feedbackBlocks(3);
+  document.querySelectorAll('#m4-why .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='Exactement&nbsp;! Comme AC = BC, le triangle ABC est isoc\u00e8le en C. Les angles \u00e0 la base &ang;BAC et &ang;CBA ont donc la m\u00eame mesure.';
+    if(!missionHadCorrection[3]) autonomousSuccesses++;
+    setTimeout(function(){ stepSuccess(3); },800);
+  } else {
+    sBad();shakeStep(3);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(m4WhyAttempts>=2){
+      correctionShown[3]=true;
+      missionHadCorrection[3]=true;
+      correctionText[3]='Correction\u00a0: AC = BC, donc le triangle ABC est isoc\u00e8le en C. Dans un triangle isoc\u00e8le, les deux angles \u00e0 la base ont la m\u00eame mesure. Ainsi, &ang;BAC = &ang;CBA.';
+      B.fbm.innerHTML=correctionText[3];
+      B.corrx.innerHTML=correctionText[3];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#m4-why .mcq-opt').forEach(function(b){ if(b.getAttribute('data-v')==='isocele') b.classList.add('selected'); });
+      setTimeout(function(){ stepSuccess(3); },900);
+    } else {
+      B.fbm.textContent='La comparaison des angles d\u00e9pend d\u2019une propri\u00e9t\u00e9 du triangle isoc\u00e8le. Rep\u00e8re les deux c\u00f4t\u00e9s cod\u00e9s \u00e9gaux.';
+      if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+      document.querySelectorAll('#m4-why .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.hint.innerHTML=STEPS[3].hint1;
+      B.hint.classList.add('show');
+    }
+  }
+}
+window.validateM4Compare=validateM4Compare;
+window.validateM4Why=validateM4Why;
+
+/* ---------------- MISSION 5 : classement final ---------------- */
+function m5Reason(card){
+  if(card.drawer==='rect'){
+    return 'Un angle mesure 90&deg;, donc ce triangle est rectangle.';
+  }
+  if(card.drawer==='equi'){
+    return 'Les trois c\u00f4t\u00e9s ont la m\u00eame longueur, donc ce triangle est \u00e9quilat\u00e9ral.';
+  }
+  if(card.drawer==='iso'){
+    return 'Exactement deux c\u00f4t\u00e9s ont la m\u00eame longueur, donc ce triangle est isoc\u00e8le non \u00e9quilat\u00e9ral.';
+  }
+  return 'Les trois longueurs sont diff\u00e9rentes et aucun angle droit n\u2019est indiqu\u00e9\u00a0: ce triangle est quelconque.';
+}
+function updateM5Drawers(){
+  DRAWERS.forEach(function(d){
+    var n=Object.keys(m5placed).filter(function(k){return m5placed[k]===d.id;}).length;
+    var cnt=$('m5count-'+d.id);
+    if(cnt) cnt.textContent='('+n+')';
+  });
+}
+function checkM5Completion(){
+  var placedCount=Object.keys(m5placed).length;
+  if(placedCount===M5_CARDS.length){
+    if(m5wrongTotal===0 && !missionHadCorrection[4]) autonomousSuccesses++;
+    setTimeout(function(){ stepSuccess(4); },600);
+  }
+}
+function placeM5CardCorrectly(idx,withCorrection){
+  var card=M5_CARDS[idx];
+  m5placed[idx]=card.drawer;
+  var cardEl=$('m5card-'+idx);
+  if(cardEl){
+    cardEl.classList.add('correct');
+    cardEl.classList.remove('selected','wrong');
+    cardEl.disabled=true;
+  }
+  updateM5Drawers();
+  m5selected=null;
+  if(withCorrection){
+    missionHadCorrection[4]=true;
+  }
+  checkM5Completion();
+}
+function m5Render(){
+  m5order=shuffle(M5_CARDS.map(function(c,i){return i;}));
+  m5placed={}; m5selected=null; m5wrongTotal=0; m5CardAttempts={};
+  var html='<p class="room-question">Clique sur une carte puis sur le casier qui lui correspond.</p>'
+    +'<p style="text-align:center;color:var(--muted);font-size:.82rem;margin-bottom:.6rem;">R\u00e8gle de classement&nbsp;: un triangle \u00e9quilat\u00e9ral va toujours dans le casier &laquo;&nbsp;\u00c9quilat\u00e9raux&nbsp;&raquo;, m\u00eame s\u2019il poss\u00e8de aussi plusieurs c\u00f4t\u00e9s \u00e9gaux.</p>';
+  html+='<div class="plans-row" id="m5-cards">';
+  m5order.forEach(function(idx){
+    var c=M5_CARDS[idx];
+    html+='<button type="button" class="plan" id="m5card-'+idx+'" aria-label="Carte '+c.vals.join(', ')+'" onclick="selectM5Card('+idx+',this)">'+classCardSVG(c.vals)+'</button>';
+  });
+  html+='</div>';
+  html+='<div class="compass-tool" id="m5-drawers" style="margin-top:1rem;">';
+  DRAWERS.forEach(function(d){
+    html+='<button type="button" class="compass-btn" id="m5drawer-'+d.id+'" style="min-width:150px;" onclick="placeM5Card(\''+d.id+'\')">'+d.t+' <span id="m5count-'+d.id+'" style="opacity:.75;">(0)</span></button>';
+  });
+  html+='</div>';
+  html+='<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-4" onclick="toggleHint(4)">? Indice</button></div>'
+    +'<div class="hint" id="hint-4">'+STEPS[4].hint1+'</div>'
+    +'<div class="correction" id="corr-4"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-4"></div></div>'
+    +'<div class="fb" id="fb-4"><span id="fbi-4"></span><div id="fbm-4"></div></div>';
+  return html;
+}
+window.selectM5Card=function(idx,btn){
+  if(solved[4] || m5placed[idx]) return;
+  sClick();
+  document.querySelectorAll('#m5-cards .plan').forEach(function(b){ b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  m5selected=idx;
+};
+window.placeM5Card=function(drawerId){
+  if(solved[4] || m5selected===null) return;
+  var idx=m5selected;
+  var card=M5_CARDS[idx];
+  var B=feedbackBlocks(4);
+  if(typeof m5CardAttempts[idx]==='undefined'){
+    m5CardAttempts[idx]=0;
+  }
+  if(card.drawer===drawerId){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='Bien class\u00e9\u00a0! '+m5Reason(card);
+    placeM5CardCorrectly(idx,false);
+  } else {
+    sBad();shakeStep(4);
+    m5CardAttempts[idx]++;
+    m5wrongTotal++;
+    if(m5CardAttempts[idx]>=2){
+      B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+      B.fbm.innerHTML='Correction\u00a0: '+m5Reason(card);
+      B.corrx.innerHTML=m5Reason(card);
+      B.corr.classList.add('show');
+      placeM5CardCorrectly(idx,true);
+    } else {
+      B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+      B.fbm.textContent='Ce n\u2019est pas le bon casier. Relis les angles ou les longueurs de cette carte.';
+      if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+      $('hint-4').classList.add('show');
+    }
+  }
+};
+
+/* =====================================================================
+   OUTILS COMMUNS
+   ===================================================================== */
+function shakeStep(mi){ var el=$('step-'+mi); if(el){ el.classList.add('shake'); setTimeout(function(){el.classList.remove('shake');},400); } }
+function refreshMissionBody(mi){
+  var body=$('body-'+mi);
+  if(!body) return;
+  body.innerHTML=bodyHTML(mi);
+}
+window.toggleHint=function(mi){
+  if(solved[mi]) return;
+  var el=$('hint-'+mi);
+  var willShow=!el.classList.contains('show');
+  if(willShow) sHint();
+  el.classList.toggle('show');
+};
+
+/* =====================================================================
+   MOTEUR GÉNÉRIQUE — construction dynamique des cartes de mission
+   ===================================================================== */
+function build(){
+  var host=$("steps");host.innerHTML="";
+  STEPS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.name+'</div><div class="step-comp">'+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro" tabindex="-1" id="intro-'+mi+'">'+M.intro+'</div>';
+      if(!solved[mi]){
+        h+=bodyHTML(mi);
+      } else {
+        h+='<div style="text-align:center;color:var(--muted);padding:.6rem;">'+M.frag+' Mission termin\u00e9e.</div>'
+          +'<div class="correction'+(correctionShown[mi]?' show':'')+'" id="corr-'+mi+'"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-'+mi+'">'+(correctionShown[mi]?correctionText[mi]:'')+'</div></div>'
+          +'<div class="fb show ok" id="fb-'+mi+'"><span id="fbi-'+mi+'">\u2705</span><div id="fbm-'+mi+'"><b style="color:var(--green)">Bravo&#8201;!</b><br>'+M.frag+' Casier class\u00e9&#8201;!</div></div>';
+      }
+    } else {
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine la mission pr\u00e9c\u00e9dente pour d\u00e9bloquer celle-ci.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+  });
+  updateCrest();updateProg();
+}
+
+function stepSuccess(mi){
+  if(solved[mi]){
+    return;
+  }
+  solved[mi]=true;
+  validatedChallenges++;
+  sFrag();
+  $('step-'+mi).classList.add('solved');
+  var hb=$('hint-btn-'+mi); if(hb) hb.disabled=true;
+  var hbox=$('hint-'+mi); if(hbox) hbox.classList.remove('show');
+  showAgent('&#128220; Le cartographe&nbsp;:<br>'+STEPS[mi].frag+' '+(mi<N-1?'Casier valid\u00e9&#8201;! Poursuis le classement.':'Toutes les cartes sont archiv\u00e9es&#8201;!'));
+  updateCrest();updateProg();
+  var body=$('body-'+mi);
+  if(body && !$('next-'+mi)){
+    var lab=(active<N-1)?'Mission suivante &#8594;':'Voir le classement termin\u00e9 &#8594;';
+    body.insertAdjacentHTML('beforeend','<div style="text-align:center;margin-top:1rem;"><button type="button" class="btn btn-try" id="next-'+mi+'" onclick="goNext('+mi+')">'+lab+'</button></div>');
+  }
+}
+function goNext(mi){
+  sClick();
+  var nb=$('next-'+mi);if(nb){nb.disabled=true;nb.style.display='none';}
+  if(active<N-1){
+    active++;
+    runScan(active,function(){
+      build();
+      var el=$('step-'+active);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+      var introEl=$('intro-'+active); if(introEl){ introEl.setAttribute('tabindex','-1'); introEl.focus({preventScroll:true}); }
+      showAgent('&#128220; Le cartographe&nbsp;:<br>Mission suivante&#8201;! \u00c0 toi de jouer.');
+    });
+  } else {
+    openFinale();
+  }
+}
+function updateCrest(){
+  STEPS.forEach(function(M,mi){
+    var f=$('frag-'+mi),hf=$('hud-frag-'+mi);
+    if(solved[mi]){ if(f){f.innerHTML=M.frag;f.classList.add('found');} if(hf){hf.classList.add('got');} }
+    else{ if(f){f.textContent='?';f.classList.remove('found');} if(hf){hf.classList.remove('got');} }
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/N*100);
+  var lab=$('hud-prog-label'),fill=$('hud-prog-fill');
+  if(lab)lab.innerHTML='Classement des cartes&nbsp;: '+pct+'&#8201;%';
+  if(fill)fill.style.width=pct+'%';
+}
+
+/* =====================================================================
+   ÉCRAN FINAL
+   ===================================================================== */
+function autonomyMessage(n){
+  if(n===5) return 'Excellent&#8201;! Tu as r\u00e9alis\u00e9 toutes les missions sans correction.';
+  if(n===3||n===4) return 'Tr\u00e8s bon travail&#8201;! Tu as r\u00e9alis\u00e9 la majorit\u00e9 des missions de mani\u00e8re autonome.';
+  if(n===1||n===2) return 'Bravo pour ta pers\u00e9v\u00e9rance&#8201;! Les corrections t\u2019ont aid\u00e9 \u00e0 terminer le classement.';
+  return 'Tu as termin\u00e9 la mission avec l\u2019aide des corrections. Relis les d\u00e9marches avant de recommencer.';
+}
+function openFinale(){
+  gameRunning=false;
+  clearInterval(totalInt);
+  $('hud-dial').innerHTML='&#127942;';
+  var cr=$('finale-crest');cr.innerHTML='';
+  STEPS.forEach(function(M,i){var d=document.createElement('div');d.className='fc';d.style.animationDelay=(i*0.1)+'s';d.innerHTML=M.frag;cr.appendChild(d);});
+  setTimeout(function(){
+    $('finale-time').innerHTML='&#9201; Temps utilis\u00e9&#8201;: '+fmtLong(totalSec);
+    $('finale-grade').innerHTML='&#128451;&#65039; CLASSEMENT TERMIN\u00c9';
+    var au=$('finale-autonomy');
+    if(au){ au.innerHTML='<b>Missions r\u00e9alis\u00e9es sans correction\u00a0: '+autonomousSuccesses+' / 5</b><br>'+autonomyMessage(autonomousSuccesses); }
+    $('finale').classList.add('show');
+    sWin();
+  },300);
+}
+
+/* =====================================================================
+   DÉMARRAGE / RECOMMENCER
+   ===================================================================== */
+function beginGame(){
+  var c=ac();if(c&&c.state==='suspended')c.resume();
+  $('start-screen').style.display='none';
+  $('game').style.display='';
+  buildHudFrags();
+  $('hud-bar').classList.add('show');
+  document.body.classList.add('playing');
+  totalSec=0;clearInterval(totalInt);gameRunning=true;
+  var ht=$('hud-timer');if(ht)ht.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: 0/5 &middot; </span>\u23F1\uFE0F 00:00';
+  totalInt=setInterval(timerTick,1000);
+  sPaper();
+  build();
+  showAgent('&#128220; Le cartographe&nbsp;:<br>Bienvenue au bureau de classement&#8201;! V\u00e9rifions ces cartes marines.');
+}
+function restartAll(){
+  gameRunning=false;
+  clearInterval(totalInt);totalSec=0;
+  solved=[];for(var i=0;i<N;i++)solved.push(false);
+  active=0; roomAttempts={}; validatedChallenges=0; autonomousSuccesses=0;
+  correctionShown=[false,false,false,false,false]; correctionText=['','','','','']; missionHadCorrection=[false,false,false,false,false];
+  m1card=0; m1phase='calc'; m1value=null; m1CalcAttempts=0; m1NatureAttempts=0;
+  m2card=0; m3card=0;
+  m4phase='compare'; m4CompareAttempts=0; m4WhyAttempts=0;
+  m5order=[]; m5placed={}; m5selected=null; m5wrongTotal=0; m5CardAttempts={};
+  $('finale').classList.remove('show');
+  var ov=$('scan-overlay');if(ov)ov.classList.remove('show');
+  $('hud-bar').classList.remove('show');
+  document.body.classList.remove('playing');
+  $('game').style.display='none';
+  $('start-screen').style.display='';
+  $('hud-dial').innerHTML='&#128220;';
+  var ht=$('hud-timer');if(ht)ht.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: 0/5 &middot; </span>\u23F1\uFE0F 00:00';
+  for(var j=0;j<N;j++){var hf=$('hud-frag-'+j);if(hf)hf.classList.remove('got');}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
