@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa · 5e · Semaine 8 Jour 3 · Je relève le défi — Effectifs, fréquences et moyenne</title>
+<style>
+/* ============================================================
+   PAZAPA — Semaine 8 — Jour 3 : centre de communication martien
+   (identité propre au Jour 3, distincte du décor extérieur du Jour 1
+   et du hangar industriel du Jour 2, même système graphique commun)
+   ============================================================ */
+:root{
+  --day-color:#34C7E8; --day-dark:#0E5C73; --day-light:#E4F8FC; --day-border:#9BE0F0;
+  --graphite:#141B2E; --graphite-dark:#0A0F1C;
+  --metal:#4A5670; --metal-light:#8B96AC;
+  --panel:#1E2A45; --panel2:#283656;
+  --signal-violet:#8B6FE8; --signal-violet-light:#EDE7FB;
+  --white:#F7FAFC; --ink:#182028; --muted:#67727D;
+  --success:#3FA66B; --success-bg:#E1F5E9;
+  --warn:#D9772F; --warn-bg:#FCE9D7;
+  --radius:14px; --glow-cyan-strong:rgba(52,199,232,.4);
+
+  /* Alias techniques hérités des jours précédents (noms de variables uniquement) : ils pointent
+     tous vers la palette "communication" ci-dessus, aucune couleur martienne ou industrielle réintroduite. */
+  --mars-red:var(--day-color); --mars-red-dark:var(--day-dark);
+  --copper:var(--signal-violet); --copper-light:var(--signal-violet-light);
+  --sand:var(--metal-light); --sand-light:var(--day-light);
+  --metal-dark:var(--graphite-dark);
+  --cyan:var(--day-color); --cyan-dark:var(--day-dark);
+  --info:var(--day-color); --info-bg:var(--day-light);
+  --glow-cyan:var(--glow-cyan-strong); --glow-copper:rgba(139,111,232,.34);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+button,input{font:inherit;color:inherit;}
+button{background:none;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;}
+html{scroll-behavior:auto;font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{
+  min-height:100vh;font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:var(--ink);
+  overflow-x:hidden;position:relative;padding-bottom:3rem;
+  background:linear-gradient(180deg,#070a14 0%,#0d1424 28%,#141b2e 55%,#1c2540 78%,#243055 100%);
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ scroll-behavior:auto !important; transition-duration:.001ms !important; transition-delay:0ms !important; }
+  .dust,.stardust,.status-light,.signal-ring{ animation:none !important; display:none !important; }
+  .card,.feedback,.pulse-ok{ animation:none !important; }
+}
+
+.hangar-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.hangar-scene svg{position:absolute;bottom:0;left:0;width:100%;height:52vh;min-height:280px;}
+.star{position:fixed;border-radius:50%;background:#fff;opacity:.7;pointer-events:none;z-index:0;}
+.star.st1{width:2px;height:2px;top:8%;left:15%;}
+.star.st2{width:2px;height:2px;top:14%;left:70%;}
+.star.st3{width:3px;height:3px;top:6%;left:45%;}
+.star.st4{width:2px;height:2px;top:20%;left:85%;}
+.star.st5{width:2px;height:2px;top:5%;left:60%;}
+.status-light{position:fixed;border-radius:50%;pointer-events:none;z-index:0;animation:statusBlink 2.6s ease-in-out infinite;}
+.status-light.s1{width:11px;height:11px;background:var(--day-color);top:16%;left:8%;box-shadow:0 0 12px var(--day-color);}
+.status-light.s2{width:9px;height:9px;background:var(--signal-violet);top:22%;right:10%;box-shadow:0 0 10px var(--signal-violet);animation-delay:.8s;}
+@keyframes statusBlink{0%,100%{opacity:.4;}50%{opacity:1;}}
+.dust{position:fixed;border-radius:50%;border:1.5px solid rgba(52,199,232,.35);pointer-events:none;z-index:0;}
+.dust.d1{width:10px;height:10px;top:30%;left:20%;animation:signalPulse 4.5s ease-out infinite;}
+.dust.d2{width:10px;height:10px;top:34%;left:78%;animation:signalPulse 5.5s ease-out infinite 1.5s;}
+.dust.d3{width:10px;height:10px;top:26%;left:50%;animation:signalPulse 5s ease-out infinite 3s;}
+@keyframes signalPulse{0%{transform:scale(.3);opacity:.7;}100%{transform:scale(3.2);opacity:0;}}
+
+.hud{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.75rem 1.3rem;background:rgba(10,15,28,.72);backdrop-filter:blur(8px);border-bottom:1px solid rgba(52,199,232,.25);flex-wrap:wrap;}
+.hud-brand{display:flex;flex-direction:column;line-height:1.3;}
+.hud-brand .logo{font-weight:800;font-size:1rem;color:var(--white);letter-spacing:.04em;}
+.hud-brand .meta{font-size:.72rem;color:var(--day-border);opacity:.9;}
+.hud-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.hud-timer{font-variant-numeric:tabular-nums;font-size:.9rem;font-weight:700;color:var(--white);
+  background:rgba(0,0,0,.28);border:1.5px solid var(--day-color);border-radius:10px;padding:.4rem .8rem;min-width:4.4em;text-align:center;
+  box-shadow:0 0 10px var(--glow-cyan) inset;}
+.btn-sound{background:rgba(0,0,0,.28);border:1.5px solid rgba(255,255,255,.25);color:var(--white);border-radius:10px;
+  padding:.4rem .7rem;font-size:.9rem;cursor:pointer;min-height:2.6rem;transition:border-color .2s;}
+.btn-sound:hover{border-color:var(--day-color);}
+.btn-sound[aria-pressed="true"]{border-color:var(--day-color);}
+:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+
+.stage{max-width:760px;margin:0 auto;padding:1.6rem 1.2rem 0;position:relative;z-index:1;}
+
+.card{background:rgba(247,252,255,.96);border-radius:var(--radius);box-shadow:0 14px 40px rgba(4,6,14,.5), 0 0 0 1px rgba(255,255,255,.5) inset;
+  padding:1.6rem 1.7rem;position:relative;overflow:hidden;animation:cardIn .5s cubic-bezier(.2,.9,.3,1) both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--day-color),var(--signal-violet),var(--metal-light));}
+
+.intro-card{text-align:center;max-width:560px;margin:1rem auto;}
+.intro-eyebrow{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--day-dark);font-weight:800;margin-bottom:.5rem;}
+.chrono-info{font-size:.74rem;color:var(--day-dark);font-weight:700;margin-bottom:.6rem;}
+.intro-card h1{font-size:clamp(1.15rem,2.7vw,1.55rem);font-weight:800;color:var(--day-dark);margin-bottom:.8rem;line-height:1.3;}
+.intro-text{max-width:500px;margin:0 auto 1.2rem;line-height:1.75;font-size:.9rem;text-align:left;color:var(--ink);}
+.intro-text p{margin-bottom:.7rem;}
+.intro-transition{font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:.8rem;}
+
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.35rem;border-radius:99px;border:none;cursor:pointer;
+  font-weight:800;font-size:.92rem;min-height:2.6rem;transition:transform .15s,box-shadow .2s,background .2s;}
+.btn:active{transform:scale(.95);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-launch{background:linear-gradient(135deg,var(--day-color),var(--day-dark));color:#04222b;box-shadow:0 6px 18px var(--glow-cyan);}
+.btn-launch:hover{transform:translateY(-2px);box-shadow:0 10px 26px var(--glow-cyan);}
+.btn-copper{background:linear-gradient(135deg,var(--signal-violet),#5B3FB0);color:#fbf8ff;box-shadow:0 6px 18px var(--glow-copper);}
+.btn-copper:hover{transform:translateY(-2px);box-shadow:0 10px 26px var(--glow-copper);}
+
+#scene-mission{display:none;} #scene-mission.show{display:block;}
+.progress-wrap{max-width:600px;margin:0 auto 1.2rem;}
+.progress-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--white);font-weight:700;margin-bottom:.4rem;text-shadow:0 1px 4px rgba(0,0,0,.4);}
+.progress-caps{display:flex;gap:.4rem;}
+.cap{flex:1;height:11px;border-radius:3px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);overflow:hidden;position:relative;}
+.cap .cap-fill{position:absolute;inset:0;border-radius:2px;background:var(--metal-light);transform:scaleX(0);transform-origin:left;transition:transform .5s ease,background .3s ease;}
+.cap.done .cap-fill{transform:scaleX(1);background:linear-gradient(90deg,var(--success),#2E7A50);box-shadow:0 0 8px rgba(63,166,107,.5);}
+.cap.current .cap-fill{transform:scaleX(1);background:linear-gradient(90deg,var(--day-color),var(--day-dark));box-shadow:0 0 8px var(--glow-cyan);}
+.cap.just-validated{animation:capGlow 1s ease;}
+.progress-caps.finale .cap{animation:capGlow .9s ease;}
+.progress-caps.finale .cap:nth-child(1){animation-delay:0s;}
+.progress-caps.finale .cap:nth-child(2){animation-delay:.12s;}
+.progress-caps.finale .cap:nth-child(3){animation-delay:.24s;}
+.progress-caps.finale .cap:nth-child(4){animation-delay:.36s;}
+.progress-caps.finale .cap:nth-child(5){animation-delay:.48s;}
+@keyframes capGlow{0%{box-shadow:0 0 0 0 rgba(63,166,107,0);}45%{box-shadow:0 0 14px 4px rgba(63,166,107,.75);}100%{box-shadow:0 0 0 0 rgba(63,166,107,0);}}
+
+.mission-eyebrow{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--day-dark);font-weight:800;margin-bottom:.3rem;}
+.mission-card h2{font-size:1.05rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;line-height:1.3;}
+.mission-story{font-size:.84rem;color:var(--muted);margin-bottom:.9rem;line-height:1.65;}
+.data-wrap{width:100%;margin:0 auto 1rem;background:var(--white);border:2px solid var(--day-border);border-radius:14px;padding:.9rem 1rem;
+  box-shadow:0 6px 18px rgba(4,6,14,.18);}
+.data-table{width:100%;border-collapse:collapse;font-size:.84rem;}
+.data-table th,.data-table td{padding:.4rem .5rem;text-align:center;border-bottom:1px solid var(--day-border);}
+.data-table th{color:var(--day-dark);font-weight:800;background:var(--day-light);}
+.data-table td{color:var(--ink);font-weight:600;}
+.data-highlight{background:var(--signal-violet-light);}
+.data-line{font-size:.9rem;color:var(--ink);font-weight:700;text-align:center;padding:.4rem 0;}
+.mission-consigne{font-weight:800;font-size:.9rem;color:var(--ink);margin-bottom:.9rem;background:var(--day-light);
+  border-left:5px solid var(--day-color);border-radius:10px;padding:.6rem .85rem;}
+
+.hint-actions{margin-bottom:1rem;}
+.btn-hint{background:var(--white);color:var(--day-dark);border:2px dashed var(--day-color);box-shadow:none;
+  display:inline-flex;align-items:center;justify-content:center;padding:.5rem .9rem;border-radius:10px;
+  font-size:.88rem;font-weight:800;min-height:42px;cursor:pointer;}
+.btn-hint:hover{background:var(--day-light);}
+.hint-box[hidden]{display:none !important;}
+.hint-box{display:flex;gap:.6rem;align-items:flex-start;background:var(--day-light);border:1.5px solid var(--day-color);border-radius:12px;
+  padding:.65rem .85rem;margin-top:.6rem;font-size:.82rem;color:#0d4a5c;line-height:1.65;}
+.hint-box .hint-emoji{font-size:1.05rem;flex-shrink:0;}
+
+.answer-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.answer-input{width:110px;height:2.6rem;border:2.5px solid var(--metal-light);border-radius:12px;text-align:center;
+  font-size:1rem;font-weight:800;color:var(--ink);background:var(--white);outline:none;transition:border-color .2s,background .2s;}
+.answer-input:focus{border-color:var(--day-color);}
+.answer-input.ok{border-color:var(--success);background:var(--success-bg);}
+.answer-input.ko{border-color:var(--warn);background:var(--warn-bg);}
+.answer-unit{font-weight:700;color:var(--muted);font-size:.86rem;}
+.answer-tip{font-size:.7rem;color:var(--muted);margin-top:.2rem;width:100%;}
+
+.choice-list{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.6rem;}
+.opt-btn{display:flex;align-items:center;gap:.65rem;padding:.65rem .9rem;border-radius:12px;border:2.5px solid var(--metal-light);
+  background:var(--white);color:var(--ink);font-weight:700;font-size:.86rem;cursor:pointer;text-align:left;min-height:2.6rem;transition:border-color .15s,background .2s;}
+.opt-btn:hover:not(:disabled){border-color:var(--day-color);}
+.opt-btn .ob-letter{width:24px;height:24px;border-radius:50%;background:var(--day-light);color:var(--day-dark);font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.78rem;}
+.opt-btn.correct{border-color:var(--success);background:var(--success-bg);}
+.opt-btn.correct .ob-letter{background:var(--success);color:#fff;}
+.opt-btn.wrong{border-color:var(--warn);background:var(--warn-bg);animation:shake .35s ease;}
+.opt-btn.wrong .ob-letter{background:var(--warn);color:#fff;}
+.opt-btn:disabled{cursor:not-allowed;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+.feedback{margin-top:.8rem;padding:.7rem .9rem;border-radius:12px;font-size:.84rem;line-height:1.7;display:none;}
+.feedback.show{display:block;animation:cardIn .35s ease both;}
+.feedback.ok{background:var(--success-bg);border:2px solid var(--success);color:#0f5c37;}
+.feedback.ko{background:var(--warn-bg);border:2px solid var(--warn);color:#7a4a12;}
+
+.correction-box[hidden]{display:none !important;}
+.correction-box{margin-top:.9rem;padding:.85rem .95rem;border-radius:14px;background:var(--day-light);border:2px solid var(--day-dark);
+  color:#0d3f4d;font-size:.84rem;line-height:1.7;}
+.correction-box strong{color:var(--day-dark);}
+
+.chrono-wrap{display:none;align-items:center;gap:.9rem;margin-top:1rem;padding:.65rem 1rem;
+  border:2px solid var(--day-color);border-radius:12px;background:var(--day-light);}
+.chrono-wrap.show{display:flex;}
+.chrono-num{font-size:1.2rem;font-weight:800;color:var(--day-dark);min-width:1.8rem;text-align:center;flex-shrink:0;}
+.chrono-body{flex:1;min-width:0;}
+.chrono-label{font-size:.78rem;color:var(--day-dark);margin-bottom:.3rem;font-weight:700;}
+.chrono-track{height:7px;border-radius:99px;background:var(--metal-light);overflow:hidden;}
+.chrono-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--day-color),var(--day-dark));width:100%;transition:width 1s linear;}
+
+.pulse-ok{animation:pulseOk .8s ease;}
+@keyframes pulseOk{0%{box-shadow:0 0 0 0 rgba(63,166,107,.5);}70%{box-shadow:0 0 0 18px rgba(63,166,107,0);}100%{box-shadow:0 0 0 0 rgba(63,166,107,0);}}
+
+.final-card{text-align:center;padding:1.6rem 1.2rem 1.8rem;position:relative;overflow:visible;}
+.final-card h2{font-size:1.4rem;font-weight:900;color:var(--day-dark);margin-bottom:.9rem;}
+.stat-row{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem;margin-bottom:1.2rem;}
+.stat-chip{display:flex;flex-direction:column;align-items:center;gap:.2rem;background:var(--day-light);border:1.5px solid var(--day-border);
+  border-radius:14px;padding:.7rem 1.1rem;min-width:100px;}
+.stat-chip .sc-val{font-size:1.3rem;font-weight:800;color:var(--day-dark);}
+.stat-chip .sc-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.final-msg{font-size:1rem;font-weight:700;color:var(--ink);max-width:480px;margin:0 auto 1.4rem;line-height:1.7;}
+.stardust{position:absolute;border-radius:50%;opacity:.9;animation:stardustFloat 2.4s ease-out forwards;z-index:0;pointer-events:none;}
+@keyframes stardustFloat{0%{transform:translateY(0) scale(1);opacity:.95;}100%{transform:translateY(-170px) scale(.25);opacity:0;}}
+
+.zone-validated{display:inline-flex;align-items:center;gap:.4rem;background:var(--success-bg);border:2px solid var(--success);
+  color:#0f5c37;font-weight:800;font-size:.92rem;padding:.5rem 1rem;border-radius:99px;margin-top:.9rem;opacity:1;
+  animation:zoneValidatedPop 1.5s ease forwards;}
+@keyframes zoneValidatedPop{
+  0%{opacity:0;transform:translateY(6px) scale(.92);}
+  18%{opacity:1;transform:translateY(0) scale(1);}
+  75%{opacity:1;transform:translateY(0) scale(1);}
+  100%{opacity:0;transform:translateY(-4px) scale(.96);}
+}
+
+@media(max-width:820px){
+  .stage{padding:1.2rem .9rem 0;}
+  .card{padding:1.3rem 1.2rem;}
+  .intro-card h1{font-size:clamp(1.05rem,3.6vw,1.35rem);}
+  .intro-text{font-size:.86rem;}
+  .mission-card h2{font-size:.98rem;}
+  .mission-story{font-size:.8rem;}
+  .mission-consigne{font-size:.86rem;padding:.55rem .75rem;}
+  .data-table{font-size:.78rem;}
+  .hint-box{font-size:.78rem;padding:.6rem .75rem;}
+  .answer-input{width:100px;height:2.4rem;font-size:.95rem;}
+  .answer-unit{font-size:.8rem;}
+  .btn{font-size:.88rem;padding:.6rem 1.2rem;min-height:2.5rem;}
+  .hud{padding:.6rem 1rem;}
+  .hud-brand .logo{font-size:.92rem;}
+  .hud-brand .meta{font-size:.64rem;}
+  .hud-timer{font-size:.8rem;padding:.35rem .6rem;}
+  .btn-sound{font-size:.8rem;padding:.35rem .6rem;min-height:2.3rem;}
+}
+@media(max-width:480px){
+  .card{padding:1.4rem 1.2rem;}
+  .stat-chip{min-width:84px;padding:.6rem .8rem;}
+}
+@media(max-width:360px){
+  body{padding-left:.55rem;padding-right:.55rem;}
+  .hud{padding:.65rem .7rem;gap:.5rem;}
+  .hud-right{width:100%;justify-content:space-between;}
+  .stage{padding-left:.35rem;padding-right:.35rem;}
+  .card{padding:1.15rem .85rem;border-radius:15px;}
+  .answer-row{flex-direction:column;align-items:stretch;}
+  .answer-input{width:100%;}
+  .answer-unit{text-align:center;}
+  .answer-row .btn{width:100%;justify-content:center;}
+  .stat-row{flex-direction:column;}
+  .stat-chip{width:100%;}
+  .btn{width:100%;justify-content:center;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<div class="hangar-scene" aria-hidden="true">
+  <svg viewBox="0 0 800 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="800" height="300" fill="#141b2e"/>
+    <g opacity=".5" stroke="#283656" stroke-width="2">
+      <line x1="70" y1="0" x2="70" y2="300"/><line x1="200" y1="0" x2="200" y2="300"/>
+      <line x1="330" y1="0" x2="330" y2="300"/><line x1="470" y1="0" x2="470" y2="300"/>
+      <line x1="610" y1="0" x2="610" y2="300"/><line x1="740" y1="0" x2="740" y2="300"/>
+    </g>
+    <line x1="620" y1="260" x2="620" y2="90" stroke="#4A5670" stroke-width="6"/>
+    <circle cx="620" cy="80" r="10" fill="#34C7E8"/>
+    <circle cx="620" cy="80" r="22" fill="none" stroke="#34C7E8" stroke-width="1.5" opacity=".5"/>
+    <circle cx="620" cy="80" r="38" fill="none" stroke="#34C7E8" stroke-width="1" opacity=".3"/>
+    <line x1="580" y1="260" x2="600" y2="150" stroke="#4A5670" stroke-width="4"/>
+    <line x1="660" y1="260" x2="640" y2="150" stroke="#4A5670" stroke-width="4"/>
+    <path d="M180,220 L180,120 A90,50 0 0 1 340,120 L340,220 Z" fill="#1E2A45" stroke="#8B96AC" stroke-width="3"/>
+    <ellipse cx="260" cy="120" rx="80" ry="18" fill="#283656" stroke="#8B96AC" stroke-width="2"/>
+    <circle cx="260" cy="130" r="6" fill="#8B6FE8"/>
+    <rect x="30" y="170" width="110" height="90" rx="6" fill="#1E2A45" stroke="#8B96AC" stroke-width="2"/>
+    <rect x="45" y="185" width="34" height="24" rx="2" fill="#34C7E8" opacity=".55"/>
+    <rect x="88" y="185" width="34" height="24" rx="2" fill="#8B6FE8" opacity=".55"/>
+    <rect x="45" y="218" width="77" height="10" rx="2" fill="#4A5670"/>
+    <rect x="0" y="255" width="800" height="45" fill="#0A0F1C"/>
+    <line x1="0" y1="270" x2="800" y2="270" stroke="#4A5670" stroke-width="1" stroke-dasharray="14 10"/>
+  </svg>
+</div>
+<div class="star st1" aria-hidden="true"></div><div class="star st2" aria-hidden="true"></div>
+<div class="star st3" aria-hidden="true"></div><div class="star st4" aria-hidden="true"></div>
+<div class="star st5" aria-hidden="true"></div>
+<div class="status-light s1" aria-hidden="true"></div>
+<div class="status-light s2" aria-hidden="true"></div>
+<div class="dust d1" aria-hidden="true"></div><div class="dust d2" aria-hidden="true"></div>
+<div class="dust d3" aria-hidden="true"></div>
+
+<div class="hud">
+  <div class="hud-brand">
+    <span class="logo">🚀 PAZAPA</span>
+    <span class="meta">Mathématiques · 5e · Semaine 8 · Jour 3 · Défi chronométré</span>
+  </div>
+  <div class="hud-right">
+    <div class="hud-timer" id="hud-timer" role="timer" aria-live="off" aria-label="Temps écoulé depuis le début du défi chronométré">⏱️ 00:00</div>
+    <button class="btn-sound" id="btn-sound" onclick="toggleSound()" aria-pressed="true" aria-label="Couper le son">🔊 Son activé</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <section id="scene-intro">
+    <div class="card intro-card">
+      <div class="intro-eyebrow">Je relève le défi · effectifs, fréquences et moyenne</div>
+      <p class="chrono-info">⏱️ Le chronomètre mesure ton temps, sans limite et sans pénalité.</p>
+      <h1>📡 Centre de communication martien</h1>
+      <div class="intro-text">
+        <p>🚀 La base martienne est désormais opérationnelle.</p>
+        <p>Chaque jour, les antennes de communication reçoivent des milliers d'informations envoyées par les différents modules de la base : laboratoire scientifique, serre, observatoire, centrale énergétique et station météo.</p>
+        <p>Avant de transmettre ces données vers la Terre, l'ordinateur central doit vérifier que toutes les statistiques sont correctes. Chaque vérification réussie autorise l'envoi du rapport suivant.</p>
+      </div>
+      <p class="intro-transition">Les antennes sont alignées. Commence par vérifier le premier rapport.</p>
+      <button class="btn btn-launch" onclick="startGame()">🚀 Lancer la vérification</button>
+    </div>
+  </section>
+
+  <section id="scene-mission">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Rapports validés</span><span id="progress-txt">0 / 5</span></div>
+      <div class="progress-caps" id="progress-caps" role="progressbar" aria-label="Progression des missions" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><!-- injecté en JS --></div>
+    </div>
+    <div class="card mission-card" id="mission-card"><!-- injecté en JS --></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+function setDisabled(el, disabled){ if(!el) return; el.disabled=disabled; el.setAttribute('aria-disabled', disabled?'true':'false'); }
+
+/* ==================================================================
+   SON — Web Audio API uniquement
+   ================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(audioCtx && audioCtx.state==='suspended'){ audioCtx.resume(); } return audioCtx; }
+function tone(freq,dur,type,startDelay,gainVal){
+  if(!soundOn) return;
+  var c=ac(); if(!c) return;
+  var t0=c.currentTime+(startDelay||0);
+  var osc=c.createOscillator(), g=c.createGain();
+  osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(gainVal||0.14,t0+0.02); g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g); g.connect(c.destination); osc.start(t0); osc.stop(t0+dur+0.05);
+}
+function playClick(){ tone(520,.06,'sine',0,.08); }
+function playCorrect(){ tone(440,.14,'sine',0,.13); tone(660,.18,'sine',.1,.11); tone(880,.22,'triangle',.2,.09); }
+function playWrong(){ tone(190,.22,'sawtooth',0,.09); }
+function playNextMission(){ tone(500,.1,'sine',0,.08); tone(700,.12,'sine',.08,.08); }
+function playFinal(){ tone(400,.3,'sine',0,.13); tone(500,.3,'sine',.15,.12); tone(650,.35,'sine',.3,.11); tone(880,.6,'triangle',.45,.09); }
+window.toggleSound=function(){
+  soundOn=!soundOn;
+  var b=$('btn-sound');
+  b.textContent = soundOn ? '🔊 Son activé' : '🔇 Son coupé';
+  b.setAttribute('aria-pressed', soundOn?'true':'false');
+  b.setAttribute('aria-label', soundOn?'Couper le son':'Activer le son');
+};
+
+/* ==================================================================
+   CHRONO — purement informatif, en pause si l'onglet est masqué
+   ================================================================== */
+var gameStartTime=null, gameTimerInterval=null;
+var elapsedBeforePause=0, timerRunningSince=null, timerPausedByVisibility=false;
+function formatTime(totalSec){ var m=Math.floor(totalSec/60), s=totalSec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+function formatLongTime(totalSec){ var m=Math.floor(totalSec/60), s=totalSec%60; return m+' min '+String(s).padStart(2,'0')+' s'; }
+function getElapsedSeconds(){
+  var elapsed=elapsedBeforePause;
+  if(timerRunningSince!==null){ elapsed+=Date.now()-timerRunningSince; }
+  return Math.floor(elapsed/1000);
+}
+function startGameTimer(){
+  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
+  gameStartTime=Date.now();
+  elapsedBeforePause=0; timerRunningSince=Date.now(); timerPausedByVisibility=false;
+  updateGameTimer();
+  gameTimerInterval=setInterval(updateGameTimer,1000);
+}
+function updateGameTimer(){
+  var el=$('hud-timer');
+  if(!el||!gameStartTime) return;
+  el.textContent='⏱️ '+formatTime(getElapsedSeconds());
+}
+function stopGameTimer(){
+  var total=getElapsedSeconds();
+  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
+  timerRunningSince=null;
+  return total;
+}
+function pauseGameTimer(){
+  if(!gameStarted || finaleTriggered || timerRunningSince===null) return;
+  elapsedBeforePause+=Date.now()-timerRunningSince;
+  timerRunningSince=null; timerPausedByVisibility=true;
+  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
+}
+function resumeGameTimer(){
+  if(!gameStarted || finaleTriggered || !timerPausedByVisibility || document.hidden) return;
+  timerPausedByVisibility=false;
+  timerRunningSince=Date.now();
+  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); }
+  gameTimerInterval=setInterval(updateGameTimer,1000);
+  updateGameTimer();
+}
+document.addEventListener('visibilitychange', function(){ if(document.hidden){ pauseGameTimer(); } else { resumeGameTimer(); } });
+window.addEventListener('blur', pauseGameTimer);
+window.addEventListener('focus', function(){ if(!document.hidden){ resumeGameTimer(); } });
+
+/* ==================================================================
+   DONNÉES DES 5 MISSIONS — vérifiées numériquement
+   ================================================================== */
+var MISSIONS=[
+  { id:1, eyebrow:'Rapport 1 / 5', title:'🌱 Rapport des cultures', type:'num',
+    story:'Le laboratoire agricole a contrôlé 50 plants répartis dans plusieurs zones de culture.',
+    data:'<table class="data-table"><thead><tr><th>Zone</th><th>Nombre de plants</th></tr></thead><tbody>'
+      +'<tr><td>Zone A</td><td>18</td></tr><tr><td>Zone B</td><td>12</td></tr>'
+      +'<tr class="data-highlight"><td>Zone C</td><td>15</td></tr><tr><td>Zone D</td><td>5</td></tr></tbody></table>',
+    consigne:'Calcule la fréquence des plants de la zone C.',
+    hint:'💡 Divise l\u2019effectif de la zone C par l\u2019effectif total.',
+    firstStep:'1ère étape : effectif total = 18 + 12 + 15 + 5 = 50.',
+    unit:'%', answer:30,
+    correction:'Effectif total = 18 + 12 + 15 + 5 = 50<br>Fréquence de la zone C = 15 ÷ 50 = 0,3 = <strong>30 %</strong>' },
+  { id:2, eyebrow:'Rapport 2 / 5', title:'🔧 Rapport des techniciens', type:'num',
+    story:'Une équipe de maintenance contrôle les systèmes de communication de la base.',
+    data:'<div class="data-line">Équipe de 32 techniciens, dont 8 travaillent sur les antennes extérieures.</div>',
+    consigne:'Calcule la fréquence des techniciens travaillant sur les antennes extérieures.',
+    hint:'💡 Divise 8 par l\u2019effectif total de l\u2019équipe.',
+    firstStep:'1ère étape : fréquence = 8 ÷ 32.',
+    unit:'%', answer:25,
+    correction:'Fréquence = 8 ÷ 32 = 0,25 = <strong>25 %</strong>' },
+  { id:3, eyebrow:'Rapport 3 / 5', title:'🧬 Rapport des cultures expérimentales', type:'num',
+    story:'L\u2019observatoire biologique analyse les résultats de plusieurs cultures expérimentales.',
+    data:'<div class="data-line">Une réaction particulière apparaît 21 fois sur 60 observations.</div>',
+    consigne:'Calcule la fréquence de cette réaction.',
+    hint:'💡 Calcule 21 ÷ 60 puis transforme le résultat en pourcentage.',
+    firstStep:'1ère étape : 21 ÷ 60 = 0,35.',
+    unit:'%', answer:35,
+    correction:'Fréquence = 21 ÷ 60 = 0,35 = <strong>35 %</strong>' },
+  { id:4, eyebrow:'Rapport 4 / 5', title:'🌡️ Rapport des observations', type:'num',
+    story:'La station météo transmet une nouvelle série de relevés à résumer avant l\u2019envoi vers la Terre.',
+    data:'<div class="data-line">Relevés : 6 ; 8 ; 9 ; 11 ; 7 ; 10 ; 5</div>',
+    consigne:'Calcule la moyenne de ces relevés.',
+    hint:'💡 Additionne toutes les valeurs puis divise la somme par le nombre de valeurs.',
+    firstStep:'1ère étape : somme = 6 + 8 + 9 + 11 + 7 + 10 + 5 = 56.',
+    unit:'', answer:8,
+    correction:'Somme = 6 + 8 + 9 + 11 + 7 + 10 + 5 = 56<br>Nombre de valeurs = 7<br>Moyenne = 56 ÷ 7 = <strong>8</strong>' },
+  { id:5, eyebrow:'Rapport 5 / 5', title:'📶 Validation finale', type:'qcm',
+    story:'Avant d\u2019autoriser la transmission générale vers la Terre, l\u2019ordinateur central demande une dernière vérification théorique.',
+    data:'',
+    consigne:'Choisis la seule affirmation correcte.',
+    hint:'💡 Une fréquence représente une proportion.',
+    options:[
+      {txt:'Une fréquence est toujours comprise entre 0 et 1.', ok:true},
+      {txt:'Une fréquence peut être supérieure à 1.', ok:false},
+      {txt:'La somme des fréquences vaut toujours 100.', ok:false},
+      {txt:'Une moyenne est toujours un nombre entier.', ok:false}
+    ],
+    correction:'Une fréquence est le quotient d\u2019un effectif par l\u2019effectif total : elle est donc toujours comprise entre 0 et 1 (soit entre 0 % et 100 %).' }
+];
+
+/* ==================================================================
+   ÉTAT
+   ================================================================== */
+var current=0;
+var results=[false,false,false,false,false];
+var attempts=[0,0,0,0,0];
+var missionHadCorrection=[false,false,false,false,false];
+var autonomousSuccesses=0;
+var gameStarted=false;
+var transitionPending=false;
+var transitionTimeoutID=null;
+function clearTransitionTimeout(){
+  if(transitionTimeoutID!==null){ clearTimeout(transitionTimeoutID); transitionTimeoutID=null; }
+}
+var finaleTriggered=false;
+
+/* ==================================================================
+   NAVIGATION
+   ================================================================== */
+window.startGame=function(){
+  if(gameStarted) return;
+  gameStarted=true;
+  playClick();
+  $('scene-intro').style.display='none';
+  $('scene-mission').classList.add('show');
+  renderCaps();
+  startGameTimer();
+  renderMission();
+};
+
+function renderCaps(){
+  var html='';
+  for(var i=0;i<5;i++){
+    var cls = results[i] ? 'done' : (i===current ? 'current' : '');
+    html+='<div class="cap '+cls+'" aria-hidden="true"><div class="cap-fill"></div></div>';
+  }
+  var progress=$('progress-caps');
+  progress.innerHTML=html;
+  var done=results.filter(function(v){return v;}).length;
+  progress.setAttribute('aria-valuenow', String(done));
+  $('progress-txt').textContent=done+' / 5';
+}
+
+/* ==================================================================
+   RENDU D'UNE MISSION — indice masqué au départ
+   ================================================================== */
+function renderMission(){
+  var m=MISSIONS[current];
+  var c=$('mission-card');
+  var body='';
+  if(m.type==='num'){
+    body='<div class="answer-row">'
+      +'<input type="text" inputmode="decimal" class="answer-input" id="mission-input" aria-label="Ta réponse'+(m.unit?' en '+m.unit:'')+'" autocomplete="off" spellcheck="false">'
+      +(m.unit?'<span class="answer-unit">'+m.unit+'</span>':'')
+      +'<button type="button" class="btn btn-launch" id="btn-check" onclick="checkNumeric()">Vérifier</button>'
+      +'</div>'
+      +'<div class="answer-tip">Saisis ta réponse puis appuie sur Entrée, ou clique sur Vérifier.</div>';
+  } else {
+    var optsHtml=m.options.map(function(o,i){
+      return '<button type="button" class="opt-btn" id="opt-'+i+'" onclick="checkQCM('+i+')" role="radio" aria-checked="false">'
+        +'<span class="ob-letter">'+String.fromCharCode(65+i)+'</span><span>'+o.txt+'</span></button>';
+    }).join('');
+    body='<div class="choice-list" role="radiogroup" aria-label="Choisis la bonne affirmation">'+optsHtml+'</div>';
+  }
+  c.innerHTML=
+    '<div class="mission-eyebrow">'+m.eyebrow+'</div>'
+    +'<h2>'+m.title+'</h2>'
+    +'<div class="mission-story">'+m.story+'</div>'
+    +(m.data?'<div class="data-wrap">'+m.data+'</div>':'')
+    +'<div class="mission-consigne">'+m.consigne+'</div>'
+    +'<div class="hint-actions">'
+      +'<button type="button" class="btn btn-hint" id="btn-hint" onclick="toggleMissionHint()" aria-expanded="false" aria-controls="mission-hint">💡 Indice</button>'
+      +'<div class="hint-box" id="mission-hint" hidden><span class="hint-emoji" aria-hidden="true">💡</span><span>'+m.hint.replace('💡 ','')+'</span></div>'
+    +'</div>'
+    +body
+    +'<div class="feedback" id="fb-box" role="status" aria-live="polite" aria-atomic="true"></div>'
+    +'<div class="correction-box" id="correction-box" hidden></div>';
+  renderCaps();
+  if(m.type==='num'){
+    var inp=$('mission-input');
+    inp.focus();
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') checkNumeric(); });
+  }
+}
+function toggleMissionHint(){
+  var box=$('mission-hint');
+  var button=$('btn-hint');
+  if(!box || !button) return;
+  var open=box.hidden;
+  box.hidden=!open;
+  button.setAttribute('aria-expanded', open?'true':'false');
+  button.textContent = open ? '💡 Masquer l\u2019indice' : '💡 Indice';
+}
+function showMissionHintAfterError(){
+  var box=$('mission-hint');
+  var button=$('btn-hint');
+  if(box){ box.hidden=false; }
+  if(button){ button.setAttribute('aria-expanded','true'); button.textContent='💡 Masquer l\u2019indice'; }
+}
+
+/* ==================================================================
+   VALIDATION — NUMÉRIQUE (deux essais avant correction automatique)
+   ================================================================== */
+function parseFlex(str){
+  if(str==null) return NaN;
+  var s=String(str).trim().replace(/\s+/g,'').replace(',', '.').replace('%','');
+  if(!/^-?\d+(\.\d+)?$/.test(s)) return NaN;
+  return parseFloat(s);
+}
+function roundToTenth(v){ return Math.round((v+Number.EPSILON)*10)/10; }
+window.checkNumeric=function(){
+  if(transitionPending || results[current]) return;
+  var m=MISSIONS[current];
+  var input=$('mission-input');
+  var val=parseFlex(input.value);
+  var feedback=$('fb-box');
+  if(isNaN(val)){
+    feedback.className='feedback show ko';
+    feedback.innerHTML='Saisis uniquement un nombre'+(m.unit?' (l\u2019unité '+m.unit+' est facultative)':'')+'.';
+    input.focus();
+    return;
+  }
+  var ok = m.decimals ? (roundToTenth(val)===roundToTenth(m.answer)) : (val===m.answer);
+  if(!ok){
+    input.classList.remove('ok');
+    input.classList.add('ko');
+    attempts[current]++;
+    playWrong();
+    feedback.className='feedback show ko';
+    if(attempts[current]===1){
+      feedback.innerHTML='Ce n\u2019est pas encore la bonne réponse. Corrige directement ta saisie.';
+      showMissionHintAfterError();
+      input.focus();
+      input.select();
+      return;
+    }
+    completeMissionWithCorrection();
+    return;
+  }
+  input.classList.remove('ko');
+  input.classList.add('ok');
+  setDisabled(input,true);
+  setDisabled($('btn-check'),true);
+  playCorrect();
+  results[current]=true;
+  if(!missionHadCorrection[current]){ autonomousSuccesses++; }
+  feedback.className='feedback show ok';
+  feedback.innerHTML='✅ Bravo ! Bonne réponse.';
+  var box=$('correction-box');
+  box.hidden=false;
+  box.innerHTML='<strong>Correction :</strong><br>'+m.correction;
+  finishMissionSuccess();
+};
+
+/* ==================================================================
+   VALIDATION — QCM (mission 5)
+   ================================================================== */
+window.checkQCM=function(index){
+  var btn=$('opt-'+index);
+  if(!btn || btn.disabled || transitionPending || results[current]) return;
+  var m=MISSIONS[current];
+  var ok=m.options[index].ok;
+  var feedback=$('fb-box');
+  btn.setAttribute('aria-checked','true');
+  if(!ok){
+    btn.classList.add('wrong');
+    setDisabled(btn,true);
+    attempts[current]++;
+    playWrong();
+    feedback.className='feedback show ko';
+    if(attempts[current]===1){
+      feedback.innerHTML='Ce n\u2019est pas la bonne affirmation. Tu peux choisir une autre réponse directement.';
+      showMissionHintAfterError();
+      return;
+    }
+    document.querySelectorAll('.opt-btn').forEach(function(b,i){
+      setDisabled(b,true);
+      if(m.options[i].ok){ b.classList.add('correct'); b.setAttribute('aria-checked','true'); }
+      else { b.setAttribute('aria-checked','false'); }
+    });
+    missionHadCorrection[current]=true;
+    results[current]=true;
+    feedback.innerHTML='📘 La correction est affichée ci-dessous.';
+    var box=$('correction-box');
+    box.hidden=false;
+    box.innerHTML='<strong>Correction :</strong><br>'+m.correction;
+    var card=$('mission-card'); if(card) card.classList.add('pulse-ok');
+    renderCaps();
+    showNextReportButton();
+    return;
+  }
+  btn.classList.add('correct');
+  playCorrect();
+  document.querySelectorAll('.opt-btn').forEach(function(b){ setDisabled(b,true); });
+  results[current]=true;
+  if(!missionHadCorrection[current]){ autonomousSuccesses++; }
+  feedback.className='feedback show ok';
+  feedback.innerHTML='✅ Bravo ! Bonne réponse.';
+  var box2=$('correction-box');
+  box2.hidden=false;
+  box2.innerHTML='<strong>Correction :</strong><br>'+m.correction;
+  finishMissionSuccess();
+};
+
+/* ==================================================================
+   CORRECTION AUTOMATIQUE APRÈS LA DEUXIÈME ERREUR (missions numériques)
+   ================================================================== */
+function completeMissionWithCorrection(){
+  var mission=MISSIONS[current];
+  var input=$('mission-input');
+  var feedback=$('fb-box');
+  var correction=$('correction-box');
+
+  missionHadCorrection[current]=true;
+  results[current]=true;
+
+  input.value=String(mission.answer).replace('.',',');
+  input.classList.remove('ko');
+  input.classList.add('ok');
+
+  setDisabled(input,true);
+  setDisabled($('btn-check'),true);
+
+  feedback.className='feedback show ko';
+  feedback.innerHTML='📘 La correction est affichée ci-dessous.';
+
+  correction.hidden=false;
+  correction.innerHTML='<strong>Correction :</strong><br>'+mission.correction;
+
+  var card=$('mission-card'); if(card) card.classList.add('pulse-ok');
+  renderCaps();
+  showNextReportButton();
+}
+
+/* ==================================================================
+   PROGRESSION MANUELLE ENTRE MISSIONS — la correction reste visible
+   jusqu'au clic de l'élève
+   ================================================================== */
+function finishMissionSuccess(){
+  var card=$('mission-card'); card.classList.add('pulse-ok');
+  renderCaps();
+  var justCap=document.querySelector('.progress-caps .cap:nth-child('+(current+1)+')');
+  if(justCap) justCap.classList.add('just-validated');
+  showNextReportButton();
+}
+function showNextReportButton(){
+  if(transitionPending) return;
+  transitionPending=true;
+
+  var card=$('mission-card');
+  if(!card || card.querySelector('#btn-next-report')) return;
+
+  var message=document.createElement('div');
+  message.className='zone-validated';
+  message.setAttribute('role','status');
+  message.textContent='✅ Rapport validé';
+  card.appendChild(message);
+
+  var button=document.createElement('button');
+  button.type='button';
+  button.className='btn btn-copper';
+  button.id='btn-next-report';
+  button.style.marginTop='1rem';
+  button.textContent = current===4 ? 'Voir le bilan →' : 'Rapport suivant →';
+  button.addEventListener('click', continueToNextReport);
+
+  card.appendChild(button);
+  button.focus();
+}
+function continueToNextReport(){
+  if(!transitionPending || !results[current]) return;
+
+  var button=$('btn-next-report');
+  if(button){ setDisabled(button,true); }
+
+  transitionPending=false;
+  playNextMission();
+
+  if(current<4){
+    current++;
+    renderMission();
+    window.scrollTo({top:0,behavior:'smooth'});
+  } else {
+    triggerFinale();
+  }
+}
+
+/* ==================================================================
+   BILAN FINAL
+   ================================================================== */
+function triggerFinale(){
+  if(finaleTriggered) return;
+  if(!results.every(Boolean)) return;
+  finaleTriggered=true;
+  clearTransitionTimeout();
+  var totalSec=stopGameTimer();
+  playFinal();
+  var goodCount=results.filter(Boolean).length;
+  var totalErrors=attempts.reduce(function(s,a){ return s+a; },0);
+  var msg;
+  if(autonomousSuccesses===5){ msg='Excellent ! Tous les rapports ont été validés sans correction automatique.'; }
+  else if(autonomousSuccesses>=4){ msg='Très bon travail ! Presque tous les rapports ont été validés sans correction.'; }
+  else { msg='Défi terminé ! Relis les corrections pour consolider les calculs statistiques.'; }
+  var c=$('mission-card');
+  c.innerHTML='<div class="final-card" id="final-card">'
+    +'<div class="mission-eyebrow">Rapport de transmission</div>'
+    +'<h2 id="final-title" tabindex="-1">🏆 Centre de communication opérationnel</h2>'
+    +'<div class="stat-row">'
+      +'<div class="stat-chip"><span class="sc-val">✅ '+goodCount+'/5</span><span class="sc-lbl">Rapports validés</span></div>'
+      +'<div class="stat-chip"><span class="sc-val">🎯 '+autonomousSuccesses+' / 5</span><span class="sc-lbl">Sans correction</span></div>'
+      +'<div class="stat-chip"><span class="sc-val">❌ '+totalErrors+'</span><span class="sc-lbl">'+(totalErrors>1?'Erreurs':'Erreur')+'</span></div>'
+      +'<div class="stat-chip"><span class="sc-val">⏱️ '+formatLongTime(totalSec)+'</span><span class="sc-lbl">Temps réalisé</span></div>'
+    +'</div>'
+    +'<div class="final-msg">🏆 '+msg+'</div>'
+    +'<div class="actions-row" style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-bottom:1rem">'
+      +'<button type="button" class="btn btn-copper" onclick="restartGame()">↻ Recommencer le défi</button>'
+    +'</div>'
+    +'</div>';
+  renderCaps();
+  var caps=$('progress-caps'); if(caps) caps.classList.add('finale');
+  spawnStardust();
+  var title=$('final-title'); if(title) title.focus();
+}
+function spawnStardust(){
+  var card=$('final-card'); if(!card) return;
+  var colors=['#34C7E8','#8B6FE8','#ffffff','#8B96AC'];
+  for(var i=0;i<18;i++){
+    var el=document.createElement('div');
+    el.className='stardust';
+    var size=2+Math.random()*4;
+    el.style.width=size+'px';
+    el.style.height=size+'px';
+    el.style.left=(5+Math.random()*90)+'%';
+    el.style.top=(30+Math.random()*50)+'%';
+    var color=colors[i%colors.length];
+    el.style.background=color;
+    el.style.boxShadow='0 0 '+(4+size)+'px '+color;
+    el.style.animationDelay=(Math.random()*0.6)+'s';
+    card.appendChild(el);
+  }
+}
+
+/* ==================================================================
+   REDÉMARRAGE
+   ================================================================== */
+window.restartGame=function(){
+  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
+  clearTransitionTimeout();
+  current=0;
+  results=[false,false,false,false,false];
+  attempts=[0,0,0,0,0];
+  missionHadCorrection=[false,false,false,false,false];
+  autonomousSuccesses=0;
+  gameStarted=false;
+  finaleTriggered=false;
+  transitionPending=false;
+  gameStartTime=null;
+  elapsedBeforePause=0; timerRunningSince=null; timerPausedByVisibility=false;
+  var timer=$('hud-timer');
+  if(timer){ timer.textContent='⏱️ 00:00'; }
+  $('scene-mission').classList.remove('show');
+  $('scene-intro').style.display='block';
+  $('progress-caps').innerHTML='';
+  $('progress-caps').classList.remove('finale');
+  $('progress-caps').setAttribute('aria-valuenow','0');
+  $('progress-txt').textContent='0 / 5';
+  window.scrollTo({top:0,behavior:'auto'});
+  // Le choix du son n'est jamais réinitialisé ici : il reste celui de l'utilisateur.
+};
+
+document.addEventListener('DOMContentLoaded', function(){});
+})();
+</script>
+</body>
+</html>
