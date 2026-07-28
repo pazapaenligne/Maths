@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pazapa Maths — 6e — Semaine 7 — Jour 5 — Probabilités et dénombrement — Je m'entraîne — Niveaux 1, 2 et 3</title>
+<style>
+:root{
+  /* ═══ Couleur du jour — Vendredi (charte Pazapa) ═══ */
+  --day-color:#f5c518; --day-dark:#8a6000; --day-light:#fffbeb;
+  --day-border:#f5e08a; --day-glow:rgba(245,197,24,.28);
+  --yellow:#f5c518; --green:#8dc63f; --pink:#f28b82;
+  --seg:#2563EB; --ok:#22C55E; --ko:#EF4444; --sec:#475569;
+  --text:#1E293B; --card:#FFFFFF; --bgclear:#FFF7ED;
+  --sand:#FFF8E1;
+  --blue-day:var(--day-color); --blue-day-dark:var(--day-dark);
+  --border:#F0E4B8; --muted:#8A7B4E; --radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bgclear);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:2rem 1rem 4rem;position:relative;overflow-x:hidden;line-height:1.6;}
+.mono{font-family:ui-monospace,Consolas,"Courier New",monospace;}
+body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+  width:340px;height:340px;background:var(--day-color);top:-80px;right:-80px;pointer-events:none;}
+body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+  width:260px;height:260px;background:var(--green);bottom:-60px;left:-60px;pointer-events:none;}
+.bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+  width:180px;height:180px;background:var(--green);bottom:120px;right:-40px;pointer-events:none;}
+.bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;
+  width:120px;height:120px;background:var(--pink);top:200px;left:-30px;pointer-events:none;}
+
+header{text-align:center;margin-bottom:1.4rem;position:relative;z-index:1;max-width:720px;}
+.logo-badge{display:inline-flex;align-items:center;gap:.5rem;background:#F5C518;color:#000;
+  font-size:.76rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:.3rem .9rem;border-radius:99px;margin-bottom:.6rem;}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.week-label{font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:.85rem;color:var(--muted);margin-bottom:.5rem;font-weight:600;}
+h1{font-size:clamp(1.4rem,4vw,2rem);font-weight:800;color:var(--blue-day-dark);line-height:1.3;}
+.subtitle{font-family:ui-monospace,Consolas,"Courier New",monospace;color:var(--sec);font-size:.95rem;margin-top:.5rem;font-weight:600;}
+
+.progress-wrap{width:100%;max-width:720px;margin-bottom:1.2rem;position:relative;z-index:1;}
+.progress-info{font-family:ui-monospace,Consolas,"Courier New",monospace;display:flex;justify-content:space-between;font-size:.85rem;color:var(--sec);
+  font-weight:700;margin-bottom:.4rem;}
+.progress-info.global-row{justify-content:center;margin-top:.35rem;margin-bottom:0;font-size:.76rem;color:var(--muted);}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--green));
+  border-radius:99px;transition:width .5s ease;}
+
+.card{width:100%;max-width:720px;background:var(--card);border:2px solid var(--border);
+  border-radius:var(--radius);padding:1.8rem 1.8rem 1.6rem;position:relative;z-index:1;
+  box-shadow:0 4px 20px rgba(138,96,0,.08);animation:fadeUp .4s ease both;}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius) var(--radius) 0 0;
+  background:linear-gradient(90deg,var(--day-color),var(--green),var(--seg),var(--ok));}
+.ex-num{font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--blue-day-dark);background:var(--day-light);border:1px solid var(--day-border);display:inline-block;
+  padding:.2rem .7rem;border-radius:99px;margin-bottom:.9rem;}
+.ex-title{font-size:1.15rem;font-weight:800;margin-bottom:.6rem;}
+.ex-enonce{font-size:.97rem;margin-bottom:.9rem;line-height:1.8;}
+.ex-consigne{font-size:.98rem;font-weight:700;margin:.9rem 0 .7rem;}
+
+.fig-wrap{width:100%;background:var(--sand);border:1.5px solid var(--border);border-radius:12px;
+  padding:.8rem;margin-bottom:1rem;}
+.fig-wrap svg{width:100%;height:auto;display:block;}
+
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.9rem;margin-bottom:1rem;}
+.pick-card{background:#fff;border:2px solid var(--border);border-radius:12px;padding:.8rem .6rem;
+  cursor:pointer;text-align:center;transition:border-color .15s,background .15s;font-family:inherit;}
+.pick-card:hover:not(.locked){border-color:var(--day-color);background:var(--day-light);}
+.pick-card:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.pick-card svg{width:64px;height:64px;margin-bottom:.5rem;}
+.pick-card .pc-label{font-size:.85rem;font-weight:700;color:var(--text);}
+.pick-card.selected{border-color:#F59E0B;background:#FFFBEB;box-shadow:0 0 0 3px rgba(245,158,11,.2);}
+.pick-card.correct{border-color:#16A34A;border-width:3px;background:#DCFCE7;}
+.pick-card.wrong{border-color:var(--ko);background:#FEF2F2;}
+.pick-card.missed{border-color:#F59E0B;background:#FFFBEB;}
+.pick-card.locked{cursor:default;}
+
+.quote-box{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:.8rem;}
+.quote-name{font-weight:800;color:var(--blue-day-dark);font-size:.85rem;margin-bottom:.3rem;}
+.quote-text{font-style:italic;font-size:.92rem;line-height:1.7;color:var(--text);}
+
+.opt-list{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.opt-btn{display:flex;align-items:center;gap:.6rem;text-align:left;padding:.7rem 1rem;
+  border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;
+  font-size:.92rem;font-weight:700;color:var(--text);min-height:48px;
+  font-family:ui-monospace,Consolas,"Courier New",monospace;transition:border-color .15s,background .15s;}
+.opt-btn:hover:not(:disabled):not(.locked){border-color:var(--day-color);background:var(--bgclear);}
+.opt-btn:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.opt-box{width:20px;height:20px;border:2px solid var(--muted);border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff;}
+.opt-btn.selected{border-color:#F59E0B;background:#FFFBEB;}
+.opt-btn.selected .opt-box{background:#F59E0B;border-color:#F59E0B;}
+.opt-btn.correct{border-color:#16A34A;border-width:3px;background:#DCFCE7;}
+.opt-btn.correct .opt-box{background:var(--ok);border-color:var(--ok);}
+.opt-btn.wrong{border-color:var(--ko);background:#FEF2F2;}
+.opt-btn.wrong .opt-box{background:var(--ko);border-color:var(--ko);}
+.opt-btn.locked{cursor:default;}
+.opt-btn:disabled{opacity:.5;cursor:default;}
+.opt-tag{margin-left:auto;font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:99px;flex-shrink:0;font-family:Arial,sans-serif;}
+.opt-btn.correct .opt-tag{background:var(--ok);color:#fff;}
+.opt-btn.wrong .opt-tag{background:var(--ko);color:#fff;}
+
+.match-row{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.8rem;
+  padding:.7rem .9rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;}
+.match-left{flex:1 1 220px;font-size:.9rem;font-weight:700;color:var(--text);}
+.match-select{flex:1 1 220px;padding:.55rem .7rem;border:2px solid var(--border);border-radius:8px;
+  font-family:inherit;font-size:.88rem;background:#fff;color:var(--text);min-height:44px;}
+.match-select:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+.match-select.ok-sel{border-color:#16A34A;border-width:3px;background:#DCFCE7;}
+.match-select.ko-sel{border-color:var(--ko);background:#FEF2F2;}
+.match-select:disabled{opacity:.85;}
+
+.hint-box{margin:.6rem 0 0;background:#FFFBEB;border:1.5px dashed #F5C518;border-radius:10px;
+  padding:.7rem 1rem;font-size:.88rem;color:#7A6010;display:none;line-height:1.8;}
+.hint-box.show{display:block;}
+.btn-hint{background:none;border:1.5px dashed var(--day-color);border-radius:8px;
+  padding:.4rem .9rem;font-size:.85rem;cursor:pointer;color:var(--blue-day-dark);
+  font-family:inherit;font-weight:700;min-height:44px;}
+.btn-hint:hover{background:var(--day-light);}
+.btn-hint:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
+
+.feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:10px;font-size:.9rem;
+  display:none;align-items:flex-start;gap:.7rem;line-height:1.8;}
+.feedback.show{display:flex;}
+.feedback.ok{background:#F0FDF4;border:1.5px solid var(--ok);color:#166534;}
+.feedback.ko{background:#FEF2F2;border:1.5px solid var(--ko);color:#B91C1C;}
+.feedback.corr{background:#FFF8E1;border:1.5px solid var(--day-color);color:#6B4E00;}
+.feedback-icon{font-size:1.3rem;flex-shrink:0;}
+
+.btn-row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.5rem;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.4rem;border-radius:10px;
+  font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+  transition:transform .12s,box-shadow .15s;min-height:48px;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-primary{background:var(--day-color);color:#5a4000;box-shadow:0 3px 10px var(--day-glow);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 16px var(--day-glow);}
+.btn-primary:focus-visible{outline:3px solid var(--blue-day-dark);outline-offset:2px;}
+.btn-ghost{background:transparent;color:var(--sec);border:2px solid var(--border);}
+.btn-ghost:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+
+.bilan,.level-transition{width:100%;max-width:720px;display:none;position:relative;z-index:1;}
+.bilan.show,.level-transition.show{display:block;}
+.bilan-card,.level-transition-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);
+  padding:2.2rem 1.8rem;box-shadow:0 4px 20px rgba(138,96,0,.08);animation:fadeUp .4s ease both;text-align:center;}
+.bilan-title,.level-transition-card h2{font-size:1.5rem;font-weight:800;color:var(--blue-day-dark);margin-bottom:1rem;}
+.bilan-text,.level-transition-card p{font-size:1rem;line-height:1.8;margin-bottom:1.6rem;color:var(--text);}
+.score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin:1rem 0 1.3rem;}
+.score-card{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;
+  padding:.85rem .7rem;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-main{grid-column:1 / -1;}
+.score-value{font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:1.3rem;font-weight:900;color:var(--blue-day-dark);}
+.score-label{font-size:.76rem;color:var(--muted);line-height:1.4;}
+.level-results{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.3rem;
+  font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:.88rem;font-weight:700;color:var(--blue-day-dark);
+  background:var(--day-light);border:1.5px solid var(--day-border);border-radius:10px;padding:.7rem 1rem;}
+@media(max-width:480px){.score-grid{grid-template-columns:1fr;}.score-main{grid-column:auto;}}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@media(prefers-reduced-motion:reduce){.card,.bilan-card,.level-transition-card{animation:none;}}
+@media(max-width:600px){.card,.bilan-card,.level-transition-card{padding:1.3rem;}
+  .btn{font-size:.88rem;padding:.6rem 1.1rem;}}
+</style>
+</head>
+<body>
+<div class="bubble1"></div>
+<div class="bubble2"></div>
+
+<header>
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#F5C518"></span>
+    <span class="logo-dot" style="background:#8DC63F"></span>
+    <span class="logo-dot" style="background:#3AB5D8"></span>
+    Pazapa &middot; Maths &middot; 6&egrave;me
+  </div>
+  <div class="week-label">Semaine 7 &ndash; Jour 5</div>
+  <h1>Initiation aux probabilit&eacute;s et d&eacute;nombrement</h1>
+  <p class="subtitle">Je m&rsquo;entra&icirc;ne &middot; 3 niveaux &middot; 12 exercices</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="level-label">Niveau 1 sur 3</span>
+    <span id="exercise-label">Exercice 1 sur 4</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+  <div class="progress-info global-row"><span id="global-label">Exercice 1 sur 12</span></div>
+</div>
+
+<div class="card" id="ex-card">
+  <div class="card-stripe"></div>
+  <div id="quiz-zone"></div>
+  <div class="feedback" id="q-fb" role="status" aria-live="polite"></div>
+  <div class="btn-row" id="btn-row">
+    <button class="btn btn-primary" id="btn-valider" onclick="validerEx()" disabled>Valider</button>
+    <button class="btn btn-primary" id="btn-continuer" onclick="continueExercise()" style="display:none;">Continuer &rarr;</button>
+  </div>
+</div>
+
+<!-- ===== Transition Niveau 1 → Niveau 2 ===== -->
+<div class="level-transition" id="level-transition-1">
+  <div class="level-transition-card">
+    <h2>🎉 Niveau 1 termin&eacute; !</h2>
+    <p>Tu sais reconna&icirc;tre une exp&eacute;rience al&eacute;atoire et identifier ses issues possibles.<br>Pour calculer une probabilit&eacute; simple, compte d&rsquo;abord le nombre total d&rsquo;issues possibles, puis le nombre d&rsquo;issues favorables.</p>
+    <button type="button" class="btn btn-primary" id="btn-next-level-1" onclick="startNextLevel()" style="margin:0 auto;">Passer au niveau 2 &rarr;</button>
+  </div>
+</div>
+
+<!-- ===== Transition Niveau 2 → Niveau 3 ===== -->
+<div class="level-transition" id="level-transition-2">
+  <div class="level-transition-card">
+    <h2>🎉 Niveau 2 termin&eacute; !</h2>
+    <p>Tu sais compter les issues favorables et d&eacute;terminer une probabilit&eacute; simple.</p>
+    <button type="button" class="btn btn-primary" id="btn-next-level-2" onclick="startNextLevel()" style="margin:0 auto;">Passer au niveau 3 &rarr;</button>
+  </div>
+</div>
+
+<!-- ===== Bilan global final ===== -->
+<div class="bilan" id="bilan-screen">
+  <div class="bilan-card">
+    <div class="bilan-title">🎉 Les trois niveaux sont termin&eacute;s !</div>
+
+    <div class="score-grid">
+      <div class="score-card score-main">
+        <span class="score-value" id="final-score">0 / 24</span>
+        <span class="score-label">Score global</span>
+      </div>
+      <div class="score-card">
+        <span class="score-value" id="final-percent">0 %</span>
+        <span class="score-label">R&eacute;ussite</span>
+      </div>
+      <div class="score-card">
+        <span class="score-value" id="final-first">0 / 12</span>
+        <span class="score-label">Sans erreur</span>
+      </div>
+      <div class="score-card">
+        <span class="score-value" id="final-second">0 / 12</span>
+        <span class="score-label">Apr&egrave;s une premi&egrave;re erreur</span>
+      </div>
+      <div class="score-card">
+        <span class="score-value" id="final-corrected">0 / 12</span>
+        <span class="score-label">Avec correction</span>
+      </div>
+    </div>
+
+    <div class="level-results">
+      <div id="level1-score">Niveau 1 : 0 / 8</div>
+      <div id="level2-score">Niveau 2 : 0 / 8</div>
+      <div id="level3-score">Niveau 3 : 0 / 8</div>
+    </div>
+
+    <div class="bilan-text" id="final-message"></div>
+    <div class="bilan-text" style="font-style:italic;">Lorsque toutes les issues sont &eacute;quiprobables, on calcule la probabilit&eacute; d&rsquo;un &eacute;v&eacute;nement en divisant le nombre d&rsquo;issues favorables par le nombre total d&rsquo;issues possibles.</div>
+    <div class="bilan-text" style="font-style:italic;">Un &eacute;v&eacute;nement peut &ecirc;tre impossible, possible mais pas certain, ou certain.</div>
+
+    <div class="btn-row" style="justify-content:center;">
+      <button type="button" class="btn btn-ghost" id="btn-restart" onclick="restartAllLevels()">🔄 Recommencer les trois niveaux</button>
+    </div>
+  </div>
+</div>
+
+<span id="live-region" class="sr-only" role="status" aria-live="polite"></span>
+
+<script>
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* ===================== Helpers génériques partagés ===================== */
+function announce(msg){ var lr=$('live-region'); if(lr) lr.textContent=msg; }
+function resetButtons(){
+  $('btn-valider').style.display='inline-flex'; $('btn-valider').disabled=true;
+  $('btn-continuer').style.display='none';
+  $('q-fb').className='feedback'; $('q-fb').innerHTML='';
+}
+function showFeedback(kind,icon,html){
+  var fb=$('q-fb'); fb.className='feedback show '+kind;
+  fb.innerHTML='<span class="feedback-icon" aria-hidden="true">'+icon+'</span><div>'+html+'</div>';
+  announce(fb.textContent);
+}
+function unlockContinue(){
+  $('btn-valider').style.display='none'; $('btn-continuer').style.display='inline-flex'; $('btn-continuer').focus();
+}
+function hintHtml(text){
+  return '<div class="hint-wrap"><button type="button" class="btn-hint" onclick="toggleHint()" id="btn-hint" aria-expanded="false" aria-controls="hint-box">💡 Indice</button>'
+    +'<div class="hint-box" id="hint-box" role="note">'+text+'</div></div>';
+}
+window.toggleHint=function(){
+  var box=$('hint-box'), btn=$('btn-hint');
+  if(!box||!btn) return;
+  var open=box.classList.toggle('show');
+  btn.textContent=open?'💡 Masquer l\u2019indice':'💡 Indice';
+  btn.setAttribute('aria-expanded',open?'true':'false');
+};
+function openHintAuto(){
+  var box=$('hint-box'), btn=$('btn-hint');
+  if(box) box.classList.add('show');
+  if(btn){ btn.setAttribute('aria-expanded','true'); btn.textContent='💡 Masquer l\u2019indice'; }
+}
+function hideHintBtn(){ var bh=$('btn-hint'); if(bh){ bh.style.display='none'; bh.setAttribute('aria-expanded','false'); } var hb=$('hint-box'); if(hb) hb.classList.remove('show'); }
+
+function buildOptList(containerId,idPrefix,options,onSelect){
+  var w=$(containerId);
+  options.forEach(function(opt,i){
+    var b=document.createElement('button');
+    b.type='button'; b.className='opt-btn'; b.id=idPrefix+i;
+    b.innerHTML='<span class="opt-box" id="'+idPrefix+'box-'+i+'"></span><span>'+opt+'</span><span class="opt-tag" id="'+idPrefix+'tag-'+i+'"></span>';
+    b.onclick=function(){ onSelect(i); };
+    w.appendChild(b);
+  });
+}
+function lockOptList(idPrefix,count,correctIdx,selIdx){
+  for(var i=0;i<count;i++){
+    var b=$(idPrefix+i); if(!b) continue;
+    b.classList.add('locked'); b.disabled=true; b.classList.remove('selected');
+    var box=$(idPrefix+'box-'+i); if(box) box.innerHTML='';
+    var tag=$(idPrefix+'tag-'+i);
+    if(i===correctIdx){ b.classList.add('correct'); if(tag) tag.textContent='Bonne r\u00e9ponse'; }
+    else if(i===selIdx){ b.classList.add('wrong'); if(tag) tag.textContent='Incorrect'; }
+  }
+}
+
+/* ===================== Organisation générale ===================== */
+var TOTAL_LEVELS=3;
+var EXERCISES_PER_LEVEL=4;
+var TOTAL_EXERCISES=12;
+var MAX_SCORE=24;
+
+var currentLevel=0;
+var currentExercise=0;
+
+var EX_RESULTS=new Array(TOTAL_EXERCISES).fill(null);
+
+function getGlobalExerciseIndex(){
+  return (currentLevel*EXERCISES_PER_LEVEL)+currentExercise;
+}
+
+/* ===================== Système de score commun ===================== */
+function recordResult(globalIndex,attempts,corrected){
+  if(globalIndex<0 || globalIndex>=TOTAL_EXERCISES || EX_RESULTS[globalIndex]!==null){
+    return;
+  }
+  var status, points;
+  if(corrected){
+    status='corrected'; points=0;
+  } else if(attempts===0){
+    status='first'; points=2;
+  } else {
+    status='second'; points=1;
+  }
+  EX_RESULTS[globalIndex]={level:currentLevel+1, exercise:currentExercise+1, status:status, points:points};
+}
+function getTotalScore(){
+  return EX_RESULTS.reduce(function(total,result){ return total+(result?result.points:0); },0);
+}
+function countStatus(status){
+  return EX_RESULTS.filter(function(result){ return result && result.status===status; }).length;
+}
+function getScorePercent(){
+  return Math.round(getTotalScore()/MAX_SCORE*100);
+}
+function getLevelScore(levelIndex){
+  var start=levelIndex*EXERCISES_PER_LEVEL;
+  var end=start+EXERCISES_PER_LEVEL;
+  return EX_RESULTS.slice(start,end).reduce(function(total,result){ return total+(result?result.points:0); },0);
+}
+
+/* ===================== Progression visuelle ===================== */
+function updateProgress(){
+  var globalIndex=getGlobalExerciseIndex();
+  $('level-label').textContent='Niveau '+(currentLevel+1)+' sur 3';
+  $('exercise-label').textContent='Exercice '+(currentExercise+1)+' sur 4';
+  $('global-label').textContent='Exercice '+(globalIndex+1)+' sur 12';
+  $('progress-bar').style.width=Math.round(globalIndex/TOTAL_EXERCISES*100)+'%';
+}
+
+/* ===================== Rendu / validation courants ===================== */
+function renderCurrentExercise(){
+  resetButtons();
+  updateProgress();
+  if(currentLevel===0) window.__N1_render();
+  else if(currentLevel===1) window.__N2_render();
+  else window.__N3_render();
+}
+window.validerEx=function(){
+  if(currentLevel===0) window.__N1_validerEx();
+  else if(currentLevel===1) window.__N2_validerEx();
+  else window.__N3_validerEx();
+};
+
+/* ===================== Transitions entre niveaux ===================== */
+function showLevelTransition(n){
+  $('ex-card').style.display='none';
+  $('level-transition-'+n).classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function hideLevelTransition(){
+  $('level-transition-1').classList.remove('show');
+  $('level-transition-2').classList.remove('show');
+}
+window.startNextLevel=function(){
+  currentLevel++;
+  currentExercise=0;
+  hideLevelTransition();
+  $('ex-card').style.display='block';
+  renderCurrentExercise();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+/* ===================== Contrôleur de progression ===================== */
+window.continueExercise=function(){
+  if(currentExercise<EXERCISES_PER_LEVEL-1){
+    currentExercise++;
+    renderCurrentExercise();
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
+  if(currentLevel<TOTAL_LEVELS-1){
+    showLevelTransition(currentLevel+1);
+    return;
+  }
+  showFinalBilan();
+};
+
+/* ===================== Bilan final ===================== */
+function showFinalBilan(){
+  $('progress-bar').style.width='100%';
+  $('ex-card').style.display='none';
+
+  var score=getTotalScore();
+  var percent=getScorePercent();
+  var first=countStatus('first');
+  var second=countStatus('second');
+  var corrected=countStatus('corrected');
+
+  $('final-score').textContent=score+' / '+MAX_SCORE;
+  $('final-percent').textContent=percent+' %';
+  $('final-first').textContent=first+' / 12';
+  $('final-second').textContent=second+' / 12';
+  $('final-corrected').textContent=corrected+' / 12';
+
+  $('level1-score').textContent='Niveau 1 : '+getLevelScore(0)+' / 8';
+  $('level2-score').textContent='Niveau 2 : '+getLevelScore(1)+' / 8';
+  $('level3-score').textContent='Niveau 3 : '+getLevelScore(2)+' / 8';
+
+  var message;
+  if(percent===100){
+    message='Excellent ! Tu as r\u00e9ussi les douze exercices sans erreur.';
+  } else if(percent>=75){
+    message='Tr\u00e8s bon travail ! Tu ma\u00eetrises les issues et les probabilit\u00e9s simples.';
+  } else if(percent>=50){
+    message='Bon travail ! Relis les corrections pour consolider ton raisonnement.';
+  } else {
+    message='Tu as termin\u00e9 les trois niveaux. Reprends les exercices corrig\u00e9s pour progresser.';
+  }
+  $('final-message').textContent=message;
+
+  var b=$('bilan-screen');
+  b.classList.add('show');
+  b.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ===================== Redémarrage complet ===================== */
+window.restartAllLevels=function(){
+  EX_RESULTS=new Array(TOTAL_EXERCISES).fill(null);
+  currentLevel=0;
+  currentExercise=0;
+
+  window.__N1_reset();
+  window.__N2_reset();
+  window.__N3_reset();
+
+  $('bilan-screen').classList.remove('show');
+  hideLevelTransition();
+  $('ex-card').style.display='block';
+  $('progress-bar').style.width='0%';
+
+  renderCurrentExercise();
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+document.addEventListener('DOMContentLoaded',function(){
+  renderCurrentExercise();
+});
+
+</script>
+<script>
+/* ==================== NIVEAU 1 — indices globaux 0 à 3 ==================== */
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* =====================================================================
+   ICÔNES SVG (simples, sans texte décoratif inutile)
+   ===================================================================== */
+function svgDe(){
+  return '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    +'<rect x="8" y="8" width="48" height="48" rx="9" fill="#fff" stroke="#1E293B" stroke-width="3"/>'
+    +'<circle cx="22" cy="22" r="4.2" fill="#1E293B"/><circle cx="42" cy="22" r="4.2" fill="#1E293B"/>'
+    +'<circle cx="22" cy="42" r="4.2" fill="#1E293B"/><circle cx="42" cy="42" r="4.2" fill="#1E293B"/>'
+    +'<circle cx="32" cy="32" r="4.2" fill="#1E293B"/></svg>';
+}
+function svgCrayon(){
+  return '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    +'<rect x="14" y="10" width="14" height="38" rx="2" fill="#F5C518" stroke="#1E293B" stroke-width="2.5" transform="rotate(35 21 29)"/>'
+    +'<path d="M40 44 L48 52 L34 56 Z" fill="#EAD9B8" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>'
+    +'<path d="M13 9 L28 9 L20.5 1.5 Z" fill="#1E293B" transform="rotate(35 21 9)"/></svg>';
+}
+function svgPalette(){
+  return '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    +'<path d="M32 8c-14 0-24 9-24 20 0 8 6 12 12 12 3 0 3-3 6-3s4 4 9 4c11 0 21-9 21-19 0-8-10-14-24-14z" fill="#fff" stroke="#1E293B" stroke-width="3" stroke-linejoin="round"/>'
+    +'<circle cx="22" cy="24" r="4" fill="#EF4444"/><circle cx="34" cy="20" r="4" fill="#3AB5D8"/>'
+    +'<circle cx="44" cy="26" r="4" fill="#8DC63F"/><circle cx="24" cy="36" r="4" fill="#F5C518"/></svg>';
+}
+function svgRegle(){
+  return '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+    +'<rect x="6" y="26" width="52" height="14" rx="2" fill="#fff" stroke="#1E293B" stroke-width="3" transform="rotate(-18 32 33)"/>'
+    +'<g stroke="#1E293B" stroke-width="2" transform="rotate(-18 32 33)">'
+    +'<line x1="12" y1="26" x2="12" y2="32"/><line x1="20" y1="26" x2="20" y2="32"/>'
+    +'<line x1="28" y1="26" x2="28" y2="34"/><line x1="36" y1="26" x2="36" y2="32"/>'
+    +'<line x1="44" y1="26" x2="44" y2="32"/><line x1="52" y1="26" x2="52" y2="34"/></g></svg>';
+}
+function svgPiece(){
+  return '<svg viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Une pi\u00e8ce vue de dessus, avec sa face Pile et sa face Face">'
+    +'<circle cx="60" cy="60" r="48" fill="#FFF3C4" stroke="#B8860B" stroke-width="4"/>'
+    +'<circle cx="60" cy="60" r="36" fill="none" stroke="#B8860B" stroke-width="2.5"/>'
+    +'<text x="60" y="68" font-size="20" font-weight="800" fill="#8a6000" text-anchor="middle">P</text>'
+    +'<circle cx="160" cy="60" r="48" fill="#FFF3C4" stroke="#B8860B" stroke-width="4"/>'
+    +'<circle cx="160" cy="60" r="36" fill="none" stroke="#B8860B" stroke-width="2.5"/>'
+    +'<text x="160" y="68" font-size="20" font-weight="800" fill="#8a6000" text-anchor="middle">F</text>'
+    +'<text x="60" y="112" font-size="13" font-weight="700" fill="#1E293B" text-anchor="middle">Pile</text>'
+    +'<text x="160" y="112" font-size="13" font-weight="700" fill="#1E293B" text-anchor="middle">Face</text>'
+    +'</svg>';
+}
+function svgSac(){
+  var billes=[
+    {x:95,y:70,c:'#EF4444'},{x:140,y:95,c:'#EF4444'},
+    {x:115,y:110,c:'#3AB5D8'},{x:160,y:65,c:'#3AB5D8'},
+    {x:130,y:80,c:'#8DC63F'}
+  ];
+  var circles=billes.map(function(b){ return '<circle cx="'+b.x+'" cy="'+b.y+'" r="12" fill="'+b.c+'" stroke="#1E293B" stroke-width="2"/>'; }).join('');
+  return '<svg viewBox="0 0 260 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sac transparent contenant deux billes rouges, deux billes bleues et une bille verte">'
+    +'<path d="M70 50 L190 50 L205 150 Q205 165 190 165 L70 165 Q55 165 55 150 Z" fill="#E8F6FB" fill-opacity=".55" stroke="#1a6e88" stroke-width="3" stroke-linejoin="round"/>'
+    +'<path d="M70 50 Q70 30 90 28 L170 28 Q190 30 190 50" fill="none" stroke="#1a6e88" stroke-width="3"/>'
+    +circles
+    +'</svg>';
+}
+
+/* =====================================================================
+   EXERCICE 1 (indice global 0) — Reconnaître une expérience aléatoire
+   ===================================================================== */
+var CARTES=[
+  {label:'Lancer un d\u00e9.', svg:svgDe, correct:true},
+  {label:'\u00c9crire son pr\u00e9nom.', svg:svgCrayon, correct:false},
+  {label:'Colorier un dessin.', svg:svgPalette, correct:false},
+  {label:'Tracer un segment de 5\u00a0cm.', svg:svgRegle, correct:false}
+];
+var n1_ex0_sel=-1, n1_ex0_attempts=0, n1_ex0_done=false;
+function n1_renderEx0(){
+  n1_ex0_sel=-1; n1_ex0_attempts=0; n1_ex0_done=false;
+  var html='<div class="ex-num">Exercice 1 sur 4</div>'
+    +'<div class="ex-title">Reconna\u00eetre une exp\u00e9rience al\u00e9atoire</div>'
+    +'<div class="ex-consigne">Quelle situation est une exp\u00e9rience al\u00e9atoire ?</div>'
+    +'<div class="cards-grid" id="cartes-grid"></div>'
+    +hintHtml('Une exp\u00e9rience al\u00e9atoire peut donner plusieurs r\u00e9sultats diff\u00e9rents que l\u2019on ne conna\u00eet pas \u00e0 l\u2019avance.');
+  $('quiz-zone').innerHTML=html;
+  var w=$('cartes-grid');
+  var letters=['A','B','C','D'];
+  CARTES.forEach(function(c,i){
+    var b=document.createElement('button');
+    b.type='button'; b.className='pick-card'; b.id='carte-'+i;
+    b.innerHTML=c.svg()+'<div class="pc-label">Carte '+letters[i]+'<br>'+c.label+'</div>';
+    b.onclick=function(){ n1_selectCarte(i); };
+    w.appendChild(b);
+  });
+}
+function n1_selectCarte(i){
+  n1_ex0_sel=i;
+  for(var j=0;j<4;j++){ $('carte-'+j).classList.toggle('selected',j===i); }
+  $('btn-valider').disabled=false;
+}
+function n1_validerEx0(){
+  if(n1_ex0_done) return;
+  var ok=CARTES[n1_ex0_sel] && CARTES[n1_ex0_sel].correct;
+  if(ok){
+    n1_ex0_done=true;
+    n1_lockCartes(0);
+    recordResult(0,n1_ex0_attempts,false);
+    showFeedback('ok','✅','Exact ! Le lancer d\u2019un d\u00e9 est une exp\u00e9rience al\u00e9atoire car on ne peut pas pr\u00e9voir le r\u00e9sultat obtenu avant le lancer.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n1_ex0_attempts++;
+    if(n1_ex0_attempts===1){
+      showFeedback('ko','❌','Ce n\u2019est pas encore la bonne carte. R\u00e9fl\u00e9chis : peut-on conna\u00eetre le r\u00e9sultat \u00e0 l\u2019avance ?');
+      openHintAuto();
+    } else {
+      n1_ex0_done=true;
+      n1_ex0_sel=0;
+      n1_lockCartes(0);
+      recordResult(0,n1_ex0_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> le lancer d\u2019un d\u00e9 est une exp\u00e9rience al\u00e9atoire car on ne peut pas pr\u00e9voir le r\u00e9sultat obtenu avant le lancer. Les autres actions donnent un r\u00e9sultat choisi ou contr\u00f4l\u00e9.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+function n1_lockCartes(correctIdx){
+  for(var i=0;i<4;i++){
+    var b=$('carte-'+i);
+    b.classList.add('locked'); b.disabled=true; b.classList.remove('selected');
+    if(i===correctIdx) b.classList.add('correct');
+    else if(i===n1_ex0_sel) b.classList.add('wrong');
+  }
+}
+
+/* =====================================================================
+   EXERCICE 2 (indice global 1) — Identifier les issues (pièce)
+   ===================================================================== */
+var PIECE_OPTS=['Pile uniquement','Face uniquement','Pile et Face','1 et 2'];
+var n1_ex1_sel=-1, n1_ex1_attempts=0, n1_ex1_done=false;
+function n1_renderEx1(){
+  n1_ex1_sel=-1; n1_ex1_attempts=0; n1_ex1_done=false;
+  var html='<div class="ex-num">Exercice 2 sur 4</div>'
+    +'<div class="ex-title">Identifier les issues</div>'
+    +'<div class="fig-wrap">'+svgPiece()+'</div>'
+    +'<div class="ex-consigne">Quelles sont les issues possibles lorsqu\u2019on lance cette pi\u00e8ce ?</div>'
+    +'<div class="opt-list" id="piece-opts"></div>'
+    +hintHtml('Une pi\u00e8ce poss\u00e8de deux faces diff\u00e9rentes.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('piece-opts','po-',PIECE_OPTS,function(i){
+    n1_ex1_sel=i;
+    for(var j=0;j<4;j++){ var b=$('po-'+j),box=$('po-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n1_validerEx1(){
+  if(n1_ex1_done) return;
+  var ok=n1_ex1_sel===2;
+  if(ok){
+    n1_ex1_done=true;
+    lockOptList('po-',4,2,n1_ex1_sel);
+    recordResult(1,n1_ex1_attempts,false);
+    showFeedback('ok','✅','Exact ! Les issues de cette exp\u00e9rience al\u00e9atoire sont Pile et Face.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n1_ex1_attempts++;
+    if(n1_ex1_attempts===1){
+      showFeedback('ko','❌','Une pi\u00e8ce poss\u00e8de deux faces diff\u00e9rentes. Combien de r\u00e9sultats sont donc possibles ?');
+      openHintAuto();
+    } else {
+      n1_ex1_done=true;
+      lockOptList('po-',4,2,n1_ex1_sel);
+      recordResult(1,n1_ex1_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> les deux r\u00e9sultats possibles sont Pile et Face. Ces deux r\u00e9sultats sont appel\u00e9s les issues de l\u2019exp\u00e9rience al\u00e9atoire.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* =====================================================================
+   EXERCICE 3 (indice global 2) — Les issues d'un sac de billes
+   ===================================================================== */
+var SAC_OPTS=['Rouge et bleue uniquement','Rouge et verte uniquement','Bleue et verte uniquement','Rouge, bleue et verte'];
+var n1_ex2_sel=-1, n1_ex2_attempts=0, n1_ex2_done=false;
+function n1_renderEx2(){
+  n1_ex2_sel=-1; n1_ex2_attempts=0; n1_ex2_done=false;
+  var html='<div class="ex-num">Exercice 3 sur 4</div>'
+    +'<div class="ex-title">Les issues d\u2019un sac de billes</div>'
+    +'<div class="fig-wrap">'+svgSac()+'</div>'
+    +'<div class="ex-consigne">Quelles couleurs peut-on obtenir en tirant une bille au hasard ?</div>'
+    +'<div class="opt-list" id="sac-opts"></div>'
+    +hintHtml('Regarde uniquement les couleurs pr\u00e9sentes dans le sac.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('sac-opts','so-',SAC_OPTS,function(i){
+    n1_ex2_sel=i;
+    for(var j=0;j<4;j++){ var b=$('so-'+j),box=$('so-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n1_validerEx2(){
+  if(n1_ex2_done) return;
+  var ok=n1_ex2_sel===3;
+  if(ok){
+    n1_ex2_done=true;
+    lockOptList('so-',4,3,n1_ex2_sel);
+    recordResult(2,n1_ex2_attempts,false);
+    showFeedback('ok','✅','Exact ! Toutes les couleurs pr\u00e9sentes dans le sac \u2014 rouge, bleue et verte \u2014 peuvent \u00eatre obtenues.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n1_ex2_attempts++;
+    if(n1_ex2_attempts===1){
+      showFeedback('ko','❌','Regarde uniquement les couleurs pr\u00e9sentes dans le sac : combien y en a-t-il ?');
+      openHintAuto();
+    } else {
+      n1_ex2_done=true;
+      lockOptList('so-',4,3,n1_ex2_sel);
+      recordResult(2,n1_ex2_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> les couleurs pr\u00e9sentes sont rouge, bleue et verte. Les issues possibles sont donc rouge, bleue et verte : toutes les couleurs pr\u00e9sentes dans le sac peuvent \u00eatre obtenues.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* =====================================================================
+   EXERCICE 4 (indice global 3) — Associer une expérience à ses issues
+   ===================================================================== */
+var MATCH_LEFT=[
+  'Lancer une pi\u00e8ce.',
+  'Lancer un d\u00e9 \u00e0 6 faces.',
+  'Tirer une bille dans un sac contenant uniquement des billes rouges et bleues.',
+  'Tourner une roue compos\u00e9e de quatre secteurs\u00a0: jaune, bleu, rouge et vert.'
+];
+var MATCH_RIGHT=[
+  'Pile / Face',
+  '1\u00a0;\u00a02\u00a0;\u00a03\u00a0;\u00a04\u00a0;\u00a05\u00a0;\u00a06',
+  'Rouge / Bleue',
+  'Jaune / Bleu / Rouge / Vert'
+];
+var MATCH_CORRECT=[0,1,2,3];
+var n1_ex3_attempts=0, n1_ex3_done=false;
+function n1_renderEx3(){
+  n1_ex3_attempts=0; n1_ex3_done=false;
+  var html='<div class="ex-num">Exercice 4 sur 4</div>'
+    +'<div class="ex-title">Associer une exp\u00e9rience \u00e0 ses issues</div>'
+    +'<div class="ex-consigne">Pour chaque exp\u00e9rience, choisis l\u2019ensemble des issues qui lui correspond.</div>'
+    +'<div id="match-zone"></div>'
+    +hintHtml('Les issues sont tous les r\u00e9sultats que l\u2019on peut obtenir.');
+  $('quiz-zone').innerHTML=html;
+  var w=$('match-zone');
+  MATCH_LEFT.forEach(function(txt,i){
+    var row=document.createElement('div');
+    row.className='match-row';
+    var optsHtml='<option value="-1">\u2014 Choisir \u2014</option>'
+      +MATCH_RIGHT.map(function(r,j){ return '<option value="'+j+'">'+r+'</option>'; }).join('');
+    row.innerHTML='<div class="match-left">'+txt+'</div>'
+      +'<select class="match-select" id="match-'+i+'" aria-label="Issues pour : '+txt+'">'+optsHtml+'</select>';
+    w.appendChild(row);
+  });
+  for(var i=0;i<MATCH_LEFT.length;i++){
+    (function(idx){
+      document.getElementById('match-'+idx).addEventListener('change',function(){
+        var select=document.getElementById('match-'+idx);
+        select.classList.remove('ok-sel','ko-sel');
+        n1_checkMatchReady();
+      });
+    })(i);
+  }
+}
+function n1_checkMatchReady(){
+  var allSet=true;
+  for(var i=0;i<MATCH_LEFT.length;i++){
+    if($('match-'+i).value==='-1'){ allSet=false; break; }
+  }
+  $('btn-valider').disabled=!allSet;
+}
+function n1_validerEx3(){
+  if(n1_ex3_done) return;
+  var allOk=true;
+  var selections=[];
+  for(var i=0;i<MATCH_LEFT.length;i++){
+    var sel=$('match-'+i);
+    var val=parseInt(sel.value,10);
+    selections.push(val);
+    if(val!==MATCH_CORRECT[i]) allOk=false;
+  }
+  if(allOk){
+    n1_ex3_done=true;
+    for(var k=0;k<MATCH_LEFT.length;k++){ var s=$('match-'+k); s.disabled=true; s.className='match-select ok-sel'; }
+    recordResult(3,n1_ex3_attempts,false);
+    showFeedback('ok','✅','Exact ! Chaque exp\u00e9rience al\u00e9atoire poss\u00e8de bien son propre ensemble d\u2019issues.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n1_ex3_attempts++;
+    if(n1_ex3_attempts===1){
+      showFeedback('ko','❌','Certaines associations ne sont pas encore correctes. Les issues sont tous les r\u00e9sultats que l\u2019on peut obtenir.');
+      openHintAuto();
+      for(var m=0;m<MATCH_LEFT.length;m++){
+        var sm=$('match-'+m);
+        sm.className='match-select '+(selections[m]===MATCH_CORRECT[m]?'ok-sel':'ko-sel');
+      }
+    } else {
+      n1_ex3_done=true;
+      for(var n=0;n<MATCH_LEFT.length;n++){
+        var sn=$('match-'+n);
+        sn.value=String(MATCH_CORRECT[n]);
+        sn.disabled=true; sn.className='match-select ok-sel';
+      }
+      recordResult(3,n1_ex3_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> Lancer une pi\u00e8ce \u2192 Pile / Face. Lancer un d\u00e9 \u2192 1\u00a0;\u00a02\u00a0;\u00a03\u00a0;\u00a04\u00a0;\u00a05\u00a0;\u00a06. Tirer une bille \u2192 Rouge / Bleue. Tourner la roue \u2192 Jaune / Bleu / Rouge / Vert. Chaque exp\u00e9rience poss\u00e8de un ensemble d\u2019issues possibles.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* ===================== Interface module ===================== */
+window.__N1_render=function(){
+  if(currentExercise===0) n1_renderEx0();
+  else if(currentExercise===1) n1_renderEx1();
+  else if(currentExercise===2) n1_renderEx2();
+  else n1_renderEx3();
+};
+window.__N1_validerEx=function(){
+  if(currentExercise===0) n1_validerEx0();
+  else if(currentExercise===1) n1_validerEx1();
+  else if(currentExercise===2) n1_validerEx2();
+  else n1_validerEx3();
+};
+window.__N1_reset=function(){
+  n1_ex0_sel=-1; n1_ex0_attempts=0; n1_ex0_done=false;
+  n1_ex1_sel=-1; n1_ex1_attempts=0; n1_ex1_done=false;
+  n1_ex2_sel=-1; n1_ex2_attempts=0; n1_ex2_done=false;
+  n1_ex3_attempts=0; n1_ex3_done=false;
+};
+})();
+
+</script>
+<script>
+/* ==================== NIVEAU 2 — indices globaux 4 à 7 ==================== */
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* =====================================================================
+   ILLUSTRATIONS SVG
+   ===================================================================== */
+function svgSacBilles(){
+  var billes=[
+    {x:95,y:65,c:'#DC2626'},{x:135,y:55,c:'#DC2626'},{x:170,y:75,c:'#DC2626'},
+    {x:110,y:100,c:'#DC2626'},{x:150,y:115,c:'#DC2626'},
+    {x:80,y:120,c:'#2563EB'},{x:190,y:105,c:'#2563EB'},
+    {x:125,y:135,c:'#2563EB'},{x:165,y:145,c:'#2563EB'},
+    {x:145,y:85,c:'#16A34A'}
+  ];
+  var circles=billes.map(function(b){ return '<circle cx="'+b.x+'" cy="'+b.y+'" r="11" fill="'+b.c+'" stroke="#1E293B" stroke-width="2"/>'; }).join('');
+  return '<svg viewBox="0 0 270 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sac transparent contenant cinq billes rouges, quatre billes bleues et une bille verte, bien m\u00e9lang\u00e9es">'
+    +'<path d="M55 45 L215 45 L232 165 Q232 182 214 182 L56 182 Q38 182 38 165 Z" fill="#E8F6FB" fill-opacity=".5" stroke="#1a6e88" stroke-width="3" stroke-linejoin="round"/>'
+    +'<path d="M55 45 Q55 22 78 20 L192 20 Q215 22 215 45" fill="none" stroke="#1a6e88" stroke-width="3"/>'
+    +circles
+    +'</svg>';
+}
+function diePips(n,ox,oy){
+  var s=44;
+  var pos={
+    1:[[0,0]],
+    2:[[-1,-1],[1,1]],
+    3:[[-1,-1],[0,0],[1,1]],
+    4:[[-1,-1],[1,-1],[-1,1],[1,1]],
+    5:[[-1,-1],[1,-1],[0,0],[-1,1],[1,1]],
+    6:[[-1,-1],[1,-1],[-1,0],[1,0],[-1,1],[1,1]]
+  };
+  var pts=pos[n].map(function(p){ return '<circle cx="'+(ox+p[0]*s/3.2)+'" cy="'+(oy+p[1]*s/3.2)+'" r="5" fill="#1E293B"/>'; }).join('');
+  return pts;
+}
+function svgDe6Faces(){
+  var parts=[];
+  for(var i=1;i<=6;i++){
+    var ox=20+(i-1)*74;
+    parts.push('<rect x="'+ox+'" y="14" width="60" height="60" rx="10" fill="#fff" stroke="#1E293B" stroke-width="3"/>');
+    parts.push(diePips(i,ox+30,44));
+    parts.push('<text x="'+(ox+30)+'" y="92" font-size="12" font-weight="700" fill="#8A7B4E" text-anchor="middle" font-family="ui-monospace,Consolas,monospace">'+i+'</text>');
+  }
+  return '<svg viewBox="0 0 464 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Un d\u00e9 \u00e9quilibr\u00e9 \u00e0 six faces, num\u00e9rot\u00e9 de 1 \u00e0 6">'
+    +parts.join('')+'</svg>';
+}
+
+/* =====================================================================
+   EXERCICE 1 (indice global 4) — Le sac de billes
+   ===================================================================== */
+var SAC2_OPTS=['1/5','1/10','5/10','9/10'];
+var n2_ex0_sel=-1, n2_ex0_attempts=0, n2_ex0_done=false;
+function n2_renderEx0(){
+  n2_ex0_sel=-1; n2_ex0_attempts=0; n2_ex0_done=false;
+  var html='<div class="ex-num">Exercice 1 sur 4</div>'
+    +'<div class="ex-title">Le sac de billes</div>'
+    +'<div class="ex-enonce">Un sac opaque contient 5 billes rouges, 4 billes bleues et 1 bille verte, toutes indiscernables au toucher. On tire une bille au hasard.</div>'
+    +'<div class="fig-wrap">'+svgSacBilles()+'</div>'
+    +'<div class="ex-consigne">Quelle est la probabilit\u00e9 de tirer une bille verte ?</div>'
+    +'<div class="opt-list" id="sac-opts"></div>'
+    +hintHtml('Compte le nombre de billes vertes puis le nombre total de billes.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('sac-opts','so-',SAC2_OPTS,function(i){
+    n2_ex0_sel=i;
+    for(var j=0;j<4;j++){ var b=$('so-'+j),box=$('so-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n2_validerEx0(){
+  if(n2_ex0_done) return;
+  var ok=n2_ex0_sel===1;
+  if(ok){
+    n2_ex0_done=true;
+    lockOptList('so-',4,1,n2_ex0_sel);
+    recordResult(4,n2_ex0_attempts,false);
+    showFeedback('ok','✅','Exact ! Le sac contient 1 bille verte sur 10 billes au total : la probabilit\u00e9 est 1/10.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n2_ex0_attempts++;
+    if(n2_ex0_attempts===1){
+      showFeedback('ko','❌','Compte le nombre de billes vertes, puis le nombre total de billes dans le sac.');
+      openHintAuto();
+    } else {
+      n2_ex0_done=true;
+      lockOptList('so-',4,1,n2_ex0_sel);
+      recordResult(4,n2_ex0_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> le sac contient 1 bille verte et 10 billes au total (5 rouges + 4 bleues + 1 verte). La probabilit\u00e9 de tirer une bille verte est donc <strong>1/10</strong>.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* =====================================================================
+   EXERCICE 2 (indice global 5) — Le dé équilibré
+   ===================================================================== */
+var DE2_OPTS=['2/6','3/6','4/6','6/6'];
+var n2_ex1_sel=-1, n2_ex1_attempts=0, n2_ex1_done=false;
+function n2_renderEx1(){
+  n2_ex1_sel=-1; n2_ex1_attempts=0; n2_ex1_done=false;
+  var html='<div class="ex-num">Exercice 2 sur 4</div>'
+    +'<div class="ex-title">Le d\u00e9 \u00e9quilibr\u00e9</div>'
+    +'<div class="fig-wrap">'+svgDe6Faces()+'</div>'
+    +'<div class="ex-consigne">Quelle est la probabilit\u00e9 d\u2019obtenir un nombre pair ?</div>'
+    +'<div class="opt-list" id="de-opts"></div>'
+    +hintHtml('Les nombres pairs du d\u00e9 sont 2, 4 et 6.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('de-opts','de-',DE2_OPTS,function(i){
+    n2_ex1_sel=i;
+    for(var j=0;j<4;j++){ var b=$('de-'+j),box=$('de-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n2_validerEx1(){
+  if(n2_ex1_done) return;
+  var ok=n2_ex1_sel===1;
+  if(ok){
+    n2_ex1_done=true;
+    lockOptList('de-',4,1,n2_ex1_sel);
+    recordResult(5,n2_ex1_attempts,false);
+    showFeedback('ok','✅','Exact ! Il y a 3 nombres pairs (2, 4 et 6) parmi les 6 issues possibles : la probabilit\u00e9 est 3/6, soit <strong>3/6 = 1/2</strong>.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n2_ex1_attempts++;
+    if(n2_ex1_attempts===1){
+      showFeedback('ko','❌','Ce n\u2019est pas encore la bonne r\u00e9ponse. Observe bien toutes les faces du d\u00e9 avant de choisir.');
+      openHintAuto();
+    } else {
+      n2_ex1_done=true;
+      lockOptList('de-',4,1,n2_ex1_sel);
+      recordResult(5,n2_ex1_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> le d\u00e9 poss\u00e8de 6 issues possibles. Les nombres pairs sont 2, 4 et 6, soit 3 issues favorables sur 6 issues possibles. La probabilit\u00e9 est donc <strong>3/6</strong>, soit <strong>3/6 = 1/2</strong>.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* =====================================================================
+   EXERCICE 3 (indice global 6) — La roue colorée (8 secteurs égaux)
+   ===================================================================== */
+var ROUE_COLORS=['#EF4444','#2563EB','#8DC63F','#2563EB','#F5C518','#2563EB','#8DC63F','#EF4444'];
+var ROUE_NAMES=['rouge','bleu','vert','bleu','jaune','bleu','vert','rouge'];
+var ROUE_PATHS=[
+  'M110,110 L110.00,20.00 A90,90 0 0,1 173.64,46.36 Z',
+  'M110,110 L173.64,46.36 A90,90 0 0,1 200.00,110.00 Z',
+  'M110,110 L200.00,110.00 A90,90 0 0,1 173.64,173.64 Z',
+  'M110,110 L173.64,173.64 A90,90 0 0,1 110.00,200.00 Z',
+  'M110,110 L110.00,200.00 A90,90 0 0,1 46.36,173.64 Z',
+  'M110,110 L46.36,173.64 A90,90 0 0,1 20.00,110.00 Z',
+  'M110,110 L20.00,110.00 A90,90 0 0,1 46.36,46.36 Z',
+  'M110,110 L46.36,46.36 A90,90 0 0,1 110.00,20.00 Z'
+];
+function svgRoue(){
+  var parts=ROUE_PATHS.map(function(d,i){
+    return '<path d="'+d+'" fill="'+ROUE_COLORS[i]+'" stroke="#1E293B" stroke-width="2" id="sector-'+i+'"/>';
+  }).join('');
+  return '<svg viewBox="0 0 220 235" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Une roue \u00e9quilibr\u00e9e divis\u00e9e en huit secteurs \u00e9gaux : trois bleus, deux verts, deux rouges et un jaune">'
+    +'<title>Roue \u00e0 huit secteurs \u00e9gaux</title>'
+    +'<desc>3 secteurs bleus, 2 secteurs verts, 2 secteurs rouges, 1 secteur jaune, tous de m\u00eame taille.</desc>'
+    +parts
+    +'<circle cx="110" cy="110" r="90" fill="none" stroke="#1E293B" stroke-width="3"/>'
+    +'<circle cx="110" cy="110" r="6" fill="#1E293B"/>'
+    +'<polygon points="110,4 100,20 120,20" fill="#1E293B"/>'
+    +'</svg>';
+}
+function n2_highlightRedSectors(){
+  for(var i=0;i<8;i++){
+    if(ROUE_NAMES[i]==='rouge'){
+      var el=$('sector-'+i);
+      if(el){ el.setAttribute('stroke','#7A1F1F'); el.setAttribute('stroke-width','5'); }
+    }
+  }
+}
+var ROUE_OPTS=['1/8','2/8','3/8','6/8'];
+var n2_ex2_sel=-1, n2_ex2_attempts=0, n2_ex2_done=false;
+function n2_renderEx2(){
+  n2_ex2_sel=-1; n2_ex2_attempts=0; n2_ex2_done=false;
+  var html='<div class="ex-num">Exercice 3 sur 4</div>'
+    +'<div class="ex-title">La roue color\u00e9e</div>'
+    +'<div class="ex-enonce">Une roue \u00e9quilibr\u00e9e est partag\u00e9e en 8 secteurs de m\u00eame taille : 2 rouges, 3 bleus, 2 verts et 1 jaune.</div>'
+    +'<div class="fig-wrap" style="display:flex;justify-content:center;"><div style="max-width:260px;">'+svgRoue()+'</div></div>'
+    +'<div class="ex-consigne">Quelle est la probabilit\u00e9 d\u2019obtenir un secteur rouge ?</div>'
+    +'<div class="opt-list" id="roue-opts"></div>'
+    +hintHtml('Compte le nombre de secteurs rouges, puis le nombre total de secteurs de la roue.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('roue-opts','ro-',ROUE_OPTS,function(i){
+    n2_ex2_sel=i;
+    for(var j=0;j<4;j++){ var b=$('ro-'+j),box=$('ro-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n2_validerEx2(){
+  if(n2_ex2_done) return;
+  var ok=n2_ex2_sel===1;
+  if(ok){
+    n2_ex2_done=true;
+    lockOptList('ro-',4,1,n2_ex2_sel);
+    recordResult(6,n2_ex2_attempts,false);
+    showFeedback('ok','✅','Bravo, tu as bien compt\u00e9 les issues favorables ! 2 secteurs rouges sur 8 secteurs donnent une probabilit\u00e9 de 2/8, soit <strong>2/8 = 1/4</strong>.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n2_ex2_attempts++;
+    if(n2_ex2_attempts===1){
+      showFeedback('ko','❌','Ce n\u2019est pas encore la bonne r\u00e9ponse. Observe bien les donn\u00e9es : compte le nombre de secteurs rouges, puis le nombre total de secteurs.');
+      openHintAuto();
+    } else {
+      n2_ex2_done=true;
+      lockOptList('ro-',4,1,n2_ex2_sel);
+      n2_highlightRedSectors();
+      recordResult(6,n2_ex2_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> la roue comporte 8 secteurs \u00e9gaux. Parmi eux, 2 secteurs sont rouges (mis en \u00e9vidence ci-dessus). Il y a donc 2 issues favorables sur 8 issues possibles. La probabilit\u00e9 d\u2019obtenir un secteur rouge est donc <strong>2/8</strong>, soit <strong>2/8 = 1/4</strong>.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* =====================================================================
+   EXERCICE 4 (indice global 7) — Le jeu de cartes numérotées
+   ===================================================================== */
+function n2_buildCartesHtml(){
+  var html='<div id="cartes-grid" style="display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;">';
+  for(var n=1;n<=10;n++){
+    html+='<div class="carte-num" id="carte-'+n+'" style="width:52px;height:74px;border-radius:8px;background:#fff;border:2.5px solid #1E293B;'
+      +'display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Consolas,monospace;font-size:1.3rem;font-weight:800;color:#1E293B;">'+n+'</div>';
+  }
+  html+='</div>';
+  return html;
+}
+function n2_highlightCartes(nums){
+  nums.forEach(function(n){
+    var el=$('carte-'+n);
+    if(el){ el.style.borderColor='#16A34A'; el.style.borderWidth='4px'; el.style.background='#DCFCE7'; el.style.color='#166534'; }
+  });
+}
+var CARTES_OPTS=['2/10','3/10','7/10','8/10'];
+var n2_ex3_sel=-1, n2_ex3_attempts=0, n2_ex3_done=false;
+function n2_renderEx3(){
+  n2_ex3_sel=-1; n2_ex3_attempts=0; n2_ex3_done=false;
+  var html='<div class="ex-num">Exercice 4 sur 4</div>'
+    +'<div class="ex-title">Le jeu de cartes num\u00e9rot\u00e9es</div>'
+    +'<div class="ex-enonce">Un jeu est compos\u00e9 de 10 cartes identiques, num\u00e9rot\u00e9es de 1 \u00e0 10. Toutes les cartes ont la m\u00eame chance d\u2019\u00eatre tir\u00e9es.</div>'
+    +'<div class="fig-wrap">'+n2_buildCartesHtml()+'</div>'
+    +'<div class="ex-consigne">On tire une carte au hasard. Quelle est la probabilit\u00e9 d\u2019obtenir un nombre sup\u00e9rieur \u00e0 7 ?</div>'
+    +'<div class="opt-list" id="cartes-opts"></div>'
+    +hintHtml('Cherche les nombres strictement sup\u00e9rieurs \u00e0 7 parmi les nombres de 1 \u00e0 10.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('cartes-opts','co-',CARTES_OPTS,function(i){
+    n2_ex3_sel=i;
+    for(var j=0;j<4;j++){ var b=$('co-'+j),box=$('co-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n2_validerEx3(){
+  if(n2_ex3_done) return;
+  var ok=n2_ex3_sel===1;
+  if(ok){
+    n2_ex3_done=true;
+    lockOptList('co-',4,1,n2_ex3_sel);
+    n2_highlightCartes([8,9,10]);
+    recordResult(7,n2_ex3_attempts,false);
+    showFeedback('ok','✅','Bonne r\u00e9ponse ! Les nombres 8, 9 et 10 sont sup\u00e9rieurs \u00e0 7, soit 3 issues favorables sur 10 : la probabilit\u00e9 est 3/10.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n2_ex3_attempts++;
+    if(n2_ex3_attempts===1){
+      showFeedback('ko','❌','Ce n\u2019est pas encore la bonne r\u00e9ponse. Observe bien les donn\u00e9es : cherche les nombres strictement sup\u00e9rieurs \u00e0 7 parmi les nombres de 1 \u00e0 10.');
+      openHintAuto();
+    } else {
+      n2_ex3_done=true;
+      lockOptList('co-',4,1,n2_ex3_sel);
+      n2_highlightCartes([8,9,10]);
+      recordResult(7,n2_ex3_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> les nombres strictement sup\u00e9rieurs \u00e0 7 sont 8, 9 et 10 (mis en \u00e9vidence ci-dessus). Il y a donc 3 issues favorables parmi 10 issues possibles. La probabilit\u00e9 d\u2019obtenir un nombre sup\u00e9rieur \u00e0 7 est donc <strong>3/10</strong>.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* ===================== Interface module ===================== */
+window.__N2_render=function(){
+  if(currentExercise===0) n2_renderEx0();
+  else if(currentExercise===1) n2_renderEx1();
+  else if(currentExercise===2) n2_renderEx2();
+  else n2_renderEx3();
+};
+window.__N2_validerEx=function(){
+  if(currentExercise===0) n2_validerEx0();
+  else if(currentExercise===1) n2_validerEx1();
+  else if(currentExercise===2) n2_validerEx2();
+  else n2_validerEx3();
+};
+window.__N2_reset=function(){
+  n2_ex0_sel=-1; n2_ex0_attempts=0; n2_ex0_done=false;
+  n2_ex1_sel=-1; n2_ex1_attempts=0; n2_ex1_done=false;
+  n2_ex2_sel=-1; n2_ex2_attempts=0; n2_ex2_done=false;
+  n2_ex3_sel=-1; n2_ex3_attempts=0; n2_ex3_done=false;
+};
+})();
+
+</script>
+<script>
+/* ==================== NIVEAU 3 — indices globaux 8 à 11 ==================== */
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+
+/* =====================================================================
+   ILLUSTRATION SVG — dé « CALCULU »
+   ===================================================================== */
+var DE_LETTRES=['C','A','L','C','U','L'];
+function svgDeCalculu(){
+  var parts=[];
+  for(var i=0;i<6;i++){
+    var ox=20+i*74;
+    parts.push('<rect x="'+ox+'" y="14" width="60" height="60" rx="10" fill="#fff" stroke="#1E293B" stroke-width="3" id="face-'+i+'"/>');
+    parts.push('<text x="'+(ox+30)+'" y="54" font-size="26" font-weight="800" fill="#1E293B" text-anchor="middle" id="face-txt-'+i+'" font-family="ui-monospace,Consolas,monospace">'+DE_LETTRES[i]+'</text>');
+  }
+  return '<svg viewBox="0 0 464 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Un d\u00e9 \u00e0 six faces portant les lettres C, A, L, C, U, L">'
+    +'<title>D\u00e9 CALCULU</title><desc>Les six faces du d\u00e9 portent respectivement les lettres C, A, L, C, U et L.</desc>'
+    +parts.join('')+'</svg>';
+}
+function n3_highlightFacesC(){
+  DE_LETTRES.forEach(function(l,i){
+    if(l==='C'){
+      var r=$('face-'+i), t=$('face-txt-'+i);
+      if(r){ r.setAttribute('stroke','#16A34A'); r.setAttribute('stroke-width','5'); r.setAttribute('fill','#DCFCE7'); }
+      if(t){ t.setAttribute('fill','#166534'); }
+    }
+  });
+}
+
+/* =====================================================================
+   EXERCICE 1 (indice global 8) — Le dé « CALCULU »
+   ===================================================================== */
+var DE3_OPTS=['1/4','2/6','1/6','4/6'];
+var n3_ex0_sel=-1, n3_ex0_attempts=0, n3_ex0_done=false;
+function n3_renderEx0(){
+  n3_ex0_sel=-1; n3_ex0_attempts=0; n3_ex0_done=false;
+  var html='<div class="ex-num">Exercice 1 sur 4</div>'
+    +'<div class="ex-title">Le d\u00e9 \u00ab\u00a0CALCULU\u00a0\u00bb</div>'
+    +'<div class="ex-enonce">Un d\u00e9 \u00e9quilibr\u00e9 poss\u00e8de six faces portant les lettres C, A, L, C, U et L. Les cases ci-dessous repr\u00e9sentent ses six faces.</div>'
+    +'<div class="fig-wrap">'+svgDeCalculu()+'</div>'
+    +'<div class="ex-consigne">Quelle est la probabilit\u00e9 d\u2019obtenir la lettre C ?</div>'
+    +'<div class="opt-list" id="de-opts"></div>'
+    +hintHtml('Compte le nombre de faces portant la lettre C, puis le nombre total de faces.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('de-opts','deo-',DE3_OPTS,function(i){
+    n3_ex0_sel=i;
+    for(var j=0;j<4;j++){ var b=$('deo-'+j),box=$('deo-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n3_validerEx0(){
+  if(n3_ex0_done) return;
+  var ok=n3_ex0_sel===1;
+  if(ok){
+    n3_ex0_done=true;
+    lockOptList('deo-',4,1,n3_ex0_sel);
+    n3_highlightFacesC();
+    recordResult(8,n3_ex0_attempts,false);
+    showFeedback('ok','✅','Bravo, tu as bien compt\u00e9 les issues favorables ! La lettre C appara\u00eet sur 2 des 6 faces : la probabilit\u00e9 est 2/6, soit <strong>2/6 = 1/3</strong>.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n3_ex0_attempts++;
+    if(n3_ex0_attempts===1){
+      showFeedback('ko','❌','Ce n\u2019est pas encore la bonne r\u00e9ponse. Compte le nombre de faces portant la lettre C, puis le nombre total de faces.');
+      openHintAuto();
+    } else {
+      n3_ex0_done=true;
+      lockOptList('deo-',4,1,n3_ex0_sel);
+      n3_highlightFacesC();
+      recordResult(8,n3_ex0_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> le d\u00e9 poss\u00e8de 6 faces au total. La lettre C appara\u00eet sur 2 faces (mises en \u00e9vidence ci-dessus). La probabilit\u00e9 d\u2019obtenir C est donc <strong>2/6</strong>, soit <strong>2/6 = 1/3</strong>.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* =====================================================================
+   EXERCICE 2 (indice global 9) — Qui a raison ?
+   ===================================================================== */
+var QUI_OPTS=['Aya','Myriam','Les deux','Aucune des deux'];
+var n3_ex1_sel=-1, n3_ex1_attempts=0, n3_ex1_done=false;
+function n3_renderEx1(){
+  n3_ex1_sel=-1; n3_ex1_attempts=0; n3_ex1_done=false;
+  var html='<div class="ex-num">Exercice 2 sur 4</div>'
+    +'<div class="ex-title">Qui a raison ?</div>'
+    +'<div class="ex-enonce">On reprend le d\u00e9 \u00e9quilibr\u00e9 \u00ab\u00a0CALCULU\u00a0\u00bb de l\u2019exercice pr\u00e9c\u00e9dent. Ses six faces portent les lettres C, A, L, C, U et L.</div>'
+    +'<div class="quote-box"><div class="quote-name">R\u00e9ponse d\u2019Aya</div><div class="quote-text">\u00ab\u00a0Il y a quatre lettres diff\u00e9rentes\u00a0: C, A, L et U. La probabilit\u00e9 d\u2019obtenir C est donc 1/4.\u00a0\u00bb</div></div>'
+    +'<div class="quote-box"><div class="quote-name">R\u00e9ponse de Myriam</div><div class="quote-text">\u00ab\u00a0Il y a deux faces portant la lettre C sur les six faces du d\u00e9. La probabilit\u00e9 est donc 2/6.\u00a0\u00bb</div></div>'
+    +'<div class="ex-consigne">Quelle \u00e9l\u00e8ve a raison ?</div>'
+    +'<div class="opt-list" id="qui-opts"></div>'
+    +hintHtml('Pour calculer une probabilit\u00e9, il faut compter les faces du d\u00e9, et non seulement les lettres diff\u00e9rentes.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('qui-opts','qo-',QUI_OPTS,function(i){
+    n3_ex1_sel=i;
+    for(var j=0;j<4;j++){ var b=$('qo-'+j),box=$('qo-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n3_validerEx1(){
+  if(n3_ex1_done) return;
+  var ok=n3_ex1_sel===1;
+  if(ok){
+    n3_ex1_done=true;
+    lockOptList('qo-',4,1,n3_ex1_sel);
+    recordResult(9,n3_ex1_attempts,false);
+    showFeedback('ok','✅','Bonne r\u00e9ponse ! Myriam a raison : chaque face du d\u00e9 compte, m\u00eame si des lettres se r\u00e9p\u00e8tent.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n3_ex1_attempts++;
+    if(n3_ex1_attempts===1){
+      showFeedback('ko','❌','Ce n\u2019est pas encore la bonne r\u00e9ponse. Pour calculer une probabilit\u00e9, il faut compter les faces du d\u00e9, et non seulement les lettres diff\u00e9rentes.');
+      openHintAuto();
+    } else {
+      n3_ex1_done=true;
+      lockOptList('qo-',4,1,n3_ex1_sel);
+      recordResult(9,n3_ex1_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> le d\u00e9 comporte 6 faces. M\u00eame si certaines lettres sont identiques, chaque face compte. La lettre C appara\u00eet sur 2 faces, donc la probabilit\u00e9 d\u2019obtenir C est <strong>2/6</strong>, soit <strong>2/6 = 1/3</strong>. C\u2019est donc <strong>Myriam</strong> qui a raison.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* =====================================================================
+   EXERCICE 3 (indice global 10) — Le dé à 12 faces
+   ===================================================================== */
+var MULT3=[3,6,9,12];
+function svgDe12(){
+  var parts=[];
+  for(var i=1;i<=12;i++){
+    var row=(i<=6)?0:1;
+    var col=(i<=6)?(i-1):(i-7);
+    var ox=14+col*76, oy=14+row*76;
+    parts.push('<rect x="'+ox+'" y="'+oy+'" width="64" height="64" rx="10" fill="#fff" stroke="#1E293B" stroke-width="3" id="face12-'+i+'"/>');
+    parts.push('<text x="'+(ox+32)+'" y="'+(oy+42)+'" font-size="24" font-weight="800" fill="#1E293B" text-anchor="middle" id="face12-txt-'+i+'" font-family="ui-monospace,Consolas,monospace">'+i+'</text>');
+  }
+  return '<svg viewBox="0 0 470 154" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Un d\u00e9 \u00e0 douze faces portant les nombres de 1 \u00e0 12, sans doublon">'
+    +'<title>D\u00e9 \u00e0 12 faces</title><desc>Les douze faces du d\u00e9 portent chacune un nombre diff\u00e9rent, de 1 \u00e0 12.</desc>'
+    +parts.join('')+'</svg>';
+}
+function n3_highlightMultiples3(){
+  MULT3.forEach(function(n){
+    var r=$('face12-'+n), t=$('face12-txt-'+n);
+    if(r){ r.setAttribute('stroke','#16A34A'); r.setAttribute('stroke-width','5'); r.setAttribute('fill','#DCFCE7'); }
+    if(t){ t.setAttribute('fill','#166534'); }
+  });
+}
+var DE12_OPTS=['3/12','4/12','6/12','9/12'];
+var n3_ex2_sel=-1, n3_ex2_attempts=0, n3_ex2_done=false;
+function n3_renderEx2(){
+  n3_ex2_sel=-1; n3_ex2_attempts=0; n3_ex2_done=false;
+  var html='<div class="ex-num">Exercice 3 sur 4</div>'
+    +'<div class="ex-title">Le d\u00e9 \u00e0 12 faces</div>'
+    +'<div class="ex-enonce">On lance un d\u00e9 \u00e9quilibr\u00e9 \u00e0 douze faces num\u00e9rot\u00e9es de 1 \u00e0 12. Les cases ci-dessous repr\u00e9sentent ses douze faces.</div>'
+    +'<div class="fig-wrap">'+svgDe12()+'</div>'
+    +'<div class="ex-consigne">Quelle est la probabilit\u00e9 d\u2019obtenir un multiple de 3 ?</div>'
+    +'<div class="opt-list" id="de12-opts"></div>'
+    +hintHtml('Cherche les multiples de 3 parmi les nombres de 1 \u00e0 12.');
+  $('quiz-zone').innerHTML=html;
+  buildOptList('de12-opts','d12-',DE12_OPTS,function(i){
+    n3_ex2_sel=i;
+    for(var j=0;j<4;j++){ var b=$('d12-'+j),box=$('d12-box-'+j); b.classList.toggle('selected',j===i); box.innerHTML=j===i?'✓':''; }
+    $('btn-valider').disabled=false;
+  });
+}
+function n3_validerEx2(){
+  if(n3_ex2_done) return;
+  var ok=n3_ex2_sel===1;
+  if(ok){
+    n3_ex2_done=true;
+    lockOptList('d12-',4,1,n3_ex2_sel);
+    n3_highlightMultiples3();
+    recordResult(10,n3_ex2_attempts,false);
+    showFeedback('ok','✅','Bravo, ton raisonnement est correct ! Les multiples de 3 (3, 6, 9, 12) donnent 4 issues favorables sur 12 : la probabilit\u00e9 est 4/12, soit <strong>4/12 = 1/3</strong>.');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n3_ex2_attempts++;
+    if(n3_ex2_attempts===1){
+      showFeedback('ko','❌','Ce n\u2019est pas encore la bonne r\u00e9ponse. Cherche les multiples de 3 parmi les nombres de 1 \u00e0 12.');
+      openHintAuto();
+    } else {
+      n3_ex2_done=true;
+      lockOptList('d12-',4,1,n3_ex2_sel);
+      n3_highlightMultiples3();
+      recordResult(10,n3_ex2_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> les multiples de 3 pr\u00e9sents sur le d\u00e9 sont 3, 6, 9 et 12 (mis en \u00e9vidence ci-dessus). Il y a donc 4 issues favorables parmi 12 issues possibles. La probabilit\u00e9 d\u2019obtenir un multiple de 3 est donc <strong>4/12</strong>, soit <strong>4/12 = 1/3</strong>.');
+      hideHintBtn(); unlockContinue();
+      return;
+    }
+    $('btn-valider').disabled=false;
+  }
+}
+
+/* =====================================================================
+   EXERCICE 4 (indice global 11) — Classer des événements
+   ===================================================================== */
+var EVENTS=[
+  {id:'A', txt:'Obtenir le nombre 8.', correct:'impossible',
+   explain:'Le d\u00e9 poss\u00e8de uniquement les nombres de 1 \u00e0 6. Le nombre 8 ne peut donc pas \u00eatre obtenu.'},
+  {id:'B', txt:'Obtenir un nombre inf\u00e9rieur \u00e0 7.', correct:'certain',
+   explain:'Toutes les faces du d\u00e9 portent un nombre inf\u00e9rieur \u00e0 7. L\u2019\u00e9v\u00e9nement se r\u00e9alise donc \u00e0 chaque lancer.'},
+  {id:'C', txt:'Obtenir un nombre pair.', correct:'possible',
+   explain:'Les nombres pairs sont 2, 4 et 6. Ils peuvent \u00eatre obtenus, mais le d\u00e9 peut aussi donner 1, 3 ou 5.'},
+  {id:'D', txt:'Obtenir un nombre sup\u00e9rieur \u00e0 4.', correct:'possible',
+   explain:'Les nombres sup\u00e9rieurs \u00e0 4 sont 5 et 6. Ils peuvent \u00eatre obtenus, mais ce ne sont pas les seuls r\u00e9sultats possibles.'}
+];
+var EVENT_CHOICES=[
+  {val:'impossible', label:'Impossible'},
+  {val:'possible', label:'Possible, mais pas certain'},
+  {val:'certain', label:'Certain'}
+];
+var eventSel={A:null,B:null,C:null,D:null};
+var n3_ex3_attempts=0, n3_ex3_done=false;
+function svgDe6Simple(){
+  return '<svg viewBox="0 0 300 60" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Un d\u00e9 \u00e9quilibr\u00e9 \u00e0 six faces, num\u00e9rot\u00e9 de 1 \u00e0 6">'
+    +[1,2,3,4,5,6].map(function(n,i){
+      var ox=6+i*48;
+      return '<rect x="'+ox+'" y="6" width="40" height="40" rx="8" fill="#fff" stroke="#1E293B" stroke-width="2.5"/>'
+        +'<text x="'+(ox+20)+'" y="33" font-size="18" font-weight="800" fill="#1E293B" text-anchor="middle" font-family="ui-monospace,Consolas,monospace">'+n+'</text>';
+    }).join('')
+    +'</svg>';
+}
+function n3_renderEx3(){
+  eventSel={A:null,B:null,C:null,D:null}; n3_ex3_attempts=0; n3_ex3_done=false;
+  var html='<div class="ex-num">Exercice 4 sur 4</div>'
+    +'<div class="ex-title">Classer des \u00e9v\u00e9nements</div>'
+    +'<div class="ex-enonce">On utilise un d\u00e9 \u00e9quilibr\u00e9 \u00e0 six faces, num\u00e9rot\u00e9 de 1 \u00e0 6.</div>'
+    +'<div class="fig-wrap">'+svgDe6Simple()+'</div>'
+    +'<div class="ex-consigne">Pour chaque \u00e9v\u00e9nement, choisis s\u2019il est impossible, possible mais pas certain, ou certain.</div>'
+    +'<div id="events-zone"></div>'
+    +hintHtml('Observe les nombres pr\u00e9sents sur le d\u00e9. Un \u00e9v\u00e9nement est impossible s\u2019il ne peut jamais se produire, certain s\u2019il se produit toujours, et possible s\u2019il peut se produire sans \u00eatre garanti.');
+  $('quiz-zone').innerHTML=html;
+  var w=$('events-zone');
+  EVENTS.forEach(function(ev){
+    var box=document.createElement('div');
+    box.className='quote-box';
+    box.id='event-box-'+ev.id;
+    var radios=EVENT_CHOICES.map(function(c,i){
+      var rid='ev-'+ev.id+'-'+i;
+      return '<label style="display:inline-flex;align-items:center;gap:.35rem;margin:.3rem 1rem .3rem 0;font-size:.85rem;font-weight:600;cursor:pointer;">'
+        +'<input type="radio" name="event-'+ev.id+'" id="'+rid+'" value="'+c.val+'" style="width:18px;height:18px;"/>'+c.label+'</label>';
+    }).join('');
+    box.innerHTML='<div class="quote-name">\u00c9v\u00e9nement '+ev.id+'</div>'
+      +'<div class="quote-text" style="font-style:normal;margin-bottom:.5rem;">'+ev.txt+'</div>'
+      +'<div role="radiogroup" aria-label="Classement de l\u2019\u00e9v\u00e9nement '+ev.id+'">'+radios+'</div>'
+      +'<div class="event-explain" id="event-explain-'+ev.id+'" style="display:none;margin-top:.5rem;font-size:.82rem;color:#6B4E00;background:#FFF8E1;border:1px dashed var(--day-color);border-radius:8px;padding:.5rem .7rem;"></div>';
+    w.appendChild(box);
+    EVENT_CHOICES.forEach(function(c,i){
+      $('ev-'+ev.id+'-'+i).addEventListener('change',function(){
+        eventSel[ev.id]=c.val;
+        n3_checkEventsReady();
+      });
+    });
+  });
+}
+function n3_checkEventsReady(){
+  var allSet=EVENTS.every(function(ev){ return eventSel[ev.id]!==null; });
+  $('btn-valider').disabled=!allSet;
+}
+function n3_validerEx3(){
+  if(n3_ex3_done) return;
+  var allOk=EVENTS.every(function(ev){ return eventSel[ev.id]===ev.correct; });
+  if(allOk){
+    n3_ex3_done=true;
+    EVENTS.forEach(function(ev){
+      var idx=EVENT_CHOICES.map(function(c){return c.val;}).indexOf(ev.correct);
+      EVENT_CHOICES.forEach(function(c,i){ var el=$('ev-'+ev.id+'-'+i); if(el) el.disabled=true; });
+    });
+    recordResult(11,n3_ex3_attempts,false);
+    showFeedback('ok','✅','Tr\u00e8s bien, tu as correctement class\u00e9 les quatre \u00e9v\u00e9nements !');
+    hideHintBtn(); unlockContinue();
+  } else {
+    n3_ex3_attempts++;
+    if(n3_ex3_attempts===1){
+      showFeedback('ko','❌','Ce n\u2019est pas encore la bonne r\u00e9ponse. Observe bien toutes les issues possibles.');
+      openHintAuto();
+      $('btn-valider').disabled=false;
+    } else {
+      /* Deuxième erreur : correction obligatoire, sélection automatique, verrouillage, 0 point */
+      n3_ex3_done=true;
+      EVENTS.forEach(function(ev){
+        var correctIndex=EVENT_CHOICES.map(function(choice){ return choice.val; }).indexOf(ev.correct);
+        EVENT_CHOICES.forEach(function(choice,index){
+          var input=$('ev-'+ev.id+'-'+index);
+          if(!input) return;
+          input.checked=(index===correctIndex);
+          input.disabled=true;
+        });
+        eventSel[ev.id]=ev.correct;
+        var explanation=$('event-explain-'+ev.id);
+        explanation.innerHTML='<strong>R\u00e9ponse attendue\u00a0: '+EVENT_CHOICES[correctIndex].label+'.</strong> '+ev.explain;
+        explanation.style.display='block';
+      });
+      recordResult(11,n3_ex3_attempts,true);
+      showFeedback('corr','📘','<strong>Correction :</strong> obtenir 8 \u2192 Impossible. Obtenir un nombre inf\u00e9rieur \u00e0 7 \u2192 Certain. Obtenir un nombre pair \u2192 Possible, mais pas certain. Obtenir un nombre sup\u00e9rieur \u00e0 4 \u2192 Possible, mais pas certain.');
+      hideHintBtn();
+      unlockContinue();
+    }
+  }
+}
+
+/* ===================== Interface module ===================== */
+window.__N3_render=function(){
+  if(currentExercise===0) n3_renderEx0();
+  else if(currentExercise===1) n3_renderEx1();
+  else if(currentExercise===2) n3_renderEx2();
+  else n3_renderEx3();
+};
+window.__N3_validerEx=function(){
+  if(currentExercise===0) n3_validerEx0();
+  else if(currentExercise===1) n3_validerEx1();
+  else if(currentExercise===2) n3_validerEx2();
+  else n3_validerEx3();
+};
+window.__N3_reset=function(){
+  n3_ex0_sel=-1; n3_ex0_attempts=0; n3_ex0_done=false;
+  n3_ex1_sel=-1; n3_ex1_attempts=0; n3_ex1_done=false;
+  n3_ex2_sel=-1; n3_ex2_attempts=0; n3_ex2_done=false;
+  n3_ex3_attempts=0; n3_ex3_done=false;
+  eventSel={A:null,B:null,C:null,D:null};
+};
+})();
+
+</script>
+</body>
+</html>
