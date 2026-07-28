@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths — Semaine 7 — Jour 1 — Je relève le défi — Le triangle de repérage de l'atelier de cartographie</title>
+<style>
+:root{
+  --day-color:#D97745; --day-dark:#7A3424; --day-light:#FFF2E7; --day-border:#E8A47C;
+  --gold:#D6A52A; --gold-d:#8A6414;
+  --bg:#2F2118; --panel:#463126; --panel2:#5A4030;
+  --line:#806047; --text:#FFF8ED; --muted:#D7C1AA;
+  --green:#6FA34A; --err:#D9534F; --neon:#E7B66B;
+  --copper:#C9864A; --brass:#D9B35F;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 14px rgba(217,119,69,.32), 0 0 34px rgba(217,119,69,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#241A14 0%, #34241B 50%, #2A1D16 100%);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#D9B35F 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#D9B35F 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#2A1D16;font-family:Arial,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:Arial,sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.15;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.16;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#C9683F;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#D9A441;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#7A5A3A;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#6E7F42;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(43,30,23,.96);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.3rem;}
+.hud-frag{width:1.6rem;height:1.8rem;border-radius:5px;background:#2B1E17;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#A8896A;transition:all .4s;}
+.hud-frag.got{background:rgba(217,119,69,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:Arial,sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#2B1E17;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Courier New',monospace;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#2B1E17;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(217,119,69,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:48px;}.hud-bar{gap:.5rem;padding:.45rem .5rem;}.hud-frag{width:1.3rem;height:1.6rem;font-size:.7rem;}.hud-dial{display:none;}.hud-timer{font-size:.8rem;padding:.2rem .4rem;}.hud-timer .lbl{display:none;}}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:620px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:var(--text);line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-note{margin:.9rem 0 .2rem;background:#2B1E17;border:1.5px dashed var(--day-border);border-radius:10px;padding:.8rem;text-align:center;font-size:.86rem;color:var(--day-light);}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#2A1D16;
+  font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.crest{display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:Arial,sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.1rem;height:2.1rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#2B1E17;border:1.5px solid var(--line);font-size:1rem;color:#A8896A;transition:all .5s;}
+.frag.found{background:rgba(217,119,69,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#2B1E17;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:Arial,sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#2B1E17;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+
+.room-question{text-align:center;font-weight:700;color:var(--text);margin:.6rem 0;font-size:.98rem;}
+.rotor-figure svg,.mfig svg{max-width:100%;height:auto;}
+.mfig{text-align:center;margin-bottom:.6rem;}
+.compass-tool{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;background:#2B1E17;border-radius:12px;padding:1rem;margin-top:.6rem;border:1px solid var(--line);}
+.compass-group{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.compass-label{font-family:Arial,sans-serif;font-weight:700;font-size:.82rem;color:var(--muted);margin-right:.2rem;}
+.compass-btn{min-width:48px;min-height:44px;padding:.5rem .9rem;border:2px solid var(--copper);border-radius:8px;background:var(--panel2);color:var(--text);font-weight:800;font-family:'Courier New',monospace;cursor:pointer;font-size:.92rem;}
+.compass-btn:hover{background:#6E4E36;}
+.compass-btn.selected{background:linear-gradient(135deg,var(--brass),var(--gold));border-color:var(--gold);color:#3b2a06;}
+.compass-btn:disabled{opacity:.5;cursor:default;}
+.mcq-list{display:flex;flex-direction:column;gap:.6rem;margin-top:.8rem;}
+.mcq-opt{width:100%;text-align:left;padding:.8rem 1.1rem;border:2px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;font-size:.92rem;font-weight:600;color:var(--text);transition:border-color .15s,background .15s;min-height:44px;}
+.mcq-opt:hover:not(:disabled){border-color:var(--day-color);}
+.mcq-opt.selected{border-color:var(--day-color);background:rgba(217,119,69,.14);}
+.mcq-opt.correct{border-color:var(--green);background:rgba(111,163,74,.16);color:#D9F2C8;}
+.mcq-opt.wrong{border-color:var(--err);background:rgba(217,83,79,.14);color:#FFD0C9;}
+.mcq-opt.locked,.mcq-opt:disabled{cursor:default;}
+.plans-row{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:.6rem;}
+.plan{width:170px;background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:.7rem;cursor:pointer;text-align:center;min-height:44px;}
+.plan:hover:not(:disabled){border-color:var(--day-color);}
+.plan.selected{border-color:var(--day-color);background:rgba(217,119,69,.14);}
+.plan.correct{border-color:var(--green);background:rgba(111,163,74,.16);}
+.plan.wrong{border-color:var(--err);background:rgba(217,83,79,.14);}
+.plan.locked,.plan:disabled{cursor:default;}
+.plan-label{font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted);margin-top:.5rem;font-weight:700;}
+.just-label{text-align:center;font-weight:700;color:var(--day-color);margin-top:.9rem;font-size:.88rem;}
+.input-row{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:.8rem 0;}
+.cell-in{border:2px solid var(--line);border-radius:8px;background:#2B1E17;color:var(--text);font-family:'Courier New',monospace;font-size:16px;font-weight:600;text-align:center;padding:.5rem;outline:none;transition:border-color .2s,background .2s;min-height:46px;width:90px;}
+.cell-in:focus{border-color:var(--day-color);}
+.cell-in.ok{border-color:var(--green);background:rgba(111,163,74,.14);color:#D9F2C8;}
+.cell-in.ko{border-color:var(--err);background:rgba(217,83,79,.12);color:#FFD0C9;}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:Arial,sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#2A1D16;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#4A3A1E;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#F5E4B7;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(111,163,74,.14);border:1.5px solid var(--green);color:#D9F2C8;}
+.fb.ko{background:rgba(217,83,79,.12);border:1.5px solid var(--err);color:#FFD0C9;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#f0dca0;}
+.correction{margin-top:.8rem;background:#2B1E17;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-family:Arial,sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--day-color);margin-bottom:.4rem;}
+.correction-x{font-size:clamp(.8rem,2.4vw,.88rem);color:var(--day-light);line-height:1.6;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+body.playing .sound-btn{top:58px;}
+@media(max-width:600px){body.playing .sound-btn{top:54px;}
+  .tools{flex-direction:column;}
+  .btn{width:100%;}
+}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(43,30,23,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:Arial,sans-serif;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(55,38,28,.97), rgba(30,20,15,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#2B1E17;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'Courier New',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:#2B1E17;}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(217,119,69,.3) 0%, rgba(217,119,69,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(217,119,69,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.4rem;margin:.8rem 0;flex-wrap:wrap;}
+.finale-crest .fc{width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(217,119,69,.16);border:1.5px solid var(--day-color);font-size:1.1rem;animation:pop .5s both;}
+.finale-title{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,5.6vw,2rem);color:var(--day-color);text-shadow:0 1px 0 rgba(184,112,10,.25);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Courier New',monospace;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#D9F2C8;margin-bottom:.6rem;}
+.finale-grade{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#2A1D16;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:var(--day-light);font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-reveal{background:#2B1E17;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:var(--day-light);line-height:1.7;}
+.finale-reveal b{color:var(--day-color);font-family:Arial,sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#2A1D16;box-shadow:var(--glow);font-family:Arial,sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+.seg-hit:focus,.seg-hit:focus-visible{outline:3px solid #FACC15;outline-offset:3px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button type="button" class="sound-btn" id="sound-btn" onclick="toggleSound()" aria-pressed="true" aria-label="Activer ou couper le son" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg" role="status" aria-live="polite"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Analyse des relevés&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Mise à jour de la carte</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128506;&#65039;</span>
+  <div class="hud-frags" id="hud-frags"></div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Construction de la carte&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">Missions validées&nbsp;: 0/5 &middot; </span>&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#127942;</div>
+    <div class="finale-crest" id="finale-crest"></div>
+    <div class="finale-title">CARTE DE REP&Eacute;RAGE VALID&Eacute;E&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201; --:--</div>
+    <div class="finale-grade" id="finale-grade">&nbsp;</div>
+    <div class="finale-sub">&#127881; Mission accomplie&#8201;! Tu as v&eacute;rifi&eacute; les relev&eacute;s, plac&eacute; les rep&egrave;res et construit le triangle n&eacute;cessaire &agrave; la carte des explorateurs.</div>
+    <div class="finale-reveal">
+      <b>&#128506;&#65039; Bilan de la mission</b>
+      Les trois rep&egrave;res et leurs distances ont permis de construire et de v&eacute;rifier le triangle de rep&eacute;rage.
+      <div id="finale-autonomy" style="margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--line);"></div>
+    </div>
+    <button type="button" class="btn-restart" onclick="restartAll()">&#8635; Recommencer</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f5a623"></span>
+      Pazapa &middot; Maths &middot; 6e
+    </div>
+    <div class="week">Semaine 7 — Jour 1</div>
+    <div class="title">&#127919; Je rel&egrave;ve le <span class="hl">d&eacute;fi</span></div>
+    <div class="subtitle">Le triangle de rep&eacute;rage &middot; Atelier de cartographie</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#128506;&#65039;</div>
+    <div class="start-mission">
+      <b>&#128203; Mission du jour&nbsp;:</b> Les explorateurs viennent de revenir d&rsquo;une nouvelle exp&eacute;dition. Ils ont relev&eacute; les distances entre trois rep&egrave;res c&ocirc;tiers. Ces mesures doivent permettre de construire un triangle de rep&eacute;rage fiable sur la carte.
+      <br><br>
+      &Agrave; toi de v&eacute;rifier les informations, d&rsquo;effectuer les constructions et de valider progressivement la carte.
+      <div class="start-note">&#128506;&#65039; Cinq missions t&rsquo;attendent pour compl&eacute;ter le triangle de rep&eacute;rage.</div>
+    </div>
+    <button type="button" class="btn-start" onclick="beginGame()">&#9654;&#65039; Commencer la mission</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">&Eacute;l&eacute;ments cartographiques&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+      <div class="frag" id="frag-4">?</div>
+    </div>
+    <div id="steps"></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* =====================================================================
+   SONS — Web Audio API uniquement, ambiance cartographie
+   ===================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+0.04);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+dur-0.05);
+  g.gain.linearRampToValueAtTime(0.0001,t+dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+/* clic sec — crayon de cartographe sur le papier */
+function sClick(){if(!soundOn)return;beep(720,0,0.035,"square",0.07);beep(500,0.02,0.03,"triangle",0.04);}
+/* erreur discr\u00e8te — mesure qui ne correspond pas */
+function sBad(){if(!soundOn)return;beep(260,0,0.09,"triangle",0.1);beep(196,0.07,0.13,"triangle",0.08);}
+/* \u00e9l\u00e9ment cartographique obtenu — chime + petit tampon de validation */
+function sFrag(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.05,0.09,900,200,c.currentTime);beep(784,0.02,0.08,"square",0.14);beep(1047,0.09,0.12,"triangle",0.18);beep(1568,0.17,0.16,"triangle",0.18);}
+/* pivot de boussole — transition entre deux missions */
+function sTransition(){if(!soundOn)return;beep(700,0,0.05,"sine",0.09);beep(1050,0.06,0.06,"sine",0.11);beep(1400,0.12,0.1,"sine",0.13);}
+/* tintement de boussole — indice */
+function sHint(){if(!soundOn)return;beep(1568,0,0.08,"sine",0.09);beep(2093,0.08,0.12,"sine",0.08);}
+
+/* petit clic de r\u00e8gle graduée — glissement du point le long de la r\u00e8gle */
+function sRuler(){if(!soundOn)return;beep(1500,0,0.025,"square",0.06);}
+/* froissement l\u00e9ger de carte — d\u00e9pliage au lancement */
+function sPaper(){if(!soundOn)return;noise(0.16,0.1,2600,700,ac()?ac().currentTime:0);}
+/* tintement de boussole — s\u00e9lection centre/rayon du compas */
+function sCompass(){if(!soundOn)return;beep(1760,0,0.12,"sine",0.11);beep(2093,0.08,0.16,"sine",0.09);}
+/* son de trac\u00e9 — segment ou arc dessin\u00e9 sur la carte */
+function sTrace(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.22,0.07,1800,400,c.currentTime);beep(440,0.02,0.16,"triangle",0.08);}
+/* fanfare finale — pivot de boussole puis carte achev\u00e9e */
+function sWin(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.14,0.08,2200,500,c.currentTime);[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,0.15+i*0.12,0.24,"triangle",0.2);});}
+function toggleSound(){
+  soundOn=!soundOn;
+  var b=$("sound-btn");
+  b.innerHTML=soundOn?"&#128266;":"&#128263;";
+  b.classList.toggle("off",!soundOn);
+  b.setAttribute("aria-pressed",soundOn?"true":"false");
+  if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();
+}
+
+/* =====================================================================
+   MESSAGES ET TRANSITIONS
+   ===================================================================== */
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2500);}
+
+var SCAN_SUB=["Analyse des relev\u00e9s\u2026","Placement du rep\u00e8re\u2026","V\u00e9rification des distances\u2026","Trac\u00e9 du triangle\u2026","Finalisation de la carte\u2026"];
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  if(!ov){done&&done();return;}
+  if(txt)txt.innerHTML=SCAN_SUB[mi]||"Analyse en cours\u2026";
+  if(sub)sub.textContent="Mise \u00e0 jour de la carte";
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");sTransition();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*22+14;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");done&&done();},220);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },90);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+
+/* =====================================================================
+   GÉOMÉTRIE — triangle de repérage (inchangée)
+   ===================================================================== */
+function polar(cx,cy,r,deg){var rad=deg*Math.PI/180;return [cx+r*Math.cos(rad), cy-r*Math.sin(rad)];}
+function arcPoly(cx,cy,r,deg1,deg2,color,width){
+  var steps=28, pts=[];
+  for(var i=0;i<=steps;i++){var d=deg1+(deg2-deg1)*(i/steps);var p=polar(cx,cy,r,d);pts.push(p[0].toFixed(1)+','+p[1].toFixed(1));}
+  return '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+(color||'#F59E0B')+'" stroke-width="'+(width||3)+'"/>';
+}
+function dotLabel(x,y,label,color){return '<text x="'+x+'" y="'+y+'" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="'+(color||'#FFF8ED')+'">'+label+'</text>';}
+function pointDot(x,y,r,color){return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r||6)+'" fill="'+(color||'#C9683F')+'" stroke="#eef4f8" stroke-width="1.5"/>';}
+function svgPointFromEvent(svg,evt){var pt=svg.createSVGPoint();pt.x=evt.clientX;pt.y=evt.clientY;var ctm=svg.getScreenCTM();if(!ctm)return{x:0,y:0};return pt.matrixTransform(ctm.inverse());}
+function chartTable(){return '<rect x="20" y="20" width="820" height="460" rx="18" fill="#2B1E17" stroke="#D97745" stroke-width="2" opacity="0.4"/>';}
+
+var TRI={A:[180,340],B:[580,340],Binit:[430,340],P:[414.375,152.735],Bx:430};
+
+function rulerTicks(A,y){
+  var svg='';
+  for(var m=0;m<=9;m++){
+    var x=A[0]+m*50;
+    svg+='<line x1="'+x+'" y1="'+(y-14)+'" x2="'+x+'" y2="'+(y+14)+'" stroke="#D7C1AA" stroke-width="2"/>';
+    svg+='<text x="'+x+'" y="'+(y+34)+'" font-family="Courier New,monospace" font-size="13" fill="#D7C1AA" text-anchor="middle">'+m+'</text>';
+  }
+  return svg;
+}
+function fig1SVG(){
+  var A=TRI.A, y=A[1];
+  var svg='<svg id="m1-svg" viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;touch-action:none;" role="img" aria-labelledby="m1-svg-title m1-svg-desc"><title id="m1-svg-title">R&egrave;gle gradu&eacute;e pour tracer le segment AB</title><desc id="m1-svg-desc">Le point A est fix&eacute;. Fais glisser le point B le long de la ligne horizontale pour que le segment AB mesure 8 m&egrave;tres.</desc>';
+  svg+=chartTable();
+  svg+=rulerTicks(A,y);
+  svg+='<line id="m1-seg" x1="'+A[0]+'" y1="'+y+'" x2="'+TRI.Binit[0]+'" y2="'+y+'" stroke="#E7B66B" stroke-width="5"/>';
+  svg+=pointDot(A[0],y,7,'#C9683F')+dotLabel(A[0]-10,y-16,'A');
+  svg+='<g id="m1-bpoint">'+pointDot(TRI.Binit[0],y,7,'#C9683F')+'</g>';
+  svg+='<text id="m1-blabel" x="'+(TRI.Binit[0]-8)+'" y="'+(y-16)+'" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="#FFF8ED">B</text>';
+  svg+='<circle id="m1-hit" class="seg-hit" cx="'+TRI.Binit[0]+'" cy="'+y+'" r="26" fill="transparent" data-x="'+TRI.Binit[0]+'" style="cursor:grab;touch-action:none;" role="slider" tabindex="0" aria-label="Point B\u00a0: fais glisser pour r\u00e9gler la longueur" aria-valuemin="0" aria-valuemax="10" aria-valuenow="5"/>';
+  svg+='</svg>';
+  return svg;
+}
+function fig1UpdateVisual(bx){
+  TRI.Bx=bx;
+  var A=TRI.A, y=A[1];
+  $('m1-seg').setAttribute('x2',bx.toFixed(1));
+  $('m1-bpoint').innerHTML=pointDot(bx,y,7,'#C9683F');
+  $('m1-blabel').setAttribute('x',(bx-8).toFixed(1));
+  var hit=$('m1-hit');
+  hit.setAttribute('cx',bx.toFixed(1));hit.setAttribute('data-x',bx.toFixed(1));
+  var lengthM=(bx-A[0])/50;
+  hit.setAttribute('aria-valuenow',lengthM.toFixed(1));
+  var rd=$('m1-readout'); if(rd) rd.textContent='Longueur trac\u00e9e\u00a0: '+lengthM.toFixed(1).replace('.',',')+' m';
+}
+function setupLinearDrag(svgId,hitId,minX,maxX,onMove){
+  var svg=$(svgId), hit=$(hitId);
+  if(!svg||!hit) return;
+  var dragging=false;
+  function clampX(x){ return Math.max(minX,Math.min(maxX,x)); }
+  function move(evt){ if(!dragging) return; evt.preventDefault(); var p=svgPointFromEvent(svg,evt); onMove(clampX(p.x)); }
+  function start(evt){ dragging=true; try{ hit.setPointerCapture(evt.pointerId); }catch(e){} hit.style.cursor='grabbing'; move(evt); evt.preventDefault(); }
+  function end(evt){ if(!dragging) return; dragging=false; hit.style.cursor='grab'; try{ hit.releasePointerCapture(evt.pointerId); }catch(e){} }
+  hit.addEventListener('pointerdown',start);
+  hit.addEventListener('pointermove',move);
+  hit.addEventListener('pointerup',end);
+  hit.addEventListener('pointercancel',end);
+  hit.addEventListener('keydown',function(evt){
+    var step=evt.shiftKey?1:5;
+    var cur=parseFloat(hit.getAttribute('data-x'))||0;
+    if(evt.key==='ArrowRight'){ onMove(clampX(cur+step)); evt.preventDefault(); }
+    else if(evt.key==='ArrowLeft'){ onMove(clampX(cur-step)); evt.preventDefault(); }
+  });
+}
+function arc1Path(){var A=TRI.A;return arcPoly(A[0],A[1],300,15,65,'#D9B35F',4);}
+function arc2Path(){var B=TRI.B;return arcPoly(B[0],B[1],250,105,160,'#D9B35F',4);}
+function fig2SVG(){
+  var A=TRI.A;
+  var svg='<svg id="m2-svg" viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" role="img" aria-labelledby="m2-svg-title m2-svg-desc"><title id="m2-svg-title">Segment AB avec compas &agrave; r&eacute;gler</title><desc id="m2-svg-desc">Le segment AB de 8 m&egrave;tres est trac&eacute;. Utilise le compas virtuel ci-dessous pour reporter une distance de 6 m&egrave;tres depuis le point A.</desc>';
+  svg+=chartTable();
+  svg+='<line x1="'+A[0]+'" y1="'+A[1]+'" x2="'+TRI.B[0]+'" y2="'+TRI.B[1]+'" stroke="#E7B66B" stroke-width="5"/>';
+  svg+=pointDot(A[0],A[1],7,'#C9683F')+dotLabel(A[0]-10,A[1]-16,'A');
+  svg+=pointDot(TRI.B[0],TRI.B[1],7,'#C9683F')+dotLabel(TRI.B[0]+8,TRI.B[1]-16,'B');
+  svg+='<g id="m2-arc"></g>';
+  svg+='</svg>';
+  return svg;
+}
+function fig3SVG(){
+  var A=TRI.A,B=TRI.B;
+  var svg='<svg id="m3-svg" viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" role="img" aria-labelledby="m3-svg-title m3-svg-desc"><title id="m3-svg-title">Premier arc trac&eacute;, second arc &agrave; construire</title><desc id="m3-svg-desc">Le premier arc, centr&eacute; en A, est visible. Utilise le compas virtuel pour tracer le second arc depuis B, &agrave; 5 m&egrave;tres.</desc>';
+  svg+=chartTable();
+  svg+='<line x1="'+A[0]+'" y1="'+A[1]+'" x2="'+B[0]+'" y2="'+B[1]+'" stroke="#E7B66B" stroke-width="5"/>';
+  svg+=arc1Path();
+  svg+=pointDot(A[0],A[1],7,'#C9683F')+dotLabel(A[0]-10,A[1]-16,'A');
+  svg+=pointDot(B[0],B[1],7,'#C9683F')+dotLabel(B[0]+8,B[1]-16,'B');
+  svg+='<g id="m3-arc"></g>';
+  svg+='<g id="m3-p" style="display:none;">'+pointDot(TRI.P[0],TRI.P[1],7,'#C9683F')+dotLabel(TRI.P[0]+8,TRI.P[1]-10,'P','#F3D6B8')+'</g>';
+  svg+='</svg>';
+  return svg;
+}
+function fig4SVG(){
+  var A=TRI.A,B=TRI.B,P=TRI.P;
+  var svg='<svg viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" role="img" aria-labelledby="m4-svg-title m4-svg-desc"><title id="m4-svg-title">Triangle &agrave; terminer</title><desc id="m4-svg-desc">Les deux arcs et le point P sont visibles. S&eacute;lectionne les deux c&ocirc;t&eacute;s &agrave; tracer pour terminer le triangle ABP.</desc>';
+  svg+=chartTable();
+  svg+='<line x1="'+A[0]+'" y1="'+A[1]+'" x2="'+B[0]+'" y2="'+B[1]+'" stroke="#E7B66B" stroke-width="5"/>';
+  svg+=arcPoly(A[0],A[1],300,15,65,'#D9B35F',2.4).replace('stroke-width="2.4"','stroke-width="2.4" opacity="0.55" stroke-dasharray="4,4"');
+  svg+=arcPoly(B[0],B[1],250,105,160,'#D9B35F',2.4).replace('stroke-width="2.4"','stroke-width="2.4" opacity="0.55" stroke-dasharray="4,4"');
+  svg+='<g id="m4-sides"></g>';
+  svg+=pointDot(A[0],A[1],7,'#C9683F')+dotLabel(A[0]-10,A[1]-16,'A');
+  svg+=pointDot(B[0],B[1],7,'#C9683F')+dotLabel(B[0]+8,B[1]-16,'B');
+  svg+=pointDot(P[0],P[1],7,'#C9683F')+dotLabel(P[0]+8,P[1]-10,'P','#F3D6B8');
+  svg+='</svg>';
+  return svg;
+}
+function fig4Reveal(correct){
+  var A=TRI.A,B=TRI.B,P=TRI.P;
+  var color=correct?'#6FA34A':'#D9534F';
+  var g=document.querySelectorAll('#m4-sides');
+  var html='<line x1="'+A[0]+'" y1="'+A[1]+'" x2="'+P[0].toFixed(1)+'" y2="'+P[1].toFixed(1)+'" stroke="'+color+'" stroke-width="5"/>'
+          +'<line x1="'+B[0]+'" y1="'+B[1]+'" x2="'+P[0].toFixed(1)+'" y2="'+P[1].toFixed(1)+'" stroke="'+color+'" stroke-width="5"/>';
+  g.forEach(function(el){ el.innerHTML=html; });
+}
+var TABLETS=[{l:'A',vals:[7,4,12],ok:false},{l:'B',vals:[6,5,8],ok:true},{l:'C',vals:[3,5,8],ok:false}];
+function tabletCardSVG(vals){
+  var svg='<svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" aria-hidden="true" focusable="false">';
+  svg+='<rect x="10" y="10" width="200" height="140" rx="10" fill="#2B1E17" stroke="#C9864A" stroke-width="3"/>';
+  vals.forEach(function(v,i){svg+='<text x="110" y="'+(55+i*35)+'" text-anchor="middle" font-family="Courier New,monospace" font-weight="800" font-size="24" fill="#FFF8ED">'+v+' m</text>';});
+  svg+='</svg>';
+  return svg;
+}
+/* =====================================================================
+   LES 5 MISSIONS DE L'ATELIER DE CARTOGRAPHIE
+   ===================================================================== */
+var STEPS=[
+ {ico:"&#128205;", name:"Mission 1&nbsp;: Premier rep&egrave;re", comp:"Tracer un segment de longueur donn\u00e9e",
+  intro:"Le premier rep\u00e8re c\u00f4tier <b>A</b> est plac\u00e9. La plus grande distance relev\u00e9e par les explorateurs mesure <b>8&nbsp;m</b>.<br>&#128070; Fais glisser le point <b>B</b> pour tracer le segment [AB] de 8&nbsp;m.",
+  hint1:"Observe la graduation atteinte par le point B et rapproche-la progressivement de 8&nbsp;m.",
+  frag:"&#128205;"},
+ {ico:"&#128207;", name:"Mission 2&nbsp;: Premi&egrave;re distance", comp:"Utiliser un compas (arc de cercle)",
+  intro:"Le troisi\u00e8me rep\u00e8re, <b>P</b>, se trouve \u00e0 <b>6&nbsp;m</b> du rep\u00e8re A.<br>&#128070; R\u00e8gle le compas sur 6&nbsp;m, place sa pointe sur A, puis trace le premier arc.",
+  hint1:"Dans la distance AP, le point A indique le centre et la valeur donn\u00e9e indique le rayon.",
+  frag:"&#128207;"},
+ {ico:"&#129517;", name:"Mission 3&nbsp;: Orientation", comp:"Utiliser un compas (second arc)",
+  intro:"Le relev\u00e9 indique aussi que P se trouve \u00e0 <b>5&nbsp;m</b> du rep\u00e8re B.<br>&#128070; R\u00e8gle le compas sur 5&nbsp;m, place sa pointe sur B, puis trace le second arc.",
+  hint1:"Dans la distance BP, le point B indique le centre et la valeur donn\u00e9e indique le rayon.",
+  frag:"&#129517;"},
+ {ico:"&#128209;", name:"Mission 4&nbsp;: Triangle construit", comp:"Terminer la construction du triangle",
+  intro:"Le troisi\u00e8me rep\u00e8re P est localis\u00e9 \u00e0 l\u2019intersection des deux arcs.<br>&#128070; S\u00e9lectionne les deux segments \u00e0 tracer pour terminer le triangle ABP.",
+  hint1:"Les deux c\u00f4t\u00e9s manquants ont le sommet P en commun.",
+  frag:"&#128209;"},
+ {ico:"&#128506;&#65039;", name:"Mission finale&nbsp;: Carte valid\u00e9e", comp:"V\u00e9rifier si un triangle est constructible",
+  intro:"Trois fiches de relev\u00e9s indiquent de nouvelles longueurs pour une future exp\u00e9dition.<br>&#128070; Choisis celle qui permet de construire un triangle, puis justifie ton choix.",
+  hint1:"Pour chaque relev\u00e9, additionne les deux plus petites longueurs puis compare leur somme \u00e0 la plus grande.",
+  frag:"&#128506;&#65039;"}
+];
+var N=STEPS.length;
+var solved=[];for(var _i=0;_i<N;_i++)solved.push(false);
+var active=0;
+var totalSec=0,totalInt=null;
+var gameRunning=false;
+var validatedChallenges=0, autonomousSuccesses=0;
+var roomAttempts={};
+var correctionShown=[false,false,false,false,false];
+var correctionText=['','','','',''];
+
+/* =====================================================================
+   CHRONOMÈTRE — pause/reprise à la visibilité (règle permanente)
+   ===================================================================== */
+function timerTick(){
+  totalSec++;
+  var h=$("hud-timer");
+  if(h)h.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: '+solved.filter(Boolean).length+'/5 &middot; </span>\u23F1\uFE0F '+fmt(totalSec);
+}
+function pauseTimer(){ clearInterval(totalInt); totalInt=null; }
+function resumeTimer(){
+  if(!gameRunning) return;
+  clearInterval(totalInt);
+  totalInt=setInterval(timerTick,1000);
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){ pauseTimer(); } else { resumeTimer(); }
+});
+window.addEventListener("blur", pauseTimer);
+window.addEventListener("focus", function(){ if(!document.hidden) resumeTimer(); });
+
+function buildHudFrags(){
+  var h=$("hud-frags");if(!h)return;h.innerHTML="";
+  for(var i=0;i<N;i++){var s=document.createElement("span");s.className="hud-frag";s.id="hud-frag-"+i;s.innerHTML=STEPS[i].frag;h.appendChild(s);}
+}
+
+/* =====================================================================
+   CORPS SPÉCIFIQUE DE CHAQUE MISSION
+   ===================================================================== */
+function bodyHTML(mi){
+  if(mi===0){
+    return '<div class="mfig" id="m1-figure"></div><p class="room-question" id="m1-readout">Longueur trac\u00e9e\u00a0: 5,0 m</p>';
+  }
+  if(mi===1){
+    return '<div class="mfig" id="m2-figure"></div>'
+      +'<div class="compass-tool"><div class="compass-group"><span class="compass-label">Centre</span>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(1,\'center\',\'A\',this)">A</button>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(1,\'center\',\'B\',this)">B</button></div>'
+      +'<div class="compass-group"><span class="compass-label">Rayon</span>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(1,\'radius\',5,this)">5 m</button>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(1,\'radius\',6,this)">6 m</button>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(1,\'radius\',8,this)">8 m</button></div></div>';
+  }
+  if(mi===2){
+    return '<div class="mfig" id="m3-figure"></div>'
+      +'<div class="compass-tool"><div class="compass-group"><span class="compass-label">Centre</span>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(2,\'center\',\'A\',this)">A</button>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(2,\'center\',\'B\',this)">B</button></div>'
+      +'<div class="compass-group"><span class="compass-label">Rayon</span>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(2,\'radius\',5,this)">5 m</button>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(2,\'radius\',6,this)">6 m</button>'
+      +'<button type="button" class="compass-btn" onclick="selectCompass(2,\'radius\',8,this)">8 m</button></div></div>';
+  }
+  if(mi===3){
+    var order=shuffle([{t:'Tracer [AP]',id:'AP',ok:true},{t:'Tracer [BP]',id:'BP',ok:true},{t:'Tracer la verticale passant par P',id:'V',ok:false},{t:'Relier P au milieu de [AB]',id:'M',ok:false}]);
+    var html='<div class="mfig" id="m4-figure"></div><div class="mcq-list" id="m4-options">';
+    order.forEach(function(o){ html+='<button type="button" class="mcq-opt" data-id="'+o.id+'" data-correct="'+o.ok+'" onclick="toggleM4(this,\''+o.id+'\')">'+o.t+'</button>'; });
+    html+='</div>';
+    return html;
+  }
+  if(mi===4){
+    var ord=shuffle(TABLETS.slice());
+    var html='<div class="plans-row" id="m5-cards">';
+    ord.forEach(function(t){ html+='<button type="button" class="plan" data-correct="'+t.ok+'" data-letter="'+t.l+'" aria-label="Choisir le relev\u00e9 '+t.l+'" onclick="selectM5(this,\''+t.l+'\','+t.ok+')">'+tabletCardSVG(t.vals)+'<div class="plan-label">Relev\u00e9 '+t.l+'</div></button>'; });
+    html+='</div><p class="just-label" id="m5-justlabel" style="display:none;">Pourquoi&nbsp;?</p><div class="mcq-list" id="m5-just"></div>';
+    return html;
+  }
+  return '';
+}
+function afterRender(mi){
+  if(mi===0){
+    $('m1-figure').innerHTML=fig1SVG();
+    TRI.Bx=TRI.Binit[0];
+    fig1UpdateVisual(TRI.Bx);
+    var lastMeterTick=null;
+    setupLinearDrag('m1-svg','m1-hit',TRI.A[0]+10,TRI.A[0]+430,function(x){
+      fig1UpdateVisual(x);
+      var meter=Math.round((x-TRI.A[0])/50);
+      if(meter!==lastMeterTick){ lastMeterTick=meter; sRuler(); }
+    });
+  } else if(mi===1){
+    $('m2-figure').innerHTML=fig2SVG();
+    compassChoice[1]={center:null,radius:null};
+  } else if(mi===2){
+    $('m3-figure').innerHTML=fig3SVG();
+    compassChoice[2]={center:null,radius:null};
+  } else if(mi===3){
+    $('m4-figure').innerHTML=fig4SVG();
+    m4Selected={};
+  } else if(mi===4){
+    var just=shuffle([
+      {t:'La somme des deux plus petites longueurs est strictement sup\u00e9rieure \u00e0 la plus grande.',c:true},
+      {t:'La plus grande longueur est toujours choisie deux fois.',c:false},
+      {t:'La somme des trois longueurs est sup\u00e9rieure \u00e0 10.',c:false}
+    ]);
+    $('m5-just').innerHTML=just.map(function(o){ return '<button type="button" class="mcq-opt" data-correct="'+o.c+'" onclick="validateM5(this,'+o.c+')">'+o.t+'</button>'; }).join('');
+    m5Choice={letter:null,ok:null,el:null};
+  }
+}
+
+/* =====================================================================
+   MOTEUR GÉNÉRIQUE (inspiré du template) — construction dynamique des cartes
+   ===================================================================== */
+function needsGenericTry(mi){ return mi!==4; }
+function tryLabel(mi){
+  return ['V\u00e9rifier','Tracer l\u2019arc','Tracer le second arc','Valider les trac\u00e9s'][mi]||'V\u00e9rifier';
+}
+function build(){
+  var host=$("steps");host.innerHTML="";
+  STEPS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.name+'</div><div class="step-comp">'+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro" tabindex="-1" id="intro-'+mi+'">'+M.intro+'</div>';
+      h+=bodyHTML(mi);
+      if(!solved[mi]){
+        if(needsGenericTry(mi)){
+          h+='<div class="tools">'
+            +'<button type="button" class="btn btn-hint" id="hint-btn-'+mi+'" onclick="toggleHint('+mi+')">? Indice</button>'
+            +'<button type="button" class="btn btn-try" id="try-'+mi+'" onclick="tryStep('+mi+')"'+(mi===1||mi===2?' disabled':'')+'>\u2705 '+tryLabel(mi)+'</button>'
+            +'</div>';
+        } else {
+          h+='<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-'+mi+'" onclick="toggleHint('+mi+')">? Indice</button></div>';
+        }
+        h+='<div class="hint" id="hint-'+mi+'">'+M.hint1+'</div>'
+          +'<div class="correction" id="corr-'+mi+'"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-'+mi+'"></div></div>'
+          +'<div class="fb" id="fb-'+mi+'"><span id="fbi-'+mi+'"></span><div id="fbm-'+mi+'"></div></div>';
+      } else {
+        h+='<div class="correction'+(correctionShown[mi]?' show':'')+'" id="corr-'+mi+'"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-'+mi+'">'+(correctionShown[mi]?correctionText[mi]:'')+'</div></div>'
+          +'<div class="fb show ok" id="fb-'+mi+'"><span id="fbi-'+mi+'">\u2705</span><div id="fbm-'+mi+'"><b style="color:var(--green)">Bravo&#8201;!</b><br>'+M.frag+' \u00c9l\u00e9ment obtenu&#8201;!</div></div>';
+      }
+    } else {
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine la mission pr\u00e9c\u00e9dente pour d\u00e9bloquer celle-ci.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(mi===active && !solved[mi]) afterRender(mi);
+    else if(solved[mi]) reapplySolvedVisual(mi);
+  });
+  updateCrest();updateProg();
+}
+function reapplySolvedVisual(mi){
+  if(mi===0){ if($('m1-figure')){ $('m1-figure').innerHTML=fig1SVG(); fig1UpdateVisual(580); $('m1-hit').style.pointerEvents='none'; } }
+  else if(mi===1){ if($('m2-figure')){ $('m2-figure').innerHTML=fig2SVG(); $('m2-arc').innerHTML=arc1Path(); } }
+  else if(mi===2){ if($('m3-figure')){ $('m3-figure').innerHTML=fig3SVG(); $('m3-arc').innerHTML=arc2Path(); $('m3-p').style.display='block'; } }
+  else if(mi===3){ if($('m4-figure')){ $('m4-figure').innerHTML=fig4SVG(); fig4Reveal(true); } document.querySelectorAll('#m4-options .mcq-opt').forEach(function(b){ if(b.getAttribute('data-id')==='AP'||b.getAttribute('data-id')==='BP'){ b.classList.add('correct'); } b.disabled=true; }); }
+  else if(mi===4){ document.querySelectorAll('#m5-cards .plan').forEach(function(b){ b.disabled=true; if(b.getAttribute('data-letter')==='B') b.classList.add('correct'); }); }
+}
+
+/* =====================================================================
+   MISSION 1 — VALIDATION
+   ===================================================================== */
+window.tryStep=function(mi){
+  if(mi===0) return validateM1();
+  if(mi===1) return validateCompass(1,'A',6);
+  if(mi===2) return validateCompass(2,'B',5);
+  if(mi===3) return validateM4();
+};
+function feedbackBlocks(mi){
+  return {fb:$('fb-'+mi),fbi:$('fbi-'+mi),fbm:$('fbm-'+mi),corr:$('corr-'+mi),corrx:$('corrx-'+mi),hint:$('hint-'+mi),hintbtn:$('hint-btn-'+mi)};
+}
+function validateM1(){
+  var mi=0;
+  if(solved[mi]) return;
+  var lengthM=(TRI.Bx-TRI.A[0])/50;
+  var isCorrect=(lengthM>=7.9 && lengthM<=8.1) || (TRI.Bx>=575 && TRI.Bx<=585);
+  roomAttempts[mi]=(roomAttempts[mi]||0)+1;
+  var B=feedbackBlocks(mi);
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='La base [AB] mesure bien 8&nbsp;m. Le premier rep\u00e8re est en place.';
+    TRI.Bx=580; fig1UpdateVisual(580);
+    var hit=$('m1-hit'); hit.style.pointerEvents='none'; hit.setAttribute('tabindex','-1');
+    $('try-0').disabled=true;
+    if(roomAttempts[mi]===1) autonomousSuccesses++;
+    stepSuccess(mi);
+  } else {
+    sBad();$("step-0").classList.add("shake");setTimeout(function(){$("step-0").classList.remove("shake");},400);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    B.fbm.textContent = lengthM<7.9 ? 'Le segment est trop court. Compare la longueur affich\u00e9e \u00e0 la longueur demand\u00e9e de 8\u00a0m.' : 'Le segment est trop long. Compare la longueur affich\u00e9e \u00e0 la longueur demand\u00e9e de 8\u00a0m.';
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[mi]>=2){
+      correctionShown[mi]=true;
+      correctionText[mi]='Correction\u00a0: place le point B sur la graduation 8\u00a0m. Le segment [AB] mesure alors exactement 8\u00a0m.';
+      B.corrx.innerHTML=correctionText[mi];
+      B.corr.classList.add('show');
+      TRI.Bx=580; fig1UpdateVisual(580);
+      $('m1-seg').setAttribute('stroke','#6FA34A');
+      var hit2=$('m1-hit'); hit2.style.pointerEvents='none';
+      $('try-0').disabled=true;
+      stepSuccess(mi);
+    } else {
+      B.hint.innerHTML='Observe la graduation atteinte par le point B et rapproche-la progressivement de 8\u00a0m.';
+    }
+  }
+}
+
+/* =====================================================================
+   MISSIONS 2 ET 3 — COMPAS
+   ===================================================================== */
+var compassChoice={1:{center:null,radius:null},2:{center:null,radius:null}};
+window.selectCompass=function(mi,kind,val,btn){
+  if(solved[mi]) return;
+  sCompass();
+  var group=btn.parentElement;
+  group.querySelectorAll('.compass-btn').forEach(function(b){ b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  compassChoice[mi][kind]=val;
+  var tb=$('try-'+mi);
+  if(tb) tb.disabled=!(compassChoice[mi].center && compassChoice[mi].radius);
+};
+function validateCompass(mi,okCenter,okRadius){
+  if(solved[mi]) return;
+  var c=compassChoice[mi];
+  var isCorrect=(c.center===okCenter && c.radius===okRadius);
+  roomAttempts[mi]=(roomAttempts[mi]||0)+1;
+  var B=feedbackBlocks(mi);
+  var wrongMsg='Ce n\u2019est pas le bon r\u00e9glage.';
+  if(mi===1){
+    if(c.center==='B') wrongMsg='La distance \u00e0 reporter est AP. Dans le nom de cette distance, quel point est le centre du cercle\u00a0?';
+    else if(c.radius===5) wrongMsg='Le rayon choisi ne correspond pas \u00e0 la distance AP indiqu\u00e9e dans l\u2019\u00e9nonc\u00e9.';
+    else if(c.radius===8) wrongMsg='Cette longueur correspond \u00e0 la base [AB]. Cherche la distance qui relie A au point P.';
+  } else {
+    if(c.center==='A') wrongMsg='La seconde distance est BP. Dans le nom de cette distance, quel point sert de centre\u00a0?';
+    else if(c.radius===6) wrongMsg='Ce rayon correspond au premier arc. Cherche la valeur associ\u00e9e \u00e0 la distance BP.';
+    else if(c.radius===8) wrongMsg='Cette longueur correspond \u00e0 la base [AB]. Le second arc doit utiliser la distance entre B et P.';
+  }
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML= mi===1 ? 'Premier arc trac\u00e9&#8201;! Tous ses points sont situ\u00e9s \u00e0 6&nbsp;m de A.' : 'Second arc trac\u00e9&#8201;! Les deux arcs se coupent en P, car AP\u00a0=\u00a06\u00a0m et BP\u00a0=\u00a05\u00a0m.';
+    if(mi===1){ $('m2-arc').innerHTML=arc1Path(); }
+    else { $('m3-arc').innerHTML=arc2Path(); $('m3-p').style.display='block'; }
+    document.querySelectorAll('#step-'+mi+' .compass-btn').forEach(function(b){ b.disabled=true; });
+    $('try-'+mi).disabled=true;
+    if(roomAttempts[mi]===1) autonomousSuccesses++;
+    stepSuccess(mi);
+  } else {
+    sBad();$("step-"+mi).classList.add("shake");setTimeout(function(){$("step-"+mi).classList.remove("shake");},400);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';B.fbm.textContent=wrongMsg;
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[mi]>=2){
+      correctionShown[mi]=true;
+      if(mi===1){ correctionText[mi]='Correction\u00a0: le premier arc est centr\u00e9 en A et son rayon mesure 6\u00a0m, car AP\u00a0=\u00a06\u00a0m.'; $('m2-arc').innerHTML=arc1Path(); }
+      else { correctionText[mi]='Correction\u00a0: le second arc est centr\u00e9 en B et son rayon mesure 5\u00a0m, car BP\u00a0=\u00a05\u00a0m. L\u2019intersection des deux arcs donne le point P.'; $('m3-arc').innerHTML=arc2Path(); $('m3-p').style.display='block'; }
+      B.corrx.innerHTML=correctionText[mi];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#step-'+mi+' .compass-btn').forEach(function(b){
+        b.classList.remove('selected');
+        var txt=b.textContent.trim();
+        if(txt===okCenter || txt===(okRadius+' m')) b.classList.add('selected');
+        b.disabled=true;
+      });
+      $('try-'+mi).disabled=true;
+      stepSuccess(mi);
+    } else {
+      B.hint.innerHTML = mi===1 ? 'Dans la distance AP, le point A indique le centre et la valeur donn\u00e9e indique le rayon.' : 'Dans la distance BP, le point B indique le centre et la valeur donn\u00e9e indique le rayon.';
+    }
+  }
+}
+
+/* =====================================================================
+   MISSION 4 — TERMINER LE TRIANGLE
+   ===================================================================== */
+var m4Selected={};
+window.toggleM4=function(btn,id){
+  if(solved[3]) return;
+  sClick();
+  m4Selected[id]=!m4Selected[id];
+  btn.classList.toggle('selected',!!m4Selected[id]);
+};
+function validateM4(){
+  var mi=3;
+  if(solved[mi]) return;
+  var chosen=Object.keys(m4Selected).filter(function(k){return m4Selected[k];});
+  var hasAP=chosen.indexOf('AP')>=0, hasBP=chosen.indexOf('BP')>=0;
+  var hasDistractor=chosen.some(function(k){return k==='V'||k==='M';});
+  var isCorrect = hasAP && hasBP && chosen.length===2;
+  roomAttempts[mi]=(roomAttempts[mi]||0)+1;
+  var B=feedbackBlocks(mi);
+  var wrongMsg;
+  if((hasAP||hasBP) && !(hasAP&&hasBP) && !hasDistractor) wrongMsg='Il manque encore un c\u00f4t\u00e9. Observe les sommets qui ne sont pas encore reli\u00e9s.';
+  else if(hasAP && hasBP && hasDistractor) wrongMsg='Les deux c\u00f4t\u00e9s manquants sont pr\u00e9sents, mais un trac\u00e9 inutile a aussi \u00e9t\u00e9 s\u00e9lectionn\u00e9.';
+  else wrongMsg='Un triangle poss\u00e8de trois c\u00f4t\u00e9s. Observe le c\u00f4t\u00e9 d\u00e9j\u00e0 trac\u00e9 et cherche les deux c\u00f4t\u00e9s manquants.';
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='Triangle termin\u00e9&#8201;! Les trois distances 8&nbsp;m, 6&nbsp;m et 5&nbsp;m sont maintenant repr\u00e9sent\u00e9es.';
+    fig4Reveal(true);
+    document.querySelectorAll('#m4-options .mcq-opt').forEach(function(b){ b.disabled=true; if(b.getAttribute('data-id')==='AP'||b.getAttribute('data-id')==='BP') b.classList.add('correct'); });
+    if(roomAttempts[mi]===1) autonomousSuccesses++;
+    stepSuccess(mi);
+  } else {
+    sBad();$("step-3").classList.add("shake");setTimeout(function(){$("step-3").classList.remove("shake");},400);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';B.fbm.textContent=wrongMsg;
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[mi]>=2){
+      correctionShown[mi]=true;
+      correctionText[mi]='Correction\u00a0: pour terminer le triangle ABP, il fallait tracer les segments [AP] et [BP]. Les trois c\u00f4t\u00e9s mesurent alors AB\u00a0=\u00a08\u00a0m, AP\u00a0=\u00a06\u00a0m et BP\u00a0=\u00a05\u00a0m.';
+      B.corrx.innerHTML=correctionText[mi];
+      B.corr.classList.add('show');
+      fig4Reveal(true);
+      document.querySelectorAll('#m4-options .mcq-opt').forEach(function(b){ b.disabled=true; if(b.getAttribute('data-id')==='AP'||b.getAttribute('data-id')==='BP') b.classList.add('correct'); });
+      stepSuccess(mi);
+    } else {
+      B.hint.innerHTML='Les deux c\u00f4t\u00e9s manquants ont le sommet P en commun.';
+    }
+  }
+}
+
+/* =====================================================================
+   MISSION 5 — RELEVÉ EXPLOITABLE + JUSTIFICATION
+   ===================================================================== */
+var m5Choice={letter:null,ok:null,el:null};
+window.selectM5=function(btn,letter,ok){
+  if(solved[4]) return;
+  sClick();
+  document.querySelectorAll('#m5-cards .plan').forEach(function(b){ b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  m5Choice={letter:letter,ok:ok,el:btn};
+  $('m5-justlabel').style.display='block';
+  document.querySelectorAll('#m5-just .mcq-opt').forEach(function(b){ b.classList.remove('selected','correct','wrong'); b.disabled=false; });
+};
+window.validateM5=function(justBtn,justOk){
+  var mi=4;
+  if(solved[mi] || m5Choice.letter===null) return;
+  var isCorrect=m5Choice.ok && justOk;
+  roomAttempts[mi]=(roomAttempts[mi]||0)+1;
+  var B=feedbackBlocks(mi);
+  var TAB_FB={A:'Ce relev\u00e9 ne convient pas. Identifie la plus grande longueur, puis additionne les deux autres.',C:'Ce relev\u00e9 ne forme pas un vrai triangle. Compare la somme des deux plus petites longueurs \u00e0 la plus grande.'};
+  var wrongMsg = !m5Choice.ok ? TAB_FB[m5Choice.letter] : 'Le bon relev\u00e9 est choisi, mais la justification ne correspond pas \u00e0 la condition de constructibilit\u00e9.';
+  if(isCorrect){
+    sTrace();
+    B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='Relev\u00e9 valid\u00e9&#8201;! Comme 5 + 6 = 11 et que 11 > 8, les trois longueurs permettent de construire un triangle.';
+    document.querySelectorAll('#m5-cards .plan').forEach(function(b){ b.disabled=true; });
+    m5Choice.el.classList.add('correct');
+    document.querySelectorAll('#m5-just .mcq-opt').forEach(function(b){ b.disabled=true; });
+    justBtn.classList.add('correct');
+    if(roomAttempts[mi]===1) autonomousSuccesses++;
+    stepSuccess(mi);
+  } else {
+    sBad();$("step-4").classList.add("shake");setTimeout(function(){$("step-4").classList.remove("shake");},400);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';B.fbm.textContent=wrongMsg;
+    if(B.hintbtn) B.hintbtn.style.display='inline-flex';
+    if(roomAttempts[mi]>=2){
+      correctionShown[mi]=true;
+      correctionText[mi]='Correction\u00a0: trois longueurs permettent de construire un triangle seulement si la somme des deux plus petites est strictement sup\u00e9rieure \u00e0 la plus grande.<br><br>'
+        +'Relev\u00e9 A\u00a0: 4 + 7 = 11 et 11 < 12, donc le triangle n\u2019est pas constructible.<br>'
+        +'Relev\u00e9 B\u00a0: 5 + 6 = 11 et 11 > 8, donc le triangle est constructible.<br>'
+        +'Relev\u00e9 C\u00a0: 3 + 5 = 8, donc les trois points seraient align\u00e9s et ne formeraient pas un triangle.';
+      B.corrx.innerHTML=correctionText[mi];
+      B.corr.classList.add('show');
+      document.querySelectorAll('#m5-cards .plan').forEach(function(b){ b.disabled=true; if(b.getAttribute('data-letter')==='B') b.classList.add('correct'); });
+      document.querySelectorAll('#m5-just .mcq-opt').forEach(function(b){ b.disabled=true; if(b.getAttribute('data-correct')==='true') b.classList.add('correct'); });
+      stepSuccess(mi);
+    } else {
+      B.hint.innerHTML='Pour chaque relev\u00e9, additionne les deux plus petites longueurs puis compare leur somme \u00e0 la plus grande.';
+    }
+  }
+};
+
+/* =====================================================================
+   INDICE / RÉUSSITE / TRANSITION / RÉCOMPENSE
+   ===================================================================== */
+window.toggleHint=function(mi){
+  if(solved[mi]) return;
+  var el=$('hint-'+mi);
+  var willShow=!el.classList.contains('show');
+  if(willShow) sHint();
+  el.classList.toggle('show');
+};
+function stepSuccess(mi){
+  if(solved[mi]){
+    return;
+  }
+  solved[mi]=true;
+  validatedChallenges++;
+  sFrag();
+  $('step-'+mi).classList.add('solved');
+  var hb=$('hint-btn-'+mi); if(hb) hb.disabled=true;
+  var hbox=$('hint-'+mi); if(hbox) hbox.classList.remove('show');
+  showAgent('&#128506;&#65039; Responsable de l\u2019atelier&nbsp;:<br>'+STEPS[mi].frag+' '+(mi<N-1?'\u00c9l\u00e9ment valid\u00e9&#8201;! Poursuis la construction.':'Le triangle de rep\u00e9rage est termin\u00e9&#8201;!'));
+  updateCrest();updateProg();
+  var body=$('body-'+mi);
+  if(body && !$('next-'+mi)){
+    var lab=(active<N-1)?'Mission suivante &#8594;':'Voir la carte termin\u00e9e &#8594;';
+    body.insertAdjacentHTML('beforeend','<div style="text-align:center;margin-top:1rem;"><button type="button" class="btn btn-try" id="next-'+mi+'" onclick="goNext('+mi+')">'+lab+'</button></div>');
+  }
+}
+function goNext(mi){
+  sClick();
+  var nb=$('next-'+mi);if(nb){nb.disabled=true;nb.style.display='none';}
+  if(active<N-1){
+    active++;
+    runScan(active,function(){
+      build();
+      var el=$('step-'+active);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+      var introEl=$('intro-'+active); if(introEl){ introEl.setAttribute('tabindex','-1'); introEl.focus({preventScroll:true}); }
+      showAgent('&#128506;&#65039; Responsable de l\u2019atelier&nbsp;:<br>Mission suivante&#8201;! \u00c0 toi de jouer.');
+    });
+  } else {
+    openFinale();
+  }
+}
+function updateCrest(){
+  STEPS.forEach(function(M,mi){
+    var f=$('frag-'+mi),hf=$('hud-frag-'+mi);
+    if(solved[mi]){ if(f){f.innerHTML=M.frag;f.classList.add('found');} if(hf){hf.classList.add('got');} }
+    else{ if(f){f.textContent='?';f.classList.remove('found');} if(hf){hf.classList.remove('got');} }
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/N*100);
+  var lab=$('hud-prog-label'),fill=$('hud-prog-fill');
+  if(lab)lab.innerHTML='Construction de la carte&nbsp;: '+pct+'&#8201;%';
+  if(fill)fill.style.width=pct+'%';
+}
+
+/* =====================================================================
+   ÉCRAN FINAL
+   ===================================================================== */
+function autonomyMessage(n){
+  if(n===5) return 'Excellent&#8201;! Tu as r\u00e9alis\u00e9 toutes les missions sans correction.';
+  if(n===3||n===4) return 'Tr\u00e8s bon travail&#8201;! Tu as r\u00e9alis\u00e9 la majorit\u00e9 des missions de mani\u00e8re autonome.';
+  if(n===1||n===2) return 'Bravo pour ta pers\u00e9v\u00e9rance&#8201;! Les corrections t\u2019ont aid\u00e9 \u00e0 terminer la carte.';
+  return 'Tu as termin\u00e9 la mission avec l\u2019aide des corrections. Relis les d\u00e9marches avant de recommencer.';
+}
+function openFinale(){
+  gameRunning=false;
+  clearInterval(totalInt);
+  $('hud-dial').innerHTML='&#127942;';
+  var cr=$('finale-crest');cr.innerHTML='';
+  STEPS.forEach(function(M,i){var d=document.createElement('div');d.className='fc';d.style.animationDelay=(i*0.1)+'s';d.innerHTML=M.frag;cr.appendChild(d);});
+  setTimeout(function(){
+    $('finale-time').innerHTML='&#9201; Temps utilis\u00e9&#8201;: '+fmtLong(totalSec);
+    $('finale-grade').innerHTML='&#127942; CARTE COMPL\u00c8TE';
+    var au=$('finale-autonomy');
+    if(au){ au.innerHTML='<b>Missions r\u00e9alis\u00e9es sans correction\u00a0: '+autonomousSuccesses+' / 5</b><br>'+autonomyMessage(autonomousSuccesses); }
+    $('finale').classList.add('show');
+    sWin();
+  },300);
+}
+
+/* =====================================================================
+   DÉMARRAGE / RECOMMENCER
+   ===================================================================== */
+function beginGame(){
+  var c=ac();if(c&&c.state==='suspended')c.resume();
+  $('start-screen').style.display='none';
+  $('game').style.display='';
+  buildHudFrags();
+  $('hud-bar').classList.add('show');
+  document.body.classList.add('playing');
+  totalSec=0;clearInterval(totalInt);gameRunning=true;
+  var ht=$('hud-timer');if(ht)ht.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: 0/5 &middot; </span>\u23F1\uFE0F 00:00';
+  totalInt=setInterval(timerTick,1000);
+  sPaper();
+  build();
+  showAgent('&#128506;&#65039; Responsable de l\u2019atelier&nbsp;:<br>Bienvenue&#8201;! V\u00e9rifions les rep\u00e8res avant de commencer.');
+}
+function restartAll(){
+  gameRunning=false;
+  clearInterval(totalInt);totalSec=0;
+  solved=[];for(var i=0;i<N;i++)solved.push(false);
+  active=0; roomAttempts={}; validatedChallenges=0; autonomousSuccesses=0;
+  correctionShown=[false,false,false,false,false]; correctionText=['','','','',''];
+  compassChoice={1:{center:null,radius:null},2:{center:null,radius:null}};
+  m4Selected={}; m5Choice={letter:null,ok:null,el:null};
+  TRI.Bx=TRI.Binit[0];
+  $('finale').classList.remove('show');
+  var ov=$('scan-overlay');if(ov)ov.classList.remove('show');
+  $('hud-bar').classList.remove('show');
+  document.body.classList.remove('playing');
+  $('game').style.display='none';
+  $('start-screen').style.display='';
+  $('hud-dial').innerHTML='&#128506;&#65039;';
+  var ht=$('hud-timer');if(ht)ht.innerHTML='<span class="lbl">Missions valid\u00e9es\u00a0: 0/5 &middot; </span>\u23F1\uFE0F 00:00';
+  for(var j=0;j<N;j++){var hf=$('hud-frag-'+j);if(hf)hf.classList.remove('got');}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
