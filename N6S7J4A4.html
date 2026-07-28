@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths — 6e — Semaine 7 — Jour 4 — Je relève le défi — Lire et interpréter des données</title>
+<style>
+:root{
+  --day-color:#3AB5D8; --day-dark:#1A6E88; --day-light:#E8F6FB; --day-border:#9DD4E8;
+  --gold:#C9A227; --gold-d:#8A6414;
+  --bg:#0E1E26; --panel:#153447; --panel2:#1C4359;
+  --line:#2E5C74; --text:#F0F8FA; --muted:#AFCBD6;
+  --green:#4E9A3A; --err:#D9534F; --neon:#9DD4E8;
+  --copper:#B98A4E; --brass:#D9B35F;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 14px rgba(58,181,216,.34), 0 0 34px rgba(58,181,216,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:linear-gradient(180deg,#081821 0%, #0E1E26 50%, #0A171F 100%);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;
+  background:repeating-linear-gradient(0deg,transparent 0 38px,#D9B35F 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#D9B35F 38px 39px);}
+.wrap{width:100%;max-width:820px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#06202B;font-family:Arial,sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:Arial,sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.15;margin-bottom:.4rem;}
+.title .hl{color:var(--day-color);text-shadow:var(--glow);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+
+.bubble{position:fixed;border-radius:50%;filter:blur(45px);opacity:.16;z-index:0;pointer-events:none;}
+.b1{width:300px;height:300px;background:#3AB5D8;top:-60px;right:-80px;}
+.b2{width:260px;height:260px;background:#D9B35F;bottom:-70px;left:-60px;}
+.b3{width:200px;height:200px;background:#1A6E88;top:42%;right:-70px;}
+.b4{width:170px;height:170px;background:#9DD4E8;bottom:10%;right:-40px;}
+
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(20,33,15,.96);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--day-color);padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-frags{display:flex;gap:.3rem;}
+.hud-frag{width:1.6rem;height:1.8rem;border-radius:5px;background:#14293A;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#6C93A0;transition:all .4s;}
+.hud-frag.got{background:rgba(58,181,216,.16);border-color:var(--day-color);color:var(--day-color);transform:scale(1.05);}
+.hud-prog{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;}
+.hud-prog-label{font-family:Arial,sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--muted);white-space:nowrap;}
+.hud-prog-gauge{display:block;width:84px;height:7px;border-radius:99px;background:#14293A;border:1px solid var(--line);overflow:hidden;}
+.hud-prog-fill{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--neon),var(--day-color));transition:width .6s ease;}
+.hud-timer{font-family:'Courier New',monospace;font-weight:900;font-size:.95rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--day-color);
+  background:#14293A;border:1.5px solid var(--day-border);border-radius:8px;padding:.25rem .55rem;white-space:nowrap;box-shadow:inset 0 0 8px rgba(58,181,216,.2);}
+@media(max-width:1024px){.wrap{max-width:680px;}}
+@media(max-width:600px){.hud-prog-label{display:none;}.hud-prog-gauge{width:48px;}.hud-bar{gap:.5rem;padding:.45rem .5rem;}.hud-frag{width:1.3rem;height:1.6rem;font-size:.7rem;}.hud-dial{display:none;}.hud-timer{font-size:.8rem;padding:.2rem .4rem;}.hud-timer .lbl{display:none;}}
+
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-ico{font-size:4.2rem;margin-bottom:.8rem;filter:drop-shadow(var(--glow));}
+.start-mission{max-width:620px;margin:0 auto 1.6rem;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--day-color);
+  border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:var(--text);line-height:1.7;text-align:left;}
+.start-mission b{color:var(--day-color);}
+.start-note{margin:.9rem 0 .2rem;background:#14293A;border:1.5px dashed var(--day-border);border-radius:10px;padding:.8rem;text-align:center;font-size:.86rem;color:var(--day-light);}
+.start-rule{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.9rem;font-size:.8rem;}
+.start-rule span{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.3rem .7rem;}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#06202B;
+  font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.25rem);letter-spacing:.05em;padding:1rem 2.2rem;border:none;
+  border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+.crest{display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:.6rem 1.1rem;margin-bottom:1.2rem;}
+.crest .c-label{font-family:Arial,sans-serif;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.frag{width:2.1rem;height:2.1rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#14293A;border:1.5px solid var(--line);font-size:1rem;color:#6C93A0;transition:all .5s;}
+.frag.found{background:rgba(58,181,216,.14);border-color:var(--day-color);color:var(--day-color);transform:scale(1.08) rotate(-4deg);box-shadow:var(--glow);}
+
+.step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.2rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28);}
+.step-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.step-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#14293A;border-bottom:1px solid var(--line);}
+.step-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.step-card.solved .step-ico{transform:scale(1.12);}
+.step-meta{flex:1;min-width:0;}
+.step-step{font-family:Arial,sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.step-name{font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.step-comp{font-size:.66rem;color:var(--day-color);letter-spacing:.04em;margin-top:.15rem;}
+.step-body{padding:1.2rem;}
+.intro{font-family:Arial,sans-serif;font-weight:700;font-size:clamp(.82rem,2.4vw,.92rem);color:var(--day-color);background:#14293A;border:1px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;line-height:1.5;}
+
+.room-question{text-align:center;font-weight:700;color:var(--text);margin:.6rem 0;font-size:.98rem;}
+.rotor-figure svg,.mfig svg{max-width:100%;height:auto;}
+.mfig{text-align:center;margin-bottom:.6rem;}
+.compass-tool{display:flex;gap:1.4rem;flex-wrap:wrap;justify-content:center;background:#14293A;border-radius:12px;padding:1rem;margin-top:.6rem;border:1px solid var(--line);}
+.compass-group{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.compass-label{font-family:Arial,sans-serif;font-weight:700;font-size:.82rem;color:var(--muted);margin-right:.2rem;}
+.compass-btn{min-width:48px;min-height:44px;padding:.5rem .9rem;border:2px solid var(--copper);border-radius:8px;background:var(--panel2);color:var(--text);font-weight:800;font-family:'Courier New',monospace;cursor:pointer;font-size:.92rem;}
+.compass-btn:hover{background:#1D5570;}
+.compass-btn.selected{background:linear-gradient(135deg,var(--brass),var(--gold));border-color:var(--gold);color:#3b2a06;}
+.compass-btn:disabled{opacity:.5;cursor:default;}
+.mcq-list{display:flex;flex-direction:column;gap:.6rem;margin-top:.8rem;}
+.mcq-opt{width:100%;text-align:left;padding:.8rem 1.1rem;border:2px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;font-size:.92rem;font-weight:600;color:var(--text);transition:border-color .15s,background .15s;min-height:44px;}
+.mcq-opt:hover:not(:disabled){border-color:var(--day-color);}
+.mcq-opt.selected{border-color:var(--day-color);background:rgba(58,181,216,.14);}
+.mcq-opt.correct{border-color:var(--green);background:rgba(111,163,74,.16);color:#D9F2C8;}
+.mcq-opt.wrong{border-color:var(--err);background:rgba(217,83,79,.14);color:#FFD0C9;}
+.mcq-opt.locked,.mcq-opt:disabled{cursor:default;}
+.plans-row{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-top:.6rem;}
+.plan{width:170px;background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:.7rem;cursor:pointer;text-align:center;min-height:44px;}
+.plan:hover:not(:disabled){border-color:var(--day-color);}
+.plan.selected{border-color:var(--day-color);background:rgba(58,181,216,.14);}
+.plan.correct{border-color:var(--green);background:rgba(111,163,74,.16);}
+.plan.wrong{border-color:var(--err);background:rgba(217,83,79,.14);}
+.plan.locked,.plan:disabled{cursor:default;}
+.plan-label{font-family:Arial,sans-serif;font-size:.8rem;color:var(--muted);margin-top:.5rem;font-weight:700;}
+.just-label{text-align:center;font-weight:700;color:var(--day-color);margin-top:.9rem;font-size:.88rem;}
+.input-row{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:.8rem 0;}
+.cell-in{border:2px solid var(--line);border-radius:8px;background:#14293A;color:var(--text);font-family:'Courier New',monospace;font-size:16px;font-weight:600;text-align:center;padding:.5rem;outline:none;transition:border-color .2s,background .2s;min-height:46px;width:90px;}
+.cell-in:focus{border-color:var(--day-color);}
+.cell-in.ok{border-color:var(--green);background:rgba(111,163,74,.14);color:#D9F2C8;}
+.cell-in.ko{border-color:var(--err);background:rgba(217,83,79,.12);color:#FFD0C9;}
+
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);font-family:Arial,sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#06202B;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--day-color);color:var(--text);}
+.hint{margin-top:.8rem;background:#16344A;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#F5E4B7;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(111,163,74,.14);border:1.5px solid var(--green);color:#D9F2C8;}
+.fb.ko{background:rgba(217,83,79,.12);border:1.5px solid var(--err);color:#FFD0C9;}
+.fb.warn{background:rgba(245,197,24,.1);border:1.5px solid var(--gold-d);color:#f0dca0;}
+.correction{margin-top:.8rem;background:#14293A;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:.8rem 1rem;display:none;}
+.correction.show{display:block;}
+.correction-t{font-family:Arial,sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--day-color);margin-bottom:.4rem;}
+.correction-x{font-size:clamp(.8rem,2.4vw,.88rem);color:var(--day-light);line-height:1.6;}
+
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.5rem .65rem;min-height:44px;min-width:44px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+body.playing .sound-btn{top:58px;}
+@media(max-width:600px){body.playing .sound-btn{top:54px;}
+  .tools{flex-direction:column;}
+  .btn{width:100%;}
+}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+@keyframes pop{0%{transform:scale(.5);opacity:0;}60%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;background:rgba(20,33,15,.97);border:1.5px solid var(--day-color);border-radius:var(--radius);padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:Arial,sans-serif;font-size:clamp(.9rem,2.8vw,1.05rem);color:var(--day-light);box-shadow:var(--glow);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.scan-overlay{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 50%, rgba(31,51,24,.97), rgba(10,24,8,.99));}
+.scan-overlay.show{display:flex;animation:fadeIn .25s ease;}
+.scan-box{text-align:center;padding:1.6rem;max-width:90%;}
+.scan-spinner{width:54px;height:54px;margin:0 auto 1.1rem;border-radius:50%;border:4px solid var(--line);border-top-color:var(--day-color);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);color:var(--day-color);text-shadow:var(--glow);letter-spacing:.05em;margin-bottom:1rem;}
+.scan-bar{width:min(280px,70vw);height:10px;margin:0 auto .7rem;background:#14293A;border:1.5px solid var(--line);border-radius:99px;overflow:hidden;}
+.scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--neon),var(--day-color));border-radius:99px;transition:width .12s linear;}
+.scan-sub{font-family:'Courier New',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em;}
+
+.finale{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem;background:#14293A;}
+.finale.show{display:flex;animation:fadeIn .5s ease;}
+.finale-glow{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle, rgba(58,181,216,.3) 0%, rgba(58,181,216,.07) 30%, transparent 60%);animation:glow-pulse 2.5s ease-in-out infinite;pointer-events:none;}
+@keyframes glow-pulse{0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1;}}
+.finale-inner{position:relative;text-align:center;padding:1rem 1rem 2rem;margin:auto;max-width:520px;animation:pop .6s cubic-bezier(.18,.89,.32,1.4);}
+.finale-ico{font-size:4.4rem;filter:drop-shadow(0 0 24px rgba(58,181,216,.9));}
+.finale-crest{display:flex;justify-content:center;gap:.4rem;margin:.8rem 0;flex-wrap:wrap;}
+.finale-crest .fc{width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(58,181,216,.16);border:1.5px solid var(--day-color);font-size:1.1rem;animation:pop .5s both;}
+.finale-title{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1.3rem,5.6vw,2rem);color:var(--day-color);text-shadow:0 1px 0 rgba(184,112,10,.25);letter-spacing:.02em;margin:.4rem 0 .6rem;}
+.finale-time{font-family:'Courier New',monospace;font-weight:700;font-size:clamp(1rem,3.8vw,1.4rem);color:#D9F2C8;margin-bottom:.6rem;}
+.finale-grade{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(1rem,3.6vw,1.25rem);color:#06202B;background:linear-gradient(135deg,var(--day-dark),var(--day-color));display:inline-block;padding:.4rem 1.4rem;border-radius:99px;box-shadow:var(--glow);margin-bottom:1rem;letter-spacing:.04em;}
+.finale-sub{color:var(--day-light);font-size:clamp(.85rem,2.6vw,1rem);margin-bottom:1.4rem;line-height:1.7;}
+.finale-reveal{background:#14293A;border:1.5px solid var(--day-dark);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;font-size:clamp(.82rem,2.5vw,.92rem);color:var(--day-light);line-height:1.7;}
+.finale-reveal b{color:var(--day-color);font-family:Arial,sans-serif;display:block;margin-bottom:.4rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#06202B;box-shadow:var(--glow);font-family:Arial,sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.04em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;}
+.seg-hit:focus,.seg-hit:focus-visible{outline:3px solid #FACC15;outline-offset:3px;}
+</style>
+</head>
+<body>
+<div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div>
+<button type="button" class="sound-btn" id="sound-btn" onclick="toggleSound()" aria-pressed="true" aria-label="Activer ou couper le son" title="Son">&#128266;</button>
+<div class="agent-msg" id="agent-msg" role="status" aria-live="polite"></div>
+
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-box">
+    <div class="scan-spinner"></div>
+    <div class="scan-text" id="scan-text">Analyse des relevés&#8230;</div>
+    <div class="scan-bar"><div class="scan-bar-fill" id="scan-bar-fill"></div></div>
+    <div class="scan-sub" id="scan-sub">Mise à jour du dossier d'archives</div>
+  </div>
+</div>
+
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128506;&#65039;</span>
+  <div class="hud-frags" id="hud-frags"></div>
+  <div class="hud-prog">
+    <span class="hud-prog-label" id="hud-prog-label">Archives déverrouillées&nbsp;: 0&nbsp;%</span>
+    <span class="hud-prog-gauge"><span class="hud-prog-fill" id="hud-prog-fill"></span></span>
+  </div>
+  <span class="hud-timer" id="hud-timer"><span class="lbl">Épreuves validées&nbsp;: 0/5 &middot; </span>&#9201;&#65039; 00:00</span>
+</div>
+
+<div class="finale" id="finale">
+  <div class="finale-glow"></div>
+  <div class="finale-inner">
+    <div class="finale-ico">&#128193;</div>
+    <div class="finale-title">MISSION R&Eacute;USSIE&#8201;!</div>
+    <div class="finale-time" id="finale-time">&#9201;&#65039; --:--</div>
+    <div class="finale-grade" id="finale-grade">Mission accomplie</div>
+    <div class="finale-sub">Les cinq documents ont &eacute;t&eacute; analys&eacute;s et les archives sont maintenant compl&egrave;tes. Tu sais lire, repr&eacute;senter, compl&eacute;ter et interpr&eacute;ter des donn&eacute;es.</div>
+    <div class="finale-reveal">
+      <b>&#128193; Bilan de la mission</b>
+      Pour lire un graphique ou un tableau, je rep&egrave;re les axes ou les en-t&ecirc;tes, je compare les valeurs entre elles, et j&rsquo;utilise les totaux de lignes et de colonnes pour retrouver une donn&eacute;e manquante.
+      <div id="finale-autonomy" style="margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--line);"></div>
+    </div>
+    <button type="button" class="btn-restart" onclick="restartAll()">&#8635; Rejouer le d&eacute;fi</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#f5a623"></span>
+      Pazapa &middot; Maths &middot; 6e
+    </div>
+    <div class="week">Semaine 7 — Jour 4</div>
+    <div class="title">&#127919; Je rel&egrave;ve le <span class="hl">d&eacute;fi</span></div>
+    <div class="subtitle">Le d&eacute;fi des archives</div>
+  </header>
+
+  <div class="start-screen" id="start-screen">
+    <div class="start-ico">&#128193;</div>
+    <div class="start-mission">
+      <b>&#128203; Mission&nbsp;:</b> Analyse les cinq documents et retrouve les donn&eacute;es qui permettront de d&eacute;verrouiller les archives.
+      <div class="start-note">&#128193; Cinq documents t&rsquo;attendent dans la salle des archives. Le chronom&egrave;tre est informatif et n&rsquo;entra&icirc;ne aucune p&eacute;nalit&eacute;.</div>
+    </div>
+    <button type="button" class="btn-start" onclick="beginGame()">&#9654;&#65039; Commencer le d&eacute;fi</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <div class="crest">
+      <span class="c-label">Documents analys&eacute;s&nbsp;:</span>
+      <div class="frag" id="frag-0">?</div>
+      <div class="frag" id="frag-1">?</div>
+      <div class="frag" id="frag-2">?</div>
+      <div class="frag" id="frag-3">?</div>
+      <div class="frag" id="frag-4">?</div>
+    </div>
+    <div id="steps"></div>
+  </div>
+</div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* =====================================================================
+   SONS — Web Audio API uniquement, ambiance salle d'archives
+   ===================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function noise(dur,vol,lpFreq,hpFreq,startT){
+  var c=ac();if(!c)return;
+  var sr=c.sampleRate, len=Math.ceil(dur*sr);
+  var buf=c.createBuffer(1,len,sr), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++) data[i]=(Math.random()*2-1);
+  var src=c.createBufferSource();src.buffer=buf;
+  var lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=lpFreq||2000;
+  var hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=hpFreq||80;
+  var g=c.createGain();
+  var t=startT!=null?startT:c.currentTime;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+0.04);
+  g.gain.linearRampToValueAtTime(vol||0.08,t+dur-0.05);
+  g.gain.linearRampToValueAtTime(0.0001,t+dur);
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.01);
+}
+/* clic sec — stylo sur un document d'archive */
+function sClick(){if(!soundOn)return;beep(720,0,0.035,"square",0.07);beep(500,0.02,0.03,"triangle",0.04);}
+/* erreur discr\u00e8te — mesure qui ne correspond pas */
+function sBad(){if(!soundOn)return;beep(260,0,0.09,"triangle",0.1);beep(196,0.07,0.13,"triangle",0.08);}
+/* document analys\u00e9 — chime de validation */
+function sFrag(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.05,0.09,900,200,c.currentTime);beep(784,0.02,0.08,"square",0.14);beep(1047,0.09,0.12,"triangle",0.18);beep(1568,0.17,0.16,"triangle",0.18);}
+/* transition entre deux \u00e9preuves */
+function sTransition(){if(!soundOn)return;beep(700,0,0.05,"sine",0.09);beep(1050,0.06,0.06,"sine",0.11);beep(1400,0.12,0.1,"sine",0.13);}
+/* tintement doux — indice */
+function sHint(){if(!soundOn)return;beep(1568,0,0.08,"sine",0.09);beep(2093,0.08,0.12,"sine",0.08);}
+
+/* froissement l\u00e9ger de papier — ouverture du dossier au lancement */
+function sPaper(){if(!soundOn)return;noise(0.16,0.1,2600,700,ac()?ac().currentTime:0);}
+/* son de validation — donn\u00e9e ou case correctement identifi\u00e9e */
+function sTrace(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.22,0.07,1800,400,c.currentTime);beep(440,0.02,0.16,"triangle",0.08);}
+/* fanfare finale — archives déverrouillées */
+function sWin(){if(!soundOn)return;var c=ac();if(!c)return;noise(0.14,0.08,2200,500,c.currentTime);[523,659,784,1047,1319,1047,1568].forEach(function(f,i){beep(f,0.15+i*0.12,0.24,"triangle",0.2);});}
+function toggleSound(){
+  soundOn=!soundOn;
+  var b=$("sound-btn");
+  b.innerHTML=soundOn?"&#128266;":"&#128263;";
+  b.classList.toggle("off",!soundOn);
+  b.setAttribute("aria-pressed",soundOn?"true":"false");
+  if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();
+}
+
+/* =====================================================================
+   MESSAGES ET TRANSITIONS
+   ===================================================================== */
+var amTimer=null;
+function hideAgent(){var el=$("agent-msg");if(el)el.classList.remove("show");}
+function showAgent(txt){var el=$("agent-msg");el.innerHTML=txt;el.classList.add("show");clearTimeout(amTimer);amTimer=setTimeout(hideAgent,2500);}
+
+var SCAN_SUB=["Analyse du relev\u00e9 des temp\u00e9ratures\u2026","Analyse du r\u00e9servoir de la station\u2026","Reconstitution du diagramme\u2026","V\u00e9rification du tableau des \u00e9quipements\u2026","D\u00e9verrouillage final des archives\u2026"];
+function runScan(mi,done){
+  var ov=$("scan-overlay"),fill=$("scan-bar-fill"),sub=$("scan-sub"),txt=$("scan-text");
+  transitionRunning=true;
+  if(!ov){done&&done();transitionRunning=false;return;}
+  if(txt)txt.innerHTML=SCAN_SUB[mi]||"Analyse en cours\u2026";
+  if(sub)sub.textContent="Mise \u00e0 jour du dossier d\u2019archives";
+  if(fill)fill.style.width="0%";
+  ov.classList.add("show");sTransition();
+  var p=0;
+  var iv=setInterval(function(){
+    p+=Math.random()*22+14;
+    if(p>=100){p=100;if(fill)fill.style.width="100%";clearInterval(iv);
+      setTimeout(function(){ov.classList.remove("show");transitionRunning=false;done&&done();},220);
+    }else{ if(fill)fill.style.width=p+"%"; }
+  },90);
+}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+function fmtLong(s){var m=Math.floor(s/60),r=s%60;return (m>0?m+" min ":"")+(r<10&&m>0?"0":"")+r+" s";}
+
+/* =====================================================================
+   UTILITAIRES SVG
+   ===================================================================== */
+function polar(cx,cy,r,deg){var rad=deg*Math.PI/180;return [cx+r*Math.cos(rad), cy-r*Math.sin(rad)];}
+function arcPoly(cx,cy,r,deg1,deg2,color,width){
+  var steps=28, pts=[];
+  for(var i=0;i<=steps;i++){var d=deg1+(deg2-deg1)*(i/steps);var p=polar(cx,cy,r,d);pts.push(p[0].toFixed(1)+','+p[1].toFixed(1));}
+  return '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+(color||'#F59E0B')+'" stroke-width="'+(width||3)+'"/>';
+}
+function dotLabel(x,y,label,color){return '<text x="'+x+'" y="'+y+'" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="'+(color||'#F2F8F6')+'">'+label+'</text>';}
+function pointDot(x,y,r,color){return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r||6)+'" fill="'+(color||'#D9B35F')+'" stroke="#F2F8F6" stroke-width="1.5"/>';}
+
+/* =====================================================================
+   GRAPHIQUES — courbes, bâtons, utilitaires communs
+   ===================================================================== */
+function chartGeom(n,yMin,yMax,W,H,ml,mt,mb,mr){
+  var pw=W-ml-mr, ph=H-mt-mb;
+  function px(i){ return ml + (n===1?pw/2:i*(pw/(n-1))); }
+  function py(v){ return mt+ph-((v-yMin)/(yMax-yMin))*ph; }
+  return {px:px,py:py,ml:ml,mt:mt,mb:mb,mr:mr,pw:pw,ph:ph};
+}
+function lineChartSVG(opts){
+  var W=opts.width||700,H=opts.height||380;
+  var ml=64,mt=42,mb=54,mr=20;
+  var n=opts.xLabels.length;
+  var g=chartGeom(n,opts.yMin,opts.yMax,W,H,ml,mt,mb,mr);
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" role="img" aria-labelledby="'+opts.id+'-t '+opts.id+'-d"><title id="'+opts.id+'-t">'+opts.title+'</title><desc id="'+opts.id+'-d">'+opts.desc+'</desc>';
+  svg+='<rect x="1" y="1" width="'+(W-2)+'" height="'+(H-2)+'" fill="#14293A" stroke="#2E5C74" rx="10"/>';
+  svg+='<text x="'+(W/2)+'" y="20" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="14" fill="#F0F8FA">'+opts.title+'</text>';
+  if(opts.yStepMinor){
+    for(var v2=opts.yMin; v2<=opts.yMax; v2+=opts.yStepMinor){
+      var y2=g.py(v2);
+      svg+='<line x1="'+ml+'" y1="'+y2.toFixed(1)+'" x2="'+(ml+g.pw)+'" y2="'+y2.toFixed(1)+'" stroke="#2E5C74" stroke-width="0.6" opacity="0.5"/>';
+    }
+  }
+  for(var v=opts.yMin; v<=opts.yMax; v+=opts.yStepMajor){
+    var y=g.py(v);
+    svg+='<line x1="'+ml+'" y1="'+y.toFixed(1)+'" x2="'+(ml+g.pw)+'" y2="'+y.toFixed(1)+'" stroke="#2E5C74" stroke-width="1"/>';
+    svg+='<text x="'+(ml-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-family="Courier New,monospace" font-size="12" fill="#AFCBD6">'+v+'</text>';
+  }
+  svg+='<line x1="'+ml+'" y1="'+mt+'" x2="'+ml+'" y2="'+(mt+g.ph)+'" stroke="#9DD4E8" stroke-width="2"/>';
+  svg+='<line x1="'+ml+'" y1="'+(mt+g.ph)+'" x2="'+(ml+g.pw)+'" y2="'+(mt+g.ph)+'" stroke="#9DD4E8" stroke-width="2"/>';
+  opts.xLabels.forEach(function(lab,i){
+    svg+='<text x="'+g.px(i).toFixed(1)+'" y="'+(mt+g.ph+18)+'" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#F0F8FA">'+lab+'</text>';
+  });
+  svg+='<text x="'+(ml+g.pw/2)+'" y="'+(H-6)+'" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#9DD4E8">'+(opts.xTitle||'')+'</text>';
+  svg+='<text x="8" y="'+(mt-14)+'" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#9DD4E8">'+(opts.yTitle||'')+'</text>';
+  var pts=opts.values.map(function(v,i){return g.px(i).toFixed(1)+','+g.py(v).toFixed(1);}).join(' ');
+  svg+='<polyline points="'+pts+'" fill="none" stroke="'+(opts.color||'#3AB5D8')+'" stroke-width="3"/>';
+  opts.values.forEach(function(v,i){
+    svg+='<circle cx="'+g.px(i).toFixed(1)+'" cy="'+g.py(v).toFixed(1)+'" r="5" fill="'+(opts.color||'#3AB5D8')+'" stroke="#F0F8FA" stroke-width="1.5"/>';
+  });
+  svg+='<g id="'+opts.id+'-guides"></g>';
+  svg+='</svg>';
+  return svg;
+}
+function chartGuideLines(id,geomOpts,idx,value){
+  var W=geomOpts.width||700,H=geomOpts.height||380;
+  var ml=64,mt=42,mb=54,mr=20;
+  var n=geomOpts.xLabels.length;
+  var g=chartGeom(n,geomOpts.yMin,geomOpts.yMax,W,H,ml,mt,mb,mr);
+  var x=g.px(idx), y=g.py(value);
+  var html='<line x1="'+x.toFixed(1)+'" y1="'+y.toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+(mt+g.ph).toFixed(1)+'" stroke="#FACC15" stroke-width="2" stroke-dasharray="5,4"/>';
+  html+='<line x1="'+ml+'" y1="'+y.toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="#FACC15" stroke-width="2" stroke-dasharray="5,4"/>';
+  var el=$(id+'-guides');
+  if(el) el.innerHTML+=html;
+}
+function barChartSVG(opts){
+  var W=opts.width||600,H=opts.height||340;
+  var ml=60,mt=40,mb=50,mr=20;
+  var n=opts.xLabels.length;
+  var pw=W-ml-mr, ph=H-mt-mb;
+  var bw=pw/n*0.5;
+  function px(i){ return ml + (i+0.5)*(pw/n); }
+  function py(v){ return mt+ph-((v-opts.yMin)/(opts.yMax-opts.yMin))*ph; }
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto" role="img" aria-labelledby="'+opts.id+'-t '+opts.id+'-d"><title id="'+opts.id+'-t">'+opts.title+'</title><desc id="'+opts.id+'-d">'+opts.desc+'</desc>';
+  svg+='<rect x="1" y="1" width="'+(W-2)+'" height="'+(H-2)+'" fill="#14293A" stroke="#2E5C74" rx="10"/>';
+  for(var v=opts.yMin; v<=opts.yMax; v+=opts.yStepMajor){
+    var y=py(v);
+    svg+='<line x1="'+ml+'" y1="'+y.toFixed(1)+'" x2="'+(ml+pw)+'" y2="'+y.toFixed(1)+'" stroke="#2E5C74" stroke-width="1"/>';
+    svg+='<text x="'+(ml-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-family="Courier New,monospace" font-size="12" fill="#AFCBD6">'+v+'</text>';
+  }
+  if(opts.yStepMinor){
+    for(var v2=opts.yMin; v2<=opts.yMax; v2+=opts.yStepMinor){
+      var y2=py(v2);
+      svg+='<line x1="'+ml+'" y1="'+y2.toFixed(1)+'" x2="'+(ml+pw)+'" y2="'+y2.toFixed(1)+'" stroke="#2E5C74" stroke-width="0.6" opacity="0.5"/>';
+    }
+  }
+  svg+='<line x1="'+ml+'" y1="'+mt+'" x2="'+ml+'" y2="'+(mt+ph)+'" stroke="#9DD4E8" stroke-width="2"/>';
+  svg+='<line x1="'+ml+'" y1="'+(mt+ph)+'" x2="'+(ml+pw)+'" y2="'+(mt+ph)+'" stroke="#9DD4E8" stroke-width="2"/>';
+  opts.xLabels.forEach(function(lab,i){
+    svg+='<text x="'+px(i).toFixed(1)+'" y="'+(mt+ph+18)+'" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#F0F8FA">'+lab+'</text>';
+    var v=opts.values[i];
+    var y=py(v);
+    svg+='<rect id="'+opts.id+'-bar-'+i+'" x="'+(px(i)-bw/2).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(mt+ph-y).toFixed(1)+'" fill="'+(opts.color||'#3AB5D8')+'" stroke="#F0F8FA" stroke-width="1"/>';
+    if(opts.showValues){
+      svg+='<text id="'+opts.id+'-val-'+i+'" x="'+px(i).toFixed(1)+'" y="'+(y-8).toFixed(1)+'" text-anchor="middle" font-family="Courier New,monospace" font-weight="700" font-size="13" fill="#F0F8FA">'+v+'</text>';
+    }
+  });
+  svg+='<text x="8" y="'+(mt-14)+'" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="#9DD4E8">'+(opts.yTitle||'')+'</text>';
+  svg+='</svg>';
+  return {svg:svg,py:py,mt:mt,ph:ph};
+}
+function updateBarHeight(id,idx,v,yMin,yMax,mt,ph){
+  var bar=$(id+'-bar-'+idx), val=$(id+'-val-'+idx);
+  var y=mt+ph-((v-yMin)/(yMax-yMin))*ph;
+  if(bar){ bar.setAttribute('y',y.toFixed(1)); bar.setAttribute('height',(mt+ph-y).toFixed(1)); }
+  if(val){ val.setAttribute('y',(y-8).toFixed(1)); val.textContent=v; }
+}
+function tableHTML(id,caption,colHeaders,rows){
+  var html='<table id="'+id+'" style="width:100%;border-collapse:collapse;margin:.8rem 0;font-size:.88rem;">';
+  html+='<caption style="text-align:left;color:var(--muted);font-size:.8rem;margin-bottom:.4rem;">'+caption+'</caption>';
+  html+='<thead><tr><th scope="col" style="text-align:left;padding:.4rem;border-bottom:2px solid var(--line);"></th>';
+  colHeaders.forEach(function(h){ html+='<th scope="col" style="text-align:center;padding:.4rem;border-bottom:2px solid var(--line);color:var(--day-color);">'+h+'</th>'; });
+  html+='</tr></thead><tbody>';
+  rows.forEach(function(r){
+    html+='<tr><th scope="row" style="text-align:left;padding:.4rem;border-bottom:1px solid var(--line);color:var(--text);">'+r.label+'</th>';
+    r.cells.forEach(function(c){ html+='<td style="text-align:center;padding:.4rem;border-bottom:1px solid var(--line);">'+c+'</td>'; });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  return html;
+}
+/* =====================================================================
+   LES 5 ÉPREUVES DE LA SALLE DES ARCHIVES
+   ===================================================================== */
+var STEPS=[
+ {ico:"&#127777;&#65039;", name:"Document 1&nbsp;: Relev&eacute; des temp&eacute;ratures", comp:"Lire une courbe de temp\u00e9ratures",
+  intro:"Le premier document pr\u00e9sente les temp\u00e9ratures relev\u00e9es pendant une semaine. Retrouve les informations demand\u00e9es.",
+  hint1:"Rep\u00e8re d\u2019abord le jour ou la temp\u00e9rature demand\u00e9e sur un axe, puis rejoins le point de la courbe pour lire l\u2019autre information.",
+  frag:"&#127777;&#65039;"},
+ {ico:"&#128167;", name:"Document 2&nbsp;: R\u00e9servoir de la station", comp:"Interpr\u00e9ter les coordonn\u00e9es d\u2019un point",
+  intro:"Le deuxi\u00e8me document indique le volume d\u2019eau pr\u00e9sent dans un r\u00e9servoir au fil du remplissage.",
+  hint1:"Sur un graphique, la premi\u00e8re coordonn\u00e9e se lit sur l\u2019axe horizontal et la seconde sur l\u2019axe vertical.",
+  frag:"&#128167;"},
+ {ico:"&#128202;", name:"Document 3&nbsp;: Diagramme des observations", comp:"Construire et comparer des donn\u00e9es",
+  intro:"Le troisi\u00e8me document doit \u00eatre reconstitu\u00e9 &agrave; partir d\u2019un tableau de donn\u00e9es.",
+  hint1:"Chaque b\u00e2ton doit avoir la m\u00eame hauteur que la valeur indiqu\u00e9e dans le tableau. Le b\u00e2ton le plus haut correspond au plus grand effectif.",
+  frag:"&#128202;"},
+ {ico:"&#128193;", name:"Document 4&nbsp;: Tableau des \u00e9quipements", comp:"Compl\u00e9ter un tableau \u00e0 double entr\u00e9e",
+  intro:"Le quatri\u00e8me document classe les \u00e9quipements de deux r\u00e9serves. Certaines cases ont disparu.",
+  hint1:"Utilise le total de la ligne pour trouver une valeur manquante, ou additionne les valeurs d\u2019une colonne pour calculer son total.",
+  frag:"&#128193;"},
+ {ico:"&#128274;", name:"Document 5&nbsp;: Reconstitution finale", comp:"Associer un tableau &agrave; un diagramme",
+  intro:"Le dernier verrou exige d\u2019associer chaque document &agrave; la conclusion correcte.",
+  hint1:"Compare attentivement les valeurs du tableau et les hauteurs des b\u00e2tons. Pour le total, additionne les deux donn\u00e9es demand\u00e9es.",
+  frag:"&#128274;"}
+];
+var N=STEPS.length;
+var solved=[];for(var _i=0;_i<N;_i++)solved.push(false);
+var active=0;
+var totalSec=0,totalInt=null;
+var gameRunning=false;
+var validatedChallenges=0, autonomousSuccesses=0;
+var roomAttempts={};
+var correctionShown=[false,false,false,false,false];
+var correctionText=['','','','',''];
+var missionHadCorrection=[false,false,false,false,false];
+var transitionRunning=false;
+
+/* =====================================================================
+   CHRONOMÈTRE — pause/reprise à la visibilité (règle permanente)
+   ===================================================================== */
+function timerTick(){
+  totalSec++;
+  var h=$("hud-timer");
+  if(h)h.innerHTML='<span class="lbl">Documents valid\u00e9s\u00a0: '+solved.filter(Boolean).length+'/5 &middot; </span>\u23F1\uFE0F '+fmt(totalSec);
+}
+function pauseTimer(){ clearInterval(totalInt); totalInt=null; }
+function resumeTimer(){
+  if(!gameRunning) return;
+  clearInterval(totalInt);
+  totalInt=setInterval(timerTick,1000);
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){ pauseTimer(); } else { resumeTimer(); }
+});
+window.addEventListener("blur", pauseTimer);
+window.addEventListener("focus", function(){ if(!document.hidden) resumeTimer(); });
+
+function buildHudFrags(){
+  var h=$("hud-frags");if(!h)return;h.innerHTML="";
+  for(var i=0;i<N;i++){var s=document.createElement("span");s.className="hud-frag";s.id="hud-frag-"+i;s.innerHTML=STEPS[i].frag;h.appendChild(s);}
+}
+
+/* =====================================================================
+   OUTILS COMMUNS
+   ===================================================================== */
+function feedbackBlocks(mi){
+  return {fb:$('fb-'+mi),fbi:$('fbi-'+mi),fbm:$('fbm-'+mi),corr:$('corr-'+mi),corrx:$('corrx-'+mi),hint:$('hint-'+mi),hintbtn:$('hint-btn-'+mi)};
+}
+function clearFeedback(mi){
+  var B=feedbackBlocks(mi);
+  if(B.fb){ B.fb.className='fb'; }
+  if(B.corr){ B.corr.className='correction'; }
+  if(B.hint){ B.hint.classList.remove('show'); }
+  var btn=$('hint-btn-'+mi); if(btn){ btn.textContent='\uD83D\uDCA1 Indice'; btn.setAttribute('aria-expanded','false'); }
+  roomAttempts[mi]=0;
+}
+function shakeStep(mi){ var el=$('step-'+mi); if(el){ el.classList.add('shake'); setTimeout(function(){el.classList.remove('shake');},400); } }
+function refreshMissionBody(mi){
+  var body=$('body-'+mi);
+  if(!body) return;
+  body.innerHTML=bodyHTML(mi);
+  afterRender(mi);
+}
+window.toggleHint=function(mi){
+  if(solved[mi]) return;
+  var el=$('hint-'+mi);
+  var willShow=!el.classList.contains('show');
+  if(willShow) sHint();
+  el.classList.toggle('show');
+  var button=$('hint-btn-'+mi);
+  if(button){
+    var open=el.classList.contains('show');
+    button.setAttribute('aria-expanded', open ? 'true' : 'false');
+    button.textContent = open ? '\uD83D\uDCA1 Masquer l\u2019indice' : '\uD83D\uDCA1 Indice';
+  }
+};
+function showHintAfterError(mi){
+  var hint=$('hint-'+mi);
+  if(!hint) return;
+  hint.classList.add('show');
+  var button=$('hint-btn-'+mi);
+  if(button){ button.setAttribute('aria-expanded','true'); button.textContent='\uD83D\uDCA1 Masquer l\u2019indice'; }
+}
+function parseStrictFR(value){
+  if(value===undefined||value===null){
+    return NaN;
+  }
+  var cleaned=String(value).trim().replace(/\u00A0/g,'').replace(/\s+/g,'').replace(/,/g,'.');
+  if(cleaned===''){
+    return NaN;
+  }
+  if(!/^-?\d+(?:\.\d+)?$/.test(cleaned)){
+    return NaN;
+  }
+  var result=Number(cleaned);
+  return Number.isFinite(result) ? result : NaN;
+}
+function showInvalidInput(mi,input){
+  var B=feedbackBlocks(mi);
+  B.fb.className='fb show warn';
+  B.fbi.textContent='\u26A0\uFE0F';
+  B.fbm.textContent='Saisis uniquement un nombre.';
+  if(input){ input.focus(); }
+}
+function showContinueBtn(mi,label,cb){
+  var id='phase-next-'+mi;
+  if($(id)) return;
+  var body=$('body-'+mi);
+  if(!body) return;
+  var wrap=document.createElement('div');
+  wrap.style.textAlign='center';
+  wrap.style.marginTop='1rem';
+  var btn=document.createElement('button');
+  btn.type='button';
+  btn.className='btn btn-try';
+  btn.id=id;
+  btn.textContent=label;
+  btn.addEventListener('click',function(){
+    if(btn.disabled) return;
+    btn.disabled=true;
+    sClick();
+    cb();
+  });
+  wrap.appendChild(btn);
+  body.appendChild(wrap);
+  btn.focus();
+}
+
+/* =====================================================================
+   CORPS DE CHAQUE ÉPREUVE
+   ===================================================================== */
+function bodyHTML(mi){
+  if(mi===0) return ep1Render();
+  if(mi===1) return ep2Render();
+  if(mi===2) return ep3Render();
+  if(mi===3) return ep4Render();
+  if(mi===4) return ep5Render();
+  return '';
+}
+function afterRender(mi){ if(mi===2) ep3AttachHandlers(); }
+
+/* =====================================================================
+   MOTEUR GÉNÉRIQUE — construction dynamique des cartes de document
+   ===================================================================== */
+function build(){
+  var host=$("steps");host.innerHTML="";
+  STEPS.forEach(function(M,mi){
+    var card=document.createElement("div");
+    card.className="step-card"+(mi===active||solved[mi]?"":" locked-step")+(solved[mi]?" solved":"");
+    card.id="step-"+mi;
+    var h='<div class="step-head">'
+      +'<span class="step-ico" id="ico-'+mi+'">'+M.ico+'</span>'
+      +'<div class="step-meta"><div class="step-step">'+M.name+'</div><div class="step-comp">'+M.comp+'</div></div>'
+      +'</div><div class="step-body" id="body-'+mi+'">';
+    if(mi===active||solved[mi]){
+      h+='<div class="intro" tabindex="-1" id="intro-'+mi+'">'+M.intro+'</div>';
+      if(!solved[mi]){
+        h+=bodyHTML(mi);
+      } else {
+        h+='<div style="text-align:center;color:var(--muted);padding:.6rem;">'+M.frag+' Document analys\u00e9.</div>'
+          +'<div class="correction'+(correctionShown[mi]?' show':'')+'" id="corr-'+mi+'"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-'+mi+'">'+(correctionShown[mi]?correctionText[mi]:'')+'</div></div>'
+          +'<div class="fb show ok" id="fb-'+mi+'"><span id="fbi-'+mi+'">\u2705</span><div id="fbm-'+mi+'"><b style="color:var(--green)">Bravo&#8201;!</b><br>'+M.frag+' Document valid\u00e9&#8201;!</div></div>';
+      }
+    } else {
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; Termine le document pr\u00e9c\u00e9dent pour d\u00e9bloquer celui-ci.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(mi===active && !solved[mi]) afterRender(mi);
+  });
+  updateCrest();updateProg();
+}
+
+function stepSuccess(mi){
+  if(solved[mi]){
+    return;
+  }
+  solved[mi]=true;
+  validatedChallenges++;
+  sFrag();
+  $('step-'+mi).classList.add('solved');
+  var hb=$('hint-btn-'+mi); if(hb) hb.disabled=true;
+  var hbox=$('hint-'+mi); if(hbox) hbox.classList.remove('show');
+  updateCrest();updateProg();
+  var body=$('body-'+mi);
+  if(body && !$('next-'+mi)){
+    var lab=(active<N-1)?'Document suivant \u2192':'D\u00e9verrouiller les archives \u2192';
+    body.insertAdjacentHTML('beforeend','<div style="text-align:center;margin-top:1rem;"><button type="button" class="btn btn-try" id="next-'+mi+'" onclick="goNext('+mi+')">'+lab+'</button></div>');
+  }
+}
+function goNext(mi){
+  if(transitionRunning) return;
+  sClick();
+  var nb=$('next-'+mi);if(nb){nb.disabled=true;nb.style.display='none';}
+  if(active<N-1){
+    active++;
+    runScan(active,function(){
+      build();
+      var el=$('step-'+active);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+      var introEl=$('intro-'+active); if(introEl){ introEl.setAttribute('tabindex','-1'); introEl.focus({preventScroll:true}); }
+    });
+  } else {
+    openFinale();
+  }
+}
+function updateCrest(){
+  STEPS.forEach(function(M,mi){
+    var f=$('frag-'+mi),hf=$('hud-frag-'+mi);
+    if(solved[mi]){ if(f){f.innerHTML=M.frag;f.classList.add('found');} if(hf){hf.classList.add('got');} }
+    else{ if(f){f.textContent='?';f.classList.remove('found');} if(hf){hf.classList.remove('got');} }
+  });
+}
+function updateProg(){
+  var got=solved.filter(Boolean).length;
+  var pct=Math.round(got/N*100);
+  var lab=$('hud-prog-label'),fill=$('hud-prog-fill');
+  if(lab)lab.innerHTML='Archives d\u00e9verrouill\u00e9es&nbsp;: '+pct+'&#8201;%';
+  if(fill)fill.style.width=pct+'%';
+}
+
+/* =====================================================================
+   ÉCRAN FINAL
+   ===================================================================== */
+function autonomyMessage(n){
+  if(n===5) return 'Excellent&#8201;! Tu as r\u00e9alis\u00e9 tous les documents sans correction.';
+  if(n===3||n===4) return 'Tr\u00e8s bon travail&#8201;! Tu as r\u00e9alis\u00e9 la majorit\u00e9 des documents de mani\u00e8re autonome.';
+  if(n===1||n===2) return 'Bravo pour ta pers\u00e9v\u00e9rance&#8201;! Les corrections t\u2019ont aid\u00e9 &agrave; d\u00e9verrouiller les archives.';
+  return 'Tu as termin\u00e9 la mission avec l\u2019aide des corrections. Relis les d\u00e9marches avant de recommencer.';
+}
+function openFinale(){
+  gameRunning=false;
+  clearInterval(totalInt);
+  $('hud-dial').innerHTML='&#128274;';
+  setTimeout(function(){
+    var finalTime=$('finale-time');
+    if(finalTime){ finalTime.textContent='\u23F1\uFE0F '+fmtLong(totalSec); }
+    var autonomy=$('finale-autonomy');
+    if(autonomy){ autonomy.innerHTML='<strong>Documents r\u00e9alis\u00e9s sans correction\u00a0:</strong> '+autonomousSuccesses+' / 5<br>'+autonomyMessage(autonomousSuccesses); }
+    $('finale').classList.add('show');
+    sWin();
+  },300);
+}
+
+/* =====================================================================
+   DÉMARRAGE / RECOMMENCER
+   ===================================================================== */
+function beginGame(){
+  var c=ac();if(c&&c.state==='suspended')c.resume();
+  $('start-screen').style.display='none';
+  $('game').style.display='';
+  buildHudFrags();
+  $('hud-bar').classList.add('show');
+  document.body.classList.add('playing');
+  totalSec=0;clearInterval(totalInt);gameRunning=true;
+  var ht=$('hud-timer');if(ht)ht.innerHTML='<span class="lbl">Documents valid\u00e9s\u00a0: 0/5 &middot; </span>\u23F1\uFE0F 00:00';
+  totalInt=setInterval(timerTick,1000);
+  sPaper();
+  build();
+}
+function restartAll(){
+  gameRunning=false;
+  clearInterval(totalInt);totalSec=0;
+  transitionRunning=false;
+  solved=[];for(var i=0;i<N;i++)solved.push(false);
+  active=0; roomAttempts={}; validatedChallenges=0; autonomousSuccesses=0;
+  correctionShown=[false,false,false,false,false]; correctionText=['','','','','']; missionHadCorrection=[false,false,false,false,false];
+  ep1phase='q1'; ep1Attempts=0; ep1MultiSel={};
+  ep2phase='q1'; ep2Attempts=0;
+  ep3phase='build'; ep3Attempts=0; ep3Bars=[0,0,0,0]; ep3Built=false;
+  ep4Attempts=0;
+  ep5phase='q1'; ep5Attempts=0;
+  $('finale').classList.remove('show');
+  var finalTime=$('finale-time'); if(finalTime){ finalTime.textContent='\u23F1\uFE0F --:--'; }
+  var finalAutonomy=$('finale-autonomy'); if(finalAutonomy){ finalAutonomy.innerHTML=''; }
+  var finalGrade=$('finale-grade'); if(finalGrade){ finalGrade.textContent='Mission accomplie'; }
+  var ov=$('scan-overlay');if(ov)ov.classList.remove('show');
+  $('hud-bar').classList.remove('show');
+  document.body.classList.remove('playing');
+  $('game').style.display='none';
+  $('start-screen').style.display='';
+  $('hud-dial').innerHTML='&#128193;';
+  var ht=$('hud-timer');if(ht)ht.innerHTML='<span class="lbl">Documents valid\u00e9s\u00a0: 0/5 &middot; </span>\u23F1\uFE0F 00:00';
+  for(var j=0;j<N;j++){var hf=$('hud-frag-'+j);if(hf)hf.classList.remove('got');}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+/* =====================================================================
+   DONNÉES DES 5 DOCUMENTS
+   ===================================================================== */
+var TEMP_DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+var TEMP_VALS=[12,15,18,20,17,25,20];
+var RES_HOURS=['0','1','2','3','4','5','6'];
+var RES_VALS=[0,10,20,30,40,50,60];
+var OBS_ZONES=['Nord','Sud','Est','Ouest'];
+var OBS_VALS=[35,20,45,30];
+var DOC_MONTHS=['Janvier','F\u00e9vrier','Mars','Avril'];
+var DOC_VALS=[24,31,28,35];
+
+/* =====================================================================
+   ÉPREUVE 1 — relevé des températures
+   ===================================================================== */
+var ep1phase='q1', ep1Attempts=0, ep1MultiSel={};
+function ep1Chart(){
+  return lineChartSVG({id:'ep1chart',title:'Temp\u00e9ratures relev\u00e9es pendant une semaine',
+    desc:'Courbe des temp\u00e9ratures relev\u00e9es chaque jour de la semaine, en degr\u00e9s Celsius.',
+    xLabels:TEMP_DAYS,xTitle:'Jours de la semaine',yTitle:'Temp\u00e9rature en \u00b0C',
+    yMin:0,yMax:30,yStepMajor:5,yStepMinor:1,values:TEMP_VALS});
+}
+function ep1Render(){
+  var html='<div class="mfig" id="ep1-figure">'+ep1Chart()+'</div>';
+  if(ep1phase==='q1'){
+    html+='<p class="room-question">Quelle temp\u00e9rature a \u00e9t\u00e9 relev\u00e9e mercredi&nbsp;?</p>'
+      +'<div class="input-row"><input type="text" inputmode="decimal" class="cell-in" id="ep1-input" placeholder="?" aria-label="Temp\u00e9rature en degr\u00e9s Celsius"/><span style="color:var(--muted)">&deg;C</span></div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-0" aria-expanded="false" aria-controls="hint-0" onclick="toggleHint(0)">\uD83D\uDCA1 Indice</button>'
+      +'<button type="button" class="btn btn-try" id="try-0" onclick="validateEp1()">\u2705 V\u00e9rifier</button></div>';
+  } else if(ep1phase==='q2'){
+    html+='<p class="room-question">Quels jours la temp\u00e9rature \u00e9tait-elle de 20&nbsp;\u00b0C&nbsp;? (plusieurs r\u00e9ponses possibles)</p>'
+      +'<div class="mcq-list" id="ep1-multi">'+['Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'].map(function(d){return '<button type="button" class="mcq-opt" data-v="'+d+'" onclick="toggleEp1Multi(this,\''+d+'\')">'+d+'</button>';}).join('')+'</div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-0" aria-expanded="false" aria-controls="hint-0" onclick="toggleHint(0)">\uD83D\uDCA1 Indice</button>'
+      +'<button type="button" class="btn btn-try" id="try-0" onclick="validateEp1()" disabled>\u2705 V\u00e9rifier</button></div>';
+  } else {
+    html+='<p class="room-question">Quel jour correspond &agrave; la temp\u00e9rature la plus &eacute;lev&eacute;e&nbsp;?</p>'
+      +'<div class="mcq-list" id="ep1-q3">'+['Mercredi','Jeudi','Vendredi','Samedi','Dimanche'].map(function(d){return '<button type="button" class="mcq-opt" data-v="'+d+'" onclick="validateEp1Q3(this)">'+d+'</button>';}).join('')+'</div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-0" aria-expanded="false" aria-controls="hint-0" onclick="toggleHint(0)">\uD83D\uDCA1 Indice</button></div>';
+  }
+  html+='<div class="hint" id="hint-0">'+STEPS[0].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[0]?' show':'')+'" id="corr-0"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-0">'+(correctionShown[0]?correctionText[0]:'')+'</div></div>'
+    +'<div class="fb" id="fb-0" role="status" aria-live="polite"><span id="fbi-0"></span><div id="fbm-0"></div></div>';
+  return html;
+}
+function ep1NextPhaseLabel(){ return ep1phase==='q3' ? 'Valider le document \u2192' : 'Question suivante \u2192'; }
+function ep1Advance(){
+  showContinueBtn(0, ep1NextPhaseLabel(), function(){
+    if(ep1phase==='q1'){ ep1phase='q2'; }
+    else if(ep1phase==='q2'){ ep1phase='q3'; }
+    else { if(!missionHadCorrection[0]) autonomousSuccesses++; stepSuccess(0); return; }
+    ep1Attempts=0; clearFeedback(0); correctionShown[0]=false;
+    refreshMissionBody(0);
+  });
+}
+window.validateEp1=function(){
+  if(solved[0]) return;
+  var B=feedbackBlocks(0);
+  if(ep1phase==='q1'){
+    var input0=$('ep1-input');
+    var val=parseStrictFR(input0.value);
+    if(Number.isNaN(val)){ showInvalidInput(0,input0); return; }
+    var isCorrect=val===18;
+    ep1Attempts++;
+    if(isCorrect){
+      sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+      B.fbm.textContent='Mercredi, la courbe passe bien par 18\u00a0\u00b0C.';
+      $('ep1-input').disabled=true; $('try-0').disabled=true;
+      ep1Advance();
+    } else {
+      sBad();shakeStep(0);
+      B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+      if(ep1Attempts>=2){
+        correctionShown[0]=true; missionHadCorrection[0]=true;
+        correctionText[0]='Correction\u00a0: mercredi, la courbe indique <b>18\u00a0\u00b0C</b>.';
+        B.fbm.innerHTML=correctionText[0]; B.corrx.innerHTML=correctionText[0]; B.corr.classList.add('show');
+        chartGuideLines('ep1chart',{width:700,height:380,xLabels:TEMP_DAYS,yMin:0,yMax:30},2,18);
+        $('ep1-input').value='18'; $('ep1-input').disabled=true; $('try-0').disabled=true;
+        ep1Advance();
+      } else {
+        B.fbm.textContent='Ce n\u2019est pas la bonne valeur. Retrouve mercredi sur l\u2019axe horizontal, puis lis la hauteur du point.';
+        showHintAfterError(0);
+      }
+    }
+  } else if(ep1phase==='q2'){
+    var chosen=Object.keys(ep1MultiSel).filter(function(k){return ep1MultiSel[k];}).sort();
+    var correct=['Dimanche','Jeudi'];
+    var isCorrect2 = chosen.length===2 && chosen[0]===correct[0] && chosen[1]===correct[1];
+    ep1Attempts++;
+    document.querySelectorAll('#ep1-multi .mcq-opt').forEach(function(b){ b.disabled=true; });
+    if(isCorrect2){
+      sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+      B.fbm.textContent='Jeudi et dimanche affichent bien 20\u00a0\u00b0C sur la courbe.';
+      ep1Advance();
+    } else {
+      sBad();shakeStep(0);
+      B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+      if(ep1Attempts>=2){
+        correctionShown[0]=true; missionHadCorrection[0]=true;
+        correctionText[0]='Correction\u00a0: la temp\u00e9rature de 20\u00a0\u00b0C est atteinte <b>jeudi</b> et <b>dimanche</b>.';
+        B.fbm.innerHTML=correctionText[0]; B.corrx.innerHTML=correctionText[0]; B.corr.classList.add('show');
+        chartGuideLines('ep1chart',{width:700,height:380,xLabels:TEMP_DAYS,yMin:0,yMax:30},3,20);
+        chartGuideLines('ep1chart',{width:700,height:380,xLabels:TEMP_DAYS,yMin:0,yMax:30},6,20);
+        document.querySelectorAll('#ep1-multi .mcq-opt').forEach(function(b){ if(correct.indexOf(b.getAttribute('data-v'))>=0) b.classList.add('correct'); });
+        ep1Advance();
+      } else {
+        document.querySelectorAll('#ep1-multi .mcq-opt').forEach(function(b){ b.disabled=false; });
+        B.fbm.textContent='Ce n\u2019est pas la bonne s\u00e9lection compl\u00e8te. V\u00e9rifie chaque jour un &agrave; un sur la courbe.';
+        showHintAfterError(0);
+      }
+    }
+  }
+};
+window.toggleEp1Multi=function(btn,d){
+  if(solved[0]) return;
+  sClick();
+  ep1MultiSel[d]=!ep1MultiSel[d];
+  btn.classList.toggle('selected',!!ep1MultiSel[d]);
+  var any=Object.keys(ep1MultiSel).some(function(k){return ep1MultiSel[k];});
+  $('try-0').disabled=!any;
+};
+window.validateEp1Q3=function(btn){
+  if(solved[0]) return;
+  var isCorrect=btn.getAttribute('data-v')==='Samedi';
+  ep1Attempts++;
+  var B=feedbackBlocks(0);
+  document.querySelectorAll('#ep1-q3 .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  if(isCorrect){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='Samedi correspond bien au point le plus haut de la courbe (25\u00a0\u00b0C).';
+    ep1Advance();
+  } else {
+    sBad();shakeStep(0);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep1Attempts>=2){
+      correctionShown[0]=true; missionHadCorrection[0]=true;
+      correctionText[0]='Correction\u00a0: la temp\u00e9rature maximale est <b>25\u00a0\u00b0C, samedi</b>.';
+      B.fbm.innerHTML=correctionText[0]; B.corrx.innerHTML=correctionText[0]; B.corr.classList.add('show');
+      chartGuideLines('ep1chart',{width:700,height:380,xLabels:TEMP_DAYS,yMin:0,yMax:30},5,25);
+      document.querySelectorAll('#ep1-q3 .mcq-opt').forEach(function(b){ if(b.getAttribute('data-v')==='Samedi') b.classList.add('selected'); });
+      ep1Advance();
+    } else {
+      document.querySelectorAll('#ep1-q3 .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.fbm.textContent='Ce n\u2019est pas le point le plus haut de la courbe. Regarde bien tous les jours.';
+      showHintAfterError(0);
+    }
+  }
+};
+/* =====================================================================
+   ÉPREUVE 2 — réservoir de la station
+   ===================================================================== */
+var ep2phase='q1', ep2Attempts=0;
+function ep2Chart(){
+  return lineChartSVG({id:'ep2chart',title:'Remplissage du r\u00e9servoir',
+    desc:'Courbe du volume d\u2019eau dans le r\u00e9servoir en fonction de la dur\u00e9e, en heures.',
+    xLabels:RES_HOURS,xTitle:'Dur\u00e9e en heures',yTitle:'Volume d\u2019eau en litres',
+    yMin:0,yMax:60,yStepMajor:10,yStepMinor:5,values:RES_VALS});
+}
+function ep2Render(){
+  var html='<div class="mfig" id="ep2-figure">'+ep2Chart()+'</div>';
+  if(ep2phase==='q1'){
+    html+='<p class="room-question">Quel volume d\u2019eau le r\u00e9servoir contient-il apr\u00e8s 4 heures&nbsp;?</p>'
+      +'<div class="input-row"><input type="text" inputmode="decimal" class="cell-in" id="ep2-input" placeholder="?" aria-label="Volume en litres"/><span style="color:var(--muted)">L</span></div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-1" aria-expanded="false" aria-controls="hint-1" onclick="toggleHint(1)">\uD83D\uDCA1 Indice</button>'
+      +'<button type="button" class="btn btn-try" id="try-1" onclick="validateEp2()">\u2705 V\u00e9rifier</button></div>';
+  } else if(ep2phase==='q2'){
+    html+='<p class="room-question">Apr\u00e8s combien d\u2019heures le r\u00e9servoir contient-il 30&nbsp;L&nbsp;?</p>'
+      +'<div class="input-row"><input type="text" inputmode="decimal" class="cell-in" id="ep2-input" placeholder="?" aria-label="Dur\u00e9e en heures"/><span style="color:var(--muted)">heures</span></div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-1" aria-expanded="false" aria-controls="hint-1" onclick="toggleHint(1)">\uD83D\uDCA1 Indice</button>'
+      +'<button type="button" class="btn btn-try" id="try-1" onclick="validateEp2()">\u2705 V\u00e9rifier</button></div>';
+  } else {
+    var opts=shuffle([
+      {t:'Apr\u00e8s 5 heures, le r\u00e9servoir contient 50\u00a0L.',ok:true},
+      {t:'Apr\u00e8s 50 heures, le r\u00e9servoir contient 5\u00a0L.',ok:false},
+      {t:'Le r\u00e9servoir perd 50\u00a0L en 5 heures.',ok:false},
+      {t:'Le r\u00e9servoir contient au maximum 5\u00a0L.',ok:false}
+    ]);
+    html+='<p class="room-question">Quelle phrase interpr\u00e8te correctement le point de coordonn\u00e9es (5&nbsp;;&nbsp;50)&nbsp;?</p>'
+      +'<div class="mcq-list" id="ep2-q3">'+opts.map(function(o){return '<button type="button" class="mcq-opt" data-ok="'+o.ok+'" onclick="validateEp2Q3(this)">'+o.t+'</button>';}).join('')+'</div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-1" aria-expanded="false" aria-controls="hint-1" onclick="toggleHint(1)">\uD83D\uDCA1 Indice</button></div>';
+  }
+  html+='<div class="hint" id="hint-1">'+STEPS[1].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[1]?' show':'')+'" id="corr-1"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-1">'+(correctionShown[1]?correctionText[1]:'')+'</div></div>'
+    +'<div class="fb" id="fb-1" role="status" aria-live="polite"><span id="fbi-1"></span><div id="fbm-1"></div></div>';
+  return html;
+}
+function ep2Advance(){
+  var label = ep2phase==='q3' ? 'Valider le document \u2192' : 'Question suivante \u2192';
+  showContinueBtn(1, label, function(){
+    if(ep2phase==='q1'){ ep2phase='q2'; }
+    else if(ep2phase==='q2'){ ep2phase='q3'; }
+    else { if(!missionHadCorrection[1]) autonomousSuccesses++; stepSuccess(1); return; }
+    ep2Attempts=0; clearFeedback(1); correctionShown[1]=false;
+    refreshMissionBody(1);
+  });
+}
+window.validateEp2=function(){
+  if(solved[1]) return;
+  var B=feedbackBlocks(1);
+  var input1=$('ep2-input');
+  var val=parseStrictFR(input1.value);
+  if(Number.isNaN(val)){ showInvalidInput(1,input1); return; }
+  var target = ep2phase==='q1' ? 40 : 3;
+  var isCorrect=val===target;
+  ep2Attempts++;
+  if(isCorrect){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent = ep2phase==='q1' ? 'Apr\u00e8s 4 heures, le r\u00e9servoir contient bien 40\u00a0L.' : '30\u00a0L sont atteints apr\u00e8s 3 heures.';
+    $('ep2-input').disabled=true; $('try-1').disabled=true;
+    ep2Advance();
+  } else {
+    sBad();shakeStep(1);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep2Attempts>=2){
+      correctionShown[1]=true; missionHadCorrection[1]=true;
+      correctionText[1] = ep2phase==='q1' ? 'Correction\u00a0: apr\u00e8s 4 heures, le r\u00e9servoir contient <b>40\u00a0L</b>.' : 'Correction\u00a0: 30\u00a0L sont atteints apr\u00e8s <b>3 heures</b>.';
+      B.fbm.innerHTML=correctionText[1]; B.corrx.innerHTML=correctionText[1]; B.corr.classList.add('show');
+      if(ep2phase==='q1'){ chartGuideLines('ep2chart',{width:700,height:380,xLabels:RES_HOURS,yMin:0,yMax:60},4,40); $('ep2-input').value='40'; }
+      else { chartGuideLines('ep2chart',{width:700,height:380,xLabels:RES_HOURS,yMin:0,yMax:60},3,30); $('ep2-input').value='3'; }
+      $('ep2-input').disabled=true; $('try-1').disabled=true;
+      ep2Advance();
+    } else {
+      B.fbm.textContent='Ce n\u2019est pas la bonne valeur. V\u00e9rifie l\u2019axe correspondant &agrave; la donn\u00e9e demand\u00e9e.';
+      showHintAfterError(1);
+    }
+  }
+};
+window.validateEp2Q3=function(btn){
+  if(solved[1]) return;
+  var isCorrect=btn.getAttribute('data-ok')==='true';
+  ep2Attempts++;
+  var B=feedbackBlocks(1);
+  document.querySelectorAll('#ep2-q3 .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  if(isCorrect){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='Exact\u00a0: la premi\u00e8re coordonn\u00e9e (5) se lit en abscisse, la seconde (50) en ordonn\u00e9e.';
+    ep2Advance();
+  } else {
+    sBad();shakeStep(1);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep2Attempts>=2){
+      correctionShown[1]=true; missionHadCorrection[1]=true;
+      correctionText[1]='Correction\u00a0: le point (5\u00a0;\u00a050) signifie <b>apr\u00e8s 5 heures, le r\u00e9servoir contient 50\u00a0L</b>.';
+      B.fbm.innerHTML=correctionText[1]; B.corrx.innerHTML=correctionText[1]; B.corr.classList.add('show');
+      chartGuideLines('ep2chart',{width:700,height:380,xLabels:RES_HOURS,yMin:0,yMax:60},5,50);
+      document.querySelectorAll('#ep2-q3 .mcq-opt').forEach(function(b){ if(b.getAttribute('data-ok')==='true') b.classList.add('selected'); });
+      ep2Advance();
+    } else {
+      document.querySelectorAll('#ep2-q3 .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.fbm.textContent='Ce n\u2019est pas la bonne interpr\u00e9tation. Relis l\u2019ordre des coordonn\u00e9es (abscisse\u00a0; ordonn\u00e9e).';
+      showHintAfterError(1);
+    }
+  }
+};
+/* =====================================================================
+   ÉPREUVE 3 — diagramme des observations
+   ===================================================================== */
+var ep3phase='build', ep3Attempts=0, ep3Bars=[0,0,0,0], ep3Built=false, ep3Geom=null;
+function ep3Render(){
+  var table=tableHTML('ep3-table','Nombre de relev\u00e9s par zone observ\u00e9e',OBS_ZONES,[{label:'Nombre de relev\u00e9s',cells:OBS_VALS}]);
+  var barRes=barChartSVG({id:'ep3chart',title:'Diagramme des observations',desc:'Diagramme en b\u00e2tons \u00e0 construire, un b\u00e2ton par zone observ\u00e9e.',
+    xLabels:OBS_ZONES,yTitle:'Nombre de relev\u00e9s',yMin:0,yMax:50,yStepMajor:10,yStepMinor:5,values:ep3Bars,showValues:true});
+  ep3Geom={mt:barRes.mt,ph:barRes.ph};
+  var html='<p class="room-question">Voici le tableau des relev\u00e9s&nbsp;:</p>'+table;
+  if(ep3phase==='build'){
+    html+='<p class="room-question">R\u00e8gle chaque b\u00e2ton &agrave; la bonne hauteur gr\u00e2ce aux boutons + et &minus;.</p>'
+      +'<div class="mfig" id="ep3-figure">'+barRes.svg+'</div>'
+      +'<div class="compass-tool" id="ep3-controls">'
+      +OBS_ZONES.map(function(z,i){
+        return '<div class="compass-group"><span class="compass-label">'+z+'</span>'
+          +'<button type="button" class="compass-btn" aria-label="Diminuer '+z+'" onclick="adjustEp3Bar('+i+',-5)">&minus;</button>'
+          +'<span id="ep3-disp-'+i+'" style="min-width:2.4rem;display:inline-block;text-align:center;font-family:\'Courier New\',monospace;font-weight:800;">'+ep3Bars[i]+'</span>'
+          +'<button type="button" class="compass-btn" aria-label="Augmenter '+z+'" onclick="adjustEp3Bar('+i+',5)">+</button></div>';
+      }).join('')
+      +'</div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-2" aria-expanded="false" aria-controls="hint-2" onclick="toggleHint(2)">\uD83D\uDCA1 Indice</button>'
+      +'<button type="button" class="btn btn-try" id="try-2" onclick="validateEp3Build()">\u2705 Valider les hauteurs</button></div>';
+  } else {
+    html+='<div class="mfig" id="ep3-figure">'+barRes.svg+'</div>'
+      +'<p class="room-question">Quelle zone poss\u00e8de le plus grand nombre de relev\u00e9s&nbsp;?</p>'
+      +'<div class="mcq-list" id="ep3-q2">'+shuffle(OBS_ZONES.slice()).map(function(z){return '<button type="button" class="mcq-opt" data-v="'+z+'" onclick="validateEp3Interpret(this)">'+z+'</button>';}).join('')+'</div>'
+      +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-2" aria-expanded="false" aria-controls="hint-2" onclick="toggleHint(2)">\uD83D\uDCA1 Indice</button></div>';
+  }
+  html+='<div class="hint" id="hint-2">'+STEPS[2].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[2]?' show':'')+'" id="corr-2"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-2">'+(correctionShown[2]?correctionText[2]:'')+'</div></div>'
+    +'<div class="fb" id="fb-2" role="status" aria-live="polite"><span id="fbi-2"></span><div id="fbm-2"></div></div>';
+  return html;
+}
+function ep3AttachHandlers(){ /* les boutons +/- appellent directement adjustEp3Bar via onclick */ }
+window.adjustEp3Bar=function(i,delta){
+  if(solved[2]||ep3Built) return;
+  sClick();
+  ep3Bars[i]=Math.max(0,Math.min(50,ep3Bars[i]+delta));
+  updateBarHeight('ep3chart',i,ep3Bars[i],0,50,ep3Geom.mt,ep3Geom.ph);
+  var disp=$('ep3-disp-'+i); if(disp) disp.textContent=ep3Bars[i];
+};
+window.validateEp3Build=function(){
+  if(solved[2]||ep3Built) return;
+  var B=feedbackBlocks(2);
+  var isCorrect = ep3Bars.every(function(v,i){ return v===OBS_VALS[i]; });
+  ep3Attempts++;
+  if(isCorrect){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='Les quatre b\u00e2tons correspondent exactement au tableau.';
+    ep3Built=true;
+    document.querySelectorAll('#ep3-controls button').forEach(function(b){ b.disabled=true; });
+    $('try-2').disabled=true;
+    showContinueBtn(2,'Question suivante \u2192',function(){
+      ep3phase='interpret'; ep3Attempts=0; clearFeedback(2); correctionShown[2]=false;
+      refreshMissionBody(2);
+    });
+  } else {
+    sBad();shakeStep(2);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep3Attempts>=2){
+      correctionShown[2]=true; missionHadCorrection[2]=true;
+      correctionText[2]='Correction\u00a0: Nord\u00a0=\u00a035, Sud\u00a0=\u00a020, Est\u00a0=\u00a045, Ouest\u00a0=\u00a030.';
+      B.fbm.innerHTML=correctionText[2]; B.corrx.innerHTML=correctionText[2]; B.corr.classList.add('show');
+      ep3Bars=OBS_VALS.slice();
+      OBS_ZONES.forEach(function(z,i){ updateBarHeight('ep3chart',i,ep3Bars[i],0,50,ep3Geom.mt,ep3Geom.ph); var d=$('ep3-disp-'+i); if(d) d.textContent=ep3Bars[i]; });
+      ep3Built=true;
+      document.querySelectorAll('#ep3-controls button').forEach(function(b){ b.disabled=true; });
+      $('try-2').disabled=true;
+      showContinueBtn(2,'Question suivante \u2192',function(){
+        ep3phase='interpret'; ep3Attempts=0; clearFeedback(2); correctionShown[2]=false;
+        refreshMissionBody(2);
+      });
+    } else {
+      B.fbm.textContent='Certaines hauteurs ne correspondent pas encore au tableau. Compare chaque b\u00e2ton &agrave; sa valeur.';
+      showHintAfterError(2);
+    }
+  }
+};
+window.validateEp3Interpret=function(btn){
+  if(solved[2]) return;
+  var isCorrect=btn.getAttribute('data-v')==='Est';
+  ep3Attempts++;
+  var B=feedbackBlocks(2);
+  document.querySelectorAll('#ep3-q2 .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  if(isCorrect){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='La zone Est poss\u00e8de le plus grand nombre de relev\u00e9s, avec 45.';
+    if(!missionHadCorrection[2]) autonomousSuccesses++;
+    showContinueBtn(2,'Valider le document \u2192',function(){ stepSuccess(2); });
+  } else {
+    sBad();shakeStep(2);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep3Attempts>=2){
+      correctionShown[2]=true; missionHadCorrection[2]=true;
+      correctionText[2]='Correction\u00a0: la zone <b>Est</b> poss\u00e8de le plus grand nombre de relev\u00e9s avec <b>45</b>.';
+      B.fbm.innerHTML=correctionText[2]; B.corrx.innerHTML=correctionText[2]; B.corr.classList.add('show');
+      document.querySelectorAll('#ep3-q2 .mcq-opt').forEach(function(b){ if(b.getAttribute('data-v')==='Est') b.classList.add('selected'); });
+      showContinueBtn(2,'Valider le document \u2192',function(){ stepSuccess(2); });
+    } else {
+      document.querySelectorAll('#ep3-q2 .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.fbm.textContent='Ce n\u2019est pas la zone avec le plus grand nombre de relev\u00e9s. Compare \u00e0 nouveau les quatre hauteurs.';
+      showHintAfterError(2);
+    }
+  }
+};
+/* =====================================================================
+   ÉPREUVE 4 — tableau des équipements
+   ===================================================================== */
+var ep4Attempts=0;
+var EP4_ANS={bB:12,cA:20,rB:16,totA:50,totB:43,totgen:93};
+function ep4Cell(id,label,given){
+  if(given!==undefined) return given;
+  return '<input type="text" inputmode="numeric" class="cell-in" id="ep4-cell-'+id+'" style="width:64px;" aria-label="'+label+'"/>';
+}
+function ep4Render(){
+  var rows=[
+    {label:'Boussoles',cells:[18, ep4Cell('bB','Boussoles, r\u00e9serve B'), 30]},
+    {label:'Compas',cells:[ep4Cell('cA','Compas, r\u00e9serve A'), 15, 35]},
+    {label:'R\u00e8gles',cells:[12, ep4Cell('rB','R\u00e8gles, r\u00e9serve B'), 28]},
+    {label:'Total',cells:[ep4Cell('totA','Total, r\u00e9serve A'), ep4Cell('totB','Total, r\u00e9serve B'), ep4Cell('totgen','Total g\u00e9n\u00e9ral')]}
+  ];
+  var table=tableHTML('ep4-table','Tableau des \u00e9quipements des deux r\u00e9serves',['R\u00e9serve A','R\u00e9serve B','Total'],rows);
+  var html=table
+    +'<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-3" aria-expanded="false" aria-controls="hint-3" onclick="toggleHint(3)">\uD83D\uDCA1 Indice</button>'
+    +'<button type="button" class="btn btn-try" id="try-3" onclick="validateEp4()">\u2705 V\u00e9rifier</button></div>'
+    +'<div class="hint" id="hint-3">'+STEPS[3].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[3]?' show':'')+'" id="corr-3"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-3">'+(correctionShown[3]?correctionText[3]:'')+'</div></div>'
+    +'<div class="fb" id="fb-3" role="status" aria-live="polite"><span id="fbi-3"></span><div id="fbm-3"></div></div>';
+  return html;
+}
+function ep4CorrectionText(){
+  return 'Correction\u00a0: Boussoles B = 30\u221218 = <b>12</b> &middot; Compas A = 35\u221215 = <b>20</b> &middot; R\u00e8gles B = 28\u221212 = <b>16</b> &middot; Total A = 18+20+12 = <b>50</b> &middot; Total B = 12+15+16 = <b>43</b> &middot; Total g\u00e9n\u00e9ral = 50+43 = <b>93</b>. Au total, <b>93</b> \u00e9quipements sont rang\u00e9s dans les deux r\u00e9serves.';
+}
+window.validateEp4=function(){
+  if(solved[3]) return;
+  var B=feedbackBlocks(3);
+  var invalidInputs=[];
+  Object.keys(EP4_ANS).forEach(function(k){
+    var input=$('ep4-cell-'+k);
+    if(input && !input.disabled && Number.isNaN(parseStrictFR(input.value))){
+      invalidInputs.push(input);
+    }
+  });
+  if(invalidInputs.length>0){
+    showInvalidInput(3,invalidInputs[0]);
+    return;
+  }
+  var allOk=true;
+  Object.keys(EP4_ANS).forEach(function(k){
+    var inp=$('ep4-cell-'+k);
+    if(!inp || inp.disabled) return;
+    var val=parseStrictFR(inp.value);
+    var ok = val===EP4_ANS[k];
+    inp.classList.remove('ok','ko');
+    if(ok){ inp.classList.add('ok'); inp.disabled=true; }
+    else { inp.classList.add('ko'); allOk=false; }
+  });
+  ep4Attempts++;
+  if(allOk){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.innerHTML='Toutes les cases sont exactes\u00a0! 93 \u00e9quipements sont rang\u00e9s dans les deux r\u00e9serves.';
+    $('try-3').disabled=true;
+    if(!missionHadCorrection[3]) autonomousSuccesses++;
+    showContinueBtn(3,'Valider le document \u2192',function(){ stepSuccess(3); });
+  } else {
+    sBad();shakeStep(3);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep4Attempts>=2){
+      correctionShown[3]=true; missionHadCorrection[3]=true;
+      correctionText[3]=ep4CorrectionText();
+      B.fbm.innerHTML=correctionText[3]; B.corrx.innerHTML=correctionText[3]; B.corr.classList.add('show');
+      Object.keys(EP4_ANS).forEach(function(k){
+        var inp=$('ep4-cell-'+k);
+        if(inp && !inp.disabled){ inp.value=EP4_ANS[k]; inp.classList.remove('ko'); inp.classList.add('ok'); inp.disabled=true; }
+      });
+      $('try-3').disabled=true;
+      showContinueBtn(3,'Valider le document \u2192',function(){ stepSuccess(3); });
+    } else {
+      B.fbm.textContent='Certaines cases ne sont pas encore correctes (en rouge). Utilise les totaux des lignes et des colonnes.';
+      showHintAfterError(3);
+    }
+  }
+};
+/* =====================================================================
+   ÉPREUVE 5 — reconstitution finale des archives
+   ===================================================================== */
+var ep5phase='q1', ep5Attempts=0;
+function ep5Table(){
+  return tableHTML('ep5-table','Document A — Nombre de dossiers class\u00e9s par mois',DOC_MONTHS,[{label:'Dossiers class\u00e9s',cells:DOC_VALS}]);
+}
+function ep5Chart(){
+  return barChartSVG({id:'ep5chart',title:'Document B \u2014 Diagramme des dossiers class\u00e9s',desc:'Diagramme en b\u00e2tons montrant le nombre de dossiers class\u00e9s chaque mois.',
+    xLabels:DOC_MONTHS,yTitle:'Nombre de dossiers',yMin:0,yMax:40,yStepMajor:5,values:DOC_VALS,showValues:true}).svg;
+}
+function ep5Render(){
+  var html=ep5Table()+'<div class="mfig" id="ep5-figure">'+ep5Chart()+'</div>';
+  if(ep5phase==='q1'){
+    html+='<p class="room-question">Le tableau et le diagramme repr\u00e9sentent-ils les m\u00eames donn\u00e9es&nbsp;?</p>'
+      +'<div class="mcq-list" id="ep5-q1" style="max-width:220px;margin-left:auto;margin-right:auto;">'
+      +['Oui','Non'].map(function(o){return '<button type="button" class="mcq-opt" data-v="'+o+'" onclick="validateEp5(this)">'+o+'</button>';}).join('')+'</div>';
+  } else if(ep5phase==='q2'){
+    html+='<p class="room-question">Quel mois poss\u00e8de le plus grand nombre de dossiers class\u00e9s&nbsp;?</p>'
+      +'<div class="mcq-list" id="ep5-q2">'+shuffle(DOC_MONTHS.slice()).map(function(m){return '<button type="button" class="mcq-opt" data-v="'+m+'" onclick="validateEp5(this)">'+m+'</button>';}).join('')+'</div>';
+  } else if(ep5phase==='q3'){
+    html+='<p class="room-question">Combien de dossiers ont \u00e9t\u00e9 class\u00e9s en f\u00e9vrier et en mars au total&nbsp;?</p>'
+      +'<div class="input-row"><input type="text" inputmode="numeric" class="cell-in" id="ep5-input" placeholder="?" aria-label="Total dossiers f\u00e9vrier et mars"/></div>'
+      +'<div class="tools" style="margin-top:.4rem;"><button type="button" class="btn btn-try" id="try-5" onclick="validateEp5Q3()">\u2705 V\u00e9rifier</button></div>';
+  } else {
+    var opts4=shuffle([
+      {t:'Avril poss\u00e8de la valeur la plus \u00e9lev\u00e9e.',ok:false},
+      {t:'Janvier poss\u00e8de la valeur la plus faible.',ok:false},
+      {t:'Mars compte 28 dossiers.',ok:false},
+      {t:'F\u00e9vrier compte moins de dossiers que janvier.',ok:true}
+    ]);
+    html+='<p class="room-question">Quelle affirmation est fausse&nbsp;?</p>'
+      +'<div class="mcq-list" id="ep5-q4">'+opts4.map(function(o){return '<button type="button" class="mcq-opt" data-ok="'+o.ok+'" onclick="validateEp5Q4(this)">'+o.t+'</button>';}).join('')+'</div>';
+  }
+  html+='<div class="tools"><button type="button" class="btn btn-hint" id="hint-btn-4" aria-expanded="false" aria-controls="hint-4" onclick="toggleHint(4)">\uD83D\uDCA1 Indice</button></div>'
+    +'<div class="hint" id="hint-4">'+STEPS[4].hint1+'</div>'
+    +'<div class="correction'+(correctionShown[4]?' show':'')+'" id="corr-4"><div class="correction-t">\u2705 Correction</div><div class="correction-x" id="corrx-4">'+(correctionShown[4]?correctionText[4]:'')+'</div></div>'
+    +'<div class="fb" id="fb-4" role="status" aria-live="polite"><span id="fbi-4"></span><div id="fbm-4"></div></div>';
+  return html;
+}
+function ep5Advance(){
+  var label = ep5phase==='q4' ? 'D\u00e9verrouiller les archives \u2192' : 'Question suivante \u2192';
+  showContinueBtn(4,label,function(){
+    if(ep5phase==='q1'){ ep5phase='q2'; }
+    else if(ep5phase==='q2'){ ep5phase='q3'; }
+    else if(ep5phase==='q3'){ ep5phase='q4'; }
+    else { if(!missionHadCorrection[4]) autonomousSuccesses++; stepSuccess(4); return; }
+    ep5Attempts=0; clearFeedback(4); correctionShown[4]=false;
+    refreshMissionBody(4);
+  });
+}
+window.validateEp5=function(btn){
+  if(solved[4]) return;
+  var isQ1 = ep5phase==='q1';
+  var isCorrect = isQ1 ? btn.getAttribute('data-v')==='Oui' : btn.getAttribute('data-v')==='Avril';
+  ep5Attempts++;
+  var B=feedbackBlocks(4);
+  var sel='#ep5-'+ep5phase;
+  document.querySelectorAll(sel+' .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  if(isCorrect){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent = isQ1 ? 'Les deux documents repr\u00e9sentent bien les m\u00eames donn\u00e9es.' : 'Avril poss\u00e8de le maximum avec 35 dossiers.';
+    ep5Advance();
+  } else {
+    sBad();shakeStep(4);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep5Attempts>=2){
+      correctionShown[4]=true; missionHadCorrection[4]=true;
+      correctionText[4] = isQ1 ? 'Correction\u00a0: les deux documents repr\u00e9sentent <b>les m\u00eames donn\u00e9es</b>.' : 'Correction\u00a0: <b>avril</b> poss\u00e8de le maximum avec <b>35</b> dossiers.';
+      B.fbm.innerHTML=correctionText[4]; B.corrx.innerHTML=correctionText[4]; B.corr.classList.add('show');
+      var correctVal = isQ1 ? 'Oui' : 'Avril';
+      document.querySelectorAll(sel+' .mcq-opt').forEach(function(b){ if(b.getAttribute('data-v')===correctVal) b.classList.add('selected'); });
+      ep5Advance();
+    } else {
+      document.querySelectorAll(sel+' .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.fbm.textContent='Ce n\u2019est pas la bonne r\u00e9ponse. Compare \u00e0 nouveau le tableau et le diagramme.';
+      showHintAfterError(4);
+    }
+  }
+};
+window.validateEp5Q3=function(){
+  if(solved[4]) return;
+  var B=feedbackBlocks(4);
+  var input4=$('ep5-input');
+  var val=parseStrictFR(input4.value);
+  if(Number.isNaN(val)){ showInvalidInput(4,input4); return; }
+  var isCorrect = val===59;
+  ep5Attempts++;
+  if(isCorrect){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='31 + 28 = 59\u00a0: c\u2019est exact.';
+    $('ep5-input').disabled=true; $('try-5').disabled=true;
+    ep5Advance();
+  } else {
+    sBad();shakeStep(4);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep5Attempts>=2){
+      correctionShown[4]=true; missionHadCorrection[4]=true;
+      correctionText[4]='Correction\u00a0: f\u00e9vrier et mars donnent 31\u00a0+\u00a028\u00a0=\u00a0<b>59</b>.';
+      B.fbm.innerHTML=correctionText[4]; B.corrx.innerHTML=correctionText[4]; B.corr.classList.add('show');
+      $('ep5-input').value='59'; $('ep5-input').disabled=true; $('try-5').disabled=true;
+      ep5Advance();
+    } else {
+      B.fbm.textContent='Ce n\u2019est pas le bon total. Additionne les valeurs de f\u00e9vrier et de mars.';
+      showHintAfterError(4);
+    }
+  }
+};
+window.validateEp5Q4=function(btn){
+  if(solved[4]) return;
+  var isCorrect=btn.getAttribute('data-ok')==='true';
+  ep5Attempts++;
+  var B=feedbackBlocks(4);
+  document.querySelectorAll('#ep5-q4 .mcq-opt').forEach(function(b){ b.classList.add('locked'); b.disabled=true; });
+  btn.classList.add(isCorrect?'selected':'wrong');
+  if(isCorrect){
+    sTrace(); B.fb.className='fb show ok';B.fbi.textContent='\u2705';
+    B.fbm.textContent='F\u00e9vrier (31) compte plus de dossiers que janvier (24)\u00a0: cette affirmation est bien fausse.';
+    ep5Advance();
+  } else {
+    sBad();shakeStep(4);
+    B.fb.className='fb show ko';B.fbi.textContent='\u274C';
+    if(ep5Attempts>=2){
+      correctionShown[4]=true; missionHadCorrection[4]=true;
+      correctionText[4]='Correction\u00a0: f\u00e9vrier compte 31 dossiers, janvier 24\u00a0: f\u00e9vrier en compte donc <b>plus</b> que janvier. L\u2019affirmation fausse est &laquo;\u00a0F\u00e9vrier compte moins de dossiers que janvier\u00a0&raquo;.';
+      B.fbm.innerHTML=correctionText[4]; B.corrx.innerHTML=correctionText[4]; B.corr.classList.add('show');
+      document.querySelectorAll('#ep5-q4 .mcq-opt').forEach(function(b){ if(b.getAttribute('data-ok')==='true') b.classList.add('selected'); });
+      ep5Advance();
+    } else {
+      document.querySelectorAll('#ep5-q4 .mcq-opt').forEach(function(b){ b.classList.remove('locked'); b.disabled=false; });
+      btn.classList.remove('wrong');
+      B.fbm.textContent='Ce n\u2019est pas l\u2019affirmation fausse. Compare chaque phrase aux donn\u00e9es du document.';
+      showHintAfterError(4);
+    }
+  }
+};
+</script>
+</body>
+</html>
