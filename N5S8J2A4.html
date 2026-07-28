@@ -29,9 +29,6 @@ header{width:100%;text-align:center;padding:1.2rem 0 .5rem;position:relative;z-i
 .week-label{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);}
 h1{font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:900;color:var(--day-dark);margin:.3rem 0 .1rem;}
 .activity-label{font-size:clamp(1rem,3vw,1.2rem);font-weight:800;color:var(--text);}
-.btn-sound{margin-top:.5rem;padding:.4rem .9rem;min-height:40px;border-radius:99px;border:2px solid var(--day-border);background:var(--surface);color:var(--day-dark);font-weight:700;cursor:pointer;}
-.btn-sound:hover{border-color:var(--day-color);background:var(--day-light);}
-.btn-sound:focus-visible{outline:3px solid var(--day-dark);outline-offset:2px;}
 .level-track{display:flex;align-items:center;justify-content:center;gap:.5rem;margin:.8rem auto;position:relative;z-index:1;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);flex-wrap:wrap;}
 .level-pill{padding:.35rem .8rem;border-radius:99px;border:2px solid var(--border);background:var(--surface);font-weight:700;}
 .level-pill.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
@@ -120,7 +117,6 @@ h1{font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:900;color:var(--day-dark);ma
   <div class="week-label">Semaine 8 &ndash; Jour 2</div>
   <h1>Calculer le volume d&rsquo;un prisme droit et d&rsquo;un cylindre</h1>
   <p class="activity-label">Je m&rsquo;entra&icirc;ne pour progresser</p>
-  <button type="button" class="btn-sound" id="btn-sound" aria-pressed="true" aria-label="Couper le son">&#128266; Son activ&eacute;</button>
 </header>
 
 <div class="progress-wrap" id="progress-wrap">
@@ -158,34 +154,6 @@ h1{font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:900;color:var(--day-dark);ma
 "use strict";
 var $=function(id){return document.getElementById(id);};
 var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ── Sons (Web Audio API) ── */
-var soundOn=true;
-var audioCtx=null,soundTimeoutID=null;
-function getCtx(){ if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}} return audioCtx; }
-function playTone(freq,duration,vol){
-  if(!soundOn) return;
-  var ctx=getCtx(); if(!ctx) return;
-  try{
-    var osc=ctx.createOscillator(),gain=ctx.createGain();
-    osc.type='sine';osc.frequency.value=freq;
-    gain.gain.setValueAtTime(vol,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration);
-    osc.connect(gain);gain.connect(ctx.destination);
-    osc.start();osc.stop(ctx.currentTime+duration);
-  }catch(e){}
-}
-function clearSoundTimeout(){ if(soundTimeoutID!==null){clearTimeout(soundTimeoutID);soundTimeoutID=null;} }
-function playOk(){ clearSoundTimeout(); playTone(880,0.16,0.16); soundTimeoutID=setTimeout(function(){soundTimeoutID=null;playTone(1175,0.18,0.13);},90); }
-function playKo(){ playTone(330,0.14,0.1); }
-function playHintSound(){ playTone(660,0.10,0.08); }
-function toggleSound(){
-  soundOn=!soundOn;
-  var button=$('btn-sound');
-  button.textContent=soundOn?'\uD83D\uDD0A Son activ\u00e9':'\uD83D\uDD07 Son coup\u00e9';
-  button.setAttribute('aria-pressed',soundOn?'true':'false');
-  button.setAttribute('aria-label',soundOn?'Couper le son':'Activer le son');
-}
 
 /* ── Figures SVG (générateurs génériques) ── */
 function svgWrap(inner,vb){
@@ -432,7 +400,6 @@ function renderExercise(){
     var willShow=box.hidden;
     box.hidden=!willShow;
     btn.setAttribute('aria-expanded',willShow?'true':'false');
-    if(willShow) playHintSound();
   });
 
   var az=$('answer-zone');
@@ -564,7 +531,6 @@ function verifyExercise(){
     markFields(ex,true);
     var fb=$('feedback');fb.className='feedback show ok';
     fb.innerHTML='<span class="fb-titre">\u2705 Bravo\u00a0!</span>'+ex.fbOk;
-    playOk();
     disableAnswerZone();
     recordResult(attempts===1?'first':'second');
     updateTrack();
@@ -574,7 +540,6 @@ function verifyExercise(){
     markFields(ex,false);
     var fb2=$('feedback');fb2.className='feedback show ko';
     fb2.innerHTML='<span class="fb-titre">\uD83D\uDD04 Essaie encore</span>Relis l\u2019indice et corrige ta r\u00e9ponse.';
-    playKo();
     showExerciseHint();
     setTimeout(function(){card.classList.remove('halo-ko');},900);
   } else {
@@ -671,7 +636,6 @@ function showFinal(){
   $('final-title').focus();
 }
 
-$('btn-sound').addEventListener('click',toggleSound);
 renderExercise();
 })();
 </script>
