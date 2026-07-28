@@ -33,6 +33,10 @@ h1{font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:900;color:var(--day-dark);ma
 .level-pill{padding:.35rem .8rem;border-radius:99px;border:2px solid var(--border);background:var(--surface);font-weight:700;}
 .level-pill.active{border-color:var(--day-color);background:var(--day-light);color:var(--day-dark);}
 .level-pill.done{border-color:var(--green);background:#eefad8;color:#3d7a10;}
+.progress-wrap{width:100%;max-width:680px;margin:1rem auto .8rem;position:relative;z-index:1;}
+.progress-info{display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:.5rem;}
+.progress-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--day-color),var(--green));border-radius:99px;transition:width .4s ease;}
 .level-title{width:100%;max-width:640px;text-align:center;font-size:1rem;font-weight:800;color:var(--day-dark);font-family:'JetBrains Mono',monospace;margin:.4rem auto 0;position:relative;z-index:1;}
 .level-mission{width:100%;max-width:640px;text-align:center;font-size:.86rem;color:var(--muted);margin:0 auto .8rem;position:relative;z-index:1;}
 #main-zone{width:100%;max-width:640px;position:relative;z-index:1;}
@@ -104,10 +108,12 @@ h1{font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:900;color:var(--day-dark);ma
   <p class="activity-label">Je m&rsquo;entra&icirc;ne pour progresser</p>
 </header>
 
-<div class="level-track" id="level-track" role="status" aria-live="off">
-  <span class="level-pill active" id="lp0">Niveau 1</span>
-  <span class="level-pill" id="lp1">Niveau 2</span>
-  <span class="level-pill" id="lp2">Niveau 3</span>
+<div class="progress-wrap" id="progress-wrap">
+  <div class="progress-info">
+    <span id="global-label">Exercice 1 / 19</span>
+    <span id="progress-pct">0&nbsp;%</span>
+  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
 </div>
 <div class="level-title" id="level-title"></div>
 <div class="level-mission" id="level-mission"></div>
@@ -287,7 +293,6 @@ function renderExercise(){
   var zone=$('main-zone'); zone.innerHTML='';
   var card=document.createElement('div'); card.className='card'; card.id='ex-card';
   card.innerHTML='<div class="card-stripe"></div>'
-    +'<div class="ex-badge">Exercice '+(curEx+1)+' / '+lvl.exercises.length+'</div>'
     +'<div class="q-label">'+ex.label+'</div>'
     +(ex.figure||'')
     +'<div class="hint-box">'+ex.hint+'</div>'
@@ -360,10 +365,14 @@ function renderExercise(){
 }
 
 function updateTrack(){
-  [0,1,2].forEach(function(i){
-    var pill=$('lp'+i);
-    pill.className='level-pill'+(i===curLevel?' active':i<curLevel?' done':'');
-  });
+  var TOTAL=LEVELS.reduce(function(s,l){return s+l.exercises.length;},0);
+  var doneBefore=0;
+  for(var i=0;i<curLevel;i++) doneBefore+=LEVELS[i].exercises.length;
+  var gIdx=doneBefore+curEx+1;
+  var pct=Math.round(((gIdx-1)/TOTAL)*100);
+  $('global-label').textContent='Exercice '+gIdx+' / '+TOTAL;
+  $('progress-pct').textContent=pct+'\u00a0%';
+  $('progress-bar').style.width=pct+'%';
 }
 
 function checkAnswer(){
@@ -489,8 +498,10 @@ function goToNext(){
 }
 
 function showFinal(){
-  updateTrack();
-  $('lp2').className='level-pill done';
+  var TOTAL=LEVELS.reduce(function(s,l){return s+l.exercises.length;},0);
+  $('global-label').textContent='Exercice '+TOTAL+' / '+TOTAL;
+  $('progress-pct').textContent='100\u00a0%';
+  $('progress-bar').style.width='100%';
   $('main-zone').style.display='none';
   $('level-title').style.display='none';
   $('level-mission').style.display='none';
