@@ -37,11 +37,10 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(
 .chrono-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;}
 .chrono-label{font-family:monospace;font-size:.78rem;color:var(--muted);text-transform:uppercase;}
 .chrono-val{font-family:monospace;font-weight:800;font-size:1.5rem;color:var(--day-dark);}
-.chrono-val.urgent{color:#c0392b;animation:pulse .5s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.chrono-bar-bg{background:var(--border);border-radius:99px;height:8px;overflow:hidden;}
-.chrono-bar{height:100%;background:linear-gradient(90deg,var(--day-color),var(--yellow));border-radius:99px;transition:width .9s linear;}
-.chrono-bar.urgent{background:linear-gradient(90deg,#c0392b,#e74c3c);}
+.chrono-val.chrono-warning{color:#c47a10;}
+.chrono-val.chrono-danger{color:var(--red);animation:timerPulse .7s ease-in-out infinite alternate;}
+@keyframes timerPulse{from{transform:scale(1);}to{transform:scale(1.08);}}
+@media(prefers-reduced-motion:reduce){.chrono-val.chrono-danger{animation:none;}}
 .prog-dots{display:flex;gap:.35rem;justify-content:center;margin-bottom:1rem;position:relative;z-index:1;flex-wrap:wrap;}
 .prog-dot{width:9px;height:9px;border-radius:50%;background:var(--border);transition:.3s;}
 .prog-dot.done{background:var(--green);}.prog-dot.active{background:var(--day-color);}
@@ -91,6 +90,10 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(
 .final-icon{font-size:2.5rem;margin-bottom:.5rem;}
 .final-title{font-size:1.2rem;font-weight:900;color:var(--day-dark);margin-bottom:.5rem;}
 .final-msg{font-size:clamp(.88rem,2.5vw,1rem);color:var(--text);line-height:1.8;margin-bottom:1.1rem;}
+.bilan-row{display:flex;justify-content:center;gap:.7rem;flex-wrap:wrap;}
+.bilan-stat{background:var(--day-light);border:2px solid var(--day-border);border-radius:12px;padding:.8rem 1.1rem;min-width:110px;}
+.bilan-stat .num{font-family:'JetBrains Mono',monospace;font-weight:900;font-size:1.3rem;color:var(--day-dark);display:block;}
+.bilan-stat .lbl{font-size:.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
 @media(max-width:480px){body{padding:1rem .75rem 3rem;}.card{padding:1.2rem;}}
 </style>
 </head>
@@ -113,7 +116,8 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(
   <div class="start-card">
     <div class="stripe"></div>
     <div class="start-title">R&eacute;active tes formules de volumes</div>
-    <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.2rem;"><strong>10 questions &mdash; 20 secondes par question, 30 secondes pour l&rsquo;association finale</strong></p>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:.6rem;"><strong>10 questions &mdash; chronom&egrave;tre global de 2 minutes</strong></p>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:1.2rem;">Attention&nbsp;: si les 2&nbsp;minutes s&rsquo;&eacute;coulent, le Flash D&eacute;fi s&rsquo;arr&ecirc;te et tu devras recommencer.</p>
     <button class="btn btn-primary" id="btn-start" style="font-size:1.05rem;padding:.8rem 2rem;">&#9654; Commencer</button>
   </div>
 </div>
@@ -121,10 +125,9 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(
 <div id="flash-zone" style="display:none;">
   <div class="chrono-wrap">
     <div class="chrono-top">
-      <span class="chrono-label">&#8987; Temps restant</span>
-      <span class="chrono-val" id="chrono-val" role="timer" aria-live="off" aria-label="Temps restant : 20 secondes">20 s</span>
+      <span class="chrono-label">&#9203; Temps restant</span>
+      <span class="chrono-val" id="chrono-val" role="timer" aria-live="off" aria-label="Temps restant : 2 minutes">2:00</span>
     </div>
-    <div class="chrono-bar-bg"><div class="chrono-bar" id="chrono-bar" style="width:100%"></div></div>
   </div>
   <div class="prog-dots" id="flash-progress" role="progressbar" aria-label="Question 1 sur 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="1">
     <div class="prog-dot active" id="pd0" aria-hidden="true"></div>
@@ -143,6 +146,20 @@ h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;line-height:1.3;color:var(
     <div class="q-badge" id="q-badge">Question 1 / 10</div>
     <div id="q-content"></div>
     <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="timeout-screen" style="display:none;" role="alert" aria-live="assertive">
+  <div class="final-card">
+    <div class="stripe"></div>
+    <div class="final-icon">&#9203;</div>
+    <div class="final-title" id="timeout-title" tabindex="-1">Temps &eacute;coul&eacute;&nbsp;!</div>
+    <div class="bilan-row">
+      <div class="bilan-stat"><span class="num" id="timeout-score">0/10</span><span class="lbl">&#9989; bonnes r&eacute;ponses</span></div>
+      <div class="bilan-stat"><span class="num" id="timeout-done">0/10</span><span class="lbl">&#128221; questions r&eacute;alis&eacute;es</span></div>
+    </div>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:1.1rem;margin-bottom:1.2rem;">Le temps est &eacute;coul&eacute;. Tu dois recommencer le Flash D&eacute;fi.</p>
+    <button class="btn btn-primary" id="btn-timeout-restart">&#8635; Recommencer</button>
   </div>
 </div>
 
@@ -222,50 +239,53 @@ function toggleSound(){
   button.setAttribute('aria-pressed',soundOn?'true':'false');
   button.setAttribute('aria-label',soundOn?'Couper le son':'Activer le son');
 }
-var DUREE_STANDARD=20,DUREE_ASSOCIATION=30,TOTAL=10;
-var tempsRestant=DUREE_STANDARD,timerID=null,transitionID=null,fini=false,answered=false,qIdx=0;
+var FLASH_DURATION=120,TOTAL=10;
+var remainingTime=FLASH_DURATION,chronoID=null,chronoPaused=false;
+var transitionID=null,fini=false,answered=false,qIdx=0,firstTryOk=0,hadErrorThisQ=false;
 var flashRunning=false,timerPausedByVisibility=false;
 function el(id){return document.getElementById(id);}
 
-function getQuestionDuration(){
-  return QUESTIONS[qIdx].type==='match'?DUREE_ASSOCIATION:DUREE_STANDARD;
+function formatCountdown(seconds){
+  var minutes=Math.floor(seconds/60);
+  var secs=seconds%60;
+  return minutes+':'+String(secs).padStart(2,'0');
 }
 function updateChrono(){
-  var duration=getQuestionDuration();
-  el('chrono-val').textContent=tempsRestant+' s';
-  el('chrono-val').setAttribute('aria-label','Temps restant\u00a0: '+tempsRestant+' seconde'+(tempsRestant>1?'s':''));
-  el('chrono-bar').style.width=(tempsRestant/duration*100)+'%';
-  var urgent=(tempsRestant<=5);
-  el('chrono-val').className='chrono-val'+(urgent?' urgent':'');
-  el('chrono-bar').className='chrono-bar'+(urgent?' urgent':'');
+  var timer=el('chrono-val'); if(!timer) return;
+  timer.textContent=formatCountdown(remainingTime);
+  var minutes=Math.floor(remainingTime/60), seconds=remainingTime%60;
+  timer.setAttribute('aria-label','Temps restant\u00a0: '+minutes+' minute'+(minutes>1?'s':'')+(seconds>0?' et '+seconds+' seconde'+(seconds>1?'s':''):''));
+  timer.classList.toggle('chrono-warning', remainingTime<=30 && remainingTime>10);
+  timer.classList.toggle('chrono-danger', remainingTime<=10);
 }
-function resetChrono(){ tempsRestant=getQuestionDuration(); updateChrono(); }
-function stopTimer(){ if(timerID!==null){clearInterval(timerID);timerID=null;} }
+function stopTimer(){ if(chronoID!==null){clearInterval(chronoID);chronoID=null;} }
 function clearTransition(){ if(transitionID!==null){clearTimeout(transitionID);transitionID=null;} }
 function startTimer(){
-  stopTimer();
-  timerID=setInterval(function(){
-    tempsRestant-=1;
-    if(tempsRestant<0) tempsRestant=0;
+  if(chronoID!==null||fini||remainingTime<=0) return;
+  chronoID=setInterval(function(){
+    remainingTime--;
+    if(remainingTime<=0){ remainingTime=0; stopTimer(); handleTimeExpired(); }
     updateChrono();
-    if(tempsRestant===0){ stopTimer(); handleTimeout(); }
   },1000);
 }
 function startFlash(){
   el('start-screen').style.display='none';
+  el('final-screen').style.display='none';
+  el('timeout-screen').style.display='none';
   el('flash-zone').style.display='block';
-  qIdx=0;fini=false;answered=false;
+  qIdx=0;fini=false;answered=false;firstTryOk=0;hadErrorThisQ=false;
   flashRunning=true;timerPausedByVisibility=false;
-  resetChrono();render();startTimer();
+  remainingTime=FLASH_DURATION;chronoPaused=false;
+  updateChrono();render();startTimer();
 }
 
 function pauseFlashTimer(){
-  if(!flashRunning||answered||fini||timerID===null) return;
+  if(!flashRunning||fini||chronoID===null) return;
   stopTimer();
   timerPausedByVisibility=true;
 }
 function resumeFlashTimer(){
-  if(!flashRunning||answered||fini||!timerPausedByVisibility||document.hidden) return;
+  if(!flashRunning||fini||!timerPausedByVisibility||document.hidden) return;
   timerPausedByVisibility=false;
   startTimer();
 }
@@ -366,8 +386,9 @@ function render(){
   }
 }
 
-function lockAndAdvance(Q){
-  answered=true;stopTimer();
+function lockAndAdvance(Q,wasFirstTry){
+  answered=true;
+  if(wasFirstTry) firstTryOk++;
   var fb=el('feedback');fb.className='feedback show ok';
   fb.innerHTML=Q.fbOk;
   playCorrect();
@@ -382,13 +403,14 @@ function showHint(Q){
 }
 
 function answerQCM(i,btn){
-  if(answered) return;
+  if(answered||fini) return;
   var Q=QUESTIONS[qIdx];
   if(i===Q.correct){
     document.querySelectorAll('#opts .opt-btn').forEach(function(b){b.disabled=true;});
     btn.classList.add('ok');
-    lockAndAdvance(Q);
+    lockAndAdvance(Q,!hadErrorThisQ);
   } else {
+    hadErrorThisQ=true;
     btn.classList.add('ko');
     showHint(Q);
     setTimeout(function(){btn.classList.remove('ko');},900);
@@ -396,14 +418,15 @@ function answerQCM(i,btn){
 }
 
 function answerVF(label){
-  if(answered) return;
+  if(answered||fini) return;
   var Q=QUESTIONS[qIdx];
   var bo=el('vf-vrai'),bf=el('vf-faux');
   if(label===Q.ans){
     bo.disabled=true;bf.disabled=true;
     (label==='Vrai'?bo:bf).classList.add('ok');
-    lockAndAdvance(Q);
+    lockAndAdvance(Q,!hadErrorThisQ);
   } else {
+    hadErrorThisQ=true;
     (label==='Vrai'?bo:bf).classList.add('ko');
     showHint(Q);
     setTimeout(function(){bo.classList.remove('ko');bf.classList.remove('ko');},900);
@@ -411,7 +434,7 @@ function answerVF(label){
 }
 
 function checkMatch(){
-  if(answered) return;
+  if(answered||fini) return;
   var Q=QUESTIONS[qIdx];
   var allFilled=true, allOk=true;
   Q.rows.forEach(function(r,ri){
@@ -423,8 +446,9 @@ function checkMatch(){
   if(!allFilled) return;
   if(allOk){
     Q.rows.forEach(function(r,ri){var sel=el('match-'+ri);sel.disabled=true;sel.classList.add('ok');});
-    lockAndAdvance(Q);
+    lockAndAdvance(Q,!hadErrorThisQ);
   } else {
+    hadErrorThisQ=true;
     Q.rows.forEach(function(r,ri){
       var sel=el('match-'+ri);
       var v=parseInt(sel.value);
@@ -434,34 +458,33 @@ function checkMatch(){
   }
 }
 
-function handleTimeout(){
-  if(answered||fini) return;
-  answered=true;stopTimer();
-  var Q=QUESTIONS[qIdx];
-  var fb=el('feedback');fb.className='feedback show ko';
-  playWrong();
-  if(Q.type==='qcm'){
-    document.querySelectorAll('#opts .opt-btn').forEach(function(b,j){b.disabled=true;if(j===Q.correct)b.classList.add('ok');});
-    fb.innerHTML='\u23F1\uFE0F Temps \u00e9coul\u00e9. La bonne r\u00e9ponse est\u00a0: <strong>'+Q.opts[Q.correct]+'</strong>.';
-  } else if(Q.type==='vf'){
-    el('vf-vrai').disabled=true;el('vf-faux').disabled=true;
-    (Q.ans==='Vrai'?el('vf-vrai'):el('vf-faux')).classList.add('ok');
-    fb.innerHTML='\u23F1\uFE0F Temps \u00e9coul\u00e9. La bonne r\u00e9ponse est\u00a0: <strong>'+Q.ans+'</strong>.';
-  } else {
-    Q.rows.forEach(function(r,ri){var sel=el('match-'+ri);sel.value=r.correct;sel.disabled=true;sel.classList.add('ok');});
-    fb.innerHTML='\u23F1\uFE0F Temps \u00e9coul\u00e9. '+Q.fbOk;
-  }
+function handleTimeExpired(){
+  if(fini) return;
+  fini=true;
+  flashRunning=false;timerPausedByVisibility=false;
   clearTransition();
-  transitionID=setTimeout(function(){transitionID=null;goToNextQuestion();},3200);
+  stopTimer();
+  el('flash-zone').style.display='none';
+  el('timeout-score').textContent=firstTryOk+'/'+TOTAL;
+  el('timeout-done').textContent=qIdx+'/'+TOTAL;
+  el('timeout-screen').style.display='block';
+  playWrong();
+  window.scrollTo({top:0,behavior:'smooth'});
+  el('timeout-title').focus();
+}
+function restartAfterTimeout(){
+  el('timeout-screen').style.display='none';
+  el('start-screen').style.display='';
+  window.scrollTo({top:0,behavior:'smooth'});
+  el('btn-start').focus();
 }
 
 function goToNextQuestion(){
   if(fini) return;
+  hadErrorThisQ=false;
   if(qIdx>=TOTAL-1){ showFin(); return; }
   qIdx+=1;
-  resetChrono();
   render();
-  startTimer();
 }
 
 function showFin(){
@@ -474,7 +497,9 @@ function showFin(){
 function restart(){
   flashRunning=false;timerPausedByVisibility=false;
   stopTimer();clearTransition();
-  fini=false;answered=false;qIdx=0;resetChrono();
+  fini=false;answered=false;qIdx=0;firstTryOk=0;hadErrorThisQ=false;
+  remainingTime=FLASH_DURATION;chronoPaused=false;
+  updateChrono();
   el('final-screen').style.display='none';el('start-screen').style.display='';
   window.scrollTo({top:0,behavior:'smooth'});
   el('btn-start').focus();
@@ -482,6 +507,7 @@ function restart(){
 
 el('btn-start').addEventListener('click',startFlash);
 el('btn-restart').addEventListener('click',restart);
+el('btn-timeout-restart').addEventListener('click',restartAfterTimeout);
 el('btn-sound').addEventListener('click',toggleSound);
 updateChrono();
 })();
