@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths — 6e — Semaine 8 — Jour 1 — Je relève le défi — L'Atelier des ingénieurs du chemin de fer</title>
+<style>
+/* =====================================================================
+   VARIABLES — palette industrielle (à ne pas confondre avec les
+   semaines précédentes : gris anthracite / acier / bleu technique /
+   orange sécurité / jaune chantier)
+   ===================================================================== */
+:root{
+  --anthracite:#1B1F24; --anthracite-2:#242A31; --anthracite-3:#2E353D;
+  --steel:#8A95A1; --steel-light:#C7CED6; --steel-dark:#4B545E;
+  --blue-tech:#1E5F9E; --blue-tech-light:#4A90D9; --blue-tech-pale:#EAF3FC;
+  --orange:#FF6A1A; --orange-dark:#CC4E00;
+  --yellow:#FFCC00; --yellow-dark:#B38600;
+  --white:#F7F9FB; --paper:#FBFCFE;
+  --green:#2E9E4F; --green-light:#E4F7EA;
+  --red:#D64545; --red-light:#FCE8E8;
+  --radius:10px; --radius-lg:16px;
+  --font:Arial,Helvetica,"Segoe UI",sans-serif;
+  --font-mono:"Courier New",monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font); color:var(--white); background:var(--anthracite);
+  min-height:100vh; overflow-x:hidden; line-height:1.55;
+}
+button{font-family:inherit;}
+a{color:inherit;}
+
+/* =====================================================================
+   FOND D'ATELIER — décor discret (poutres, verrière, rails, établis)
+   ===================================================================== */
+.workshop-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(74,144,217,.10), transparent 55%),
+    linear-gradient(180deg,#14171B 0%,#1B1F24 40%,#171B1F 100%);
+}
+.workshop-bg svg{position:absolute;inset:0;width:100%;height:100%;}
+.grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.035;
+  background-image:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px);}
+
+/* =====================================================================
+   BANDEAU SUPÉRIEUR
+   ===================================================================== */
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;padding:.7rem 1.2rem;background:linear-gradient(180deg,#2A3138,#1D2126);
+  border-bottom:3px solid var(--orange);box-shadow:0 6px 18px rgba(0,0,0,.45);flex-wrap:wrap;}
+.topbar-brand{display:flex;align-items:center;gap:.65rem;}
+.topbar-ico{font-size:1.7rem;filter:drop-shadow(0 0 6px rgba(255,106,26,.5));}
+.topbar-brand-text{display:flex;flex-direction:column;line-height:1.15;}
+.topbar-brand-text b{font-size:.98rem;letter-spacing:.02em;color:var(--white);}
+.topbar-brand-text span{font-size:.68rem;color:var(--steel-light);text-transform:uppercase;letter-spacing:.12em;}
+.topbar-title{flex:1;text-align:center;min-width:180px;}
+.topbar-title b{font-size:clamp(.95rem,2.6vw,1.25rem);color:var(--white);letter-spacing:.02em;}
+.topbar-title span{display:block;font-size:.68rem;color:var(--orange);text-transform:uppercase;letter-spacing:.14em;margin-top:.15rem;}
+.topbar-timer{display:flex;align-items:center;gap:.5rem;background:#0E1013;border:1.5px solid var(--steel-dark);
+  border-radius:8px;padding:.35rem .6rem;box-shadow:inset 0 0 10px rgba(0,0,0,.6);}
+.led-display{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:#FF8A3D;
+  text-shadow:0 0 8px rgba(255,138,61,.75);letter-spacing:.06em;min-width:64px;text-align:center;}
+.timer-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--steel-dark);background:#20252B;
+  color:var(--steel-light);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;
+  transition:transform .12s,background .15s;}
+.timer-btn:hover{background:#2C333B;}
+.timer-btn:active{transform:scale(.92);}
+.sound-btn[aria-pressed="false"]{opacity:.45;}
+
+/* =====================================================================
+   MISE EN PAGE PRINCIPALE — 3 colonnes
+   ===================================================================== */
+.layout{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:1.2rem;
+  display:grid;grid-template-columns:230px 1fr 250px;gap:1rem;align-items:start;}
+@media(max-width:1024px){.layout{grid-template-columns:1fr;}
+  .panel-left,.panel-right{order:2;}
+  .table-zone{order:1;}
+}
+
+/* =====================================================================
+   PANNEAU GAUCHE — tablette « Mission »
+   ===================================================================== */
+.panel-left{background:linear-gradient(180deg,#20262C,#181C21);border:1px solid var(--steel-dark);
+  border-radius:var(--radius-lg);padding:1rem;position:sticky;top:90px;box-shadow:0 10px 26px rgba(0,0,0,.35);}
+.panel-title{display:flex;align-items:center;gap:.45rem;font-size:.8rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--blue-tech-light);margin-bottom:.8rem;padding-bottom:.6rem;border-bottom:1px solid var(--steel-dark);}
+.plan-list{display:flex;flex-direction:column;gap:.5rem;}
+.plan-item{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border-radius:8px;
+  background:#1C2126;border:1px solid var(--steel-dark);color:var(--steel-light);font-size:.82rem;font-weight:600;
+  transition:background .15s,border-color .15s,transform .15s;}
+.plan-item .dot{width:9px;height:9px;border-radius:50%;background:var(--steel);flex-shrink:0;}
+.plan-item.current{background:rgba(74,144,217,.14);border-color:var(--blue-tech-light);color:var(--white);transform:translateX(2px);}
+.plan-item.current .dot{background:var(--blue-tech-light);box-shadow:0 0 8px rgba(74,144,217,.8);}
+.plan-item.done{background:rgba(46,158,79,.12);border-color:var(--green);color:var(--white);}
+.plan-item.done .dot{background:var(--green);}
+.plan-item.done .dot::after{content:'\2713';}
+
+/* =====================================================================
+   PANNEAU DROIT — boîte à outils
+   ===================================================================== */
+.panel-right{background:linear-gradient(180deg,#20262C,#181C21);border:1px solid var(--steel-dark);
+  border-radius:var(--radius-lg);padding:1rem;position:sticky;top:90px;box-shadow:0 10px 26px rgba(0,0,0,.35);}
+.toolbox-body{display:flex;flex-direction:column;gap:.6rem;font-size:.82rem;color:var(--steel-light);}
+.toolbox-empty{opacity:.6;font-style:italic;font-size:.78rem;}
+.tool-box{border-radius:8px;padding:.6rem .75rem;display:none;line-height:1.6;}
+.tool-box.show{display:block;animation:toolOpen .3s ease both;}
+@keyframes toolOpen{from{opacity:0;transform:translateY(-6px) scaleY(.9);}to{opacity:1;transform:translateY(0) scaleY(1);}}
+.tool-hint{background:rgba(255,204,0,.1);border:1.5px dashed var(--yellow);color:#FFE58A;}
+.tool-corr{background:rgba(74,144,217,.12);border:1.5px solid var(--blue-tech-light);color:#CFE4FA;}
+
+/* =====================================================================
+   ZONE PRINCIPALE — table d'ingénieur
+   ===================================================================== */
+.table-zone{background:
+    repeating-linear-gradient(100deg,rgba(255,255,255,.025) 0 2px,transparent 2px 6px),
+    linear-gradient(160deg,#3A4048,#2A2F35 60%,#23272C);
+  border:1px solid var(--steel-dark);border-radius:var(--radius-lg);padding:1.3rem;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.35),0 12px 30px rgba(0,0,0,.4);min-height:420px;position:relative;}
+.mission-brief{background:rgba(30,95,158,.14);border-left:4px solid var(--blue-tech-light);
+  border-radius:6px;padding:.8rem 1rem;margin-bottom:1rem;font-size:.88rem;color:var(--white);line-height:1.7;}
+.mission-brief b{color:var(--blue-tech-light);}
+
+/* Carte "plan technique" */
+.plan-card{background:var(--paper);color:#1B2430;border-radius:var(--radius-lg);
+  box-shadow:0 14px 30px rgba(0,0,0,.4),0 0 0 1px rgba(0,0,0,.06);overflow:hidden;
+  animation:cardIn .35s ease both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px) rotate(-.4deg);}to{opacity:1;transform:translateY(0) rotate(0);}}
+.plan-card-head{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;
+  background:linear-gradient(180deg,#26303B,#1B222A);color:var(--white);}
+.plan-card-num{width:2rem;height:2rem;border-radius:6px;background:var(--orange);color:#2A1200;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;flex-shrink:0;}
+.plan-card-title{font-weight:800;font-size:.98rem;letter-spacing:.01em;}
+.plan-card-sub{font-size:.68rem;color:var(--steel-light);text-transform:uppercase;letter-spacing:.08em;margin-top:.1rem;}
+.plan-card-body{padding:1.2rem 1.3rem 1.4rem;}
+.plan-figure{text-align:center;margin-bottom:.9rem;}
+.plan-figure svg{max-width:100%;height:auto;}
+.plan-question{font-size:.95rem;font-weight:700;color:#1B2430;margin-bottom:.9rem;line-height:1.6;}
+
+.opt-list{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.9rem;}
+.opt-btn{text-align:left;padding:.7rem .9rem;border:2px solid #D7DEE6;border-radius:9px;background:#fff;
+  color:#1B2430;font-size:.9rem;font-weight:600;cursor:pointer;min-height:44px;transition:border-color .15s,background .15s,transform .1s;}
+.opt-btn:hover:not(:disabled){border-color:var(--blue-tech-light);background:var(--blue-tech-pale);}
+.opt-btn.selected{border-color:var(--blue-tech-light);background:var(--blue-tech-pale);}
+.opt-btn.correct{border-color:var(--green);background:var(--green-light);color:#155C2C;}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-light);color:#7A1F1F;}
+.opt-btn:disabled{cursor:default;opacity:.9;}
+
+.num-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap;}
+.num-input{width:110px;padding:.6rem .7rem;border:2px solid #D7DEE6;border-radius:8px;font-family:var(--font-mono);
+  font-size:1rem;font-weight:700;text-align:center;color:#1B2430;background:#fff;outline:none;}
+.num-input:focus{border-color:var(--blue-tech-light);}
+.num-input.ok{border-color:var(--green);background:var(--green-light);}
+.num-input.ko{border-color:var(--red);background:var(--red-light);}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.4rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.25rem;border-radius:9px;border:none;
+  font-weight:800;font-size:.85rem;letter-spacing:.01em;cursor:pointer;min-height:44px;
+  transition:transform .12s,box-shadow .15s,filter .15s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#2A1200;
+  box-shadow:0 4px 14px rgba(255,106,26,.4);}
+.btn-primary:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px);}
+.btn-secondary{background:#3A4048;color:var(--steel-light);border:1.5px solid var(--steel-dark);}
+.btn-secondary:hover:not(:disabled){background:#454C55;}
+.btn-validate{background:linear-gradient(135deg,#3BBE64,var(--green));color:#0B2A14;
+  box-shadow:0 4px 14px rgba(46,158,79,.4);}
+.btn-error{background:linear-gradient(135deg,#E56A6A,var(--red));color:#3A0E0E;}
+
+.feedback-box{margin-top:.9rem;padding:.75rem 1rem;border-radius:9px;font-size:.86rem;line-height:1.7;display:none;
+  align-items:flex-start;gap:.6rem;}
+.feedback-box.show{display:flex;}
+.feedback-box.ok{background:var(--green-light);border:1.5px solid var(--green);color:#155C2C;}
+.feedback-box.ko{background:var(--red-light);border:1.5px solid var(--red);color:#7A1F1F;}
+.shake{animation:cardShake .35s;}
+@keyframes cardShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+/* =====================================================================
+   BARRE DE PROGRESSION — voie ferrée
+   ===================================================================== */
+.rail-wrap{max-width:1320px;margin:0 auto;padding:0 1.2rem 1.4rem;position:relative;z-index:1;}
+.rail-track{background:#14171B;border:1px solid var(--steel-dark);border-radius:12px;padding:.8rem 1rem;
+  display:flex;align-items:center;gap:1rem;}
+.rail-label{font-size:.72rem;color:var(--steel-light);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;}
+.rail-svg{flex:1;height:34px;}
+.rail-pct{font-family:var(--font-mono);font-size:.82rem;color:var(--yellow);font-weight:700;white-space:nowrap;}
+
+/* =====================================================================
+   ÉCRAN D'INTRODUCTION
+   ===================================================================== */
+.intro-screen{position:relative;z-index:1;max-width:720px;margin:2.2rem auto;padding:0 1.2rem;text-align:center;}
+.intro-card{background:linear-gradient(180deg,#20262C,#181C21);border:1px solid var(--steel-dark);
+  border-radius:var(--radius-lg);padding:2.2rem 1.8rem;box-shadow:0 16px 40px rgba(0,0,0,.45);}
+.intro-ico{font-size:3.4rem;margin-bottom:.7rem;}
+.intro-card h2{font-size:1.35rem;color:var(--white);margin-bottom:.5rem;}
+.intro-card p{color:var(--steel-light);font-size:.92rem;line-height:1.75;margin-bottom:1.2rem;}
+.intro-note{background:rgba(255,204,0,.1);border:1.5px dashed var(--yellow);border-radius:8px;
+  padding:.7rem 1rem;font-size:.82rem;color:#FFE58A;margin-bottom:1.4rem;}
+
+/* =====================================================================
+   ÉCRAN DE FIN
+   ===================================================================== */
+.finale-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+  background:rgba(10,12,15,.92);padding:1.2rem;}
+.finale-overlay.show{display:flex;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.finale-card{max-width:520px;width:100%;background:linear-gradient(180deg,#20262C,#181C21);
+  border:1px solid var(--steel-dark);border-radius:var(--radius-lg);padding:2rem 1.8rem;text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,.55);animation:cardIn .4s ease both;}
+.finale-ico{font-size:3.6rem;margin-bottom:.6rem;}
+.finale-card h2{font-size:1.4rem;color:var(--white);margin-bottom:.6rem;}
+.finale-card p{color:var(--steel-light);font-size:.9rem;line-height:1.7;margin-bottom:1rem;}
+.finale-stats{display:flex;justify-content:center;gap:1.4rem;margin-bottom:1.4rem;flex-wrap:wrap;}
+.finale-stat{background:#14171B;border:1px solid var(--steel-dark);border-radius:8px;padding:.6rem 1rem;min-width:110px;}
+.finale-stat b{display:block;font-family:var(--font-mono);font-size:1.15rem;color:var(--orange);}
+.finale-stat span{font-size:.68rem;color:var(--steel-light);text-transform:uppercase;letter-spacing:.08em;}
+.finale-btn-row{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+
+/* =====================================================================
+   RESPONSIVE — panneaux repliables
+   ===================================================================== */
+.panel-toggle{display:none;}
+@media(max-width:1024px){
+  .panel-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;cursor:pointer;
+    background:none;border:none;color:inherit;font:inherit;}
+  .panel-toggle .chev{transition:transform .2s;color:var(--steel-light);}
+  .panel-left.collapsed .plan-list,.panel-right.collapsed .toolbox-body{display:none;}
+  .panel-left.collapsed .panel-toggle .chev,.panel-right.collapsed .panel-toggle .chev{transform:rotate(-90deg);}
+}
+@media(max-width:600px){
+  .topbar{padding:.55rem .7rem;}
+  .topbar-brand-text span{display:none;}
+  .layout{padding:.7rem;gap:.7rem;}
+  .table-zone{padding:.9rem;}
+  .plan-card-body{padding:.9rem .9rem 1.1rem;}
+  .rail-label{display:none;}
+}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     DÉCOR D'ATELIER (discret, non interactif)
+     ============================================================ -->
+<div class="workshop-bg" aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+    <!-- verrière / poutres du plafond -->
+    <g opacity="0.14" stroke="#8A95A1" stroke-width="2">
+      <line x1="0" y1="60" x2="1600" y2="60"/>
+      <line x1="0" y1="90" x2="1600" y2="90"/>
+      <line x1="120" y1="0" x2="60" y2="90"/>
+      <line x1="360" y1="0" x2="300" y2="90"/>
+      <line x1="600" y1="0" x2="540" y2="90"/>
+      <line x1="840" y1="0" x2="780" y2="90"/>
+      <line x1="1080" y1="0" x2="1020" y2="90"/>
+      <line x1="1320" y1="0" x2="1260" y2="90"/>
+      <line x1="1560" y1="0" x2="1500" y2="90"/>
+    </g>
+    <!-- rails au loin -->
+    <g opacity="0.10" stroke="#4A90D9" stroke-width="3">
+      <line x1="0" y1="760" x2="1600" y2="745"/>
+      <line x1="0" y1="778" x2="1600" y2="763"/>
+    </g>
+    <g opacity="0.08" stroke="#8A95A1" stroke-width="2">
+      <line x1="40" y1="752" x2="30" y2="772"/>
+      <line x1="140" y1="750" x2="130" y2="770"/>
+      <line x1="240" y1="748" x2="230" y2="768"/>
+      <line x1="1360" y1="748" x2="1370" y2="768"/>
+      <line x1="1460" y1="750" x2="1470" y2="770"/>
+      <line x1="1560" y1="752" x2="1570" y2="772"/>
+    </g>
+    <!-- établi / caisse à outils à gauche -->
+    <g opacity="0.10" fill="#8A95A1">
+      <rect x="30" y="640" width="180" height="16" rx="3"/>
+      <rect x="45" y="656" width="18" height="90"/>
+      <rect x="180" y="656" width="18" height="90"/>
+      <rect x="60" y="590" width="70" height="46" rx="4"/>
+    </g>
+    <!-- rouleaux de plans -->
+    <g opacity="0.10" fill="none" stroke="#4A90D9" stroke-width="3">
+      <ellipse cx="1500" cy="640" rx="16" ry="55"/>
+      <ellipse cx="1500" cy="640" rx="8" ry="30"/>
+    </g>
+    <!-- panneau technique à droite -->
+    <g opacity="0.08" fill="#FFCC00">
+      <rect x="1440" y="120" width="120" height="90" rx="4"/>
+      <rect x="1455" y="140" width="90" height="6"/>
+      <rect x="1455" y="156" width="60" height="6"/>
+      <rect x="1455" y="172" width="75" height="6"/>
+    </g>
+  </svg>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ============================================================
+     BANDEAU SUPÉRIEUR
+     ============================================================ -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="topbar-ico" aria-hidden="true">&#128646;</span>
+    <div class="topbar-brand-text">
+      <b>Atelier des ing&eacute;nieurs</b>
+      <span>Mission technique</span>
+    </div>
+  </div>
+  <div class="topbar-title">
+    <b id="mission-dynamic-title">Plan technique</b>
+    <span id="mission-dynamic-sub">Inspection en cours</span>
+  </div>
+  <div class="topbar-timer">
+    <button type="button" class="timer-btn" id="timer-start-btn" onclick="timerStart()" aria-label="D&eacute;marrer le chronom&egrave;tre" title="D&eacute;marrer">&#9654;</button>
+    <button type="button" class="timer-btn" id="timer-pause-btn" onclick="timerPause()" aria-label="Mettre en pause le chronom&egrave;tre" title="Pause">&#10074;&#10074;</button>
+    <span class="led-display" id="led-display" aria-live="off">00:00</span>
+    <button type="button" class="timer-btn" id="timer-reset-btn" onclick="timerReset()" aria-label="R&eacute;initialiser le chronom&egrave;tre" title="R&eacute;initialiser">&#8635;</button>
+    <button type="button" class="timer-btn sound-btn" id="sound-toggle" aria-pressed="true" aria-label="Couper les sons" title="Son activ&eacute;" onclick="toggleSound()">&#128266;</button>
+  </div>
+</header>
+
+<!-- ============================================================
+     ÉCRAN D'INTRODUCTION
+     ============================================================ -->
+<div class="intro-screen" id="intro-screen">
+  <div class="intro-card">
+    <div class="intro-ico" aria-hidden="true">&#128646;</div>
+    <h2 id="intro-title">Je rel&egrave;ve le d&eacute;fi</h2>
+    <p id="intro-text">Bienvenue dans l&rsquo;atelier des ing&eacute;nieurs&nbsp;! Avant la construction de la nouvelle gare, tu dois v&eacute;rifier les plans techniques un &agrave; un.</p>
+    <div class="intro-note" id="intro-note">&#128203; 5 plans t&rsquo;attendent sur la table de l&rsquo;ing&eacute;nieur. Le chronom&egrave;tre est informatif et n&rsquo;entra&icirc;ne aucune p&eacute;nalit&eacute;.</div>
+    <button type="button" class="btn btn-primary" id="btn-begin" onclick="beginMission()">&#9654;&#65039; Commencer la mission</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ZONE DE JEU (masquée avant le lancement)
+     ============================================================ -->
+<div id="game-area" style="display:none;">
+  <div class="layout">
+
+    <!-- PANNEAU GAUCHE : MISSION -->
+    <aside class="panel-left" id="panel-left">
+      <button type="button" class="panel-toggle" id="toggle-left" aria-expanded="true" onclick="togglePanel('panel-left')">
+        <span class="panel-title" style="margin:0;border:none;padding:0;">&#128203; Mission</span>
+        <span class="chev" aria-hidden="true">&#9660;</span>
+      </button>
+      <div class="panel-title" id="panel-left-title-desktop">&#128203; Mission</div>
+      <div class="plan-list" id="plan-list"></div>
+    </aside>
+
+    <!-- ZONE PRINCIPALE : TABLE D'INGÉNIEUR -->
+    <main class="table-zone" id="table-zone">
+      <div class="mission-brief" id="mission-brief"><b>&#128204; Consigne&nbsp;:</b> <span id="mission-brief-text">V&eacute;rifie chaque plan technique avant validation finale.</span></div>
+      <div id="plan-host"></div>
+    </main>
+
+    <!-- PANNEAU DROIT : BOÎTE À OUTILS -->
+    <aside class="panel-right" id="panel-right">
+      <button type="button" class="panel-toggle" id="toggle-right" aria-expanded="true" onclick="togglePanel('panel-right')">
+        <span class="panel-title" style="margin:0;border:none;padding:0;">&#128736;&#65039; Outils de l&rsquo;ing&eacute;nieur</span>
+        <span class="chev" aria-hidden="true">&#9660;</span>
+      </button>
+      <div class="panel-title" id="panel-right-title-desktop">&#128736;&#65039; Outils de l&rsquo;ing&eacute;nieur</div>
+      <div class="toolbox-body" id="toolbox-body">
+        <div class="toolbox-empty" id="toolbox-empty">Les indices et corrections appara&icirc;tront ici pendant la mission.</div>
+        <div class="tool-box tool-hint" id="toolbox-hint" role="status" aria-live="polite"></div>
+        <div class="tool-box tool-corr" id="toolbox-corr" role="status" aria-live="polite"></div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- BARRE DE PROGRESSION : VOIE FERRÉE -->
+  <div class="rail-wrap">
+    <div class="rail-track"
+         id="rail-progress"
+         role="progressbar"
+         aria-valuemin="0"
+         aria-valuemax="5"
+         aria-valuenow="0"
+         aria-label="0 plan validé sur 5">
+      <span class="rail-label">Construction de la voie</span>
+      <svg class="rail-svg" id="rail-svg" viewBox="0 0 1000 34" preserveAspectRatio="none" role="img" aria-labelledby="rail-title">
+        <title id="rail-title">Progression de la voie ferr&eacute;e</title>
+        <line x1="0" y1="17" x2="1000" y2="17" stroke="#3A4048" stroke-width="6"/>
+        <g id="rail-ties"></g>
+        <line id="rail-fill" x1="0" y1="17" x2="0" y2="17" stroke="#FF6A1A" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <span class="rail-pct" id="rail-pct">0&nbsp;%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN DE FIN (réutilisable)
+     ============================================================ -->
+<div class="finale-overlay" id="finale-overlay">
+  <div class="finale-card">
+    <div class="finale-ico" aria-hidden="true">&#127937;</div>
+    <h2 id="finale-title">Mission accomplie&nbsp;!</h2>
+    <p id="finale-text">Mission termin&eacute;e.</p>
+    <div class="finale-stats">
+      <div class="finale-stat"><b id="finale-time">00:00</b><span>Temps</span></div>
+      <div class="finale-stat"><b id="finale-score">0/5</b><span>Plans valid&eacute;s</span></div>
+      <div class="finale-stat"><b id="finale-auto">0/5</b><span>Sans correction</span></div>
+    </div>
+    <div class="finale-btn-row">
+      <button type="button" class="btn btn-primary" onclick="restartMission()">&#128260; Rejouer la mission</button>
+      <button type="button" class="btn btn-secondary" onclick="returnToIntro()">&#127968; Retour</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+function $(id){return document.getElementById(id);}
+
+/* =====================================================================
+   IDENTITÉ SONORE — atelier des ingénieurs du chemin de fer
+   Sons entièrement synthétisés (Web Audio API), aucun fichier externe.
+   Palette : métal, rails, outils techniques, chantier ferroviaire.
+   ===================================================================== */
+var soundOn=true, audioCtx=null;
+function ac(){
+  if(!audioCtx){
+    try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
+    catch(e){ audioCtx=null; }
+  }
+  return audioCtx;
+}
+/* Note simple (oscillateur + enveloppe douce) */
+function tone(freq,startOffset,dur,type,vol){
+  if(!soundOn) return;
+  var c=ac(); if(!c) return;
+  var o=c.createOscillator(), g=c.createGain();
+  o.type=type||'triangle';
+  o.frequency.value=freq;
+  o.connect(g); g.connect(c.destination);
+  var t=c.currentTime+(startOffset||0);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol||0.12,t+0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.12));
+  o.start(t); o.stop(t+(dur||0.12)+0.03);
+}
+/* Souffle filtré (métal, frottement, vapeur) */
+function noiseBurst(dur,vol,lowpass,highpass,startOffset){
+  if(!soundOn) return;
+  var c=ac(); if(!c) return;
+  var len=Math.max(1,Math.ceil((dur||0.1)*c.sampleRate));
+  var buf=c.createBuffer(1,len,c.sampleRate), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++){ data[i]=Math.random()*2-1; }
+  var src=c.createBufferSource(); src.buffer=buf;
+  var lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=lowpass||2400;
+  var hp=c.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=highpass||120;
+  var g=c.createGain();
+  var t=c.currentTime+(startOffset||0);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol||0.07,t+0.02);
+  g.gain.linearRampToValueAtTime(0.0001,t+(dur||0.1));
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(c.destination);
+  src.start(t); src.stop(t+(dur||0.1)+0.02);
+}
+/* Signal de départ en gare — deux notes de quai + léger souffle ferroviaire */
+function sndMissionStart(){
+  if(!soundOn) return;
+  var c=ac();
+  if(!c) return;
+  if(c.state==='suspended'){ c.resume(); }
+  tone(660,0,0.09,'sine',0.045);
+  tone(880,0.13,0.11,'sine',0.04);
+  noiseBurst(0.10,0.018,1800,500,0.25);
+}
+/* Destination validée sur le panneau d'affichage — bonne réponse */
+function sndValidate(){
+  if(!soundOn) return;
+  tone(587,0,0.08,'sine',0.045);
+  tone(784,0.10,0.13,'triangle',0.05);
+  noiseBurst(0.035,0.015,2400,900,0.02);
+}
+/* Signal orange — itinéraire non validé (première erreur) */
+function sndError(){
+  if(!soundOn) return;
+  tone(294,0,0.11,'triangle',0.035);
+  tone(247,0.10,0.14,'sine',0.028);
+}
+/* Case qui bascule sur le tableau des horaires — indice */
+function sndHint(){
+  if(!soundOn) return;
+  noiseBurst(0.045,0.018,3200,1100,0);
+  tone(988,0.05,0.09,'sine',0.032);
+}
+/* Aiguillage repositionné — correction complète (deuxième erreur) */
+function sndCorrection(){
+  if(!soundOn) return;
+  noiseBurst(0.08,0.022,1500,250,0);
+  tone(330,0.03,0.10,'triangle',0.032);
+  tone(392,0.13,0.13,'triangle',0.035);
+}
+/* Wagon passant sur un joint de rail — passage au plan suivant */
+function sndNextPlan(){
+  if(!soundOn) return;
+  noiseBurst(0.035,0.025,1000,180,0);
+  noiseBurst(0.035,0.022,1000,180,0.11);
+  tone(220,0,0.055,'triangle',0.025);
+  tone(247,0.11,0.055,'triangle',0.022);
+}
+/* Roulement discret du wagon — presque imperceptible */
+function sndTile(offset){
+  if(!soundOn) return;
+  noiseBurst(0.025,0.008,850,180,offset||0);
+}
+/* Arrivée en gare — souffle qui s'immobilise puis sonnerie de quai */
+function sndFinale(){
+  if(!soundOn) return;
+  noiseBurst(0.30,0.022,1200,120,0);
+  tone(523,0.12,0.12,'triangle',0.045);
+  tone(659,0.27,0.14,'triangle',0.045);
+  tone(784,0.44,0.20,'sine',0.05);
+  tone(1047,0.70,0.09,'sine',0.028);
+  tone(1319,0.84,0.12,'sine',0.024);
+}
+/* =====================================================================
+   AMBIANCE DE GARE — nappe continue très discrète, générée en Web Audio.
+   Souffle du hall, grondement lointain, vibration des rails, passages
+   occasionnels, sonnerie de quai très rare. Aucun fichier externe.
+   ===================================================================== */
+var stationAmbienceGain=null;
+var stationAmbienceSources=[];
+var stationAmbienceRunning=false;
+var stationAmbienceTimeouts=[];
+
+/* Buffer de bruit en boucle (base du souffle et de la vibration) */
+function makeLoopNoiseBuffer(c,seconds){
+  var len=Math.max(1,Math.ceil((seconds||4)*c.sampleRate));
+  var buf=c.createBuffer(1,len,c.sampleRate);
+  var data=buf.getChannelData(0);
+  var last=0;
+  for(var i=0;i<len;i++){
+    /* bruit légèrement lissé : moins sifflant qu'un bruit blanc pur */
+    var white=Math.random()*2-1;
+    last=(last*0.94)+(white*0.06);
+    data[i]=last*3.2;
+  }
+  return buf;
+}
+function ambienceLayer(c,buffer,lowpass,highpass,gainValue,detuneRate){
+  var src=c.createBufferSource();
+  src.buffer=buffer;
+  src.loop=true;
+  if(detuneRate){ src.playbackRate.value=detuneRate; }
+  var lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=lowpass;
+  var hp=c.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=highpass;
+  var g=c.createGain(); g.gain.value=gainValue;
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(stationAmbienceGain);
+  src.start(0);
+  stationAmbienceSources.push(src);
+  return g;
+}
+/* Passage lointain d'un train : montée puis descente très douce */
+function ambienceTrainPass(){
+  if(!soundOn || !stationAmbienceRunning) return;
+  var c=ac(); if(!c || !stationAmbienceGain) return;
+  var buf=makeLoopNoiseBuffer(c,3);
+  var src=c.createBufferSource(); src.buffer=buf; src.loop=true;
+  var lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=340;
+  var hp=c.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=60;
+  var g=c.createGain();
+  var t=c.currentTime;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(0.020,t+2.2);
+  g.gain.linearRampToValueAtTime(0.0001,t+5.4);
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(stationAmbienceGain);
+  src.start(t); src.stop(t+5.6);
+  stationAmbienceSources.push(src);
+  scheduleAmbienceEvent(ambienceTrainPass,26000,22000);
+}
+/* Sonnerie de quai très rare, à peine audible */
+function ambienceQuaiChime(){
+  if(!soundOn || !stationAmbienceRunning) return;
+  var c=ac(); if(!c || !stationAmbienceGain) return;
+  [880,1109].forEach(function(f,i){
+    var o=c.createOscillator(), g=c.createGain();
+    o.type='sine'; o.frequency.value=f;
+    var t=c.currentTime+i*0.22;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.012,t+0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.55);
+    o.connect(g); g.connect(stationAmbienceGain);
+    o.start(t); o.stop(t+0.6);
+  });
+  scheduleAmbienceEvent(ambienceQuaiChime,48000,30000);
+}
+function scheduleAmbienceEvent(fn,base,spread){
+  var delay=base+Math.random()*(spread||0);
+  var id=setTimeout(fn,delay);
+  stationAmbienceTimeouts.push(id);
+}
+function startStationAmbience(){
+  if(stationAmbienceRunning || !soundOn) return;
+  var c=ac(); if(!c) return;
+  if(c.state==='suspended'){ c.resume(); }
+  stationAmbienceRunning=true;
+  stationAmbienceGain=c.createGain();
+  stationAmbienceGain.gain.value=0.0001;
+  stationAmbienceGain.connect(c.destination);
+  var buf=makeLoopNoiseBuffer(c,5);
+  /* souffle d'air du hall */
+  ambienceLayer(c,buf,900,180,0.016,1);
+  /* grondement grave et lointain */
+  ambienceLayer(c,buf,150,35,0.022,0.72);
+  /* vibration très douce des rails */
+  ambienceLayer(c,buf,320,90,0.010,0.5);
+  /* montée en volume progressive pour éviter tout démarrage brusque */
+  var t=c.currentTime;
+  stationAmbienceGain.gain.setValueAtTime(0.0001,t);
+  stationAmbienceGain.gain.linearRampToValueAtTime(0.55,t+3.5);
+  scheduleAmbienceEvent(ambienceTrainPass,14000,12000);
+  scheduleAmbienceEvent(ambienceQuaiChime,32000,25000);
+}
+function stopStationAmbience(){
+  stationAmbienceRunning=false;
+
+  stationAmbienceTimeouts.forEach(function(id){
+    clearTimeout(id);
+  });
+  stationAmbienceTimeouts=[];
+
+  var oldSources=stationAmbienceSources.slice();
+  var oldGain=stationAmbienceGain;
+  var c=audioCtx;
+
+  stationAmbienceSources=[];
+  stationAmbienceGain=null;
+
+  if(oldGain&&c){
+    var t=c.currentTime;
+
+    try{
+      oldGain.gain.cancelScheduledValues(t);
+
+      oldGain.gain.setValueAtTime(
+        Math.max(oldGain.gain.value,0.0001),
+        t
+      );
+
+      oldGain.gain.linearRampToValueAtTime(
+        0.0001,
+        t+0.6
+      );
+    }catch(error){}
+  }
+
+  oldSources.forEach(function(source){
+    try{
+      source.stop(c ? c.currentTime+0.7 : 0);
+    }catch(error){}
+  });
+
+  setTimeout(function(){
+    try{
+      if(oldGain){
+        oldGain.disconnect();
+      }
+    }catch(error){}
+  },800);
+}
+
+window.toggleSound=function(){
+  soundOn=!soundOn;
+  var b=$('sound-toggle');
+  if(b){
+    b.innerHTML = soundOn ? '\uD83D\uDD0A' : '\uD83D\uDD07';
+    b.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+    b.setAttribute('aria-label', soundOn ? 'Couper les sons' : 'Activer les sons');
+    b.setAttribute('title', soundOn ? 'Son activ\u00e9' : 'Son coup\u00e9');
+  }
+  if(soundOn){
+    var c=ac(); if(c && c.state==='suspended'){ c.resume(); }
+    sndHint();
+    if(missionStarted){ startStationAmbience(); }
+  } else {
+    stopStationAmbience();
+  }
+};
+
+
+/* =====================================================================
+   CONFIGURATION — SEULE CETTE SECTION CHANGE CHAQUE JOUR
+   Remplacer missionTitle / missionSub / plans par le contenu du jour.
+   Chaque plan : {type:'qcm'|'numeric', title, sub, figure(optionnel, HTML SVG),
+   question, options (qcm) ou answer (numeric), hint, correction}
+   ===================================================================== */
+var CONFIG={
+  missionTitle:"Mesurer les contours de la nouvelle gare",
+  missionSub:"Semaine 8 — Jour 1",
+  introTitle:"Je relève le défi",
+  introText:"Dans le grand atelier des ing\u00e9nieurs du chemin de fer, une nouvelle gare est en cours de construction. Avant de fabriquer les barri\u00e8res de s\u00e9curit\u00e9, les cl\u00f4tures et les bordures des quais, les ing\u00e9nieurs doivent mesurer tout le contour des diff\u00e9rentes structures dessin\u00e9es sur les plans. Les plans sont pr\u00eats, mais aucune mesure n\u2019a encore \u00e9t\u00e9 r\u00e9alis\u00e9e.",
+  introNote:"\uD83D\uDCCB Aide les ing\u00e9nieurs \u00e0 calculer correctement le p\u00e9rim\u00e8tre de chaque structure avant le lancement des travaux. Le chronom\u00e8tre est informatif et n\u2019entra\u00eene aucune p\u00e9nalit\u00e9.",
+  briefText:"Calcule le p\u00e9rim\u00e8tre de chaque structure avant validation finale.",
+  finaleTitle:"Mission accomplie\u00a0!",
+  finaleText:"Gr\u00e2ce \u00e0 tes calculs, les ing\u00e9nieurs connaissent d\u00e9sormais la longueur exacte des barri\u00e8res, des cl\u00f4tures et des bordures n\u00e9cessaires \u00e0 la construction de la nouvelle gare. Tu as correctement calcul\u00e9 le p\u00e9rim\u00e8tre de plusieurs figures.",
+  plans:[
+    /* ---- MISSION 1 — Barrière carrée ---- */
+    {type:'qcm', title:'Plan 1 — Barri\u00e8re carr\u00e9e', sub:'Calculer un p\u00e9rim\u00e8tre',
+     figure:'<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" style="max-width:220px" role="img" aria-labelledby="f1-t f1-d"><title id="f1-t">Barri\u00e8re carr\u00e9e de 8 m de c\u00f4t\u00e9</title><desc id="f1-d">Un carr\u00e9 dont chaque c\u00f4t\u00e9 mesure 8 m\u00e8tres.</desc><rect x="40" y="40" width="140" height="140" fill="#EAF3FC" stroke="#1E5F9E" stroke-width="3"/><text x="110" y="32" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E">8 m</text><text x="110" y="196" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E">8 m</text><text x="24" y="114" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E" transform="rotate(-90 24 114)">8 m</text><text x="196" y="114" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E" transform="rotate(90 196 114)">8 m</text></svg>',
+     question:'Les ing\u00e9nieurs doivent installer une barri\u00e8re tout autour de cette structure carr\u00e9e. Quel sera le p\u00e9rim\u00e8tre&nbsp;?',
+     options:[{t:'24 m',ok:false},{t:'32 m',ok:true},{t:'40 m',ok:false},{t:'64 m',ok:false}],
+     hint:'Un carr\u00e9 poss\u00e8de quatre c\u00f4t\u00e9s identiques.',
+     correction:'D\u00e9marche\u00a0: un carr\u00e9 a 4 c\u00f4t\u00e9s de m\u00eame longueur.<br>Calcul\u00a0: P = 8 + 8 + 8 + 8<br>R\u00e9ponse\u00a0: P = <b>32 m</b>.'},
+    /* ---- MISSION 2 — Quai rectangulaire ---- */
+    {type:'qcm', title:'Plan 2 — Quai rectangulaire', sub:'Calculer un p\u00e9rim\u00e8tre',
+     figure:'<svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" style="max-width:300px" role="img" aria-labelledby="f2-t f2-d"><title id="f2-t">Quai rectangulaire de 15 m sur 6 m</title><desc id="f2-d">Un rectangle de longueur 15 m\u00e8tres et de largeur 6 m\u00e8tres.</desc><rect x="40" y="40" width="220" height="80" fill="#EAF3FC" stroke="#1E5F9E" stroke-width="3"/><text x="150" y="30" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E">15 m</text><text x="150" y="140" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E">15 m</text><text x="24" y="84" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E" transform="rotate(-90 24 84)">6 m</text><text x="276" y="84" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E" transform="rotate(90 276 84)">6 m</text></svg>',
+     question:'Quelle longueur de bordure faudra-t-il installer tout autour de ce quai&nbsp;?',
+     options:[{t:'21 m',ok:false},{t:'42 m',ok:true},{t:'90 m',ok:false},{t:'30 m',ok:false}],
+     hint:'Additionne les quatre c\u00f4t\u00e9s du rectangle.',
+     correction:'D\u00e9marche\u00a0: un rectangle a deux longueurs et deux largeurs.<br>Calcul\u00a0: 15 + 6 + 15 + 6<br>R\u00e9ponse\u00a0: = <b>42 m</b>.'},
+    /* ---- MISSION 3 — Support triangulaire ---- */
+    {type:'qcm', title:'Plan 3 — Support triangulaire', sub:'Calculer un p\u00e9rim\u00e8tre',
+     figure:'<svg viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg" style="max-width:260px" role="img" aria-labelledby="f3-t f3-d"><title id="f3-t">Support triangulaire de c\u00f4t\u00e9s 12 m, 10 m et 9 m</title><desc id="f3-d">Un triangle dont les c\u00f4t\u00e9s mesurent 12 m\u00e8tres, 10 m\u00e8tres et 9 m\u00e8tres.</desc><polygon points="50,180 218,180 145,77.2" fill="#EAF3FC" stroke="#1E5F9E" stroke-width="3"/><text x="134" y="200" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E">12 m</text><text x="80" y="140" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E">10 m</text><text x="196" y="140" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E">9 m</text></svg>',
+     question:'Quelle longueur de profil\u00e9 m\u00e9tallique faut-il pr\u00e9voir pour border ce support triangulaire&nbsp;?',
+     options:[{t:'31 m',ok:true},{t:'21 m',ok:false},{t:'22 m',ok:false},{t:'120 m',ok:false}],
+     hint:'Le p\u00e9rim\u00e8tre d\u2019un triangle est la somme de ses trois c\u00f4t\u00e9s.',
+     correction:'D\u00e9marche\u00a0: on additionne les trois c\u00f4t\u00e9s du triangle.<br>Calcul\u00a0: 12 + 10 + 9<br>R\u00e9ponse\u00a0: = <b>31 m</b>.'},
+    /* ---- MISSION 4 — Zone technique (pentagone) ---- */
+    {type:'qcm', title:'Plan 4 — Zone technique', sub:'Calculer un p\u00e9rim\u00e8tre',
+     figure:'<svg viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" style="max-width:280px" role="img" aria-labelledby="f4-t f4-d"><title id="f4-t">Zone technique \u00e0 cinq c\u00f4t\u00e9s</title><desc id="f4-d">Un polygone \u00e0 cinq c\u00f4t\u00e9s mesurant successivement 5 m, 8 m, 7 m, 6 m et 4 m\u00e8tres.</desc><polygon points="150,50 230,90 210,180 120,190 70,110" fill="#EAF3FC" stroke="#1E5F9E" stroke-width="3"/><text x="199.6" y="54.8" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">5 m</text><text x="237.7" y="138" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">8 m</text><text x="167.6" y="202.8" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">7 m</text><text x="78.4" y="157" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">6 m</text><text x="97" y="67.6" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">4 m</text></svg>',
+     question:'Quelle longueur de cl\u00f4ture est n\u00e9cessaire pour entourer cette zone technique&nbsp;?',
+     options:[{t:'25 m',ok:false},{t:'30 m',ok:true},{t:'35 m',ok:false},{t:'56 m',ok:false}],
+     hint:'Additionne chaque c\u00f4t\u00e9 une seule fois.',
+     correction:'D\u00e9marche\u00a0: on additionne les cinq c\u00f4t\u00e9s du polygone.<br>Calcul\u00a0: 5 + 8 + 7 + 6 + 4<br>R\u00e9ponse\u00a0: = <b>30 m</b>.'},
+    /* ---- MISSION 5 — Plan final (hexagone) ---- */
+    {type:'qcm', title:'Plan 5 — Plan final', sub:'Calculer un p\u00e9rim\u00e8tre',
+     figure:'<svg viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" style="max-width:280px" role="img" aria-labelledby="f5-t f5-d"><title id="f5-t">Contour d\u2019un b\u00e2timent technique \u00e0 six c\u00f4t\u00e9s</title><desc id="f5-d">Un polygone \u00e0 six c\u00f4t\u00e9s mesurant successivement 9 m, 4 m, 8 m, 5 m, 6 m et 10 m\u00e8tres.</desc><polygon points="150,40 220,60 250,140 190,200 110,190 60,110" fill="#EAF3FC" stroke="#1E5F9E" stroke-width="3"/><text x="190.1" y="32.7" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">9 m</text><text x="252.1" y="94.4" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">4 m</text><text x="233.9" y="181.4" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">8 m</text><text x="146.7" y="212.7" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">5 m</text><text x="68" y="155.8" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">6 m</text><text x="91.1" y="63.5" text-anchor="middle" font-family="Arial" font-weight="700" font-size="14" fill="#1E5F9E">10 m</text></svg>',
+     question:'Les ing\u00e9nieurs veulent poser une bordure tout autour de ce b\u00e2timent technique. Quel est le p\u00e9rim\u00e8tre&nbsp;?',
+     options:[{t:'36 m',ok:false},{t:'42 m',ok:true},{t:'48 m',ok:false},{t:'54 m',ok:false}],
+     hint:'Suis le contour sans oublier aucun c\u00f4t\u00e9.',
+     correction:'D\u00e9marche\u00a0: on additionne les six c\u00f4t\u00e9s du polygone.<br>Calcul\u00a0: 9 + 4 + 8 + 5 + 6 + 10<br>R\u00e9ponse\u00a0: = <b>42 m</b>.'}
+  ]
+};
+
+/* =====================================================================
+   ÉTAT GLOBAL
+   ===================================================================== */
+var N=CONFIG.plans.length;
+var solved=[]; for(var _i=0;_i<N;_i++) solved.push(false);
+var attempts=[]; for(var _j=0;_j<N;_j++) attempts.push(0);
+var correctionShown=[]; for(var _k=0;_k<N;_k++) correctionShown.push(false);
+var active=0;
+var validatedCount=0, autonomousCount=0;
+var missionStarted=false;
+var transitionRunning=false;
+
+/* =====================================================================
+   CHRONOMÈTRE — démarrage/pause manuels + pause automatique à la visibilité
+   ===================================================================== */
+var totalSec=0, timerInterval=null, timerRunning=false;
+function fmtTime(s){ var m=Math.floor(s/60), r=s%60; return (m<10?'0':'')+m+':'+(r<10?'0':'')+r; }
+function timerTick(){ totalSec++; $('led-display').textContent=fmtTime(totalSec); }
+window.timerStart=function(){
+  if(timerRunning) return;
+  timerRunning=true;
+  clearInterval(timerInterval);
+  timerInterval=setInterval(timerTick,1000);
+};
+window.timerPause=function(){
+  timerRunning=false;
+  clearInterval(timerInterval); timerInterval=null;
+};
+window.timerReset=function(){
+  window.timerPause();
+  totalSec=0;
+  $('led-display').textContent='00:00';
+};
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){
+    clearInterval(timerInterval); timerInterval=null;
+    stopStationAmbience();
+  } else {
+    if(timerRunning){ clearInterval(timerInterval); timerInterval=setInterval(timerTick,1000); }
+    if(soundOn && missionStarted && !$('finale-overlay').classList.contains('show')){ startStationAmbience(); }
+  }
+});
+window.addEventListener('blur',function(){ clearInterval(timerInterval); timerInterval=null; });
+window.addEventListener('focus',function(){ if(!document.hidden && timerRunning){ clearInterval(timerInterval); timerInterval=setInterval(timerTick,1000); } });
+
+/* =====================================================================
+   PANNEAUX (repli mobile)
+   ===================================================================== */
+window.togglePanel=function(id){
+  var panel=$(id);
+  var collapsed=panel.classList.toggle('collapsed');
+  var button=panel.querySelector('.panel-toggle');
+  if(button){
+    button.setAttribute('aria-expanded',collapsed?'false':'true');
+  }
+};
+
+/* =====================================================================
+   BOÎTE À OUTILS (indices / corrections)
+   ===================================================================== */
+function toolboxReset(){
+  $('toolbox-empty').style.display='block';
+  var h=$('toolbox-hint'); h.classList.remove('show'); h.innerHTML='';
+  var c=$('toolbox-corr'); c.classList.remove('show'); c.innerHTML='';
+}
+function toolboxShowHint(text){
+  $('toolbox-empty').style.display='none';
+  var h=$('toolbox-hint');
+  h.innerHTML='<b>\uD83D\uDCA1 Indice</b><br>'+text;
+  h.classList.add('show');
+}
+function toolboxShowCorrection(text){
+  $('toolbox-empty').style.display='none';
+  var c=$('toolbox-corr');
+  c.innerHTML='<b>\u2705 Correction</b><br>'+text;
+  c.classList.add('show');
+}
+
+/* =====================================================================
+   LISTE DES PLANS (panneau gauche)
+   ===================================================================== */
+function renderPlanList(){
+  var host=$('plan-list'); host.innerHTML='';
+  CONFIG.plans.forEach(function(p,i){
+    var div=document.createElement('div');
+    div.className='plan-item'+(i===active?' current':'')+(solved[i]?' done':'');
+    div.innerHTML='<span class="dot" aria-hidden="true"></span><span>Plan '+(i+1)+'/'+N+'</span>';
+    host.appendChild(div);
+  });
+}
+function updateRail(){
+  var pct=Math.round((validatedCount/N)*100);
+  $('rail-pct').textContent=pct+'\u00a0%';
+  var fill=$('rail-fill');
+  fill.setAttribute('x2', (pct*10)); // viewBox width 1000
+  var ties=$('rail-ties'); ties.innerHTML='';
+  for(var i=0;i<N;i++){
+    var x=40+i*((1000-80)/(N-1||1));
+    var on = i < validatedCount;
+    ties.innerHTML+='<line x1="'+x+'" y1="6" x2="'+x+'" y2="28" stroke="'+(on?'#FF6A1A':'#4B545E')+'" stroke-width="5"/>';
+  }
+  var progress=$('rail-progress');
+  if(progress){
+    progress.setAttribute('aria-valuemax',String(N));
+    progress.setAttribute('aria-valuenow',String(validatedCount));
+    progress.setAttribute(
+      'aria-label',
+      validatedCount+' plan'+(validatedCount>1?'s':'')+
+      ' valid\u00e9'+(validatedCount>1?'s':'')+' sur '+N
+    );
+  }
+}
+
+/* =====================================================================
+   RENDU D'UN PLAN
+   ===================================================================== */
+function planHTML(i){
+  var p=CONFIG.plans[i];
+  var html='<div class="plan-card" id="plan-card-'+i+'">'
+    +'<div class="plan-card-head"><div class="plan-card-num">'+(i+1)+'</div>'
+    +'<div><div class="plan-card-title">'+p.title+'</div><div class="plan-card-sub">'+p.sub+'</div></div></div>'
+    +'<div class="plan-card-body">';
+  if(p.figure){ html+='<div class="plan-figure">'+p.figure+'</div>'; }
+  html+='<div class="plan-question">'+p.question+'</div>';
+  if(p.type==='qcm'){
+    html+='<div class="opt-list" id="opt-list-'+i+'">'+p.options.map(function(o,oi){
+      return '<button type="button" class="opt-btn" data-i="'+oi+'" data-ok="'+(!!o.ok)+'" onclick="validatePlan('+i+',this)">'+o.t+'</button>';
+    }).join('')+'</div>';
+  } else if(p.type==='numeric'){
+    html+='<div class="num-row"><input type="text" inputmode="decimal" class="num-input" id="num-input-'+i+'" placeholder="?" aria-label="R\u00e9ponse num\u00e9rique"/>'
+      +(p.unit?'<span style="color:#4B545E;font-weight:700;">'+p.unit+'</span>':'')
+      +'<button type="button" class="btn btn-validate" id="num-btn-'+i+'" onclick="validatePlan('+i+',null)">\u2705 V\u00e9rifier</button></div>';
+  }
+  html+='<div class="feedback-box" id="feedback-'+i+'" role="status" aria-live="polite"></div>';
+  html+='</div></div>';
+  return html;
+}
+function showActivePlan(){
+  $('plan-host').innerHTML=planHTML(active);
+  toolboxReset();
+  renderPlanList();
+  var p=CONFIG.plans[active];
+  $('mission-dynamic-sub').textContent=CONFIG.missionSub+' \u00b7 Plan '+(active+1)+'/'+N;
+  if(p.type==='numeric'){
+    var inp=$('num-input-'+active);
+    inp.addEventListener('keydown',function(evt){ if(evt.key==='Enter'){ evt.preventDefault(); window.validatePlan(active,null); } });
+  }
+}
+
+/* =====================================================================
+   VALIDATION STRICTE D'UN NOMBRE
+   ===================================================================== */
+function parseStrictNumber(value){
+  if(value===undefined||value===null) return NaN;
+  var cleaned=String(value).trim().replace(/\u00A0/g,'').replace(/\s+/g,'').replace(/,/g,'.');
+  if(cleaned==='' || !/^-?\d+(?:\.\d+)?$/.test(cleaned)) return NaN;
+  var n=Number(cleaned);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+/* =====================================================================
+   VALIDATION D'UN PLAN (QCM ou numérique)
+   ===================================================================== */
+window.validatePlan=function(i,btn){
+  if(solved[i]||transitionRunning) return;
+  var p=CONFIG.plans[i];
+  var isCorrect=false;
+  var fb=$('feedback-'+i);
+
+  if(p.type==='qcm'){
+    if(!btn) return;
+    isCorrect = btn.getAttribute('data-ok')==='true';
+    document.querySelectorAll('#opt-list-'+i+' .opt-btn').forEach(function(b){ b.disabled=true; });
+    btn.classList.add(isCorrect?'correct':'wrong');
+  } else if(p.type==='numeric'){
+    var input=$('num-input-'+i);
+    var val=parseStrictNumber(input.value);
+    if(Number.isNaN(val)){
+      fb.className='feedback-box show ko';
+      fb.innerHTML='\u26A0\uFE0F Saisis uniquement un nombre.';
+      input.focus();
+      return;
+    }
+    isCorrect = val===p.answer;
+    input.disabled=true; $('num-btn-'+i).disabled=true;
+    input.classList.add(isCorrect?'ok':'ko');
+  }
+
+  attempts[i]++;
+  var card=$('plan-card-'+i);
+
+  if(isCorrect){
+    fb.className='feedback-box show ok';
+    fb.innerHTML='\u2705 Excellent&nbsp;! Les mesures de ce plan sont maintenant valid\u00e9es.';
+    sndValidate();
+    if(!correctionShown[i]) autonomousCount++;
+    validatedCount++;
+    solved[i]=true;
+    updateRail(); renderPlanList();
+    showNextButton(i);
+  } else {
+    fb.className='feedback-box show ko';
+    fb.innerHTML = (i===3||i===4)
+      ? '\u274C Ce calcul n\u2019est pas correct. Suis le contour du plan et additionne chaque c\u00f4t\u00e9 une seule fois.'
+      : '\u274C Ce calcul n\u2019est pas correct. Observe bien le contour de la figure et la longueur de chaque c\u00f4t\u00e9.';
+    if(card){ card.classList.add('shake'); setTimeout(function(){card.classList.remove('shake');},350); }
+    if(attempts[i]>=2){
+      correctionShown[i]=true;
+      sndCorrection();
+      toolboxShowCorrection(p.correction);
+      fb.className='feedback-box show ko';
+      fb.innerHTML=p.correction;
+      if(p.type==='qcm'){
+        revealCorrectQCM(i);
+      } else {
+        $('num-input-'+i).value=p.answer;
+        $('num-input-'+i).disabled=true; $('num-btn-'+i).disabled=true;
+      }
+      solved[i]=true;
+      validatedCount++;
+      updateRail(); renderPlanList();
+      showNextButton(i);
+    } else {
+      sndError();
+      toolboxShowHint(p.hint);
+      if(p.type==='qcm'){
+        document.querySelectorAll('#opt-list-'+i+' .opt-btn').forEach(function(b){ b.disabled=false; b.classList.remove('wrong'); });
+      } else {
+        $('num-input-'+i).disabled=false; $('num-btn-'+i).disabled=false;
+        $('num-input-'+i).classList.remove('ko');
+      }
+    }
+  }
+};
+function revealCorrectQCM(i){
+  document.querySelectorAll('#opt-list-'+i+' .opt-btn').forEach(function(button){
+    button.disabled=true;
+    button.classList.remove('wrong','selected');
+    if(button.getAttribute('data-ok')==='true'){
+      button.classList.add('correct');
+    }
+  });
+}
+function showNextButton(i){
+  var body=$('plan-card-'+i).querySelector('.plan-card-body');
+  if($('next-plan-btn')) return;
+  var isLast = i>=N-1;
+  var wrap=document.createElement('div');
+  wrap.className='btn-row';
+  var btn=document.createElement('button');
+  btn.type='button'; btn.className='btn btn-primary'; btn.id='next-plan-btn';
+  btn.textContent = isLast ? 'Terminer la mission \u2192' : 'Plan suivant \u2192';
+  btn.addEventListener('click',function(){
+    if(btn.disabled) return;
+    btn.disabled=true;
+    if(isLast){ finishMission(); }
+    else { sndNextPlan(); active++; showActivePlan(); }
+  });
+  wrap.appendChild(btn);
+  body.appendChild(wrap);
+}
+
+/* =====================================================================
+   ÉCRANS — introduction / fin / redémarrage
+   ===================================================================== */
+function resetMissionState(){
+  solved=[];
+  attempts=[];
+  correctionShown=[];
+
+  for(var i=0;i<N;i++){
+    solved.push(false);
+    attempts.push(0);
+    correctionShown.push(false);
+  }
+
+  active=0;
+  validatedCount=0;
+  autonomousCount=0;
+  transitionRunning=false;
+}
+window.beginMission=function(){
+  missionStarted=true;
+  var c=ac(); if(c && c.state==='suspended'){ c.resume(); }
+  $('intro-screen').style.display='none';
+  $('game-area').style.display='block';
+  $('mission-dynamic-title').textContent=CONFIG.missionTitle;
+  $('mission-brief-text').innerHTML=CONFIG.briefText;
+  active=0; showActivePlan(); updateRail();
+  window.timerStart();
+  sndMissionStart();
+  startStationAmbience();
+};
+function finishMission(){
+  window.timerPause();
+  var rail=$('rail-svg');
+  if(rail && !$('loco-group')){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('id','loco-group');
+    g.setAttribute('transform','translate(-60,0)');
+    g.style.transition='transform 1.6s ease-in-out';
+    g.innerHTML='<rect x="0" y="4" width="52" height="20" rx="4" fill="#FF6A1A" stroke="#2A1200" stroke-width="1.5"/>'
+      +'<rect x="6" y="-6" width="18" height="12" rx="2" fill="#FF6A1A" stroke="#2A1200" stroke-width="1.5"/>'
+      +'<circle cx="12" cy="26" r="5" fill="#1B1F24"/><circle cx="30" cy="26" r="5" fill="#1B1F24"/><circle cx="44" cy="26" r="5" fill="#1B1F24"/>';
+    rail.appendChild(g);
+    requestAnimationFrame(function(){ g.setAttribute('transform','translate(1010,0)'); });
+    sndTile(0); sndTile(0.5); sndTile(1.0);
+  }
+  setTimeout(function(){
+    $('finale-time').textContent=fmtTime(totalSec);
+    $('finale-score').textContent=validatedCount+'/'+N;
+    $('finale-auto').textContent=autonomousCount+'/'+N;
+    $('finale-title').textContent=CONFIG.finaleTitle;
+    $('finale-text').textContent=CONFIG.finaleText;
+    $('finale-overlay').classList.add('show');
+    stopStationAmbience();
+    sndFinale();
+  }, rail ? 1700 : 0);
+}
+window.restartMission=function(){
+  $('finale-overlay').classList.remove('show');
+
+  var loco=$('loco-group');
+  if(loco){
+    loco.remove();
+  }
+
+  resetMissionState();
+
+  window.timerReset();
+  window.timerStart();
+
+  showActivePlan();
+  updateRail();
+
+  if(soundOn){
+    startStationAmbience();
+  }
+};
+window.returnToIntro=function(){
+  $('finale-overlay').classList.remove('show');
+  $('game-area').style.display='none';
+  $('intro-screen').style.display='block';
+
+  window.timerPause();
+  window.timerReset();
+  stopStationAmbience();
+
+  missionStarted=false;
+
+  resetMissionState();
+  updateRail();
+
+  var loco=$('loco-group');
+  if(loco){
+    loco.remove();
+  }
+
+  $('mission-dynamic-title').textContent='Plan technique';
+  $('mission-dynamic-sub').textContent='Inspection en cours';
+};
+
+/* =====================================================================
+   INITIALISATION
+   ===================================================================== */
+document.addEventListener('DOMContentLoaded',function(){
+  $('intro-title').textContent=CONFIG.introTitle;
+  $('intro-text').innerHTML=CONFIG.introText;
+  $('intro-note').innerHTML=CONFIG.introNote;
+});
+})();
+</script>
+</body>
+</html>
