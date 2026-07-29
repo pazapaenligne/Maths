@@ -2,829 +2,1141 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Pazapa · 5e · Semaine 8 Jour 3 · Je relève le défi — Effectifs, fréquences et moyenne</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths — 6e — Semaine 8 — Jour 3 — Je relève le défi — L'Atelier des ingénieurs du chemin de fer</title>
 <style>
-/* ============================================================
-   PAZAPA — Semaine 8 — Jour 3 : centre de communication martien
-   (identité propre au Jour 3, distincte du décor extérieur du Jour 1
-   et du hangar industriel du Jour 2, même système graphique commun)
-   ============================================================ */
+/* =====================================================================
+   VARIABLES — palette industrielle (à ne pas confondre avec les
+   semaines précédentes : gris anthracite / acier / bleu technique /
+   orange sécurité / jaune chantier)
+   ===================================================================== */
 :root{
-  --day-color:#34C7E8; --day-dark:#0E5C73; --day-light:#E4F8FC; --day-border:#9BE0F0;
-  --graphite:#141B2E; --graphite-dark:#0A0F1C;
-  --metal:#4A5670; --metal-light:#8B96AC;
-  --panel:#1E2A45; --panel2:#283656;
-  --signal-violet:#8B6FE8; --signal-violet-light:#EDE7FB;
-  --white:#F7FAFC; --ink:#182028; --muted:#67727D;
-  --success:#3FA66B; --success-bg:#E1F5E9;
-  --warn:#D9772F; --warn-bg:#FCE9D7;
-  --radius:14px; --glow-cyan-strong:rgba(52,199,232,.4);
-
-  /* Alias techniques hérités des jours précédents (noms de variables uniquement) : ils pointent
-     tous vers la palette "communication" ci-dessus, aucune couleur martienne ou industrielle réintroduite. */
-  --mars-red:var(--day-color); --mars-red-dark:var(--day-dark);
-  --copper:var(--signal-violet); --copper-light:var(--signal-violet-light);
-  --sand:var(--metal-light); --sand-light:var(--day-light);
-  --metal-dark:var(--graphite-dark);
-  --cyan:var(--day-color); --cyan-dark:var(--day-dark);
-  --info:var(--day-color); --info-bg:var(--day-light);
-  --glow-cyan:var(--glow-cyan-strong); --glow-copper:rgba(139,111,232,.34);
+  --anthracite:#1B1F24; --anthracite-2:#242A31; --anthracite-3:#2E353D;
+  --steel:#8A95A1; --steel-light:#C7CED6; --steel-dark:#4B545E;
+  --blue-tech:#1E5F9E; --blue-tech-light:#4A90D9; --blue-tech-pale:#EAF3FC;
+  --orange:#FF6A1A; --orange-dark:#CC4E00;
+  --yellow:#FFCC00; --yellow-dark:#B38600;
+  --white:#F7F9FB; --paper:#FBFCFE;
+  --green:#2E9E4F; --green-light:#E4F7EA;
+  --red:#D64545; --red-light:#FCE8E8;
+  --radius:10px; --radius-lg:16px;
+  --font:Arial,Helvetica,"Segoe UI",sans-serif;
+  --font-mono:"Courier New",monospace;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-button,input{font:inherit;color:inherit;}
-button{background:none;border:none;cursor:pointer;appearance:none;-webkit-appearance:none;}
-html{scroll-behavior:auto;font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
 body{
-  min-height:100vh;font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:var(--ink);
-  overflow-x:hidden;position:relative;padding-bottom:3rem;
-  background:linear-gradient(180deg,#070a14 0%,#0d1424 28%,#141b2e 55%,#1c2540 78%,#243055 100%);
+  font-family:var(--font); color:var(--white); background:var(--anthracite);
+  min-height:100vh; overflow-x:hidden; line-height:1.55;
 }
-@media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{ scroll-behavior:auto !important; transition-duration:.001ms !important; transition-delay:0ms !important; }
-  .dust,.stardust,.status-light,.signal-ring{ animation:none !important; display:none !important; }
-  .card,.feedback,.pulse-ok{ animation:none !important; }
+button{font-family:inherit;}
+a{color:inherit;}
+
+/* =====================================================================
+   FOND D'ATELIER — décor discret (poutres, verrière, rails, établis)
+   ===================================================================== */
+.workshop-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(74,144,217,.10), transparent 55%),
+    linear-gradient(180deg,#14171B 0%,#1B1F24 40%,#171B1F 100%);
 }
+.workshop-bg svg{position:absolute;inset:0;width:100%;height:100%;}
+.grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.035;
+  background-image:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px);}
 
-.hangar-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-.hangar-scene svg{position:absolute;bottom:0;left:0;width:100%;height:52vh;min-height:280px;}
-.star{position:fixed;border-radius:50%;background:#fff;opacity:.7;pointer-events:none;z-index:0;}
-.star.st1{width:2px;height:2px;top:8%;left:15%;}
-.star.st2{width:2px;height:2px;top:14%;left:70%;}
-.star.st3{width:3px;height:3px;top:6%;left:45%;}
-.star.st4{width:2px;height:2px;top:20%;left:85%;}
-.star.st5{width:2px;height:2px;top:5%;left:60%;}
-.status-light{position:fixed;border-radius:50%;pointer-events:none;z-index:0;animation:statusBlink 2.6s ease-in-out infinite;}
-.status-light.s1{width:11px;height:11px;background:var(--day-color);top:16%;left:8%;box-shadow:0 0 12px var(--day-color);}
-.status-light.s2{width:9px;height:9px;background:var(--signal-violet);top:22%;right:10%;box-shadow:0 0 10px var(--signal-violet);animation-delay:.8s;}
-@keyframes statusBlink{0%,100%{opacity:.4;}50%{opacity:1;}}
-.dust{position:fixed;border-radius:50%;border:1.5px solid rgba(52,199,232,.35);pointer-events:none;z-index:0;}
-.dust.d1{width:10px;height:10px;top:30%;left:20%;animation:signalPulse 4.5s ease-out infinite;}
-.dust.d2{width:10px;height:10px;top:34%;left:78%;animation:signalPulse 5.5s ease-out infinite 1.5s;}
-.dust.d3{width:10px;height:10px;top:26%;left:50%;animation:signalPulse 5s ease-out infinite 3s;}
-@keyframes signalPulse{0%{transform:scale(.3);opacity:.7;}100%{transform:scale(3.2);opacity:0;}}
+/* =====================================================================
+   BANDEAU SUPÉRIEUR
+   ===================================================================== */
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+  gap:.7rem;padding:.5rem .8rem;background:linear-gradient(180deg,#2A3138,#1D2126);
+  border-bottom:3px solid var(--orange);box-shadow:0 6px 18px rgba(0,0,0,.45);flex-wrap:wrap;}
+.topbar-brand{display:flex;align-items:center;gap:.65rem;}
+.topbar-ico{font-size:1.7rem;filter:drop-shadow(0 0 6px rgba(255,106,26,.5));}
+.topbar-brand-text{display:flex;flex-direction:column;line-height:1.15;}
+.topbar-brand-text b{font-size:.98rem;letter-spacing:.02em;color:var(--white);}
+.topbar-brand-text span{font-size:.68rem;color:var(--steel-light);text-transform:uppercase;letter-spacing:.12em;}
+.topbar-title{flex:1;text-align:center;min-width:180px;}
+.topbar-title b{font-size:clamp(.95rem,2.6vw,1.25rem);color:var(--white);letter-spacing:.02em;}
+.topbar-title span{display:block;font-size:.68rem;color:var(--orange);text-transform:uppercase;letter-spacing:.14em;margin-top:.15rem;}
+.topbar-timer{display:flex;align-items:center;gap:.5rem;background:#0E1013;border:1.5px solid var(--steel-dark);
+  border-radius:8px;padding:.35rem .6rem;box-shadow:inset 0 0 10px rgba(0,0,0,.6);}
+.led-display{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:#FF8A3D;
+  text-shadow:0 0 8px rgba(255,138,61,.75);letter-spacing:.06em;min-width:64px;text-align:center;}
+.timer-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--steel-dark);background:#20252B;
+  color:var(--steel-light);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;
+  transition:transform .12s,background .15s;}
+.timer-btn:hover{background:#2C333B;}
+.timer-btn:active{transform:scale(.92);}
+.sound-btn[aria-pressed="false"]{opacity:.45;}
 
-.hud{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:1rem;
-  padding:.75rem 1.3rem;background:rgba(10,15,28,.72);backdrop-filter:blur(8px);border-bottom:1px solid rgba(52,199,232,.25);flex-wrap:wrap;}
-.hud-brand{display:flex;flex-direction:column;line-height:1.3;}
-.hud-brand .logo{font-weight:800;font-size:1rem;color:var(--white);letter-spacing:.04em;}
-.hud-brand .meta{font-size:.72rem;color:var(--day-border);opacity:.9;}
-.hud-right{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
-.hud-timer{font-variant-numeric:tabular-nums;font-size:.9rem;font-weight:700;color:var(--white);
-  background:rgba(0,0,0,.28);border:1.5px solid var(--day-color);border-radius:10px;padding:.4rem .8rem;min-width:4.4em;text-align:center;
-  box-shadow:0 0 10px var(--glow-cyan) inset;}
-.btn-sound{background:rgba(0,0,0,.28);border:1.5px solid rgba(255,255,255,.25);color:var(--white);border-radius:10px;
-  padding:.4rem .7rem;font-size:.9rem;cursor:pointer;min-height:2.6rem;transition:border-color .2s;}
-.btn-sound:hover{border-color:var(--day-color);}
-.btn-sound[aria-pressed="true"]{border-color:var(--day-color);}
-:focus-visible{outline:3px solid var(--day-color);outline-offset:2px;}
-
-.stage{max-width:760px;margin:0 auto;padding:1.6rem 1.2rem 0;position:relative;z-index:1;}
-
-.card{background:rgba(247,252,255,.96);border-radius:var(--radius);box-shadow:0 14px 40px rgba(4,6,14,.5), 0 0 0 1px rgba(255,255,255,.5) inset;
-  padding:1.6rem 1.7rem;position:relative;overflow:hidden;animation:cardIn .5s cubic-bezier(.2,.9,.3,1) both;}
-@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--day-color),var(--signal-violet),var(--metal-light));}
-
-.intro-card{text-align:center;max-width:560px;margin:1rem auto;}
-.intro-eyebrow{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--day-dark);font-weight:800;margin-bottom:.5rem;}
-.chrono-info{font-size:.74rem;color:var(--day-dark);font-weight:700;margin-bottom:.6rem;}
-.intro-card h1{font-size:clamp(1.15rem,2.7vw,1.55rem);font-weight:800;color:var(--day-dark);margin-bottom:.8rem;line-height:1.3;}
-.intro-text{max-width:500px;margin:0 auto 1.2rem;line-height:1.75;font-size:.9rem;text-align:left;color:var(--ink);}
-.intro-text p{margin-bottom:.7rem;}
-.intro-transition{font-size:.78rem;color:var(--muted);font-style:italic;margin-bottom:.8rem;}
-
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.35rem;border-radius:99px;border:none;cursor:pointer;
-  font-weight:800;font-size:.92rem;min-height:2.6rem;transition:transform .15s,box-shadow .2s,background .2s;}
-.btn:active{transform:scale(.95);}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn-launch{background:linear-gradient(135deg,var(--day-color),var(--day-dark));color:#04222b;box-shadow:0 6px 18px var(--glow-cyan);}
-.btn-launch:hover{transform:translateY(-2px);box-shadow:0 10px 26px var(--glow-cyan);}
-.btn-copper{background:linear-gradient(135deg,var(--signal-violet),#5B3FB0);color:#fbf8ff;box-shadow:0 6px 18px var(--glow-copper);}
-.btn-copper:hover{transform:translateY(-2px);box-shadow:0 10px 26px var(--glow-copper);}
-
-#scene-mission{display:none;} #scene-mission.show{display:block;}
-.progress-wrap{max-width:600px;margin:0 auto 1.2rem;}
-.progress-label{display:flex;justify-content:space-between;font-size:.8rem;color:var(--white);font-weight:700;margin-bottom:.4rem;text-shadow:0 1px 4px rgba(0,0,0,.4);}
-.progress-caps{display:flex;gap:.4rem;}
-.cap{flex:1;height:11px;border-radius:3px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);overflow:hidden;position:relative;}
-.cap .cap-fill{position:absolute;inset:0;border-radius:2px;background:var(--metal-light);transform:scaleX(0);transform-origin:left;transition:transform .5s ease,background .3s ease;}
-.cap.done .cap-fill{transform:scaleX(1);background:linear-gradient(90deg,var(--success),#2E7A50);box-shadow:0 0 8px rgba(63,166,107,.5);}
-.cap.current .cap-fill{transform:scaleX(1);background:linear-gradient(90deg,var(--day-color),var(--day-dark));box-shadow:0 0 8px var(--glow-cyan);}
-.cap.just-validated{animation:capGlow 1s ease;}
-.progress-caps.finale .cap{animation:capGlow .9s ease;}
-.progress-caps.finale .cap:nth-child(1){animation-delay:0s;}
-.progress-caps.finale .cap:nth-child(2){animation-delay:.12s;}
-.progress-caps.finale .cap:nth-child(3){animation-delay:.24s;}
-.progress-caps.finale .cap:nth-child(4){animation-delay:.36s;}
-.progress-caps.finale .cap:nth-child(5){animation-delay:.48s;}
-@keyframes capGlow{0%{box-shadow:0 0 0 0 rgba(63,166,107,0);}45%{box-shadow:0 0 14px 4px rgba(63,166,107,.75);}100%{box-shadow:0 0 0 0 rgba(63,166,107,0);}}
-
-.mission-eyebrow{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--day-dark);font-weight:800;margin-bottom:.3rem;}
-.mission-card h2{font-size:1.05rem;font-weight:800;color:var(--day-dark);margin-bottom:.6rem;line-height:1.3;}
-.mission-story{font-size:.84rem;color:var(--muted);margin-bottom:.9rem;line-height:1.65;}
-.data-wrap{width:100%;margin:0 auto 1rem;background:var(--white);border:2px solid var(--day-border);border-radius:14px;padding:.9rem 1rem;
-  box-shadow:0 6px 18px rgba(4,6,14,.18);}
-.data-table{width:100%;border-collapse:collapse;font-size:.84rem;}
-.data-table th,.data-table td{padding:.4rem .5rem;text-align:center;border-bottom:1px solid var(--day-border);}
-.data-table th{color:var(--day-dark);font-weight:800;background:var(--day-light);}
-.data-table td{color:var(--ink);font-weight:600;}
-.data-highlight{background:var(--signal-violet-light);}
-.data-line{font-size:.9rem;color:var(--ink);font-weight:700;text-align:center;padding:.4rem 0;}
-.mission-consigne{font-weight:800;font-size:.9rem;color:var(--ink);margin-bottom:.9rem;background:var(--day-light);
-  border-left:5px solid var(--day-color);border-radius:10px;padding:.6rem .85rem;}
-
-.hint-actions{margin-bottom:1rem;}
-.btn-hint{background:var(--white);color:var(--day-dark);border:2px dashed var(--day-color);box-shadow:none;
-  display:inline-flex;align-items:center;justify-content:center;padding:.5rem .9rem;border-radius:10px;
-  font-size:.88rem;font-weight:800;min-height:42px;cursor:pointer;}
-.btn-hint:hover{background:var(--day-light);}
-.hint-box[hidden]{display:none !important;}
-.hint-box{display:flex;gap:.6rem;align-items:flex-start;background:var(--day-light);border:1.5px solid var(--day-color);border-radius:12px;
-  padding:.65rem .85rem;margin-top:.6rem;font-size:.82rem;color:#0d4a5c;line-height:1.65;}
-.hint-box .hint-emoji{font-size:1.05rem;flex-shrink:0;}
-
-.answer-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem;}
-.answer-input{width:110px;height:2.6rem;border:2.5px solid var(--metal-light);border-radius:12px;text-align:center;
-  font-size:1rem;font-weight:800;color:var(--ink);background:var(--white);outline:none;transition:border-color .2s,background .2s;}
-.answer-input:focus{border-color:var(--day-color);}
-.answer-input.ok{border-color:var(--success);background:var(--success-bg);}
-.answer-input.ko{border-color:var(--warn);background:var(--warn-bg);}
-.answer-unit{font-weight:700;color:var(--muted);font-size:.86rem;}
-.answer-tip{font-size:.7rem;color:var(--muted);margin-top:.2rem;width:100%;}
-
-.choice-list{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.6rem;}
-.opt-btn{display:flex;align-items:center;gap:.65rem;padding:.65rem .9rem;border-radius:12px;border:2.5px solid var(--metal-light);
-  background:var(--white);color:var(--ink);font-weight:700;font-size:.86rem;cursor:pointer;text-align:left;min-height:2.6rem;transition:border-color .15s,background .2s;}
-.opt-btn:hover:not(:disabled){border-color:var(--day-color);}
-.opt-btn .ob-letter{width:24px;height:24px;border-radius:50%;background:var(--day-light);color:var(--day-dark);font-weight:800;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.78rem;}
-.opt-btn.correct{border-color:var(--success);background:var(--success-bg);}
-.opt-btn.correct .ob-letter{background:var(--success);color:#fff;}
-.opt-btn.wrong{border-color:var(--warn);background:var(--warn-bg);animation:shake .35s ease;}
-.opt-btn.wrong .ob-letter{background:var(--warn);color:#fff;}
-.opt-btn:disabled{cursor:not-allowed;}
-@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
-
-.feedback{margin-top:.8rem;padding:.7rem .9rem;border-radius:12px;font-size:.84rem;line-height:1.7;display:none;}
-.feedback.show{display:block;animation:cardIn .35s ease both;}
-.feedback.ok{background:var(--success-bg);border:2px solid var(--success);color:#0f5c37;}
-.feedback.ko{background:var(--warn-bg);border:2px solid var(--warn);color:#7a4a12;}
-
-.correction-box[hidden]{display:none !important;}
-.correction-box{margin-top:.9rem;padding:.85rem .95rem;border-radius:14px;background:var(--day-light);border:2px solid var(--day-dark);
-  color:#0d3f4d;font-size:.84rem;line-height:1.7;}
-.correction-box strong{color:var(--day-dark);}
-
-.chrono-wrap{display:none;align-items:center;gap:.9rem;margin-top:1rem;padding:.65rem 1rem;
-  border:2px solid var(--day-color);border-radius:12px;background:var(--day-light);}
-.chrono-wrap.show{display:flex;}
-.chrono-num{font-size:1.2rem;font-weight:800;color:var(--day-dark);min-width:1.8rem;text-align:center;flex-shrink:0;}
-.chrono-body{flex:1;min-width:0;}
-.chrono-label{font-size:.78rem;color:var(--day-dark);margin-bottom:.3rem;font-weight:700;}
-.chrono-track{height:7px;border-radius:99px;background:var(--metal-light);overflow:hidden;}
-.chrono-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--day-color),var(--day-dark));width:100%;transition:width 1s linear;}
-
-.pulse-ok{animation:pulseOk .8s ease;}
-@keyframes pulseOk{0%{box-shadow:0 0 0 0 rgba(63,166,107,.5);}70%{box-shadow:0 0 0 18px rgba(63,166,107,0);}100%{box-shadow:0 0 0 0 rgba(63,166,107,0);}}
-
-.final-card{text-align:center;padding:1.6rem 1.2rem 1.8rem;position:relative;overflow:visible;}
-.final-card h2{font-size:1.4rem;font-weight:900;color:var(--day-dark);margin-bottom:.9rem;}
-.stat-row{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem;margin-bottom:1.2rem;}
-.stat-chip{display:flex;flex-direction:column;align-items:center;gap:.2rem;background:var(--day-light);border:1.5px solid var(--day-border);
-  border-radius:14px;padding:.7rem 1.1rem;min-width:100px;}
-.stat-chip .sc-val{font-size:1.3rem;font-weight:800;color:var(--day-dark);}
-.stat-chip .sc-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
-.final-msg{font-size:1rem;font-weight:700;color:var(--ink);max-width:480px;margin:0 auto 1.4rem;line-height:1.7;}
-.stardust{position:absolute;border-radius:50%;opacity:.9;animation:stardustFloat 2.4s ease-out forwards;z-index:0;pointer-events:none;}
-@keyframes stardustFloat{0%{transform:translateY(0) scale(1);opacity:.95;}100%{transform:translateY(-170px) scale(.25);opacity:0;}}
-
-.zone-validated{display:inline-flex;align-items:center;gap:.4rem;background:var(--success-bg);border:2px solid var(--success);
-  color:#0f5c37;font-weight:800;font-size:.92rem;padding:.5rem 1rem;border-radius:99px;margin-top:.9rem;opacity:1;
-  animation:zoneValidatedPop 1.5s ease forwards;}
-@keyframes zoneValidatedPop{
-  0%{opacity:0;transform:translateY(6px) scale(.92);}
-  18%{opacity:1;transform:translateY(0) scale(1);}
-  75%{opacity:1;transform:translateY(0) scale(1);}
-  100%{opacity:0;transform:translateY(-4px) scale(.96);}
+/* =====================================================================
+   MISE EN PAGE PRINCIPALE — 3 colonnes
+   ===================================================================== */
+.layout{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:.8rem;
+  display:grid;grid-template-columns:180px 1fr 190px;gap:.7rem;align-items:start;}
+@media(max-width:1150px){.layout{grid-template-columns:1fr;}
+  .panel-left,.panel-right{order:2;}
+  .table-zone{order:1;}
 }
 
-@media(max-width:820px){
-  .stage{padding:1.2rem .9rem 0;}
-  .card{padding:1.3rem 1.2rem;}
-  .intro-card h1{font-size:clamp(1.05rem,3.6vw,1.35rem);}
-  .intro-text{font-size:.86rem;}
-  .mission-card h2{font-size:.98rem;}
-  .mission-story{font-size:.8rem;}
-  .mission-consigne{font-size:.86rem;padding:.55rem .75rem;}
-  .data-table{font-size:.78rem;}
-  .hint-box{font-size:.78rem;padding:.6rem .75rem;}
-  .answer-input{width:100px;height:2.4rem;font-size:.95rem;}
-  .answer-unit{font-size:.8rem;}
-  .btn{font-size:.88rem;padding:.6rem 1.2rem;min-height:2.5rem;}
-  .hud{padding:.6rem 1rem;}
-  .hud-brand .logo{font-size:.92rem;}
-  .hud-brand .meta{font-size:.64rem;}
-  .hud-timer{font-size:.8rem;padding:.35rem .6rem;}
-  .btn-sound{font-size:.8rem;padding:.35rem .6rem;min-height:2.3rem;}
+/* =====================================================================
+   PANNEAU GAUCHE — tablette « Mission »
+   ===================================================================== */
+.panel-left{background:linear-gradient(180deg,#20262C,#181C21);border:1px solid var(--steel-dark);
+  border-radius:var(--radius-lg);padding:.7rem;position:sticky;top:70px;box-shadow:0 10px 26px rgba(0,0,0,.35);}
+.panel-title{display:flex;align-items:center;gap:.45rem;font-size:.8rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--blue-tech-light);margin-bottom:.8rem;padding-bottom:.6rem;border-bottom:1px solid var(--steel-dark);}
+.plan-list{display:flex;flex-direction:column;gap:.5rem;}
+.plan-item{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;border-radius:8px;
+  background:#1C2126;border:1px solid var(--steel-dark);color:var(--steel-light);font-size:.82rem;font-weight:600;
+  transition:background .15s,border-color .15s,transform .15s;}
+.plan-item .dot{width:9px;height:9px;border-radius:50%;background:var(--steel);flex-shrink:0;}
+.plan-item.current{background:rgba(74,144,217,.14);border-color:var(--blue-tech-light);color:var(--white);transform:translateX(2px);}
+.plan-item.current .dot{background:var(--blue-tech-light);box-shadow:0 0 8px rgba(74,144,217,.8);}
+.plan-item.done{background:rgba(46,158,79,.12);border-color:var(--green);color:var(--white);}
+.plan-item.done .dot{background:var(--green);}
+.plan-item.done .dot::after{content:'\2713';}
+
+/* =====================================================================
+   PANNEAU DROIT — boîte à outils
+   ===================================================================== */
+.panel-right{background:linear-gradient(180deg,#20262C,#181C21);border:1px solid var(--steel-dark);
+  border-radius:var(--radius-lg);padding:.7rem;position:sticky;top:70px;box-shadow:0 10px 26px rgba(0,0,0,.35);}
+.toolbox-body{display:flex;flex-direction:column;gap:.6rem;font-size:.82rem;color:var(--steel-light);}
+.toolbox-empty{opacity:.6;font-style:italic;font-size:.78rem;}
+.tool-box{border-radius:8px;padding:.6rem .75rem;display:none;line-height:1.6;}
+.tool-box.show{display:block;animation:toolOpen .3s ease both;}
+@keyframes toolOpen{from{opacity:0;transform:translateY(-6px) scaleY(.9);}to{opacity:1;transform:translateY(0) scaleY(1);}}
+.tool-hint{background:rgba(255,204,0,.1);border:1.5px dashed var(--yellow);color:#FFE58A;}
+.tool-corr{background:rgba(74,144,217,.12);border:1.5px solid var(--blue-tech-light);color:#CFE4FA;}
+
+/* =====================================================================
+   ZONE PRINCIPALE — table d'ingénieur
+   ===================================================================== */
+.table-zone{background:
+    repeating-linear-gradient(100deg,rgba(255,255,255,.025) 0 2px,transparent 2px 6px),
+    linear-gradient(160deg,#3A4048,#2A2F35 60%,#23272C);
+  border:1px solid var(--steel-dark);border-radius:var(--radius-lg);padding:.9rem;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.35),0 12px 30px rgba(0,0,0,.4);min-height:280px;position:relative;}
+.mission-brief{background:rgba(30,95,158,.14);border-left:4px solid var(--blue-tech-light);
+  border-radius:6px;padding:.55rem .8rem;margin-bottom:.6rem;font-size:.84rem;color:var(--white);line-height:1.5;}
+.mission-brief b{color:var(--blue-tech-light);}
+
+/* Carte "plan technique" */
+.plan-card{background:var(--paper);color:#1B2430;border-radius:var(--radius-lg);
+  box-shadow:0 14px 30px rgba(0,0,0,.4),0 0 0 1px rgba(0,0,0,.06);overflow:hidden;
+  animation:cardIn .35s ease both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px) rotate(-.4deg);}to{opacity:1;transform:translateY(0) rotate(0);}}
+.plan-card-head{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;
+  background:linear-gradient(180deg,#26303B,#1B222A);color:var(--white);}
+.plan-card-num{width:2rem;height:2rem;border-radius:6px;background:var(--orange);color:#2A1200;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;flex-shrink:0;}
+.plan-card-title{font-weight:800;font-size:.98rem;letter-spacing:.01em;}
+.plan-card-sub{font-size:.68rem;color:var(--steel-light);text-transform:uppercase;letter-spacing:.08em;margin-top:.1rem;}
+.plan-card-body{padding:.65rem .8rem .8rem;}
+.plan-figure{text-align:center;margin-bottom:.4rem;}
+.plan-figure svg{max-width:100%;max-height:130px;height:auto;}
+.plan-question{font-size:.9rem;font-weight:700;color:#1B2430;margin-bottom:.5rem;line-height:1.45;}
+
+.opt-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.5rem;}
+.opt-btn{text-align:left;padding:.5rem .75rem;border:2px solid #D7DEE6;border-radius:8px;background:#fff;
+  color:#1B2430;font-size:.86rem;font-weight:600;cursor:pointer;min-height:40px;transition:border-color .15s,background .15s,transform .1s;}
+.opt-btn:hover:not(:disabled){border-color:var(--blue-tech-light);background:var(--blue-tech-pale);}
+.opt-btn.selected{border-color:var(--blue-tech-light);background:var(--blue-tech-pale);}
+.opt-btn.correct{border-color:var(--green);background:var(--green-light);color:#155C2C;}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-light);color:#7A1F1F;}
+.opt-btn:disabled{cursor:default;opacity:.9;}
+
+.num-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap;}
+.num-input{width:110px;padding:.6rem .7rem;border:2px solid #D7DEE6;border-radius:8px;font-family:var(--font-mono);
+  font-size:1rem;font-weight:700;text-align:center;color:#1B2430;background:#fff;outline:none;}
+.num-input:focus{border-color:var(--blue-tech-light);}
+.num-input.ok{border-color:var(--green);background:var(--green-light);}
+.num-input.ko{border-color:var(--red);background:var(--red-light);}
+
+/* Tableau de conversion des aires */
+.conv-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.5rem 0 .7rem;border-radius:8px;}
+.conv-table{border-collapse:collapse;min-width:520px;width:100%;font-family:var(--font-mono);}
+.conv-table th{background:#26303B;color:#CFE0F0;font-size:.62rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.03em;padding:.3rem .15rem;border:1px solid #3A4048;white-space:nowrap;}
+.conv-table td{width:2.1rem;height:2.1rem;text-align:center;border:1px solid #D7DEE6;font-weight:800;
+  font-size:.95rem;color:#1B2430;background:#fff;}
+.conv-table .conv-digits td.conv-from{background:#FFD9B8;border:3px solid var(--orange);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);}
+.conv-table .conv-digits td.conv-to{background:#BEEBCB;border:3px solid var(--green);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);}
+.conv-marks td{border:none;height:1.3rem;text-align:center;}
+.conv-tag{display:inline-block;font-size:.58rem;font-weight:800;padding:.05rem .3rem;border-radius:4px;white-space:nowrap;}
+.conv-tag-from{background:var(--orange);color:#2A1200;}
+.conv-tag-to{background:var(--green);color:#0B2A14;}
+.conv-ref-wrap{margin-bottom:.5rem;}
+.conv-ref-wrap .conv-table{min-width:460px;}
+.conv-ref-wrap td{height:1.6rem;font-size:.8rem;background:#F3F6FA;color:#4B545E;}
+
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.4rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.25rem;border-radius:9px;border:none;
+  font-weight:800;font-size:.85rem;letter-spacing:.01em;cursor:pointer;min-height:44px;
+  transition:transform .12s,box-shadow .15s,filter .15s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-primary{background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#2A1200;
+  box-shadow:0 4px 14px rgba(255,106,26,.4);}
+.btn-primary:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px);}
+.btn-secondary{background:#3A4048;color:var(--steel-light);border:1.5px solid var(--steel-dark);}
+.btn-secondary:hover:not(:disabled){background:#454C55;}
+.btn-validate{background:linear-gradient(135deg,#3BBE64,var(--green));color:#0B2A14;
+  box-shadow:0 4px 14px rgba(46,158,79,.4);}
+.btn-error{background:linear-gradient(135deg,#E56A6A,var(--red));color:#3A0E0E;}
+
+.feedback-box{margin-top:.9rem;padding:.75rem 1rem;border-radius:9px;font-size:.86rem;line-height:1.7;display:none;
+  align-items:flex-start;gap:.6rem;}
+.feedback-box.show{display:flex;}
+.feedback-box.ok{background:var(--green-light);border:1.5px solid var(--green);color:#155C2C;}
+.feedback-box.ko{background:var(--red-light);border:1.5px solid var(--red);color:#7A1F1F;}
+.shake{animation:cardShake .35s;}
+@keyframes cardShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+/* =====================================================================
+   BARRE DE PROGRESSION — voie ferrée
+   ===================================================================== */
+.rail-wrap{max-width:980px;margin:0 auto;padding:0 .8rem 1rem;position:relative;z-index:1;}
+.rail-track{background:#14171B;border:1px solid var(--steel-dark);border-radius:12px;padding:.8rem 1rem;
+  display:flex;align-items:center;gap:1rem;}
+.rail-label{font-size:.72rem;color:var(--steel-light);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;}
+.rail-svg{flex:1;height:34px;}
+.rail-pct{font-family:var(--font-mono);font-size:.82rem;color:var(--yellow);font-weight:700;white-space:nowrap;}
+
+/* =====================================================================
+   ÉCRAN D'INTRODUCTION
+   ===================================================================== */
+.intro-screen{position:relative;z-index:1;max-width:620px;margin:1.3rem auto;padding:0 .8rem;text-align:center;}
+.intro-card{background:linear-gradient(180deg,#20262C,#181C21);border:1px solid var(--steel-dark);
+  border-radius:var(--radius-lg);padding:1.4rem 1.2rem;box-shadow:0 16px 40px rgba(0,0,0,.45);}
+.intro-ico{font-size:2.6rem;margin-bottom:.5rem;}
+.intro-card h2{font-size:1.35rem;color:var(--white);margin-bottom:.5rem;}
+.intro-card p{color:var(--steel-light);font-size:.92rem;line-height:1.75;margin-bottom:1.2rem;}
+.intro-note{background:rgba(255,204,0,.1);border:1.5px dashed var(--yellow);border-radius:8px;
+  padding:.7rem 1rem;font-size:.82rem;color:#FFE58A;margin-bottom:1.4rem;}
+
+/* =====================================================================
+   ÉCRAN DE FIN
+   ===================================================================== */
+.finale-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+  background:rgba(10,12,15,.92);padding:1.2rem;}
+.finale-overlay.show{display:flex;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.finale-card{max-width:520px;width:100%;background:linear-gradient(180deg,#20262C,#181C21);
+  border:1px solid var(--steel-dark);border-radius:var(--radius-lg);padding:2rem 1.8rem;text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,.55);animation:cardIn .4s ease both;}
+.finale-ico{font-size:2.8rem;margin-bottom:.5rem;}
+.finale-card h2{font-size:1.4rem;color:var(--white);margin-bottom:.6rem;}
+.finale-card p{color:var(--steel-light);font-size:.9rem;line-height:1.7;margin-bottom:1rem;}
+.finale-stats{display:flex;justify-content:center;gap:1.4rem;margin-bottom:1.4rem;flex-wrap:wrap;}
+.finale-stat{background:#14171B;border:1px solid var(--steel-dark);border-radius:8px;padding:.6rem 1rem;min-width:110px;}
+.finale-stat b{display:block;font-family:var(--font-mono);font-size:1.15rem;color:var(--orange);}
+.finale-stat span{font-size:.68rem;color:var(--steel-light);text-transform:uppercase;letter-spacing:.08em;}
+.finale-btn-row{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+
+/* =====================================================================
+   RESPONSIVE — panneaux repliables
+   ===================================================================== */
+.panel-toggle{display:none;}
+@media(max-width:1150px){
+  .panel-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;cursor:pointer;
+    background:none;border:none;color:inherit;font:inherit;}
+  .panel-toggle .chev{transition:transform .2s;color:var(--steel-light);}
+  .panel-left.collapsed .plan-list,.panel-right.collapsed .toolbox-body{display:none;}
+  .panel-left.collapsed .panel-toggle .chev,.panel-right.collapsed .panel-toggle .chev{transform:rotate(-90deg);}
 }
-@media(max-width:480px){
-  .card{padding:1.4rem 1.2rem;}
-  .stat-chip{min-width:84px;padding:.6rem .8rem;}
+@media(max-width:600px){
+  .topbar{padding:.55rem .7rem;}
+  .topbar-brand-text span{display:none;}
+  .layout{padding:.7rem;gap:.7rem;}
+  .table-zone{padding:.9rem;}
+  .plan-card-body{padding:.6rem .7rem .8rem;}
+  .rail-label{display:none;}
 }
-@media(max-width:360px){
-  body{padding-left:.55rem;padding-right:.55rem;}
-  .hud{padding:.65rem .7rem;gap:.5rem;}
-  .hud-right{width:100%;justify-content:space-between;}
-  .stage{padding-left:.35rem;padding-right:.35rem;}
-  .card{padding:1.15rem .85rem;border-radius:15px;}
-  .answer-row{flex-direction:column;align-items:stretch;}
-  .answer-input{width:100%;}
-  .answer-unit{text-align:center;}
-  .answer-row .btn{width:100%;justify-content:center;}
-  .stat-row{flex-direction:column;}
-  .stat-chip{width:100%;}
-  .btn{width:100%;justify-content:center;text-align:center;}
-}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 </style>
 </head>
 <body>
 
-<div class="hangar-scene" aria-hidden="true">
-  <svg viewBox="0 0 800 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="0" y="0" width="800" height="300" fill="#141b2e"/>
-    <g opacity=".5" stroke="#283656" stroke-width="2">
-      <line x1="70" y1="0" x2="70" y2="300"/><line x1="200" y1="0" x2="200" y2="300"/>
-      <line x1="330" y1="0" x2="330" y2="300"/><line x1="470" y1="0" x2="470" y2="300"/>
-      <line x1="610" y1="0" x2="610" y2="300"/><line x1="740" y1="0" x2="740" y2="300"/>
+<!-- ============================================================
+     DÉCOR D'ATELIER (discret, non interactif)
+     ============================================================ -->
+<div class="workshop-bg" aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+    <!-- verrière / poutres du plafond -->
+    <g opacity="0.14" stroke="#8A95A1" stroke-width="2">
+      <line x1="0" y1="60" x2="1600" y2="60"/>
+      <line x1="0" y1="90" x2="1600" y2="90"/>
+      <line x1="120" y1="0" x2="60" y2="90"/>
+      <line x1="360" y1="0" x2="300" y2="90"/>
+      <line x1="600" y1="0" x2="540" y2="90"/>
+      <line x1="840" y1="0" x2="780" y2="90"/>
+      <line x1="1080" y1="0" x2="1020" y2="90"/>
+      <line x1="1320" y1="0" x2="1260" y2="90"/>
+      <line x1="1560" y1="0" x2="1500" y2="90"/>
     </g>
-    <line x1="620" y1="260" x2="620" y2="90" stroke="#4A5670" stroke-width="6"/>
-    <circle cx="620" cy="80" r="10" fill="#34C7E8"/>
-    <circle cx="620" cy="80" r="22" fill="none" stroke="#34C7E8" stroke-width="1.5" opacity=".5"/>
-    <circle cx="620" cy="80" r="38" fill="none" stroke="#34C7E8" stroke-width="1" opacity=".3"/>
-    <line x1="580" y1="260" x2="600" y2="150" stroke="#4A5670" stroke-width="4"/>
-    <line x1="660" y1="260" x2="640" y2="150" stroke="#4A5670" stroke-width="4"/>
-    <path d="M180,220 L180,120 A90,50 0 0 1 340,120 L340,220 Z" fill="#1E2A45" stroke="#8B96AC" stroke-width="3"/>
-    <ellipse cx="260" cy="120" rx="80" ry="18" fill="#283656" stroke="#8B96AC" stroke-width="2"/>
-    <circle cx="260" cy="130" r="6" fill="#8B6FE8"/>
-    <rect x="30" y="170" width="110" height="90" rx="6" fill="#1E2A45" stroke="#8B96AC" stroke-width="2"/>
-    <rect x="45" y="185" width="34" height="24" rx="2" fill="#34C7E8" opacity=".55"/>
-    <rect x="88" y="185" width="34" height="24" rx="2" fill="#8B6FE8" opacity=".55"/>
-    <rect x="45" y="218" width="77" height="10" rx="2" fill="#4A5670"/>
-    <rect x="0" y="255" width="800" height="45" fill="#0A0F1C"/>
-    <line x1="0" y1="270" x2="800" y2="270" stroke="#4A5670" stroke-width="1" stroke-dasharray="14 10"/>
+    <!-- rails au loin -->
+    <g opacity="0.10" stroke="#4A90D9" stroke-width="3">
+      <line x1="0" y1="760" x2="1600" y2="745"/>
+      <line x1="0" y1="778" x2="1600" y2="763"/>
+    </g>
+    <g opacity="0.08" stroke="#8A95A1" stroke-width="2">
+      <line x1="40" y1="752" x2="30" y2="772"/>
+      <line x1="140" y1="750" x2="130" y2="770"/>
+      <line x1="240" y1="748" x2="230" y2="768"/>
+      <line x1="1360" y1="748" x2="1370" y2="768"/>
+      <line x1="1460" y1="750" x2="1470" y2="770"/>
+      <line x1="1560" y1="752" x2="1570" y2="772"/>
+    </g>
+    <!-- établi / caisse à outils à gauche -->
+    <g opacity="0.10" fill="#8A95A1">
+      <rect x="30" y="640" width="180" height="16" rx="3"/>
+      <rect x="45" y="656" width="18" height="90"/>
+      <rect x="180" y="656" width="18" height="90"/>
+      <rect x="60" y="590" width="70" height="46" rx="4"/>
+    </g>
+    <!-- rouleaux de plans -->
+    <g opacity="0.10" fill="none" stroke="#4A90D9" stroke-width="3">
+      <ellipse cx="1500" cy="640" rx="16" ry="55"/>
+      <ellipse cx="1500" cy="640" rx="8" ry="30"/>
+    </g>
+    <!-- panneau technique à droite -->
+    <g opacity="0.08" fill="#FFCC00">
+      <rect x="1440" y="120" width="120" height="90" rx="4"/>
+      <rect x="1455" y="140" width="90" height="6"/>
+      <rect x="1455" y="156" width="60" height="6"/>
+      <rect x="1455" y="172" width="75" height="6"/>
+    </g>
   </svg>
 </div>
-<div class="star st1" aria-hidden="true"></div><div class="star st2" aria-hidden="true"></div>
-<div class="star st3" aria-hidden="true"></div><div class="star st4" aria-hidden="true"></div>
-<div class="star st5" aria-hidden="true"></div>
-<div class="status-light s1" aria-hidden="true"></div>
-<div class="status-light s2" aria-hidden="true"></div>
-<div class="dust d1" aria-hidden="true"></div><div class="dust d2" aria-hidden="true"></div>
-<div class="dust d3" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
 
-<div class="hud">
-  <div class="hud-brand">
-    <span class="logo">🚀 PAZAPA</span>
-    <span class="meta">Mathématiques · 5e · Semaine 8 · Jour 3 · Défi chronométré</span>
+<!-- ============================================================
+     BANDEAU SUPÉRIEUR
+     ============================================================ -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="topbar-ico" aria-hidden="true">&#128646;</span>
+    <div class="topbar-brand-text">
+      <b>Atelier des ing&eacute;nieurs</b>
+      <span>Mission technique</span>
+    </div>
   </div>
-  <div class="hud-right">
-    <div class="hud-timer" id="hud-timer" role="timer" aria-live="off" aria-label="Temps écoulé depuis le début du défi chronométré">⏱️ 00:00</div>
-    <button class="btn-sound" id="btn-sound" onclick="toggleSound()" aria-pressed="true" aria-label="Couper le son">🔊 Son activé</button>
+  <div class="topbar-title">
+    <b id="mission-dynamic-title">Plan technique</b>
+    <span id="mission-dynamic-sub">Inspection en cours</span>
+  </div>
+  <div class="topbar-timer">
+    <button type="button" class="timer-btn" id="timer-start-btn" onclick="timerStart()" aria-label="D&eacute;marrer le chronom&egrave;tre" title="D&eacute;marrer">&#9654;</button>
+    <button type="button" class="timer-btn" id="timer-pause-btn" onclick="timerPause()" aria-label="Mettre en pause le chronom&egrave;tre" title="Pause">&#10074;&#10074;</button>
+    <span class="led-display" id="led-display" aria-live="off">00:00</span>
+    <button type="button" class="timer-btn" id="timer-reset-btn" onclick="timerReset()" aria-label="R&eacute;initialiser le chronom&egrave;tre" title="R&eacute;initialiser">&#8635;</button>
+    <button type="button" class="timer-btn sound-btn" id="sound-toggle" aria-pressed="true" aria-label="Couper les sons" title="Son activ&eacute;" onclick="toggleSound()">&#128266;</button>
+  </div>
+</header>
+
+<!-- ============================================================
+     ÉCRAN D'INTRODUCTION
+     ============================================================ -->
+<div class="intro-screen" id="intro-screen">
+  <div class="intro-card">
+    <div class="intro-ico" aria-hidden="true">&#128646;</div>
+    <h2 id="intro-title">Je rel&egrave;ve le d&eacute;fi</h2>
+    <p id="intro-text">Bienvenue dans l&rsquo;atelier des ing&eacute;nieurs&nbsp;! Avant la construction de la nouvelle gare, tu dois v&eacute;rifier les plans techniques un &agrave; un.</p>
+    <div class="intro-note" id="intro-note">&#128203; 5 plans t&rsquo;attendent sur la table de l&rsquo;ing&eacute;nieur. Le chronom&egrave;tre est informatif et n&rsquo;entra&icirc;ne aucune p&eacute;nalit&eacute;.</div>
+    <button type="button" class="btn btn-primary" id="btn-begin" onclick="beginMission()">&#9654;&#65039; Commencer la mission</button>
   </div>
 </div>
 
-<div class="stage">
+<!-- ============================================================
+     ZONE DE JEU (masquée avant le lancement)
+     ============================================================ -->
+<div id="game-area" style="display:none;">
+  <div class="layout">
 
-  <section id="scene-intro">
-    <div class="card intro-card">
-      <div class="intro-eyebrow">Je relève le défi · effectifs, fréquences et moyenne</div>
-      <p class="chrono-info">⏱️ Le chronomètre mesure ton temps, sans limite et sans pénalité.</p>
-      <h1>📡 Centre de communication martien</h1>
-      <div class="intro-text">
-        <p>🚀 La base martienne est désormais opérationnelle.</p>
-        <p>Chaque jour, les antennes de communication reçoivent des milliers d'informations envoyées par les différents modules de la base : laboratoire scientifique, serre, observatoire, centrale énergétique et station météo.</p>
-        <p>Avant de transmettre ces données vers la Terre, l'ordinateur central doit vérifier que toutes les statistiques sont correctes. Chaque vérification réussie autorise l'envoi du rapport suivant.</p>
+    <!-- PANNEAU GAUCHE : MISSION -->
+    <aside class="panel-left" id="panel-left">
+      <button type="button" class="panel-toggle" id="toggle-left" aria-expanded="true" onclick="togglePanel('panel-left')">
+        <span class="panel-title" style="margin:0;border:none;padding:0;">&#128203; Mission</span>
+        <span class="chev" aria-hidden="true">&#9660;</span>
+      </button>
+      <div class="panel-title" id="panel-left-title-desktop">&#128203; Mission</div>
+      <div class="plan-list" id="plan-list"></div>
+    </aside>
+
+    <!-- ZONE PRINCIPALE : TABLE D'INGÉNIEUR -->
+    <main class="table-zone" id="table-zone">
+      <div class="mission-brief" id="mission-brief"><b>&#128204; Consigne&nbsp;:</b> <span id="mission-brief-text">V&eacute;rifie chaque plan technique avant validation finale.</span></div>
+      <div id="plan-host"></div>
+    </main>
+
+    <!-- PANNEAU DROIT : BOÎTE À OUTILS -->
+    <aside class="panel-right" id="panel-right">
+      <button type="button" class="panel-toggle" id="toggle-right" aria-expanded="true" onclick="togglePanel('panel-right')">
+        <span class="panel-title" style="margin:0;border:none;padding:0;">&#128736;&#65039; Outils de l&rsquo;ing&eacute;nieur</span>
+        <span class="chev" aria-hidden="true">&#9660;</span>
+      </button>
+      <div class="panel-title" id="panel-right-title-desktop">&#128736;&#65039; Outils de l&rsquo;ing&eacute;nieur</div>
+      <div class="toolbox-body" id="toolbox-body">
+        <div class="toolbox-empty" id="toolbox-empty">Les indices et corrections appara&icirc;tront ici pendant la mission.</div>
+        <div class="tool-box tool-hint" id="toolbox-hint" role="status" aria-live="polite"></div>
+        <div class="tool-box tool-corr" id="toolbox-corr" role="status" aria-live="polite"></div>
       </div>
-      <p class="intro-transition">Les antennes sont alignées. Commence par vérifier le premier rapport.</p>
-      <button class="btn btn-launch" onclick="startGame()">🚀 Lancer la vérification</button>
-    </div>
-  </section>
+    </aside>
 
-  <section id="scene-mission">
-    <div class="progress-wrap">
-      <div class="progress-label"><span>Rapports validés</span><span id="progress-txt">0 / 5</span></div>
-      <div class="progress-caps" id="progress-caps" role="progressbar" aria-label="Progression des missions" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><!-- injecté en JS --></div>
-    </div>
-    <div class="card mission-card" id="mission-card"><!-- injecté en JS --></div>
-  </section>
+  </div>
 
+  <!-- BARRE DE PROGRESSION : VOIE FERRÉE -->
+  <div class="rail-wrap">
+    <div class="rail-track"
+         id="rail-progress"
+         role="progressbar"
+         aria-valuemin="0"
+         aria-valuemax="5"
+         aria-valuenow="0"
+         aria-label="0 plan validé sur 5">
+      <span class="rail-label">Construction de la voie</span>
+      <svg class="rail-svg" id="rail-svg" viewBox="0 0 1000 34" preserveAspectRatio="none" role="img" aria-labelledby="rail-title">
+        <title id="rail-title">Progression de la voie ferr&eacute;e</title>
+        <line x1="0" y1="17" x2="1000" y2="17" stroke="#3A4048" stroke-width="6"/>
+        <g id="rail-ties"></g>
+        <line id="rail-fill" x1="0" y1="17" x2="0" y2="17" stroke="#FF6A1A" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <span class="rail-pct" id="rail-pct">0&nbsp;%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN DE FIN (réutilisable)
+     ============================================================ -->
+<div class="finale-overlay" id="finale-overlay">
+  <div class="finale-card">
+    <div class="finale-ico" aria-hidden="true">&#127937;</div>
+    <h2 id="finale-title">Mission accomplie&nbsp;!</h2>
+    <p id="finale-text">Mission termin&eacute;e.</p>
+    <div class="finale-stats">
+      <div class="finale-stat"><b id="finale-time">00:00</b><span>Temps</span></div>
+    </div>
+    <div class="finale-btn-row">
+      <button type="button" class="btn btn-primary" onclick="restartMission()">&#128260; Rejouer la mission</button>
+      <button type="button" class="btn btn-secondary" onclick="returnToIntro()">&#127968; Retour</button>
+    </div>
+  </div>
 </div>
 
 <script>
 (function(){
 'use strict';
-var $=function(id){return document.getElementById(id);};
-function setDisabled(el, disabled){ if(!el) return; el.disabled=disabled; el.setAttribute('aria-disabled', disabled?'true':'false'); }
+function $(id){return document.getElementById(id);}
 
-/* ==================================================================
-   SON — Web Audio API uniquement
-   ================================================================== */
+/* =====================================================================
+   IDENTITÉ SONORE — atelier des ingénieurs du chemin de fer
+   Sons entièrement synthétisés (Web Audio API), aucun fichier externe.
+   Palette : métal, rails, outils techniques, chantier ferroviaire.
+   ===================================================================== */
 var soundOn=true, audioCtx=null;
-function ac(){ if(!audioCtx){ try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(audioCtx && audioCtx.state==='suspended'){ audioCtx.resume(); } return audioCtx; }
-function tone(freq,dur,type,startDelay,gainVal){
+function ac(){
+  if(!audioCtx){
+    try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
+    catch(e){ audioCtx=null; }
+  }
+  return audioCtx;
+}
+/* Note simple (oscillateur + enveloppe douce) */
+function tone(freq,startOffset,dur,type,vol){
   if(!soundOn) return;
   var c=ac(); if(!c) return;
-  var t0=c.currentTime+(startDelay||0);
-  var osc=c.createOscillator(), g=c.createGain();
-  osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,t0);
-  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(gainVal||0.14,t0+0.02); g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
-  osc.connect(g); g.connect(c.destination); osc.start(t0); osc.stop(t0+dur+0.05);
+  var o=c.createOscillator(), g=c.createGain();
+  o.type=type||'triangle';
+  o.frequency.value=freq;
+  o.connect(g); g.connect(c.destination);
+  var t=c.currentTime+(startOffset||0);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol||0.12,t+0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.12));
+  o.start(t); o.stop(t+(dur||0.12)+0.03);
 }
-function playClick(){ tone(520,.06,'sine',0,.08); }
-function playCorrect(){ tone(440,.14,'sine',0,.13); tone(660,.18,'sine',.1,.11); tone(880,.22,'triangle',.2,.09); }
-function playWrong(){ tone(190,.22,'sawtooth',0,.09); }
-function playNextMission(){ tone(500,.1,'sine',0,.08); tone(700,.12,'sine',.08,.08); }
-function playFinal(){ tone(400,.3,'sine',0,.13); tone(500,.3,'sine',.15,.12); tone(650,.35,'sine',.3,.11); tone(880,.6,'triangle',.45,.09); }
+/* Souffle filtré (métal, frottement, vapeur) */
+function noiseBurst(dur,vol,lowpass,highpass,startOffset){
+  if(!soundOn) return;
+  var c=ac(); if(!c) return;
+  var len=Math.max(1,Math.ceil((dur||0.1)*c.sampleRate));
+  var buf=c.createBuffer(1,len,c.sampleRate), data=buf.getChannelData(0);
+  for(var i=0;i<len;i++){ data[i]=Math.random()*2-1; }
+  var src=c.createBufferSource(); src.buffer=buf;
+  var lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=lowpass||2400;
+  var hp=c.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=highpass||120;
+  var g=c.createGain();
+  var t=c.currentTime+(startOffset||0);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol||0.07,t+0.02);
+  g.gain.linearRampToValueAtTime(0.0001,t+(dur||0.1));
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(c.destination);
+  src.start(t); src.stop(t+(dur||0.1)+0.02);
+}
+/* Signal de départ en gare — deux notes de quai + léger souffle ferroviaire */
+function sndMissionStart(){
+  if(!soundOn) return;
+  var c=ac();
+  if(!c) return;
+  if(c.state==='suspended'){ c.resume(); }
+  tone(660,0,0.09,'sine',0.045);
+  tone(880,0.13,0.11,'sine',0.04);
+  noiseBurst(0.10,0.018,1800,500,0.25);
+}
+/* Destination validée sur le panneau d'affichage — bonne réponse */
+function sndValidate(){
+  if(!soundOn) return;
+  tone(587,0,0.08,'sine',0.045);
+  tone(784,0.10,0.13,'triangle',0.05);
+  noiseBurst(0.035,0.015,2400,900,0.02);
+}
+/* Signal orange — itinéraire non validé (première erreur) */
+function sndError(){
+  if(!soundOn) return;
+  tone(294,0,0.11,'triangle',0.035);
+  tone(247,0.10,0.14,'sine',0.028);
+}
+/* Case qui bascule sur le tableau des horaires — indice */
+function sndHint(){
+  if(!soundOn) return;
+  noiseBurst(0.045,0.018,3200,1100,0);
+  tone(988,0.05,0.09,'sine',0.032);
+}
+/* Aiguillage repositionné — correction complète (deuxième erreur) */
+function sndCorrection(){
+  if(!soundOn) return;
+  noiseBurst(0.08,0.022,1500,250,0);
+  tone(330,0.03,0.10,'triangle',0.032);
+  tone(392,0.13,0.13,'triangle',0.035);
+}
+/* Wagon passant sur un joint de rail — passage au plan suivant */
+function sndNextPlan(){
+  if(!soundOn) return;
+  noiseBurst(0.035,0.025,1000,180,0);
+  noiseBurst(0.035,0.022,1000,180,0.11);
+  tone(220,0,0.055,'triangle',0.025);
+  tone(247,0.11,0.055,'triangle',0.022);
+}
+/* Pose d'une dalle — presque imperceptible */
+function sndTile(offset){
+  if(!soundOn) return;
+  noiseBurst(0.025,0.008,850,180,offset||0);
+}
+/* Arrivée en gare — souffle qui s'immobilise puis sonnerie de quai */
+function sndFinale(){
+  if(!soundOn) return;
+  noiseBurst(0.30,0.022,1200,120,0);
+  tone(523,0.12,0.12,'triangle',0.045);
+  tone(659,0.27,0.14,'triangle',0.045);
+  tone(784,0.44,0.20,'sine',0.05);
+  tone(1047,0.70,0.09,'sine',0.028);
+  tone(1319,0.84,0.12,'sine',0.024);
+}
+/* =====================================================================
+   AMBIANCE DE GARE — nappe continue très discrète, générée en Web Audio.
+   Souffle du hall, grondement lointain, vibration des rails, passages
+   occasionnels, sonnerie de quai très rare. Aucun fichier externe.
+   ===================================================================== */
+var stationAmbienceGain=null;
+var stationAmbienceSources=[];
+var stationAmbienceRunning=false;
+var stationAmbienceTimeouts=[];
+
+/* Buffer de bruit en boucle (base du souffle et de la vibration) */
+function makeLoopNoiseBuffer(c,seconds){
+  var len=Math.max(1,Math.ceil((seconds||4)*c.sampleRate));
+  var buf=c.createBuffer(1,len,c.sampleRate);
+  var data=buf.getChannelData(0);
+  var last=0;
+  for(var i=0;i<len;i++){
+    /* bruit légèrement lissé : moins sifflant qu'un bruit blanc pur */
+    var white=Math.random()*2-1;
+    last=(last*0.94)+(white*0.06);
+    data[i]=last*3.2;
+  }
+  return buf;
+}
+function ambienceLayer(c,buffer,lowpass,highpass,gainValue,detuneRate){
+  var src=c.createBufferSource();
+  src.buffer=buffer;
+  src.loop=true;
+  if(detuneRate){ src.playbackRate.value=detuneRate; }
+  var lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=lowpass;
+  var hp=c.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=highpass;
+  var g=c.createGain(); g.gain.value=gainValue;
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(stationAmbienceGain);
+  src.start(0);
+  stationAmbienceSources.push(src);
+  return g;
+}
+/* Passage lointain d'un train : montée puis descente très douce */
+function ambienceTrainPass(){
+  if(!soundOn || !stationAmbienceRunning) return;
+  var c=ac(); if(!c || !stationAmbienceGain) return;
+  var buf=makeLoopNoiseBuffer(c,3);
+  var src=c.createBufferSource(); src.buffer=buf; src.loop=true;
+  var lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=340;
+  var hp=c.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=60;
+  var g=c.createGain();
+  var t=c.currentTime;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(0.020,t+2.2);
+  g.gain.linearRampToValueAtTime(0.0001,t+5.4);
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(stationAmbienceGain);
+  src.start(t); src.stop(t+5.6);
+  stationAmbienceSources.push(src);
+  scheduleAmbienceEvent(ambienceTrainPass,26000,22000);
+}
+/* Sonnerie de quai très rare, à peine audible */
+function ambienceQuaiChime(){
+  if(!soundOn || !stationAmbienceRunning) return;
+  var c=ac(); if(!c || !stationAmbienceGain) return;
+  [880,1109].forEach(function(f,i){
+    var o=c.createOscillator(), g=c.createGain();
+    o.type='sine'; o.frequency.value=f;
+    var t=c.currentTime+i*0.22;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.012,t+0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.55);
+    o.connect(g); g.connect(stationAmbienceGain);
+    o.start(t); o.stop(t+0.6);
+  });
+  scheduleAmbienceEvent(ambienceQuaiChime,48000,30000);
+}
+function scheduleAmbienceEvent(fn,base,spread){
+  var delay=base+Math.random()*(spread||0);
+  var id=setTimeout(fn,delay);
+  stationAmbienceTimeouts.push(id);
+}
+function startStationAmbience(){
+  if(stationAmbienceRunning || !soundOn) return;
+  var c=ac(); if(!c) return;
+  if(c.state==='suspended'){ c.resume(); }
+  stationAmbienceRunning=true;
+  stationAmbienceGain=c.createGain();
+  stationAmbienceGain.gain.value=0.0001;
+  stationAmbienceGain.connect(c.destination);
+  var buf=makeLoopNoiseBuffer(c,5);
+  /* souffle d'air du hall */
+  ambienceLayer(c,buf,900,180,0.016,1);
+  /* grondement grave et lointain */
+  ambienceLayer(c,buf,150,35,0.022,0.72);
+  /* vibration très douce des rails */
+  ambienceLayer(c,buf,320,90,0.010,0.5);
+  /* montée en volume progressive pour éviter tout démarrage brusque */
+  var t=c.currentTime;
+  stationAmbienceGain.gain.setValueAtTime(0.0001,t);
+  stationAmbienceGain.gain.linearRampToValueAtTime(0.55,t+3.5);
+  scheduleAmbienceEvent(ambienceTrainPass,14000,12000);
+  scheduleAmbienceEvent(ambienceQuaiChime,32000,25000);
+}
+function stopStationAmbience(){
+  stationAmbienceRunning=false;
+
+  stationAmbienceTimeouts.forEach(function(id){
+    clearTimeout(id);
+  });
+  stationAmbienceTimeouts=[];
+
+  var oldSources=stationAmbienceSources.slice();
+  var oldGain=stationAmbienceGain;
+  var c=audioCtx;
+
+  stationAmbienceSources=[];
+  stationAmbienceGain=null;
+
+  if(oldGain&&c){
+    var t=c.currentTime;
+
+    try{
+      oldGain.gain.cancelScheduledValues(t);
+
+      oldGain.gain.setValueAtTime(
+        Math.max(oldGain.gain.value,0.0001),
+        t
+      );
+
+      oldGain.gain.linearRampToValueAtTime(
+        0.0001,
+        t+0.6
+      );
+    }catch(error){}
+  }
+
+  oldSources.forEach(function(source){
+    try{
+      source.stop(c ? c.currentTime+0.7 : 0);
+    }catch(error){}
+  });
+
+  setTimeout(function(){
+    try{
+      if(oldGain){
+        oldGain.disconnect();
+      }
+    }catch(error){}
+  },800);
+}
+
 window.toggleSound=function(){
   soundOn=!soundOn;
-  var b=$('btn-sound');
-  b.textContent = soundOn ? '🔊 Son activé' : '🔇 Son coupé';
-  b.setAttribute('aria-pressed', soundOn?'true':'false');
-  b.setAttribute('aria-label', soundOn?'Couper le son':'Activer le son');
-};
-
-/* ==================================================================
-   CHRONO — purement informatif, en pause si l'onglet est masqué
-   ================================================================== */
-var gameStartTime=null, gameTimerInterval=null;
-var elapsedBeforePause=0, timerRunningSince=null, timerPausedByVisibility=false;
-function formatTime(totalSec){ var m=Math.floor(totalSec/60), s=totalSec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
-function formatLongTime(totalSec){ var m=Math.floor(totalSec/60), s=totalSec%60; return m+' min '+String(s).padStart(2,'0')+' s'; }
-function getElapsedSeconds(){
-  var elapsed=elapsedBeforePause;
-  if(timerRunningSince!==null){ elapsed+=Date.now()-timerRunningSince; }
-  return Math.floor(elapsed/1000);
-}
-function startGameTimer(){
-  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
-  gameStartTime=Date.now();
-  elapsedBeforePause=0; timerRunningSince=Date.now(); timerPausedByVisibility=false;
-  updateGameTimer();
-  gameTimerInterval=setInterval(updateGameTimer,1000);
-}
-function updateGameTimer(){
-  var el=$('hud-timer');
-  if(!el||!gameStartTime) return;
-  el.textContent='⏱️ '+formatTime(getElapsedSeconds());
-}
-function stopGameTimer(){
-  var total=getElapsedSeconds();
-  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
-  timerRunningSince=null;
-  return total;
-}
-function pauseGameTimer(){
-  if(!gameStarted || finaleTriggered || timerRunningSince===null) return;
-  elapsedBeforePause+=Date.now()-timerRunningSince;
-  timerRunningSince=null; timerPausedByVisibility=true;
-  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
-}
-function resumeGameTimer(){
-  if(!gameStarted || finaleTriggered || !timerPausedByVisibility || document.hidden) return;
-  timerPausedByVisibility=false;
-  timerRunningSince=Date.now();
-  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); }
-  gameTimerInterval=setInterval(updateGameTimer,1000);
-  updateGameTimer();
-}
-document.addEventListener('visibilitychange', function(){ if(document.hidden){ pauseGameTimer(); } else { resumeGameTimer(); } });
-window.addEventListener('blur', pauseGameTimer);
-window.addEventListener('focus', function(){ if(!document.hidden){ resumeGameTimer(); } });
-
-/* ==================================================================
-   DONNÉES DES 5 MISSIONS — vérifiées numériquement
-   ================================================================== */
-var MISSIONS=[
-  { id:1, eyebrow:'Rapport 1 / 5', title:'🌱 Rapport des cultures', type:'num',
-    story:'Le laboratoire agricole a contrôlé 50 plants répartis dans plusieurs zones de culture.',
-    data:'<table class="data-table"><thead><tr><th>Zone</th><th>Nombre de plants</th></tr></thead><tbody>'
-      +'<tr><td>Zone A</td><td>18</td></tr><tr><td>Zone B</td><td>12</td></tr>'
-      +'<tr class="data-highlight"><td>Zone C</td><td>15</td></tr><tr><td>Zone D</td><td>5</td></tr></tbody></table>',
-    consigne:'Calcule la fréquence des plants de la zone C.',
-    hint:'💡 Divise l\u2019effectif de la zone C par l\u2019effectif total.',
-    firstStep:'1ère étape : effectif total = 18 + 12 + 15 + 5 = 50.',
-    unit:'%', answer:30,
-    correction:'Effectif total = 18 + 12 + 15 + 5 = 50<br>Fréquence de la zone C = 15 ÷ 50 = 0,3 = <strong>30 %</strong>' },
-  { id:2, eyebrow:'Rapport 2 / 5', title:'🔧 Rapport des techniciens', type:'num',
-    story:'Une équipe de maintenance contrôle les systèmes de communication de la base.',
-    data:'<div class="data-line">Équipe de 32 techniciens, dont 8 travaillent sur les antennes extérieures.</div>',
-    consigne:'Calcule la fréquence des techniciens travaillant sur les antennes extérieures.',
-    hint:'💡 Divise 8 par l\u2019effectif total de l\u2019équipe.',
-    firstStep:'1ère étape : fréquence = 8 ÷ 32.',
-    unit:'%', answer:25,
-    correction:'Fréquence = 8 ÷ 32 = 0,25 = <strong>25 %</strong>' },
-  { id:3, eyebrow:'Rapport 3 / 5', title:'🧬 Rapport des cultures expérimentales', type:'num',
-    story:'L\u2019observatoire biologique analyse les résultats de plusieurs cultures expérimentales.',
-    data:'<div class="data-line">Une réaction particulière apparaît 21 fois sur 60 observations.</div>',
-    consigne:'Calcule la fréquence de cette réaction.',
-    hint:'💡 Calcule 21 ÷ 60 puis transforme le résultat en pourcentage.',
-    firstStep:'1ère étape : 21 ÷ 60 = 0,35.',
-    unit:'%', answer:35,
-    correction:'Fréquence = 21 ÷ 60 = 0,35 = <strong>35 %</strong>' },
-  { id:4, eyebrow:'Rapport 4 / 5', title:'🌡️ Rapport des observations', type:'num',
-    story:'La station météo transmet une nouvelle série de relevés à résumer avant l\u2019envoi vers la Terre.',
-    data:'<div class="data-line">Relevés : 6 ; 8 ; 9 ; 11 ; 7 ; 10 ; 5</div>',
-    consigne:'Calcule la moyenne de ces relevés.',
-    hint:'💡 Additionne toutes les valeurs puis divise la somme par le nombre de valeurs.',
-    firstStep:'1ère étape : somme = 6 + 8 + 9 + 11 + 7 + 10 + 5 = 56.',
-    unit:'', answer:8,
-    correction:'Somme = 6 + 8 + 9 + 11 + 7 + 10 + 5 = 56<br>Nombre de valeurs = 7<br>Moyenne = 56 ÷ 7 = <strong>8</strong>' },
-  { id:5, eyebrow:'Rapport 5 / 5', title:'📶 Validation finale', type:'qcm',
-    story:'Avant d\u2019autoriser la transmission générale vers la Terre, l\u2019ordinateur central demande une dernière vérification théorique.',
-    data:'',
-    consigne:'Choisis la seule affirmation correcte.',
-    hint:'💡 Une fréquence représente une proportion.',
-    options:[
-      {txt:'Une fréquence est toujours comprise entre 0 et 1.', ok:true},
-      {txt:'Une fréquence peut être supérieure à 1.', ok:false},
-      {txt:'La somme des fréquences vaut toujours 100.', ok:false},
-      {txt:'Une moyenne est toujours un nombre entier.', ok:false}
-    ],
-    correction:'Une fréquence est le quotient d\u2019un effectif par l\u2019effectif total : elle est donc toujours comprise entre 0 et 1 (soit entre 0 % et 100 %).' }
-];
-
-/* ==================================================================
-   ÉTAT
-   ================================================================== */
-var current=0;
-var results=[false,false,false,false,false];
-var attempts=[0,0,0,0,0];
-var missionHadCorrection=[false,false,false,false,false];
-var autonomousSuccesses=0;
-var gameStarted=false;
-var transitionPending=false;
-var transitionTimeoutID=null;
-function clearTransitionTimeout(){
-  if(transitionTimeoutID!==null){ clearTimeout(transitionTimeoutID); transitionTimeoutID=null; }
-}
-var finaleTriggered=false;
-
-/* ==================================================================
-   NAVIGATION
-   ================================================================== */
-window.startGame=function(){
-  if(gameStarted) return;
-  gameStarted=true;
-  playClick();
-  $('scene-intro').style.display='none';
-  $('scene-mission').classList.add('show');
-  renderCaps();
-  startGameTimer();
-  renderMission();
-};
-
-function renderCaps(){
-  var html='';
-  for(var i=0;i<5;i++){
-    var cls = results[i] ? 'done' : (i===current ? 'current' : '');
-    html+='<div class="cap '+cls+'" aria-hidden="true"><div class="cap-fill"></div></div>';
+  var b=$('sound-toggle');
+  if(b){
+    b.innerHTML = soundOn ? '\uD83D\uDD0A' : '\uD83D\uDD07';
+    b.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+    b.setAttribute('aria-label', soundOn ? 'Couper les sons' : 'Activer les sons');
+    b.setAttribute('title', soundOn ? 'Son activ\u00e9' : 'Son coup\u00e9');
   }
-  var progress=$('progress-caps');
-  progress.innerHTML=html;
-  var done=results.filter(function(v){return v;}).length;
-  progress.setAttribute('aria-valuenow', String(done));
-  $('progress-txt').textContent=done+' / 5';
-}
-
-/* ==================================================================
-   RENDU D'UNE MISSION — indice masqué au départ
-   ================================================================== */
-function renderMission(){
-  var m=MISSIONS[current];
-  var c=$('mission-card');
-  var body='';
-  if(m.type==='num'){
-    body='<div class="answer-row">'
-      +'<input type="text" inputmode="decimal" class="answer-input" id="mission-input" aria-label="Ta réponse'+(m.unit?' en '+m.unit:'')+'" autocomplete="off" spellcheck="false">'
-      +(m.unit?'<span class="answer-unit">'+m.unit+'</span>':'')
-      +'<button type="button" class="btn btn-launch" id="btn-check" onclick="checkNumeric()">Vérifier</button>'
-      +'</div>'
-      +'<div class="answer-tip">Saisis ta réponse puis appuie sur Entrée, ou clique sur Vérifier.</div>';
+  if(soundOn){
+    var c=ac(); if(c && c.state==='suspended'){ c.resume(); }
+    sndHint();
+    if(missionStarted){ startStationAmbience(); }
   } else {
-    var optsHtml=m.options.map(function(o,i){
-      return '<button type="button" class="opt-btn" id="opt-'+i+'" onclick="checkQCM('+i+')" role="radio" aria-checked="false">'
-        +'<span class="ob-letter">'+String.fromCharCode(65+i)+'</span><span>'+o.txt+'</span></button>';
-    }).join('');
-    body='<div class="choice-list" role="radiogroup" aria-label="Choisis la bonne affirmation">'+optsHtml+'</div>';
+    stopStationAmbience();
   }
-  c.innerHTML=
-    '<div class="mission-eyebrow">'+m.eyebrow+'</div>'
-    +'<h2>'+m.title+'</h2>'
-    +'<div class="mission-story">'+m.story+'</div>'
-    +(m.data?'<div class="data-wrap">'+m.data+'</div>':'')
-    +'<div class="mission-consigne">'+m.consigne+'</div>'
-    +'<div class="hint-actions">'
-      +'<button type="button" class="btn btn-hint" id="btn-hint" onclick="toggleMissionHint()" aria-expanded="false" aria-controls="mission-hint">💡 Indice</button>'
-      +'<div class="hint-box" id="mission-hint" hidden><span class="hint-emoji" aria-hidden="true">💡</span><span>'+m.hint.replace('💡 ','')+'</span></div>'
-    +'</div>'
-    +body
-    +'<div class="feedback" id="fb-box" role="status" aria-live="polite" aria-atomic="true"></div>'
-    +'<div class="correction-box" id="correction-box" hidden></div>';
-  renderCaps();
-  if(m.type==='num'){
-    var inp=$('mission-input');
-    inp.focus();
-    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') checkNumeric(); });
+};
+
+
+/* =====================================================================
+   CONFIGURATION — SEULE CETTE SECTION CHANGE CHAQUE JOUR
+   Remplacer missionTitle / missionSub / plans par le contenu du jour.
+   Chaque plan : {type:'qcm'|'numeric', title, sub, figure(optionnel, HTML SVG),
+   question, options (qcm) ou answer (numeric), hint, correction}
+   ===================================================================== */
+var CONFIG={
+  missionTitle:"Harmoniser les plans de la nouvelle gare",
+  missionSub:"Semaine 8 — Jour 3",
+  introTitle:"Je relève le défi",
+  introText:"Les travaux de la nouvelle gare avancent. Les ing\u00e9nieurs ont re\u00e7u plusieurs plans provenant de bureaux d\u2019\u00e9tudes diff\u00e9rents. Les surfaces y sont exprim\u00e9es dans des unit\u00e9s vari\u00e9es\u00a0: m\u00e8tres carr\u00e9s, d\u00e9cim\u00e8tres carr\u00e9s, centim\u00e8tres carr\u00e9s, hectares\u2026 Avant de commander les mat\u00e9riaux et de comparer les diff\u00e9rentes zones, toutes les mesures doivent \u00eatre converties dans les unit\u00e9s demand\u00e9es. Une seule erreur pourrait entra\u00eener une mauvaise estimation des surfaces \u00e0 am\u00e9nager.",
+  introNote:"\uD83D\uDCCB Convertis correctement les mesures d\u2019aire des cinq plans techniques afin d\u2019uniformiser le dossier de construction de la gare. Le chronom\u00e8tre est informatif et n\u2019entra\u00eene aucune p\u00e9nalit\u00e9.",
+  briefText:"Convertis l\u2019aire de chaque plan dans l\u2019unit\u00e9 demand\u00e9e avant validation finale.",
+  finaleTitle:"Mission accomplie\u00a0!",
+  finaleText:"Gr\u00e2ce \u00e0 tes conversions, toutes les surfaces des plans de la nouvelle gare sont maintenant exprim\u00e9es dans les unit\u00e9s demand\u00e9es. Les ing\u00e9nieurs peuvent comparer les zones et pr\u00e9parer les commandes de mat\u00e9riaux sans risque d\u2019erreur.<br><br><i>Pour convertir une aire, chaque changement d\u2019unit\u00e9 correspond \u00e0 un facteur 100.</i>",
+  refTable:'<div class="conv-table-wrap conv-ref-wrap"><table class="conv-table"><thead><tr><th colspan="2">km\u00b2</th><th colspan="2">hm\u00b2 (ha)</th><th colspan="2">dam\u00b2</th><th colspan="2">m\u00b2</th><th colspan="2">dm\u00b2</th><th colspan="2">cm\u00b2</th><th colspan="2">mm\u00b2</th></tr></thead><tbody><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>',
+  plans:[
+    /* ---- PLAN 1 — Les dalles du quai ---- */
+    {type:'numeric', title:'Plan 1 — Les dalles du quai', sub:'Convertir une aire (m\u00b2 \u2192 dm\u00b2)',
+     figure:'', useRefTable:true,
+     question:'Les dalles d\u2019un quai couvrent une surface de <b>0,385 m\u00b2</b>. Le fournisseur demande la mesure en dm\u00b2.<br>Convertis 0,385 m\u00b2 en dm\u00b2.',
+     answer:38.5, unit:'dm\u00b2',
+     hint:'Pour passer de m\u00b2 \u00e0 dm\u00b2, on descend d\u2019une unit\u00e9 dans le tableau des aires.',
+     hint2:'\u00c0 chaque changement d\u2019unit\u00e9 d\u2019aire vers une unit\u00e9 plus petite, on multiplie par 100.',
+     correction:'<b>D\u00e9marche\u00a0:</b> de m\u00b2 \u00e0 dm\u00b2, on multiplie par 100.<br><b>Calcul\u00a0:</b> 0,385 &times; 100 = 38,5<br><b>R\u00e9ponse\u00a0:</b> 0,385 m\u00b2 = <b>38,5 dm\u00b2</b>.'
+     +'<div class="conv-table-wrap"><table class="conv-table" id="conv-p0"><thead><tr><th colspan="2">km\u00b2</th><th colspan="2">hm\u00b2 (ha)</th><th colspan="2">dam\u00b2</th><th colspan="2">m\u00b2</th><th colspan="2">dm\u00b2</th><th colspan="2">cm\u00b2</th><th colspan="2">mm\u00b2</th></tr></thead><tbody><tr class="conv-digits"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="conv-from">0</td><td>3</td><td class="conv-to">8</td><td>5</td><td></td><td></td><td></td></tr><tr class="conv-marks"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="conv-tag conv-tag-from">d\u00e9part (m\u00b2)</span></td><td></td><td><span class="conv-tag conv-tag-to">arriv\u00e9e (dm\u00b2)</span></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>'},
+    /* ---- PLAN 2 — Les plaques de signalisation ---- */
+    {type:'numeric', title:'Plan 2 — Les plaques de signalisation', sub:'Convertir une aire (mm\u00b2 \u2192 cm\u00b2)',
+     figure:'', useRefTable:true,
+     question:'Une plaque m\u00e9tallique poss\u00e8de une aire de <b>183 mm\u00b2</b>. Le plan g\u00e9n\u00e9ral utilise les cm\u00b2.<br>Convertis 183 mm\u00b2 en cm\u00b2.',
+     answer:1.83, unit:'cm\u00b2',
+     hint:'Pour passer de mm\u00b2 \u00e0 cm\u00b2, on va vers une unit\u00e9 plus grande.',
+     hint2:'De mm\u00b2 \u00e0 cm\u00b2, on divise par 100.',
+     correction:'<b>D\u00e9marche\u00a0:</b> de mm\u00b2 \u00e0 cm\u00b2, on divise par 100.<br><b>Calcul\u00a0:</b> 183 \u00f7 100 = 1,83<br><b>R\u00e9ponse\u00a0:</b> 183 mm\u00b2 = <b>1,83 cm\u00b2</b>.'
+     +'<div class="conv-table-wrap"><table class="conv-table" id="conv-p1"><thead><tr><th colspan="2">km\u00b2</th><th colspan="2">hm\u00b2 (ha)</th><th colspan="2">dam\u00b2</th><th colspan="2">m\u00b2</th><th colspan="2">dm\u00b2</th><th colspan="2">cm\u00b2</th><th colspan="2">mm\u00b2</th></tr></thead><tbody><tr class="conv-digits"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="conv-to">1</td><td>8</td><td class="conv-from">3</td></tr><tr class="conv-marks"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="conv-tag conv-tag-to">arriv\u00e9e (cm\u00b2)</span></td><td></td><td><span class="conv-tag conv-tag-from">d\u00e9part (mm\u00b2)</span></td></tr></tbody></table></div>'},
+    /* ---- PLAN 3 — Le revêtement du hall ---- */
+    {type:'numeric', title:'Plan 3 — Le rev\u00eatement du hall', sub:'Convertir une aire (cm\u00b2 \u2192 m\u00b2)',
+     figure:'', useRefTable:true,
+     question:'Le rev\u00eatement pr\u00e9vu pour le hall repr\u00e9sente <b>12\u00a0000 cm\u00b2</b>. Les ing\u00e9nieurs souhaitent exprimer cette aire en m\u00b2.<br>Convertis 12\u00a0000 cm\u00b2 en m\u00b2.',
+     answer:1.2, unit:'m\u00b2',
+     hint:'De cm\u00b2 \u00e0 m\u00b2, il faut remonter deux unit\u00e9s\u00a0: cm\u00b2 \u2192 dm\u00b2 \u2192 m\u00b2.',
+     hint2:'Chaque \u00e9tape correspond \u00e0 une division par 100.',
+     correction:'<b>D\u00e9marche\u00a0:</b> 12\u00a0000 cm\u00b2 \u00f7 100 = 120 dm\u00b2, puis 120 dm\u00b2 \u00f7 100 = 1,2 m\u00b2.<br><b>Calcul\u00a0:</b> 12\u00a0000 \u00f7 100 = 120 &nbsp;&nbsp; 120 \u00f7 100 = 1,2<br><b>R\u00e9ponse\u00a0:</b> 12\u00a0000 cm\u00b2 = <b>1,2 m\u00b2</b>.'
+     +'<div class="conv-table-wrap"><table class="conv-table" id="conv-p2"><thead><tr><th colspan="2">km\u00b2</th><th colspan="2">hm\u00b2 (ha)</th><th colspan="2">dam\u00b2</th><th colspan="2">m\u00b2</th><th colspan="2">dm\u00b2</th><th colspan="2">cm\u00b2</th><th colspan="2">mm\u00b2</th></tr></thead><tbody><tr class="conv-digits"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="conv-to">1</td><td>2</td><td>0</td><td>0</td><td class="conv-from">0</td><td></td><td></td></tr><tr class="conv-marks"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="conv-tag conv-tag-to">arriv\u00e9e (m\u00b2)</span></td><td></td><td></td><td></td><td><span class="conv-tag conv-tag-from">d\u00e9part (cm\u00b2)</span></td><td></td><td></td></tr></tbody></table></div>'},
+    /* ---- PLAN 4 — La zone de stockage ---- */
+    {type:'numeric', title:'Plan 4 — La zone de stockage', sub:'Convertir une aire (dm\u00b2 \u2192 hm\u00b2)',
+     figure:'', useRefTable:true,
+     question:'Une grande zone de stockage poss\u00e8de une aire de <b>34\u00a0000 dm\u00b2</b>. Les documents administratifs utilisent les hm\u00b2.<br>Convertis 34\u00a0000 dm\u00b2 en hm\u00b2.',
+     answer:0.034, unit:'hm\u00b2',
+     hint:'\u00c9cris d\u2019abord les \u00e9tapes\u00a0: dm\u00b2 \u2192 m\u00b2 \u2192 dam\u00b2 \u2192 hm\u00b2. Compte ensuite le nombre de d\u00e9placements dans le tableau des aires.',
+     hint2:'dm\u00b2 \u2192 m\u00b2 \u2192 dam\u00b2 \u2192 hm\u00b2\u00a0: il faut diviser trois fois par 100.',
+     correction:'<b>D\u00e9marche\u00a0:</b> 34\u00a0000 dm\u00b2 = 340 m\u00b2, puis 340 m\u00b2 = 3,4 dam\u00b2, puis 3,4 dam\u00b2 = 0,034 hm\u00b2.<br><b>Calcul\u00a0:</b> 34\u00a0000 \u00f7 1\u00a0000\u00a0000 = 0,034<br><b>R\u00e9ponse\u00a0:</b> 34\u00a0000 dm\u00b2 = <b>0,034 hm\u00b2</b> (et non 0,34\u00a0hm\u00b2).'
+     +'<div class="conv-table-wrap"><table class="conv-table" id="conv-p3"><thead><tr><th colspan="2">km\u00b2</th><th colspan="2">hm\u00b2 (ha)</th><th colspan="2">dam\u00b2</th><th colspan="2">m\u00b2</th><th colspan="2">dm\u00b2</th><th colspan="2">cm\u00b2</th><th colspan="2">mm\u00b2</th></tr></thead><tbody><tr class="conv-digits"><td></td><td></td><td></td><td class="conv-to"></td><td></td><td>3</td><td>4</td><td>0</td><td>0</td><td class="conv-from">0</td><td></td><td></td><td></td><td></td></tr><tr class="conv-marks"><td></td><td></td><td></td><td><span class="conv-tag conv-tag-to">arriv\u00e9e (hm\u00b2)</span></td><td></td><td></td><td></td><td></td><td></td><td><span class="conv-tag conv-tag-from">d\u00e9part (dm\u00b2)</span></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>'},
+    /* ---- PLAN 5 — Le terrain de la gare ---- */
+    {type:'qcm', title:'Plan 5 — Le terrain de la gare', sub:'Convertir une aire en hectares',
+     figure:'<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" style="max-width:280px" role="img" aria-labelledby="f5-t f5-d"><title id="f5-t">Terrain rectangulaire de 250 m sur 400 m</title><desc id="f5-d">Un rectangle de longueur 400 m\u00e8tres et de largeur 250 m\u00e8tres.</desc><rect x="30" y="40" width="240" height="120" fill="#CFE4FA" stroke="#1E5F9E" stroke-width="3"/><text x="150" y="30" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E">400 m</text><text x="14" y="104" text-anchor="middle" font-family="Arial" font-weight="700" font-size="15" fill="#1E5F9E" transform="rotate(-90 14 104)">250 m</text></svg>', useRefTable:false,
+     question:'La gare doit \u00eatre construite sur un terrain rectangulaire de longueur 400 m et de largeur 250 m. Le dossier foncier exprime les grandes surfaces en hectares (rappel\u00a0: 1 ha = 10\u00a0000 m\u00b2).<br>Quelle est l\u2019aire du terrain en hectares&nbsp;?',
+     options:[{t:'1 ha',ok:false},{t:'5 ha',ok:false},{t:'10 ha',ok:true},{t:'100 ha',ok:false}],
+     successNote:'On divise par 10\u00a0000 car 1 hectare correspond \u00e0 10\u00a0000 m\u00b2.',
+     hint:'Calcule d\u2019abord l\u2019aire du rectangle en m\u00b2.',
+     hint2:'Aire = longueur &times; largeur, puis divise par 10\u00a0000 pour obtenir des hectares.',
+     correction:'<b>D\u00e9marche\u00a0:</b> aire du terrain = longueur &times; largeur, puis conversion en hectares.<br><b>Calcul\u00a0:</b> 400 &times; 250 = 100\u00a0000 m\u00b2 &nbsp;&nbsp; 100\u00a0000 \u00f7 10\u00a0000 = 10<br><b>R\u00e9ponse\u00a0:</b> le terrain mesure <b>10 ha</b>.'
+     +'<div class="conv-table-wrap"><table class="conv-table" id="conv-p4"><thead><tr><th colspan="2">km\u00b2</th><th colspan="2">hm\u00b2 (ha)</th><th colspan="2">dam\u00b2</th><th colspan="2">m\u00b2</th><th colspan="2">dm\u00b2</th><th colspan="2">cm\u00b2</th><th colspan="2">mm\u00b2</th></tr></thead><tbody><tr class="conv-digits"><td></td><td></td><td>1</td><td class="conv-to">0</td><td>0</td><td>0</td><td>0</td><td class="conv-from">0</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="conv-marks"><td></td><td></td><td></td><td><span class="conv-tag conv-tag-to">arriv\u00e9e (hm\u00b2=ha)</span></td><td></td><td></td><td></td><td><span class="conv-tag conv-tag-from">d\u00e9part (m\u00b2)</span></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>'}
+  ]
+};
+
+/* =====================================================================
+   ÉTAT GLOBAL
+   ===================================================================== */
+var N=CONFIG.plans.length;
+var solved=[]; for(var _i=0;_i<N;_i++) solved.push(false);
+var attempts=[]; for(var _j=0;_j<N;_j++) attempts.push(0);
+var correctionShown=[]; for(var _k=0;_k<N;_k++) correctionShown.push(false);
+var active=0;
+var validatedCount=0, autonomousCount=0;
+var missionStarted=false;
+var transitionRunning=false;
+
+/* =====================================================================
+   CHRONOMÈTRE — démarrage/pause manuels + pause automatique à la visibilité
+   ===================================================================== */
+var totalSec=0, timerInterval=null, timerRunning=false;
+function fmtTime(s){ var m=Math.floor(s/60), r=s%60; return (m<10?'0':'')+m+':'+(r<10?'0':'')+r; }
+function timerTick(){ totalSec++; $('led-display').textContent=fmtTime(totalSec); }
+window.timerStart=function(){
+  if(timerRunning) return;
+  timerRunning=true;
+  clearInterval(timerInterval);
+  timerInterval=setInterval(timerTick,1000);
+};
+window.timerPause=function(){
+  timerRunning=false;
+  clearInterval(timerInterval); timerInterval=null;
+};
+window.timerReset=function(){
+  window.timerPause();
+  totalSec=0;
+  $('led-display').textContent='00:00';
+};
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){
+    clearInterval(timerInterval); timerInterval=null;
+    stopStationAmbience();
+  } else {
+    if(timerRunning){ clearInterval(timerInterval); timerInterval=setInterval(timerTick,1000); }
+    if(soundOn && missionStarted && !$('finale-overlay').classList.contains('show')){ startStationAmbience(); }
   }
+});
+window.addEventListener('blur',function(){ clearInterval(timerInterval); timerInterval=null; });
+window.addEventListener('focus',function(){ if(!document.hidden && timerRunning){ clearInterval(timerInterval); timerInterval=setInterval(timerTick,1000); } });
+
+/* =====================================================================
+   PANNEAUX (repli mobile)
+   ===================================================================== */
+window.togglePanel=function(id){
+  var panel=$(id);
+  var collapsed=panel.classList.toggle('collapsed');
+  var button=panel.querySelector('.panel-toggle');
+  if(button){
+    button.setAttribute('aria-expanded',collapsed?'false':'true');
+  }
+};
+
+/* =====================================================================
+   BOÎTE À OUTILS (indices / corrections)
+   ===================================================================== */
+function toolboxReset(){
+  $('toolbox-empty').style.display='block';
+  var h=$('toolbox-hint'); h.classList.remove('show'); h.innerHTML='';
+  var c=$('toolbox-corr'); c.classList.remove('show'); c.innerHTML='';
 }
-function toggleMissionHint(){
-  var box=$('mission-hint');
-  var button=$('btn-hint');
-  if(!box || !button) return;
-  var open=box.hidden;
-  box.hidden=!open;
-  button.setAttribute('aria-expanded', open?'true':'false');
-  button.textContent = open ? '💡 Masquer l\u2019indice' : '💡 Indice';
+function toolboxShowHint(text){
+  $('toolbox-empty').style.display='none';
+  var h=$('toolbox-hint');
+  h.innerHTML='<b>\uD83D\uDCA1 Indice</b><br>'+text;
+  h.classList.add('show');
 }
-function showMissionHintAfterError(){
-  var box=$('mission-hint');
-  var button=$('btn-hint');
-  if(box){ box.hidden=false; }
-  if(button){ button.setAttribute('aria-expanded','true'); button.textContent='💡 Masquer l\u2019indice'; }
+function toolboxShowCorrection(text){
+  $('toolbox-empty').style.display='none';
+  var c=$('toolbox-corr');
+  c.innerHTML='<b>\u2705 Correction</b><br>'+text;
+  c.classList.add('show');
 }
 
-/* ==================================================================
-   VALIDATION — NUMÉRIQUE (deux essais avant correction automatique)
-   ================================================================== */
-function parseFlex(str){
-  if(str==null) return NaN;
-  var s=String(str).trim().replace(/\s+/g,'').replace(',', '.').replace('%','');
-  if(!/^-?\d+(\.\d+)?$/.test(s)) return NaN;
-  return parseFloat(s);
+/* =====================================================================
+   LISTE DES PLANS (panneau gauche)
+   ===================================================================== */
+function renderPlanList(){
+  var host=$('plan-list'); host.innerHTML='';
+  CONFIG.plans.forEach(function(p,i){
+    var div=document.createElement('div');
+    div.className='plan-item'+(i===active?' current':'')+(solved[i]?' done':'');
+    div.innerHTML='<span class="dot" aria-hidden="true"></span><span>Plan '+(i+1)+'/'+N+'</span>';
+    host.appendChild(div);
+  });
 }
-function roundToTenth(v){ return Math.round((v+Number.EPSILON)*10)/10; }
-window.checkNumeric=function(){
-  if(transitionPending || results[current]) return;
-  var m=MISSIONS[current];
-  var input=$('mission-input');
-  var val=parseFlex(input.value);
-  var feedback=$('fb-box');
-  if(isNaN(val)){
-    feedback.className='feedback show ko';
-    feedback.innerHTML='Saisis uniquement un nombre'+(m.unit?' (l\u2019unité '+m.unit+' est facultative)':'')+'.';
-    input.focus();
-    return;
+function updateRail(){
+  var pct=Math.round((validatedCount/N)*100);
+  $('rail-pct').textContent=pct+'\u00a0%';
+  var fill=$('rail-fill');
+  fill.setAttribute('x2', (pct*10)); // viewBox width 1000
+  var ties=$('rail-ties'); ties.innerHTML='';
+  for(var i=0;i<N;i++){
+    var x=40+i*((1000-80)/(N-1||1));
+    var on = i < validatedCount;
+    ties.innerHTML+='<line x1="'+x+'" y1="6" x2="'+x+'" y2="28" stroke="'+(on?'#FF6A1A':'#4B545E')+'" stroke-width="5"/>';
   }
-  var ok = m.decimals ? (roundToTenth(val)===roundToTenth(m.answer)) : (val===m.answer);
-  if(!ok){
-    input.classList.remove('ok');
-    input.classList.add('ko');
-    attempts[current]++;
-    playWrong();
-    feedback.className='feedback show ko';
-    if(attempts[current]===1){
-      feedback.innerHTML='Ce n\u2019est pas encore la bonne réponse. Corrige directement ta saisie.';
-      showMissionHintAfterError();
+  var progress=$('rail-progress');
+  if(progress){
+    progress.setAttribute('aria-valuemax',String(N));
+    progress.setAttribute('aria-valuenow',String(validatedCount));
+    progress.setAttribute(
+      'aria-label',
+      validatedCount+' plan'+(validatedCount>1?'s':'')+
+      ' valid\u00e9'+(validatedCount>1?'s':'')+' sur '+N
+    );
+  }
+}
+
+/* =====================================================================
+   RENDU D'UN PLAN
+   ===================================================================== */
+function planHTML(i){
+  var p=CONFIG.plans[i];
+  var html='<div class="plan-card" id="plan-card-'+i+'">'
+    +'<div class="plan-card-head"><div class="plan-card-num">'+(i+1)+'</div>'
+    +'<div><div class="plan-card-title">'+p.title+'</div><div class="plan-card-sub">'+p.sub+'</div></div></div>'
+    +'<div class="plan-card-body">';
+  if(p.figure){ html+='<div class="plan-figure">'+p.figure+'</div>'; }
+  if(p.useRefTable && CONFIG.refTable){ html+=CONFIG.refTable; }
+  html+='<div class="plan-question">'+p.question+'</div>';
+  if(p.type==='qcm'){
+    html+='<div class="opt-list" id="opt-list-'+i+'">'+p.options.map(function(o,oi){
+      return '<button type="button" class="opt-btn" data-i="'+oi+'" data-ok="'+(!!o.ok)+'" onclick="validatePlan('+i+',this)">'+o.t+'</button>';
+    }).join('')+'</div>';
+  } else if(p.type==='numeric'){
+    html+='<div class="num-row"><input type="text" inputmode="decimal" class="num-input" id="num-input-'+i+'" placeholder="?" aria-label="R\u00e9ponse num\u00e9rique"/>'
+      +(p.unit?'<span style="color:#4B545E;font-weight:700;">'+p.unit+'</span>':'')
+      +'<button type="button" class="btn btn-validate" id="num-btn-'+i+'" onclick="validatePlan('+i+',null)">\u2705 V\u00e9rifier</button></div>';
+  }
+  html+='<div class="feedback-box" id="feedback-'+i+'" role="status" aria-live="polite"></div>';
+  html+='</div></div>';
+  return html;
+}
+function showActivePlan(){
+  $('plan-host').innerHTML=planHTML(active);
+  toolboxReset();
+  renderPlanList();
+  var p=CONFIG.plans[active];
+  $('mission-dynamic-sub').textContent=CONFIG.missionSub+' \u00b7 Plan '+(active+1)+'/'+N;
+  if(p.type==='numeric'){
+    var inp=$('num-input-'+active);
+    inp.addEventListener('keydown',function(evt){ if(evt.key==='Enter'){ evt.preventDefault(); window.validatePlan(active,null); } });
+  }
+}
+
+/* =====================================================================
+   VALIDATION STRICTE D'UN NOMBRE
+   ===================================================================== */
+function parseStrictNumber(value){
+  if(value===undefined||value===null) return NaN;
+  var cleaned=String(value).trim().replace(/\u00A0/g,'').replace(/\s+/g,'').replace(/,/g,'.');
+  if(cleaned==='' || !/^-?\d+(?:\.\d+)?$/.test(cleaned)) return NaN;
+  var n=Number(cleaned);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+/* =====================================================================
+   VALIDATION D'UN PLAN (QCM ou numérique)
+   ===================================================================== */
+window.validatePlan=function(i,btn){
+  if(solved[i]||transitionRunning) return;
+  var p=CONFIG.plans[i];
+  var isCorrect=false;
+  var fb=$('feedback-'+i);
+
+  if(p.type==='qcm'){
+    if(!btn) return;
+    isCorrect = btn.getAttribute('data-ok')==='true';
+    document.querySelectorAll('#opt-list-'+i+' .opt-btn').forEach(function(b){ b.disabled=true; });
+    btn.classList.add(isCorrect?'correct':'wrong');
+  } else if(p.type==='numeric'){
+    var input=$('num-input-'+i);
+    var val=parseStrictNumber(input.value);
+    if(Number.isNaN(val)){
+      fb.className='feedback-box show ko';
+      fb.innerHTML='\u26A0\uFE0F Saisis uniquement un nombre.';
       input.focus();
-      input.select();
       return;
     }
-    completeMissionWithCorrection();
-    return;
+    isCorrect = val===p.answer;
+    input.classList.add(isCorrect?'ok':'ko');
   }
-  input.classList.remove('ko');
-  input.classList.add('ok');
-  setDisabled(input,true);
-  setDisabled($('btn-check'),true);
-  playCorrect();
-  results[current]=true;
-  if(!missionHadCorrection[current]){ autonomousSuccesses++; }
-  feedback.className='feedback show ok';
-  feedback.innerHTML='✅ Bravo ! Bonne réponse.';
-  var box=$('correction-box');
-  box.hidden=false;
-  box.innerHTML='<strong>Correction :</strong><br>'+m.correction;
-  finishMissionSuccess();
-};
 
-/* ==================================================================
-   VALIDATION — QCM (mission 5)
-   ================================================================== */
-window.checkQCM=function(index){
-  var btn=$('opt-'+index);
-  if(!btn || btn.disabled || transitionPending || results[current]) return;
-  var m=MISSIONS[current];
-  var ok=m.options[index].ok;
-  var feedback=$('fb-box');
-  btn.setAttribute('aria-checked','true');
-  if(!ok){
-    btn.classList.add('wrong');
-    setDisabled(btn,true);
-    attempts[current]++;
-    playWrong();
-    feedback.className='feedback show ko';
-    if(attempts[current]===1){
-      feedback.innerHTML='Ce n\u2019est pas la bonne affirmation. Tu peux choisir une autre réponse directement.';
-      showMissionHintAfterError();
-      return;
-    }
-    document.querySelectorAll('.opt-btn').forEach(function(b,i){
-      setDisabled(b,true);
-      if(m.options[i].ok){ b.classList.add('correct'); b.setAttribute('aria-checked','true'); }
-      else { b.setAttribute('aria-checked','false'); }
-    });
-    missionHadCorrection[current]=true;
-    results[current]=true;
-    feedback.innerHTML='📘 La correction est affichée ci-dessous.';
-    var box=$('correction-box');
-    box.hidden=false;
-    box.innerHTML='<strong>Correction :</strong><br>'+m.correction;
-    var card=$('mission-card'); if(card) card.classList.add('pulse-ok');
-    renderCaps();
-    showNextReportButton();
-    return;
-  }
-  btn.classList.add('correct');
-  playCorrect();
-  document.querySelectorAll('.opt-btn').forEach(function(b){ setDisabled(b,true); });
-  results[current]=true;
-  if(!missionHadCorrection[current]){ autonomousSuccesses++; }
-  feedback.className='feedback show ok';
-  feedback.innerHTML='✅ Bravo ! Bonne réponse.';
-  var box2=$('correction-box');
-  box2.hidden=false;
-  box2.innerHTML='<strong>Correction :</strong><br>'+m.correction;
-  finishMissionSuccess();
-};
+  attempts[i]++;
+  var card=$('plan-card-'+i);
 
-/* ==================================================================
-   CORRECTION AUTOMATIQUE APRÈS LA DEUXIÈME ERREUR (missions numériques)
-   ================================================================== */
-function completeMissionWithCorrection(){
-  var mission=MISSIONS[current];
-  var input=$('mission-input');
-  var feedback=$('fb-box');
-  var correction=$('correction-box');
-
-  missionHadCorrection[current]=true;
-  results[current]=true;
-
-  input.value=String(mission.answer).replace('.',',');
-  input.classList.remove('ko');
-  input.classList.add('ok');
-
-  setDisabled(input,true);
-  setDisabled($('btn-check'),true);
-
-  feedback.className='feedback show ko';
-  feedback.innerHTML='📘 La correction est affichée ci-dessous.';
-
-  correction.hidden=false;
-  correction.innerHTML='<strong>Correction :</strong><br>'+mission.correction;
-
-  var card=$('mission-card'); if(card) card.classList.add('pulse-ok');
-  renderCaps();
-  showNextReportButton();
-}
-
-/* ==================================================================
-   PROGRESSION MANUELLE ENTRE MISSIONS — la correction reste visible
-   jusqu'au clic de l'élève
-   ================================================================== */
-function finishMissionSuccess(){
-  var card=$('mission-card'); card.classList.add('pulse-ok');
-  renderCaps();
-  var justCap=document.querySelector('.progress-caps .cap:nth-child('+(current+1)+')');
-  if(justCap) justCap.classList.add('just-validated');
-  showNextReportButton();
-}
-function showNextReportButton(){
-  if(transitionPending) return;
-  transitionPending=true;
-
-  var card=$('mission-card');
-  if(!card || card.querySelector('#btn-next-report')) return;
-
-  var message=document.createElement('div');
-  message.className='zone-validated';
-  message.setAttribute('role','status');
-  message.textContent='✅ Rapport validé';
-  card.appendChild(message);
-
-  var button=document.createElement('button');
-  button.type='button';
-  button.className='btn btn-copper';
-  button.id='btn-next-report';
-  button.style.marginTop='1rem';
-  button.textContent = current===4 ? 'Voir le bilan →' : 'Rapport suivant →';
-  button.addEventListener('click', continueToNextReport);
-
-  card.appendChild(button);
-  button.focus();
-}
-function continueToNextReport(){
-  if(!transitionPending || !results[current]) return;
-
-  var button=$('btn-next-report');
-  if(button){ setDisabled(button,true); }
-
-  transitionPending=false;
-  playNextMission();
-
-  if(current<4){
-    current++;
-    renderMission();
-    window.scrollTo({top:0,behavior:'smooth'});
+  if(isCorrect){
+    fb.className='feedback-box show ok';
+    fb.innerHTML='\u2705 Conversion valid\u00e9e. Ce plan peut \u00eatre ajout\u00e9 au dossier technique.'
+      + (p.successNote ? '<br><i>'+p.successNote+'</i>' : '');
+    sndValidate();
+    if(!correctionShown[i]) autonomousCount++;
+    validatedCount++;
+    solved[i]=true;
+    if(p.type==='numeric'){ $('num-input-'+i).disabled=true; $('num-btn-'+i).disabled=true; }
+    updateRail(); renderPlanList();
+    showNextButton(i);
   } else {
-    triggerFinale();
+    sndError();
+    if(card){ card.classList.add('shake'); setTimeout(function(){card.classList.remove('shake');},350); }
+    fb.className='feedback-box show ko';
+
+    if(attempts[i]===1){
+      fb.innerHTML='\u274C V\u00e9rifie l\u2019unit\u00e9 de d\u00e9part et l\u2019unit\u00e9 d\u2019arriv\u00e9e.';
+      toolboxShowHint(p.hint);
+      reenablePlanInputs(i,p);
+    } else if(attempts[i]===2 && !correctionShown[i]){
+      fb.innerHTML='\u274C V\u00e9rifie l\u2019unit\u00e9 de d\u00e9part et l\u2019unit\u00e9 d\u2019arriv\u00e9e.';
+      toolboxShowHint(p.hint2||p.hint);
+      reenablePlanInputs(i,p);
+    } else if(!correctionShown[i]){
+      correctionShown[i]=true;
+      sndCorrection();
+      toolboxShowCorrection(p.correction);
+      fb.innerHTML=p.correction;
+      reenablePlanInputs(i,p);
+    } else {
+      fb.innerHTML='\u274C Ce n\u2019est pas encore la bonne r\u00e9ponse. Relis la correction affich\u00e9e ci-dessus, puis r\u00e9ponds \u00e0 nouveau.';
+      reenablePlanInputs(i,p);
+    }
+  }
+};
+function reenablePlanInputs(i,p){
+  if(p.type==='qcm'){
+    document.querySelectorAll('#opt-list-'+i+' .opt-btn').forEach(function(b){ b.disabled=false; b.classList.remove('wrong'); });
+  } else {
+    var input=$('num-input-'+i);
+    input.disabled=false; input.classList.remove('ko'); input.value=''; input.focus();
+    $('num-btn-'+i).disabled=false;
   }
 }
-
-/* ==================================================================
-   BILAN FINAL
-   ================================================================== */
-function triggerFinale(){
-  if(finaleTriggered) return;
-  if(!results.every(Boolean)) return;
-  finaleTriggered=true;
-  clearTransitionTimeout();
-  var totalSec=stopGameTimer();
-  playFinal();
-  var goodCount=results.filter(Boolean).length;
-  var totalErrors=attempts.reduce(function(s,a){ return s+a; },0);
-  var msg;
-  if(autonomousSuccesses===5){ msg='Excellent ! Tous les rapports ont été validés sans correction automatique.'; }
-  else if(autonomousSuccesses>=4){ msg='Très bon travail ! Presque tous les rapports ont été validés sans correction.'; }
-  else { msg='Défi terminé ! Relis les corrections pour consolider les calculs statistiques.'; }
-  var c=$('mission-card');
-  c.innerHTML='<div class="final-card" id="final-card">'
-    +'<div class="mission-eyebrow">Rapport de transmission</div>'
-    +'<h2 id="final-title" tabindex="-1">🏆 Centre de communication opérationnel</h2>'
-    +'<div class="stat-row">'
-      +'<div class="stat-chip"><span class="sc-val">✅ '+goodCount+'/5</span><span class="sc-lbl">Rapports validés</span></div>'
-      +'<div class="stat-chip"><span class="sc-val">🎯 '+autonomousSuccesses+' / 5</span><span class="sc-lbl">Sans correction</span></div>'
-      +'<div class="stat-chip"><span class="sc-val">❌ '+totalErrors+'</span><span class="sc-lbl">'+(totalErrors>1?'Erreurs':'Erreur')+'</span></div>'
-      +'<div class="stat-chip"><span class="sc-val">⏱️ '+formatLongTime(totalSec)+'</span><span class="sc-lbl">Temps réalisé</span></div>'
-    +'</div>'
-    +'<div class="final-msg">🏆 '+msg+'</div>'
-    +'<div class="actions-row" style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-bottom:1rem">'
-      +'<button type="button" class="btn btn-copper" onclick="restartGame()">↻ Recommencer le défi</button>'
-    +'</div>'
-    +'</div>';
-  renderCaps();
-  var caps=$('progress-caps'); if(caps) caps.classList.add('finale');
-  spawnStardust();
-  var title=$('final-title'); if(title) title.focus();
+function showNextButton(i){
+  var body=$('plan-card-'+i).querySelector('.plan-card-body');
+  if($('next-plan-btn')) return;
+  var isLast = i>=N-1;
+  var wrap=document.createElement('div');
+  wrap.className='btn-row';
+  var btn=document.createElement('button');
+  btn.type='button'; btn.className='btn btn-primary'; btn.id='next-plan-btn';
+  btn.textContent = isLast ? 'Terminer la mission \u2192' : 'Plan suivant \u2192';
+  btn.addEventListener('click',function(){
+    if(btn.disabled) return;
+    btn.disabled=true;
+    if(isLast){ finishMission(); }
+    else { sndNextPlan(); active++; showActivePlan(); }
+  });
+  wrap.appendChild(btn);
+  body.appendChild(wrap);
 }
-function spawnStardust(){
-  var card=$('final-card'); if(!card) return;
-  var colors=['#34C7E8','#8B6FE8','#ffffff','#8B96AC'];
-  for(var i=0;i<18;i++){
-    var el=document.createElement('div');
-    el.className='stardust';
-    var size=2+Math.random()*4;
-    el.style.width=size+'px';
-    el.style.height=size+'px';
-    el.style.left=(5+Math.random()*90)+'%';
-    el.style.top=(30+Math.random()*50)+'%';
-    var color=colors[i%colors.length];
-    el.style.background=color;
-    el.style.boxShadow='0 0 '+(4+size)+'px '+color;
-    el.style.animationDelay=(Math.random()*0.6)+'s';
-    card.appendChild(el);
+
+/* =====================================================================
+   ÉCRANS — introduction / fin / redémarrage
+   ===================================================================== */
+window.beginMission=function(){
+  missionStarted=true;
+  var c=ac(); if(c && c.state==='suspended'){ c.resume(); }
+  $('intro-screen').style.display='none';
+  $('game-area').style.display='block';
+  $('mission-dynamic-title').textContent=CONFIG.missionTitle;
+  $('mission-brief-text').innerHTML=CONFIG.briefText;
+  active=0; showActivePlan(); updateRail();
+  window.timerStart();
+  sndMissionStart();
+  startStationAmbience();
+};
+function finishMission(){
+  window.timerPause();
+  var rail=$('rail-svg');
+  if(rail && !$('dossier-group')){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('id','dossier-group');
+    rail.appendChild(g);
+    var count=5, w=1000/count;
+    for(var d=0; d<count; d++){
+      (function(idx){
+        var doc=document.createElementNS('http://www.w3.org/2000/svg','g');
+        doc.style.opacity='0';
+        doc.style.transform='translateY(6px) scale(0.6)';
+        doc.style.transformOrigin=(idx*w+w/2)+'px 17px';
+        doc.style.transition='opacity .3s ease, transform .3s ease';
+        var x=idx*w+w/2-11;
+        doc.innerHTML='<rect x="'+x+'" y="4" width="22" height="26" rx="2" fill="#F5F8FB" stroke="#1E5F9E" stroke-width="1.4"/>'
+          +'<line x1="'+(x+4)+'" y1="11" x2="'+(x+18)+'" y2="11" stroke="#1E5F9E" stroke-width="1.2"/>'
+          +'<line x1="'+(x+4)+'" y1="16" x2="'+(x+18)+'" y2="16" stroke="#1E5F9E" stroke-width="1.2"/>'
+          +'<line x1="'+(x+4)+'" y1="21" x2="'+(x+14)+'" y2="21" stroke="#1E5F9E" stroke-width="1.2"/>';
+        g.appendChild(doc);
+        setTimeout(function(){ doc.style.opacity='1'; doc.style.transform='translateY(0) scale(1)'; sndTile(0); }, idx*220);
+      })(d);
+    }
   }
+  setTimeout(function(){
+    $('finale-time').textContent=fmtTime(totalSec);
+    $('finale-title').textContent=CONFIG.finaleTitle;
+    $('finale-text').innerHTML=CONFIG.finaleText;
+    $('finale-overlay').classList.add('show');
+    stopStationAmbience();
+    sndFinale();
+  }, rail ? 1400 : 0);
 }
+function resetMissionState(){
+  solved=[];
+  attempts=[];
+  correctionShown=[];
 
-/* ==================================================================
-   REDÉMARRAGE
-   ================================================================== */
-window.restartGame=function(){
-  if(gameTimerInterval!==null){ clearInterval(gameTimerInterval); gameTimerInterval=null; }
-  clearTransitionTimeout();
-  current=0;
-  results=[false,false,false,false,false];
-  attempts=[0,0,0,0,0];
-  missionHadCorrection=[false,false,false,false,false];
-  autonomousSuccesses=0;
-  gameStarted=false;
-  finaleTriggered=false;
-  transitionPending=false;
-  gameStartTime=null;
-  elapsedBeforePause=0; timerRunningSince=null; timerPausedByVisibility=false;
-  var timer=$('hud-timer');
-  if(timer){ timer.textContent='⏱️ 00:00'; }
-  $('scene-mission').classList.remove('show');
-  $('scene-intro').style.display='block';
-  $('progress-caps').innerHTML='';
-  $('progress-caps').classList.remove('finale');
-  $('progress-caps').setAttribute('aria-valuenow','0');
-  $('progress-txt').textContent='0 / 5';
-  window.scrollTo({top:0,behavior:'auto'});
-  // Le choix du son n'est jamais réinitialisé ici : il reste celui de l'utilisateur.
+  for(var i=0;i<N;i++){
+    solved.push(false);
+    attempts.push(0);
+    correctionShown.push(false);
+  }
+
+  active=0;
+  validatedCount=0;
+  autonomousCount=0;
+  transitionRunning=false;
+}
+window.restartMission=function(){
+  $('finale-overlay').classList.remove('show');
+
+  var dossier=$('dossier-group');
+  if(dossier){
+    dossier.remove();
+  }
+
+  resetMissionState();
+
+  window.timerReset();
+  window.timerStart();
+
+  showActivePlan();
+  updateRail();
+
+  if(soundOn){
+    startStationAmbience();
+  }
+};
+window.returnToIntro=function(){
+  $('finale-overlay').classList.remove('show');
+  $('game-area').style.display='none';
+  $('intro-screen').style.display='block';
+
+  window.timerPause();
+  window.timerReset();
+  stopStationAmbience();
+
+  missionStarted=false;
+
+  resetMissionState();
+  updateRail();
+
+  var dossier=$('dossier-group');
+  if(dossier){
+    dossier.remove();
+  }
+
+  $('mission-dynamic-title').textContent='Plan technique';
+  $('mission-dynamic-sub').textContent='Inspection en cours';
 };
 
-document.addEventListener('DOMContentLoaded', function(){});
+/* =====================================================================
+   INITIALISATION
+   ===================================================================== */
+document.addEventListener('DOMContentLoaded',function(){
+  $('intro-title').textContent=CONFIG.introTitle;
+  $('intro-text').innerHTML=CONFIG.introText;
+  $('intro-note').innerHTML=CONFIG.introNote;
+});
 })();
 </script>
 </body>
