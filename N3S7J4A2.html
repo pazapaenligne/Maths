@@ -1,557 +1,125 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Résoudre les exercices — Mathador (le compte est bon)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAZAPA Maths — Calculer des probabilités</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-  /* ===== Charte du jour : J4 BLEU ===== */
-  :root{
-    --j4:#3ab5d8; --j4-dark:#1a6e88; --j4-soft:#e8f6fb; --j4-accent:#9dd4e8;
-    --ink:#1b2a30; --ink-soft:#4d6470; --ok:#3d8b40; --ok-soft:#eaf6ea;
-    --err:#c0392b; --err-soft:#fdecea; --line:#cfe6ee; --white:#ffffff;
-    --gold:#f5a623;
-  }
-  *{ box-sizing:border-box; margin:0; padding:0; }
-  html,body{ width:100%; overflow-x:hidden; }
-  body{ font-family:'JetBrains Mono', ui-monospace, monospace; color:var(--ink); background:var(--white);
-    line-height:1.55; -webkit-font-smoothing:antialiased; position:relative; min-height:100vh; }
+/* ───────── CHARTE J4 BLEU (JEUDI) ───────── */
+:root{
+  --jour:#3ab5d8;
+  --jour-fonce:#1a6e88;
+  --jour-soft:#e8f6fb;
+  --jour-accent:#9dd4e8;
+  --jour-titre:#1a6e88;
+  --badge-txt:#7a4500;
+  --vert:#8dc63f; --vert-fonce:#3d7a10; --vert-soft:#f0faeb;
+  --rouge:#e74c3c; --rouge-soft:#fdedec; --rouge-fonce:#c0392b;
+  --texte:#23262d; --gris:#8a8f9a; --bord:#ece8dd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{
+  background:#fffdf7; color:var(--texte);
+  font-family:'JetBrains Mono',monospace;
+  min-height:100vh; display:flex; flex-direction:column; align-items:center;
+  padding:1.6rem 1rem 4rem; position:relative;
+}
 
-  .blob{ position:fixed; z-index:0; background:var(--j4-accent); opacity:0.28; filter:blur(1px); pointer-events:none; }
-  .blob-1{ top:-160px; right:-150px; width:460px; height:430px; border-radius:62% 38% 46% 54% / 58% 47% 53% 42%; }
-  .blob-2{ top:42%; left:-190px; width:430px; height:470px; border-radius:44% 56% 63% 37% / 49% 38% 62% 51%; opacity:0.26; }
-  .blob-3{ bottom:-180px; left:14%; width:500px; height:420px; border-radius:55% 45% 38% 62% / 42% 60% 40% 58%; opacity:0.27; }
+/* ───────── BLOBS FIXES (identiques tous les jours) ───────── */
+.blob{position:fixed;z-index:0;pointer-events:none;filter:blur(1px);}
+.blob1{width:300px;height:280px;top:-70px;right:-80px;opacity:.28;
+  background:#9dd4e8;border-radius:38% 62% 55% 45% / 56% 40% 60% 44%;}
+.blob2{width:220px;height:240px;top:38%;left:-90px;opacity:.22;
+  background:var(--jour-accent);border-radius:62% 38% 44% 56% / 42% 58% 42% 58%;}
+.blob3{width:260px;height:230px;bottom:-60px;right:-50px;opacity:.20;
+  background:#8dc63f;border-radius:45% 55% 62% 38% / 55% 45% 58% 42%;}
+.blob4{width:140px;height:150px;bottom:200px;left:-30px;opacity:.16;
+  background:#f28b82;border-radius:50% 50% 40% 60% / 60% 40% 60% 40%;}
 
-  .wrap{ position:relative; z-index:1; max-width:760px; margin:0 auto; padding:26px 18px 60px; }
-  .hero{ text-align:center; padding:14px 6px 18px; }
-  .pill{ display:inline-block; background:var(--j4-soft); border:2px solid var(--j4-accent); color:var(--j4-dark);
-    font-weight:700; font-size:0.82rem; letter-spacing:0.06em; text-transform:uppercase; padding:7px 16px; border-radius:999px; margin-bottom:16px; }
-  .hero h1{ font-size:2.05rem; font-weight:800; color:var(--j4-dark); line-height:1.15; margin-bottom:10px; }
-  .hero p.sub{ font-size:1.02rem; color:var(--ink-soft); max-width:580px; margin:0 auto; font-weight:500; }
-  .hero .consigne{ display:inline-block; margin-top:14px; background:var(--white); border:2px dashed var(--j4-accent);
-    border-radius:12px; padding:8px 16px; font-weight:600; color:var(--j4-dark); font-size:0.92rem; }
+/* ───────── HERO ───────── */
+.hero{text-align:center;position:relative;z-index:1;margin-bottom:1.4rem;max-width:720px;width:100%;}
+.logo-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:#f5c518;color:#000;
+  font-size:.78rem;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;padding:.3rem .9rem;
+  border-radius:99px;margin-bottom:.5rem;
+}
+.logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.week-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.82rem;color:var(--gris);margin-bottom:.5rem;
+}
+h1{font-size:clamp(1.45rem,4vw,2.1rem);font-weight:800;line-height:1.25;}
+h1 .hl{color:var(--jour-fonce);}
+.sous-titre{color:var(--gris);font-size:.9rem;margin-top:.4rem;line-height:1.8;}
+.consigne{
+  margin:1rem auto 0;max-width:560px;border:2px dashed var(--jour);
+  background:var(--jour-soft);color:var(--jour-fonce);border-radius:14px;
+  padding:.7rem 1rem;font-size:.9rem;font-weight:600;line-height:1.8;
+}
 
-  /* ----- écran départ ----- */
-  .startgate{ text-align:center; background:var(--white); border:2px solid var(--line); border-radius:18px; padding:26px 22px; margin-bottom:22px;
-    box-shadow:0 4px 14px rgba(27,42,48,0.05); }
-  .startgate h2{ color:var(--j4-dark); font-size:1.3rem; margin-bottom:8px; }
-  .startgate p{ color:var(--ink-soft); font-weight:500; margin-bottom:14px; font-size:0.96rem; }
-  .points-memo{ display:inline-block; text-align:left; background:var(--j4-soft); border:2px solid var(--j4-accent); border-radius:12px;
-    padding:12px 18px; font-weight:600; color:var(--j4-dark); font-size:0.92rem; line-height:1.9; margin-bottom:16px; }
-  .points-memo .op{ display:inline-block; width:1.5em; text-align:center; font-weight:800; color:var(--j4-dark); }
+/* ───────── CARTE IFRAME ───────── */
+.carte-iframe{
+  position:relative;z-index:1;width:100%;max-width:640px;
+  background:#fff;border:2px solid var(--bord);border-radius:18px;
+  overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);
+}
+.carte-stripe{
+  height:4px;
+  background:linear-gradient(90deg,var(--jour),#8dc63f,#f5c518);
+}
+.iframe-wrap{width:100%;height:500px;background:#f8f8f8;}
+.iframe-wrap iframe{width:100%;height:100%;border:0;}
+.ext-link{padding:.65rem 1.2rem;font-size:.8rem;color:var(--gris);
+  border-top:1.5px solid var(--bord);background:#fffdf7;text-align:center;line-height:1.8;}
+.ext-link a{color:var(--jour-fonce);font-weight:700;text-decoration:underline;}
 
-  .btn{ font-family:inherit; font-weight:700; font-size:1.02rem; padding:14px 26px; border:none; border-radius:12px; cursor:pointer; transition:0.12s; }
-  .btn:active{ transform:scale(0.97); }
-  .btn-big{ display:block; width:100%; max-width:360px; margin:18px auto 0; background:var(--j4-dark); color:var(--white);
-    font-size:1.08rem; padding:16px; box-shadow:0 5px 0 #124f63; }
-  .btn-big:hover{ background:#155f78; }
-
-  /* ----- barre du haut ----- */
-  .topbar{ position:sticky; top:10px; z-index:20; background:var(--white); border:2px solid var(--line); border-radius:16px;
-    box-shadow:0 6px 20px rgba(26,110,136,0.10); padding:12px 16px; margin:10px 0 22px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-  .manche{ font-weight:800; color:var(--j4-dark); font-size:1rem; }
-  .score-box{ display:flex; align-items:center; gap:8px; font-weight:800; color:var(--j4-dark);
-    background:var(--j4-soft); border:2px solid var(--j4-accent); border-radius:12px; padding:6px 14px; }
-  .sound-toggle{ background:var(--white); border:2px solid var(--j4-accent); border-radius:10px; cursor:pointer;
-    font-family:inherit; font-size:1.1rem; padding:6px 10px; color:var(--j4-dark); }
-  .sound-toggle:hover{ background:var(--j4-soft); }
-
-  /* ----- cible + jeu ----- */
-  .game-card{ background:var(--white); border:2px solid var(--line); border-radius:18px; padding:22px 18px; margin-bottom:22px;
-    box-shadow:0 4px 14px rgba(27,42,48,0.05); }
-  .target-wrap{ text-align:center; margin-bottom:18px; }
-  .target-label{ font-size:0.95rem; color:var(--ink-soft); font-weight:600; }
-  .target{ font-size:3.4rem; font-weight:800; color:var(--white); background:var(--j4-dark);
-    width:120px; height:120px; line-height:120px; border-radius:24px; margin:8px auto 0; box-shadow:0 6px 0 #124f63; }
-  .target.reached{ background:var(--ok); box-shadow:0 6px 0 #2c6e2f; animation:pop 0.4s ease; }
-  @keyframes pop{ from{ transform:scale(0.8); } 50%{ transform:scale(1.08); } to{ transform:scale(1); } }
-
-  .nums{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin:18px 0 8px; min-height:74px; }
-  .numbtn{ font-family:inherit; font-size:1.7rem; font-weight:800; min-width:74px; height:74px; padding:0 14px;
-    border:3px solid var(--j4-accent); border-radius:16px; background:var(--white); color:var(--j4-dark); cursor:pointer; transition:0.12s; }
-  .numbtn:hover{ background:var(--j4-soft); } .numbtn:active{ transform:scale(0.95); }
-  .numbtn.sel{ background:var(--j4); color:var(--white); border-color:var(--j4-dark); box-shadow:0 0 0 4px rgba(58,181,216,0.30); }
-  .numbtn.used{ opacity:0.28; pointer-events:none; text-decoration:line-through; }
-  .numbtn.fresh{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(245,166,35,0.25); }
-
-  .ops{ display:flex; gap:12px; justify-content:center; margin:6px 0 4px; }
-  .opbtn{ font-family:inherit; font-size:1.8rem; font-weight:800; width:62px; height:62px; border:3px solid var(--j4-accent);
-    border-radius:16px; background:var(--white); color:var(--j4-dark); cursor:pointer; transition:0.12s; }
-  .opbtn:hover{ background:var(--j4-soft); } .opbtn:active{ transform:scale(0.95); }
-  .opbtn.sel{ background:var(--j4); color:var(--white); border-color:var(--j4-dark); box-shadow:0 0 0 4px rgba(58,181,216,0.30); }
-  .opbtn .pts{ display:block; font-size:0.6rem; font-weight:700; margin-top:-6px; color:var(--ink-soft); }
-  .opbtn.sel .pts{ color:#dff; }
-
-  .pending{ text-align:center; font-size:1.5rem; font-weight:800; color:var(--j4-dark); min-height:1.8em; margin:10px 0 2px; }
-  .pending .ph{ color:var(--j4); }
-
-  .controls{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px; }
-  .btn-ctrl{ background:var(--white); border:2px solid var(--j4-accent); color:var(--j4-dark); }
-  .btn-ctrl:hover{ background:var(--j4-soft); }
-  .btn-ctrl.danger{ border-color:#f3c6c0; color:var(--err); }
-  .btn-ctrl.danger:hover{ background:var(--err-soft); }
-
-  .history{ margin-top:16px; background:var(--j4-soft); border:1.5px solid var(--j4-accent); border-radius:12px; padding:10px 14px; min-height:2.4em; }
-  .history .htitle{ font-size:0.8rem; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
-  .history ul{ list-style:none; }
-  .history li{ font-size:1.05rem; font-weight:700; color:var(--j4-dark); padding:2px 0; }
-  .history .empty{ color:var(--ink-soft); font-weight:500; font-size:0.92rem; }
-
-  .feedback{ margin-top:14px; font-weight:700; text-align:center; min-height:1.4em; font-size:1.05rem; }
-  .feedback.ok{ color:var(--ok); } .feedback.bad{ color:var(--err); } .feedback.info{ color:var(--j4-dark); }
-
-  /* ----- bandeau victoire manche ----- */
-  .win{ display:none; text-align:center; background:var(--ok-soft); border:2.5px solid #bfe0c0; border-radius:16px; padding:20px; margin-top:16px; }
-  .win.show{ display:block; animation:pop 0.4s ease; }
-  .win .wt{ font-size:1.3rem; font-weight:800; color:var(--ok); }
-  .win .ws{ font-weight:700; color:var(--ink); margin-top:4px; }
-  .win .wmath{ display:inline-block; margin-top:6px; background:var(--gold); color:#3a2600; font-weight:800; padding:4px 12px; border-radius:999px; font-size:0.9rem; }
-
-  /* ----- solution ----- */
-  .solbox{ display:none; margin-top:14px; background:var(--white); border:2px dashed var(--j4-accent); border-radius:12px; padding:12px 16px; }
-  .solbox.show{ display:block; }
-  .solbox .stitle{ font-weight:800; color:var(--j4-dark); margin-bottom:6px; }
-  .solbox ol{ margin-left:1.2em; } .solbox li{ font-weight:700; padding:1px 0; }
-
-  /* ----- résultats fin ----- */
-  .results{ display:none; text-align:center; background:var(--white); border:2.5px solid var(--j4-accent); border-radius:20px;
-    padding:34px 22px; margin-bottom:24px; box-shadow:0 10px 30px rgba(26,110,136,0.16); }
-  .results.show{ display:block; animation:pop 0.5s ease; }
-  .results .trophy{ font-size:3.4rem; line-height:1; }
-  .results h2{ color:var(--j4-dark); font-size:1.6rem; margin:10px 0 4px; }
-  .results .rscore{ font-size:1.2rem; font-weight:800; color:var(--ink); margin-bottom:8px; }
-  .stars{ font-size:2rem; letter-spacing:6px; margin:6px 0 12px; }
-  .star-on{ color:var(--j4); } .star-off{ color:var(--line); }
-  .results .rmsg{ color:var(--ink-soft); font-weight:500; max-width:480px; margin:0 auto 6px; }
-  .recap{ list-style:none; max-width:520px; margin:14px auto 0; text-align:left; }
-  .recap li{ display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; margin-bottom:6px; font-size:0.95rem; background:var(--j4-soft); }
-  .recap li.ko{ background:var(--err-soft); } .recap li .ic{ font-size:1.1rem; }
-
-  .countdown{ position:fixed; inset:0; z-index:60; background:rgba(20,50,62,0.80); display:none; align-items:center; justify-content:center; }
-  .countdown.show{ display:flex; }
-  .countdown .num{ font-size:8rem; font-weight:800; color:#fff; line-height:1; animation:cdpop 1s ease; }
-  .countdown .go{ font-size:4rem; color:var(--j4); }
-  @keyframes cdpop{ from{ transform:scale(0.4); opacity:0; } 40%{ transform:scale(1.1); opacity:1; } to{ transform:scale(1); opacity:1; } }
-
-  @media (max-width:430px){
-    .hero h1{ font-size:1.62rem; } .wrap{ padding:20px 12px 50px; }
-    .countdown .num{ font-size:6rem; } .target{ width:104px; height:104px; line-height:104px; font-size:2.9rem; }
-    .numbtn{ font-size:1.45rem; min-width:62px; height:62px; } .opbtn{ width:54px; height:54px; font-size:1.5rem; }
-  }
+/* ───────── MOBILE ───────── */
+@media(max-width:500px){
+  body{padding:1rem .6rem 3rem;}
+  .iframe-wrap{height:420px;}
+}
 </style>
 </head>
 <body>
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+<div class="blob blob4"></div>
 
-  <div class="wrap">
-    <header class="hero">
-      <span class="pill">Semaine 7 · Jour 4</span>
-      <h1>&#9999;&#65039; Résoudre les exercices</h1>
-      <p class="sub">Mathador — le « compte est bon » : combine les <b>5 nombres</b> avec les 4 opérations pour atteindre la <b>cible</b>.</p>
-      <div class="consigne">&#127919; Atteins la cible en cliquant&nbsp;: un nombre, une opération, un nombre&nbsp;!</div>
-    </header>
-
-    <div id="startgate" class="startgate">
-      <h2>&#127919; Le défi Mathador</h2>
-      <p>Tu joues <b>5 manches</b>. À chaque manche, une <b>cible</b> (0 à 99) et <b>5 nombres</b>.<br>
-      Clique un nombre, une opération, un autre nombre&nbsp;: le résultat revient dans la réserve. Continue jusqu&rsquo;à fabriquer la cible&nbsp;!<br>
-      Chaque nombre s&rsquo;utilise <b>une seule fois</b> &middot; la division doit tomber juste (quotient entier).</p>
-      <div class="points-memo">
-        &#127941; <b>Points par opération&nbsp;:</b><br>
-        <span class="op">+</span> addition = 1 point &middot; <span class="op">&times;</span> multiplication = 1 point<br>
-        <span class="op">&minus;</span> soustraction = 2 points &middot; <span class="op">&divide;</span> division = 3 points<br>
-        &#11088; Les <b>4 opérations</b> dans une manche = <b>MATHADOR</b> = 13 points&nbsp;!
-      </div><br>
-      <button class="btn btn-big" id="start-btn" style="margin-top:0;">&#9654;&#65039; Commencer</button>
-    </div>
-
-    <section id="topbar" class="topbar" style="display:none;">
-      <div class="manche" id="manche">Manche 1 / 5</div>
-      <div class="score-box"><span>&#127941;</span><span id="score">0</span><span>pts</span></div>
-      <button class="sound-toggle" id="sound-toggle" title="Activer/couper le son" aria-label="son">&#128266;</button>
-    </section>
-
-    <div id="results" class="results">
-      <div class="trophy">&#127942;</div>
-      <h2>Défi terminé&nbsp;!</h2>
-      <div class="rscore" id="r-score"></div>
-      <div class="stars" id="r-stars"></div>
-      <p class="rmsg" id="r-msg"></p>
-      <ul class="recap" id="recap"></ul>
-      <button class="btn btn-big" onclick="restartDefi()">&#8635; Rejouer avec de nouveaux tirages</button>
-    </div>
-
-    <main id="gameZone"></main>
+<!-- ───────── HERO ───────── -->
+<header class="hero">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#f5c518"></span>
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    Pazapa &middot; Maths &middot; 3&egrave;me
   </div>
+  <div class="week-label">Semaine&nbsp;7 &ndash; Jour&nbsp;4</div>
+  <h1><span class="hl">Calculer des probabilit&eacute;s</span></h1>
+  <p class="sous-titre">Je travaille mes automatismes de calculs</p>
+  <div class="consigne">&#128073; Le casse-t&ecirc;te des nombres.</div>
+</header>
 
-  <div id="countdown" class="countdown" aria-hidden="true"><div id="cd-inner"></div></div>
+<!-- ───────── CARTE IFRAME ───────── -->
+<section class="carte-iframe" aria-label="Activit&eacute; Mathador">
+  <div class="carte-stripe"></div>
+  <div class="iframe-wrap">
+    <iframe
+      src="https://mathix.org/mathador/"
+      allowfullscreen="true"
+      webkitallowfullscreen="true"
+      mozallowfullscreen="true"
+      title="Le casse-t&ecirc;te des nombres - Mathador">
+    </iframe>
+  </div>
+  <div class="ext-link">&#128279; Si l&rsquo;activit&eacute; ne s&rsquo;affiche pas&nbsp;:
+    <a href="https://mathix.org/mathador/" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+  </div>
+</section>
 
-<script>
-/* ============================================================
-   PAZAPA — N3S7J4 — Mathador (le compte est bon)
-   5 manches, interface à clics, score Mathador, solution garantie
-   ============================================================ */
-const TOTAL = 5;
-const rint=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-
-let manches=[], current=0, totalScore=0, soundOn=true;
-let state=null; // état de la manche courante
-
-/* ---------- Son ---------- */
-let actx=null;
-function audio(){ if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
-function beep(freq,dur,type,vol){ if(!soundOn) return; const a=audio(); if(!a) return; if(a.state==='suspended') a.resume();
-  const o=a.createOscillator(), g=a.createGain(); o.type=type||'sine'; o.frequency.value=freq; g.gain.value=0.0001;
-  o.connect(g); g.connect(a.destination); const t=a.currentTime;
-  g.gain.exponentialRampToValueAtTime(vol||0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.15));
-  o.start(t); o.stop(t+(dur||0.15)+0.02); }
-function sClick(){ beep(520,0.06,'sine',0.16); }
-function sOp(){ beep(700,0.08,'triangle',0.18); }
-function sStep(){ beep(880,0.12,'sine',0.2); }
-function sGood(){ [660,990,1320].forEach((f,k)=>setTimeout(()=>beep(f,0.16,'triangle',0.26),k*120)); }
-function sBad(){ beep(196,0.26,'sawtooth',0.24); }
-function sUndo(){ beep(380,0.09,'sine',0.16); }
-function sCount(){ beep(440,0.18,'square',0.3); }
-function sGo(){ beep(880,0.32,'square',0.32); }
-function sMathador(){ if(!soundOn) return; [523,659,784,1047,1319].forEach((f,k)=>setTimeout(()=>beep(f,0.2,'triangle',0.28),k*130)); }
-function sWin(){ if(!soundOn) return; [523,659,784,1047].forEach((f,k)=>setTimeout(()=>beep(f,0.18,'triangle',0.28),k*140)); }
-
-/* ============================================================
-   GÉNÉRATION (solution garantie) + SOLVEUR
-   ============================================================ */
-function genTirage(){
-  for(let attempt=0; attempt<3000; attempt++){
-    const nums=[ rint(1,6), rint(1,6), rint(1,10), rint(1,10), pick([10,15,20,25,50,75,100]) ];
-    let pool=nums.map((v,i)=>({v, used:[i]}));
-    const steps=rint(2,4); let ok=true;
-    for(let s=0;s<steps && pool.length>1;s++){
-      const i=rint(0,pool.length-1); let j; do{ j=rint(0,pool.length-1);}while(j===i);
-      const A=pool[i], B=pool[j];
-      let done=false;
-      for(const op of ['+','*','-','/'].sort(()=>Math.random()-0.5)){
-        let r=null;
-        if(op==='+') r=A.v+B.v;
-        else if(op==='*') r=A.v*B.v;
-        else if(op==='-'){ const hi=Math.max(A.v,B.v),lo=Math.min(A.v,B.v); if(hi!==lo) r=hi-lo; }
-        else if(op==='/'){ const hi=Math.max(A.v,B.v),lo=Math.min(A.v,B.v); if(lo>1 && hi%lo===0) r=hi/lo; }
-        if(r!==null && r>=0 && r<=200){ pool=pool.filter((_,k)=>k!==i&&k!==j); pool.push({v:r,used:[...A.used,...B.used]}); done=true; break; }
-      }
-      if(!done){ ok=false; break; }
-    }
-    if(!ok) continue;
-    const cand=pool.filter(p=>p.v>=0 && p.v<=99 && p.used.length>=2);
-    if(cand.length===0) continue;
-    const target=pick(cand).v;
-    // double sécurité : le solveur doit confirmer
-    if(solve(nums, target)) return {nums, target};
-  }
-  // filet ultime
-  return {nums:[2,3,4,5,10], target:24};
-}
-function solve(nums, target){
-  let best=null;
-  function rec(pool, ops, steps){
-    if(best) return;
-    for(const p of pool){ if(p.v===target && steps.length>=1){ best={ops:[...ops], steps:[...steps]}; return; } }
-    if(pool.length<2) return;
-    for(let i=0;i<pool.length;i++) for(let j=0;j<pool.length;j++){
-      if(i===j) continue; if(best) return;
-      const A=pool[i], B=pool[j], rest=pool.filter((_,k)=>k!==i&&k!==j);
-      const tries=[['+',A.v+B.v],['*',A.v*B.v]];
-      if(A.v-B.v>=0) tries.push(['-',A.v-B.v]);
-      if(B.v!==0 && A.v%B.v===0) tries.push(['/',A.v/B.v]);
-      for(const [op,r] of tries){
-        if(r<0||r>10000) continue;
-        const sym=op==='*'?'\u00d7':op==='/'?'\u00f7':op;
-        rec([...rest,{v:r}], [...ops,op], [...steps,`${A.v} ${sym} ${B.v} = ${r}`]);
-        if(best) return;
-      }
-    }
-  }
-  rec(nums.map(v=>({v})), [], []);
-  return best;
-}
-
-/* ============================================================
-   SCORE
-   ============================================================ */
-function opPoints(op){ return op==='+'?1: op==='*'?1: op==='-'?2: 3; }
-function scoreFromOps(ops){
-  const set=new Set(ops);
-  if(set.has('+')&&set.has('-')&&set.has('*')&&set.has('/')) return {pts:13, mathador:true};
-  let p=0; ops.forEach(o=>p+=opPoints(o));
-  return {pts:p, mathador:false};
-}
-
-/* ============================================================
-   ÉTAT DE MANCHE
-   ============================================================ */
-function newRoundState(tirage){
-  return {
-    target: tirage.target,
-    nums: tirage.nums.slice(),
-    // tokens : chaque nombre disponible {id, v, used, fresh}
-    tokens: tirage.nums.map((v,i)=>({id:i, v, used:false, fresh:false})),
-    nextId: tirage.nums.length,
-    selNum: null,    // id sélectionné
-    selOp: null,     // '+'/'-'/'*'/'/'
-    opsUsed: [],     // opérations validées
-    history: [],     // ["a × b = c"]
-    solved: false
-  };
-}
-
-/* ============================================================
-   RENDU
-   ============================================================ */
-const OPS=[['+','1'],['\u2212','2'],['\u00d7','1'],['\u00f7','3']];
-const OPMAP={'+':'+','\u2212':'-','\u00d7':'*','\u00f7':'/'};
-const OPSYM={'+':'+','-':'\u2212','*':'\u00d7','/':'\u00f7'};
-
-function renderGame(){
-  const st=state;
-  let numsHTML='';
-  st.tokens.forEach(t=>{
-    let cls='numbtn';
-    if(t.used) cls+=' used';
-    if(st.selNum===t.id) cls+=' sel';
-    if(t.fresh && !t.used) cls+=' fresh';
-    numsHTML+=`<button class="${cls}" data-id="${t.id}" ${t.used?'disabled':''}>${t.v}</button>`;
-  });
-  let opsHTML='';
-  OPS.forEach(([sym,pts])=>{
-    const internal=OPMAP[sym];
-    const cls='opbtn'+(st.selOp===internal?' sel':'');
-    opsHTML+=`<button class="${cls}" data-op="${internal}">${sym}<span class="pts">${pts} pt${pts==='1'?'':'s'}</span></button>`;
-  });
-  // expression en attente
-  let pend='Choisis un nombre…';
-  if(st.selNum!==null){
-    const a=st.tokens.find(t=>t.id===st.selNum).v;
-    if(st.selOp){ pend=`${a} <span class="ph">${OPSYM[st.selOp]}</span> ?`; }
-    else { pend=`${a} <span class="ph">?</span>`; }
-  }
-  let histHTML;
-  if(st.history.length===0){ histHTML='<span class="empty">Tes calculs apparaîtront ici.</span>'; }
-  else { histHTML='<ul>'+st.history.map(h=>`<li>${h}</li>`).join('')+'</ul>'; }
-
-  document.getElementById('gameZone').innerHTML=`
-    <div class="game-card">
-      <div class="target-wrap">
-        <div class="target-label">CIBLE À ATTEINDRE</div>
-        <div class="target" id="target">${st.target}</div>
-      </div>
-      <div class="nums" id="nums">${numsHTML}</div>
-      <div class="ops" id="ops">${opsHTML}</div>
-      <div class="pending" id="pending">${pend}</div>
-      <div class="controls">
-        <button class="btn btn-ctrl" id="undo">&#8630; Annuler le dernier calcul</button>
-        <button class="btn btn-ctrl" id="reset">&#8635; Recommencer la manche</button>
-        <button class="btn btn-ctrl" id="showsol">&#128161; Voir une solution</button>
-      </div>
-      <div class="history">
-        <div class="htitle">Mes calculs</div>
-        ${histHTML}
-      </div>
-      <div class="feedback" id="fb"></div>
-      <div class="solbox" id="solbox"></div>
-      <div class="win" id="win"></div>
-    </div>`;
-
-  // listeners
-  document.querySelectorAll('#nums .numbtn').forEach(b=> b.addEventListener('click', ()=>onNum(parseInt(b.dataset.id,10))));
-  document.querySelectorAll('#ops .opbtn').forEach(b=> b.addEventListener('click', ()=>onOp(b.dataset.op)));
-  document.getElementById('undo').addEventListener('click', onUndo);
-  document.getElementById('reset').addEventListener('click', onResetRound);
-  document.getElementById('showsol').addEventListener('click', onShowSol);
-  if(st.solved) showWin();
-}
-
-/* ============================================================
-   INTERACTIONS
-   ============================================================ */
-function onNum(id){
-  const st=state; if(st.solved) return;
-  const tok=st.tokens.find(t=>t.id===id); if(!tok || tok.used) return;
-  if(st.selNum===null){
-    st.selNum=id; sClick(); renderGame(); return;
-  }
-  if(st.selNum===id){ // déselection
-    st.selNum=null; st.selOp=null; sUndo(); renderGame(); return;
-  }
-  if(st.selOp===null){
-    // changer le premier opérande
-    st.selNum=id; sClick(); renderGame(); return;
-  }
-  // on a a, op, et b -> calculer
-  doCompute(st.selNum, st.selOp, id);
-}
-function onOp(op){
-  const st=state; if(st.solved) return;
-  if(st.selNum===null){ flash('Choisis d\u2019abord un nombre.', 'bad'); sBad(); return; }
-  st.selOp=op; sOp(); renderGame();
-}
-function doCompute(idA, op, idB){
-  const st=state;
-  const A=st.tokens.find(t=>t.id===idA), B=st.tokens.find(t=>t.id===idB);
-  let r=null, a=A.v, b=B.v;
-  if(op==='+') r=a+b;
-  else if(op==='*') r=a*b;
-  else if(op==='-'){ if(a-b<0){ flash('La soustraction doit donner un nombre positif (essaie '+b+' \u2212 '+a+').','bad'); sBad(); return; } r=a-b; }
-  else if(op==='/'){ if(b===0 || a%b!==0){ flash('La division doit tomber juste (quotient entier).','bad'); sBad(); return; } r=a/b; }
-  // appliquer
-  A.used=true; B.used=true;
-  st.tokens.forEach(t=>t.fresh=false);
-  const nid=st.nextId++;
-  st.tokens.push({id:nid, v:r, used:false, fresh:true});
-  st.opsUsed.push(op);
-  st.history.push(`${a} ${OPSYM[op]} ${b} = ${r}`);
-  st.selNum=null; st.selOp=null;
-  sStep();
-  // victoire ?
-  if(r===st.target){ st.solved=true; renderGame(); return; }
-  renderGame();
-}
-function onUndo(){
-  const st=state; if(st.solved || st.history.length===0) return;
-  // retirer le dernier calcul : enlever le token résultat (le dernier ajouté), restaurer les 2 opérandes
-  st.history.pop(); const op=st.opsUsed.pop();
-  // le dernier token est le résultat
-  const res=st.tokens.pop();
-  // restaurer : les deux tokens used les plus récents redeviennent dispo
-  // on retrouve les used par ordre : on remet used=false aux 2 derniers marqués
-  const usedTokens=st.tokens.filter(t=>t.used);
-  // remettre les 2 derniers (par id décroissant)
-  usedTokens.sort((a,b)=>b.id-a.id);
-  if(usedTokens[0]) usedTokens[0].used=false;
-  if(usedTokens[1]) usedTokens[1].used=false;
-  st.tokens.forEach(t=>t.fresh=false);
-  st.selNum=null; st.selOp=null;
-  sUndo(); renderGame();
-}
-function onResetRound(){
-  state=newRoundState({target:state.target, nums:state.nums});
-  flash('Manche réinitialisée. À toi !','info');
-  renderGame();
-}
-function onShowSol(){
-  const st=state;
-  const sol=solve(st.nums, st.target);
-  const box=document.getElementById('solbox');
-  if(!sol){ box.innerHTML='<div class="stitle">Solution</div>Aucune trouvée (cela ne devrait pas arriver).'; box.classList.add('show'); return; }
-  box.innerHTML='<div class="stitle">&#128161; Une solution possible</div><ol>'+sol.steps.map(s=>`<li>${s}</li>`).join('')+'</ol>';
-  box.classList.add('show');
-}
-function flash(msg, kind){
-  const fb=document.getElementById('fb'); if(!fb) return;
-  fb.className='feedback '+(kind||'info'); fb.innerHTML=msg;
-}
-
-/* ============================================================
-   VICTOIRE DE MANCHE
-   ============================================================ */
-function showWin(){
-  const st=state;
-  const sc=scoreFromOps(st.opsUsed);
-  // mémoriser le score de la manche (une seule fois)
-  if(manches[current].roundScore===undefined){
-    manches[current].roundScore=sc.pts;
-    manches[current].mathador=sc.mathador;
-    manches[current].opsUsed=st.opsUsed.slice();
-    totalScore+=sc.pts;
-    document.getElementById('score').textContent=totalScore;
-  }
-  const tgt=document.getElementById('target'); if(tgt) tgt.classList.add('reached');
-  if(sc.mathador) sMathador(); else sGood();
-  const win=document.getElementById('win');
-  const detail=st.opsUsed.map(o=>OPSYM[o]).join(' ');
-  win.innerHTML=`<div class="wt">&#127881; Cible atteinte&nbsp;!</div>
-    <div class="ws">Opérations utilisées : ${detail||'—'} &middot; <b>${sc.pts} point${sc.pts>1?'s':''}</b></div>
-    ${sc.mathador?'<div class="wmath">&#11088; MATHADOR ! 13 points</div>':''}
-    <button class="btn btn-big" id="nextround" style="max-width:320px;">${current+1<TOTAL?'&#9654;&#65039; Manche suivante':'&#127942; Voir mes résultats'}</button>`;
-  win.classList.add('show');
-  document.getElementById('nextround').addEventListener('click', nextRound);
-  // verrouiller la zone de jeu
-  document.querySelectorAll('#nums .numbtn, #ops .opbtn, #undo').forEach(b=>{ b.style.pointerEvents='none'; b.style.opacity=b.classList.contains('used')?'0.28':'0.6'; });
-}
-function nextRound(){
-  current++;
-  if(current>=TOTAL){ finishDefi(); return; }
-  loadRound();
-}
-
-/* ============================================================
-   ENCHAÎNEMENT
-   ============================================================ */
-function loadRound(){
-  document.getElementById('manche').textContent=`Manche ${current+1} / ${TOTAL}`;
-  state=newRoundState(manches[current].tirage);
-  renderGame();
-}
-function finishDefi(){
-  document.getElementById('topbar').style.display='none';
-  document.getElementById('gameZone').innerHTML='';
-  const solvedCount=manches.filter(m=>m.roundScore!==undefined && m.roundScore>0).length;
-  const mathadors=manches.filter(m=>m.mathador).length;
-  document.getElementById('r-score').innerHTML=`${totalScore} points &middot; ${solvedCount}/${TOTAL} cibles atteintes`;
-  let stars=1; if(totalScore>=25||solvedCount===TOTAL) stars=3; else if(totalScore>=12||solvedCount>=3) stars=2;
-  let sh=''; for(let k=0;k<3;k++) sh+=`<span class="${k<stars?'star-on':'star-off'}">&#9733;</span>`;
-  document.getElementById('r-stars').innerHTML=sh;
-  document.getElementById('r-msg').textContent = (solvedCount===TOTAL)
-    ? (mathadors>0 ? 'Bravo, toutes les cibles atteintes'+(mathadors>0?' avec '+mathadors+' Mathador'+(mathadors>1?'s':'')+' !':'!') : 'Bravo, toutes les cibles atteintes ! Relance pour viser plus de points (soustraction et division rapportent plus).')
-    : 'Personne ne réussit tout du premier coup. Astuce : la soustraction (2 pts) et la division (3 pts) rapportent plus. Relance autant de fois que tu veux : ce seront de nouveaux tirages !';
-  const recap=document.getElementById('recap'); recap.innerHTML='';
-  manches.forEach((m,i)=>{
-    const li=document.createElement('li'); const good=(m.roundScore!==undefined && m.roundScore>0);
-    li.className=good?'':'ko';
-    const detail = good ? `${m.roundScore} pt${m.roundScore>1?'s':''}${m.mathador?' &middot; \u2b50 Mathador':''}` : 'non atteinte';
-    li.innerHTML=`<span class="ic">${good?'&#10004;&#65039;':'&#10008;'}</span> <span><b>Manche ${i+1}</b> · cible ${m.tirage.target} → ${detail}</span>`;
-    recap.appendChild(li);
-  });
-  const res=document.getElementById('results'); res.classList.add('show');
-  if(solvedCount===TOTAL) sWin();
-  res.scrollIntoView({behavior:'smooth', block:'center'});
-}
-
-function runCountdown(done){
-  const ov=document.getElementById('countdown'), inner=document.getElementById('cd-inner');
-  ov.classList.add('show');
-  const seq=['3','2','1','Partez !']; let k=0;
-  (function step(){
-    if(k<seq.length){ const go=(seq[k]==='Partez !');
-      inner.className=go?'go':'num'; inner.textContent=seq[k];
-      inner.style.animation='none'; void inner.offsetWidth; inner.style.animation='';
-      if(go) sGo(); else sCount(); k++; setTimeout(step, go?700:850);
-    } else { ov.classList.remove('show'); done(); }
-  })();
-}
-function launchDefi(){
-  manches = Array.from({length:TOTAL}, ()=>({ tirage: genTirage() }));
-  current=0; totalScore=0;
-  document.getElementById('score').textContent='0';
-  document.getElementById('startgate').style.display='none';
-  document.getElementById('results').classList.remove('show');
-  document.getElementById('topbar').style.display='flex';
-  window.__manches=manches;
-  runCountdown(()=>{ loadRound(); });
-}
-function restartDefi(){ launchDefi(); }
-
-document.getElementById('sound-toggle').addEventListener('click', function(){
-  soundOn=!soundOn; this.innerHTML = soundOn?'&#128266;':'&#128263;';
-  if(soundOn){ audio(); beep(660,0.1,'sine',0.2); }
-});
-document.getElementById('start-btn').addEventListener('click', function(){ audio(); launchDefi(); });
-
-// expose pour tests
-window.__genTirage=genTirage; window.__solve=solve; window.__scoreFromOps=scoreFromOps;
-window.__state=()=>state; window.__manchesRef=()=>manches;
-</script>
 </body>
 </html>
