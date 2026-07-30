@@ -1,328 +1,564 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Série d'exercices — Niveau 1 — Arbres de probabilités</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{ --main:#f5c518; --titre:#c49a00; --light:#fff8d6; --border:#f1d97a;
-         --badgetxt:#3a2600; --ink:#2a2a2a; --soft:#7a5c00; }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'JetBrains Mono',monospace;background:#ffffff;color:var(--ink);
-        line-height:1.55;padding:14px;max-width:860px;margin:0 auto;}
-  /* HERO */
-  .hero{background:var(--light);border:3px solid var(--border);border-radius:20px;
-        padding:24px 20px;text-align:center;margin-bottom:16px;}
-  .brand-pill{display:inline-flex;align-items:center;gap:9px;background:var(--main);
-        color:var(--badgetxt);font-weight:800;font-size:.92rem;letter-spacing:1px;
-        padding:9px 22px;border-radius:30px;margin-bottom:16px;}
-  .brand-pill .dot{width:11px;height:11px;border-radius:50%;display:inline-block;}
-  .brand-pill .d1{background:rgba(58,38,0,.30);}
-  .brand-pill .d2{background:var(--badgetxt);}
-  .week-label{color:var(--soft);font-weight:700;font-size:.86rem;letter-spacing:2px;
-        margin-bottom:8px;}
-  h1{font-weight:800;line-height:1.15;margin-bottom:10px;}
-  h1 .serie{display:block;font-size:1.55rem;color:var(--titre);}
-  h1 .niv{display:block;font-size:1.7rem;color:var(--ink);}
-  h1 .niv .exp{color:var(--titre);font-size:1.1rem;}
-  .subtitle{font-size:.95rem;color:var(--soft);font-weight:500;margin-bottom:16px;}
-  .level-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-  .pill{font-weight:800;font-size:.85rem;letter-spacing:.5px;padding:11px 20px;
-        border-radius:14px;border:3px solid var(--border);background:#fff;
-        color:var(--soft);min-width:118px;}
-  .pill.active{background:var(--main);color:var(--badgetxt);border-color:var(--titre);
-        box-shadow:0 4px 0 rgba(0,0,0,.12);}
-  /* SCOREBOARD */
-  .scoreboard{position:sticky;top:8px;z-index:30;background:#fff;border:3px solid var(--border);
-        border-radius:16px;padding:12px 14px;margin-bottom:18px;box-shadow:0 4px 14px rgba(0,0,0,.06);}
-  .sb-row{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;}
-  .sb-item{flex:1;min-width:90px;text-align:center;background:var(--light);border-radius:11px;padding:8px 4px;}
-  .sb-item b{display:block;font-size:1.25rem;color:var(--titre);}
-  .sb-item small{font-size:.7rem;color:var(--soft);font-weight:600;}
-  .xp-wrap{margin-top:10px;}
-  .xp-bar{height:14px;background:var(--light);border-radius:30px;overflow:hidden;border:2px solid var(--border);}
-  .xp-fill{height:100%;width:0;background:var(--main);transition:width .4s ease;}
-  .xp-txt{text-align:center;font-size:.78rem;color:var(--soft);font-weight:700;margin-top:5px;}
-  /* CARDS */
-  .card{background:#fff;border:3px solid var(--border);border-radius:18px;padding:18px 16px;margin-bottom:16px;transition:.2s;}
-  .card.done{border-color:var(--main);background:var(--light);}
-  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .card-num{flex:none;width:34px;height:34px;border-radius:10px;background:var(--main);
-        color:var(--badgetxt);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.95rem;}
-  .card-title{font-weight:700;font-size:.96rem;color:var(--titre);}
-  .prompt{font-size:.95rem;margin-bottom:12px;}
-  .prompt b{color:var(--titre);}
-  .fig-wrap{display:flex;justify-content:center;margin:12px 0;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;}
-  .field{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:8px 0;}
-  .field label{font-size:.9rem;font-weight:600;flex:1;min-width:160px;}
-  .field .unit{font-weight:700;color:var(--soft);}
-  input[type=text]{font-family:inherit;font-size:1.05rem;font-weight:700;width:120px;padding:11px 12px;
-        border:3px solid var(--border);border-radius:11px;text-align:center;color:var(--ink);background:#fff;}
-  input[type=text]:focus{outline:none;border-color:var(--main);}
-  .choices{display:flex;flex-direction:column;gap:9px;}
-  .choice{font-family:inherit;text-align:left;font-size:.95rem;font-weight:600;padding:13px 14px;
-        border:3px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;color:var(--ink);transition:.12s;}
-  .choice:hover{border-color:var(--main);}
-  .choice.sel{background:var(--main);color:var(--badgetxt);border-color:var(--titre);}
-  .choice.good{background:#dff5c6;border-color:#8dc63f;color:#3a4d00;}
-  .choice.bad{background:#ffe1dd;border-color:#f28b82;color:#7a1c14;}
-  .btn{font-family:inherit;font-weight:800;font-size:.95rem;cursor:pointer;border:none;border-radius:12px;
-        padding:13px 20px;background:var(--main);color:var(--badgetxt);box-shadow:0 4px 0 rgba(0,0,0,.14);transition:.1s;margin-top:6px;}
-  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.14);}
-  .btn.sec{background:#fff;color:var(--soft);border:3px solid var(--border);box-shadow:none;}
-  .btn.retry{background:#ffe9a8;color:var(--badgetxt);}
-  .fb{margin-top:12px;font-weight:700;font-size:.92rem;padding:10px 12px;border-radius:11px;display:none;}
-  .fb.ok{display:block;background:#dff5c6;color:#3a4d00;border:2px solid #8dc63f;}
-  .fb.no{display:block;background:#ffe1dd;color:#7a1c14;border:2px solid #f28b82;}
-  .sol{display:none;margin-top:10px;background:var(--light);border:2px dashed var(--titre);border-radius:11px;padding:11px 13px;font-size:.9rem;}
-  .sol.show{display:block;}
-  .sol b{color:var(--titre);}
-  .ext-card .ext-frame{width:100%;border:2px solid var(--border);border-radius:12px;background:#fff;margin:10px 0;}
-  .ext-note{font-size:.82rem;color:var(--soft);margin-bottom:8px;}
-  .results{display:none;text-align:center;background:var(--light);border:3px solid var(--main);border-radius:20px;padding:28px 20px;margin-top:10px;}
-  .results.show{display:block;}
-  .results h2{color:var(--titre);font-size:1.4rem;margin-bottom:10px;}
-  .results .big{font-size:2.4rem;font-weight:800;color:var(--titre);margin:8px 0;}
-  .footer-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
-  .hidden{display:none!important;}
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pazapa Maths 3e – Arbre pondéré – S7 J5</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --day-color:#f5c518;--day-dark:#8a6000;--day-light:#fffbeb;--day-border:#f5e08a;
+      --day-glow:rgba(245,197,24,.3);
+      --bg:#fffdf7;--surface:#fff;--border:#e8e4d9;
+      --yellow:#f5c518;--green:#8dc63f;--blue:#3ab5d8;--pink:#f28b82;--orange:#f5a623;
+      --text:#1a1d23;--muted:#8a8f9a;--radius:16px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem;
+      position:relative;overflow-x:hidden;letter-spacing:.03em;line-height:1.6;}
+    body::before{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:340px;height:340px;background:var(--yellow);top:-80px;right:-80px;pointer-events:none;}
+    body::after{content:'';position:fixed;border-radius:50%;z-index:0;opacity:.13;
+      width:260px;height:260px;background:var(--orange);bottom:-60px;left:-60px;pointer-events:none;}
+    .bubble1{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:180px;height:180px;
+      background:var(--blue);bottom:120px;right:-40px;pointer-events:none;}
+    .bubble2{position:fixed;border-radius:50%;z-index:0;opacity:.10;width:120px;height:120px;
+      background:var(--green);top:200px;left:-30px;pointer-events:none;}
+    .head-card{width:100%;max-width:900px;background:var(--day-light);border:2px solid var(--day-border);
+      border-radius:var(--radius);padding:1.9rem 1.5rem 1.6rem;text-align:center;
+      position:relative;z-index:1;margin-bottom:1.5rem;}
+    .logo-badge{background:var(--yellow);color:#000;font-size:14px;letter-spacing:.09em;
+      display:inline-flex;align-items:center;gap:.5rem;font-weight:700;text-transform:uppercase;
+      padding:.35rem 1.1rem;border-radius:99px;margin-bottom:.6rem;}
+    .logo-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+    .week-label{color:var(--day-dark);font-size:.88rem;margin:.5rem 0;font-family:'JetBrains Mono',monospace;}
+    .head-card h1{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;color:var(--text);margin:.3rem 0;}
+    .head-card h1 .hl{color:var(--day-dark);}
+    .subtitle{color:var(--muted);font-size:.97rem;margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+    .activities{width:100%;max-width:900px;display:flex;flex-direction:column;gap:1.5rem;position:relative;z-index:1;}
+    .activity-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+      overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+    .activity-stripe{height:4px;background:linear-gradient(90deg,var(--day-color),var(--orange),var(--green));}
+    .activity-label{padding:.8rem 1.4rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;
+      font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--day-dark);
+      background:var(--day-light);border-bottom:1.5px solid var(--day-border);}
+    iframe{display:block;width:100%;border:0;}
+    /* Pavé numérique */
+    #A2-keypad{position:absolute;
+      background:#f0f0f0;border:2px solid #999;border-radius:12px;
+      padding:.6rem .8rem;z-index:9999;display:none;box-shadow:0 4px 16px rgba(0,0,0,.25);}
+    #A2-keypad .kp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;width:190px;}
+    #A2-keypad .kp-btn{background:#fff;border:1.5px solid #aaa;border-radius:10px;
+      padding:.6rem 0;font-size:1.2rem;font-weight:700;text-align:center;cursor:pointer;
+      user-select:none;-webkit-user-select:none;}
+    #A2-keypad .kp-btn:active{background:#e0e0e0;}
+    #A2-keypad .kp-slash{color:#3333cc;}
+    #A2-keypad .kp-del{font-size:1rem;}
+    #A2-keypad .kp-close{grid-column:1/5;background:#c0392b;color:#fff;border-color:#c0392b;font-size:.9rem;margin-top:.2rem;}
+    /* Illustration */
+    #A2-illus{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:.5rem;justify-content:center;min-width:90px;}
+    .ext-link{padding:.65rem 1.4rem;font-size:.88rem;color:var(--muted);
+      border-top:1.5px solid var(--border);background:var(--bg);}
+    .ext-link a{color:var(--day-dark);font-weight:700;text-decoration:underline;}
+    .ext-link a:hover{color:var(--day-color);}
+  </style>
 </head>
 <body>
+<div class="bubble1"></div><div class="bubble2"></div>
 
-<div class="hero">
-  <div class="brand-pill"><span class="dot d1"></span><span class="dot d2"></span>PAZAPA · MATHS · 3ÈME</div>
-  <div class="week-label">SEMAINE 7 — JOUR 5</div>
-  <h1><span class="serie">✏️ Série d'exercices</span><span class="niv">Niveau 1</span></h1>
-  <div class="subtitle">Arbres de probabilités — expériences à deux épreuves</div>
-  <div class="level-pills"><span class="pill active">NIVEAU 1</span><span class="pill">NIVEAU 2</span><span class="pill">NIVEAU 3</span></div>
-</div>
-
-<div class="scoreboard">
-  <div class="sb-row">
-    <div class="sb-item"><b id="sb-ok">0</b><small>Réussies</small></div>
-    <div class="sb-item"><b id="sb-rem">0</b><small>Restantes</small></div>
-    <div class="sb-item"><b id="sb-err">0</b><small>Erreurs</small></div>
+<div class="head-card">
+  <div class="logo-badge">
+    <span class="logo-dot" style="background:#8dc63f"></span>
+    <span class="logo-dot" style="background:#3ab5d8"></span>
+    PAZAPA &middot; MATHS &middot; 3&Egrave;ME
   </div>
-  <div class="xp-wrap">
-    <div class="xp-bar"><div class="xp-fill" id="xp"></div></div>
-    <div class="xp-txt" id="xp-txt">0 / 0</div>
+  <div class="week-label">Semaine&nbsp;7 &ndash; Jour&nbsp;5</div>
+  <h1><span class="hl">Construire un arbre pond&eacute;r&eacute; &agrave; deux &eacute;tapes</span></h1>
+  <p class="subtitle">Probabilit&eacute;s &middot; Exp&eacute;riences &agrave; deux &eacute;preuves</p>
+</div>
+
+<div class="activities">
+
+  <div class="activity-card">
+    <div class="activity-stripe"></div>
+    <div class="activity-label">Activit&eacute;&nbsp;1 &mdash; Exp&eacute;riences &agrave; deux &eacute;preuves</div>
+    <iframe src="https://college.hachette-education.com/ressources/0002017158318/cami3_c08_006_79_exointer/"
+      height="600" allowfullscreen="true"></iframe>
+    <div class="ext-link">
+      &#128279; Si l&rsquo;activit&eacute; ne s&rsquo;affiche pas&nbsp;:
+      <a href="https://college.hachette-education.com/ressources/0002017158318/cami3_c08_006_79_exointer/"
+        target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+    </div>
   </div>
-</div>
 
-<div id="exos"></div>
 
-<div class="results" id="results">
-  <h2>🎉 Niveau terminé !</h2>
-  <div class="big" id="res-score">0 / 0</div>
-  <p id="res-msg"></p>
-</div>
+  <!-- ═══ EXERCICE 2 : ARBRE PONDÉRÉ ═══ -->
+  <div class="activity-card">
+    <div class="activity-stripe"></div>
+    <div class="activity-label">Activit&eacute;&nbsp;2 &mdash; Exp&eacute;riences &agrave; deux &eacute;preuves</div>
+    <div id="A2w" style="background:#f8f8f8;font-family:Arial,sans-serif;color:#000;min-height:480px;padding:1.5rem 2rem;">
+      <!-- Départ -->
+      <div id="A2s" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:380px;background:#fff;border:2px solid #ccc;border-radius:8px;">
+        <p style="font-size:1.5rem;font-style:italic;font-weight:700;margin-bottom:.3rem;">Exp&eacute;riences &agrave; deux</p>
+        <p style="font-size:1.5rem;font-style:italic;font-weight:700;margin-bottom:2rem;">&eacute;preuves</p>
+        <button onclick="A2.start()" style="background:#3333cc;color:#fff;border:none;padding:.6rem 2rem;font-size:1.1rem;font-weight:700;border-radius:20px;cursor:pointer;">Commencer</button>
+      </div>
+      <!-- Question -->
+      <div id="A2q" style="display:none;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.6rem;font-size:.95rem;">
+          <span id="A2qn" style="font-weight:700;">Question 1/5</span>
+          <span style="font-weight:700;">Score&nbsp;: <span id="A2sc">0</span></span>
+          <span id="A2dots" style="display:flex;gap:5px;align-items:center;"></span>
+        </div>
+        <p id="A2en" style="font-size:.95rem;line-height:1.6;margin-bottom:.6rem;"></p>
+        <div id="A2qp" style="font-size:.95rem;font-weight:600;margin-bottom:.5rem;"></div>
+        <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+          <div id="A2-illus"></div>
+          <div id="A2tr" style="overflow-x:auto;flex:1;position:relative;"></div>
+        </div>
+        <!-- Zone p (masquée en phase 0) -->
+        <div id="A2zone-p" style="display:none;align-items:center;gap:.5rem;margin-top:.8rem;">
+          <span style="font-style:italic;font-size:1rem;">p&nbsp;=</span>
+          <input id="A2in" type="text" autocomplete="off" onkeydown="if(event.key==='Enter')A2.validerP()"
+            style="background:#f5c518;border:2px solid #aaa;outline:none;padding:.4rem .6rem;font-size:1rem;font-weight:700;width:130px;border-radius:4px;"/>
+        </div>
+        <div style="margin-top:.6rem;display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;">
+          <button id="A2vb" style="background:#3333cc;color:#fff;border:none;padding:.5rem 1.4rem;font-size:.95rem;font-weight:700;border-radius:16px;cursor:pointer;">Vérifier l'arbre</button>
+          <button id="A2su" onclick="A2.suite()" style="display:none;background:#3333cc;color:#fff;border:none;padding:.5rem 1.4rem;font-size:.95rem;font-weight:700;border-radius:16px;cursor:pointer;">Suite</button>
+        </div>
+        <div id="A2fb" style="display:none;margin-top:.6rem;padding:.6rem .9rem;border-radius:6px;font-size:.93rem;line-height:1.6;"></div>
+      </div>
+      <!-- Fin -->
+      <div id="A2end" style="display:none;text-align:center;padding:2rem;">
+        <p id="A2em" style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem;"></p>
+        <p id="A2es" style="font-size:.95rem;color:#555;margin-bottom:1.2rem;"></p>
+        <button onclick="A2.start()" style="background:#3333cc;color:#fff;border:none;padding:.6rem 1.8rem;font-size:1rem;font-weight:700;border-radius:16px;cursor:pointer;">Recommencer</button>
+      </div>
+    </div>
+  </div>
 
-<div class="footer-actions">
-  <button class="btn sec" onclick="resetLevel()">↻ Recommencer</button>
 </div>
 
 <script>
-function pLabel(x,y,txt){
-  return '<rect x="'+(x-17)+'" y="'+(y-10)+'" width="34" height="18" rx="4" fill="#ffffff" stroke="#f1d97a" stroke-width="1.5"/>'
-       + '<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#7a5c00">'+txt+'</text>';
-}
-function pNode(x,y,lbl){
-  var r=lbl?13:7;
-  return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#fff8d6" stroke="#c49a00" stroke-width="2.5"/>'
-       + (lbl?'<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="12" font-weight="800" fill="#3a2600">'+lbl+'</text>':'');
-}
-function arbreSVG(o){
-  var rx=42, ry=131, l1x=192, l1y=[71,191], l2x=336, l2y=[[37,105],[157,225]];
-  var s='<svg viewBox="0 0 412 262" width="100%" style="max-width:412px" xmlns="http://www.w3.org/2000/svg">';
-  var i,j;
-  for(i=0;i<2;i++) s+='<line x1="'+(rx+9)+'" y1="'+ry+'" x2="'+(l1x-13)+'" y2="'+l1y[i]+'" stroke="#c49a00" stroke-width="2.2"/>';
-  for(i=0;i<2;i++) for(j=0;j<2;j++) s+='<line x1="'+(l1x+13)+'" y1="'+l1y[i]+'" x2="'+(l2x-13)+'" y2="'+l2y[i][j]+'" stroke="#c49a00" stroke-width="2.2"/>';
-  s+=pNode(rx,ry,'');
-  for(i=0;i<2;i++) s+=pNode(l1x,l1y[i],o.l1[i].lbl);
-  for(i=0;i<2;i++) for(j=0;j<2;j++) s+=pNode(l2x,l2y[i][j],o.l2[i][j].lbl);
-  for(i=0;i<2;i++) s+=pLabel((rx+l1x)/2,(ry+l1y[i])/2-7,o.l1[i].p);
-  for(i=0;i<2;i++) for(j=0;j<2;j++) s+=pLabel((l1x+l2x)/2,(l1y[i]+l2y[i][j])/2-7,o.l2[i][j].p);
-  if(o.out) for(i=0;i<2;i++) for(j=0;j<2;j++)
-    s+='<text x="'+(l2x+18)+'" y="'+(l2y[i][j]+4)+'" font-size="10" font-weight="700" fill="#7a5c00">'+o.out[i][j]+'</text>';
-  s+='</svg>';
-  return s;
-}
-function crossTable(rows, cols, data, totals){
-  var s='<table style="border-collapse:collapse;width:100%;font-size:.86rem;text-align:center">';
-  s+='<tr><th style="border:2px solid #f1d97a;padding:7px;background:#fff8d6"></th>';
-  for(var c=0;c<cols.length;c++) s+='<th style="border:2px solid #f1d97a;padding:7px;background:#fff8d6;color:#7a5c00">'+cols[c]+'</th>';
-  if(totals) s+='<th style="border:2px solid #f1d97a;padding:7px;background:#f5c518;color:#3a2600">Total</th>';
-  s+='</tr>';
-  for(var r=0;r<rows.length;r++){
-    s+='<tr><th style="border:2px solid #f1d97a;padding:7px;background:#fff8d6;color:#7a5c00">'+rows[r]+'</th>';
-    var rt=0;
-    for(c=0;c<cols.length;c++){ s+='<td style="border:2px solid #f1d97a;padding:7px;font-weight:700">'+data[r][c]+'</td>'; rt+=data[r][c]; }
-    if(totals) s+='<td style="border:2px solid #f1d97a;padding:7px;background:#fff8d6;font-weight:800;color:#7a5c00">'+rt+'</td>';
-    s+='</tr>';
-  }
-  if(totals){
-    s+='<tr><th style="border:2px solid #f1d97a;padding:7px;background:#f5c518;color:#3a2600">Total</th>';
-    var grand=0;
-    for(c=0;c<cols.length;c++){ var ct=0; for(r=0;r<rows.length;r++) ct+=data[r][c]; grand+=ct;
-      s+='<td style="border:2px solid #f1d97a;padding:7px;background:#fff8d6;font-weight:800;color:#7a5c00">'+ct+'</td>'; }
-    s+='<td style="border:2px solid #f1d97a;padding:7px;background:#f5c518;font-weight:800;color:#3a2600">'+grand+'</td></tr>';
-  }
-  s+='</table>';
-  return s;
-}
+var A2=(function(){
+  var idx=0,score=0,nb=5,phase=0,answered=false,questions=[];
+  var branchInputs=[];
 
-var EXOS = [
-  { kind:'num', title:'La somme fait toujours 1',
-    prompt:'Dans un sac de billes, on tire une bille. La probabilité de tirer une bille <b>rouge</b> est <b>0,6</b>. Le sac ne contient que des billes rouges et des billes vertes. Quelle est la probabilité de tirer une bille <b>verte</b> ?',
-    unit:'', ans:0.4, tol:0.001,
-    sol:'Sur chaque départ de l\'arbre, les probabilités s\'additionnent pour faire 1.<br>P(verte) = 1 \u2212 0,6 = <b>0,4</b>.' },
-  { kind:'num', title:'Probabilité le long d\'un chemin',
-    prompt:'On tire une bille, on la <b>remet</b> dans le sac, puis on tire une 2\u1d49 bille. \u00c0 chaque tirage, P(rouge) = 0,5. En suivant le chemin <b>Rouge \u2192 Rouge</b> de l\'arbre, quelle est la probabilité d\'obtenir <b>deux billes rouges</b> ?',
-    figure: arbreSVG({ l1:[{lbl:'R',p:'0,5'},{lbl:'V',p:'0,5'}],
-                       l2:[[{lbl:'R',p:'0,5'},{lbl:'V',p:'0,5'}],[{lbl:'R',p:'0,5'},{lbl:'V',p:'0,5'}]],
-                       out:[['(R;R)','(R;V)'],['(V;R)','(V;V)']] }),
-    unit:'', ans:0.25, tol:0.001,
-    sol:'Le long d\'un chemin, on <b>multiplie</b> les probabilités des branches.<br>P(R puis R) = 0,5 \u00d7 0,5 = <b>0,25</b>.' },
-  { kind:'num', title:'Deux fruits différents',
-    prompt:'Un panier contient des pommes et des bananes. On tire un fruit, on le <b>remet</b>, on en tire un 2\u1d49. \u00c0 chaque tirage : P(pomme) = 0,4 et P(banane) = 0,6. Quelle est la probabilité d\'obtenir le chemin <b>Pomme \u2192 Banane</b> ?',
-    figure: arbreSVG({ l1:[{lbl:'P',p:'0,4'},{lbl:'B',p:'0,6'}],
-                       l2:[[{lbl:'P',p:'0,4'},{lbl:'B',p:'0,6'}],[{lbl:'P',p:'0,4'},{lbl:'B',p:'0,6'}]],
-                       out:[['(P;P)','(P;B)'],['(B;P)','(B;B)']] }),
-    unit:'', ans:0.24, tol:0.001,
-    sol:'P(Pomme puis Banane) = 0,4 \u00d7 0,6 = <b>0,24</b>.' },
-  { kind:'qcm', title:'Comment lire un arbre ?',
-    prompt:'Pour calculer la probabilité d\'un <b>seul chemin</b> de l\'arbre (par exemple Rouge \u2192 Vert), que fait-on avec les probabilités des branches ?',
-    choices:['On les additionne','On les multiplie','On prend la plus grande','On les soustrait'],
-    ans:1,
-    sol:'Le long d\'un même chemin, on <b>multiplie</b> les probabilités des branches successives.' },
-  { kind:'num', title:'Avec des fractions',
-    prompt:'Un sac contient 5 billes : 3 rouges et 2 vertes. On tire une bille, on la <b>remet</b>, puis on en tire une 2\u1d49. La probabilité de tirer une rouge est 3/5. Quelle est la probabilité d\'obtenir <b>deux billes rouges</b> ? (donne le résultat en écriture décimale)',
-    figure: arbreSVG({ l1:[{lbl:'R',p:'3/5'},{lbl:'V',p:'2/5'}],
-                       l2:[[{lbl:'R',p:'3/5'},{lbl:'V',p:'2/5'}],[{lbl:'R',p:'3/5'},{lbl:'V',p:'2/5'}]],
-                       out:[['(R;R)','(R;V)'],['(V;R)','(V;V)']] }),
-    unit:'', ans:0.36, tol:0.001,
-    sol:'P(R puis R) = 3/5 \u00d7 3/5 = 9/25 = <b>0,36</b>.' }
-];
+  function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+  function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a;}
+  function fracR(n,d){var g=gcd(n,d);return(n/g)+'/'+(d/g);}
+  function fracOk(raw,n,d){
+    raw=(raw||'').trim().replace(',','.');
+    var m=raw.match(/^(\d+)\/(\d+)$/);
+    if(m){var a=parseInt(m[1]),b=parseInt(m[2]);return a*d===b*n;}
+    var v=parseFloat(raw);return!isNaN(v)&&Math.abs(v-n/d)<0.005;
+  }
+  function $(id){return document.getElementById(id);}
 
-var state=[], errCount=0;
-function genExercises(){
-  state = EXOS.map(function(){ return {done:false, sel:null}; });
-  errCount = 0;
-  buildAll(); updateScore();
-  document.getElementById('results').classList.remove('show');
-}
-function buildAll(){
-  var box=document.getElementById('exos'); box.innerHTML='';
-  EXOS.forEach(function(ex,idx){
-    var c=document.createElement('div');
-    c.className='card'+(ex.kind==='ext'?' ext-card':''); c.id='card'+idx;
-    var inner='<div class="card-head"><div class="card-num">'+(idx+1)+'</div><div class="card-title">'+ex.title+'</div></div>';
-    if(ex.kind==='ext'){
-      inner+='<div class="ext-note">'+ex.note+'</div>';
-      inner+='<iframe class="ext-frame" style="height:'+(ex.height||520)+'px" src="'+ex.url+'" loading="lazy" allowfullscreen></iframe>';
-      inner+='<button class="btn" id="extbtn'+idx+'" onclick="markExtDone('+idx+')">✓ J\'ai terminé</button>';
-      inner+='<div class="fb" id="fb'+idx+'"></div>';
-    } else {
-      inner+='<div class="prompt">'+ex.prompt+'</div>';
-      if(ex.figure) inner+='<div class="fig-wrap">'+ex.figure+'</div>';
-      if(ex.kind==='num'){
-        inner+='<div class="field"><input type="text" id="in'+idx+'_0" inputmode="decimal" autocomplete="off">'+(ex.unit?'<span class="unit">'+ex.unit+'</span>':'')+'</div>';
-      } else if(ex.kind==='multi'){
-        ex.fields.forEach(function(f,fi){
-          inner+='<div class="field"><label>'+f.label+'</label><input type="text" id="in'+idx+'_'+fi+'" inputmode="decimal" autocomplete="off">'+(f.unit?'<span class="unit">'+f.unit+'</span>':'')+'</div>';
-        });
-      } else if(ex.kind==='qcm'){
-        inner+='<div class="choices" id="ch'+idx+'">';
-        ex.choices.forEach(function(ch,ci){ inner+='<button class="choice" id="ch'+idx+'_'+ci+'" onclick="selectQcm('+idx+','+ci+')">'+ch+'</button>'; });
-        inner+='</div>';
+  function genPP(){
+    var evts=[['deux piles','P','P'],['pile puis face','P','F'],['face puis pile','F','P'],['deux faces','F','F']];
+    var e=evts[rand(0,3)];
+    return{enonce:"Une exp\u00e9rience consiste \u00e0 lancer deux fois de suite une pi\u00e8ce de monnaie non truqu\u00e9e.",
+      question:"Calculer P("+e[1]+" ; "+e[2]+")",
+      type:'PP',b1:[{l:'P',n:1,d:2},{l:'F',n:1,d:2}],b2:[{l:'P',n:1,d:2},{l:'F',n:1,d:2}],c1:e[0],c2:e[1],rN:1,rD:4};
+  }
+  function genRP(){
+    var evts=[['la couleur rouge puis pile','R','P',3,8],['la couleur jaune puis pile','J','P',1,8],
+              ['la couleur rouge puis face','R','F',3,8],['la couleur jaune puis face','J','F',1,8]];
+    var e=evts[rand(0,3)];
+    return{enonce:"Une exp\u00e9rience consiste \u00e0 faire tourner la roue de loterie repr\u00e9sent\u00e9e ci-dessous (on note J l\u2019\u00e9v\u00e8nement \"obtenir Jaune\" et R l\u2019\u00e9v\u00e8nement \"obtenir Rouge\") puis \u00e0 lancer une pi\u00e8ce de monnaie non truqu\u00e9e.",
+      question:"Calculer P("+e[1]+" ; "+e[2]+")",
+      type:'RP',b1:[{l:'J',n:1,d:4},{l:'R',n:3,d:4}],b2:[{l:'P',n:1,d:2},{l:'F',n:1,d:2}],c1:e[1],c2:e[2],rN:e[3],rD:e[4]};
+  }
+  function genPU(){
+    var cfgs=[{nR:2,nJ:1,nB:1,tot:4},{nR:5,nJ:2,nB:3,tot:10},{nR:3,nJ:1,nB:1,tot:5}];
+    var cfg=cfgs[rand(0,cfgs.length-1)];
+    var eff={R:cfg.nR,J:cfg.nJ,B:cfg.nB};
+    var c1=Math.random()<0.5?'P':'F';
+    var c2=['R','J','B'][rand(0,2)];
+    var clbl={R:'rouge',J:'jaune',B:'bleu'},cn={P:'pile',F:'face'};
+    var rN=eff[c2],rD=cfg.tot*2,g=gcd(rN,rD);rN/=g;rD/=g;
+    return{enonce:"Une exp\u00e9rience consiste \u00e0 lancer une pi\u00e8ce puis \\u00e0 tirer une boule dans l\\u2019urne repr\\u00e9sent\\u00e9e ci-dessous. (on note J : Jaune, R : Rouge, B : Bleu).",
+      question:"Calculer P("+c1+" ; "+c2+")",
+      type:'PU',cfg:cfg,b1:[{l:'P',n:1,d:2},{l:'F',n:1,d:2}],b2:[{l:'R',n:cfg.nR,d:cfg.tot},{l:'J',n:cfg.nJ,d:cfg.tot},{l:'B',n:cfg.nB,d:cfg.tot}],c1:c1,c2:c2,rN:rN,rD:rD};
+  }
+  function genRR(){
+    var c1=Math.random()<0.5?'J':'R',c2=Math.random()<0.5?'J':'B';
+    var p1N=c1==='J'?1:3,rN=p1N,rD=8,g=gcd(rN,rD);rN/=g;rD/=g;
+    var lbl1={J:'jaune',R:'rouge'},lbl2={J:'jaune',B:'bleu'};
+    return{enonce:"faire tourner successivement les deux roues de loterie repr\u00e9sent\u00e9es ci-dessous puis \u00e0 noter la couleur obtenue. (on note J l\u2019\u00e9v\u00e8nement \"obtenir Jaune\", R l\u2019\u00e9v\u00e8nement \"obtenir Rouge\" et B l\u2019\u00e9v\u00e8nement \"obtenir Bleu\").",
+      question:"Calculer P("+c1+" ; "+c2+")",
+      type:'RR',b1:[{l:'J',n:1,d:4},{l:'R',n:3,d:4}],b2:[{l:'J',n:1,d:2},{l:'B',n:1,d:2}],c1:c1,c2:c2,rN:rN,rD:rD};
+  }
+
+  function genLevel(){
+    var pool=[genPP,genRP,genPU,genRR,genRP];
+    for(var k=pool.length-1;k>0;k--){var r=rand(0,k);var t=pool[k];pool[k]=pool[r];pool[r]=t;}
+    var qs=[];for(var i=0;i<nb;i++)qs.push(pool[i]());return qs;
+  }
+
+  /* Coordonnées des cases de l'arbre */
+  function treeCoords(b1,b2){
+    var n1=b1.length,n2=b2.length;
+    var H=Math.max(n1*n2*60+80,260),W=460;
+    var x0=20,x1=160,x2=320;
+    var boxes=[];
+    b1.forEach(function(br1,i1){
+      var y1=H*(i1+0.5)/n1;
+      var mx=(x0+x1)/2,my=(H/2+y1)/2;
+      boxes.push({x:mx-16,y:my-10,w:32,h:18,n:br1.n,d:br1.d,key:'b1_'+i1});
+      b2.forEach(function(br2,i2){
+        var y2=H*i1/n1+H*(i2+0.5)/(n1*n2);
+        var mx2=(x1+x2)/2,my2=(y1+y2)/2;
+        boxes.push({x:mx2-16,y:my2-10,w:32,h:18,n:br2.n,d:br2.d,key:'b2_'+i1+'_'+i2});
+      });
+    });
+    return{H:H,W:W,x0:x0,x1:x1,x2:x2,boxes:boxes};
+  }
+
+  /* Dessine le SVG des lignes et labels uniquement (sans les cases) */
+  function drawSVG(q,coords,showValues,doneMap){
+    var b1=q.b1,b2=q.b2,n1=b1.length,n2=b2.length;
+    var H=coords.H,W=coords.W,x0=coords.x0,x1=coords.x1,x2=coords.x2;
+    var svg='<svg width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg" style="display:block;">';
+    b1.forEach(function(br1,i1){
+      var y1=H*(i1+0.5)/n1;
+      svg+='<line x1="'+x0+'" y1="'+(H/2)+'" x2="'+x1+'" y2="'+y1+'" stroke="#000" stroke-width="1.5"/>';
+      /* rectangle de la case branche 1 */
+      var mx=(x0+x1)/2,my=(H/2+y1)/2;
+      var key='b1_'+i1;
+      if(showValues){
+        var col=doneMap&&doneMap[key]==='ok'?'#27ae60':'#555';
+        svg+='<rect x="'+(mx-16)+'" y="'+(my-10)+'" width="32" height="18" fill="#e8f9ee" stroke="#27ae60" stroke-width="1.5" rx="2"/>';
+        svg+='<text x="'+mx+'" y="'+(my+4)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#1a5c30">'+fracR(br1.n,br1.d)+'</text>';
+      } else {
+        svg+='<rect x="'+(mx-16)+'" y="'+(my-10)+'" width="32" height="18" fill="#fff" stroke="#888" stroke-width="1" rx="2"/>';
       }
-      inner+='<button class="btn" id="vbtn'+idx+'" onclick="checkExo('+idx+')">Valider</button>';
-      inner+='<div class="fb" id="fb'+idx+'"></div>';
-      inner+='<div class="sol" id="sol'+idx+'"><b>Solution :</b><br>'+ex.sol+'</div>';
-    }
-    c.innerHTML=inner; box.appendChild(c);
-  });
-}
-function parseNum(v){
-  if(v===null||v===undefined) return NaN;
-  v=(''+v).trim().replace(',','.').replace(/\s/g,'').replace('%','');
-  if(v==='') return NaN;
-  return parseFloat(v);
-}
-function selectQcm(idx,ci){
-  if(state[idx].done) return;
-  state[idx].sel=ci; var ex=EXOS[idx];
-  for(var i=0;i<ex.choices.length;i++) document.getElementById('ch'+idx+'_'+i).classList.remove('sel');
-  document.getElementById('ch'+idx+'_'+ci).classList.add('sel');
-}
-function checkExo(idx){
-  if(state[idx].done) return;
-  var ex=EXOS[idx], ok=true;
-  if(ex.kind==='num'){
-    var v=parseNum(document.getElementById('in'+idx+'_0').value);
-    ok = !isNaN(v) && Math.abs(v-ex.ans)<=ex.tol;
-  } else if(ex.kind==='multi'){
-    for(var fi=0; fi<ex.fields.length; fi++){
-      var val=parseNum(document.getElementById('in'+idx+'_'+fi).value);
-      if(isNaN(val) || Math.abs(val-ex.fields[fi].ans)>ex.fields[fi].tol) ok=false;
-    }
-  } else if(ex.kind==='qcm'){
-    if(state[idx].sel===null){ flash(idx,false,'Choisis d\'abord une réponse.'); return; }
-    ok = (state[idx].sel===ex.ans);
+      svg+='<text x="'+(x1+6)+'" y="'+(y1+4)+'" font-size="13" font-weight="700">'+br1.l+'</text>';
+      b2.forEach(function(br2,i2){
+        var y2=H*i1/n1+H*(i2+0.5)/(n1*n2);
+        var isCible=(br1.l===q.c1&&br2.l===q.c2)&&showValues;
+        svg+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(isCible?'#c0392b':'#000')+'" stroke-width="'+(isCible?2.5:1.5)+'"/>';
+        var mx2=(x1+x2)/2,my2=(y1+y2)/2;
+        var key2='b2_'+i1+'_'+i2;
+        if(showValues){
+          svg+='<rect x="'+(mx2-16)+'" y="'+(my2-10)+'" width="32" height="18" fill="#e8f9ee" stroke="#27ae60" stroke-width="1.5" rx="2"/>';
+          svg+='<text x="'+mx2+'" y="'+(my2+4)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#1a5c30">'+fracR(br2.n,br2.d)+'</text>';
+        } else {
+          svg+='<rect x="'+(mx2-16)+'" y="'+(my2-10)+'" width="32" height="18" fill="#fff" stroke="#888" stroke-width="1" rx="2"/>';
+        }
+        svg+='<text x="'+(x2+6)+'" y="'+(y2+4)+'" font-size="13" font-weight="700">'+br2.l+'</text>';
+      });
+    });
+    return svg+'</svg>';
   }
-  if(ok){
-    state[idx].done=true;
-    document.getElementById('card'+idx).classList.add('done');
-    document.getElementById('sol'+idx).classList.add('show');
-    document.getElementById('vbtn'+idx).classList.add('hidden');
-    if(ex.kind==='qcm') document.getElementById('ch'+idx+'_'+ex.ans).classList.add('good');
-    flash(idx,true,'✓ Bravo, c\'est juste !');
-  } else {
-    errCount++;
-    if(ex.kind==='qcm' && state[idx].sel!==null){
-      var b=document.getElementById('ch'+idx+'_'+state[idx].sel);
-      b.classList.remove('sel'); b.classList.add('bad');
-      setTimeout(function(){ if(!state[idx].done) b.classList.remove('bad'); },900);
-    }
-    flash(idx,false,'✗ Pas encore. Vérifie ton calcul et réessaye.');
-    var vb=document.getElementById('vbtn'+idx); vb.textContent='↻ Réessayer'; vb.classList.add('retry');
+
+  /* Superpose les inputs HTML sur les cases vides */
+  function placeInputs(coords,container){
+    branchInputs=[];
+    var rect=container.getBoundingClientRect();
+    var svgEl=container.querySelector('svg');
+    var svgRect=svgEl.getBoundingClientRect();
+    coords.boxes.forEach(function(box,ii){
+      var inp=document.createElement('input');
+      inp.type='text';inp.autocomplete='off';
+      inp.dataset.key=box.key;
+      inp.dataset.n=box.n;inp.dataset.d=box.d;
+      inp.style.cssText='position:absolute;'
+        +'left:'+(svgRect.left-rect.left+box.x+2)+'px;'
+        +'top:'+(svgRect.top-rect.top+box.y+2)+'px;'
+        +'width:'+(box.w-4)+'px;height:'+(box.h-4)+'px;'
+        +'font-size:10px;font-weight:700;text-align:center;'
+        +'border:none;outline:none;background:transparent;padding:0;';
+      inp.addEventListener('keydown',function(e){
+        if(e.key==='Enter'){
+          e.preventDefault();
+          var next=branchInputs[ii+1];
+          if(next)next.focus();
+          else validerArbre();
+        }
+      });
+      container.appendChild(inp);
+      branchInputs.push(inp);
+    });
+    if(branchInputs.length>0)setTimeout(function(){branchInputs[0].focus();},80);
   }
-  updateScore();
-}
-function markExtDone(idx){
-  if(state[idx].done) return;
-  state[idx].done=true;
-  document.getElementById('card'+idx).classList.add('done');
-  document.getElementById('extbtn'+idx).classList.add('hidden');
-  flash(idx,true,'✓ Activité validée !'); updateScore();
-}
-function flash(idx,good,msg){ var fb=document.getElementById('fb'+idx); fb.className='fb '+(good?'ok':'no'); fb.textContent=msg; }
-function updateScore(){
-  var done=state.filter(function(s){return s.done;}).length, tot=EXOS.length;
-  document.getElementById('sb-ok').textContent=done;
-  document.getElementById('sb-rem').textContent=(tot-done);
-  document.getElementById('sb-err').textContent=errCount;
-  var pct=tot?Math.round(done/tot*100):0;
-  document.getElementById('xp').style.width=pct+'%';
-  document.getElementById('xp-txt').textContent=done+' / '+tot;
-  if(done===tot && tot>0) showResults(done,tot);
-  else document.getElementById('results').classList.remove('show');
-}
-function showResults(done,tot){
-  var r=document.getElementById('results');
-  document.getElementById('res-score').textContent=done+' / '+tot;
-  var msg;
-  if(errCount===0) msg='Sans-faute ! Tu maîtrises les arbres de probabilités. 🌳';
-  else if(errCount<=3) msg='Très bien joué, tu as su rebondir après les erreurs. 💪';
-  else msg='Niveau terminé ! Recommence pour viser le sans-faute. ✨';
-  document.getElementById('res-msg').textContent=msg;
-  r.classList.add('show'); r.scrollIntoView({behavior:'smooth',block:'center'});
-}
-function resetLevel(){ genExercises(); window.scrollTo({top:0,behavior:'smooth'}); }
-genExercises();
+
+  function updateDots(){
+    var de=$('A2dots');de.innerHTML='';
+    for(var i=0;i<nb;i++){
+      var d=document.createElement('div');
+      d.style.cssText='width:13px;height:13px;border-radius:50%;background:'+(i<idx?'#9b59b6':'#ddd')+';border:1.5px solid #bbb;';
+      de.appendChild(d);
+    }
+  }
+
+  /* ── Phase 0 : arbre vide ── */
+  function renderPhase0(){
+    phase=0;answered=false;
+    var q=questions[idx];
+    $('A2qn').textContent='Question '+(idx+1)+'/'+nb;
+    $('A2sc').textContent=score;
+    updateDots();
+    $('A2en').textContent=q.enonce;
+    $('A2qp').textContent='Compl\u00e8te l\u2019arbre avec les probabilit\u00e9s manquantes.';
+    $('A2fb').style.display='none';
+    $('A2su').style.display='none';
+    $('A2zone-p').style.display='none';
+    var container=$('A2tr');
+    container.innerHTML='';
+    container.style.position='relative';
+    var coords=treeCoords(q.b1,q.b2);
+    container.style.height=coords.H+'px';
+    container.style.width=coords.W+'px';
+    container.style.maxWidth='100%';
+    container.innerHTML=drawSVG(q,coords,false,null);
+    placeInputsWithKP(coords,container);
+    $('A2-illus').innerHTML=illustSVG(q);
+    $('A2vb').textContent='V\u00e9rifier l\u2019arbre';
+    $('A2vb').style.display='inline-block';
+    $('A2vb').onclick=validerArbre;
+  }
+
+  function validerArbre(){
+    var q=questions[idx];
+    var allOk=true;
+    branchInputs.forEach(function(inp){
+      var n=parseInt(inp.dataset.n),d=parseInt(inp.dataset.d);
+      var ok=fracOk(inp.value,n,d);
+      inp.style.background=ok?'rgba(39,174,96,.15)':'rgba(231,76,60,.15)';
+      inp.style.color=ok?'#1a5c30':'#7b1a1a';
+      if(!ok)allOk=false;
+    });
+    var fb=$('A2fb');fb.style.display='block';
+    if(allOk){
+      fb.style.cssText='display:block;background:#e8f9ee;border:1.5px solid #27ae60;border-radius:6px;padding:.6rem .9rem;font-size:.93rem;color:#1a5c30;margin-top:.8rem;';
+      fb.textContent='\u2713 Toutes les probabilit\u00e9s sont correctes\u00a0! Maintenant trouve p.';
+      $('A2vb').style.display='none';
+      setTimeout(function(){renderPhase1();},900);
+    } else {
+      fb.style.cssText='display:block;background:#fef0f0;border:1.5px solid #e74c3c;border-radius:6px;padding:.6rem .9rem;font-size:.93rem;color:#7b1a1a;margin-top:.8rem;';
+      fb.textContent='\u2717 Certaines probabilit\u00e9s sont incorrectes. Corrige les cases en rouge.';
+    }
+  }
+
+  /* ── Phase 1 : arbre rempli, trouver p ── */
+  function renderPhase1(){
+    phase=1;answered=false;
+    var q=questions[idx];
+    var container=$('A2tr');
+    container.innerHTML='';
+    var coords=treeCoords(q.b1,q.b2);
+    container.style.height=coords.H+'px';
+    container.innerHTML=drawSVG(q,coords,true,null);
+    $('A2-illus').innerHTML=illustSVG(q);
+    $('A2fb').style.display='none';
+    // Afficher la question et le champ p sous l'arbre
+    $('A2qp').innerHTML=q.question+'<br><span style="font-size:.9rem;color:#555;font-weight:400;">Ecris ta réponse sous forme de fraction.</span>';
+    $('A2zone-p').style.display='flex';
+    $('A2in').value='';$('A2in').style.display='inline-block';
+    $('A2vb').textContent='Valider';
+    $('A2vb').style.display='inline-block';
+    $('A2vb').onclick=validerP;
+    $('A2su').style.display='none';
+    setTimeout(function(){$('A2in').focus();},80);
+  }
+
+  function validerP(){
+    if(answered)return;
+    var q=questions[idx];
+    var raw=$('A2in').value;if(!raw.trim())return;
+    answered=true;
+    var ok=fracOk(raw,q.rN,q.rD);if(ok)score++;
+    $('A2sc').textContent=score;
+    var fb=$('A2fb');fb.style.display='block';
+    var b1c=q.b1.filter(function(b){return b.l===q.c1;})[0];
+    var b2c=q.b2.filter(function(b){return b.l===q.c2;})[0];
+    var calc=fracR(b1c.n,b1c.d)+' \u00d7 '+fracR(b2c.n,b2c.d)+' = '+fracR(q.rN,q.rD);
+    if(ok){
+      fb.style.cssText='display:block;background:#e8f9ee;border:1.5px solid #27ae60;border-radius:6px;padding:.6rem .9rem;font-size:.93rem;color:#1a5c30;margin-top:.8rem;';
+      fb.innerHTML='<strong>Bravo\u00a0!</strong> p = '+calc;
+    } else {
+      fb.style.cssText='display:block;background:#fef0f0;border:1.5px solid #e74c3c;border-radius:6px;padding:.6rem .9rem;font-size:.93rem;color:#7b1a1a;margin-top:.8rem;';
+      fb.innerHTML='<strong>Dommage.</strong> p = '+calc+'<br><small>On multiplie les probabilit\u00e9s sur le chemin correspondant.</small>';
+    }
+    $('A2in').style.display='none';
+    $('A2zone-p').style.display='none';
+    $('A2vb').style.display='none';
+    $('A2su').style.display='inline-block';
+    $('A2su').textContent=idx<nb-1?'Suite \u2192':'Voir mon r\u00e9sultat';
+  }
+
+  function suite(){idx++;if(idx>=nb){showEnd();return;}renderPhase0();}
+
+  function showEnd(){
+    $('A2q').style.display='none';$('A2end').style.display='block';
+    $('A2em').textContent='Ton r\u00e9sultat est '+score+' bonnes r\u00e9ponses sur '+nb+'.';
+    $('A2es').textContent=score>=4?'Excellent\u00a0! Tu ma\u00eetrises les arbres pond\u00e9r\u00e9s.':score>=3?'Bien\u00a0! Continue \u00e0 t\u2019entra\u00eener.':'Il faut t\u2019entra\u00eener encore\u00a0! Courage\u00a0!';
+  }
+
+  function start(){
+    questions=genLevel();idx=0;score=0;answered=false;
+    $('A2s').style.display='none';$('A2end').style.display='none';$('A2q').style.display='block';
+    renderPhase0();
+  }
+
+  /* ── Illustrations SVG ── */
+  function illustSVG(q){
+    var t=q.type||'';
+    // Pièce de monnaie
+    function coin(lbl){
+      return '<svg width="54" height="54" viewBox="0 0 54 54" xmlns="http://www.w3.org/2000/svg">'
+        +'<circle cx="27" cy="27" r="25" fill="#d4a827" stroke="#a07010" stroke-width="2"/>'
+        +'<circle cx="27" cy="27" r="20" fill="#e8c040" stroke="#a07010" stroke-width="1"/>'
+        +'<text x="27" y="32" text-anchor="middle" font-size="14" font-weight="900" fill="#7a5000">'+lbl+'</text>'
+        +'</svg>';
+    }
+    // Roue J=1/4 R=3/4
+    function roueJR(){
+      return '<svg width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">'
+        +'<circle cx="35" cy="35" r="33" fill="#e03030" stroke="#888" stroke-width="1.5"/>'
+        +'<path d="M35,35 L35,2 A33,33 0 0,0 2,35 Z" fill="#f5c518"/>'
+        +'<line x1="35" y1="35" x2="35" y2="2" stroke="#555" stroke-width="1"/>'
+        +'<line x1="35" y1="35" x2="2" y2="35" stroke="#555" stroke-width="1"/>'
+        +'<text x="22" y="25" font-size="11" font-weight="700" fill="#7a5000">J</text>'
+        +'<text x="48" y="50" font-size="11" font-weight="700" fill="#fff">R</text>'
+        +'<circle cx="35" cy="35" r="4" fill="#333"/>'
+        +'<line x1="35" y1="35" x2="50" y2="28" stroke="#333" stroke-width="2" stroke-linecap="round"/>'
+        +'</svg>';
+    }
+    // Roue J=1/2 B=1/2
+    function roueJB(){
+      return '<svg width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">'
+        +'<circle cx="35" cy="35" r="33" fill="#3ab5d8" stroke="#888" stroke-width="1.5"/>'
+        +'<path d="M35,35 L35,2 A33,33 0 0,1 68,35 Z" fill="#f5c518"/>'
+        +'<path d="M35,35 L35,68 A33,33 0 0,1 2,35 Z" fill="#f5c518"/>'
+        +'<line x1="35" y1="2" x2="35" y2="68" stroke="#555" stroke-width="1"/>'
+        +'<line x1="2" y1="35" x2="68" y2="35" stroke="#555" stroke-width="1"/>'
+        +'<text x="48" y="25" font-size="11" font-weight="700" fill="#7a5000">J</text>'
+        +'<text x="22" y="25" font-size="11" font-weight="700" fill="#fff">B</text>'
+        +'<circle cx="35" cy="35" r="4" fill="#333"/>'
+        +'<line x1="35" y1="35" x2="52" y2="28" stroke="#333" stroke-width="2" stroke-linecap="round"/>'
+        +'</svg>';
+    }
+    // Urne avec boules
+    function urne(cfg){
+      var boules=[];
+      for(var i=0;i<cfg.nR;i++)boules.push('#e03030');
+      for(var j=0;j<cfg.nJ;j++)boules.push('#f5c518');
+      for(var k=0;k<cfg.nB;k++)boules.push('#3ab5d8');
+      var n=boules.length;
+      var cols=Math.min(n,4),rows=Math.ceil(n/cols);
+      var r=8,pad=3,W=cols*(2*r+pad)+pad+20,H=rows*(2*r+pad)+pad+30;
+      var svg='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+      // Urne (trapèze)
+      var bx=4,by=H-24,bw=W-8,bh=22;
+      svg+='<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" rx="4" fill="#ccc" stroke="#888" stroke-width="1.5"/>';
+      svg+='<line x1="'+bx+'" y1="'+by+'" x2="10" y2="8" stroke="#888" stroke-width="1.5"/>';
+      svg+='<line x1="'+(bx+bw)+'" y1="'+by+'" x2="'+(W-10)+'" y2="8" stroke="#888" stroke-width="1.5"/>';
+      // Boules
+      boules.forEach(function(c,bi){
+        var col=bi%cols,row=Math.floor(bi/cols);
+        var cx=pad+r+col*(2*r+pad)+10,cy=pad+r+row*(2*r+pad)+6;
+        svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+c+'" stroke="rgba(0,0,0,.2)" stroke-width="1"/>';
+      });
+      return svg+'</svg>';
+    }
+
+    var html='';
+    if(t==='PP'){
+      html=coin('P')+'<div style="font-size:.7rem;color:#555;text-align:center;">Pièce 1</div>';
+      html+=coin('P')+'<div style="font-size:.7rem;color:#555;text-align:center;">Pièce 2</div>';
+    } else if(t==='RP'){
+      html=roueJR()+'<div style="font-size:.7rem;color:#555;text-align:center;">Roue</div>';
+      html+=coin('P')+'<div style="font-size:.7rem;color:#555;text-align:center;">Pièce</div>';
+    } else if(t==='PU'){
+      html=coin('P')+'<div style="font-size:.7rem;color:#555;text-align:center;">Pièce</div>';
+      html+=urne(q.cfg)+'<div style="font-size:.7rem;color:#555;text-align:center;">Urne</div>';
+    } else if(t==='RR'){
+      html=roueJR()+'<div style="font-size:.7rem;color:#555;text-align:center;">Roue 1</div>';
+      html+=roueJB()+'<div style="font-size:.7rem;color:#555;text-align:center;">Roue 2</div>';
+    }
+    return html;
+  }
+
+  /* ── Pavé numérique ── */
+  var kpTarget=null;
+  function kpOpen(inp){
+    kpTarget=inp;
+    var kp=document.getElementById('A2-keypad');
+    var container=document.getElementById('A2tr');
+    // Positionner le pavé sous l'input dans le container
+    var cRect=container.getBoundingClientRect();
+    var iRect=inp.getBoundingClientRect();
+    var offsetLeft=iRect.left-cRect.left;
+    var offsetTop=iRect.bottom-cRect.top+container.scrollTop+4;
+    // S'assurer que le pavé reste dans le container
+    offsetLeft=Math.max(0,Math.min(offsetLeft,cRect.width-200));
+    kp.style.left=offsetLeft+'px';
+    kp.style.top=offsetTop+'px';
+    // Le pavé doit être dans le même conteneur relatif
+    if(kp.parentElement!==container){container.appendChild(kp);}
+    kp.style.display='block';
+  }
+  function kpClose(){
+    var kp=document.getElementById('A2-keypad');
+    kp.style.display='none';
+    kpTarget=null;
+  }
+  function kp(v){
+    if(!kpTarget)return;
+    if(v==='DEL'){kpTarget.value=kpTarget.value.slice(0,-1);}
+    else kpTarget.value+=v;
+    kpTarget.dispatchEvent(new Event('input'));
+  }
+
+  /* ── Modifier placeInputs pour ouvrir le pavé au focus ── */
+  function placeInputsWithKP(coords,container){
+    branchInputs=[];
+    var rect=container.getBoundingClientRect();
+    var svgEl=container.querySelector('svg');
+    var svgRect=svgEl.getBoundingClientRect();
+    coords.boxes.forEach(function(box,ii){
+      var inp=document.createElement('input');
+      inp.type='text';inp.autocomplete='off';inp.readOnly=true;
+      inp.dataset.key=box.key;inp.dataset.n=box.n;inp.dataset.d=box.d;
+      inp.style.cssText='position:absolute;'
+        +'left:'+(svgRect.left-rect.left+box.x+2)+'px;'
+        +'top:'+(svgRect.top-rect.top+box.y+2)+'px;'
+        +'width:'+(box.w-4)+'px;height:'+(box.h-4)+'px;'
+        +'font-size:10px;font-weight:700;text-align:center;'
+        +'border:none;outline:none;background:transparent;padding:0;cursor:pointer;';
+      inp.addEventListener('click',function(){kpOpen(inp);});
+      inp.addEventListener('focus',function(){kpOpen(inp);});
+      container.appendChild(inp);
+      branchInputs.push(inp);
+    });
+    /* Le pavé ne s'ouvre plus automatiquement : il s'ouvre seulement au clic/focus sur une case,
+       pour ne pas masquer l'arbre dès l'affichage de la question. */
+  }
+
+  return{start:start,validerP:validerP,suite:suite,kp:kp,kpClose:kpClose};
+})();
 </script>
+<!-- PAVÉ NUMÉRIQUE -->
+<div id="A2-keypad">
+  <div class="kp-grid">
+    <div class="kp-btn" onclick="A2.kp('7')">7</div>
+    <div class="kp-btn" onclick="A2.kp('8')">8</div>
+    <div class="kp-btn" onclick="A2.kp('9')">9</div>
+    <div class="kp-btn kp-del" onclick="A2.kp('DEL')">&#8592;</div>
+    <div class="kp-btn" onclick="A2.kp('4')">4</div>
+    <div class="kp-btn" onclick="A2.kp('5')">5</div>
+    <div class="kp-btn" onclick="A2.kp('6')">6</div>
+    <div class="kp-btn kp-slash" onclick="A2.kp('/')">/</div>
+    <div class="kp-btn" onclick="A2.kp('1')">1</div>
+    <div class="kp-btn" onclick="A2.kp('2')">2</div>
+    <div class="kp-btn" onclick="A2.kp('3')">3</div>
+    <div class="kp-btn" onclick="A2.kp('0')">0</div>
+    <div class="kp-btn kp-close" onclick="A2.kpClose()">&#10005; Fermer</div>
+  </div>
+</div>
 </body>
 </html>
